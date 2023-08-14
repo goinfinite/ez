@@ -283,11 +283,6 @@ func (repo GetOverview) Get() (entity.O11yOverview, error) {
 		hostnameStr = "localhost"
 	}
 
-	isVirtualHostEnvSet := os.Getenv("VIRTUAL_HOST") != ""
-	if isVirtualHostEnvSet {
-		hostnameStr = os.Getenv("VIRTUAL_HOST")
-	}
-
 	hostname, err := valueObject.NewFqdn(hostnameStr)
 	if err != nil {
 		return entity.O11yOverview{}, errors.New("GetHostnameFailed")

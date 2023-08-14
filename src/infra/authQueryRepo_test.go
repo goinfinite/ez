@@ -40,7 +40,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	t.Run("ValidSessionAccessToken", func(t *testing.T) {
 		authCmdRepo := AuthCmdRepo{}
 
-		token := authCmdRepo.GenerateSessionToken(
+		token, _ := authCmdRepo.GenerateSessionToken(
 			valueObject.UserId(1000),
 			valueObject.UnixTime(
 				time.Now().Add(3*time.Hour).Unix(),
