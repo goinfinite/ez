@@ -42,10 +42,11 @@ transactional-update grub.cfg
 6. Install a few packages and Go runtime:
 
 ```
-transactional-update pkg install cyrus-sasl git wget curl gcc make tar procps
+transactional-update pkg install git wget curl cyrus-sasl pam-devel gcc make tar procps
 wget -nv https://go.dev/dl/go1.20.5.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
-echo 'PATH="/usr/local/go/bin:${PATH}"' >> ~/.bashrc
+echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
+echo 'alias sfm-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
 ```
 
 7. Add your public SSH key to "/root/.ssh/authorized_keys" file and now you can reboot:
@@ -60,6 +61,7 @@ transactional-update reboot
 git config --global user.name "yourgithubnick"
 git config --global user.email yourgithubemail
 git clone git@github.com:speedianet/sfm.git
+go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 OK, now you have the VM running and you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to it and manage the project.
