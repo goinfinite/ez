@@ -1,23 +1,5 @@
 basePath: /v1
 definitions:
-  dto.AddDatabase:
-    properties:
-      dbName:
-        type: string
-    type: object
-  dto.AddDatabaseUser:
-    properties:
-      dbName:
-        type: string
-      password:
-        type: string
-      privileges:
-        items:
-          type: string
-        type: array
-      username:
-        type: string
-    type: object
   dto.AddUser:
     properties:
       password:
@@ -30,30 +12,6 @@ definitions:
       password:
         type: string
       username:
-        type: string
-    type: object
-  dto.UpdatePhpConfigs:
-    properties:
-      hostname:
-        type: string
-      modules:
-        items:
-          $ref: '#/definitions/entity.PhpModule'
-        type: array
-      settings:
-        items:
-          $ref: '#/definitions/entity.PhpSetting'
-        type: array
-      version:
-        type: string
-    type: object
-  dto.UpdateSvcStatus:
-    properties:
-      name:
-        type: string
-      status:
-        $ref: '#/definitions/valueObject.ServiceStatus'
-      version:
         type: string
     type: object
   dto.UpdateUser:
@@ -83,32 +41,6 @@ definitions:
       username:
         type: string
     type: object
-  entity.Database:
-    properties:
-      name:
-        type: string
-      size:
-        type: integer
-      type:
-        $ref: '#/definitions/valueObject.DatabaseType'
-      users:
-        items:
-          $ref: '#/definitions/entity.DatabaseUser'
-        type: array
-    type: object
-  entity.DatabaseUser:
-    properties:
-      dbName:
-        type: string
-      dbType:
-        $ref: '#/definitions/valueObject.DatabaseType'
-      privileges:
-        items:
-          type: string
-        type: array
-      username:
-        type: string
-    type: object
   entity.O11yOverview:
     properties:
       currentUsage:
@@ -117,71 +49,10 @@ definitions:
         type: string
       publicIp:
         type: string
-      runtimeContext:
-        $ref: '#/definitions/valueObject.RuntimeContext'
       specs:
         $ref: '#/definitions/valueObject.HardwareSpecs'
       uptimeSecs:
         type: integer
-    type: object
-  entity.PhpConfigs:
-    properties:
-      hostname:
-        type: string
-      modules:
-        items:
-          $ref: '#/definitions/entity.PhpModule'
-        type: array
-      settings:
-        items:
-          $ref: '#/definitions/entity.PhpSetting'
-        type: array
-      version:
-        $ref: '#/definitions/entity.PhpVersion'
-    type: object
-  entity.PhpModule:
-    properties:
-      name:
-        type: string
-      status:
-        type: boolean
-    type: object
-  entity.PhpSetting:
-    properties:
-      name:
-        type: string
-      options:
-        items:
-          type: string
-        type: array
-      value:
-        type: string
-    type: object
-  entity.PhpVersion:
-    properties:
-      options:
-        items:
-          type: string
-        type: array
-      value:
-        type: string
-    type: object
-  entity.Service:
-    properties:
-      cpuUsagePercent:
-        type: number
-      memUsagePercent:
-        type: number
-      name:
-        type: string
-      pids:
-        items:
-          type: integer
-        type: array
-      status:
-        $ref: '#/definitions/valueObject.ServiceStatus'
-      uptimeSecs:
-        type: number
     type: object
   valueObject.AccessTokenType:
     enum:
@@ -200,14 +71,6 @@ definitions:
       storageUsage:
         type: number
     type: object
-  valueObject.DatabaseType:
-    enum:
-    - mysql
-    - postgres
-    type: string
-    x-enum-varnames:
-    - mysql
-    - postgres
   valueObject.HardwareSpecs:
     properties:
       cpuCores:
@@ -221,40 +84,18 @@ definitions:
       storageTotal:
         type: integer
     type: object
-  valueObject.RuntimeContext:
-    enum:
-    - container
-    - vm
-    - bareMetal
-    type: string
-    x-enum-varnames:
-    - container
-    - vm
-    - bareMetal
-  valueObject.ServiceStatus:
-    enum:
-    - running
-    - stopped
-    - uninstalled
-    - installed
-    type: string
-    x-enum-varnames:
-    - running
-    - stopped
-    - uninstalled
-    - installed
-host: localhost:10000
+host: localhost:10001
 info:
   contact:
     email: eng+swagger@speedia.net
     name: Speedia Engineering
     url: https://speedia.net/
-  description: Speedia AppManager API
+  description: Speedia FleetManager API
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: SPEEDIA WEB SERVICES © 2023. All Rights Reserved.
+    url: https://speedia.net/tos/
   termsOfService: https://speedia.net/tos/
-  title: SamApi
+  title: SfmApi
   version: 0.0.1
 paths:
   /auth/login/:
@@ -283,169 +124,6 @@ paths:
       summary: GenerateJwtWithCredentials
       tags:
       - auth
-  /database/{dbType}/:
-    get:
-      consumes:
-      - application/json
-      description: List databases names, users and sizes.
-      parameters:
-      - description: DatabaseType
-        enum:
-        - mysql
-        - postgres
-        in: path
-        name: dbType
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Database'
-            type: array
-      security:
-      - Bearer: []
-      summary: GetDatabases
-      tags:
-      - database
-    post:
-      consumes:
-      - application/json
-      description: Add a new database.
-      parameters:
-      - description: DatabaseType
-        enum:
-        - mysql
-        - postgres
-        in: path
-        name: dbType
-        required: true
-        type: string
-      - description: AddDatabase
-        in: body
-        name: addDatabaseDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddDatabase'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: DatabaseAdded
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: AddDatabase
-      tags:
-      - database
-  /database/{dbType}/{dbName}/:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a database.
-      parameters:
-      - description: DatabaseType
-        enum:
-        - mysql
-        - postgres
-        in: path
-        name: dbType
-        required: true
-        type: string
-      - description: DatabaseName
-        in: path
-        name: dbName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: DatabaseDeleted
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: DeleteDatabase
-      tags:
-      - database
-  /database/{dbType}/{dbName}/user/:
-    post:
-      consumes:
-      - application/json
-      description: Add a new database user.
-      parameters:
-      - description: DatabaseType
-        enum:
-        - mysql
-        - postgres
-        in: path
-        name: dbType
-        required: true
-        type: string
-      - description: DatabaseName
-        in: path
-        name: dbName
-        required: true
-        type: string
-      - description: AddDatabaseUser
-        in: body
-        name: addDatabaseUserDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddDatabaseUser'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: DatabaseUserAdded
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: AddDatabaseUser
-      tags:
-      - database
-  /database/{dbType}/{dbName}/user/{dbUser}/:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a database user.
-      parameters:
-      - description: DatabaseType
-        enum:
-        - mysql
-        - postgres
-        in: path
-        name: dbType
-        required: true
-        type: string
-      - description: DatabaseName
-        in: path
-        name: dbName
-        required: true
-        type: string
-      - description: DatabaseUsername
-        in: path
-        name: dbUser
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: DatabaseUserDeleted
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: DeleteDatabaseUser
-      tags:
-      - database
   /o11y/overview/:
     get:
       consumes:
@@ -463,99 +141,6 @@ paths:
       summary: O11yOverview
       tags:
       - o11y
-  /runtime/php/{hostname}/:
-    get:
-      consumes:
-      - application/json
-      description: Get php version, modules and settings for a hostname.
-      parameters:
-      - description: Hostname
-        in: path
-        name: hostname
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.PhpConfigs'
-      security:
-      - Bearer: []
-      summary: GetPhpConfigs
-      tags:
-      - runtime
-    put:
-      consumes:
-      - application/json
-      description: Update php version, modules and settings for a hostname.
-      parameters:
-      - description: Hostname
-        in: path
-        name: hostname
-        required: true
-        type: string
-      - description: UpdatePhpConfigs
-        in: body
-        name: updatePhpConfigsDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdatePhpConfigs'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: PhpConfigsUpdated
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: UpdatePhpConfigs
-      tags:
-      - runtime
-  /services/:
-    get:
-      consumes:
-      - application/json
-      description: List services and their status.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Service'
-            type: array
-      security:
-      - Bearer: []
-      summary: GetServices
-      tags:
-      - services
-    put:
-      consumes:
-      - application/json
-      description: Start, stop, install or uninstall a service.
-      parameters:
-      - description: UpdateServiceStatusDetails
-        in: body
-        name: updateSvcStatusDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateSvcStatus'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ServiceStatusUpdated
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: UpdateServiceStatus
-      tags:
-      - services
   /user/:
     get:
       consumes:

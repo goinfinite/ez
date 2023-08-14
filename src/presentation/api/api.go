@@ -7,24 +7,24 @@ import (
 	_ "github.com/swaggo/echo-swagger/example/docs"
 )
 
-// @title			SamApi
+// @title			SfmApi
 // @version			0.0.1
-// @description		Speedia AppManager API
+// @description		Speedia FleetManager API
 // @termsOfService	https://speedia.net/tos/
 
 // @contact.name	Speedia Engineering
 // @contact.url		https://speedia.net/
 // @contact.email	eng+swagger@speedia.net
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name  SPEEDIA WEB SERVICES © 2023. All Rights Reserved.
+// @license.url   https://speedia.net/tos/
 
 // @securityDefinitions.apikey	Bearer
 // @in 							header
 // @name						Authorization
 // @description					Type "Bearer" + JWT token or API key.
 
-// @host		localhost:10000
+// @host		localhost:10001
 // @BasePath	/v1
 func ApiInit() {
 	shared.CheckEnvs()
@@ -41,5 +41,5 @@ func ApiInit() {
 
 	registerApiRoutes(baseRoute)
 
-	e.Start(":10000")
+	e.Start(":10001")
 }
