@@ -3,12 +3,12 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-bin = "bin/sam"
-cmd = "go build -o ./bin/sam ./sam.go"
+bin = "bin/sfm"
+cmd = "go build -o ./bin/sfm ./sfm.go"
 delay = 1000
 exclude_dir = [".git", "bin", "logs", "tmp", "vendor", "src/devUtils"]
 follow_symlink = false
-full_bin = "export $(grep -v '^#' .env | xargs); ./bin/sam"
+full_bin = "export $(grep -v '^#' .env | xargs); ./bin/sfm"
 ignore = ["*_test.go", "testHelpers.go"]
 
 [[watcher]]

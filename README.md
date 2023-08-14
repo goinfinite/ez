@@ -39,7 +39,7 @@ Then apply the changes with the following command (no need to reboot yet):
 transactional-update grub.cfg
 ```
 
-6. Install a few packages and Go runtime:
+6. Install a few system packages and Go runtime:
 
 ```
 transactional-update pkg install git wget curl cyrus-sasl pam-devel gcc make tar procps
@@ -55,13 +55,14 @@ echo 'alias sfm-swag="swag init -g src/presentation/api/api.go -o src/presentati
 transactional-update reboot
 ```
 
-8. After the reboot, you can clone the SFM repository:
+8. After the reboot, you can install a few Go packages and clone the SFM repository:
 
 ```
+go install github.com/swaggo/swag/cmd/swag@latest
+go install github.com/cosmtrek/air@latest
 git config --global user.name "yourgithubnick"
 git config --global user.email yourgithubemail
 git clone git@github.com:speedianet/sfm.git
-go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 OK, now you have the VM running and you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to it and manage the project.
