@@ -14,6 +14,58 @@ In this repository you'll find the REST API and CLI code plus the dashboard asse
 
 To run this project during development you must install [Air](https://github.com/cosmtrek/air). Air is a tool that will watch for changes in the project and recompile it automatically.
 
+### Unit Testing
+
+Since SFM relies on the operational system being openSUSE MicroOS, the entire development and testing should be done in a VM. The VM can be created with the following steps:
+
+1. Install VMWare Player;
+
+2. Download the VMware `.vmx` and `.vmdk` files from "Base System + Container Runtime" column on MicroOS download page:
+   https://en.opensuse.org/Portal:MicroOS/Downloads
+
+3. Add the VM to the VMWare Player interface, change the resources to 2GB RAM // 2vCPU, fix the disk path and add a Network Adapter so the VM gets a connection.
+
+4. Run the VM. The first boot will allow you to set up a root password. After the first reboot, login with the password you set.
+
+5. On the terminal, change "security=1 selinux=1" to "selinux=0" with the command:
+
+```
+vim /etc/default/grub
+```
+
+Then apply the changes with the following command (no need to reboot yet):
+
+```
+transactional-update grub.cfg
+```
+
+6. Install a few packages and Go runtime:
+
+```
+transactional-update pkg install cyrus-sasl git wget curl gcc make tar procps
+wget -nv https://go.dev/dl/go1.20.5.linux-amd64.tar.gz
+tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
+echo 'PATH="/usr/local/go/bin:${PATH}"' >> ~/.bashrc
+```
+
+7. Add your public SSH key to "/root/.ssh/authorized_keys" file and now you can reboot:
+
+```
+transactional-update reboot
+```
+
+8. After the reboot, you can clone the SFM repository:
+
+```
+git config --global user.name "yourgithubnick"
+git config --global user.email yourgithubemail
+git clone git@github.com:speedianet/sfm.git
+```
+
+OK, now you have the VM running and you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to it and manage the project.
+
+Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found with the `ip a` command on the VM terminal.
+
 ### Environment Variables
 
 You must have an `.env` file in the root of the git directory **during development**. You can use the `.env.example` file as a template. Air will read the `.env` file and use it to run the project during development.
@@ -23,10 +75,8 @@ If you add a new env var that is required to run the apis, please add it to the 
 When running in production, the `/speedia/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
 
 ```
-ENV1=XXX /speedia/sam
+ENV1=XXX /speedia/sfm
 ```
-
-### Unit Testing
 
 ### Dev Utils
 
