@@ -50,6 +50,7 @@ func userRoutes() {
 func registerCliRoutes() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(cliController.SysInstallController())
 	o11yRoutes()
 	userRoutes()
 }
