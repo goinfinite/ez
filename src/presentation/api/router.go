@@ -33,8 +33,16 @@ func o11yRoutes(baseRoute *echo.Group) {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
+func userRoutes(baseRoute *echo.Group) {
+	userGroup := baseRoute.Group("/user")
+	userGroup.GET("/", apiController.GetUsersController)
+	userGroup.POST("/", apiController.AddUserController)
+	userGroup.PUT("/", apiController.UpdateUserController)
+}
+
 func registerApiRoutes(baseRoute *echo.Group) {
 	swaggerRoute(baseRoute)
 	authRoutes(baseRoute)
 	o11yRoutes(baseRoute)
+	userRoutes(baseRoute)
 }
