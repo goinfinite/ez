@@ -58,6 +58,7 @@ transactional-update reboot
 8. After the reboot, you can install a few Go packages and clone the SFM repository:
 
 ```
+ln -s /etc/pam.d/common-auth /etc/pam.d/system-auth
 go install github.com/swaggo/swag/cmd/swag@latest
 go install github.com/cosmtrek/air@latest
 git config --global user.name "yourgithubnick"
@@ -88,6 +89,18 @@ The `src/devUtils` folder is not a Clean Architecture layer, it's there to help 
 For instance there you'll find a `testHelpers.go` file that is used to read the `.env` during tests.
 
 ### Building
+
+SFM is likely on the marketplace of your cloud provider already, but if you want to build it yourself.
+
+The software itself is a single binary, but it requires openSUSE MicroOS to run.
+
+Once you have uploaded the openSUSE MicroOS cloud-init image to your provider and deployed a VM, get the SFM binary and download it to the `/speedia/` directory.
+
+Then you just need to run:
+
+```
+sfm sys-install
+```
 
 ## REST API
 
