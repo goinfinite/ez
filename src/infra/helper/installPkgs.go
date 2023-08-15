@@ -3,24 +3,18 @@ package infraHelper
 import (
 	"errors"
 	"log"
-	"os"
 )
 
 func InstallPkgs(packages []string) error {
-	_, err := RunCmd("apt-get", "update", "-qq")
-	if err != nil {
-		return errors.New("UpdateRepositoriesFailed")
-	}
-
 	installPackages := append(
-		[]string{"install", "-y", "--no-install-recommends"},
+		[]string{"pkg", "install", "-y"},
 		packages...,
 	)
 
 	var installErr error
 	nAttempts := 3
 	for i := 0; i < nAttempts; i++ {
-		_, err := RunCmd("apt-get", installPackages...)
+		_, err := RunCmd("transactional-update", installPackages...)
 		if err == nil {
 			break
 		}
@@ -31,9 +25,6 @@ func InstallPkgs(packages []string) error {
 			installErr = errors.New("InstallAttemptsFailed")
 		}
 	}
-
-	os.RemoveAll("/var/lib/apt/lists")
-	os.RemoveAll("/var/cache/apt/archives")
 
 	return installErr
 }
