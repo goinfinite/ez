@@ -5,12 +5,14 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v3/net"
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
@@ -28,83 +30,64 @@ func (repo GetOverview) getUptime() (uint64, error) {
 	return uint64(sysinfo.Uptime), nil
 }
 
-func (repo GetOverview) isCgroupV2() bool {
-	_, err := os.Stat("/sys/fs/cgroup/cpu.max")
-	return err == nil
-}
-
-func (repo GetOverview) getFileContent(file string) (string, error) {
-	fileContent, err := os.ReadFile(file)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(string(fileContent)), nil
-}
-
-func (repo GetOverview) getCpuQuota() (int64, error) {
-	cpuQuotaFile := "/sys/fs/cgroup/cpu/cpu.cfs_quota_us"
-	if repo.isCgroupV2() {
-		cpuQuotaFile = "/sys/fs/cgroup/cpu.max"
-	}
-
-	cpuQuotaStr, err := repo.getFileContent(cpuQuotaFile)
-	if err != nil {
-		cpuQuotaStr = "max"
-	}
-	if repo.isCgroupV2() {
-		cpuQuotaStr = strings.Split(cpuQuotaStr, " ")[0]
-	}
-
-	cpuQuotaInt, err := strconv.ParseInt(cpuQuotaStr, 10, 64)
-	if err != nil || cpuQuotaStr == "max" || cpuQuotaStr == "-1" {
-		cpuQuotaInt = int64(100000 * runtime.NumCPU())
-	}
-
-	return cpuQuotaInt, nil
-}
-
-func (repo GetOverview) getMemoryLimit() (int64, error) {
-	memLimitFile := "/sys/fs/cgroup/memory/memory.limit_in_bytes"
-	if repo.isCgroupV2() {
-		memLimitFile = "/sys/fs/cgroup/memory.max"
-	}
-
-	memLimit, err := repo.getFileContent(memLimitFile)
-	if err != nil {
-		memLimit = "max"
-	}
-
-	memLimitInt, err := strconv.ParseInt(memLimit, 10, 64)
-	if err != nil || memLimit == "9223372036854771712" || memLimit == "max" {
-		var sysInfo syscall.Sysinfo_t
-		err = syscall.Sysinfo(&sysInfo)
-		if err != nil {
-			return 0, errors.New("GetSysInfoError")
-		}
-
-		memLimitInt = int64(sysInfo.Totalram * uint64(sysInfo.Unit))
-	}
-
-	return memLimitInt, nil
-}
-
-func (repo GetOverview) getStorageInfo() (valueObject.StorageInfo, error) {
+func (repo GetOverview) getDiskInfo(
+	diskName valueObject.DiskName,
+) (valueObject.DiskInfo, error) {
 	var stat syscall.Statfs_t
 	err := syscall.Statfs("/", &stat)
 	if err != nil {
-		return valueObject.StorageInfo{}, errors.New("StorageInfoError")
+		return valueObject.DiskInfo{}, errors.New("StorageInfoError")
 	}
 
 	storageTotal := stat.Blocks * uint64(stat.Bsize)
 	storageAvailable := stat.Bavail * uint64(stat.Bsize)
 	storageUsed := storageTotal - storageAvailable
 
-	return valueObject.NewStorageInfo(
+	return valueObject.NewDiskInfo(
+		diskName,
 		valueObject.Byte(storageTotal),
 		valueObject.Byte(storageAvailable),
 		valueObject.Byte(storageUsed),
 	), nil
+}
+
+func (repo GetOverview) getDiskInfos() ([]valueObject.DiskInfo, error) {
+	disksList, err := infraHelper.RunCmd("lsblk", "-ndp", "-e", "7", "--output", "KNAME")
+	if err != nil {
+		log.Printf("GetDisksFailed: %v", err)
+		return []valueObject.DiskInfo{}, errors.New("GetDisksFailed")
+	}
+
+	disks := strings.Split(disksList, "\n")
+	diskInfos := []valueObject.DiskInfo{}
+	for _, disk := range disks {
+		if disk == "" {
+			continue
+		}
+
+		diskName, err := valueObject.NewDiskName(disk)
+		if err != nil {
+			continue
+		}
+
+		diskInfo, err := repo.getDiskInfo(diskName)
+		if err != nil {
+			return []valueObject.DiskInfo{}, errors.New("GetDiskInfoFailed")
+		}
+
+		diskInfos = append(diskInfos, diskInfo)
+	}
+
+	return diskInfos, nil
+}
+
+func (repo GetOverview) getMemLimit() (uint64, error) {
+	memInfo, err := mem.VirtualMemory()
+	if err != nil {
+		return 0, errors.New("GetMemInfoFailed")
+	}
+
+	return memInfo.Total, nil
 }
 
 func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
@@ -137,20 +120,23 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 		return valueObject.HardwareSpecs{}, errors.New("GetCpuFrequencyFailed")
 	}
 
-	cpuQuota, err := repo.getCpuQuota()
+	cpuCoresStr, err := infraHelper.RunCmd("nproc")
 	if err != nil {
-		return valueObject.HardwareSpecs{}, errors.New("GetCpuQuotaFailed")
+		return valueObject.HardwareSpecs{}, errors.New("GetCpuCoresStrFailed")
 	}
-	cpuCores := uint64(cpuQuota / 100000)
-
-	memoryLimit, err := repo.getMemoryLimit()
+	cpuCores, err := strconv.ParseUint(cpuCoresStr, 10, 64)
 	if err != nil {
-		return valueObject.HardwareSpecs{}, errors.New("GetMemoryLimitFailed")
+		return valueObject.HardwareSpecs{}, errors.New("GetCpuCoresFailed")
 	}
 
-	storageInfo, err := repo.getStorageInfo()
+	memoryLimit, err := repo.getMemLimit()
 	if err != nil {
-		return valueObject.HardwareSpecs{}, errors.New("GetStorageInfoFailed")
+		return valueObject.HardwareSpecs{}, err
+	}
+
+	storageInfo, err := repo.getDiskInfos()
+	if err != nil {
+		return valueObject.HardwareSpecs{}, err
 	}
 
 	return valueObject.NewHardwareSpecs(
@@ -158,97 +144,50 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 		cpuCores,
 		cpuFrequencyFloat,
 		valueObject.Byte(memoryLimit),
-		storageInfo.Total,
+		storageInfo,
 	), nil
 }
 
 func (repo GetOverview) getCpuUsagePercent() (float64, error) {
-	cpuUsageFile := "/sys/fs/cgroup/cpuacct/cpuacct.usage"
-	if repo.isCgroupV2() {
-		cpuUsageFile = "/sys/fs/cgroup/cpu.stat"
-	}
-
-	readUsageFileErr := false
-	startCpuUsage, err := repo.getFileContent(cpuUsageFile)
+	cpuPercent, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		readUsageFileErr = true
-		startCpuUsage, err = repo.getFileContent("/proc/stat")
-		if err != nil {
-			return 0, errors.New("CpuStartUsageFileError")
-		}
-		startCpuUsage = strings.Fields(startCpuUsage)[2]
-	}
-	time.Sleep(time.Second)
-	endCpuUsage, err := repo.getFileContent(cpuUsageFile)
-	if err != nil {
-		readUsageFileErr = true
-		endCpuUsage, err = repo.getFileContent("/proc/stat")
-		if err != nil {
-			return 0, errors.New("CpuEndUsageFileError")
-		}
-		endCpuUsage = strings.Fields(endCpuUsage)[2]
+		return 0, errors.New("GetCpuUsageFailed")
 	}
 
-	if repo.isCgroupV2() && !readUsageFileErr {
-		startCpuUsage = strings.Fields(startCpuUsage)[1]
-		endCpuUsage = strings.Fields(endCpuUsage)[1]
-	}
-
-	startCpuUsageInt, err := strconv.ParseInt(startCpuUsage, 10, 64)
-	if err != nil {
-		return 0, errors.New("ParseCpuStartUsageFailed")
-	}
-	endCpuUsageInt, err := strconv.ParseInt(endCpuUsage, 10, 64)
-	if err != nil {
-		return 0, errors.New("ParseCpuEndUsageFailed")
-	}
-
-	cpuQuotaUs, err := repo.getCpuQuota()
-	if err != nil {
-		return 0, errors.New("GetCpuQuotaFailed")
-	}
-
-	cpuUsageUs := float64(endCpuUsageInt - startCpuUsageInt)
-	if !repo.isCgroupV2() {
-		cpuUsageUs = cpuUsageUs / 1000
-	}
-	cpuUsagePercent := cpuUsageUs / float64(cpuQuotaUs) * 100
-
-	return cpuUsagePercent, nil
+	return cpuPercent[0], nil
 }
 
 func (repo GetOverview) getMemUsagePercent() (float64, error) {
-	memUsageFile := "/sys/fs/cgroup/memory/memory.usage_in_bytes"
-	if repo.isCgroupV2() {
-		memUsageFile = "/sys/fs/cgroup/memory.current"
-	}
-
-	memUsage, err := repo.getFileContent(memUsageFile)
+	memInfo, err := mem.VirtualMemory()
 	if err != nil {
-		memUsageCmd := exec.Command(
-			"awk",
-			"/^MemTotal:/ {total=$2} /^MemAvailable:/ {available=$2} END {used=(total-available)*1024; printf \"%d\", used}",
-			"/proc/meminfo",
-		)
-		cmdOutput, err := memUsageCmd.Output()
-		if err != nil {
-			return 0, errors.New("GetMemUsageFailed")
-		}
-
-		memUsage = strings.TrimSpace(string(cmdOutput))
+		return 0, errors.New("GetMemInfoFailed")
 	}
-	memUsageFloat, err := strconv.ParseFloat(memUsage, 64)
+
+	return memInfo.UsedPercent, nil
+}
+
+func (repo GetOverview) getNetUsage() (valueObject.NetUsage, error) {
+	initialStats, err := net.IOCounters(true)
 	if err != nil {
-		return 0, errors.New("ParseMemUsageFailed")
+		log.Printf("GetInitialNetStatsFailed: %v", err)
+		return valueObject.NetUsage{}, errors.New("GetInitialNetStatsFailed")
 	}
 
-	memLimit, err := repo.getMemoryLimit()
+	time.Sleep(time.Second)
+
+	finalStats, err := net.IOCounters(true)
 	if err != nil {
-		return 0, errors.New("GetMemoryLimitFailed")
+		log.Printf("GetFinalNetStatsFailed: %v", err)
+		return valueObject.NetUsage{}, errors.New("GetFinalNetStatsFailed")
 	}
-	memUsagePercent := memUsageFloat / float64(memLimit) * 100
 
-	return memUsagePercent, nil
+	sentBytes := finalStats[0].BytesSent - initialStats[0].BytesSent
+	recvBytes := finalStats[0].BytesRecv - initialStats[0].BytesRecv
+
+	return valueObject.NewNetUsage(
+		valueObject.Byte(sentBytes),
+		valueObject.Byte(recvBytes),
+	), nil
 }
 
 func (repo GetOverview) getCurrentResourceUsage() (
@@ -264,16 +203,21 @@ func (repo GetOverview) getCurrentResourceUsage() (
 		return valueObject.CurrentResourceUsage{}, err
 	}
 
-	storageInfo, err := repo.getStorageInfo()
+	diskInfos, err := repo.getDiskInfos()
 	if err != nil {
 		return valueObject.CurrentResourceUsage{}, errors.New("GetStorageInfoFailed")
 	}
-	storageUsagePercent := float64(storageInfo.Used.Get()) / float64(storageInfo.Total.Get()) * 100
+
+	netUsage, err := repo.getNetUsage()
+	if err != nil {
+		return valueObject.CurrentResourceUsage{}, errors.New("GetNetUsageFailed")
+	}
 
 	return valueObject.NewCurrentResourceUsage(
 		cpuUsagePercent,
 		memUsagePercent,
-		storageUsagePercent,
+		diskInfos,
+		netUsage,
 	), nil
 }
 
