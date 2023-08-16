@@ -1,7 +1,6 @@
 package cliController
 
 import (
-	"errors"
 	"strconv"
 	"strings"
 
@@ -31,7 +30,7 @@ func GetContainersController() *cobra.Command {
 	return cmd
 }
 
-func parsePortBindings(portBindingsSlice []string) ([]valueObject.PortBinding, error) {
+func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
 	for _, portBindingStr := range portBindingsSlice {
 		protocol := valueObject.NewNetworkProtocolPanic("tcp")
@@ -39,14 +38,14 @@ func parsePortBindings(portBindingsSlice []string) ([]valueObject.PortBinding, e
 		portBindingParts := strings.Split(portBindingStr, ":")
 		hostPort, err := strconv.ParseUint(portBindingParts[0], 10, 16)
 		if err != nil {
-			return nil, err
+			panic("InvalidPortBindingHostPort")
 		}
 		containerPortStr := portBindingParts[1]
 
 		containerPortParts := strings.Split(containerPortStr, "/")
 		containerPort, err := strconv.ParseUint(containerPortParts[0], 10, 16)
 		if err != nil {
-			return nil, err
+			panic("InvalidPortBindingContainerPort")
 		}
 		if len(containerPortParts) == 1 {
 			protocol = valueObject.NewNetworkProtocolPanic(containerPortParts[1])
@@ -56,31 +55,31 @@ func parsePortBindings(portBindingsSlice []string) ([]valueObject.PortBinding, e
 		portBindings = append(portBindings, portBinding)
 	}
 
-	return portBindings, nil
+	return portBindings
 }
 
-func parseContainerSpecs(specStr string) (valueObject.ContainerSpecs, error) {
+func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 	specParts := strings.Split(specStr, ":")
 	cpuCores, err := strconv.ParseFloat(specParts[0], 64)
 	if err != nil {
-		return valueObject.ContainerSpecs{}, errors.New("InvalidCpuCoresLimit")
+		panic("InvalidCpuCoresLimit")
 	}
 
 	memory, err := strconv.ParseInt(specParts[1], 10, 64)
 	if err != nil {
-		return valueObject.ContainerSpecs{}, errors.New("InvalidMemoryLimit")
+		panic("InvalidMemoryLimit")
 	}
 
 	storage, err := strconv.ParseInt(specParts[2], 10, 64)
 	if err != nil {
-		return valueObject.ContainerSpecs{}, errors.New("InvalidStorageLimit")
+		panic("InvalidStorageLimit")
 	}
 
 	return valueObject.NewContainerSpecs(
 		cpuCores,
 		valueObject.Byte(memory),
 		valueObject.Byte(storage),
-	), nil
+	)
 }
 
 func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
@@ -95,7 +94,7 @@ func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
 
 func AddContainerController() *cobra.Command {
 	var hostnameStr string
-	var containerImageAddressStr string
+	var containerImgAddressStr string
 	var portBindingsSlice []string
 	var restartPolicyStr string
 	var entrypointStr string
@@ -108,31 +107,54 @@ func AddContainerController() *cobra.Command {
 		Short: "AddNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
 			hostname := valueObject.NewFqdnPanic(hostnameStr)
-			imgAddr := valueObject.NewContainerImgAddressPanic(containerImageAddressStr)
+			imgAddr := valueObject.NewContainerImgAddressPanic(containerImgAddressStr)
 
-			portBindings, err := parsePortBindings(portBindingsSlice)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, "InvalidPortBindingsFormat")
-				return
+			var portBindingsPtr *[]valueObject.PortBinding
+			if len(portBindingsSlice) > 0 {
+				portBindings := parsePortBindings(portBindingsSlice)
+				portBindingsPtr = &portBindings
 			}
 
-			restartPolicy := valueObject.NewContainerRestartPolicyPanic(restartPolicyStr)
-			entrypoint := valueObject.NewContainerEntrypointPanic(entrypointStr)
-			baseSpecs, err := parseContainerSpecs(baseSpecStr)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-				return
+			var restartPolicyPtr *valueObject.ContainerRestartPolicy
+			if restartPolicyStr == "" {
+				restartPolicy := valueObject.NewContainerRestartPolicyPanic(restartPolicyStr)
+				restartPolicyPtr = &restartPolicy
 			}
 
-			maxSpecs, err := parseContainerSpecs(maxSpecStr)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-				return
+			var entrypointPtr *valueObject.ContainerEntrypoint
+			if entrypointStr == "" {
+				entrypoint := valueObject.NewContainerEntrypointPanic(entrypointStr)
+				entrypointPtr = &entrypoint
 			}
 
-			envs := parseContainerEnvs(envsSlice)
+			var baseSpecsPtr *valueObject.ContainerSpecs
+			if baseSpecStr == "" {
+				baseSpecs := parseContainerSpecs(baseSpecStr)
+				baseSpecsPtr = &baseSpecs
+			}
 
-			addContainerDto := dto.NewAddContainer(containername, password)
+			var maxSpecsPtr *valueObject.ContainerSpecs
+			if maxSpecStr == "" {
+				maxSpecs := parseContainerSpecs(maxSpecStr)
+				maxSpecsPtr = &maxSpecs
+			}
+
+			var envsPtr *[]valueObject.ContainerEnv
+			if len(envsSlice) > 0 {
+				envs := parseContainerEnvs(envsSlice)
+				envsPtr = &envs
+			}
+
+			addContainerDto := dto.NewAddContainer(
+				hostname,
+				imgAddr,
+				portBindingsPtr,
+				restartPolicyPtr,
+				entrypointPtr,
+				baseSpecsPtr,
+				maxSpecsPtr,
+				envsPtr,
+			)
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
@@ -150,10 +172,22 @@ func AddContainerController() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&containernameStr, "containername", "u", "", "Containername")
-	cmd.MarkFlagRequired("containername")
-	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
-	cmd.MarkFlagRequired("password")
+	cmd.Flags().StringVarP(&hostnameStr, "hostname", "h", "", "Hostname")
+	cmd.MarkFlagRequired("hostname")
+	cmd.Flags().StringVarP(&containerImgAddressStr, "image", "i", "", "ImageAddress")
+	cmd.MarkFlagRequired("image")
+	cmd.Flags().StringSliceVarP(
+		&portBindingsSlice,
+		"port-bindings",
+		"p",
+		[]string{},
+		"PortBindings",
+	)
+	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
+	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
+	cmd.Flags().StringVarP(&baseSpecStr, "base-specs", "b", "", "BaseSpecs")
+	cmd.Flags().StringVarP(&maxSpecStr, "max-specs", "m", "", "MaxSpecs")
+	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs")
 	return cmd
 }
 
