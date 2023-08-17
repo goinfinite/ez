@@ -198,7 +198,7 @@ func DeleteContainerController() *cobra.Command {
 		Use:   "delete",
 		Short: "DeleteContainer",
 		Run: func(cmd *cobra.Command, args []string) {
-			containerId := valueObject.NewContainerIdFromStringPanic(containerIdStr)
+			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
@@ -216,74 +216,62 @@ func DeleteContainerController() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&containerIdStr, "container-id", "u", "", "ContainerId")
-	cmd.MarkFlagRequired("container-id")
+	cmd.Flags().StringVarP(&containerIdStr, "id", "i", "", "ContainerId")
+	cmd.MarkFlagRequired("id")
 	return cmd
 }
 
 func UpdateContainerController() *cobra.Command {
 	var containerIdStr string
-	var passwordStr string
-	shouldUpdateApiKeyBool := false
+	var containerStatus bool
+	var baseSpecStr string
+	var maxSpecStr string
 
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "UpdateContainer (pass or apiKey)",
+		Short: "UpdateContainer",
 		Run: func(cmd *cobra.Command, args []string) {
-			containerId := valueObject.NewContainerIdFromStringPanic(containerIdStr)
+			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
-			var passPtr *valueObject.Password
-			if passwordStr != "" {
-				password := valueObject.NewPasswordPanic(passwordStr)
-				passPtr = &password
+			var baseSpecsPtr *valueObject.ContainerSpecs
+			if baseSpecStr == "" {
+				baseSpecs := parseContainerSpecs(baseSpecStr)
+				baseSpecsPtr = &baseSpecs
 			}
 
-			var shouldUpdateApiKeyPtr *bool
-			if shouldUpdateApiKeyBool {
-				shouldUpdateApiKeyPtr = &shouldUpdateApiKeyBool
+			var maxSpecsPtr *valueObject.ContainerSpecs
+			if maxSpecStr == "" {
+				maxSpecs := parseContainerSpecs(maxSpecStr)
+				maxSpecsPtr = &maxSpecs
 			}
 
 			updateContainerDto := dto.NewUpdateContainer(
 				containerId,
-				passPtr,
-				shouldUpdateApiKeyPtr,
+				containerStatus,
+				baseSpecsPtr,
+				maxSpecsPtr,
 			)
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
-			if updateContainerDto.Password != nil {
-				useCase.UpdateContainerPassword(
-					containerQueryRepo,
-					containerCmdRepo,
-					updateContainerDto,
-				)
+			err := useCase.UpdateContainer(
+				containerQueryRepo,
+				containerCmdRepo,
+				updateContainerDto,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			if shouldUpdateApiKeyBool {
-				newKey, err := useCase.UpdateContainerApiKey(
-					containerQueryRepo,
-					containerCmdRepo,
-					updateContainerDto,
-				)
-				if err != nil {
-					cliHelper.ResponseWrapper(false, err.Error())
-				}
-
-				cliHelper.ResponseWrapper(true, newKey)
-			}
+			cliHelper.ResponseWrapper(true, "ContainerUpdated")
 		},
 	}
 
-	cmd.Flags().StringVarP(&containerIdStr, "container-id", "u", "", "ContainerId")
-	cmd.MarkFlagRequired("container-id")
-	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
-	cmd.Flags().BoolVarP(
-		&shouldUpdateApiKeyBool,
-		"update-api-key",
-		"k",
-		false,
-		"ShouldUpdateApiKey",
-	)
+	cmd.Flags().StringVarP(&containerIdStr, "id", "i", "", "ContainerId")
+	cmd.MarkFlagRequired("id")
+	cmd.Flags().BoolVarP(&containerStatus, "status", "s", false, "ContainerStatus")
+	cmd.Flags().StringVarP(&baseSpecStr, "base-specs", "b", "", "BaseSpecs")
+	cmd.Flags().StringVarP(&maxSpecStr, "max-specs", "m", "", "MaxSpecs")
 	return cmd
 }
