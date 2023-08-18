@@ -7,5 +7,6 @@ import (
 
 type ContainerCmdRepo interface {
 	Add(dto.AddContainer) error
+	Update(dto.UpdateContainer) error
 	Delete(valueObject.ContainerId) error
 }
