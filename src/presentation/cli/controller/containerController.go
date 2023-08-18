@@ -156,11 +156,9 @@ func AddContainerController() *cobra.Command {
 				envsPtr,
 			)
 
-			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
 			err := useCase.AddContainer(
-				containerQueryRepo,
 				containerCmdRepo,
 				addContainerDto,
 			)
