@@ -6,7 +6,7 @@ import (
 )
 
 type ContainerCmdRepo interface {
-	Add(dto.AddContainer) error
-	Update(dto.UpdateContainer) error
-	Delete(valueObject.ContainerId) error
+	Add(addContainer dto.AddContainer) error
+	Update(updateContainer dto.UpdateContainer) error
+	Delete(containerId valueObject.ContainerId) error
 }
