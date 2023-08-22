@@ -9,6 +9,7 @@ import (
 func SysInstall(
 	sysInstallQueryRepo repository.SysInstallQueryRepo,
 	sysInstallCmdRepo repository.SysInstallCmdRepo,
+	serverCmdRepo repository.ServerCmdRepo,
 ) error {
 	isInstalled := sysInstallQueryRepo.IsInstalled()
 	isDataDiskMounted := sysInstallQueryRepo.IsDataDiskMounted()
@@ -22,7 +23,11 @@ func SysInstall(
 		if err != nil {
 			return err
 		}
+
+		serverCmdRepo.AddOneTimerSvc("sys-install-continue", "sfm sys-install")
+		serverCmdRepo.Reboot()
 	}
 
+	serverCmdRepo.DeleteOneTimerSvc("sys-install-continue")
 	return sysInstallCmdRepo.AddDataDisk()
 }

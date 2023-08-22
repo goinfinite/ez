@@ -14,7 +14,12 @@ func SysInstallController() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			sysInstallQueryRepo := infra.SysInstallQueryRepo{}
 			sysInstallCmdRepo := infra.SysInstallCmdRepo{}
-			err := useCase.SysInstall(sysInstallQueryRepo, sysInstallCmdRepo)
+			serverCmdRepo := infra.ServerCmdRepo{}
+			err := useCase.SysInstall(
+				sysInstallQueryRepo,
+				sysInstallCmdRepo,
+				serverCmdRepo,
+			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
