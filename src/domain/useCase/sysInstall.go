@@ -10,13 +10,18 @@ func SysInstall(
 	sysInstallQueryRepo repository.SysInstallQueryRepo,
 	sysInstallCmdRepo repository.SysInstallCmdRepo,
 ) error {
-	if sysInstallQueryRepo.IsInstalled() {
+	isInstalled := sysInstallQueryRepo.IsInstalled()
+	isDataDiskMounted := sysInstallQueryRepo.IsDataDiskMounted()
+
+	if isInstalled && isDataDiskMounted {
 		return errors.New("SysAlreadyInstalled")
 	}
 
-	err := sysInstallCmdRepo.Install()
-	if err != nil {
-		return err
+	if !isInstalled {
+		err := sysInstallCmdRepo.Install()
+		if err != nil {
+			return err
+		}
 	}
 
 	return sysInstallCmdRepo.AddDataDisk()
