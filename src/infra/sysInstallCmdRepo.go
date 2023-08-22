@@ -30,8 +30,6 @@ func (repo SysInstallCmdRepo) Install() error {
 
 	os.Symlink("/etc/pam.d/common-auth", "/etc/pam.d/system-auth")
 
-	infraHelper.RunCmd("transactional-update", "reboot")
-
 	return nil
 }
 
