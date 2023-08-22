@@ -70,15 +70,9 @@ func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 		panic("InvalidMemoryLimit")
 	}
 
-	storage, err := strconv.ParseInt(specParts[2], 10, 64)
-	if err != nil {
-		panic("InvalidStorageLimit")
-	}
-
 	return valueObject.NewContainerSpecs(
 		cpuCores,
 		valueObject.Byte(memory),
-		valueObject.Byte(storage),
 	)
 }
 
