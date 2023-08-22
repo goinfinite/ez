@@ -11,4 +11,5 @@ type ServerCmdRepo interface {
 		operation valueObject.ServerLogOperation,
 		payload valueObject.ServerLogPayload,
 	)
+	SendServerMessage(message string)
 }

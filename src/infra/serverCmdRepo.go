@@ -124,3 +124,7 @@ func (repo ServerCmdRepo) AddServerLog(
 	logFile.WriteString(logContent)
 	log.Print(logContent)
 }
+
+func (repo ServerCmdRepo) SendServerMessage(message string) {
+	infraHelper.RunCmd("wall", "-n", message)
+}

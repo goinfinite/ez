@@ -34,22 +34,27 @@ func SysInstall(
 			),
 		)
 		serverCmdRepo.AddOneTimerSvc("sys-install-continue", "sfm sys-install")
+		serverCmdRepo.SendServerMessage("Server is rebooting!")
 		serverCmdRepo.Reboot()
 	}
 
+	serverCmdRepo.SendServerMessage(
+		"[Elevator Music ♬] SFM is still installing... " +
+			"please await and don't interact with the server.",
+	)
 	serverCmdRepo.DeleteOneTimerSvc("sys-install-continue")
 	err := sysInstallCmdRepo.AddDataDisk()
 	if err != nil {
 		return err
 	}
 
+	successMessage := "SFM has been installed and is now ready to be used."
 	serverCmdRepo.AddServerLog(
 		valueObject.NewServerLogLevelPanic("info"),
 		valueObject.NewServerLogOperationPanic("sys-install"),
-		valueObject.NewServerLogPayloadPanic(
-			"Data disk mounted, the system is now ready to use.",
-		),
+		valueObject.NewServerLogPayloadPanic(successMessage),
 	)
+	serverCmdRepo.SendServerMessage(successMessage)
 
 	return nil
 }

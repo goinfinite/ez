@@ -22,6 +22,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		"tar",
 		"procps",
 		"xfsprogs",
+		"util-linux-tty-tools",
 	}
 	err := infraHelper.InstallPkgs(necessaryPkgs)
 	if err != nil {
