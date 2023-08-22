@@ -3,7 +3,9 @@ package useCase
 import (
 	"errors"
 
+	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/repository"
+	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
 func SysInstall(
@@ -24,10 +26,35 @@ func SysInstall(
 			return err
 		}
 
+		serverCmdRepo.AddServerLog(
+			entity.NewServerLog(
+				valueObject.NewServerLogLevelPanic("info"),
+				valueObject.NewServerLogOperationPanic("sys-install"),
+				valueObject.NewServerLogPayloadPanic(
+					"Packages installed, the system will now reboot "+
+						"and then continue the process.",
+				),
+			),
+		)
 		serverCmdRepo.AddOneTimerSvc("sys-install-continue", "sfm sys-install")
 		serverCmdRepo.Reboot()
 	}
 
 	serverCmdRepo.DeleteOneTimerSvc("sys-install-continue")
-	return sysInstallCmdRepo.AddDataDisk()
+	err := sysInstallCmdRepo.AddDataDisk()
+	if err != nil {
+		return err
+	}
+
+	serverCmdRepo.AddServerLog(
+		entity.NewServerLog(
+			valueObject.NewServerLogLevelPanic("info"),
+			valueObject.NewServerLogOperationPanic("sys-install"),
+			valueObject.NewServerLogPayloadPanic(
+				"Data disk mounted, the system is now ready to use.",
+			),
+		),
+	)
+
+	return nil
 }
