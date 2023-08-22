@@ -1,9 +1,12 @@
 package infra
 
 import (
+	"encoding/json"
 	"errors"
+	"log"
 	"os"
 
+	"github.com/speedianet/sfm/src/domain/entity"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 )
 
@@ -92,4 +95,26 @@ func (repo ServerCmdRepo) DeleteOneTimerSvc(name string) error {
 	}
 
 	return nil
+}
+
+func (repo ServerCmdRepo) AddServerLog(logEntity entity.ServerLog) {
+	logFilePath := "/var/log/sfm.log"
+	jsonLogEntry, err := json.Marshal(logEntity)
+	if err != nil {
+		return
+	}
+	logContent := string(jsonLogEntry) + "\n"
+
+	logFile, err := os.OpenFile(
+		logFilePath,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0644,
+	)
+	if err != nil {
+		return
+	}
+	defer logFile.Close()
+
+	logFile.WriteString(logContent)
+	log.Print(logContent)
 }
