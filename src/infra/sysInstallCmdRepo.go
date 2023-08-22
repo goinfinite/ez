@@ -45,9 +45,7 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 	}
 
 	primaryDiskId, err := infraHelper.RunCmd(
-		"bash",
-		"-c",
-		"lsblk "+primaryPart+" -n --output PKNAME",
+		"lsblk", primaryPart, "-n", "--output", "PKNAME",
 	)
 	if err != nil {
 		return "", errors.New("GetPrimaryDiskIdError")
@@ -72,11 +70,7 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 	}
 
 	addDiskFilesystem, err := infraHelper.RunCmd(
-		"lsblk",
-		addDisk,
-		"-n",
-		"--output",
-		"FSTYPE",
+		"lsblk", addDisk, "-n", "--output", "FSTYPE",
 	)
 	if err != nil {
 		return errors.New("GetAddDiskFilesystemError")
