@@ -32,18 +32,13 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, envFlags...)
 	}
 
-	if addContainer.BaseSpecs != nil {
-		specsParams := []string{
-			"--cpus",
-			addContainer.BaseSpecs.GetCpuCoresAsString(),
-			"--memory",
-			addContainer.BaseSpecs.GetMemoryAsString(),
-			"--storage-opt",
-			"size=" + addContainer.BaseSpecs.GetStorageAsString(),
-		}
-
-		runParams = append(runParams, specsParams...)
+	specsParams := []string{
+		"--cpus",
+		addContainer.BaseSpecs.GetCpuCoresAsString(),
+		"--memory",
+		addContainer.BaseSpecs.GetMemoryAsString(),
 	}
+	runParams = append(runParams, specsParams...)
 
 	if addContainer.RestartPolicy != nil {
 		runParams = append(runParams, "--restart", addContainer.RestartPolicy.String())
@@ -57,7 +52,8 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		portBindingsParams := []string{}
 		for _, portBinding := range *addContainer.PortBindings {
 			portBindingsParams = append(portBindingsParams, "--publish")
-			portBindingsString := portBinding.GetHostPortAsString() + ":" + portBinding.GetContainerPortAsString()
+			portBindingsString := portBinding.GetHostPortAsString() +
+				":" + portBinding.GetContainerPortAsString()
 			if portBinding.GetProtocol().String() != "" {
 				portBindingsString += "/" + portBinding.GetProtocol().String()
 			}
