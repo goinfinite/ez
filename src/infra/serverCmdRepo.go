@@ -19,7 +19,59 @@ func (repo ServerCmdRepo) Reboot() error {
 	return nil
 }
 
-func (repo ServerCmdRepo) AddOneTimerSvc(name string, cmd string) error {
+func (repo ServerCmdRepo) AddSvc(
+	name valueObject.SvcName,
+	cmd valueObject.SvcCmd,
+) error {
+	nameStr := name.String()
+	cmdStr := cmd.String()
+	svcFilePath := "/etc/systemd/system/" + nameStr + ".service"
+	svcContent := `[Unit]
+Description=` + nameStr + `
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/speedia
+ExecStart=` + cmdStr + `
+Restart=always
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target
+`
+
+	err := infraHelper.UpdateFile(svcFilePath, svcContent, true)
+	if err != nil {
+		return errors.New("AddSvcFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"daemon-reload",
+	)
+	if err != nil {
+		return errors.New("SystemctlDaemonReloadFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"enable",
+		nameStr+".service",
+		"--now",
+	)
+	if err != nil {
+		return errors.New("SystemctlEnableFailed")
+	}
+
+	return nil
+}
+
+func (repo ServerCmdRepo) AddOneTimerSvc(
+	svcName valueObject.SvcName,
+	cmd valueObject.SvcCmd,
+) error {
+	name := svcName.String()
 	svcFilePath := "/etc/systemd/system/" + name + ".service"
 	svcContent := `[Unit]
 Description=` + name + `
@@ -27,7 +79,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=` + cmd + `
+ExecStart=` + cmd.String() + `
 RemainAfterExit=yes
 `
 
@@ -73,7 +125,8 @@ WantedBy=multi-user.target
 	return nil
 }
 
-func (repo ServerCmdRepo) DeleteOneTimerSvc(name string) error {
+func (repo ServerCmdRepo) DeleteOneTimerSvc(svcName valueObject.SvcName) error {
+	name := svcName.String()
 	infraHelper.RunCmd("systemctl", "stop", name+".service")
 	infraHelper.RunCmd("systemctl", "disable", name+".service")
 
