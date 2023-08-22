@@ -14,5 +14,10 @@ func SysInstall(
 		return errors.New("SysAlreadyInstalled")
 	}
 
-	return sysInstallCmdRepo.Install()
+	err := sysInstallCmdRepo.Install()
+	if err != nil {
+		return err
+	}
+
+	return sysInstallCmdRepo.AddDataDisk()
 }

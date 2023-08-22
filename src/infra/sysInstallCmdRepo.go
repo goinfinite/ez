@@ -20,6 +20,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		"make",
 		"tar",
 		"procps",
+		"xfsprogs",
 	}
 	err := infraHelper.InstallPkgs(necessaryPkgs)
 	if err != nil {
@@ -30,5 +31,9 @@ func (repo SysInstallCmdRepo) Install() error {
 
 	infraHelper.RunCmd("transactional-update", "reboot")
 
+	return nil
+}
+
+func (repo SysInstallCmdRepo) AddDataDisk() error {
 	return nil
 }
