@@ -1,10 +1,14 @@
 package repository
 
-import "github.com/speedianet/sfm/src/domain/entity"
+import "github.com/speedianet/sfm/src/domain/valueObject"
 
 type ServerCmdRepo interface {
 	Reboot() error
 	AddOneTimerSvc(name string, cmd string) error
 	DeleteOneTimerSvc(name string) error
-	AddServerLog(log entity.ServerLog)
+	AddServerLog(
+		level valueObject.ServerLogLevel,
+		operation valueObject.ServerLogOperation,
+		payload valueObject.ServerLogPayload,
+	)
 }

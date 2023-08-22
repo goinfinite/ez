@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/speedianet/sfm/src/domain/entity"
+	"github.com/speedianet/sfm/src/domain/valueObject"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 )
 
@@ -97,7 +98,12 @@ func (repo ServerCmdRepo) DeleteOneTimerSvc(name string) error {
 	return nil
 }
 
-func (repo ServerCmdRepo) AddServerLog(logEntity entity.ServerLog) {
+func (repo ServerCmdRepo) AddServerLog(
+	level valueObject.ServerLogLevel,
+	operation valueObject.ServerLogOperation,
+	payload valueObject.ServerLogPayload,
+) {
+	logEntity := entity.NewServerLog(level, operation, payload)
 	logFilePath := "/var/log/sfm.log"
 	jsonLogEntry, err := json.Marshal(logEntity)
 	if err != nil {
