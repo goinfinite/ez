@@ -34,6 +34,25 @@ func (repo SysInstallCmdRepo) Install() error {
 	return nil
 }
 
+func (repo SysInstallCmdRepo) DisableDefaultSoftwares() error {
+	_, err := infraHelper.RunCmd(
+		"sed",
+		"-i",
+		"s/security=1 selinux=1/selinux=0/g",
+		"/etc/default/grub",
+	)
+	if err != nil {
+		return errors.New("DisableSelinuxFailed")
+	}
+
+	_, err = infraHelper.RunCmd("transactional-update", "grub.cfg")
+	if err != nil {
+		return errors.New("UpdateGrubFailed")
+	}
+
+	return nil
+}
+
 func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 	primaryPart, err := infraHelper.RunCmd(
 		"bash",

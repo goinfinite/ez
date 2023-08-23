@@ -27,6 +27,11 @@ func SysInstall(
 			return err
 		}
 
+		err = sysInstallCmdRepo.DisableDefaultSoftwares()
+		if err != nil {
+			return err
+		}
+
 		serverCmdRepo.AddServerLog(
 			valueObject.NewServerLogLevelPanic("info"),
 			valueObject.NewServerLogOperationPanic("sys-install"),
