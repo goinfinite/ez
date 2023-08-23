@@ -4,7 +4,7 @@ This project is under active development and is not ready for production use.
 
 # Speedia FleetManager
 
-Speedia FleetManager (SFM) is proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
+Speedia FleetManager (SFM) is a proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
 
 ## Running
 
@@ -23,39 +23,30 @@ Since SFM relies on the operational system being openSUSE MicroOS, the entire de
 2. Download the VMware `.vmx` and `.vmdk` files from "Base System + Container Runtime" column on MicroOS download page:
    https://en.opensuse.org/Portal:MicroOS/Downloads
 
-3. Add the VM to the VMWare Player interface, change the resources to 2GB RAM // 2vCPU, fix the disk path and add a Network Adapter so the VM gets a connection.
+3. Add the VM to the VMWare Player interface and then:
+
+   1. Change the resources to 2GB RAM // 2vCPU;
+   2. Fix the main disk .vmx path;
+   3. Add a Network Adapter (bridge mode);
+   4. Remove the floppy drive;
+   5. Add a secondary disk (5GB minimal);
 
 4. Run the VM. The first boot will allow you to set up a root password. After the first reboot, login with the password you set.
 
-5. On the terminal, change "security=1 selinux=1" to "selinux=0" with the command:
+5. Add your public SSH key to "/root/.ssh/authorized_keys" file.
+
+6. Install git and Go and reboot:
 
 ```
-vim /etc/default/grub
-```
-
-Then apply the changes with the following command (no need to reboot yet):
-
-```
-transactional-update grub.cfg
-```
-
-6. Install a few system packages and Go runtime:
-
-```
-transactional-update pkg install git wget curl cyrus-sasl pam-devel gcc make tar procps
+transactional-update pkg install git wget tar
 wget -nv https://go.dev/dl/go1.20.5.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
 echo 'alias sfm-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
-```
-
-7. Add your public SSH key to "/root/.ssh/authorized_keys" file and now you can reboot:
-
-```
 transactional-update reboot
 ```
 
-8. After the reboot, you can install a few Go packages and clone the SFM repository:
+8. After the reboot, install a few Go packages and clone the SFM repository:
 
 ```
 ln -s /etc/pam.d/common-auth /etc/pam.d/system-auth
@@ -66,7 +57,16 @@ git config --global user.email yourgithubemail
 git clone git@github.com:speedianet/sfm.git
 ```
 
-OK, now you have the VM running and you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to it and manage the project.
+9. Build the project and run the installer:
+
+```
+cd /root/sfm
+air
+chmod +x /speedia/sfm
+/speedia/sfm sys-install
+```
+
+10. The system will reboot and once you get the success message, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to it and manage the project.
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found with the `ip a` command on the VM terminal.
 
@@ -94,9 +94,11 @@ SFM is likely on the marketplace of your cloud provider already, but if you want
 
 The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
-Once you have uploaded the openSUSE MicroOS cloud-init image to your provider and deployed a VM, get the SFM binary and download it to the `/speedia/` directory.
+1. Once you have uploaded the openSUSE MicroOS cloud-init image to your provider, attach a secondary unformatted disk and deploy the VM.
 
-Then you just need to run:
+2. Get the SFM binary and download it to the `/speedia/` directory.
+
+3. Then run the installer, the system will reboot and once you get the success message, you are good to go:
 
 ```
 sfm sys-install
