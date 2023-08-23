@@ -30,6 +30,7 @@ func (repo SysInstallCmdRepo) Install() error {
 	}
 
 	os.Symlink("/etc/pam.d/common-auth", "/etc/pam.d/system-auth")
+	os.Symlink("/speedia/sfm", "/usr/bin/sfm")
 
 	return nil
 }
