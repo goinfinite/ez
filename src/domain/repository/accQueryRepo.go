@@ -6,11 +6,11 @@ import (
 )
 
 type AccQueryRepo interface {
-	Get() ([]entity.AccountDetails, error)
+	Get() ([]entity.Account, error)
 	GetByUsername(
 		username valueObject.Username,
-	) (entity.AccountDetails, error)
+	) (entity.Account, error)
 	GetById(
-		userId valueObject.UserId,
-	) (entity.AccountDetails, error)
+		accountId valueObject.AccountId,
+	) (entity.Account, error)
 }

@@ -34,17 +34,17 @@ func o11yRoutes() {
 	o11yCmd.AddCommand(cliController.GetO11yOverviewController())
 }
 
-func userRoutes() {
-	var userCmd = &cobra.Command{
-		Use:   "user",
-		Short: "UserManagement",
+func accountRoutes() {
+	var accountCmd = &cobra.Command{
+		Use:   "account",
+		Short: "AccountManagement",
 	}
 
-	rootCmd.AddCommand(userCmd)
-	userCmd.AddCommand(cliController.GetUsersController())
-	userCmd.AddCommand(cliController.AddUserController())
-	userCmd.AddCommand(cliController.DeleteUserController())
-	userCmd.AddCommand(cliController.UpdateUserController())
+	rootCmd.AddCommand(accountCmd)
+	accountCmd.AddCommand(cliController.GetAccountsController())
+	accountCmd.AddCommand(cliController.AddAccountController())
+	accountCmd.AddCommand(cliController.DeleteAccountController())
+	accountCmd.AddCommand(cliController.UpdateAccountController())
 }
 
 func registerCliRoutes() {
@@ -52,5 +52,5 @@ func registerCliRoutes() {
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(cliController.SysInstallController())
 	o11yRoutes()
-	userRoutes()
+	accountRoutes()
 }

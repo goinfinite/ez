@@ -14,7 +14,7 @@ func TestAuthCmdRepo(t *testing.T) {
 	t.Run("GetSessionToken", func(t *testing.T) {
 		authCmdRepo := AuthCmdRepo{}
 		_, err := authCmdRepo.GenerateSessionToken(
-			valueObject.UserId(1000),
+			valueObject.AccountId(1000),
 			valueObject.UnixTime(
 				time.Now().Add(3*time.Hour).Unix(),
 			),

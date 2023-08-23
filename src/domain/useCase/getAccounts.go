@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/sfm/src/domain/repository"
 )
 
-func GetUsers(
+func GetAccounts(
 	accQueryRepo repository.AccQueryRepo,
-) ([]entity.AccountDetails, error) {
+) ([]entity.Account, error) {
 	return accQueryRepo.Get()
 }

@@ -13,37 +13,37 @@ import (
 type AccQueryRepo struct {
 }
 
-func accDetailsFactory(userInfo *user.User) (entity.AccountDetails, error) {
+func accDetailsFactory(userInfo *user.User) (entity.Account, error) {
 	username, err := valueObject.NewUsername(userInfo.Username)
 	if err != nil {
-		return entity.AccountDetails{}, errors.New("UsernameParseError")
+		return entity.Account{}, errors.New("UsernameParseError")
 	}
 
-	userId, err := valueObject.NewUserIdFromString(userInfo.Uid)
+	accountId, err := valueObject.NewAccountIdFromString(userInfo.Uid)
 	if err != nil {
-		return entity.AccountDetails{}, errors.New("UserIdParseError")
+		return entity.Account{}, errors.New("AccountIdParseError")
 	}
 
 	groupId, err := valueObject.NewGroupIdFromString(userInfo.Gid)
 	if err != nil {
-		return entity.AccountDetails{}, errors.New("GroupIdParseError")
+		return entity.Account{}, errors.New("GroupIdParseError")
 	}
 
-	return entity.NewAccountDetails(
+	return entity.NewAccount(
 		username,
-		userId,
+		accountId,
 		groupId,
 	), nil
 }
 
-func (repo AccQueryRepo) Get() ([]entity.AccountDetails, error) {
+func (repo AccQueryRepo) Get() ([]entity.Account, error) {
 	output, err := infraHelper.RunCmd("awk", "-F:", "{print $1}", "/etc/passwd")
 	if err != nil {
-		return []entity.AccountDetails{}, errors.New("UsersLookupError")
+		return []entity.Account{}, errors.New("UsersLookupError")
 	}
 
 	usernames := strings.Split(string(output), "\n")
-	var accsDetails []entity.AccountDetails
+	var accsDetails []entity.Account
 	for _, username := range usernames {
 		username, err := valueObject.NewUsername(username)
 		if err != nil {
@@ -54,7 +54,7 @@ func (repo AccQueryRepo) Get() ([]entity.AccountDetails, error) {
 		if err != nil {
 			continue
 		}
-		if accDetails.UserId < 1000 {
+		if accDetails.AccountId < 1000 {
 			continue
 		}
 		if accDetails.Username == "nobody" {
@@ -69,21 +69,21 @@ func (repo AccQueryRepo) Get() ([]entity.AccountDetails, error) {
 
 func (repo AccQueryRepo) GetByUsername(
 	username valueObject.Username,
-) (entity.AccountDetails, error) {
+) (entity.Account, error) {
 	userInfo, err := user.Lookup(string(username))
 	if err != nil {
-		return entity.AccountDetails{}, errors.New("UserLookupError")
+		return entity.Account{}, errors.New("UserLookupError")
 	}
 
 	return accDetailsFactory(userInfo)
 }
 
 func (repo AccQueryRepo) GetById(
-	userId valueObject.UserId,
-) (entity.AccountDetails, error) {
-	userInfo, err := user.LookupId(userId.String())
+	accountId valueObject.AccountId,
+) (entity.Account, error) {
+	userInfo, err := user.LookupId(accountId.String())
 	if err != nil {
-		return entity.AccountDetails{}, errors.New("UserLookupError")
+		return entity.Account{}, errors.New("UserLookupError")
 	}
 
 	return accDetailsFactory(userInfo)

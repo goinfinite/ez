@@ -8,22 +8,22 @@ import (
 	"github.com/speedianet/sfm/src/domain/repository"
 )
 
-func AddUser(
+func AddAccount(
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
-	addUser dto.AddUser,
+	addAccount dto.AddAccount,
 ) error {
-	_, err := accQueryRepo.GetByUsername(addUser.Username)
+	_, err := accQueryRepo.GetByUsername(addAccount.Username)
 	if err == nil {
-		return errors.New("UserAlreadyExists")
+		return errors.New("AccountAlreadyExists")
 	}
 
-	err = accCmdRepo.Add(addUser)
+	err = accCmdRepo.Add(addAccount)
 	if err != nil {
-		return errors.New("AddUserError")
+		return errors.New("AddAccountError")
 	}
 
-	log.Printf("User '%v' added.", addUser.Username.String())
+	log.Printf("User '%v' added.", addAccount.Username.String())
 
 	return nil
 }
