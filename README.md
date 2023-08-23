@@ -73,8 +73,7 @@ git clone git@github.com:speedianet/sfm.git
 
 ```
 cd sfm; air
-chmod +x /speedia/sfm
-/speedia/sfm sys-install
+/var/speedia/sfm sys-install
 ```
 
 11. The system will reboot and once you get the final success message, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
@@ -87,10 +86,10 @@ You must have an `.env` file in the root of the git directory **during developme
 
 If you add a new env var that is required to run the apis, please add it to the `src/presentation/shared/checkEnvs.go` file.
 
-When running in production, the `/speedia/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
+When running in production, the `/var/speedia/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
 
 ```
-ENV1=XXX /speedia/sfm
+ENV1=XXX /var/speedia/sfm
 ```
 
 ### Dev Utils
@@ -107,7 +106,7 @@ The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
 1. Once you have uploaded the openSUSE MicroOS cloud-init image to your provider, attach a secondary unformatted disk and deploy the VM.
 
-2. Get the SFM binary and download it to the `/speedia/` directory.
+2. Get the SFM binary and download it to the `/var/speedia/` directory.
 
 3. Then run the installer, the system will reboot and once you get the success message, you are good to go:
 

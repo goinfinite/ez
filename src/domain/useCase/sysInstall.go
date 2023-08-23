@@ -42,7 +42,7 @@ func SysInstall(
 		)
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
-			valueObject.NewSvcCmdPanic("/speedia/sfm sys-install"),
+			valueObject.NewSvcCmdPanic("/var/speedia/sfm sys-install"),
 		)
 		serverCmdRepo.SendServerMessage("Server is rebooting!")
 		serverCmdRepo.Reboot()
@@ -60,7 +60,7 @@ func SysInstall(
 
 	err = serverCmdRepo.AddSvc(
 		valueObject.NewSvcNamePanic("sfm"),
-		valueObject.NewSvcCmdPanic("/speedia/sfm serve"),
+		valueObject.NewSvcCmdPanic("/var/speedia/sfm serve"),
 	)
 	if err != nil {
 		return err
