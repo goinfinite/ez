@@ -25,31 +25,43 @@ Since SFM relies on the operational system being openSUSE MicroOS, the entire de
 
 3. Add the VM to the VMWare Player interface and then:
 
-   1. Change the resources to 2GB RAM // 2vCPU;
-   2. Fix the main disk .vmx path;
-   3. Add a Network Adapter (bridge mode);
-   4. Remove the floppy drive;
-   5. Add a secondary disk (5GB minimal);
+   1. Change the resources to 4GB RAM // 2vCPU;
+   2. Remove the default disk;
+   3. Remove the floppy drive;
+   4. Add a new disk selecting "Use an existent disk" and use the .vmdk file you downloaded (keep the format when asked);
+   5. Add a secondary disk (5GB minimal - do not format);
+   6. Add a Network Adapter (keep set to NAT mode);
 
 4. Run the VM. The first boot will allow you to set up a root password. After the first reboot, login with the password you set.
 
-5. Add your public SSH key to "/root/.ssh/authorized_keys" file.
+5. Add your public SSH key to "/root/.ssh/authorized_keys" file. I would recommend uploading your .pub to a Pastebin or similar service and then using curl to download it to the VM as curl is installed by default.
 
 6. Install git and Go and reboot:
 
 ```
-transactional-update pkg install git wget tar
-wget -nv https://go.dev/dl/go1.20.5.linux-amd64.tar.gz
-tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
+transactional-update pkg install git
+curl -L https://go.dev/dl/go1.20.5.linux-amd64.tar.gz -o go.tar.gz
+tar -C /usr/local -xzf go.tar.gz
+rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
 echo 'alias sfm-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
-transactional-update reboot
+systemctl reboot
 ```
 
-8. After the reboot, install a few Go packages and clone the SFM repository:
+8. After the reboot, you'll need to configure GitHub authentication. The `.ssh/config` file is your friend, this is an example:
 
 ```
-ln -s /etc/pam.d/common-auth /etc/pam.d/system-auth
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/the_github_key
+```
+
+Replace `the_github_key` with the path to your private key and remember to chmod the key to 400.
+
+9. Install a few Go packages and clone the SFM repository:
+
+```
 go install github.com/swaggo/swag/cmd/swag@latest
 go install github.com/cosmtrek/air@latest
 git config --global user.name "yourgithubnick"
@@ -57,16 +69,15 @@ git config --global user.email yourgithubemail
 git clone git@github.com:speedianet/sfm.git
 ```
 
-9. Build the project and run the installer:
+10. Build the project and run the installer:
 
 ```
-cd /root/sfm
-air
+cd sfm; air
 chmod +x /speedia/sfm
 /speedia/sfm sys-install
 ```
 
-10. The system will reboot and once you get the success message, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to it and manage the project.
+11. The system will reboot and once you get the final success message, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found with the `ip a` command on the VM terminal.
 
