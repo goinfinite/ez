@@ -55,6 +55,7 @@ func SysInstall(
 
 		logAction(serverCmdRepo, "Packages installed. Rebooting...")
 		serverCmdRepo.Reboot()
+		return nil
 	}
 
 	logAction(serverCmdRepo, "Formatting data disk...")
@@ -82,5 +83,6 @@ func SysInstall(
 	}
 
 	logAction(serverCmdRepo, "Installation completed! Rebooting...")
+	serverCmdRepo.Reboot()
 	return nil
 }
