@@ -1,8 +1,6 @@
 package useCase
 
 import (
-	"errors"
-
 	"github.com/speedianet/sfm/src/domain/repository"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
@@ -29,13 +27,18 @@ func SysInstall(
 	svcInstallName := valueObject.NewSvcNamePanic("sys-install-continue")
 
 	if isInstalled && isDataDiskMounted {
-		return errors.New("SysInstallAlreadyCompleted")
+		_ = serverCmdRepo.DeleteOneTimerSvc(svcInstallName)
+		logAction(
+			serverCmdRepo,
+			"Installation succeeded. The server is now ready to be used.",
+		)
+		return nil
 	}
 
 	if !isInstalled {
 		logAction(
 			serverCmdRepo,
-			"Installation started, the server will reboot twice. "+
+			"Installation started. The server will reboot a few times. "+
 				"Check /var/log/sfm.log for the installation progress.",
 		)
 
@@ -79,12 +82,7 @@ func SysInstall(
 		return err
 	}
 
-	serverCmdRepo.DeleteOneTimerSvc(svcInstallName)
-
-	logAction(
-		serverCmdRepo,
-		"Installation completed! System will be ready after the reboot...",
-	)
+	logAction(serverCmdRepo, "Installation completed. Rebooting...")
 	serverCmdRepo.Reboot()
 	return nil
 }
