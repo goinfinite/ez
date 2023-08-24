@@ -35,7 +35,7 @@ func (repo SysInstallCmdRepo) DisableDefaultSoftwares() error {
 	_, err := infraHelper.RunCmd(
 		"sed",
 		"-i",
-		"s/security=1 selinux=1/selinux=0/g",
+		"s/security=selinux selinux=1/selinux=0/g",
 		"/etc/default/grub",
 	)
 	if err != nil {
