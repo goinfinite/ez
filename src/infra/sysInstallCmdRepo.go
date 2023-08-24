@@ -25,7 +25,6 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
-	os.Symlink("/etc/pam.d/common-auth", "/etc/pam.d/system-auth")
 	os.MkdirAll("/var/speedia", 0755)
 	os.Symlink("/var/speedia/sfm", "/usr/bin/sfm")
 

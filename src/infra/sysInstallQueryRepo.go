@@ -10,7 +10,7 @@ type SysInstallQueryRepo struct {
 }
 
 func (repo SysInstallQueryRepo) IsInstalled() bool {
-	_, err := infraHelper.GetFilePathWithMatch("/etc/pam.d/", "system-auth")
+	_, err := infraHelper.GetFilePathWithMatch("/usr/bin", "sfm")
 	return err == nil
 }
 
