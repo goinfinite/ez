@@ -122,7 +122,16 @@ WantedBy=multi-user.target
 		name+".service",
 	)
 	if err != nil {
-		return errors.New("SystemctlEnableFailed")
+		return errors.New("SystemctlEnableSvcFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"enable",
+		name+".timer",
+	)
+	if err != nil {
+		return errors.New("SystemctlEnableTimerFailed")
 	}
 
 	return nil
