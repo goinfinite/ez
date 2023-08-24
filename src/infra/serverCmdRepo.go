@@ -16,6 +16,7 @@ type ServerCmdRepo struct {
 
 func (repo ServerCmdRepo) Reboot() error {
 	infraHelper.RunCmd("systemctl", "reboot")
+	os.Exit(0)
 	return nil
 }
 
@@ -96,7 +97,10 @@ RemainAfterExit=yes
 	if err != nil {
 		return errors.New("AddOneTimerSvcFailed")
 	}
-	os.Chmod(svcFilePath, 0644)
+	err = os.Chmod(svcFilePath, 0644)
+	if err != nil {
+		return errors.New("ChmodSvcFailed")
+	}
 
 	svcTimerFilePath := "/etc/systemd/system/" + name + ".timer"
 	svcTimerContent := `[Unit]
@@ -114,7 +118,10 @@ WantedBy=multi-user.target
 	if err != nil {
 		return errors.New("AddOneTimerSvcTimerFailed")
 	}
-	os.Chmod(svcTimerFilePath, 0644)
+	err = os.Chmod(svcTimerFilePath, 0644)
+	if err != nil {
+		return errors.New("ChmodSvcTimerFailed")
+	}
 
 	_, err = infraHelper.RunCmd(
 		"systemctl",
@@ -147,8 +154,8 @@ WantedBy=multi-user.target
 
 func (repo ServerCmdRepo) DeleteOneTimerSvc(svcName valueObject.SvcName) error {
 	name := svcName.String()
-	infraHelper.RunCmd("systemctl", "stop", name+".service")
-	infraHelper.RunCmd("systemctl", "disable", name+".service")
+	_, _ = infraHelper.RunCmd("systemctl", "stop", name+".timer")
+	_, _ = infraHelper.RunCmd("systemctl", "disable", name+".timer")
 
 	err := os.Remove("/etc/systemd/system/" + name + ".service")
 	if err != nil {
@@ -194,10 +201,10 @@ func (repo ServerCmdRepo) AddServerLog(
 	}
 	defer logFile.Close()
 
-	logFile.WriteString(logContent)
+	_, _ = logFile.WriteString(logContent)
 	log.Print(logContent)
 }
 
 func (repo ServerCmdRepo) SendServerMessage(message string) {
-	infraHelper.RunCmd("wall", "-n", message)
+	_, _ = infraHelper.RunCmd("wall", "-n", message)
 }
