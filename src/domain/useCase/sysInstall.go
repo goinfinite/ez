@@ -7,12 +7,12 @@ import (
 
 func logAction(
 	serverCmdRepo repository.ServerCmdRepo,
-	logPayload valueObject.ServerLogPayload,
+	logPayload string,
 ) {
 	serverCmdRepo.AddServerLog(
 		valueObject.NewServerLogLevelPanic("info"),
 		valueObject.NewServerLogOperationPanic("sys-install"),
-		logPayload,
+		valueObject.NewServerLogPayloadPanic(logPayload),
 	)
 }
 
@@ -30,9 +30,7 @@ func SysInstall(
 		serverCmdRepo.DeleteOneTimerSvc(svcInstallName)
 		logAction(
 			serverCmdRepo,
-			valueObject.NewServerLogPayloadPanic(
-				"The installation succeeded. The server is ready to use.",
-			),
+			"The installation succeeded. The server is ready to use!",
 		)
 		return nil
 	}
@@ -40,14 +38,13 @@ func SysInstall(
 	if !isInstalled {
 		logAction(
 			serverCmdRepo,
-			valueObject.NewServerLogPayloadPanic(
-				"Installation started, the server will reboot a few times. "+
-					"Check /var/log/sfm.log for the installation progress.",
-			),
+			"Installation started, the server will reboot a few times. "+
+				"Check /var/log/sfm.log for the installation progress.",
 		)
 
 		err := sysInstallCmdRepo.Install()
 		if err != nil {
+			logAction(serverCmdRepo, err.Error())
 			return err
 		}
 
@@ -56,56 +53,34 @@ func SysInstall(
 			valueObject.NewSvcCmdPanic("/var/speedia/sfm sys-install"),
 		)
 
-		logAction(
-			serverCmdRepo,
-			valueObject.NewServerLogPayloadPanic(
-				"Packages installed. Rebooting...",
-			),
-		)
+		logAction(serverCmdRepo, "Packages installed. Rebooting...")
 		serverCmdRepo.Reboot()
 	}
 
-	logAction(
-		serverCmdRepo,
-		valueObject.NewServerLogPayloadPanic(
-			"Formatting data disk...",
-		),
-	)
+	logAction(serverCmdRepo, "Formatting data disk...")
 	err := sysInstallCmdRepo.AddDataDisk()
 	if err != nil {
+		logAction(serverCmdRepo, err.Error())
 		return err
 	}
 
-	logAction(
-		serverCmdRepo,
-		valueObject.NewServerLogPayloadPanic(
-			"Adding core services...",
-		),
-	)
+	logAction(serverCmdRepo, "Adding core services...")
 	err = serverCmdRepo.AddSvc(
 		valueObject.NewSvcNamePanic("sfm"),
 		valueObject.NewSvcCmdPanic("/var/speedia/sfm serve"),
 	)
 	if err != nil {
+		logAction(serverCmdRepo, err.Error())
 		return err
 	}
 
-	logAction(
-		serverCmdRepo,
-		valueObject.NewServerLogPayloadPanic(
-			"Disabling default softwares...",
-		),
-	)
+	logAction(serverCmdRepo, "Disabling default softwares...")
 	err = sysInstallCmdRepo.DisableDefaultSoftwares()
 	if err != nil {
+		logAction(serverCmdRepo, err.Error())
 		return err
 	}
 
-	logAction(
-		serverCmdRepo,
-		valueObject.NewServerLogPayloadPanic(
-			"Installation completed! Rebooting...",
-		),
-	)
+	logAction(serverCmdRepo, "Installation completed! Rebooting...")
 	return nil
 }
