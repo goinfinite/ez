@@ -62,7 +62,6 @@ WantedBy=multi-user.target
 		"systemctl",
 		"enable",
 		nameStr+".service",
-		"--now",
 	)
 	if err != nil {
 		return errors.New("SystemctlEnableFailed")
