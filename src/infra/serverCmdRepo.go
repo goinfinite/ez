@@ -35,6 +35,9 @@ User=root
 WorkingDirectory=/var/speedia
 ExecStart=` + cmdStr + `
 Restart=always
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=` + nameStr + `
 RestartSec=15
 
 [Install]
@@ -45,7 +48,7 @@ WantedBy=multi-user.target
 	if err != nil {
 		return errors.New("AddSvcFailed")
 	}
-	os.Chmod(svcFilePath, 0755)
+	os.Chmod(svcFilePath, 0644)
 
 	_, err = infraHelper.RunCmd(
 		"systemctl",
@@ -83,6 +86,9 @@ Type=oneshot
 User=root
 WorkingDirectory=/var/speedia
 Restart=no
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=` + name + `
 ExecStart=` + cmd.String() + `
 RemainAfterExit=yes
 `
@@ -91,7 +97,7 @@ RemainAfterExit=yes
 	if err != nil {
 		return errors.New("AddOneTimerSvcFailed")
 	}
-	os.Chmod(svcFilePath, 0755)
+	os.Chmod(svcFilePath, 0644)
 
 	svcTimerFilePath := "/etc/systemd/system/" + name + ".timer"
 	svcTimerContent := `[Unit]
