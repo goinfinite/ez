@@ -32,7 +32,7 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/speedia
+WorkingDirectory=/var/speedia
 ExecStart=` + cmdStr + `
 Restart=always
 RestartSec=15
@@ -81,7 +81,7 @@ After=network.target
 [Service]
 Type=oneshot
 User=root
-WorkingDirectory=/speedia
+WorkingDirectory=/var/speedia
 Restart=no
 ExecStart=` + cmd.String() + `
 RemainAfterExit=yes
