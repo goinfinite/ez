@@ -80,6 +80,9 @@ After=network.target
 
 [Service]
 Type=oneshot
+User=root
+WorkingDirectory=/speedia
+Restart=no
 ExecStart=` + cmd.String() + `
 RemainAfterExit=yes
 `
