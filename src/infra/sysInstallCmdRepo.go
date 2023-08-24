@@ -113,10 +113,17 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 		return errors.New("MkdirDataDirFailed")
 	}
 
+	addDiskUuid, err := infraHelper.RunCmd(
+		"lsblk", addDisk, "-n", "--output", "UUID",
+	)
+	if err != nil {
+		return errors.New("GetAddDiskUuidError")
+	}
+
 	_, err = infraHelper.RunCmd(
 		"bash",
 		"-c",
-		"echo '"+addDisk+" /var/data xfs defaults,uquota 0 0' >> /etc/fstab",
+		"echo 'UUID="+addDiskUuid+" /var/data xfs defaults,uquota 0 0' >> /etc/fstab",
 	)
 	if err != nil {
 		return errors.New("AddDataDiskToFsTabFailed")
