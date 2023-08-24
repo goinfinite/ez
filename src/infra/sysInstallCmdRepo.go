@@ -25,7 +25,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
-	os.MkdirAll("/var/speedia", 0755)
+	_ = os.MkdirAll("/var/speedia", 0755)
 	_, err = infraHelper.RunCmd(
 		"bash",
 		"-c",
