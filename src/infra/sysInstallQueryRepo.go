@@ -10,8 +10,12 @@ type SysInstallQueryRepo struct {
 }
 
 func (repo SysInstallQueryRepo) IsInstalled() bool {
-	_, err := infraHelper.GetFilePathWithMatch("/usr/bin", "sfm")
-	return err == nil
+	filePath, err := infraHelper.GetFilePathWithMatch("/usr/bin", "sfm")
+	if err != nil || filePath == "" {
+		return false
+	}
+
+	return true
 }
 
 func (repo SysInstallQueryRepo) IsDataDiskMounted() bool {
