@@ -2,6 +2,8 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra"
 	apiMiddleware "github.com/speedianet/sfm/src/presentation/api/middleware"
 	"github.com/speedianet/sfm/src/presentation/shared"
 	_ "github.com/swaggo/echo-swagger/example/docs"
@@ -42,4 +44,10 @@ func ApiInit() {
 	registerApiRoutes(baseRoute)
 
 	e.Start(":10001")
+
+	infra.ServerCmdRepo{}.AddServerLog(
+		valueObject.NewServerLogLevelPanic("info"),
+		valueObject.NewServerLogOperationPanic("sfm"),
+		valueObject.NewServerLogPayloadPanic("SFM backend is up and running!"),
+	)
 }
