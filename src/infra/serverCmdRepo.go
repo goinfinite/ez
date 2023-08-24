@@ -115,7 +115,7 @@ WantedBy=multi-user.target
 	if err != nil {
 		return errors.New("AddOneTimerSvcTimerFailed")
 	}
-	os.Chmod(svcTimerFilePath, 0755)
+	os.Chmod(svcTimerFilePath, 0644)
 
 	_, err = infraHelper.RunCmd(
 		"systemctl",
