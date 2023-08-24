@@ -55,7 +55,7 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 	primaryPart, err := infraHelper.RunCmd(
 		"bash",
 		"-c",
-		"mount | awk '/on / type/{print $1}'",
+		"mount | awk '/on \\/ type/{print $1}'",
 	)
 	if err != nil {
 		return "", errors.New("GetPrimaryPartError")
