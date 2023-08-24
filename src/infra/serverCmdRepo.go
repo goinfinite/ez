@@ -15,7 +15,7 @@ type ServerCmdRepo struct {
 }
 
 func (repo ServerCmdRepo) Reboot() error {
-	infraHelper.RunCmd("systemctl", "reboot")
+	_, _ = infraHelper.RunCmd("systemctl", "reboot")
 	os.Exit(0)
 	return nil
 }
@@ -49,7 +49,10 @@ WantedBy=multi-user.target
 	if err != nil {
 		return errors.New("AddSvcFailed")
 	}
-	os.Chmod(svcFilePath, 0644)
+	err = os.Chmod(svcFilePath, 0644)
+	if err != nil {
+		return errors.New("ChmodSvcFailed")
+	}
 
 	_, err = infraHelper.RunCmd(
 		"systemctl",
