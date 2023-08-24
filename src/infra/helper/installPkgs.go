@@ -14,7 +14,8 @@ func InstallPkgs(packages []string) error {
 	var installErr error
 	nAttempts := 3
 	for i := 0; i < nAttempts; i++ {
-		_, err := RunCmd("transactional-update", installPackages...)
+		out, err := RunCmd("transactional-update", installPackages...)
+		log.Printf("InstallPkgOut: %s", out)
 		if err == nil {
 			break
 		}
