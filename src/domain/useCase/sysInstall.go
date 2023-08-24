@@ -1,11 +1,20 @@
 package useCase
 
 import (
-	"errors"
-
 	"github.com/speedianet/sfm/src/domain/repository"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
+
+func logAction(
+	serverCmdRepo repository.ServerCmdRepo,
+	logPayload valueObject.ServerLogPayload,
+) {
+	serverCmdRepo.AddServerLog(
+		valueObject.NewServerLogLevelPanic("info"),
+		valueObject.NewServerLogOperationPanic("sys-install"),
+		logPayload,
+	)
+}
 
 func SysInstall(
 	sysInstallQueryRepo repository.SysInstallQueryRepo,
@@ -15,55 +24,64 @@ func SysInstall(
 	isInstalled := sysInstallQueryRepo.IsInstalled()
 	isDataDiskMounted := sysInstallQueryRepo.IsDataDiskMounted()
 
-	if isInstalled && isDataDiskMounted {
-		return errors.New("SysAlreadyInstalled")
-	}
-
-	serverCmdRepo.AddServerLog(
-		valueObject.NewServerLogLevelPanic("info"),
-		valueObject.NewServerLogOperationPanic("sys-install"),
-		valueObject.NewServerLogPayloadPanic("System installation started."),
-	)
-
 	svcInstallName := valueObject.NewSvcNamePanic("sys-install-continue")
 
+	if isInstalled && isDataDiskMounted {
+		serverCmdRepo.DeleteOneTimerSvc(svcInstallName)
+		logAction(
+			serverCmdRepo,
+			valueObject.NewServerLogPayloadPanic(
+				"The installation succeeded. The server is ready to use.",
+			),
+		)
+		return nil
+	}
+
 	if !isInstalled {
+		logAction(
+			serverCmdRepo,
+			valueObject.NewServerLogPayloadPanic(
+				"Installation started, the server will reboot a few times. "+
+					"Check /var/log/sfm.log for the installation progress.",
+			),
+		)
+
 		err := sysInstallCmdRepo.Install()
 		if err != nil {
 			return err
 		}
 
-		err = sysInstallCmdRepo.DisableDefaultSoftwares()
-		if err != nil {
-			return err
-		}
-
-		serverCmdRepo.AddServerLog(
-			valueObject.NewServerLogLevelPanic("info"),
-			valueObject.NewServerLogOperationPanic("sys-install"),
-			valueObject.NewServerLogPayloadPanic(
-				"Packages installed. The server will now reboot "+
-					"and then continue the process automatically.",
-			),
-		)
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
 			valueObject.NewSvcCmdPanic("/var/speedia/sfm sys-install"),
 		)
-		serverCmdRepo.SendServerMessage("Server is rebooting!")
+
+		logAction(
+			serverCmdRepo,
+			valueObject.NewServerLogPayloadPanic(
+				"Packages installed. Rebooting...",
+			),
+		)
 		serverCmdRepo.Reboot()
 	}
 
-	serverCmdRepo.SendServerMessage(
-		"[elevator music ♬] SFM is still installing... " +
-			"please await and don't interact with the server.",
+	logAction(
+		serverCmdRepo,
+		valueObject.NewServerLogPayloadPanic(
+			"Formatting data disk...",
+		),
 	)
-	serverCmdRepo.DeleteOneTimerSvc(svcInstallName)
 	err := sysInstallCmdRepo.AddDataDisk()
 	if err != nil {
 		return err
 	}
 
+	logAction(
+		serverCmdRepo,
+		valueObject.NewServerLogPayloadPanic(
+			"Adding core services...",
+		),
+	)
 	err = serverCmdRepo.AddSvc(
 		valueObject.NewSvcNamePanic("sfm"),
 		valueObject.NewSvcCmdPanic("/var/speedia/sfm serve"),
@@ -72,14 +90,22 @@ func SysInstall(
 		return err
 	}
 
-	successMessage := "SFM has been installed and is running. " +
-		"The server is now ready to be used."
-	serverCmdRepo.AddServerLog(
-		valueObject.NewServerLogLevelPanic("info"),
-		valueObject.NewServerLogOperationPanic("sys-install"),
-		valueObject.NewServerLogPayloadPanic(successMessage),
+	logAction(
+		serverCmdRepo,
+		valueObject.NewServerLogPayloadPanic(
+			"Disabling default softwares...",
+		),
 	)
-	serverCmdRepo.SendServerMessage(successMessage)
+	err = sysInstallCmdRepo.DisableDefaultSoftwares()
+	if err != nil {
+		return err
+	}
 
+	logAction(
+		serverCmdRepo,
+		valueObject.NewServerLogPayloadPanic(
+			"Installation completed! Rebooting...",
+		),
+	)
 	return nil
 }
