@@ -19,6 +19,12 @@ func SysInstall(
 		return errors.New("SysAlreadyInstalled")
 	}
 
+	serverCmdRepo.AddServerLog(
+		valueObject.NewServerLogLevelPanic("info"),
+		valueObject.NewServerLogOperationPanic("sys-install"),
+		valueObject.NewServerLogPayloadPanic("System installation started."),
+	)
+
 	svcInstallName := valueObject.NewSvcNamePanic("sys-install-continue")
 
 	if !isInstalled {
