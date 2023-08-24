@@ -45,6 +45,7 @@ WantedBy=multi-user.target
 	if err != nil {
 		return errors.New("AddSvcFailed")
 	}
+	os.Chmod(svcFilePath, 0755)
 
 	_, err = infraHelper.RunCmd(
 		"systemctl",
@@ -87,6 +88,7 @@ RemainAfterExit=yes
 	if err != nil {
 		return errors.New("AddOneTimerSvcFailed")
 	}
+	os.Chmod(svcFilePath, 0755)
 
 	svcTimerFilePath := "/etc/systemd/system/" + name + ".timer"
 	svcTimerContent := `[Unit]
@@ -104,6 +106,7 @@ WantedBy=multi-user.target
 	if err != nil {
 		return errors.New("AddOneTimerSvcTimerFailed")
 	}
+	os.Chmod(svcTimerFilePath, 0755)
 
 	_, err = infraHelper.RunCmd(
 		"systemctl",
@@ -167,7 +170,7 @@ func (repo ServerCmdRepo) AddServerLog(
 	logFile, err := os.OpenFile(
 		logFilePath,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-		0644,
+		0640,
 	)
 	if err != nil {
 		return
