@@ -41,31 +41,32 @@ func AddAccountController() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			username := valueObject.NewUsernamePanic(usernameStr)
 			password := valueObject.NewPasswordPanic(passwordStr)
+
 			if cpuCores == 0 {
 				cpuCores = 1
 			}
-
 			if memoryBytesUint == 0 {
 				memoryBytesUint = 1073741824
 			}
 			memoryBytes := valueObject.Byte(memoryBytesUint)
-
 			if diskBytesUint == 0 {
 				diskBytesUint = 5368709120
 			}
 			diskBytes := valueObject.Byte(diskBytesUint)
-
 			if inodes == 0 {
 				inodes = 500000
 			}
-
-			addAccountDto := dto.NewAddAccount(
-				username,
-				password,
+			quota := valueObject.NewAccountQuota(
 				cpuCores,
 				memoryBytes,
 				diskBytes,
 				inodes,
+			)
+
+			addAccountDto := dto.NewAddAccount(
+				username,
+				password,
+				quota,
 			)
 
 			accQueryRepo := infra.AccQueryRepo{}
