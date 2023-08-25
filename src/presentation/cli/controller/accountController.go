@@ -30,6 +30,10 @@ func GetAccountsController() *cobra.Command {
 func AddAccountController() *cobra.Command {
 	var usernameStr string
 	var passwordStr string
+	var cpuCores float64
+	var memoryBytesUint uint64
+	var diskBytesUint uint64
+	var inodes uint64
 
 	cmd := &cobra.Command{
 		Use:   "add",
@@ -37,8 +41,32 @@ func AddAccountController() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			username := valueObject.NewUsernamePanic(usernameStr)
 			password := valueObject.NewPasswordPanic(passwordStr)
+			if cpuCores == 0 {
+				cpuCores = 1
+			}
 
-			addAccountDto := dto.NewAddAccount(username, password)
+			if memoryBytesUint == 0 {
+				memoryBytesUint = 1073741824
+			}
+			memoryBytes := valueObject.Byte(memoryBytesUint)
+
+			if diskBytesUint == 0 {
+				diskBytesUint = 5368709120
+			}
+			diskBytes := valueObject.Byte(diskBytesUint)
+
+			if inodes == 0 {
+				inodes = 500000
+			}
+
+			addAccountDto := dto.NewAddAccount(
+				username,
+				password,
+				cpuCores,
+				memoryBytes,
+				diskBytes,
+				inodes,
+			)
 
 			accQueryRepo := infra.AccQueryRepo{}
 			accCmdRepo := infra.AccCmdRepo{}
@@ -60,6 +88,10 @@ func AddAccountController() *cobra.Command {
 	cmd.MarkFlagRequired("username")
 	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
 	cmd.MarkFlagRequired("password")
+	cmd.Flags().Float64VarP(&cpuCores, "cpu-cores", "c", 0, "CpuCores")
+	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory-bytes", "m", 0, "MemoryBytes")
+	cmd.Flags().Uint64VarP(&diskBytesUint, "disk-bytes", "d", 0, "DiskBytes")
+	cmd.Flags().Uint64VarP(&inodes, "inodes", "i", 0, "Inodes")
 	return cmd
 }
 
