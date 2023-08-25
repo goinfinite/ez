@@ -18,6 +18,7 @@
     "godotenv",
     "gopsutil",
     "gsub",
+    "inodes",
     "ioncube",
     "joho",
     "keyrings",
