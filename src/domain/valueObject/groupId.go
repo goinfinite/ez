@@ -5,28 +5,42 @@ import (
 	"strconv"
 )
 
-type GroupId int64
+type GroupId uint64
 
-func NewGroupIdFromString(value string) (GroupId, error) {
-	accId, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
+func NewGroupId(value interface{}) (GroupId, error) {
+	var gId uint64
+	var err error
+	switch v := value.(type) {
+	case string:
+		gId, err = strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			return 0, errors.New("InvalidGroupId")
+		}
+	case int, int8, int16, int32, int64:
+		gId = uint64(v.(int64))
+	case uint, uint8, uint16, uint32, uint64:
+		gId = uint64(v.(uint64))
+	case float32, float64:
+		gId = uint64(v.(float64))
+	default:
 		return 0, errors.New("InvalidGroupId")
 	}
-	return GroupId(accId), nil
+
+	return GroupId(gId), nil
 }
 
-func NewGroupIdFromStringPanic(value string) GroupId {
-	accId, err := strconv.ParseInt(value, 10, 64)
+func NewGroupIdPanic(value interface{}) GroupId {
+	gId, err := NewGroupId(value)
 	if err != nil {
-		panic("InvalidGroupId")
+		panic(err)
 	}
-	return GroupId(accId)
+	return gId
 }
 
-func (gid GroupId) Get() int64 {
-	return int64(gid)
+func (id GroupId) Get() uint64 {
+	return uint64(id)
 }
 
-func (gid GroupId) String() string {
-	return strconv.FormatInt(int64(gid), 10)
+func (id GroupId) String() string {
+	return strconv.FormatUint(uint64(id), 10)
 }
