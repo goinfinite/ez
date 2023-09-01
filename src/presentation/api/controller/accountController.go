@@ -77,7 +77,7 @@ func AddAccountController(c echo.Context) error {
 // @Success      200 {object} object{} "AccountDeleted"
 // @Router       /account/{accountId}/ [delete]
 func DeleteAccountController(c echo.Context) error {
-	accountId := valueObject.NewAccountIdFromStringPanic(c.Param("accountId"))
+	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 
 	accQueryRepo := infra.AccQueryRepo{}
 	accCmdRepo := infra.AccCmdRepo{}
@@ -113,7 +113,7 @@ func UpdateAccountController(c echo.Context) error {
 	var accountId valueObject.AccountId
 	switch id := requestBody["accountId"].(type) {
 	case string:
-		accountId = valueObject.NewAccountIdFromStringPanic(id)
+		accountId = valueObject.NewAccountIdPanic(id)
 	case float64:
 		accountId = valueObject.NewAccountIdFromFloatPanic(id)
 	}

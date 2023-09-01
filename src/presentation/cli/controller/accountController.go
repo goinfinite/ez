@@ -103,7 +103,7 @@ func DeleteAccountController() *cobra.Command {
 		Use:   "delete",
 		Short: "DeleteAccount",
 		Run: func(cmd *cobra.Command, args []string) {
-			accountId := valueObject.NewAccountIdFromStringPanic(accountIdStr)
+			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
 			accQueryRepo := infra.AccQueryRepo{}
 			accCmdRepo := infra.AccCmdRepo{}
@@ -135,7 +135,7 @@ func UpdateAccountController() *cobra.Command {
 		Use:   "update",
 		Short: "UpdateAccount (pass or apiKey)",
 		Run: func(cmd *cobra.Command, args []string) {
-			accountId := valueObject.NewAccountIdFromStringPanic(accountIdStr)
+			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
 			var passPtr *valueObject.Password
 			if passwordStr != "" {
