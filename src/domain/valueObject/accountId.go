@@ -30,7 +30,7 @@ func NewAccountId(value interface{}) (AccountId, error) {
 	return AccountId(accId), nil
 }
 
-func NewAccountIdPanic(value string) AccountId {
+func NewAccountIdPanic(value interface{}) AccountId {
 	accId, err := NewAccountId(value)
 	if err != nil {
 		panic(err)

@@ -110,13 +110,7 @@ func UpdateAccountController(c echo.Context) error {
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
-	var accountId valueObject.AccountId
-	switch id := requestBody["accountId"].(type) {
-	case string:
-		accountId = valueObject.NewAccountIdPanic(id)
-	case float64:
-		accountId = valueObject.NewAccountIdFromFloatPanic(id)
-	}
+	accountId := valueObject.NewAccountIdPanic(requestBody["accountId"])
 
 	var passPtr *valueObject.Password
 	if requestBody["password"] != nil {
