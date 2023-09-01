@@ -10,20 +10,19 @@ type AccountId uint64
 func NewAccountId(value interface{}) (AccountId, error) {
 	var accId uint64
 	var err error
-	switch value := value.(type) {
+	switch v := value.(type) {
 	case string:
-		accId, err = strconv.ParseUint(value, 10, 64)
-	case float64:
-		accId = uint64(value)
-	case int64:
-		accId = uint64(value)
-	case uint64:
-		accId = value
+		accId, err = strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			return 0, errors.New("InvalidAccountId")
+		}
+	case int, int8, int16, int32, int64:
+		accId = uint64(v.(int64))
+	case uint, uint8, uint16, uint32, uint64:
+		accId = uint64(v.(uint64))
+	case float32, float64:
+		accId = uint64(v.(float64))
 	default:
-		return 0, errors.New("InvalidAccountId")
-	}
-
-	if err != nil {
 		return 0, errors.New("InvalidAccountId")
 	}
 
