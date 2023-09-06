@@ -2,6 +2,7 @@ package valueObject
 
 import (
 	"errors"
+	"reflect"
 	"strconv"
 )
 
@@ -13,16 +14,25 @@ func NewAccountId(value interface{}) (AccountId, error) {
 	switch v := value.(type) {
 	case string:
 		accId, err = strconv.ParseUint(v, 10, 64)
-		if err != nil {
-			return 0, errors.New("InvalidAccountId")
-		}
 	case int, int8, int16, int32, int64:
-		accId = uint64(v.(int64))
+		intValue := reflect.ValueOf(v).Int()
+		if intValue < 0 {
+			err = errors.New("InvalidAccountId")
+		}
+		accId = uint64(intValue)
 	case uint, uint8, uint16, uint32, uint64:
-		accId = uint64(v.(uint64))
+		accId = uint64(reflect.ValueOf(v).Uint())
 	case float32, float64:
-		accId = uint64(v.(float64))
+		floatValue := reflect.ValueOf(v).Float()
+		if floatValue < 0 {
+			err = errors.New("InvalidAccountId")
+		}
+		accId = uint64(floatValue)
 	default:
+		err = errors.New("InvalidAccountId")
+	}
+
+	if err != nil {
 		return 0, errors.New("InvalidAccountId")
 	}
 
