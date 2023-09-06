@@ -17,6 +17,7 @@
     "godoc",
     "godotenv",
     "gopsutil",
+    "gorm",
     "gsub",
     "inodes",
     "ioncube",
