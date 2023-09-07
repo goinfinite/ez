@@ -11,11 +11,16 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/speedianet/sfm/src/domain/dto"
+	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra/db"
+	dbModel "github.com/speedianet/sfm/src/infra/db/model"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
 )
@@ -43,8 +48,49 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 
 	err = addAccountCmd.Run()
 	if err != nil {
-		log.Printf("UserAddError: %s", err)
-		return errors.New("UserAddError")
+		log.Printf("AccountAddError: %s", err)
+		return errors.New("AccountAddError")
+	}
+
+	userInfo, err := user.Lookup(addAccount.Username.String())
+	if err != nil {
+		return errors.New("AccountLookupError")
+	}
+	accId, err := valueObject.NewAccountId(userInfo.Uid)
+	if err != nil {
+		return errors.New("AccountIdParseError")
+	}
+	gid, err := valueObject.NewGroupId(userInfo.Gid)
+	if err != nil {
+		return errors.New("GroupIdParseError")
+	}
+
+	dbSvc, err := db.DatabaseService()
+	if err != nil {
+		return err
+	}
+
+	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+	accEntity := entity.NewAccount(
+		accId,
+		gid,
+		addAccount.Username,
+		addAccount.Quota,
+		valueObject.NewAccountQuotaWithBlankValues(),
+		nowUnixTime,
+		nowUnixTime,
+	)
+
+	accModel, err := dbModel.Account{}.ToModel(accEntity)
+	if err != nil {
+		log.Printf("AccountModelParseError: %s", err)
+		return errors.New("AccountModelParseError")
+	}
+
+	dbResult := dbSvc.Create(&accModel)
+	if dbResult.Error != nil {
+		log.Printf("AddAccountDbError: %s", dbResult.Error)
+		return errors.New("AddAccountDbError")
 	}
 
 	return nil
