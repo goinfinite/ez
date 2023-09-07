@@ -20,18 +20,18 @@ func (AccountQuotaUsage) TableName() string {
 
 func (AccountQuotaUsage) ToModel(
 	vo valueObject.AccountQuota,
+	accId uint,
 ) (AccountQuotaUsage, error) {
 	return AccountQuotaUsage{
 		CpuCores:    vo.CpuCores.Get(),
 		MemoryBytes: uint64(vo.MemoryBytes.Get()),
 		DiskBytes:   uint64(vo.DiskBytes.Get()),
 		Inodes:      vo.Inodes.Get(),
+		AccountID:   accId,
 	}, nil
 }
 
-func (AccountQuotaUsage) ToValueObject(
-	model AccountQuotaUsage,
-) (valueObject.AccountQuota, error) {
+func (model AccountQuotaUsage) ToValueObject() (valueObject.AccountQuota, error) {
 	cpuCores, err := valueObject.NewCpuCoresCount(model.CpuCores)
 	if err != nil {
 		return valueObject.AccountQuota{}, err
