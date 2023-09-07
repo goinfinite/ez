@@ -1,6 +1,7 @@
 package apiController
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -30,6 +31,42 @@ func GetAccountsController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, accsList)
 }
 
+func accQuotaFactory(quota interface{}) (valueObject.AccountQuota, error) {
+	quotaMap, quotaMapOk := quota.(map[string]interface{})
+	if !quotaMapOk {
+		return valueObject.AccountQuota{}, errors.New("InvalidQuotaStructure")
+	}
+
+	accQuotaDefaults := valueObject.NewAccountQuotaWithDefaultValues()
+
+	cpuCores := accQuotaDefaults.CpuCores
+	if quotaMap["cpuCores"] != nil {
+		cpuCores = valueObject.NewCpuCoresCountPanic(quotaMap["cpuCores"])
+	}
+
+	memoryBytes := accQuotaDefaults.MemoryBytes
+	if quotaMap["memoryBytes"] != nil {
+		memoryBytes = valueObject.NewBytePanic(quotaMap["memoryBytes"])
+	}
+
+	diskBytes := accQuotaDefaults.DiskBytes
+	if quotaMap["diskBytes"] != nil {
+		diskBytes = valueObject.NewBytePanic(quotaMap["diskBytes"])
+	}
+
+	inodes := accQuotaDefaults.Inodes
+	if quotaMap["inodes"] != nil {
+		inodes = valueObject.NewInodesCountPanic(quotaMap["inodes"])
+	}
+
+	return valueObject.NewAccountQuota(
+		cpuCores,
+		memoryBytes,
+		diskBytes,
+		inodes,
+	), nil
+}
+
 // AddAccount	 godoc
 // @Summary      AddNewAccount
 // @Description  Add a new account.
@@ -46,9 +83,19 @@ func AddAccountController(c echo.Context) error {
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
+	var quotaPtr *valueObject.AccountQuota
+	if requestBody["quota"] != nil {
+		quota, err := accQuotaFactory(requestBody["quota"])
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+		quotaPtr = &quota
+	}
+
 	addAccountDto := dto.NewAddAccount(
 		valueObject.NewUsernamePanic(requestBody["username"].(string)),
 		valueObject.NewPasswordPanic(requestBody["password"].(string)),
+		quotaPtr,
 	)
 
 	accQueryRepo := infra.AccQueryRepo{}

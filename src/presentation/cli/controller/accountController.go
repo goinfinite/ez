@@ -27,6 +27,42 @@ func GetAccountsController() *cobra.Command {
 	return cmd
 }
 
+func accQuotaFactory(
+	cpuCores float64,
+	memoryBytesUint uint64,
+	diskBytesUint uint64,
+	inodes uint64,
+) (valueObject.AccountQuota, error) {
+	accQuotaDefaults := valueObject.NewAccountQuotaWithDefaultValues()
+
+	cpuCoresCount := accQuotaDefaults.CpuCores
+	if cpuCores != 0 {
+		cpuCoresCount = valueObject.NewCpuCoresCountPanic(cpuCores)
+	}
+
+	memoryBytes := accQuotaDefaults.MemoryBytes
+	if memoryBytesUint != 0 {
+		memoryBytes = valueObject.NewBytePanic(memoryBytesUint)
+	}
+
+	diskBytes := accQuotaDefaults.DiskBytes
+	if diskBytesUint != 0 {
+		diskBytes = valueObject.NewBytePanic(diskBytesUint)
+	}
+
+	inodesCount := accQuotaDefaults.Inodes
+	if inodes != 0 {
+		inodesCount = valueObject.NewInodesCountPanic(inodes)
+	}
+
+	return valueObject.NewAccountQuota(
+		cpuCoresCount,
+		memoryBytes,
+		diskBytes,
+		inodesCount,
+	), nil
+}
+
 func AddAccountController() *cobra.Command {
 	var usernameStr string
 	var passwordStr string
@@ -42,37 +78,26 @@ func AddAccountController() *cobra.Command {
 			username := valueObject.NewUsernamePanic(usernameStr)
 			password := valueObject.NewPasswordPanic(passwordStr)
 
-			if cpuCores == 0 {
-				cpuCores = 1
-			}
-			if memoryBytesUint == 0 {
-				memoryBytesUint = 1073741824
-			}
-			memoryBytes := valueObject.Byte(memoryBytesUint)
-			if diskBytesUint == 0 {
-				diskBytesUint = 5368709120
-			}
-			diskBytes := valueObject.Byte(diskBytesUint)
-			if inodes == 0 {
-				inodes = 500000
-			}
-			quota := valueObject.NewAccountQuota(
+			quota, err := accQuotaFactory(
 				cpuCores,
-				memoryBytes,
-				diskBytes,
+				memoryBytesUint,
+				diskBytesUint,
 				inodes,
 			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
 
 			addAccountDto := dto.NewAddAccount(
 				username,
 				password,
-				quota,
+				&quota,
 			)
 
 			accQueryRepo := infra.AccQueryRepo{}
 			accCmdRepo := infra.AccCmdRepo{}
 
-			err := useCase.AddAccount(
+			err = useCase.AddAccount(
 				accQueryRepo,
 				accCmdRepo,
 				addAccountDto,
@@ -89,9 +114,9 @@ func AddAccountController() *cobra.Command {
 	cmd.MarkFlagRequired("username")
 	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
 	cmd.MarkFlagRequired("password")
-	cmd.Flags().Float64VarP(&cpuCores, "cpu-cores", "c", 0, "CpuCores")
-	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory-bytes", "m", 0, "MemoryBytes")
-	cmd.Flags().Uint64VarP(&diskBytesUint, "disk-bytes", "d", 0, "DiskBytes")
+	cmd.Flags().Float64VarP(&cpuCores, "cpu", "c", 0, "CpuCores")
+	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory", "m", 0, "MemoryInBytes")
+	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
 	cmd.Flags().Uint64VarP(&inodes, "inodes", "i", 0, "Inodes")
 	return cmd
 }
