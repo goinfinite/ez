@@ -83,19 +83,19 @@ func AddAccountController(c echo.Context) error {
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
-	var quotaPtr *valueObject.AccountQuota
+	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	if requestBody["quota"] != nil {
-		quota, err := accQuotaFactory(requestBody["quota"])
+		quotaReceived, err := accQuotaFactory(requestBody["quota"])
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
-		quotaPtr = &quota
+		quota = quotaReceived
 	}
 
 	addAccountDto := dto.NewAddAccount(
 		valueObject.NewUsernamePanic(requestBody["username"].(string)),
 		valueObject.NewPasswordPanic(requestBody["password"].(string)),
-		quotaPtr,
+		quota,
 	)
 
 	accQueryRepo := infra.AccQueryRepo{}

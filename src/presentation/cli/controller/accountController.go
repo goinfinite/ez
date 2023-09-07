@@ -91,7 +91,7 @@ func AddAccountController() *cobra.Command {
 			addAccountDto := dto.NewAddAccount(
 				username,
 				password,
-				&quota,
+				quota,
 			)
 
 			accQueryRepo := infra.AccQueryRepo{}
