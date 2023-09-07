@@ -19,7 +19,29 @@ func (Account) TableName() string {
 	return "accounts"
 }
 
-func (Account) ToEntity(model Account) (entity.Account, error) {
+func (Account) ToModel(entity entity.Account) (Account, error) {
+	accId := uint(entity.Id.Get())
+	quota, err := AccountQuota{}.ToModel(entity.Quota, accId)
+	if err != nil {
+		return Account{}, err
+	}
+
+	quotaUsage, err := AccountQuotaUsage{}.ToModel(entity.QuotaUsage, accId)
+	if err != nil {
+		return Account{}, err
+	}
+
+	return Account{
+		Model:      gorm.Model{ID: accId},
+		GroupID:    uint(entity.GroupId.Get()),
+		Username:   entity.Username.String(),
+		KeyHash:    nil,
+		Quota:      quota,
+		QuotaUsage: quotaUsage,
+	}, nil
+}
+
+func (model Account) ToEntity() (entity.Account, error) {
 	accId, err := valueObject.NewAccountId(model.ID)
 	if err != nil {
 		return entity.Account{}, err
@@ -54,26 +76,4 @@ func (Account) ToEntity(model Account) (entity.Account, error) {
 		valueObject.UnixTime(model.CreatedAt.Unix()),
 		valueObject.UnixTime(model.UpdatedAt.Unix()),
 	), nil
-}
-
-func (Account) ToModel(entity entity.Account) (Account, error) {
-	accId := uint(entity.Id.Get())
-	quota, err := AccountQuota{}.ToModel(entity.Quota, accId)
-	if err != nil {
-		return Account{}, err
-	}
-
-	quotaUsage, err := AccountQuotaUsage{}.ToModel(entity.QuotaUsage, accId)
-	if err != nil {
-		return Account{}, err
-	}
-
-	return Account{
-		Model:      gorm.Model{ID: accId},
-		GroupID:    uint(entity.GroupId.Get()),
-		Username:   entity.Username.String(),
-		KeyHash:    nil,
-		Quota:      quota,
-		QuotaUsage: quotaUsage,
-	}, nil
 }
