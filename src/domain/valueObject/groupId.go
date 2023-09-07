@@ -2,39 +2,49 @@ package valueObject
 
 import (
 	"errors"
+	"reflect"
 	"strconv"
 )
 
 type GroupId uint64
 
 func NewGroupId(value interface{}) (GroupId, error) {
-	var gId uint64
+	var gid uint64
 	var err error
 	switch v := value.(type) {
 	case string:
-		gId, err = strconv.ParseUint(v, 10, 64)
-		if err != nil {
-			return 0, errors.New("InvalidGroupId")
-		}
+		gid, err = strconv.ParseUint(v, 10, 64)
 	case int, int8, int16, int32, int64:
-		gId = uint64(v.(int64))
+		intValue := reflect.ValueOf(v).Int()
+		if intValue < 0 {
+			err = errors.New("InvalidGroupId")
+		}
+		gid = uint64(intValue)
 	case uint, uint8, uint16, uint32, uint64:
-		gId = uint64(v.(uint64))
+		gid = uint64(reflect.ValueOf(v).Uint())
 	case float32, float64:
-		gId = uint64(v.(float64))
+		floatValue := reflect.ValueOf(v).Float()
+		if floatValue < 0 {
+			err = errors.New("InvalidGroupId")
+		}
+		gid = uint64(floatValue)
 	default:
+		err = errors.New("InvalidGroupId")
+	}
+
+	if err != nil {
 		return 0, errors.New("InvalidGroupId")
 	}
 
-	return GroupId(gId), nil
+	return GroupId(gid), nil
 }
 
 func NewGroupIdPanic(value interface{}) GroupId {
-	gId, err := NewGroupId(value)
+	gid, err := NewGroupId(value)
 	if err != nil {
 		panic(err)
 	}
-	return gId
+	return gid
 }
 
 func (id GroupId) Get() uint64 {
