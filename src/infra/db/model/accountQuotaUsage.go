@@ -11,7 +11,7 @@ type AccountQuotaUsage struct {
 	MemoryBytes uint64  `gorm:"not null"`
 	DiskBytes   uint64  `gorm:"not null"`
 	Inodes      uint64  `gorm:"not null"`
-	AccountID   uint    `gorm:"not null"`
+	AccountID   uint
 }
 
 func (AccountQuotaUsage) TableName() string {
