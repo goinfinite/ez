@@ -8,11 +8,11 @@ import (
 
 type Account struct {
 	gorm.Model
-	GroupID           uint   `gorm:"not null"`
-	Username          string `gorm:"not null"`
-	KeyHash           *string
-	AccountQuota      AccountQuota
-	AccountQuotaUsage AccountQuotaUsage
+	GroupID    uint   `gorm:"not null"`
+	Username   string `gorm:"not null"`
+	KeyHash    *string
+	Quota      AccountQuota
+	QuotaUsage AccountQuotaUsage
 }
 
 func (Account) TableName() string {
@@ -35,12 +35,12 @@ func (Account) ToEntity(model Account) (entity.Account, error) {
 		return entity.Account{}, err
 	}
 
-	quota, err := model.AccountQuota.ToValueObject(model.AccountQuota)
+	quota, err := model.Quota.ToValueObject()
 	if err != nil {
 		return entity.Account{}, err
 	}
 
-	quotaUsage, err := model.AccountQuotaUsage.ToValueObject(model.AccountQuotaUsage)
+	quotaUsage, err := model.QuotaUsage.ToValueObject()
 	if err != nil {
 		return entity.Account{}, err
 	}
@@ -57,22 +57,23 @@ func (Account) ToEntity(model Account) (entity.Account, error) {
 }
 
 func (Account) ToModel(entity entity.Account) (Account, error) {
-	quota, err := AccountQuota{}.ToModel(entity.Quota)
+	accId := uint(entity.Id.Get())
+	quota, err := AccountQuota{}.ToModel(entity.Quota, accId)
 	if err != nil {
 		return Account{}, err
 	}
 
-	quotaUsage, err := AccountQuotaUsage{}.ToModel(entity.QuotaUsage)
+	quotaUsage, err := AccountQuotaUsage{}.ToModel(entity.QuotaUsage, accId)
 	if err != nil {
 		return Account{}, err
 	}
 
 	return Account{
-		Model:             gorm.Model{ID: uint(entity.Id.Get())},
-		GroupID:           uint(entity.GroupId.Get()),
-		Username:          entity.Username.String(),
-		KeyHash:           nil,
-		AccountQuota:      quota,
-		AccountQuotaUsage: quotaUsage,
+		Model:      gorm.Model{ID: accId},
+		GroupID:    uint(entity.GroupId.Get()),
+		Username:   entity.Username.String(),
+		KeyHash:    nil,
+		Quota:      quota,
+		QuotaUsage: quotaUsage,
 	}, nil
 }
