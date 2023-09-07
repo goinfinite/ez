@@ -29,3 +29,12 @@ func NewAccountQuotaWithDefaultValues() AccountQuota {
 		Inodes:      NewInodesCountPanic(500000),
 	}
 }
+
+func NewAccountQuotaWithBlankValues() AccountQuota {
+	return AccountQuota{
+		CpuCores:    NewCpuCoresCountPanic(0),
+		MemoryBytes: NewBytePanic(0),
+		DiskBytes:   NewBytePanic(0),
+		Inodes:      NewInodesCountPanic(0),
+	}
+}
