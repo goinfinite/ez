@@ -12,11 +12,8 @@ import (
 func addDummyUser() error {
 	username := valueObject.NewUsernamePanic(os.Getenv("DUMMY_USER_NAME"))
 	password := valueObject.NewPasswordPanic(os.Getenv("DUMMY_USER_PASS"))
-
-	addAccount := dto.AddAccount{
-		Username: username,
-		Password: password,
-	}
+	quota := valueObject.NewAccountQuotaWithDefaultValues()
+	addAccount := dto.NewAddAccount(username, password, quota)
 
 	accCmdRepo := AccCmdRepo{}
 	err := accCmdRepo.Add(addAccount)
