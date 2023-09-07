@@ -2,89 +2,77 @@ package infra
 
 import (
 	"errors"
-	"os/user"
-	"strings"
+	"log"
 
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
-	infraHelper "github.com/speedianet/sfm/src/infra/helper"
+	"github.com/speedianet/sfm/src/infra/db"
+	dbModel "github.com/speedianet/sfm/src/infra/db/model"
 )
 
 type AccQueryRepo struct {
 }
 
-func accDetailsFactory(userInfo *user.User) (entity.Account, error) {
-	accountId, err := valueObject.NewAccountId(userInfo.Uid)
-	if err != nil {
-		return entity.Account{}, errors.New("AccountIdParseError")
-	}
-
-	groupId, err := valueObject.NewGroupId(userInfo.Gid)
-	if err != nil {
-		return entity.Account{}, errors.New("GroupIdParseError")
-	}
-
-	username, err := valueObject.NewUsername(userInfo.Username)
-	if err != nil {
-		return entity.Account{}, errors.New("UsernameParseError")
-	}
-
-	return entity.NewAccount(
-		accountId,
-		groupId,
-		username,
-	), nil
-}
-
 func (repo AccQueryRepo) Get() ([]entity.Account, error) {
-	output, err := infraHelper.RunCmd("awk", "-F:", "{print $1}", "/etc/passwd")
+	var accEntities []entity.Account
+
+	dbSvc, err := db.DatabaseService()
 	if err != nil {
-		return []entity.Account{}, errors.New("UsersLookupError")
+		return accEntities, errors.New("DatabaseServiceError")
 	}
 
-	usernames := strings.Split(string(output), "\n")
-	var accsDetails []entity.Account
-	for _, username := range usernames {
-		username, err := valueObject.NewUsername(username)
-		if err != nil {
-			continue
-		}
+	var accModels []dbModel.Account
 
-		accDetails, err := repo.GetByUsername(username)
-		if err != nil {
-			continue
-		}
-		if accDetails.Id < 1000 {
-			continue
-		}
-		if accDetails.Username == "nobody" {
-			continue
-		}
-
-		accsDetails = append(accsDetails, accDetails)
+	err = dbSvc.Model(&dbModel.Account{}).
+		Preload("Quota").
+		Preload("QuotaUsage").Find(&accModels).Error
+	if err != nil {
+		return accEntities, errors.New("DatabaseQueryAccountsError")
 	}
 
-	return accsDetails, nil
+	for _, accModel := range accModels {
+		accEntity, err := accModel.ToEntity()
+		if err != nil {
+			log.Printf("AccountModelToEntityError: %v", err.Error())
+			continue
+		}
+
+		accEntities = append(accEntities, accEntity)
+	}
+
+	return accEntities, nil
 }
 
 func (repo AccQueryRepo) GetByUsername(
 	username valueObject.Username,
 ) (entity.Account, error) {
-	userInfo, err := user.Lookup(string(username))
+	accEntities, err := repo.Get()
 	if err != nil {
-		return entity.Account{}, errors.New("UserLookupError")
+		return entity.Account{}, errors.New("AccountQueryError")
 	}
 
-	return accDetailsFactory(userInfo)
+	for _, accEntity := range accEntities {
+		if accEntity.Username.String() == username.String() {
+			return accEntity, nil
+		}
+	}
+
+	return entity.Account{}, errors.New("AccountNotFound")
 }
 
 func (repo AccQueryRepo) GetById(
 	accountId valueObject.AccountId,
 ) (entity.Account, error) {
-	userInfo, err := user.LookupId(accountId.String())
+	accEntities, err := repo.Get()
 	if err != nil {
-		return entity.Account{}, errors.New("UserLookupError")
+		return entity.Account{}, errors.New("AccountQueryError")
 	}
 
-	return accDetailsFactory(userInfo)
+	for _, accEntity := range accEntities {
+		if accEntity.Id.String() == accountId.String() {
+			return accEntity, nil
+		}
+	}
+
+	return entity.Account{}, errors.New("AccountNotFound")
 }
