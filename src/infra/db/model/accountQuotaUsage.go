@@ -22,16 +22,21 @@ func (AccountQuotaUsage) ToModel(
 	vo valueObject.AccountQuota,
 ) (AccountQuotaUsage, error) {
 	return AccountQuotaUsage{
-		CpuCores:    vo.CpuCores,
+		CpuCores:    vo.CpuCores.Get(),
 		MemoryBytes: uint64(vo.MemoryBytes.Get()),
 		DiskBytes:   uint64(vo.DiskBytes.Get()),
-		Inodes:      vo.Inodes,
+		Inodes:      vo.Inodes.Get(),
 	}, nil
 }
 
 func (AccountQuotaUsage) ToValueObject(
 	model AccountQuotaUsage,
 ) (valueObject.AccountQuota, error) {
+	cpuCores, err := valueObject.NewCpuCoresCount(model.CpuCores)
+	if err != nil {
+		return valueObject.AccountQuota{}, err
+	}
+
 	memoryBytes, err := valueObject.NewByte(model.MemoryBytes)
 	if err != nil {
 		return valueObject.AccountQuota{}, err
@@ -42,10 +47,15 @@ func (AccountQuotaUsage) ToValueObject(
 		return valueObject.AccountQuota{}, err
 	}
 
+	inodes, err := valueObject.NewInodesCount(model.Inodes)
+	if err != nil {
+		return valueObject.AccountQuota{}, err
+	}
+
 	return valueObject.NewAccountQuota(
-		model.CpuCores,
+		cpuCores,
 		memoryBytes,
 		diskBytes,
-		model.Inodes,
+		inodes,
 	), nil
 }

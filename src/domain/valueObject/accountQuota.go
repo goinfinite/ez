@@ -1,22 +1,31 @@
 package valueObject
 
 type AccountQuota struct {
-	CpuCores    float64
+	CpuCores    CpuCoresCount
 	MemoryBytes Byte
 	DiskBytes   Byte
-	Inodes      uint64
+	Inodes      InodesCount
 }
 
 func NewAccountQuota(
-	cpuCores float64,
+	cpuCores CpuCoresCount,
 	memoryBytes Byte,
 	diskBytes Byte,
-	inodes uint64,
+	inodes InodesCount,
 ) AccountQuota {
 	return AccountQuota{
 		CpuCores:    cpuCores,
 		MemoryBytes: memoryBytes,
 		DiskBytes:   diskBytes,
 		Inodes:      inodes,
+	}
+}
+
+func NewAccountQuotaWithDefaultValues() AccountQuota {
+	return AccountQuota{
+		CpuCores:    NewCpuCoresCountPanic(0.5),
+		MemoryBytes: NewBytePanic(1073741824),
+		DiskBytes:   NewBytePanic(5368709120),
+		Inodes:      NewInodesCountPanic(500000),
 	}
 }
