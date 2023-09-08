@@ -1,9 +1,6 @@
 package infra
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"os"
@@ -84,39 +81,6 @@ func (repo AuthQueryRepo) getTokenDetailsFromSession(
 	), nil
 }
 
-func (repo AuthQueryRepo) decryptApiKey(
-	token valueObject.AccessTokenStr,
-) (string, error) {
-	apiKeyDecoded, err := base64.StdEncoding.DecodeString(
-		token.String(),
-	)
-	if err != nil {
-		return "", errors.New("ApiKeyDecodingError")
-	}
-	if len(apiKeyDecoded) < aes.BlockSize {
-		return "", errors.New("ApiKeyTooShort")
-	}
-
-	secretKey := os.Getenv("ACC_API_KEY_SECRET")
-	secretKeyBytes, err := base64.RawURLEncoding.DecodeString(secretKey)
-	if err != nil {
-		return "", errors.New("ApiKeySecretDecodingError")
-	}
-
-	block, err := aes.NewCipher(secretKeyBytes)
-	if err != nil {
-		return "", errors.New("ApiKeyCipherError")
-	}
-
-	apiKeyDecryptedBinary := make([]byte, len(apiKeyDecoded)-aes.BlockSize)
-	iv := apiKeyDecoded[:aes.BlockSize]
-
-	stream := cipher.NewCTR(block, iv)
-	stream.XORKeyStream(apiKeyDecryptedBinary, apiKeyDecoded[aes.BlockSize:])
-
-	return string(apiKeyDecryptedBinary), nil
-}
-
 func (repo AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
@@ -152,7 +116,8 @@ func (repo AuthQueryRepo) getKeyHash(
 func (repo AuthQueryRepo) getTokenDetailsFromApiKey(
 	token valueObject.AccessTokenStr,
 ) (dto.AccessTokenDetails, error) {
-	decryptedApiKey, err := repo.decryptApiKey(token)
+	secretKey := os.Getenv("ACC_API_KEY_SECRET")
+	decryptedApiKey, err := infraHelper.DecryptStr(secretKey, token.String())
 	if err != nil {
 		return dto.AccessTokenDetails{}, errors.New("ApiKeyDecryptionError")
 	}
