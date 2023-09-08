@@ -55,28 +55,21 @@ func TestAccCmdRepo(t *testing.T) {
 	t.Run("AddInvalidAccount", func(t *testing.T) {
 		username := valueObject.NewUsernamePanic("root")
 		password := valueObject.NewPasswordPanic("invalid")
-
-		addAccount := dto.AddAccount{
-			Username: username,
-			Password: password,
-		}
+		quota := valueObject.NewAccountQuotaWithDefaultValues()
+		addAccount := dto.NewAddAccount(username, password, quota)
 
 		accCmdRepo := AccCmdRepo{}
 		err := accCmdRepo.Add(addAccount)
 		if err == nil {
-			t.Error("ExpectingError")
+			t.Error("AccountShouldNotBeAdded")
 		}
 	})
 
 	t.Run("DeleteValidAccount", func(t *testing.T) {
-		_ = addDummyUser()
-
 		err := deleteDummyUser()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}
-
-		_ = addDummyUser()
 	})
 
 	t.Run("UpdatePasswordValidAccount", func(t *testing.T) {

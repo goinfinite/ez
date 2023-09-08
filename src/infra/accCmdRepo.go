@@ -125,6 +125,17 @@ func (repo AccCmdRepo) Delete(accountId valueObject.AccountId) error {
 		return errors.New("UserDeleteError")
 	}
 
+	dbSvc, err := db.DatabaseService()
+	if err != nil {
+		return err
+	}
+
+	err = dbModel.Account{ID: uint(accountId.Get())}.Delete(dbSvc)
+	if err != nil {
+		log.Printf("DeleteAccountDbError: %s", err)
+		return errors.New("DeleteAccountDbError")
+	}
+
 	return nil
 }
 
