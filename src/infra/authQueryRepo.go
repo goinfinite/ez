@@ -97,7 +97,7 @@ func (repo AuthQueryRepo) decryptApiKey(
 		return "", errors.New("ApiKeyTooShort")
 	}
 
-	secretKey := os.Getenv("UAK_SECRET")
+	secretKey := os.Getenv("ACC_API_KEY_SECRET")
 	secretKeyBytes, err := base64.RawURLEncoding.DecodeString(secretKey)
 	if err != nil {
 		return "", errors.New("ApiKeySecretDecodingError")

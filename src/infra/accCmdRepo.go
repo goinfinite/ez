@@ -1,13 +1,8 @@
 package infra
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -21,6 +16,7 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
+	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
 )
@@ -184,42 +180,6 @@ func (repo AccCmdRepo) UpdatePassword(
 	return nil
 }
 
-func encryptApiKey(plainTextApiKey string) (valueObject.AccessTokenStr, error) {
-	secretKey := os.Getenv("UAK_SECRET")
-	secretKeyBytes, err := base64.RawURLEncoding.DecodeString(secretKey)
-	if err != nil {
-		log.Printf("ApiKeySecretKeyError: %s", err)
-		return "", errors.New("ApiKeySecretKeyError")
-	}
-
-	block, err := aes.NewCipher(secretKeyBytes)
-	if err != nil {
-		log.Printf("ApiKeyCipherError: %s", err)
-		return "", errors.New("ApiKeyCipherError")
-	}
-
-	plainTextApiKeyBytes := []byte(plainTextApiKey)
-	cipherText := make([]byte, aes.BlockSize+len(plainTextApiKeyBytes))
-	iv := cipherText[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		log.Printf("ApiKeyIvGenerationError: %s", err)
-		return "", errors.New("ApiKeyIvGenerationError")
-	}
-
-	stream := cipher.NewCTR(block, iv)
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainTextApiKeyBytes)
-
-	newApiKey, err := valueObject.NewAccessTokenStr(
-		base64.StdEncoding.EncodeToString(cipherText),
-	)
-	if err != nil {
-		log.Printf("ApiKeyEncodingError: %s", err)
-		return "", errors.New("ApiKeyEncodingError")
-	}
-
-	return newApiKey, nil
-}
-
 func storeNewKeyHash(
 	accountId valueObject.AccountId,
 	uuid uuid.UUID,
@@ -268,10 +228,17 @@ func (repo AccCmdRepo) UpdateApiKey(
 	accountId valueObject.AccountId,
 ) (valueObject.AccessTokenStr, error) {
 	uuid := uuid.New()
-	plainTextApiKey := accountId.String() + ":" + uuid.String()
-	newApiKey, err := encryptApiKey(plainTextApiKey)
+	secretKey := os.Getenv("ACC_API_KEY_SECRET")
+	apiKeyPlainText := accountId.String() + ":" + uuid.String()
+
+	encryptedApiKey, err := infraHelper.EncryptStr(secretKey, apiKeyPlainText)
 	if err != nil {
-		return "", err
+		return "", errors.New("ApiKeyEncryptionError")
+	}
+
+	apiKey, err := valueObject.NewAccessTokenStr(encryptedApiKey)
+	if err != nil {
+		return "", errors.New("ApiKeyParseError")
 	}
 
 	err = storeNewKeyHash(accountId, uuid)
@@ -279,5 +246,5 @@ func (repo AccCmdRepo) UpdateApiKey(
 		return "", err
 	}
 
-	return newApiKey, nil
+	return apiKey, nil
 }

@@ -11,12 +11,12 @@ import (
 
 var requiredEnvVars = []string{
 	"JWT_SECRET",
-	"UAK_SECRET",
+	"ACC_API_KEY_SECRET",
 }
 
 var envVarsToGenerateIfEmpty = []string{
 	"JWT_SECRET",
-	"UAK_SECRET",
+	"ACC_API_KEY_SECRET",
 }
 
 func genSecret() (string, error) {
