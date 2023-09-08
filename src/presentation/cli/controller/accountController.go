@@ -146,8 +146,8 @@ func DeleteAccountController() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&accountIdStr, "account-id", "i", "", "AccountId")
-	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&accountIdStr, "id", "i", "", "AccountId")
+	cmd.MarkFlagRequired("id")
 	return cmd
 }
 
