@@ -1,18 +1,23 @@
 package dbModel
 
 import (
+	"errors"
+	"time"
+
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"gorm.io/gorm"
 )
 
 type Account struct {
-	gorm.Model
+	ID         uint   `gorm:"primarykey"`
 	GroupID    uint   `gorm:"not null"`
 	Username   string `gorm:"not null"`
 	KeyHash    *string
 	Quota      AccountQuota
 	QuotaUsage AccountQuotaUsage
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (Account) TableName() string {
@@ -32,7 +37,7 @@ func (Account) ToModel(entity entity.Account) (Account, error) {
 	}
 
 	return Account{
-		Model:      gorm.Model{ID: accId},
+		ID:         accId,
 		GroupID:    uint(entity.GroupId.Get()),
 		Username:   entity.Username.String(),
 		KeyHash:    nil,
@@ -76,4 +81,27 @@ func (model Account) ToEntity() (entity.Account, error) {
 		valueObject.UnixTime(model.CreatedAt.Unix()),
 		valueObject.UnixTime(model.UpdatedAt.Unix()),
 	), nil
+}
+
+func (model Account) Delete(dbSvc *gorm.DB) error {
+	relatedTables := []string{
+		AccountQuota{}.TableName(),
+		AccountQuotaUsage{}.TableName(),
+	}
+
+	for _, tableName := range relatedTables {
+		err := dbSvc.Exec(
+			"DELETE FROM "+tableName+" WHERE account_id = ?", model.ID,
+		).Error
+		if err != nil {
+			return errors.New("DeleteAccRelatedTablesDbError")
+		}
+	}
+
+	err := dbSvc.Delete(model, model.ID).Error
+	if err != nil {
+		return errors.New("DeleteAccDbError")
+	}
+
+	return nil
 }

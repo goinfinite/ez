@@ -1,17 +1,20 @@
 package dbModel
 
 import (
+	"time"
+
 	"github.com/speedianet/sfm/src/domain/valueObject"
-	"gorm.io/gorm"
 )
 
 type AccountQuota struct {
-	gorm.Model
+	ID          uint    `gorm:"primarykey"`
 	CpuCores    float64 `gorm:"not null"`
 	MemoryBytes uint64  `gorm:"not null"`
 	DiskBytes   uint64  `gorm:"not null"`
 	Inodes      uint64  `gorm:"not null"`
 	AccountID   uint
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func (AccountQuota) TableName() string {
