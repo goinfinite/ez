@@ -4,12 +4,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra/db"
+	dbModel "github.com/speedianet/sfm/src/infra/db/model"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
@@ -84,33 +85,23 @@ func (repo AuthQueryRepo) getTokenDetailsFromSession(
 func (repo AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
-	keysHashFile := ".accountApiKeys"
-	if _, err := os.Stat(keysHashFile); err != nil {
-		return "", errors.New("KeysHashFileUnreadable")
-	}
 
-	getKeyCmd := exec.Command(
-		"sed",
-		"-n",
-		"/"+accountId.String()+":/p",
-		keysHashFile,
-	)
-	getKeyOutput, err := getKeyCmd.Output()
+	dbSvc, err := db.DatabaseService()
 	if err != nil {
-		return "", errors.New("KeysHashFileUnreadable")
-	}
-	if len(getKeyOutput) == 0 {
-		return "", errors.New("UserKeyNotFound")
+		return "", err
 	}
 
-	// lineFormat: accountId:uuidHash
-	lineContent := strings.TrimSpace(string(getKeyOutput))
-	lineParts := strings.Split(lineContent, ":")
-	if len(lineParts) != 2 {
-		return "", errors.New("UserKeyFormatError")
+	accModel := dbModel.Account{ID: uint(accountId.Get())}
+	err = dbSvc.Model(&accModel).First(&accModel).Error
+	if err != nil {
+		return "", errors.New("AccountNotFound")
 	}
 
-	return lineParts[1], nil
+	if accModel.KeyHash == nil {
+		return "", errors.New("UserKeyHashNotFound")
+	}
+
+	return *accModel.KeyHash, nil
 }
 
 func (repo AuthQueryRepo) getTokenDetailsFromApiKey(
