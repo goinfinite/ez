@@ -46,6 +46,7 @@
     "Pkgs",
     "pkill",
     "podman",
+    "primarykey",
     "privs",
     "Procs",
     "responsetype",
