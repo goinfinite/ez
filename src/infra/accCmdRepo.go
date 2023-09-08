@@ -169,6 +169,18 @@ func (repo AccCmdRepo) UpdatePassword(
 		return errors.New("PasswordUpdateError")
 	}
 
+	dbSvc, err := db.DatabaseService()
+	if err != nil {
+		return err
+	}
+
+	err = dbSvc.Model(&dbModel.Account{ID: uint(accountId.Get())}).
+		Update("updated_at", time.Now()).Error
+	if err != nil {
+		log.Printf("UpdateAccountDbError: %s", err)
+		return errors.New("UpdateAccountDbError")
+	}
+
 	return nil
 }
 

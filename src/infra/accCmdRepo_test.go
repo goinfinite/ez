@@ -83,8 +83,6 @@ func TestAccCmdRepo(t *testing.T) {
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}
-
-		resetDummyUser()
 	})
 
 	t.Run("UpdateApiKeyValidAccount", func(t *testing.T) {
@@ -97,7 +95,5 @@ func TestAccCmdRepo(t *testing.T) {
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}
-
-		resetDummyUser()
 	})
 }
