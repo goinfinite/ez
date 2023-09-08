@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -180,50 +179,6 @@ func (repo AccCmdRepo) UpdatePassword(
 	return nil
 }
 
-func storeNewKeyHash(
-	accountId valueObject.AccountId,
-	uuid uuid.UUID,
-) error {
-	var lock sync.Mutex
-	lock.Lock()
-	defer lock.Unlock()
-
-	keysHashFile := ".accountApiKeys"
-
-	if _, err := os.Stat(keysHashFile); err == nil {
-		purgeOldKeyCmd := exec.Command(
-			"sed",
-			"-i",
-			"/"+accountId.String()+":/d",
-			keysHashFile,
-		)
-		err := purgeOldKeyCmd.Run()
-		if err != nil {
-			log.Printf("PurgeOldKeyError: %s", err)
-			return errors.New("PurgeOldKeyError")
-		}
-	}
-
-	hash := sha3.New256()
-	hash.Write([]byte(uuid.String()))
-	hashString := hex.EncodeToString(hash.Sum(nil))
-
-	file, err := os.OpenFile(keysHashFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0400)
-	if err != nil {
-		log.Printf("KeysFileUnreadable: %v", err)
-		return errors.New("KeysFileUnreadable")
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(accountId.String() + ":" + hashString + "\n")
-	if err != nil {
-		log.Printf("UserKeysWriteError: %v", err)
-		return errors.New("UserKeysWriteError")
-	}
-
-	return nil
-}
-
 func (repo AccCmdRepo) UpdateApiKey(
 	accountId valueObject.AccountId,
 ) (valueObject.AccessTokenStr, error) {
@@ -241,9 +196,20 @@ func (repo AccCmdRepo) UpdateApiKey(
 		return "", errors.New("ApiKeyParseError")
 	}
 
-	err = storeNewKeyHash(accountId, uuid)
+	hash := sha3.New256()
+	hash.Write([]byte(uuid.String()))
+	uuidHash := hex.EncodeToString(hash.Sum(nil))
+
+	dbSvc, err := db.DatabaseService()
 	if err != nil {
 		return "", err
+	}
+
+	err = dbSvc.Model(&dbModel.Account{ID: uint(accountId.Get())}).
+		Update("key_hash", uuidHash).Error
+	if err != nil {
+		log.Printf("UpdateAccountDbError: %s", err)
+		return "", errors.New("UpdateAccountDbError")
 	}
 
 	return apiKey, nil
