@@ -66,5 +66,20 @@ func TestAuthQueryRepo(t *testing.T) {
 		}
 	})
 
-	// TODO: Test ApiKey
+	t.Run("ValidAccountApiKey", func(t *testing.T) {
+		accCmdRepo := AccCmdRepo{}
+
+		apiKey, err := accCmdRepo.UpdateApiKey(
+			valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID")),
+		)
+		if err != nil {
+			t.Error(err)
+		}
+
+		authQueryRepo := AuthQueryRepo{}
+		_, err = authQueryRepo.GetAccessTokenDetails(apiKey)
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }
