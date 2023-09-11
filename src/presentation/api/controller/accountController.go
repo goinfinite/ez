@@ -196,14 +196,6 @@ func UpdateAccountController(c echo.Context) error {
 	accQueryRepo := infra.AccQueryRepo{}
 	accCmdRepo := infra.AccCmdRepo{}
 
-	if updateAccountDto.Password != nil {
-		useCase.UpdateAccountPassword(
-			accQueryRepo,
-			accCmdRepo,
-			updateAccountDto,
-		)
-	}
-
 	if updateAccountDto.ShouldUpdateApiKey != nil && *updateAccountDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
 			accQueryRepo,
@@ -211,10 +203,23 @@ func UpdateAccountController(c echo.Context) error {
 			updateAccountDto,
 		)
 		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+			return apiHelper.ResponseWrapper(
+				c, http.StatusInternalServerError, err.Error(),
+			)
 		}
 
 		return apiHelper.ResponseWrapper(c, http.StatusOK, newKey)
+	}
+
+	err := useCase.UpdateAccount(
+		accQueryRepo,
+		accCmdRepo,
+		updateAccountDto,
+	)
+	if err != nil {
+		return apiHelper.ResponseWrapper(
+			c, http.StatusInternalServerError, err.Error(),
+		)
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountUpdated")

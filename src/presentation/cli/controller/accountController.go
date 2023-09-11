@@ -203,14 +203,6 @@ func UpdateAccountController() *cobra.Command {
 			accQueryRepo := infra.AccQueryRepo{}
 			accCmdRepo := infra.AccCmdRepo{}
 
-			if updateAccountDto.Password != nil {
-				useCase.UpdateAccountPassword(
-					accQueryRepo,
-					accCmdRepo,
-					updateAccountDto,
-				)
-			}
-
 			if shouldUpdateApiKeyBool {
 				newKey, err := useCase.UpdateAccountApiKey(
 					accQueryRepo,
@@ -222,6 +214,15 @@ func UpdateAccountController() *cobra.Command {
 				}
 
 				cliHelper.ResponseWrapper(true, newKey)
+			}
+
+			err = useCase.UpdateAccount(
+				accQueryRepo,
+				accCmdRepo,
+				updateAccountDto,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
 			}
 		},
 	}
