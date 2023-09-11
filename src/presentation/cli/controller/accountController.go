@@ -32,8 +32,12 @@ func accQuotaFactory(
 	memoryBytesUint uint64,
 	diskBytesUint uint64,
 	inodes uint64,
+	withDefaults bool,
 ) (valueObject.AccountQuota, error) {
 	accQuotaDefaults := valueObject.NewAccountQuotaWithDefaultValues()
+	if !withDefaults {
+		accQuotaDefaults = valueObject.NewAccountQuotaWithBlankValues()
+	}
 
 	cpuCoresCount := accQuotaDefaults.CpuCores
 	if cpuCores != 0 {
@@ -83,6 +87,7 @@ func AddAccountController() *cobra.Command {
 				memoryBytesUint,
 				diskBytesUint,
 				inodes,
+				true,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -155,6 +160,10 @@ func UpdateAccountController() *cobra.Command {
 	var accountIdStr string
 	var passwordStr string
 	shouldUpdateApiKeyBool := false
+	var cpuCores float64
+	var memoryBytesUint uint64
+	var diskBytesUint uint64
+	var inodes uint64
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -173,10 +182,22 @@ func UpdateAccountController() *cobra.Command {
 				shouldUpdateApiKeyPtr = &shouldUpdateApiKeyBool
 			}
 
+			quota, err := accQuotaFactory(
+				cpuCores,
+				memoryBytesUint,
+				diskBytesUint,
+				inodes,
+				false,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
 			updateAccountDto := dto.NewUpdateAccount(
 				accountId,
 				passPtr,
 				shouldUpdateApiKeyPtr,
+				&quota,
 			)
 
 			accQueryRepo := infra.AccQueryRepo{}
@@ -205,8 +226,8 @@ func UpdateAccountController() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&accountIdStr, "account-id", "i", "", "AccountId")
-	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&accountIdStr, "id", "i", "", "AccountId")
+	cmd.MarkFlagRequired("id")
 	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
 	cmd.Flags().BoolVarP(
 		&shouldUpdateApiKeyBool,
@@ -215,5 +236,9 @@ func UpdateAccountController() *cobra.Command {
 		false,
 		"ShouldUpdateApiKey",
 	)
+	cmd.Flags().Float64VarP(&cpuCores, "cpu", "c", 0, "CpuCores")
+	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory", "m", 0, "MemoryInBytes")
+	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
+	cmd.Flags().Uint64VarP(&inodes, "inodes", "i", 0, "Inodes")
 	return cmd
 }

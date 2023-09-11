@@ -31,30 +31,36 @@ func GetAccountsController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, accsList)
 }
 
-func accQuotaFactory(quota interface{}) (valueObject.AccountQuota, error) {
+func accQuotaFactory(
+	quota interface{},
+	withDefaults bool,
+) (valueObject.AccountQuota, error) {
 	quotaMap, quotaMapOk := quota.(map[string]interface{})
 	if !quotaMapOk {
 		return valueObject.AccountQuota{}, errors.New("InvalidQuotaStructure")
 	}
 
-	accQuotaDefaults := valueObject.NewAccountQuotaWithDefaultValues()
+	accQuota := valueObject.NewAccountQuotaWithDefaultValues()
+	if !withDefaults {
+		accQuota = valueObject.NewAccountQuotaWithBlankValues()
+	}
 
-	cpuCores := accQuotaDefaults.CpuCores
+	cpuCores := accQuota.CpuCores
 	if quotaMap["cpuCores"] != nil {
 		cpuCores = valueObject.NewCpuCoresCountPanic(quotaMap["cpuCores"])
 	}
 
-	memoryBytes := accQuotaDefaults.MemoryBytes
+	memoryBytes := accQuota.MemoryBytes
 	if quotaMap["memoryBytes"] != nil {
 		memoryBytes = valueObject.NewBytePanic(quotaMap["memoryBytes"])
 	}
 
-	diskBytes := accQuotaDefaults.DiskBytes
+	diskBytes := accQuota.DiskBytes
 	if quotaMap["diskBytes"] != nil {
 		diskBytes = valueObject.NewBytePanic(quotaMap["diskBytes"])
 	}
 
-	inodes := accQuotaDefaults.Inodes
+	inodes := accQuota.Inodes
 	if quotaMap["inodes"] != nil {
 		inodes = valueObject.NewInodesCountPanic(quotaMap["inodes"])
 	}
@@ -85,7 +91,7 @@ func AddAccountController(c echo.Context) error {
 
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	if requestBody["quota"] != nil {
-		quotaReceived, err := accQuotaFactory(requestBody["quota"])
+		quotaReceived, err := accQuotaFactory(requestBody["quota"], true)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
@@ -171,10 +177,20 @@ func UpdateAccountController(c echo.Context) error {
 		shouldUpdateApiKeyPtr = &shouldUpdateApiKey
 	}
 
+	var quotaPtr *valueObject.AccountQuota
+	if requestBody["quota"] != nil {
+		quota, err := accQuotaFactory(requestBody["quota"], false)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+		quotaPtr = &quota
+	}
+
 	updateAccountDto := dto.NewUpdateAccount(
 		accountId,
 		passPtr,
 		shouldUpdateApiKeyPtr,
+		quotaPtr,
 	)
 
 	accQueryRepo := infra.AccQueryRepo{}
