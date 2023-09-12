@@ -64,6 +64,7 @@ func RunCmdAsUser(
 
 	execCmd := exec.Command(command, args...)
 	execCmd.SysProcAttr = &syscall.SysProcAttr{}
+	execCmd.Dir = userInfo.HomeDir
 	execCmd.SysProcAttr.Credential = &syscall.Credential{
 		Uid: uint32(accId),
 		Gid: uint32(gId),
