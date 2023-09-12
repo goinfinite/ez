@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
+
+	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
 type CommandError struct {
@@ -36,4 +38,20 @@ func RunCmd(command string, args ...string) (string, error) {
 	}
 
 	return stdOut, nil
+}
+
+func RunCmdAsUser(
+	accId valueObject.AccountId,
+	cmd []string,
+) (string, error) {
+	args := []string{
+		"-H",
+		"-u",
+		"#" + accId.String(),
+		"bash",
+		"-c",
+	}
+	args = append(args, cmd...)
+
+	return RunCmd("sudo", args...)
 }
