@@ -38,6 +38,7 @@
     "mysqld",
     "nginx",
     "nogroup",
+    "nologin",
     "openlitespeed",
     "pecl",
     "percona",
