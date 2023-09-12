@@ -1,6 +1,9 @@
 package useCase
 
 import (
+	"errors"
+	"log"
+
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/repository"
 )
@@ -8,5 +11,10 @@ import (
 func GetAccounts(
 	accQueryRepo repository.AccQueryRepo,
 ) ([]entity.Account, error) {
-	return accQueryRepo.Get()
+	accs, err := accQueryRepo.Get()
+	if err != nil {
+		log.Printf("GetAccountsError: %s", err)
+		return nil, errors.New("GetAccountsInfraError")
+	}
+	return accs, nil
 }

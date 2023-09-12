@@ -24,7 +24,8 @@ func UpdateAccount(
 			*updateAccountDto.Password,
 		)
 		if err != nil {
-			return errors.New("UpdateAccountPasswordError")
+			log.Printf("UpdateAccountPasswordError: %s", err)
+			return errors.New("UpdateAccountPasswordInfraError")
 		}
 
 		log.Printf("AccountId '%v' password updated.", updateAccountDto.AccountId)
@@ -36,7 +37,8 @@ func UpdateAccount(
 			*updateAccountDto.Quota,
 		)
 		if err != nil {
-			return errors.New("UpdateAccountQuotaError")
+			log.Printf("UpdateAccountQuotaError: %s", err)
+			return errors.New("UpdateAccountQuotaInfraError")
 		}
 
 		log.Printf("AccountId '%v' quota updated.", updateAccountDto.AccountId)

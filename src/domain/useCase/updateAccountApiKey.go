@@ -21,7 +21,8 @@ func UpdateAccountApiKey(
 
 	newKey, err := accCmdRepo.UpdateApiKey(updateAccountDto.AccountId)
 	if err != nil {
-		return "", errors.New("UpdateAccountApiKeyError")
+		log.Printf("UpdateAccountApiKeyError: %s", err)
+		return "", errors.New("UpdateAccountApiKeyInfraError")
 	}
 
 	log.Printf("AccountId '%v' api key updated.", updateAccountDto.AccountId)

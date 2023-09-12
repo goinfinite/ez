@@ -20,7 +20,8 @@ func AddAccount(
 
 	err = accCmdRepo.Add(addAccount)
 	if err != nil {
-		return errors.New("AddAccountError")
+		log.Printf("AddAccountError: %s", err)
+		return errors.New("AddAccountInfraError")
 	}
 
 	log.Printf("User '%v' added.", addAccount.Username.String())

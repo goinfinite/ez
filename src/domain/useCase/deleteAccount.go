@@ -20,7 +20,8 @@ func DeleteAccount(
 
 	err = accCmdRepo.Delete(accountId)
 	if err != nil {
-		return errors.New("DeleteAccountError")
+		log.Printf("DeleteAccountError: %s", err)
+		return errors.New("DeleteAccountInfraError")
 	}
 
 	log.Printf("AccountId '%v' deleted.", accountId)
