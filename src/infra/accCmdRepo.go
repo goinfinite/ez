@@ -21,26 +21,13 @@ import (
 type AccCmdRepo struct {
 }
 
-func getUsernameById(accId valueObject.AccountId) (valueObject.Username, error) {
-	accQuery := AccQueryRepo{}
-	accDetails, err := accQuery.GetById(accId)
-	if err != nil {
-		return "", err
-	}
-
-	return accDetails.Username, nil
-}
-
 func (repo AccCmdRepo) updateFilesystemQuota(
 	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
 	diskBytesStr := quota.DiskBytes.String()
 	inodesStr := quota.Inodes.String()
-	username, err := getUsernameById(accId)
-	if err != nil {
-		return err
-	}
+	accIdStr := accId.String()
 
 	shouldUpdateDiskQuota := quota.DiskBytes.Get() > 0
 	shouldUpdateInodeQuota := quota.Inodes.Get() > 0
@@ -56,9 +43,9 @@ func (repo AccCmdRepo) updateFilesystemQuota(
 	if shouldRemoveQuota {
 		xfsFlags = "-x -c 'limit -u bhard=0 ihard=0"
 	}
-	xfsFlags += " " + username.String() + "' /var/data"
+	xfsFlags += " " + accIdStr + "' /var/data"
 
-	_, err = infraHelper.RunCmd("bash", "-c", "xfs_quota "+xfsFlags)
+	_, err := infraHelper.RunCmd("bash", "-c", "xfs_quota "+xfsFlags)
 	if err != nil {
 		return err
 	}
@@ -133,6 +120,16 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 	}
 
 	return nil
+}
+
+func getUsernameById(accId valueObject.AccountId) (valueObject.Username, error) {
+	accQuery := AccQueryRepo{}
+	accDetails, err := accQuery.GetById(accId)
+	if err != nil {
+		return "", err
+	}
+
+	return accDetails.Username, nil
 }
 
 func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
