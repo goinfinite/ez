@@ -29,6 +29,7 @@
     "keyrings",
     "labstack",
     "litespeed",
+    "LOGNAME",
     "lsadm",
     "lsapi",
     "Lsapi",
