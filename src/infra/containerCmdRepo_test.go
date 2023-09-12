@@ -31,7 +31,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
 
 		baseSpecs := valueObject.NewContainerSpecs(
-			1,
+			valueObject.NewCpuCoresCountPanic(1),
 			valueObject.Byte(1073741824),
 		)
 
