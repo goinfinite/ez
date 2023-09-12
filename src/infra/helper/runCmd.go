@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
@@ -19,13 +20,12 @@ func (e *CommandError) Error() string {
 	return string(errJSON)
 }
 
-func RunCmd(command string, args ...string) (string, error) {
+func runExecCmd(execCmd *exec.Cmd) (string, error) {
 	var stdout, stderr bytes.Buffer
-	cmdObj := exec.Command(command, args...)
-	cmdObj.Stdout = &stdout
-	cmdObj.Stderr = &stderr
+	execCmd.Stdout = &stdout
+	execCmd.Stderr = &stderr
 
-	err := cmdObj.Run()
+	err := execCmd.Run()
 	stdOut := strings.TrimSpace(stdout.String())
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
@@ -40,18 +40,21 @@ func RunCmd(command string, args ...string) (string, error) {
 	return stdOut, nil
 }
 
+func RunCmd(command string, args ...string) (string, error) {
+	execCmd := exec.Command(command, args...)
+	return runExecCmd(execCmd)
+}
+
 func RunCmdAsUser(
 	accId valueObject.AccountId,
-	cmd []string,
+	command string,
+	args ...string,
 ) (string, error) {
-	args := []string{
-		"-H",
-		"-u",
-		"#" + accId.String(),
-		"bash",
-		"-c",
+	execCmd := exec.Command(command, args...)
+	execCmd.SysProcAttr = &syscall.SysProcAttr{}
+	execCmd.SysProcAttr.Credential = &syscall.Credential{
+		Uid: uint32(accId),
 	}
-	args = append(args, cmd...)
 
-	return RunCmd("sudo", args...)
+	return runExecCmd(execCmd)
 }
