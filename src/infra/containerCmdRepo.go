@@ -34,9 +34,9 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	specsParams := []string{
 		"--cpus",
-		addContainer.BaseSpecs.GetCpuCoresAsString(),
+		addContainer.BaseSpecs.CpuCores.String(),
 		"--memory",
-		addContainer.BaseSpecs.GetMemoryAsString(),
+		addContainer.BaseSpecs.MemoryBytes.String(),
 	}
 	runParams = append(runParams, specsParams...)
 

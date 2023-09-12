@@ -60,7 +60,7 @@ func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 
 func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 	specParts := strings.Split(specStr, ":")
-	cpuCores, err := strconv.ParseFloat(specParts[0], 64)
+	cpuCores, err := valueObject.NewCpuCoresCount(specParts[0])
 	if err != nil {
 		panic("InvalidCpuCoresLimit")
 	}
