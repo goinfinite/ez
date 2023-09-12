@@ -8,5 +8,8 @@ import (
 type ContainerCmdRepo interface {
 	Add(addContainer dto.AddContainer) error
 	Update(updateContainer dto.UpdateContainer) error
-	Delete(containerId valueObject.ContainerId) error
+	Delete(
+		accId valueObject.AccountId,
+		containerId valueObject.ContainerId,
+	) error
 }

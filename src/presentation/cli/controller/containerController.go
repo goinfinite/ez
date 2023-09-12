@@ -87,6 +87,7 @@ func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
 }
 
 func AddContainerController() *cobra.Command {
+	var accId uint64
 	var hostnameStr string
 	var containerImgAddressStr string
 	var portBindingsSlice []string
@@ -100,6 +101,7 @@ func AddContainerController() *cobra.Command {
 		Use:   "add",
 		Short: "AddNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
+			accId := valueObject.NewAccountIdPanic(accId)
 			hostname := valueObject.NewFqdnPanic(hostnameStr)
 			imgAddr := valueObject.NewContainerImgAddressPanic(
 				containerImgAddressStr,
@@ -144,6 +146,7 @@ func AddContainerController() *cobra.Command {
 			}
 
 			addContainerDto := dto.NewAddContainer(
+				accId,
 				hostname,
 				imgAddr,
 				portBindingsPtr,
@@ -168,6 +171,8 @@ func AddContainerController() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("acc-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "h", "", "Hostname")
 	cmd.MarkFlagRequired("hostname")
 	cmd.Flags().StringVarP(&containerImgAddressStr, "image", "i", "", "ImageAddress")
@@ -200,12 +205,14 @@ func AddContainerController() *cobra.Command {
 }
 
 func DeleteContainerController() *cobra.Command {
+	var accId uint64
 	var containerIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainer",
 		Run: func(cmd *cobra.Command, args []string) {
+			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
@@ -214,6 +221,7 @@ func DeleteContainerController() *cobra.Command {
 			err := useCase.DeleteContainer(
 				containerQueryRepo,
 				containerCmdRepo,
+				accId,
 				containerId,
 			)
 			if err != nil {
@@ -224,12 +232,15 @@ func DeleteContainerController() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&containerIdStr, "id", "i", "", "ContainerId")
-	cmd.MarkFlagRequired("id")
+	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.MarkFlagRequired("container-id")
 	return cmd
 }
 
 func UpdateContainerController() *cobra.Command {
+	var accId uint64
 	var containerIdStr string
 	var containerStatus bool
 	var baseSpecStr string
@@ -239,6 +250,7 @@ func UpdateContainerController() *cobra.Command {
 		Use:   "update",
 		Short: "UpdateContainer",
 		Run: func(cmd *cobra.Command, args []string) {
+			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
@@ -254,6 +266,7 @@ func UpdateContainerController() *cobra.Command {
 			}
 
 			updateContainerDto := dto.NewUpdateContainer(
+				accId,
 				containerId,
 				containerStatus,
 				baseSpecsPtr,
@@ -276,8 +289,10 @@ func UpdateContainerController() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&containerIdStr, "id", "i", "", "ContainerId")
-	cmd.MarkFlagRequired("id")
+	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.MarkFlagRequired("container-id")
 	cmd.Flags().BoolVarP(&containerStatus, "status", "s", false, "ContainerStatus")
 	cmd.Flags().StringVarP(
 		&baseSpecStr,

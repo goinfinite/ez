@@ -13,7 +13,8 @@ func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 }
 
 func (repo ContainerQueryRepo) GetById(
-	id valueObject.ContainerId,
+	accId valueObject.AccountId,
+	containerId valueObject.ContainerId,
 ) (entity.Container, error) {
 	return entity.Container{}, nil
 }

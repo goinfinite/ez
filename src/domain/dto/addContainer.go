@@ -3,6 +3,7 @@ package dto
 import "github.com/speedianet/sfm/src/domain/valueObject"
 
 type AddContainer struct {
+	AccountId     valueObject.AccountId               `json:"accountId"`
 	Hostname      valueObject.Fqdn                    `json:"hostname"`
 	Image         valueObject.ContainerImgAddress     `json:"image"`
 	PortBindings  *[]valueObject.PortBinding          `json:"portBindings"`
@@ -14,6 +15,7 @@ type AddContainer struct {
 }
 
 func NewAddContainer(
+	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
 	image valueObject.ContainerImgAddress,
 	portBindings *[]valueObject.PortBinding,
@@ -24,6 +26,7 @@ func NewAddContainer(
 	envs *[]valueObject.ContainerEnv,
 ) AddContainer {
 	return AddContainer{
+		AccountId:     accountId,
 		Hostname:      hostname,
 		Image:         image,
 		PortBindings:  portBindings,

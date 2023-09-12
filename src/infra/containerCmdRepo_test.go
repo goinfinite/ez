@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"os"
 	"testing"
 
 	testHelpers "github.com/speedianet/sfm/src/devUtils"
@@ -39,7 +40,10 @@ func TestContainerCmdRepo(t *testing.T) {
 			valueObject.NewContainerEnvPanic("SFM_ENV2=testing"),
 		}
 
+		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+
 		addContainer := dto.NewAddContainer(
+			accountId,
 			valueObject.NewFqdnPanic("speedia.net"),
 			valueObject.NewContainerImgAddressPanic("docker.io/speedia/sam:latest"),
 			&portBindings,

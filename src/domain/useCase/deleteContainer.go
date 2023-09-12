@@ -11,14 +11,15 @@ import (
 func DeleteContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
+	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
-	_, err := containerQueryRepo.GetById(containerId)
+	_, err := containerQueryRepo.GetById(accId, containerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}
 
-	err = containerCmdRepo.Delete(containerId)
+	err = containerCmdRepo.Delete(accId, containerId)
 	if err != nil {
 		return errors.New("DeleteContainerError")
 	}

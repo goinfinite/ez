@@ -7,5 +7,8 @@ import (
 
 type ContainerQueryRepo interface {
 	Get() ([]entity.Container, error)
-	GetById(id valueObject.ContainerId) (entity.Container, error)
+	GetById(
+		accId valueObject.AccountId,
+		containerId valueObject.ContainerId,
+	) (entity.Container, error)
 }
