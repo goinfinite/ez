@@ -1,6 +1,9 @@
 package useCase
 
 import (
+	"errors"
+	"log"
+
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/repository"
 	"github.com/speedianet/sfm/src/domain/valueObject"
@@ -19,5 +22,11 @@ func AddContainer(
 		addContainer.BaseSpecs = &defaultSpecs
 	}
 
-	return containerCmdRepo.Add(addContainer)
+	err := containerCmdRepo.Add(addContainer)
+	if err != nil {
+		log.Printf("AddContainerError: %s", err)
+		return errors.New("AddContainerInfraError")
+	}
+
+	return nil
 }

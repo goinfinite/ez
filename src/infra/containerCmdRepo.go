@@ -1,9 +1,6 @@
 package infra
 
 import (
-	"errors"
-	"log"
-
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
@@ -67,8 +64,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	_, err := infraHelper.RunCmd("podman", runParams...)
 	if err != nil {
-		log.Printf("AddContainerFailed: %v", err)
-		return errors.New("AddContainerFailed")
+		return err
 	}
 
 	return nil
