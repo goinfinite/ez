@@ -11,6 +11,7 @@ type ContainerCmdRepo struct {
 
 func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	runParams := []string{
+		"podman",
 		"run",
 		"--detach",
 		"--name",
@@ -62,7 +63,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	runParams = append(runParams, addContainer.Image.String())
 
-	_, err := infraHelper.RunCmd("podman", runParams...)
+	_, err := infraHelper.RunCmdAsUser(addContainer.AccountId, runParams)
 	if err != nil {
 		return err
 	}
@@ -70,10 +71,15 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	return nil
 }
 
-func (repo ContainerCmdRepo) Update(dto.UpdateContainer) error {
+func (repo ContainerCmdRepo) Update(
+	updateContainer dto.UpdateContainer,
+) error {
 	return nil
 }
 
-func (repo ContainerCmdRepo) Delete(valueObject.ContainerId) error {
+func (repo ContainerCmdRepo) Delete(
+	accId valueObject.AccountId,
+	containerId valueObject.ContainerId,
+) error {
 	return nil
 }
