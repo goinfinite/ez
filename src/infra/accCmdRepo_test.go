@@ -123,6 +123,9 @@ func TestAccCmdRepo(t *testing.T) {
 			t.Error(err)
 		}
 
+		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		os.Chown(testFilePath, int(accId.Get()), int(accId.Get()))
+
 		accCmdRepo := AccCmdRepo{}
 		err = accCmdRepo.UpdateQuotasUsage()
 		if err != nil {
@@ -130,7 +133,6 @@ func TestAccCmdRepo(t *testing.T) {
 		}
 
 		accQueryRepo := AccQueryRepo{}
-		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		accEntity, err := accQueryRepo.GetById(accId)
 		if err != nil {
 			t.Error(err)
