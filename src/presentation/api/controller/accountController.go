@@ -3,6 +3,7 @@ package apiController
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/sfm/src/domain/dto"
@@ -223,4 +224,15 @@ func UpdateAccountController(c echo.Context) error {
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountUpdated")
+}
+
+func AutoUpdateAccountsQuotaUsageController() {
+	taskInterval := time.Duration(15) * time.Minute
+	timer := time.NewTicker(taskInterval)
+	defer timer.Stop()
+
+	accCmdRepo := infra.AccCmdRepo{}
+	for range timer.C {
+		useCase.AutoUpdateAccountsQuotaUsage(accCmdRepo)
+	}
 }

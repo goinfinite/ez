@@ -1,8 +1,6 @@
 package cliController
 
 import (
-	"time"
-
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
@@ -244,15 +242,4 @@ func UpdateAccountController() *cobra.Command {
 	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
 	cmd.Flags().Uint64VarP(&inodes, "inodes", "n", 0, "Inodes")
 	return cmd
-}
-
-func UpdateAccountsQuotaUsageController() {
-	taskInterval := time.Duration(15) * time.Minute
-	timer := time.NewTicker(taskInterval)
-	defer timer.Stop()
-
-	accCmdRepo := infra.AccCmdRepo{}
-	for range timer.C {
-		useCase.AutoUpdateAccountsQuotaUsage(accCmdRepo)
-	}
 }
