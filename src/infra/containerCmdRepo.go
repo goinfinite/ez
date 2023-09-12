@@ -11,7 +11,6 @@ type ContainerCmdRepo struct {
 
 func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	runParams := []string{
-		"podman",
 		"run",
 		"--detach",
 		"--name",
@@ -63,7 +62,11 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	runParams = append(runParams, addContainer.Image.String())
 
-	_, err := infraHelper.RunCmdAsUser(addContainer.AccountId, runParams)
+	_, err := infraHelper.RunCmdAsUser(
+		addContainer.AccountId,
+		"podman",
+		runParams...,
+	)
 	if err != nil {
 		return err
 	}
