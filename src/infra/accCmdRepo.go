@@ -21,6 +21,51 @@ import (
 type AccCmdRepo struct {
 }
 
+func getUsernameById(accId valueObject.AccountId) (valueObject.Username, error) {
+	accQuery := AccQueryRepo{}
+	accDetails, err := accQuery.GetById(accId)
+	if err != nil {
+		return "", err
+	}
+
+	return accDetails.Username, nil
+}
+
+func (repo AccCmdRepo) updateFilesystemQuota(
+	accId valueObject.AccountId,
+	quota valueObject.AccountQuota,
+) error {
+	diskBytesStr := quota.DiskBytes.String()
+	inodesStr := quota.Inodes.String()
+	username, err := getUsernameById(accId)
+	if err != nil {
+		return err
+	}
+
+	shouldUpdateDiskQuota := quota.DiskBytes.Get() > 0
+	shouldUpdateInodeQuota := quota.Inodes.Get() > 0
+	shouldRemoveQuota := !shouldUpdateDiskQuota && !shouldUpdateInodeQuota
+
+	xfsFlags := "-x -c 'limit -u"
+	if shouldUpdateDiskQuota {
+		xfsFlags += " bhard=" + diskBytesStr
+	}
+	if shouldUpdateInodeQuota {
+		xfsFlags += " ihard=" + inodesStr
+	}
+	if shouldRemoveQuota {
+		xfsFlags = "-x -c 'limit -u bhard=0 ihard=0"
+	}
+	xfsFlags += " " + username.String() + "' /var/data"
+
+	_, err = infraHelper.RunCmd("bash", "-c", "xfs_quota "+xfsFlags)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 	passHash, err := bcrypt.GenerateFromPassword(
 		[]byte(addAccount.Password.String()),
@@ -82,20 +127,21 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
+	err = repo.updateFilesystemQuota(accId, addAccount.Quota)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func getUsernameById(accId valueObject.AccountId) (valueObject.Username, error) {
-	accQuery := AccQueryRepo{}
-	accDetails, err := accQuery.GetById(accId)
+func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
+	quota := valueObject.NewAccountQuotaWithBlankValues()
+	err := repo.updateFilesystemQuota(accId, quota)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return accDetails.Username, nil
-}
-
-func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 	username, err := getUsernameById(accId)
 	if err != nil {
 		return err
@@ -244,6 +290,11 @@ func (repo AccCmdRepo) UpdateQuota(
 	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
+	err := repo.updateFilesystemQuota(accId, quota)
+	if err != nil {
+		return err
+	}
+
 	return repo.updateQuotaTable(
 		dbModel.AccountQuota{}.TableName(),
 		accId,

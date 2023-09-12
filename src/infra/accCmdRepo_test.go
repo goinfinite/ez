@@ -103,6 +103,7 @@ func TestAccCmdRepo(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
 		quota.CpuCores = valueObject.NewCpuCoresCountPanic(1)
+		quota.DiskBytes = valueObject.NewBytePanic(1073741824)
 
 		accCmdRepo := AccCmdRepo{}
 		err := accCmdRepo.UpdateQuota(accountId, quota)
