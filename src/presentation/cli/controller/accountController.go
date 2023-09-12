@@ -1,7 +1,6 @@
 package cliController
 
 import (
-	"log"
 	"time"
 
 	"github.com/speedianet/sfm/src/domain/dto"
@@ -254,9 +253,6 @@ func UpdateAccountsQuotaUsageController() {
 
 	accCmdRepo := infra.AccCmdRepo{}
 	for range timer.C {
-		err := accCmdRepo.UpdateQuotasUsage()
-		if err != nil {
-			log.Printf("UpdateQuotasUsageError: %v", err)
-		}
+		useCase.AutoUpdateAccountsQuotaUsage(accCmdRepo)
 	}
 }
