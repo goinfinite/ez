@@ -7,6 +7,7 @@ import (
 	testHelpers "github.com/speedianet/sfm/src/devUtils"
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 )
 
 func addDummyUser() error {
@@ -109,6 +110,38 @@ func TestAccCmdRepo(t *testing.T) {
 		err := accCmdRepo.UpdateQuota(accountId, quota)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
+
+	t.Run("UpdateQuotasUsage", func(t *testing.T) {
+		resetDummyUser()
+
+		testFilePath := "/var/data/" + os.Getenv("DUMMY_USER_NAME") + "/test.file"
+
+		_, err := infraHelper.RunCmd("fallocate", "-l", "100M", testFilePath)
+		if err != nil {
+			t.Error(err)
+		}
+
+		accCmdRepo := AccCmdRepo{}
+		err = accCmdRepo.UpdateQuotasUsage()
+		if err != nil {
+			t.Error(err)
+		}
+
+		accQueryRepo := AccQueryRepo{}
+		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		accEntity, err := accQueryRepo.GetById(accId)
+		if err != nil {
+			t.Error(err)
+		}
+		if accEntity.QuotaUsage.DiskBytes.Get() < 100000000 {
+			t.Error("QuotaUsageNotUpdated")
+		}
+
+		_, err = infraHelper.RunCmd("rm", "-f", testFilePath)
+		if err != nil {
+			t.Error(err)
 		}
 	})
 }

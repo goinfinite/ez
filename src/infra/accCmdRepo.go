@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -308,4 +309,68 @@ func (repo AccCmdRepo) UpdateQuotaUsage(
 		accId,
 		quota,
 	)
+}
+
+func (repo AccCmdRepo) UpdateQuotasUsage() error {
+	xfsQuotasUsage, err := infraHelper.RunCmd(
+		"bash",
+		"-c",
+		"xfs_quota -x -c 'report -nbiN' /var/data | awk '{print $1, $2, $7}'",
+	)
+	if err != nil {
+		return err
+	}
+
+	if xfsQuotasUsage == "" {
+		return nil
+	}
+
+	quotasUsageLines := strings.Split(xfsQuotasUsage, "\n")
+	for _, quotasUsageLine := range quotasUsageLines {
+		quotasUsageLine = strings.TrimSpace(quotasUsageLine)
+		if quotasUsageLine == "" {
+			continue
+		}
+		usageColumns := strings.Split(quotasUsageLine, " ")
+		accIdStr := usageColumns[0]
+		if accIdStr == "#0" || accIdStr == "" {
+			continue
+		}
+		accIdStrWithoutHash := strings.Replace(accIdStr, "#", "", 1)
+		accId, err := valueObject.NewAccountId(accIdStrWithoutHash)
+		if err != nil {
+			continue
+		}
+
+		diskUsageKilobytesStr := usageColumns[1]
+		inodesUsageStr := usageColumns[2]
+		if diskUsageKilobytesStr == "" || inodesUsageStr == "" {
+			continue
+		}
+
+		diskUsageBytesStr := diskUsageKilobytesStr + "000"
+		diskUsage, err := valueObject.NewByte(diskUsageBytesStr)
+		if err != nil {
+			continue
+		}
+
+		inodesUsage, err := valueObject.NewInodesCount(inodesUsageStr)
+		if err != nil {
+			continue
+		}
+
+		quota := valueObject.NewAccountQuota(
+			valueObject.NewCpuCoresCountPanic(0),
+			valueObject.NewBytePanic(0),
+			diskUsage,
+			inodesUsage,
+		)
+
+		err = repo.UpdateQuotaUsage(accId, quota)
+		if err != nil {
+			continue
+		}
+	}
+
+	return nil
 }
