@@ -195,7 +195,7 @@ func AddContainerController() *cobra.Command {
 		"",
 		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
 	)
-	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs")
+	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs (key=value)")
 	return cmd
 }
 
