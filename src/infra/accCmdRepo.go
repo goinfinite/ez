@@ -91,9 +91,9 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 	return nil
 }
 
-func getUsernameById(accountId valueObject.AccountId) (valueObject.Username, error) {
+func getUsernameById(accId valueObject.AccountId) (valueObject.Username, error) {
 	accQuery := AccQueryRepo{}
-	accDetails, err := accQuery.GetById(accountId)
+	accDetails, err := accQuery.GetById(accId)
 	if err != nil {
 		log.Printf("GetUserDetailsError: %s", err)
 		return "", errors.New("GetUserDetailsError")
@@ -102,8 +102,8 @@ func getUsernameById(accountId valueObject.AccountId) (valueObject.Username, err
 	return accDetails.Username, nil
 }
 
-func (repo AccCmdRepo) Delete(accountId valueObject.AccountId) error {
-	username, err := getUsernameById(accountId)
+func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
+	username, err := getUsernameById(accId)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (repo AccCmdRepo) Delete(accountId valueObject.AccountId) error {
 		return err
 	}
 
-	err = dbModel.Account{ID: uint(accountId.Get())}.Delete(dbSvc)
+	err = dbModel.Account{ID: uint(accId.Get())}.Delete(dbSvc)
 	if err != nil {
 		log.Printf("DeleteAccountDbError: %s", err)
 		return errors.New("DeleteAccountDbError")
@@ -135,7 +135,7 @@ func (repo AccCmdRepo) Delete(accountId valueObject.AccountId) error {
 }
 
 func (repo AccCmdRepo) UpdatePassword(
-	accountId valueObject.AccountId,
+	accId valueObject.AccountId,
 	password valueObject.Password,
 ) error {
 	passHash, err := bcrypt.GenerateFromPassword(
@@ -147,7 +147,7 @@ func (repo AccCmdRepo) UpdatePassword(
 		return errors.New("PasswordHashError")
 	}
 
-	username, err := getUsernameById(accountId)
+	username, err := getUsernameById(accId)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (repo AccCmdRepo) UpdatePassword(
 		return err
 	}
 
-	err = dbSvc.Model(&dbModel.Account{ID: uint(accountId.Get())}).
+	err = dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
 		Update("updated_at", time.Now()).Error
 	if err != nil {
 		log.Printf("UpdateAccountDbError: %s", err)
@@ -180,11 +180,11 @@ func (repo AccCmdRepo) UpdatePassword(
 }
 
 func (repo AccCmdRepo) UpdateApiKey(
-	accountId valueObject.AccountId,
+	accId valueObject.AccountId,
 ) (valueObject.AccessTokenStr, error) {
 	uuid := uuid.New()
 	secretKey := os.Getenv("ACC_API_KEY_SECRET")
-	apiKeyPlainText := accountId.String() + ":" + uuid.String()
+	apiKeyPlainText := accId.String() + ":" + uuid.String()
 
 	encryptedApiKey, err := infraHelper.EncryptStr(secretKey, apiKeyPlainText)
 	if err != nil {
@@ -205,7 +205,7 @@ func (repo AccCmdRepo) UpdateApiKey(
 		return "", err
 	}
 
-	err = dbSvc.Model(&dbModel.Account{ID: uint(accountId.Get())}).
+	err = dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
 		Update("key_hash", uuidHash).Error
 	if err != nil {
 		log.Printf("UpdateAccountDbError: %s", err)
@@ -215,8 +215,9 @@ func (repo AccCmdRepo) UpdateApiKey(
 	return apiKey, nil
 }
 
-func (repo AccCmdRepo) UpdateQuota(
-	accountId valueObject.AccountId,
+func (repo AccCmdRepo) updateQuotaTable(
+	tableName string,
+	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
 	dbSvc, err := db.DatabaseService()
@@ -242,8 +243,8 @@ func (repo AccCmdRepo) UpdateQuota(
 		updateMap["inodes"] = quota.Inodes.Get()
 	}
 
-	err = dbSvc.Table(dbModel.AccountQuota{}.TableName()).
-		Where("account_id = ?", uint(accountId.Get())).
+	err = dbSvc.Table(tableName).
+		Where("account_id = ?", uint(accId.Get())).
 		Updates(updateMap).Error
 	if err != nil {
 		log.Printf("UpdateAccountQuotaDbError: %s", err)
@@ -251,4 +252,26 @@ func (repo AccCmdRepo) UpdateQuota(
 	}
 
 	return nil
+}
+
+func (repo AccCmdRepo) UpdateQuota(
+	accId valueObject.AccountId,
+	quota valueObject.AccountQuota,
+) error {
+	return repo.updateQuotaTable(
+		dbModel.AccountQuota{}.TableName(),
+		accId,
+		quota,
+	)
+}
+
+func (repo AccCmdRepo) UpdateQuotaUsage(
+	accId valueObject.AccountId,
+	quota valueObject.AccountQuota,
+) error {
+	return repo.updateQuotaTable(
+		dbModel.AccountQuotaUsage{}.TableName(),
+		accId,
+		quota,
+	)
 }
