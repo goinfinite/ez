@@ -38,6 +38,7 @@ func accountRoutes(baseRoute *echo.Group) {
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
+	go apiController.AutoUpdateAccountsQuotaUsageController()
 }
 
 func registerApiRoutes(baseRoute *echo.Group) {
