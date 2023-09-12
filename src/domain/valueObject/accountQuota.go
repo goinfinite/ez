@@ -1,10 +1,10 @@
 package valueObject
 
 type AccountQuota struct {
-	CpuCores    CpuCoresCount
-	MemoryBytes Byte
-	DiskBytes   Byte
-	Inodes      InodesCount
+	CpuCores    CpuCoresCount `json:"cpuCores"`
+	MemoryBytes Byte          `json:"memoryBytes"`
+	DiskBytes   Byte          `json:"diskBytes"`
+	Inodes      InodesCount   `json:"inodes"`
 }
 
 func NewAccountQuota(
