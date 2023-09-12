@@ -101,7 +101,9 @@ func AddContainerController() *cobra.Command {
 		Short: "AddNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
 			hostname := valueObject.NewFqdnPanic(hostnameStr)
-			imgAddr := valueObject.NewContainerImgAddressPanic(containerImgAddressStr)
+			imgAddr := valueObject.NewContainerImgAddressPanic(
+				containerImgAddressStr,
+			)
 
 			var portBindingsPtr *[]valueObject.PortBinding
 			if len(portBindingsSlice) > 0 {
@@ -111,7 +113,9 @@ func AddContainerController() *cobra.Command {
 
 			var restartPolicyPtr *valueObject.ContainerRestartPolicy
 			if restartPolicyStr == "" {
-				restartPolicy := valueObject.NewContainerRestartPolicyPanic(restartPolicyStr)
+				restartPolicy := valueObject.NewContainerRestartPolicyPanic(
+					restartPolicyStr,
+				)
 				restartPolicyPtr = &restartPolicy
 			}
 
@@ -173,12 +177,24 @@ func AddContainerController() *cobra.Command {
 		"port-bindings",
 		"p",
 		[]string{},
-		"PortBindings",
+		"PortBindings (hostPort:containerPort[/protocol])",
 	)
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
-	cmd.Flags().StringVarP(&baseSpecStr, "base-specs", "b", "", "BaseSpecs")
-	cmd.Flags().StringVarP(&maxSpecStr, "max-specs", "m", "", "MaxSpecs")
+	cmd.Flags().StringVarP(
+		&baseSpecStr,
+		"base-specs",
+		"b",
+		"",
+		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
+	)
+	cmd.Flags().StringVarP(
+		&maxSpecStr,
+		"max-specs",
+		"m",
+		"",
+		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
+	)
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs")
 	return cmd
 }
@@ -263,7 +279,19 @@ func UpdateContainerController() *cobra.Command {
 	cmd.Flags().StringVarP(&containerIdStr, "id", "i", "", "ContainerId")
 	cmd.MarkFlagRequired("id")
 	cmd.Flags().BoolVarP(&containerStatus, "status", "s", false, "ContainerStatus")
-	cmd.Flags().StringVarP(&baseSpecStr, "base-specs", "b", "", "BaseSpecs")
-	cmd.Flags().StringVarP(&maxSpecStr, "max-specs", "m", "", "MaxSpecs")
+	cmd.Flags().StringVarP(
+		&baseSpecStr,
+		"base-specs",
+		"b",
+		"",
+		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
+	)
+	cmd.Flags().StringVarP(
+		&maxSpecStr,
+		"max-specs",
+		"m",
+		"",
+		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
+	)
 	return cmd
 }
