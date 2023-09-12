@@ -36,14 +36,14 @@ func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 		protocol := valueObject.NewNetworkProtocolPanic("tcp")
 
 		portBindingParts := strings.Split(portBindingStr, ":")
-		hostPort, err := strconv.ParseUint(portBindingParts[0], 10, 16)
+		hostPort, err := valueObject.NewNetworkPort(portBindingParts[0])
 		if err != nil {
 			panic("InvalidPortBindingHostPort")
 		}
 		containerPortStr := portBindingParts[1]
 
 		containerPortParts := strings.Split(containerPortStr, "/")
-		containerPort, err := strconv.ParseUint(containerPortParts[0], 10, 16)
+		containerPort, err := valueObject.NewNetworkPort(containerPortParts[0])
 		if err != nil {
 			panic("InvalidPortBindingContainerPort")
 		}

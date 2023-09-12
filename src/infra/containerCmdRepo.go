@@ -52,8 +52,8 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		portBindingsParams := []string{}
 		for _, portBinding := range *addContainer.PortBindings {
 			portBindingsParams = append(portBindingsParams, "--publish")
-			portBindingsString := portBinding.GetHostPortAsString() +
-				":" + portBinding.GetContainerPortAsString()
+			portBindingsString := portBinding.HostPort.String() +
+				":" + portBinding.ContainerPort.String()
 			if portBinding.GetProtocol().String() != "" {
 				portBindingsString += "/" + portBinding.GetProtocol().String()
 			}
