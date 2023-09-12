@@ -96,4 +96,18 @@ func TestAccCmdRepo(t *testing.T) {
 			t.Errorf("UnexpectedError: %v", err)
 		}
 	})
+
+	t.Run("UpdateQuotaValidAccount", func(t *testing.T) {
+		resetDummyUser()
+
+		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		quota := valueObject.NewAccountQuotaWithDefaultValues()
+		quota.CpuCores = valueObject.NewCpuCoresCountPanic(1)
+
+		accCmdRepo := AccCmdRepo{}
+		err := accCmdRepo.UpdateQuota(accountId, quota)
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
 }

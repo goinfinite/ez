@@ -214,3 +214,41 @@ func (repo AccCmdRepo) UpdateApiKey(
 
 	return apiKey, nil
 }
+
+func (repo AccCmdRepo) UpdateQuota(
+	accountId valueObject.AccountId,
+	quota valueObject.AccountQuota,
+) error {
+	dbSvc, err := db.DatabaseService()
+	if err != nil {
+		return err
+	}
+
+	updateMap := map[string]interface{}{}
+
+	if quota.CpuCores.Get() > 0 {
+		updateMap["cpu_cores"] = quota.CpuCores.Get()
+	}
+
+	if quota.MemoryBytes.Get() > 0 {
+		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Get())
+	}
+
+	if quota.DiskBytes.Get() > 0 {
+		updateMap["disk_bytes"] = uint64(quota.DiskBytes.Get())
+	}
+
+	if quota.Inodes.Get() > 0 {
+		updateMap["inodes"] = quota.Inodes.Get()
+	}
+
+	err = dbSvc.Table(dbModel.AccountQuota{}.TableName()).
+		Where("account_id = ?", uint(accountId.Get())).
+		Updates(updateMap).Error
+	if err != nil {
+		log.Printf("UpdateAccountQuotaDbError: %s", err)
+		return errors.New("UpdateAccountQuotaDbError")
+	}
+
+	return nil
+}
