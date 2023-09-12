@@ -243,6 +243,9 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -268,6 +271,9 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
                 "shouldUpdateApiKey": {
                     "type": "boolean"
                 }
@@ -290,10 +296,22 @@ const docTemplate = `{
         "entity.Account": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "integer"
+                },
                 "groupId": {
                     "type": "integer"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "quotaUsage": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "updatedAt": {
                     "type": "integer"
                 },
                 "username": {
@@ -331,6 +349,23 @@ const docTemplate = `{
                 "sessionToken",
                 "accountApiKey"
             ]
+        },
+        "valueObject.AccountQuota": {
+            "type": "object",
+            "properties": {
+                "cpuCores": {
+                    "type": "number"
+                },
+                "diskBytes": {
+                    "type": "integer"
+                },
+                "inodes": {
+                    "type": "integer"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                }
+            }
         },
         "valueObject.CurrentResourceUsage": {
             "type": "object",

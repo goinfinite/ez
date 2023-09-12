@@ -4,6 +4,8 @@ definitions:
     properties:
       password:
         type: string
+      quota:
+        $ref: '#/definitions/valueObject.AccountQuota'
       username:
         type: string
     type: object
@@ -20,6 +22,8 @@ definitions:
         type: integer
       password:
         type: string
+      quota:
+        $ref: '#/definitions/valueObject.AccountQuota'
       shouldUpdateApiKey:
         type: boolean
     type: object
@@ -34,9 +38,17 @@ definitions:
     type: object
   entity.Account:
     properties:
+      createdAt:
+        type: integer
       groupId:
         type: integer
       id:
+        type: integer
+      quota:
+        $ref: '#/definitions/valueObject.AccountQuota'
+      quotaUsage:
+        $ref: '#/definitions/valueObject.AccountQuota'
+      updatedAt:
         type: integer
       username:
         type: string
@@ -62,6 +74,17 @@ definitions:
     x-enum-varnames:
     - sessionToken
     - accountApiKey
+  valueObject.AccountQuota:
+    properties:
+      cpuCores:
+        type: number
+      diskBytes:
+        type: integer
+      inodes:
+        type: integer
+      memoryBytes:
+        type: integer
+    type: object
   valueObject.CurrentResourceUsage:
     properties:
       cpuUsagePercent:

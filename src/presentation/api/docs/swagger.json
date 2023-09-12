@@ -236,6 +236,9 @@
                 "password": {
                     "type": "string"
                 },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -261,6 +264,9 @@
                 "password": {
                     "type": "string"
                 },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
                 "shouldUpdateApiKey": {
                     "type": "boolean"
                 }
@@ -283,10 +289,22 @@
         "entity.Account": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "integer"
+                },
                 "groupId": {
                     "type": "integer"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "quotaUsage": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "updatedAt": {
                     "type": "integer"
                 },
                 "username": {
@@ -324,6 +342,23 @@
                 "sessionToken",
                 "accountApiKey"
             ]
+        },
+        "valueObject.AccountQuota": {
+            "type": "object",
+            "properties": {
+                "cpuCores": {
+                    "type": "number"
+                },
+                "diskBytes": {
+                    "type": "integer"
+                },
+                "inodes": {
+                    "type": "integer"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                }
+            }
         },
         "valueObject.CurrentResourceUsage": {
             "type": "object",
