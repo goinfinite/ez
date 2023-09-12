@@ -122,7 +122,7 @@ func AddAccountController() *cobra.Command {
 	cmd.Flags().Float64VarP(&cpuCores, "cpu", "c", 0, "CpuCores")
 	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory", "m", 0, "MemoryInBytes")
 	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
-	cmd.Flags().Uint64VarP(&inodes, "inodes", "i", 0, "Inodes")
+	cmd.Flags().Uint64VarP(&inodes, "inodes", "n", 0, "Inodes")
 	return cmd
 }
 
@@ -240,6 +240,6 @@ func UpdateAccountController() *cobra.Command {
 	cmd.Flags().Float64VarP(&cpuCores, "cpu", "c", 0, "CpuCores")
 	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory", "m", 0, "MemoryInBytes")
 	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
-	cmd.Flags().Uint64VarP(&inodes, "inodes", "i", 0, "Inodes")
+	cmd.Flags().Uint64VarP(&inodes, "inodes", "n", 0, "Inodes")
 	return cmd
 }
