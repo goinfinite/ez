@@ -66,6 +66,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 	addAccountCmd := exec.Command(
 		"useradd",
 		"-m",
+		"-d", "/var/data/"+addAccount.Username.String(),
 		"-s", "/usr/sbin/nologin",
 		"-p", string(passHash),
 		addAccount.Username.String(),
