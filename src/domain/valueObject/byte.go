@@ -58,3 +58,7 @@ func (b Byte) ToGiB() int64 {
 func (b Byte) ToTiB() int64 {
 	return b.ToGiB() / 1024
 }
+
+func (b Byte) String() string {
+	return strconv.FormatInt(int64(b), 10)
+}
