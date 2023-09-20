@@ -79,6 +79,8 @@ func RunCmdAsUser(
 		"LANG=en_US.UTF-8",
 		"PWD=" + userInfo.HomeDir,
 		"TERM=xterm-256color",
+		"XDG_RUNTIME_DIR=/run/user/" + accId.String(),
+		"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + accId.String() + "/bus",
 	}
 	return runExecCmd(execCmd)
 }
