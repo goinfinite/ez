@@ -146,13 +146,17 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 		return err
 	}
 
-	delUserCmd := exec.Command(
-		"userdel",
-		"-r",
-		username.String(),
-	)
+	err = infraHelper.DisableLingering(accId)
+	if err != nil {
+		return err
+	}
 
-	err = delUserCmd.Run()
+	_, err = infraHelper.RunCmd("pgrep", "-u", accId.String())
+	if err == nil {
+		_, _ = infraHelper.RunCmd("pkill", "-9", "-U", accId.String())
+	}
+
+	_, err = infraHelper.RunCmd("userdel", "-r", username.String())
 	if err != nil {
 		return err
 	}
