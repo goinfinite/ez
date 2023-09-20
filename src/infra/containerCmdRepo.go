@@ -62,7 +62,12 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	runParams = append(runParams, addContainer.Image.String())
 
-	_, err := infraHelper.RunCmdAsUser(
+	err := infraHelper.EnableLingering(addContainer.AccountId)
+	if err != nil {
+		return err
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
 		addContainer.AccountId,
 		"podman",
 		runParams...,
