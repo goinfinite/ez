@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"time"
+
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
@@ -66,6 +68,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	if err != nil {
 		return err
 	}
+	time.Sleep(1 * time.Second)
 
 	_, err = infraHelper.RunCmdAsUser(
 		addContainer.AccountId,
