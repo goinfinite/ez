@@ -231,8 +231,9 @@ func AutoUpdateAccountsQuotaUsageController() {
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
+	accQueryRepo := infra.AccQueryRepo{}
 	accCmdRepo := infra.AccCmdRepo{}
 	for range timer.C {
-		useCase.AutoUpdateAccountsQuotaUsage(accCmdRepo)
+		useCase.AutoUpdateAccountsQuotaUsage(accQueryRepo, accCmdRepo)
 	}
 }

@@ -307,7 +307,6 @@ func (repo AccCmdRepo) UpdateQuota(
 
 func (repo AccCmdRepo) UpdateQuotaUsage(
 	accId valueObject.AccountId,
-	quota valueObject.AccountQuota,
 ) error {
 	return repo.updateQuotaTable(
 		dbModel.AccountQuotaUsage{}.TableName(),
