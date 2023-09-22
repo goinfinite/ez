@@ -10,6 +10,7 @@ import (
 func UpdateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
+	accQueryRepo repository.AccQueryRepo,
 	updateContainerDto dto.UpdateContainer,
 ) error {
 	_, err := containerQueryRepo.GetById(
@@ -18,6 +19,15 @@ func UpdateContainer(
 	)
 	if err != nil {
 		return errors.New("ContainerNotFound")
+	}
+
+	err = AccQuotaCheck(
+		accQueryRepo,
+		updateContainerDto.AccountId,
+		*updateContainerDto.BaseSpecs,
+	)
+	if err != nil {
+		return err
 	}
 
 	return containerCmdRepo.Update(updateContainerDto)

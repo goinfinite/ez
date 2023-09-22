@@ -11,6 +11,7 @@ import (
 
 func AddContainer(
 	containerCmdRepo repository.ContainerCmdRepo,
+	accQueryRepo repository.AccQueryRepo,
 	addContainer dto.AddContainer,
 ) error {
 	defaultSpecs := valueObject.NewContainerSpecs(
@@ -22,7 +23,17 @@ func AddContainer(
 		addContainer.BaseSpecs = &defaultSpecs
 	}
 
-	err := containerCmdRepo.Add(addContainer)
+	err := AccQuotaCheck(
+		accQueryRepo,
+		addContainer.AccountId,
+		*addContainer.BaseSpecs,
+	)
+	if err != nil {
+		log.Printf("QuotaCheckError: %s", err)
+		return err
+	}
+
+	err = containerCmdRepo.Add(addContainer)
 	if err != nil {
 		log.Printf("AddContainerError: %s", err)
 		return errors.New("AddContainerInfraError")
