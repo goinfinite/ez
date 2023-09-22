@@ -114,7 +114,7 @@ func AddContainerController() *cobra.Command {
 			}
 
 			var restartPolicyPtr *valueObject.ContainerRestartPolicy
-			if restartPolicyStr == "" {
+			if restartPolicyStr != "" {
 				restartPolicy := valueObject.NewContainerRestartPolicyPanic(
 					restartPolicyStr,
 				)
@@ -122,19 +122,19 @@ func AddContainerController() *cobra.Command {
 			}
 
 			var entrypointPtr *valueObject.ContainerEntrypoint
-			if entrypointStr == "" {
+			if entrypointStr != "" {
 				entrypoint := valueObject.NewContainerEntrypointPanic(entrypointStr)
 				entrypointPtr = &entrypoint
 			}
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
-			if baseSpecStr == "" {
+			if baseSpecStr != "" {
 				baseSpecs := parseContainerSpecs(baseSpecStr)
 				baseSpecsPtr = &baseSpecs
 			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
-			if maxSpecStr == "" {
+			if maxSpecStr != "" {
 				maxSpecs := parseContainerSpecs(maxSpecStr)
 				maxSpecsPtr = &maxSpecs
 			}
@@ -158,9 +158,11 @@ func AddContainerController() *cobra.Command {
 			)
 
 			containerCmdRepo := infra.ContainerCmdRepo{}
+			accQueryRepo := infra.AccQueryRepo{}
 
 			err := useCase.AddContainer(
 				containerCmdRepo,
+				accQueryRepo,
 				addContainerDto,
 			)
 			if err != nil {
@@ -173,7 +175,7 @@ func AddContainerController() *cobra.Command {
 
 	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
 	cmd.MarkFlagRequired("acc-id")
-	cmd.Flags().StringVarP(&hostnameStr, "hostname", "h", "", "Hostname")
+	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.MarkFlagRequired("hostname")
 	cmd.Flags().StringVarP(&containerImgAddressStr, "image", "i", "", "ImageAddress")
 	cmd.MarkFlagRequired("image")
@@ -254,13 +256,13 @@ func UpdateContainerController() *cobra.Command {
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
-			if baseSpecStr == "" {
+			if baseSpecStr != "" {
 				baseSpecs := parseContainerSpecs(baseSpecStr)
 				baseSpecsPtr = &baseSpecs
 			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
-			if maxSpecStr == "" {
+			if maxSpecStr != "" {
 				maxSpecs := parseContainerSpecs(maxSpecStr)
 				maxSpecsPtr = &maxSpecs
 			}
@@ -275,10 +277,12 @@ func UpdateContainerController() *cobra.Command {
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
+			accQueryRepo := infra.AccQueryRepo{}
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
 				containerCmdRepo,
+				accQueryRepo,
 				updateContainerDto,
 			)
 			if err != nil {
