@@ -21,7 +21,7 @@ func UpdateContainer(
 		return errors.New("ContainerNotFound")
 	}
 
-	err = AccQuotaCheck(
+	err = CheckAccountQuota(
 		accQueryRepo,
 		updateContainerDto.AccountId,
 		*updateContainerDto.BaseSpecs,

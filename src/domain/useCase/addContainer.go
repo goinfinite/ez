@@ -23,7 +23,7 @@ func AddContainer(
 		addContainer.BaseSpecs = &defaultSpecs
 	}
 
-	err := AccQuotaCheck(
+	err := CheckAccountQuota(
 		accQueryRepo,
 		addContainer.AccountId,
 		*addContainer.BaseSpecs,

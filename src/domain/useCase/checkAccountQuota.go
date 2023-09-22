@@ -8,7 +8,7 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-func AccQuotaCheck(
+func CheckAccountQuota(
 	accQueryRepo repository.AccQueryRepo,
 	accId valueObject.AccountId,
 	containerSpecs valueObject.ContainerSpecs,
