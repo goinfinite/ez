@@ -159,10 +159,12 @@ func AddContainerController() *cobra.Command {
 
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.AccQueryRepo{}
+			accCmdRepo := infra.AccCmdRepo{}
 
 			err := useCase.AddContainer(
 				containerCmdRepo,
 				accQueryRepo,
+				accCmdRepo,
 				addContainerDto,
 			)
 			if err != nil {
@@ -219,10 +221,12 @@ func DeleteContainerController() *cobra.Command {
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
+			accCmdRepo := infra.AccCmdRepo{}
 
 			err := useCase.DeleteContainer(
 				containerQueryRepo,
 				containerCmdRepo,
+				accCmdRepo,
 				accId,
 				containerId,
 			)
@@ -278,11 +282,13 @@ func UpdateContainerController() *cobra.Command {
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.AccQueryRepo{}
+			accCmdRepo := infra.AccCmdRepo{}
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
 				containerCmdRepo,
 				accQueryRepo,
+				accCmdRepo,
 				updateContainerDto,
 			)
 			if err != nil {
