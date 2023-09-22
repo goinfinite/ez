@@ -11,6 +11,5 @@ type AccCmdRepo interface {
 	UpdatePassword(accId valueObject.AccountId, password valueObject.Password) error
 	UpdateApiKey(accId valueObject.AccountId) (valueObject.AccessTokenStr, error)
 	UpdateQuota(accId valueObject.AccountId, quota valueObject.AccountQuota) error
-	UpdateQuotaUsage(accId valueObject.AccountId, quota valueObject.AccountQuota) error
-	UpdateQuotasUsage() error
+	UpdateQuotaUsage(accId valueObject.AccountId) error
 }

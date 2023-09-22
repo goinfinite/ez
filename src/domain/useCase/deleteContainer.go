@@ -11,6 +11,7 @@ import (
 func DeleteContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
+	accCmdRepo repository.AccCmdRepo,
 	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
@@ -25,6 +26,12 @@ func DeleteContainer(
 	}
 
 	log.Printf("ContainerId '%v' deleted.", containerId)
+
+	err = accCmdRepo.UpdateQuotaUsage(accId)
+	if err != nil {
+		log.Printf("UpdateAccountQuotaError: %s", err)
+		return errors.New("UpdateAccountQuotaError")
+	}
 
 	return nil
 }
