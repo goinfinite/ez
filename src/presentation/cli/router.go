@@ -47,10 +47,24 @@ func accountRoutes() {
 	accountCmd.AddCommand(cliController.UpdateAccountController())
 }
 
+func containerRoutes() {
+	var containerCmd = &cobra.Command{
+		Use:   "container",
+		Short: "ContainerManagement",
+	}
+
+	rootCmd.AddCommand(containerCmd)
+	containerCmd.AddCommand(cliController.GetContainersController())
+	containerCmd.AddCommand(cliController.AddContainerController())
+	containerCmd.AddCommand(cliController.DeleteContainerController())
+	containerCmd.AddCommand(cliController.UpdateContainerController())
+}
+
 func registerCliRoutes() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(cliController.SysInstallController())
-	o11yRoutes()
 	accountRoutes()
+	containerRoutes()
+	o11yRoutes()
 }
