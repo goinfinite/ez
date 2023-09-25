@@ -4,6 +4,7 @@ import "github.com/speedianet/sfm/src/domain/valueObject"
 
 type Container struct {
 	Id               valueObject.ContainerId            `json:"id"`
+	AccountId        valueObject.AccountId              `json:"accountId"`
 	Hostname         valueObject.Fqdn                   `json:"hostname"`
 	Status           bool                               `json:"status"`
 	Image            valueObject.ContainerImgAddress    `json:"image"`
@@ -21,6 +22,7 @@ type Container struct {
 
 func NewContainer(
 	id valueObject.ContainerId,
+	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
 	status bool,
 	image valueObject.ContainerImgAddress,
@@ -37,6 +39,7 @@ func NewContainer(
 ) Container {
 	return Container{
 		Id:               id,
+		AccountId:        accountId,
 		Hostname:         hostname,
 		Status:           status,
 		Image:            image,
