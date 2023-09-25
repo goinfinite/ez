@@ -305,76 +305,96 @@ func (repo AccCmdRepo) UpdateQuota(
 	)
 }
 
-func (repo AccCmdRepo) UpdateQuotaUsage(
+func (repo AccCmdRepo) getStorageUsage(
 	accId valueObject.AccountId,
-) error {
+) (valueObject.AccountQuota, error) {
+	quotaUsage := valueObject.AccountQuota{}
+
+	xfsReportUsage, err := infraHelper.RunCmd(
+		"bash",
+		"-c",
+		"xfs_quota -x -c 'report -nbiN' /var/data | awk '/#"+
+			accId.String()+"/{print $1, $2, $7}'",
+	)
+	if err != nil {
+		return quotaUsage, err
+	}
+
+	if xfsReportUsage == "" {
+		return quotaUsage, nil
+	}
+
+	xfsReportUsage = strings.TrimSpace(xfsReportUsage)
+	if xfsReportUsage == "" {
+		return quotaUsage, nil
+	}
+
+	usageColumns := strings.Split(xfsReportUsage, " ")
+	diskUsageKilobytesStr := usageColumns[1]
+	inodesUsageStr := usageColumns[2]
+	if diskUsageKilobytesStr == "" || inodesUsageStr == "" {
+		return quotaUsage, nil
+	}
+
+	diskUsageBytesStr := diskUsageKilobytesStr + "000"
+	diskUsage, err := valueObject.NewByte(diskUsageBytesStr)
+	if err != nil {
+		return quotaUsage, err
+	}
+
+	inodesUsage, err := valueObject.NewInodesCount(inodesUsageStr)
+	if err != nil {
+		return quotaUsage, err
+	}
+
+	cpuCores, _ := valueObject.NewCpuCoresCount(0)
+	memoryBytes, _ := valueObject.NewByte(0)
+
+	return valueObject.NewAccountQuota(
+		cpuCores,
+		memoryBytes,
+		diskUsage,
+		inodesUsage,
+	), nil
+}
+
+func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
+	storageUsage, err := repo.getStorageUsage(accId)
+	if err != nil {
+		return err
+	}
+
+	containers, err := ContainerQueryRepo{}.Get()
+	if err != nil {
+		return err
+	}
+	cpuCores, _ := valueObject.NewCpuCoresCount(0)
+	memoryBytes, _ := valueObject.NewByte(0)
+
+	for _, container := range containers {
+		if container.AccountId.Get() != accId.Get() {
+			continue
+		}
+		containerCpuCores := container.BaseSpecs.CpuCores.Get()
+		containerMemoryBytes := container.BaseSpecs.MemoryBytes.Get()
+
+		cpuCores = valueObject.CpuCoresCount(
+			cpuCores.Get() + containerCpuCores,
+		)
+		memoryBytes = valueObject.Byte(
+			memoryBytes.Get() + containerMemoryBytes,
+		)
+	}
+
+	quota := valueObject.NewAccountQuota(
+		cpuCores,
+		memoryBytes,
+		storageUsage.DiskBytes,
+		storageUsage.Inodes,
+	)
 	return repo.updateQuotaTable(
 		dbModel.AccountQuotaUsage{}.TableName(),
 		accId,
 		quota,
 	)
-}
-
-func (repo AccCmdRepo) UpdateQuotasUsage() error {
-	xfsQuotasUsage, err := infraHelper.RunCmd(
-		"bash",
-		"-c",
-		"xfs_quota -x -c 'report -nbiN' /var/data | awk '{print $1, $2, $7}'",
-	)
-	if err != nil {
-		return err
-	}
-
-	if xfsQuotasUsage == "" {
-		return nil
-	}
-
-	quotasUsageLines := strings.Split(xfsQuotasUsage, "\n")
-	for _, quotasUsageLine := range quotasUsageLines {
-		quotasUsageLine = strings.TrimSpace(quotasUsageLine)
-		if quotasUsageLine == "" {
-			continue
-		}
-		usageColumns := strings.Split(quotasUsageLine, " ")
-		accIdStr := usageColumns[0]
-		if accIdStr == "#0" || accIdStr == "" {
-			continue
-		}
-		accIdStrWithoutHash := strings.Replace(accIdStr, "#", "", 1)
-		accId, err := valueObject.NewAccountId(accIdStrWithoutHash)
-		if err != nil {
-			continue
-		}
-
-		diskUsageKilobytesStr := usageColumns[1]
-		inodesUsageStr := usageColumns[2]
-		if diskUsageKilobytesStr == "" || inodesUsageStr == "" {
-			continue
-		}
-
-		diskUsageBytesStr := diskUsageKilobytesStr + "000"
-		diskUsage, err := valueObject.NewByte(diskUsageBytesStr)
-		if err != nil {
-			continue
-		}
-
-		inodesUsage, err := valueObject.NewInodesCount(inodesUsageStr)
-		if err != nil {
-			continue
-		}
-
-		quota := valueObject.NewAccountQuota(
-			valueObject.NewCpuCoresCountPanic(0),
-			valueObject.NewBytePanic(0),
-			diskUsage,
-			inodesUsage,
-		)
-
-		err = repo.UpdateQuotaUsage(accId, quota)
-		if err != nil {
-			continue
-		}
-	}
-
-	return nil
 }

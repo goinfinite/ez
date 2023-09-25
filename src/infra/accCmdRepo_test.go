@@ -127,7 +127,7 @@ func TestAccCmdRepo(t *testing.T) {
 		os.Chown(testFilePath, int(accId.Get()), int(accId.Get()))
 
 		accCmdRepo := AccCmdRepo{}
-		err = accCmdRepo.UpdateQuotasUsage()
+		err = accCmdRepo.UpdateQuotaUsage(accId)
 		if err != nil {
 			t.Error(err)
 		}
