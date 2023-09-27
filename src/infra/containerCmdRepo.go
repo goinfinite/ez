@@ -31,13 +31,23 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, envFlags...)
 	}
 
-	specsParams := []string{
+	baseSpecsParams := []string{
 		"--cpus",
 		addContainer.BaseSpecs.CpuCores.String(),
 		"--memory",
 		addContainer.BaseSpecs.MemoryBytes.String(),
 	}
-	runParams = append(runParams, specsParams...)
+	runParams = append(runParams, baseSpecsParams...)
+
+	if addContainer.MaxSpecs != nil {
+		maxSpecsParams := []string{
+			"--annotation",
+			"speedia/max-cpu=" + addContainer.MaxSpecs.CpuCores.String(),
+			"--annotation",
+			"speedia/max-memory=" + addContainer.MaxSpecs.MemoryBytes.String(),
+		}
+		runParams = append(runParams, maxSpecsParams...)
+	}
 
 	if addContainer.RestartPolicy != nil {
 		runParams = append(runParams, "--restart", addContainer.RestartPolicy.String())

@@ -34,6 +34,10 @@ func TestContainerCmdRepo(t *testing.T) {
 			valueObject.NewCpuCoresCountPanic(1),
 			valueObject.Byte(1073741824),
 		)
+		maxSpecs := valueObject.NewContainerSpecs(
+			valueObject.NewCpuCoresCountPanic(2),
+			valueObject.Byte(2147483648),
+		)
 
 		envs := []valueObject.ContainerEnv{
 			valueObject.NewContainerEnvPanic("SFM_ENV1=testing"),
@@ -50,7 +54,7 @@ func TestContainerCmdRepo(t *testing.T) {
 			&restartPolicy,
 			nil,
 			&baseSpecs,
-			nil,
+			&maxSpecs,
 			&envs,
 		)
 
