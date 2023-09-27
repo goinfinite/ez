@@ -14,9 +14,9 @@ type Container struct {
 	RestartPolicy    valueObject.ContainerRestartPolicy `json:"restartPolicy"`
 	Entrypoint       valueObject.ContainerEntrypoint    `json:"entrypoint"`
 	CreatedAt        valueObject.UnixTime               `json:"createdAt"`
-	StartedAt        valueObject.UnixTime               `json:"startedAt"`
+	StartedAt        *valueObject.UnixTime              `json:"startedAt"`
 	BaseSpecs        valueObject.ContainerSpecs         `json:"baseSpecs"`
-	MaxSpecs         valueObject.ContainerSpecs         `json:"maxSpecs"`
+	MaxSpecs         *valueObject.ContainerSpecs        `json:"maxSpecs"`
 	Envs             []valueObject.ContainerEnv         `json:"envs"`
 }
 
@@ -32,9 +32,9 @@ func NewContainer(
 	restartPolicy valueObject.ContainerRestartPolicy,
 	entrypoint valueObject.ContainerEntrypoint,
 	createdAt valueObject.UnixTime,
-	startedAt valueObject.UnixTime,
+	startedAt *valueObject.UnixTime,
 	baseSpecs valueObject.ContainerSpecs,
-	maxSpecs valueObject.ContainerSpecs,
+	maxSpecs *valueObject.ContainerSpecs,
 	envs []valueObject.ContainerEnv,
 ) Container {
 	return Container{
