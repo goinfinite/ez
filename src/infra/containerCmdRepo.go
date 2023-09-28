@@ -17,6 +17,8 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		"--detach",
 		"--name",
 		addContainer.Hostname.String(),
+		"--hostname",
+		addContainer.Hostname.String(),
 		"--env",
 		"VIRTUAL_HOST=" + addContainer.Hostname.String(),
 	}
