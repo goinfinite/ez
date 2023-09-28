@@ -104,5 +104,16 @@ func (repo ContainerCmdRepo) Delete(
 	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
+	_, err := infraHelper.RunCmdAsUser(
+		accId,
+		"podman",
+		"rm",
+		"--force",
+		containerId.String(),
+	)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

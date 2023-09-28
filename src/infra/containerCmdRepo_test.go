@@ -63,4 +63,24 @@ func TestContainerCmdRepo(t *testing.T) {
 			t.Errorf("Expected no error, got %v", err)
 		}
 	})
+
+	t.Run("DeleteContainer", func(t *testing.T) {
+		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		containers, err := ContainerQueryRepo{}.GetByAccId(accId)
+		if err != nil {
+			t.Errorf("GetContainersFailed: %v", err)
+		}
+
+		if len(containers) == 0 {
+			t.Errorf("NoContainersFound: %v", err)
+		}
+
+		err = ContainerCmdRepo{}.Delete(
+			accId,
+			containers[0].Id,
+		)
+		if err != nil {
+			t.Errorf("DeleteContainerFailed: %v", err)
+		}
+	})
 }
