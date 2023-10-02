@@ -83,4 +83,29 @@ func TestContainerCmdRepo(t *testing.T) {
 			t.Errorf("DeleteContainerFailed: %v", err)
 		}
 	})
+
+	t.Run("UpdateContainer", func(t *testing.T) {
+		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		containers, err := ContainerQueryRepo{}.GetByAccId(accId)
+		if err != nil {
+			t.Errorf("GetContainersFailed: %v", err)
+		}
+
+		if len(containers) == 0 {
+			t.Errorf("NoContainersFound: %v", err)
+		}
+
+		updateContainer := dto.NewUpdateContainer(
+			accId,
+			containers[0].Id,
+			false,
+			nil,
+			nil,
+		)
+
+		err = ContainerCmdRepo{}.Update(updateContainer)
+		if err != nil {
+			t.Errorf("UpdateContainerFailed: %v", err)
+		}
+	})
 }

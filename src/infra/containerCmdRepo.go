@@ -97,6 +97,50 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 func (repo ContainerCmdRepo) Update(
 	updateContainer dto.UpdateContainer,
 ) error {
+	currentContainer, err := ContainerQueryRepo{}.GetById(
+		updateContainer.AccountId,
+		updateContainer.ContainerId,
+	)
+	if err != nil {
+		return err
+	}
+
+	shouldUpdateStatus := updateContainer.Status != currentContainer.Status
+	if shouldUpdateStatus {
+		actionToPerform := "start"
+		if !updateContainer.Status {
+			actionToPerform = "stop"
+		}
+
+		_, err := infraHelper.RunCmdAsUser(
+			updateContainer.AccountId,
+			"podman",
+			actionToPerform,
+			updateContainer.ContainerId.String(),
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	if updateContainer.BaseSpecs != nil {
+		_, err := infraHelper.RunCmdAsUser(
+			updateContainer.AccountId,
+			"podman",
+			"update",
+			"--cpus",
+			updateContainer.BaseSpecs.CpuCores.String(),
+			"--memory",
+			updateContainer.BaseSpecs.MemoryBytes.String(),
+			updateContainer.ContainerId.String(),
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// TODO: Update podman max specs annotation
+
 	return nil
 }
 
