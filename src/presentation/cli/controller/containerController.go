@@ -1,7 +1,6 @@
 package cliController
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/speedianet/sfm/src/domain/dto"
@@ -58,24 +57,6 @@ func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 	return portBindings
 }
 
-func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
-	specParts := strings.Split(specStr, ":")
-	cpuCores, err := valueObject.NewCpuCoresCount(specParts[0])
-	if err != nil {
-		panic("InvalidCpuCoresLimit")
-	}
-
-	memory, err := strconv.ParseInt(specParts[1], 10, 64)
-	if err != nil {
-		panic("InvalidMemoryLimit")
-	}
-
-	return valueObject.NewContainerSpecs(
-		cpuCores,
-		valueObject.Byte(memory),
-	)
-}
-
 func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
 	envs := []valueObject.ContainerEnv{}
 	for _, envStr := range envsSlice {
@@ -129,13 +110,19 @@ func AddContainerController() *cobra.Command {
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
 			if baseSpecStr != "" {
-				baseSpecs := parseContainerSpecs(baseSpecStr)
+				baseSpecs, err := valueObject.NewContainerSpecsFromString(baseSpecStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				baseSpecsPtr = &baseSpecs
 			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
 			if maxSpecStr != "" {
-				maxSpecs := parseContainerSpecs(maxSpecStr)
+				maxSpecs, err := valueObject.NewContainerSpecsFromString(maxSpecStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				maxSpecsPtr = &maxSpecs
 			}
 
@@ -261,13 +248,19 @@ func UpdateContainerController() *cobra.Command {
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
 			if baseSpecStr != "" {
-				baseSpecs := parseContainerSpecs(baseSpecStr)
+				baseSpecs, err := valueObject.NewContainerSpecsFromString(baseSpecStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				baseSpecsPtr = &baseSpecs
 			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
 			if maxSpecStr != "" {
-				maxSpecs := parseContainerSpecs(maxSpecStr)
+				maxSpecs, err := valueObject.NewContainerSpecsFromString(maxSpecStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				maxSpecsPtr = &maxSpecs
 			}
 
