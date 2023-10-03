@@ -13,6 +13,7 @@ func UpdateContainer(
 	containerCmdRepo repository.ContainerCmdRepo,
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
+	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
 	updateContainer dto.UpdateContainer,
 ) error {
 	_, err := containerQueryRepo.GetById(
@@ -26,7 +27,8 @@ func UpdateContainer(
 	err = CheckAccountQuota(
 		accQueryRepo,
 		updateContainer.AccountId,
-		*updateContainer.BaseSpecs,
+		resourceProfileQueryRepo,
+		*updateContainer.ResourceProfileId,
 	)
 	if err != nil {
 		return err
