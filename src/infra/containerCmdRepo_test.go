@@ -30,14 +30,7 @@ func TestContainerCmdRepo(t *testing.T) {
 
 		restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
 
-		baseSpecs := valueObject.NewContainerSpecs(
-			valueObject.NewCpuCoresCountPanic(1),
-			valueObject.Byte(1073741824),
-		)
-		maxSpecs := valueObject.NewContainerSpecs(
-			valueObject.NewCpuCoresCountPanic(2),
-			valueObject.Byte(2147483648),
-		)
+		resourceProfileId := valueObject.NewResourceProfileIdPanic(0)
 
 		envs := []valueObject.ContainerEnv{
 			valueObject.NewContainerEnvPanic("SFM_ENV1=testing"),
@@ -50,12 +43,11 @@ func TestContainerCmdRepo(t *testing.T) {
 			accountId,
 			valueObject.NewFqdnPanic("speedia.net"),
 			valueObject.NewContainerImgAddressPanic("docker.io/speedia/sam:latest"),
-			&portBindings,
+			portBindings,
 			&restartPolicy,
 			nil,
-			&baseSpecs,
-			&maxSpecs,
-			&envs,
+			&resourceProfileId,
+			envs,
 		)
 
 		err := repo.Add(addContainer)
@@ -99,7 +91,6 @@ func TestContainerCmdRepo(t *testing.T) {
 			accId,
 			containers[0].Id,
 			false,
-			nil,
 			nil,
 		)
 

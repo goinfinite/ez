@@ -11,21 +11,37 @@ import (
 type ContainerCmdRepo struct {
 }
 
+func (repo ContainerCmdRepo) getBaseSpecs(
+	resourceProfileId valueObject.ResourceProfileId,
+) (valueObject.ContainerSpecs, error) {
+	resourceProfile, err := ResourceProfileQueryRepo{}.GetById(
+		resourceProfileId,
+	)
+	if err != nil {
+		return valueObject.ContainerSpecs{}, err
+	}
+
+	return resourceProfile.BaseSpecs, nil
+}
+
 func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
+	containerName := addContainer.ResourceProfileId.String() +
+		"-" + addContainer.Hostname.String()
+
 	runParams := []string{
 		"run",
 		"--detach",
 		"--name",
-		addContainer.Hostname.String(),
+		containerName,
 		"--hostname",
 		addContainer.Hostname.String(),
 		"--env",
 		"VIRTUAL_HOST=" + addContainer.Hostname.String(),
 	}
 
-	if addContainer.Envs != nil {
+	if len(addContainer.Envs) > 0 {
 		envFlags := []string{}
-		for _, env := range *addContainer.Envs {
+		for _, env := range addContainer.Envs {
 			envFlags = append(envFlags, "--env")
 			envFlags = append(envFlags, env.String())
 		}
@@ -33,23 +49,18 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, envFlags...)
 	}
 
+	baseSpecs, err := repo.getBaseSpecs(*addContainer.ResourceProfileId)
+	if err != nil {
+		return err
+	}
+
 	baseSpecsParams := []string{
 		"--cpus",
-		addContainer.BaseSpecs.CpuCores.String(),
+		baseSpecs.CpuCores.String(),
 		"--memory",
-		addContainer.BaseSpecs.MemoryBytes.String(),
+		baseSpecs.MemoryBytes.String(),
 	}
 	runParams = append(runParams, baseSpecsParams...)
-
-	if addContainer.MaxSpecs != nil {
-		maxSpecsParams := []string{
-			"--annotation",
-			"speedia/max-cpu=" + addContainer.MaxSpecs.CpuCores.String(),
-			"--annotation",
-			"speedia/max-memory=" + addContainer.MaxSpecs.MemoryBytes.String(),
-		}
-		runParams = append(runParams, maxSpecsParams...)
-	}
 
 	if addContainer.RestartPolicy != nil {
 		runParams = append(runParams, "--restart", addContainer.RestartPolicy.String())
@@ -59,9 +70,9 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, "--entrypoint", addContainer.Entrypoint.String())
 	}
 
-	if addContainer.PortBindings != nil {
+	if len(addContainer.PortBindings) > 0 {
 		portBindingsParams := []string{}
-		for _, portBinding := range *addContainer.PortBindings {
+		for _, portBinding := range addContainer.PortBindings {
 			portBindingsParams = append(portBindingsParams, "--publish")
 			portBindingsString := portBinding.HostPort.String() +
 				":" + portBinding.ContainerPort.String()
@@ -76,7 +87,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	runParams = append(runParams, addContainer.Image.String())
 
-	err := infraHelper.EnableLingering(addContainer.AccountId)
+	err = infraHelper.EnableLingering(addContainer.AccountId)
 	if err != nil {
 		return err
 	}
@@ -123,23 +134,26 @@ func (repo ContainerCmdRepo) Update(
 		}
 	}
 
-	if updateContainer.BaseSpecs != nil {
-		_, err := infraHelper.RunCmdAsUser(
+	if updateContainer.ResourceProfileId != nil {
+		newSpecs, err := repo.getBaseSpecs(*updateContainer.ResourceProfileId)
+		if err != nil {
+			return err
+		}
+
+		_, err = infraHelper.RunCmdAsUser(
 			updateContainer.AccountId,
 			"podman",
 			"update",
 			"--cpus",
-			updateContainer.BaseSpecs.CpuCores.String(),
+			newSpecs.CpuCores.String(),
 			"--memory",
-			updateContainer.BaseSpecs.MemoryBytes.String(),
+			newSpecs.MemoryBytes.String(),
 			updateContainer.ContainerId.String(),
 		)
 		if err != nil {
 			return err
 		}
 	}
-
-	// TODO: Update podman max specs annotation
 
 	return nil
 }
