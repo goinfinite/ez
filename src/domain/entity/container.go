@@ -15,7 +15,7 @@ type Container struct {
 	Entrypoint        valueObject.ContainerEntrypoint    `json:"entrypoint"`
 	CreatedAt         valueObject.UnixTime               `json:"createdAt"`
 	StartedAt         *valueObject.UnixTime              `json:"startedAt"`
-	ResourceProfileId *valueObject.ResourceProfileId     `json:"resourceProfileId"`
+	ResourceProfileId valueObject.ResourceProfileId      `json:"resourceProfileId"`
 	Envs              []valueObject.ContainerEnv         `json:"envs"`
 }
 
@@ -32,7 +32,7 @@ func NewContainer(
 	entrypoint valueObject.ContainerEntrypoint,
 	createdAt valueObject.UnixTime,
 	startedAt *valueObject.UnixTime,
-	resourceProfileId *valueObject.ResourceProfileId,
+	resourceProfileId valueObject.ResourceProfileId,
 	envs []valueObject.ContainerEnv,
 ) Container {
 	return Container{
