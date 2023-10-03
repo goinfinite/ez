@@ -375,8 +375,16 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 		if container.AccountId.Get() != accId.Get() {
 			continue
 		}
-		containerCpuCores := container.BaseSpecs.CpuCores.Get()
-		containerMemoryBytes := container.BaseSpecs.MemoryBytes.Get()
+
+		resourceProfile, err := ResourceProfileQueryRepo{}.GetById(
+			container.ResourceProfileId,
+		)
+		if err != nil {
+			continue
+		}
+
+		containerCpuCores := resourceProfile.BaseSpecs.CpuCores.Get()
+		containerMemoryBytes := resourceProfile.BaseSpecs.MemoryBytes.Get()
 
 		cpuCores = valueObject.CpuCoresCount(
 			cpuCores.Get() + containerCpuCores,
