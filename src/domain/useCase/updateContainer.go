@@ -24,14 +24,17 @@ func UpdateContainer(
 		return errors.New("ContainerNotFound")
 	}
 
-	err = CheckAccountQuota(
-		accQueryRepo,
-		updateContainer.AccountId,
-		resourceProfileQueryRepo,
-		*updateContainer.ResourceProfileId,
-	)
-	if err != nil {
-		return err
+	shouldUpdateQuota := updateContainer.ResourceProfileId != nil
+	if shouldUpdateQuota {
+		err = CheckAccountQuota(
+			accQueryRepo,
+			updateContainer.AccountId,
+			resourceProfileQueryRepo,
+			*updateContainer.ResourceProfileId,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = containerCmdRepo.Update(updateContainer)
@@ -40,10 +43,12 @@ func UpdateContainer(
 		return errors.New("UpdateContainerInfraError")
 	}
 
-	err = accCmdRepo.UpdateQuotaUsage(updateContainer.AccountId)
-	if err != nil {
-		log.Printf("UpdateAccountQuotaError: %s", err)
-		return errors.New("UpdateAccountQuotaError")
+	if shouldUpdateQuota {
+		err = accCmdRepo.UpdateQuotaUsage(updateContainer.AccountId)
+		if err != nil {
+			log.Printf("UpdateAccountQuotaError: %s", err)
+			return errors.New("UpdateAccountQuotaError")
+		}
 	}
 
 	return nil
