@@ -74,8 +74,7 @@ func AddContainerController() *cobra.Command {
 	var portBindingsSlice []string
 	var restartPolicyStr string
 	var entrypointStr string
-	var baseSpecStr string
-	var maxSpecStr string
+	var resourceProfileId uint64
 	var envsSlice []string
 
 	cmd := &cobra.Command{
@@ -88,10 +87,9 @@ func AddContainerController() *cobra.Command {
 				containerImgAddressStr,
 			)
 
-			var portBindingsPtr *[]valueObject.PortBinding
+			portBindings := []valueObject.PortBinding{}
 			if len(portBindingsSlice) > 0 {
-				portBindings := parsePortBindings(portBindingsSlice)
-				portBindingsPtr = &portBindings
+				portBindings = parsePortBindings(portBindingsSlice)
 			}
 
 			var restartPolicyPtr *valueObject.ContainerRestartPolicy
@@ -108,50 +106,40 @@ func AddContainerController() *cobra.Command {
 				entrypointPtr = &entrypoint
 			}
 
-			var baseSpecsPtr *valueObject.ContainerSpecs
-			if baseSpecStr != "" {
-				baseSpecs, err := valueObject.NewContainerSpecsFromString(baseSpecStr)
-				if err != nil {
-					cliHelper.ResponseWrapper(false, err.Error())
-				}
-				baseSpecsPtr = &baseSpecs
+			var resourceProfileIdPtr *valueObject.ResourceProfileId
+			if resourceProfileId != 0 {
+				resourceProfileId := valueObject.NewResourceProfileIdPanic(
+					resourceProfileId,
+				)
+				resourceProfileIdPtr = &resourceProfileId
 			}
 
-			var maxSpecsPtr *valueObject.ContainerSpecs
-			if maxSpecStr != "" {
-				maxSpecs, err := valueObject.NewContainerSpecsFromString(maxSpecStr)
-				if err != nil {
-					cliHelper.ResponseWrapper(false, err.Error())
-				}
-				maxSpecsPtr = &maxSpecs
-			}
-
-			var envsPtr *[]valueObject.ContainerEnv
+			envs := []valueObject.ContainerEnv{}
 			if len(envsSlice) > 0 {
-				envs := parseContainerEnvs(envsSlice)
-				envsPtr = &envs
+				envs = parseContainerEnvs(envsSlice)
 			}
 
 			addContainerDto := dto.NewAddContainer(
 				accId,
 				hostname,
 				imgAddr,
-				portBindingsPtr,
+				portBindings,
 				restartPolicyPtr,
 				entrypointPtr,
-				baseSpecsPtr,
-				maxSpecsPtr,
-				envsPtr,
+				resourceProfileIdPtr,
+				envs,
 			)
 
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.AccQueryRepo{}
 			accCmdRepo := infra.AccCmdRepo{}
+			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 
 			err := useCase.AddContainer(
 				containerCmdRepo,
 				accQueryRepo,
 				accCmdRepo,
+				resourceProfileQueryRepo,
 				addContainerDto,
 			)
 			if err != nil {
@@ -177,20 +165,7 @@ func AddContainerController() *cobra.Command {
 	)
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
-	cmd.Flags().StringVarP(
-		&baseSpecStr,
-		"base-specs",
-		"b",
-		"",
-		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
-	)
-	cmd.Flags().StringVarP(
-		&maxSpecStr,
-		"max-specs",
-		"m",
-		"",
-		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
-	)
+	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs (key=value)")
 	return cmd
 }
@@ -236,8 +211,7 @@ func UpdateContainerController() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 	var containerStatus bool
-	var baseSpecStr string
-	var maxSpecStr string
+	var resourceProfileId uint64
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -246,42 +220,33 @@ func UpdateContainerController() *cobra.Command {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
-			var baseSpecsPtr *valueObject.ContainerSpecs
-			if baseSpecStr != "" {
-				baseSpecs, err := valueObject.NewContainerSpecsFromString(baseSpecStr)
-				if err != nil {
-					cliHelper.ResponseWrapper(false, err.Error())
-				}
-				baseSpecsPtr = &baseSpecs
-			}
-
-			var maxSpecsPtr *valueObject.ContainerSpecs
-			if maxSpecStr != "" {
-				maxSpecs, err := valueObject.NewContainerSpecsFromString(maxSpecStr)
-				if err != nil {
-					cliHelper.ResponseWrapper(false, err.Error())
-				}
-				maxSpecsPtr = &maxSpecs
+			var resourceProfileIdPtr *valueObject.ResourceProfileId
+			if resourceProfileId != 0 {
+				resourceProfileId := valueObject.NewResourceProfileIdPanic(
+					resourceProfileId,
+				)
+				resourceProfileIdPtr = &resourceProfileId
 			}
 
 			updateContainerDto := dto.NewUpdateContainer(
 				accId,
 				containerId,
 				containerStatus,
-				baseSpecsPtr,
-				maxSpecsPtr,
+				resourceProfileIdPtr,
 			)
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.AccQueryRepo{}
 			accCmdRepo := infra.AccCmdRepo{}
+			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
 				containerCmdRepo,
 				accQueryRepo,
 				accCmdRepo,
+				resourceProfileQueryRepo,
 				updateContainerDto,
 			)
 			if err != nil {
@@ -297,19 +262,6 @@ func UpdateContainerController() *cobra.Command {
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
 	cmd.Flags().BoolVarP(&containerStatus, "status", "s", false, "ContainerStatus")
-	cmd.Flags().StringVarP(
-		&baseSpecStr,
-		"base-specs",
-		"b",
-		"",
-		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
-	)
-	cmd.Flags().StringVarP(
-		&maxSpecStr,
-		"max-specs",
-		"m",
-		"",
-		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
-	)
+	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
 	return cmd
 }
