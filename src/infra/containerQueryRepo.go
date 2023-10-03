@@ -198,51 +198,15 @@ func (repo ContainerQueryRepo) GetById(
 		startedAtPtr = &startedAt
 	}
 
-	rawCpuQuota, assertOk := rawHostConfig["CpuQuota"].(float64)
-	if !assertOk {
-		return entity.Container{}, errors.New("CpuQuotaParseError")
+	containerName := rawState["Name"].(string)
+	containerNameParts := strings.Split(containerName, "-")
+	if len(containerNameParts) < 2 {
+		return entity.Container{}, errors.New("ContainerNameParseError")
 	}
-	cpuQuotaSimplified := rawCpuQuota / 100000
-	cpuCoresQuota, err := valueObject.NewCpuCoresCount(cpuQuotaSimplified)
+
+	resourceProfileId, err := valueObject.NewResourceProfileId(containerNameParts[0])
 	if err != nil {
 		return entity.Container{}, err
-	}
-
-	rawMemoryQuota, assertOk := rawHostConfig["Memory"].(float64)
-	if !assertOk {
-		return entity.Container{}, errors.New("MemoryQuotaParseError")
-	}
-	memoryBytesQuota, err := valueObject.NewByte(rawMemoryQuota)
-	if err != nil {
-		return entity.Container{}, err
-	}
-
-	baseSpecs := valueObject.NewContainerSpecs(cpuCoresQuota, memoryBytesQuota)
-
-	annotations, assertOk := rawConfig["Annotations"].(map[string]interface{})
-	if !assertOk {
-		return entity.Container{}, errors.New("AnnotationsParseError")
-	}
-	isMaxCpuSet := annotations["speedia/max-cpu"] != nil
-	isMaxMemorySet := annotations["speedia/max-memory"] != nil
-
-	var maxSpecsPtr *valueObject.ContainerSpecs
-	if isMaxCpuSet || isMaxMemorySet {
-		maxCpuCores, err := valueObject.NewCpuCoresCount(annotations["speedia/max-cpu"])
-		if err != nil {
-			return entity.Container{}, err
-		}
-
-		maxMemoryQuota, err := valueObject.NewByte(annotations["speedia/max-memory"])
-		if err != nil {
-			return entity.Container{}, err
-		}
-
-		maxSpecs := valueObject.NewContainerSpecs(
-			maxCpuCores,
-			maxMemoryQuota,
-		)
-		maxSpecsPtr = &maxSpecs
 	}
 
 	rawEnvs, assertOk := rawConfig["Env"].([]interface{})
@@ -271,8 +235,7 @@ func (repo ContainerQueryRepo) GetById(
 		entrypoint,
 		createdAt,
 		startedAtPtr,
-		baseSpecs,
-		maxSpecsPtr,
+		resourceProfileId,
 		envs,
 	), nil
 }
