@@ -152,43 +152,6 @@ func AddContainerController() *cobra.Command {
 	return cmd
 }
 
-func DeleteContainerController() *cobra.Command {
-	var accId uint64
-	var containerIdStr string
-
-	cmd := &cobra.Command{
-		Use:   "delete",
-		Short: "DeleteContainer",
-		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accId)
-			containerId := valueObject.NewContainerIdPanic(containerIdStr)
-
-			containerQueryRepo := infra.ContainerQueryRepo{}
-			containerCmdRepo := infra.ContainerCmdRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
-
-			err := useCase.DeleteContainer(
-				containerQueryRepo,
-				containerCmdRepo,
-				accCmdRepo,
-				accId,
-				containerId,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
-
-			cliHelper.ResponseWrapper(true, "ContainerDeleted")
-		},
-	}
-
-	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("acc-id")
-	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
-	cmd.MarkFlagRequired("container-id")
-	return cmd
-}
-
 func UpdateContainerController() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
@@ -245,5 +208,42 @@ func UpdateContainerController() *cobra.Command {
 	cmd.MarkFlagRequired("container-id")
 	cmd.Flags().BoolVarP(&containerStatus, "status", "s", false, "ContainerStatus")
 	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
+	return cmd
+}
+
+func DeleteContainerController() *cobra.Command {
+	var accId uint64
+	var containerIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteContainer",
+		Run: func(cmd *cobra.Command, args []string) {
+			accId := valueObject.NewAccountIdPanic(accId)
+			containerId := valueObject.NewContainerIdPanic(containerIdStr)
+
+			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerCmdRepo := infra.ContainerCmdRepo{}
+			accCmdRepo := infra.AccCmdRepo{}
+
+			err := useCase.DeleteContainer(
+				containerQueryRepo,
+				containerCmdRepo,
+				accCmdRepo,
+				accId,
+				containerId,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, "ContainerDeleted")
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.MarkFlagRequired("container-id")
 	return cmd
 }
