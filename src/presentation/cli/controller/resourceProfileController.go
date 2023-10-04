@@ -195,10 +195,14 @@ func UpdateResourceProfileController() *cobra.Command {
 			)
 
 			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
+			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerCmdRepo := infra.ContainerCmdRepo{}
 
 			err := useCase.UpdateResourceProfile(
 				resourceProfileCmdRepo,
 				dto,
+				containerQueryRepo,
+				containerCmdRepo,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
