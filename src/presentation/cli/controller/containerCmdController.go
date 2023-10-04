@@ -141,11 +141,11 @@ func AddContainerController() *cobra.Command {
 	cmd.Flags().StringSliceVarP(
 		&portBindingsSlice,
 		"port-bindings",
-		"p",
+		"b",
 		[]string{},
 		"PortBindings (hostPort:containerPort[/protocol])",
 	)
-	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
+	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "p", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
 	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs (key=value)")
