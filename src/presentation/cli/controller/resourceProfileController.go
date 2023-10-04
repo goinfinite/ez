@@ -59,7 +59,7 @@ func AddResourceProfileController() *cobra.Command {
 	var baseSpecsStr string
 	var maxSpecsStr string
 	var scalingPolicyStr string
-	var scalingThresholdStr string
+	var scalingThreshold uint64
 
 	cmd := &cobra.Command{
 		Use:   "add",
@@ -82,11 +82,7 @@ func AddResourceProfileController() *cobra.Command {
 			}
 
 			var scalingThresholdPtr *uint64
-			if scalingThresholdStr != "" {
-				scalingThreshold, err := strconv.ParseUint(scalingThresholdStr, 10, 64)
-				if err != nil {
-					panic("InvalidScalingThreshold")
-				}
+			if scalingThreshold != 0 {
 				scalingThresholdPtr = &scalingThreshold
 			}
 
@@ -136,11 +132,111 @@ func AddResourceProfileController() *cobra.Command {
 		"",
 		"ScalingPolicy",
 	)
-	cmd.Flags().StringVarP(
-		&scalingThresholdStr,
+	cmd.Flags().Uint64VarP(
+		&scalingThreshold,
 		"scaling-threshold",
 		"t",
+		0,
+		"ScalingThreshold",
+	)
+	return cmd
+}
+
+func UpdateResourceProfileController() *cobra.Command {
+	var profileIdUint uint64
+	var nameStr string
+	var baseSpecsStr string
+	var maxSpecsStr string
+	var scalingPolicyStr string
+	var scalingThreshold uint64
+
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "UpdateResourceProfile",
+		Run: func(cmd *cobra.Command, args []string) {
+			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
+
+			var namePtr *valueObject.ResourceProfileName
+			if nameStr != "" {
+				name := valueObject.NewResourceProfileNamePanic(nameStr)
+				namePtr = &name
+			}
+
+			var baseSpecsPtr *valueObject.ContainerSpecs
+			if baseSpecsStr != "" {
+				baseSpecs := parseContainerSpecs(baseSpecsStr)
+				baseSpecsPtr = &baseSpecs
+			}
+
+			var maxSpecsPtr *valueObject.ContainerSpecs
+			if maxSpecsStr != "" {
+				maxSpecs := parseContainerSpecs(maxSpecsStr)
+				maxSpecsPtr = &maxSpecs
+			}
+
+			var scalingPolicyPtr *valueObject.ScalingPolicy
+			if scalingPolicyStr != "" {
+				scalingPolicy := valueObject.NewScalingPolicyPanic(scalingPolicyStr)
+				scalingPolicyPtr = &scalingPolicy
+			}
+
+			var scalingThresholdPtr *uint64
+			if scalingThreshold != 0 {
+				scalingThresholdPtr = &scalingThreshold
+			}
+
+			dto := dto.NewUpdateResourceProfile(
+				resourceProfileId,
+				namePtr,
+				baseSpecsPtr,
+				maxSpecsPtr,
+				scalingPolicyPtr,
+				scalingThresholdPtr,
+			)
+
+			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
+
+			err := useCase.UpdateResourceProfile(
+				resourceProfileCmdRepo,
+				dto,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, "ResourceProfileUpdated")
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ResourceProfileId")
+	cmd.MarkFlagRequired("id")
+	cmd.Flags().StringVarP(&nameStr, "name", "n", "", "Name")
+	cmd.Flags().StringVarP(
+		&baseSpecsStr,
+		"base-specs",
+		"b",
 		"",
+		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
+	)
+	cmd.Flags().StringVarP(
+		&maxSpecsStr,
+		"max-specs",
+		"m",
+		"",
+		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
+	)
+	cmd.Flags().StringVarP(
+		&scalingPolicyStr,
+		"scaling-policy",
+		"s",
+		"",
+		"ScalingPolicy",
+	)
+	cmd.Flags().Uint64VarP(
+		&scalingThreshold,
+		"scaling-threshold",
+		"t",
+		0,
 		"ScalingThreshold",
 	)
 	return cmd
