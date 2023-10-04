@@ -24,16 +24,6 @@ var serveCmd = &cobra.Command{
 	},
 }
 
-func o11yRoutes() {
-	var o11yCmd = &cobra.Command{
-		Use:   "o11y",
-		Short: "O11yManagement",
-	}
-
-	rootCmd.AddCommand(o11yCmd)
-	o11yCmd.AddCommand(cliController.GetO11yOverviewController())
-}
-
 func accountRoutes() {
 	var accountCmd = &cobra.Command{
 		Use:   "account",
@@ -58,6 +48,16 @@ func containerRoutes() {
 	containerCmd.AddCommand(cliController.AddContainerController())
 	containerCmd.AddCommand(cliController.DeleteContainerController())
 	containerCmd.AddCommand(cliController.UpdateContainerController())
+}
+
+func o11yRoutes() {
+	var o11yCmd = &cobra.Command{
+		Use:   "o11y",
+		Short: "O11yManagement",
+	}
+
+	rootCmd.AddCommand(o11yCmd)
+	o11yCmd.AddCommand(cliController.GetO11yOverviewController())
 }
 
 func registerCliRoutes() {
