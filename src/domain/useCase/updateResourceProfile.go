@@ -43,12 +43,18 @@ func updateContainerResourceProfileId(
 }
 
 func UpdateResourceProfile(
+	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
 	resourceProfileCmdRepo repository.ResourceProfileCmdRepo,
-	updateResourceProfileDto dto.UpdateResourceProfile,
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
+	updateResourceProfileDto dto.UpdateResourceProfile,
 ) error {
-	err := resourceProfileCmdRepo.Update(updateResourceProfileDto)
+	_, err := resourceProfileQueryRepo.GetById(updateResourceProfileDto.Id)
+	if err != nil {
+		return errors.New("ResourceProfileNotFound")
+	}
+
+	err = resourceProfileCmdRepo.Update(updateResourceProfileDto)
 	if err != nil {
 		log.Printf("UpdateResourceProfileError: %s", err)
 		return errors.New("UpdateResourceProfileInfraError")

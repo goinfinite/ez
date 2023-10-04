@@ -194,15 +194,17 @@ func UpdateResourceProfileController() *cobra.Command {
 				scalingThresholdPtr,
 			)
 
+			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
 			err := useCase.UpdateResourceProfile(
+				resourceProfileQueryRepo,
 				resourceProfileCmdRepo,
-				dto,
 				containerQueryRepo,
 				containerCmdRepo,
+				dto,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -255,15 +257,17 @@ func DeleteResourceProfileController() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
 
+			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
 			err := useCase.DeleteResourceProfile(
+				resourceProfileQueryRepo,
 				resourceProfileCmdRepo,
-				resourceProfileId,
 				containerQueryRepo,
 				containerCmdRepo,
+				resourceProfileId,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
