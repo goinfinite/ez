@@ -245,3 +245,35 @@ func UpdateResourceProfileController() *cobra.Command {
 	)
 	return cmd
 }
+
+func DeleteResourceProfileController() *cobra.Command {
+	var profileIdUint uint64
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteResourceProfile",
+		Run: func(cmd *cobra.Command, args []string) {
+			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
+
+			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
+			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerCmdRepo := infra.ContainerCmdRepo{}
+
+			err := useCase.DeleteResourceProfile(
+				resourceProfileCmdRepo,
+				resourceProfileId,
+				containerQueryRepo,
+				containerCmdRepo,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, "ResourceProfileDeleted")
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ResourceProfileId")
+	cmd.MarkFlagRequired("id")
+	return cmd
+}
