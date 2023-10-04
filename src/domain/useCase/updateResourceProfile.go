@@ -6,7 +6,41 @@ import (
 
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/repository"
+	"github.com/speedianet/sfm/src/domain/valueObject"
 )
+
+func updateContainerResourceProfileId(
+	containerQueryRepo repository.ContainerQueryRepo,
+	containerCmdRepo repository.ContainerCmdRepo,
+	profileId valueObject.ResourceProfileId,
+) error {
+	containers, err := containerQueryRepo.Get()
+	if err != nil {
+		log.Printf("GetContainersError: %s", err)
+		return errors.New("GetContainersInfraError")
+	}
+
+	for _, container := range containers {
+		if container.ResourceProfileId != profileId {
+			continue
+		}
+
+		updateContainerDto := dto.NewUpdateContainer(
+			container.AccountId,
+			container.Id,
+			container.Status,
+			&profileId,
+		)
+
+		err := containerCmdRepo.Update(updateContainerDto)
+		if err != nil {
+			log.Printf("UpdateContainerResourceProfileError: %s", err)
+			continue
+		}
+	}
+
+	return nil
+}
 
 func UpdateResourceProfile(
 	resourceProfileCmdRepo repository.ResourceProfileCmdRepo,
@@ -25,29 +59,14 @@ func UpdateResourceProfile(
 		return nil
 	}
 
-	containers, err := containerQueryRepo.Get()
+	err = updateContainerResourceProfileId(
+		containerQueryRepo,
+		containerCmdRepo,
+		updateResourceProfileDto.Id,
+	)
 	if err != nil {
-		log.Printf("GetContainersError: %s", err)
-		return errors.New("GetContainersInfraError")
-	}
-
-	for _, container := range containers {
-		if container.ResourceProfileId != updateResourceProfileDto.Id {
-			continue
-		}
-
-		updateContainerDto := dto.NewUpdateContainer(
-			container.AccountId,
-			container.Id,
-			container.Status,
-			&updateResourceProfileDto.Id,
-		)
-
-		err := containerCmdRepo.Update(updateContainerDto)
-		if err != nil {
-			log.Printf("UpdateContainerAfterResourceProfileUpdateError: %s", err)
-			continue
-		}
+		log.Printf("UpdateResourceProfileContainersError: %s", err)
+		return errors.New("UpdateResourceProfileContainersInfraError")
 	}
 
 	return nil
