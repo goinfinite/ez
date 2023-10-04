@@ -48,6 +48,17 @@ func containerRoutes() {
 	containerCmd.AddCommand(cliController.AddContainerController())
 	containerCmd.AddCommand(cliController.DeleteContainerController())
 	containerCmd.AddCommand(cliController.UpdateContainerController())
+
+	var resourceProfileCmd = &cobra.Command{
+		Use:   "resource-profile",
+		Short: "ResourceProfileManagement",
+	}
+
+	containerCmd.AddCommand(resourceProfileCmd)
+	resourceProfileCmd.AddCommand(cliController.GetResourceProfilesController())
+	resourceProfileCmd.AddCommand(cliController.AddResourceProfileController())
+	resourceProfileCmd.AddCommand(cliController.DeleteResourceProfileController())
+	resourceProfileCmd.AddCommand(cliController.UpdateResourceProfileController())
 }
 
 func o11yRoutes() {
