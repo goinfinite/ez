@@ -192,7 +192,7 @@ func UpdateContainerController() *cobra.Command {
 				resourceProfileIdPtr,
 			)
 
-			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
@@ -239,7 +239,7 @@ func DeleteContainerController() *cobra.Command {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
-			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 

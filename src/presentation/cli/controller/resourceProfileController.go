@@ -9,7 +9,9 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
+	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
+	"gorm.io/gorm"
 )
 
 func GetResourceProfilesController() *cobra.Command {
@@ -143,6 +145,8 @@ func AddResourceProfileController() *cobra.Command {
 }
 
 func UpdateResourceProfileController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var profileIdUint uint64
 	var nameStr string
 	var baseSpecsStr string
@@ -153,6 +157,9 @@ func UpdateResourceProfileController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateResourceProfile",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
 
@@ -196,7 +203,7 @@ func UpdateResourceProfileController() *cobra.Command {
 
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
-			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
 			err := useCase.UpdateResourceProfile(
@@ -249,17 +256,22 @@ func UpdateResourceProfileController() *cobra.Command {
 }
 
 func DeleteResourceProfileController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var profileIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteResourceProfile",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
 
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
-			containerQueryRepo := infra.ContainerQueryRepo{}
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
 			err := useCase.DeleteResourceProfile(

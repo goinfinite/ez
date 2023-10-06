@@ -10,9 +10,15 @@ import (
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
+	"gorm.io/gorm"
 )
 
 type ContainerQueryRepo struct {
+	dbSvc *gorm.DB
+}
+
+func NewContainerQueryRepo(dbSvc *gorm.DB) *ContainerQueryRepo {
+	return &ContainerQueryRepo{dbSvc: dbSvc}
 }
 
 func (repo ContainerQueryRepo) parsePortBindings(
@@ -285,7 +291,7 @@ func (repo ContainerQueryRepo) GetByAccId(
 func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 	allContainers := []entity.Container{}
 
-	accsList, err := AccQueryRepo{}.Get()
+	accsList, err := NewAccQueryRepo(repo.dbSvc).Get()
 	if err != nil {
 		return allContainers, err
 	}

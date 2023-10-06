@@ -11,6 +11,8 @@ import (
 
 func TestContainerCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
+	dbSvc := testHelpers.GetDbSvc()
+	containerQueryRepo := NewContainerQueryRepo(dbSvc)
 
 	t.Run("AddContainer", func(t *testing.T) {
 		repo := ContainerCmdRepo{}
@@ -58,7 +60,7 @@ func TestContainerCmdRepo(t *testing.T) {
 
 	t.Run("DeleteContainer", func(t *testing.T) {
 		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		containers, err := ContainerQueryRepo{}.GetByAccId(accId)
+		containers, err := containerQueryRepo.GetByAccId(accId)
 		if err != nil {
 			t.Errorf("GetContainersFailed: %v", err)
 		}
@@ -78,7 +80,7 @@ func TestContainerCmdRepo(t *testing.T) {
 
 	t.Run("UpdateContainer", func(t *testing.T) {
 		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		containers, err := ContainerQueryRepo{}.GetByAccId(accId)
+		containers, err := containerQueryRepo.GetByAccId(accId)
 		if err != nil {
 			t.Errorf("GetContainersFailed: %v", err)
 		}
