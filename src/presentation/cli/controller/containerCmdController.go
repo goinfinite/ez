@@ -8,7 +8,9 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
+	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
+	"gorm.io/gorm"
 )
 
 func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
@@ -50,6 +52,8 @@ func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
 }
 
 func AddContainerController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var accId uint64
 	var hostnameStr string
 	var containerImgAddressStr string
@@ -62,6 +66,9 @@ func AddContainerController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddNewContainer",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			hostname := valueObject.NewFqdnPanic(hostnameStr)
@@ -113,8 +120,8 @@ func AddContainerController() *cobra.Command {
 			)
 
 			containerCmdRepo := infra.ContainerCmdRepo{}
-			accQueryRepo := infra.AccQueryRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
+			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 
 			err := useCase.AddContainer(
@@ -153,6 +160,8 @@ func AddContainerController() *cobra.Command {
 }
 
 func UpdateContainerController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var accId uint64
 	var containerIdStr string
 	var containerStatus bool
@@ -161,6 +170,9 @@ func UpdateContainerController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateContainer",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
@@ -182,8 +194,8 @@ func UpdateContainerController() *cobra.Command {
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
-			accQueryRepo := infra.AccQueryRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
+			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
 
 			err := useCase.UpdateContainer(
@@ -212,19 +224,24 @@ func UpdateContainerController() *cobra.Command {
 }
 
 func DeleteContainerController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var accId uint64
 	var containerIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainer",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
 			containerQueryRepo := infra.ContainerQueryRepo{}
 			containerCmdRepo := infra.ContainerCmdRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
+			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 			err := useCase.DeleteContainer(
 				containerQueryRepo,
