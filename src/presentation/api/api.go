@@ -40,6 +40,7 @@ func ApiInit() {
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
 	e.Use(apiMiddleware.Auth(basePath))
+	e.Use(apiMiddleware.DatabaseInit())
 
 	registerApiRoutes(baseRoute)
 
