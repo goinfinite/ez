@@ -6,6 +6,8 @@ import (
 	"runtime"
 
 	"github.com/joho/godotenv"
+	"github.com/speedianet/sfm/src/infra/db"
+	"gorm.io/gorm"
 )
 
 func LoadEnvVars() {
@@ -15,6 +17,14 @@ func LoadEnvVars() {
 
 	loadEnvErr := godotenv.Load(testEnvPath)
 	if loadEnvErr != nil {
-		panic(fmt.Errorf("Error loading .env file: %s", loadEnvErr))
+		panic(fmt.Errorf("LoadEnvFileError: %s", loadEnvErr))
 	}
+}
+
+func GetDbSvc() *gorm.DB {
+	dbSvc, err := db.DatabaseService()
+	if err != nil {
+		panic(fmt.Errorf("GetDbSvcError: %s", err))
+	}
+	return dbSvc
 }
