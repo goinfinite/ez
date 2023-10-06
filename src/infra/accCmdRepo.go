@@ -12,14 +12,19 @@ import (
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
+	"gorm.io/gorm"
 )
 
 type AccCmdRepo struct {
+	dbSvc *gorm.DB
+}
+
+func NewAccCmdRepo(dbSvc *gorm.DB) *AccCmdRepo {
+	return &AccCmdRepo{dbSvc: dbSvc}
 }
 
 func (repo AccCmdRepo) updateFilesystemQuota(
@@ -90,11 +95,6 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return err
-	}
-
 	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
 	accEntity := entity.NewAccount(
 		accId,
@@ -111,7 +111,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	err = dbSvc.Create(&accModel).Error
+	err = repo.dbSvc.Create(&accModel).Error
 	if err != nil {
 		return err
 	}
@@ -161,12 +161,7 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 		return err
 	}
 
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return err
-	}
-
-	err = dbModel.Account{ID: uint(accId.Get())}.Delete(dbSvc)
+	err = dbModel.Account{ID: uint(accId.Get())}.Delete(repo.dbSvc)
 	if err != nil {
 		return err
 	}
@@ -202,12 +197,7 @@ func (repo AccCmdRepo) UpdatePassword(
 		return err
 	}
 
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return err
-	}
-
-	err = dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
+	err = repo.dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
 		Update("updated_at", time.Now()).Error
 	if err != nil {
 		return err
@@ -237,12 +227,7 @@ func (repo AccCmdRepo) UpdateApiKey(
 	hash.Write([]byte(uuid.String()))
 	uuidHash := hex.EncodeToString(hash.Sum(nil))
 
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return "", err
-	}
-
-	err = dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
+	err = repo.dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
 		Update("key_hash", uuidHash).Error
 	if err != nil {
 		return "", err
@@ -256,11 +241,6 @@ func (repo AccCmdRepo) updateQuotaTable(
 	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return err
-	}
-
 	updateMap := map[string]interface{}{}
 
 	if quota.CpuCores.Get() > 0 {
@@ -279,7 +259,7 @@ func (repo AccCmdRepo) updateQuotaTable(
 		updateMap["inodes"] = quota.Inodes.Get()
 	}
 
-	err = dbSvc.Table(tableName).
+	err := repo.dbSvc.Table(tableName).
 		Where("account_id = ?", uint(accId.Get())).
 		Updates(updateMap).Error
 	if err != nil {

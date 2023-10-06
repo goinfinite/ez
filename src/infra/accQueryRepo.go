@@ -6,24 +6,24 @@ import (
 
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
+	"gorm.io/gorm"
 )
 
 type AccQueryRepo struct {
+	dbSvc *gorm.DB
+}
+
+func NewAccQueryRepo(dbSvc *gorm.DB) *AccQueryRepo {
+	return &AccQueryRepo{dbSvc: dbSvc}
 }
 
 func (repo AccQueryRepo) Get() ([]entity.Account, error) {
 	var accEntities []entity.Account
 
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return accEntities, errors.New("DatabaseServiceError")
-	}
-
 	var accModels []dbModel.Account
 
-	err = dbSvc.Model(&dbModel.Account{}).
+	err := repo.dbSvc.Model(&dbModel.Account{}).
 		Preload("Quota").
 		Preload("QuotaUsage").Find(&accModels).Error
 	if err != nil {
