@@ -96,7 +96,7 @@ func TestContainerCmdRepo(t *testing.T) {
 			nil,
 		)
 
-		err = ContainerCmdRepo{}.Update(updateContainer)
+		err = ContainerCmdRepo{}.Update(containers[0], updateContainer)
 		if err != nil {
 			t.Errorf("UpdateContainerFailed: %v", err)
 		}

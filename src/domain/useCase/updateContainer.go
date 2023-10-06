@@ -16,7 +16,7 @@ func UpdateContainer(
 	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
 	updateContainer dto.UpdateContainer,
 ) error {
-	_, err := containerQueryRepo.GetById(
+	currentContainer, err := containerQueryRepo.GetById(
 		updateContainer.AccountId,
 		updateContainer.ContainerId,
 	)
@@ -37,7 +37,7 @@ func UpdateContainer(
 		}
 	}
 
-	err = containerCmdRepo.Update(updateContainer)
+	err = containerCmdRepo.Update(currentContainer, updateContainer)
 	if err != nil {
 		log.Printf("UpdateContainerError: %s", err)
 		return errors.New("UpdateContainerInfraError")

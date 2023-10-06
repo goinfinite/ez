@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/speedianet/sfm/src/domain/dto"
+	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 )
@@ -106,16 +107,9 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 }
 
 func (repo ContainerCmdRepo) Update(
+	currentContainer entity.Container,
 	updateContainer dto.UpdateContainer,
 ) error {
-	currentContainer, err := ContainerQueryRepo{}.GetById(
-		updateContainer.AccountId,
-		updateContainer.ContainerId,
-	)
-	if err != nil {
-		return err
-	}
-
 	shouldUpdateStatus := updateContainer.Status != currentContainer.Status
 	if shouldUpdateStatus {
 		actionToPerform := "start"
