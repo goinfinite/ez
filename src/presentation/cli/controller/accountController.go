@@ -6,15 +6,22 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
+	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
+	"gorm.io/gorm"
 )
 
 func GetAccountsController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetAccounts",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-			accQueryRepo := infra.AccQueryRepo{}
+			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accsList, err := useCase.GetAccounts(accQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -68,6 +75,8 @@ func accQuotaFactory(
 }
 
 func AddAccountController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var usernameStr string
 	var passwordStr string
 	var cpuCores float64
@@ -78,6 +87,9 @@ func AddAccountController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddNewAccount",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			username := valueObject.NewUsernamePanic(usernameStr)
 			password := valueObject.NewPasswordPanic(passwordStr)
@@ -99,8 +111,8 @@ func AddAccountController() *cobra.Command {
 				quota,
 			)
 
-			accQueryRepo := infra.AccQueryRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
+			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 			err = useCase.AddAccount(
 				accQueryRepo,
@@ -127,6 +139,8 @@ func AddAccountController() *cobra.Command {
 }
 
 func UpdateAccountController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var accountIdStr string
 	var passwordStr string
 	shouldUpdateApiKeyBool := false
@@ -138,6 +152,9 @@ func UpdateAccountController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateAccount (pass or apiKey)",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
@@ -170,8 +187,8 @@ func UpdateAccountController() *cobra.Command {
 				&quota,
 			)
 
-			accQueryRepo := infra.AccQueryRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
+			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 			if shouldUpdateApiKeyBool {
 				newKey, err := useCase.UpdateAccountApiKey(
@@ -215,16 +232,20 @@ func UpdateAccountController() *cobra.Command {
 }
 
 func DeleteAccountController() *cobra.Command {
+	var dbSvc *gorm.DB
 	var accountIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteAccount",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
-			accQueryRepo := infra.AccQueryRepo{}
-			accCmdRepo := infra.AccCmdRepo{}
+			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 			err := useCase.DeleteAccount(
 				accQueryRepo,
