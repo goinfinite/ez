@@ -10,7 +10,9 @@ import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
+	"github.com/speedianet/sfm/src/infra/db"
 	apiHelper "github.com/speedianet/sfm/src/presentation/api/helper"
+	"gorm.io/gorm"
 )
 
 // GetAccounts	 godoc
@@ -23,7 +25,7 @@ import (
 // @Success      200 {array} entity.Account
 // @Router       /account/ [get]
 func GetAccountsController(c echo.Context) error {
-	accsQueryRepo := infra.AccQueryRepo{}
+	accsQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
 	accsList, err := useCase.GetAccounts(accsQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -105,8 +107,8 @@ func AddAccountController(c echo.Context) error {
 		quota,
 	)
 
-	accQueryRepo := infra.AccQueryRepo{}
-	accCmdRepo := infra.AccCmdRepo{}
+	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
+	accCmdRepo := infra.NewAccCmdRepo(c.Get("dbSvc").(*gorm.DB))
 
 	err := useCase.AddAccount(
 		accQueryRepo,
@@ -133,8 +135,8 @@ func AddAccountController(c echo.Context) error {
 func DeleteAccountController(c echo.Context) error {
 	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 
-	accQueryRepo := infra.AccQueryRepo{}
-	accCmdRepo := infra.AccCmdRepo{}
+	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
+	accCmdRepo := infra.NewAccCmdRepo(c.Get("dbSvc").(*gorm.DB))
 
 	err := useCase.DeleteAccount(
 		accQueryRepo,
@@ -194,8 +196,8 @@ func UpdateAccountController(c echo.Context) error {
 		quotaPtr,
 	)
 
-	accQueryRepo := infra.AccQueryRepo{}
-	accCmdRepo := infra.AccCmdRepo{}
+	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
+	accCmdRepo := infra.NewAccCmdRepo(c.Get("dbSvc").(*gorm.DB))
 
 	if updateAccountDto.ShouldUpdateApiKey != nil && *updateAccountDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
@@ -231,8 +233,13 @@ func AutoUpdateAccountsQuotaUsageController() {
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
-	accQueryRepo := infra.AccQueryRepo{}
-	accCmdRepo := infra.AccCmdRepo{}
+	dbSvc, err := db.DatabaseService()
+	if err != nil {
+		return
+	}
+
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 	for range timer.C {
 		useCase.AutoUpdateAccountsQuotaUsage(accQueryRepo, accCmdRepo)
 	}
