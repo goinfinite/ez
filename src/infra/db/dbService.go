@@ -18,6 +18,7 @@ func DatabaseService() (*gorm.DB, error) {
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
+		&dbModel.ResourceProfile{},
 	)
 	if err != nil {
 		return nil, errors.New("DatabaseMigrationError")
