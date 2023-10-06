@@ -10,10 +10,11 @@ import (
 
 func TestAccQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	authQueryRepo := AccQueryRepo{}
+	dbSvc := testHelpers.GetDbSvc()
+	accQueryRepo := NewAccQueryRepo(dbSvc)
 
 	t.Run("GetValidAccounts", func(t *testing.T) {
-		_, err := authQueryRepo.Get()
+		_, err := accQueryRepo.Get()
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -22,7 +23,7 @@ func TestAccQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountByUsername", func(t *testing.T) {
 		username := valueObject.NewUsernamePanic(os.Getenv("DUMMY_USER_NAME"))
 
-		_, err := authQueryRepo.GetByUsername(username)
+		_, err := accQueryRepo.GetByUsername(username)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -31,7 +32,7 @@ func TestAccQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountById", func(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-		_, err := authQueryRepo.GetById(accountId)
+		_, err := accQueryRepo.GetById(accountId)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -40,7 +41,7 @@ func TestAccQueryRepo(t *testing.T) {
 	t.Run("GetInvalidAccount", func(t *testing.T) {
 		username := valueObject.NewUsernamePanic("invalid")
 
-		_, err := authQueryRepo.GetByUsername(username)
+		_, err := accQueryRepo.GetByUsername(username)
 		if err == nil {
 			t.Error("ExpectingError")
 		}

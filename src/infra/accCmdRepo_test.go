@@ -16,7 +16,7 @@ func addDummyUser() error {
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	addAccount := dto.NewAddAccount(username, password, quota)
 
-	accCmdRepo := AccCmdRepo{}
+	accCmdRepo := NewAccCmdRepo(testHelpers.GetDbSvc())
 	err := accCmdRepo.Add(addAccount)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func addDummyUser() error {
 func deleteDummyUser() error {
 	accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-	accCmdRepo := AccCmdRepo{}
+	accCmdRepo := NewAccCmdRepo(testHelpers.GetDbSvc())
 	err := accCmdRepo.Delete(accountId)
 	if err != nil {
 		return err
@@ -45,6 +45,9 @@ func resetDummyUser() {
 
 func TestAccCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
+	dbSvc := testHelpers.GetDbSvc()
+	accQueryRepo := NewAccQueryRepo(dbSvc)
+	accCmdRepo := NewAccCmdRepo(dbSvc)
 
 	t.Run("AddValidAccount", func(t *testing.T) {
 		err := addDummyUser()
@@ -59,7 +62,6 @@ func TestAccCmdRepo(t *testing.T) {
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
 		addAccount := dto.NewAddAccount(username, password, quota)
 
-		accCmdRepo := AccCmdRepo{}
 		err := accCmdRepo.Add(addAccount)
 		if err == nil {
 			t.Error("AccountShouldNotBeAdded")
@@ -79,7 +81,6 @@ func TestAccCmdRepo(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		newPassword := valueObject.NewPasswordPanic("newPassword")
 
-		accCmdRepo := AccCmdRepo{}
 		err := accCmdRepo.UpdatePassword(accountId, newPassword)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
@@ -91,7 +92,6 @@ func TestAccCmdRepo(t *testing.T) {
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-		accCmdRepo := AccCmdRepo{}
 		_, err := accCmdRepo.UpdateApiKey(accountId)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
@@ -106,7 +106,6 @@ func TestAccCmdRepo(t *testing.T) {
 		quota.CpuCores = valueObject.NewCpuCoresCountPanic(1)
 		quota.DiskBytes = valueObject.NewBytePanic(1073741824)
 
-		accCmdRepo := AccCmdRepo{}
 		err := accCmdRepo.UpdateQuota(accountId, quota)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
@@ -126,13 +125,11 @@ func TestAccCmdRepo(t *testing.T) {
 		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		os.Chown(testFilePath, int(accId.Get()), int(accId.Get()))
 
-		accCmdRepo := AccCmdRepo{}
 		err = accCmdRepo.UpdateQuotaUsage(accId)
 		if err != nil {
 			t.Error(err)
 		}
 
-		accQueryRepo := AccQueryRepo{}
 		accEntity, err := accQueryRepo.GetById(accId)
 		if err != nil {
 			t.Error(err)
