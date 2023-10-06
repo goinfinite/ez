@@ -124,8 +124,10 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 	return nil
 }
 
-func getUsernameById(accId valueObject.AccountId) (valueObject.Username, error) {
-	accQuery := AccQueryRepo{}
+func (repo AccCmdRepo) getUsernameById(
+	accId valueObject.AccountId,
+) (valueObject.Username, error) {
+	accQuery := NewAccQueryRepo(repo.dbSvc)
 	accDetails, err := accQuery.GetById(accId)
 	if err != nil {
 		return "", err
@@ -141,7 +143,7 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 		return err
 	}
 
-	username, err := getUsernameById(accId)
+	username, err := repo.getUsernameById(accId)
 	if err != nil {
 		return err
 	}
@@ -181,7 +183,7 @@ func (repo AccCmdRepo) UpdatePassword(
 		return err
 	}
 
-	username, err := getUsernameById(accId)
+	username, err := repo.getUsernameById(accId)
 	if err != nil {
 		return err
 	}
@@ -344,7 +346,8 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 		return err
 	}
 
-	containers, err := ContainerQueryRepo{}.Get()
+	containerQueryRepo := NewContainerQueryRepo(repo.dbSvc)
+	containers, err := containerQueryRepo.Get()
 	if err != nil {
 		return err
 	}
