@@ -9,6 +9,7 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
 	apiHelper "github.com/speedianet/sfm/src/presentation/api/helper"
+	"gorm.io/gorm"
 )
 
 // AuthLogin godoc
@@ -32,9 +33,9 @@ func AuthLoginController(c echo.Context) error {
 		valueObject.NewPasswordPanic(requestBody["password"].(string)),
 	)
 
-	authQueryRepo := infra.AuthQueryRepo{}
+	authQueryRepo := infra.NewAuthQueryRepo(c.Get("dbSvc").(*gorm.DB))
 	authCmdRepo := infra.AuthCmdRepo{}
-	accQueryRepo := infra.AccQueryRepo{}
+	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
 
 	ipAddress := valueObject.NewIpAddressPanic(c.RealIP())
 
