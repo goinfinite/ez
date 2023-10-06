@@ -9,14 +9,19 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
+	"gorm.io/gorm"
 )
 
 type AuthQueryRepo struct {
+	dbSvc *gorm.DB
+}
+
+func NewAuthQueryRepo(dbSvc *gorm.DB) *AuthQueryRepo {
+	return &AuthQueryRepo{dbSvc: dbSvc}
 }
 
 func (repo AuthQueryRepo) IsLoginValid(login dto.Login) bool {
@@ -85,14 +90,8 @@ func (repo AuthQueryRepo) getTokenDetailsFromSession(
 func (repo AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
-
-	dbSvc, err := db.DatabaseService()
-	if err != nil {
-		return "", err
-	}
-
 	accModel := dbModel.Account{ID: uint(accountId.Get())}
-	err = dbSvc.Model(&accModel).First(&accModel).Error
+	err := repo.dbSvc.Model(&accModel).First(&accModel).Error
 	if err != nil {
 		return "", errors.New("AccountNotFound")
 	}
