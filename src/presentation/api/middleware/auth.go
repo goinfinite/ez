@@ -7,17 +7,18 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/sfm/src/domain/repository"
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
+	"gorm.io/gorm"
 )
 
 func getAccountIdFromAccessToken(
+	authQueryRepo repository.AuthQueryRepo,
 	accessToken valueObject.AccessTokenStr,
 	ipAddress valueObject.IpAddress,
 ) (valueObject.AccountId, error) {
-	authQueryRepo := infra.AuthQueryRepo{}
-
 	trustedIpsRaw := strings.Split(os.Getenv("TRUSTED_IPS"), ",")
 	var trustedIps []valueObject.IpAddress
 	for _, trustedIp := range trustedIpsRaw {
@@ -60,8 +61,10 @@ func Auth(basePath string) echo.MiddlewareFunc {
 				})
 			}
 
+			authQueryRepo := infra.NewAuthQueryRepo(c.Get("dbSvc").(*gorm.DB))
 			tokenWithoutPrefix := token[7:]
 			accountId, err := getAccountIdFromAccessToken(
+				authQueryRepo,
 				valueObject.AccessTokenStr(tokenWithoutPrefix),
 				valueObject.NewIpAddressPanic(c.RealIP()),
 			)
