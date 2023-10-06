@@ -204,7 +204,11 @@ func (repo ContainerQueryRepo) GetById(
 		startedAtPtr = &startedAt
 	}
 
-	containerName := rawState["Name"].(string)
+	containerName, assertOk := containerInfo["Name"].(string)
+	if !assertOk {
+		return entity.Container{}, errors.New("ContainerNameNotString")
+	}
+
 	containerNameParts := strings.Split(containerName, "-")
 	if len(containerNameParts) < 2 {
 		return entity.Container{}, errors.New("ContainerNameParseError")
