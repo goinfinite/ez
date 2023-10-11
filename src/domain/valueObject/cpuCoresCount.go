@@ -2,28 +2,15 @@ package valueObject
 
 import (
 	"errors"
-	"reflect"
 	"strconv"
+
+	voHelper "github.com/speedianet/sfm/src/domain/valueObject/helper"
 )
 
 type CpuCoresCount float64
 
 func NewCpuCoresCount(value interface{}) (CpuCoresCount, error) {
-	var ccc float64
-	var err error
-	switch v := value.(type) {
-	case string:
-		ccc, err = strconv.ParseFloat(v, 64)
-	case int, int8, int16, int32, int64:
-		ccc = float64(reflect.ValueOf(v).Int())
-	case uint, uint8, uint16, uint32, uint64:
-		ccc = float64(reflect.ValueOf(v).Uint())
-	case float32, float64:
-		ccc = float64(reflect.ValueOf(v).Float())
-	default:
-		err = errors.New("InvalidCpuCoresCount")
-	}
-
+	ccc, err := voHelper.InterfaceToFloat(value)
 	if err != nil || ccc < 0 {
 		return 0, errors.New("InvalidCpuCoresCount")
 	}
