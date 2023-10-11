@@ -57,6 +57,8 @@ func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 }
 
 func AddResourceProfileController() *cobra.Command {
+	var dbSvc *gorm.DB
+
 	var nameStr string
 	var baseSpecsStr string
 	var maxSpecsStr string
@@ -69,6 +71,9 @@ func AddResourceProfileController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddNewResourceProfile",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			name := valueObject.NewResourceProfileNamePanic(nameStr)
 
@@ -118,7 +123,7 @@ func AddResourceProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr,
 			)
 
-			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
+			resourceProfileCmdRepo := infra.NewResourceProfileCmdRepo(dbSvc)
 
 			err := useCase.AddResourceProfile(
 				resourceProfileCmdRepo,
@@ -267,7 +272,7 @@ func UpdateResourceProfileController() *cobra.Command {
 			)
 
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
-			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
+			resourceProfileCmdRepo := infra.NewResourceProfileCmdRepo(dbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
@@ -356,7 +361,7 @@ func DeleteResourceProfileController() *cobra.Command {
 			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
 
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
-			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
+			resourceProfileCmdRepo := infra.NewResourceProfileCmdRepo(dbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
