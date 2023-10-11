@@ -62,6 +62,9 @@ func AddResourceProfileController() *cobra.Command {
 	var maxSpecsStr string
 	var scalingPolicyStr string
 	var scalingThreshold uint64
+	var scalingMaxDurationSecs uint64
+	var scalingIntervalSecs uint64
+	var hostMinCapacityPercent float64
 
 	cmd := &cobra.Command{
 		Use:   "add",
@@ -88,12 +91,31 @@ func AddResourceProfileController() *cobra.Command {
 				scalingThresholdPtr = &scalingThreshold
 			}
 
+			var scalingMaxDurationSecsPtr *uint64
+			if scalingMaxDurationSecs != 0 {
+				scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+			}
+
+			var scalingIntervalSecsPtr *uint64
+			if scalingIntervalSecs != 0 {
+				scalingIntervalSecsPtr = &scalingIntervalSecs
+			}
+
+			var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
+			if hostMinCapacityPercent != 0 {
+				hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(hostMinCapacityPercent)
+				hostMinCapacityPercentPtr = &hostMinCapacityPercent
+			}
+
 			dto := dto.NewAddResourceProfile(
 				name,
 				baseSpecs,
 				maxSpecsPtr,
 				scalingPolicyPtr,
 				scalingThresholdPtr,
+				scalingMaxDurationSecsPtr,
+				scalingIntervalSecsPtr,
+				hostMinCapacityPercentPtr,
 			)
 
 			resourceProfileCmdRepo := infra.ResourceProfileCmdRepo{}
@@ -129,17 +151,38 @@ func AddResourceProfileController() *cobra.Command {
 	)
 	cmd.Flags().StringVarP(
 		&scalingPolicyStr,
-		"scaling-policy",
-		"s",
+		"policy",
+		"p",
 		"",
 		"ScalingPolicy",
 	)
 	cmd.Flags().Uint64VarP(
 		&scalingThreshold,
-		"scaling-threshold",
+		"threshold",
 		"t",
 		0,
 		"ScalingThreshold",
+	)
+	cmd.Flags().Uint64VarP(
+		&scalingMaxDurationSecs,
+		"max-duration",
+		"d",
+		0,
+		"ScalingMaxDurationSecs",
+	)
+	cmd.Flags().Uint64VarP(
+		&scalingIntervalSecs,
+		"interval",
+		"i",
+		0,
+		"ScalingIntervalSecs",
+	)
+	cmd.Flags().Float64VarP(
+		&hostMinCapacityPercent,
+		"min-capacity",
+		"c",
+		0,
+		"HostMinCapacityPercent",
 	)
 	return cmd
 }
@@ -153,6 +196,9 @@ func UpdateResourceProfileController() *cobra.Command {
 	var maxSpecsStr string
 	var scalingPolicyStr string
 	var scalingThreshold uint64
+	var scalingMaxDurationSecs uint64
+	var scalingIntervalSecs uint64
+	var hostMinCapacityPercent float64
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -192,6 +238,22 @@ func UpdateResourceProfileController() *cobra.Command {
 				scalingThresholdPtr = &scalingThreshold
 			}
 
+			var scalingMaxDurationSecsPtr *uint64
+			if scalingMaxDurationSecs != 0 {
+				scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+			}
+
+			var scalingIntervalSecsPtr *uint64
+			if scalingIntervalSecs != 0 {
+				scalingIntervalSecsPtr = &scalingIntervalSecs
+			}
+
+			var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
+			if hostMinCapacityPercent != 0 {
+				hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(hostMinCapacityPercent)
+				hostMinCapacityPercentPtr = &hostMinCapacityPercent
+			}
+
 			dto := dto.NewUpdateResourceProfile(
 				resourceProfileId,
 				namePtr,
@@ -199,6 +261,9 @@ func UpdateResourceProfileController() *cobra.Command {
 				maxSpecsPtr,
 				scalingPolicyPtr,
 				scalingThresholdPtr,
+				scalingMaxDurationSecsPtr,
+				scalingIntervalSecsPtr,
+				hostMinCapacityPercentPtr,
 			)
 
 			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
@@ -240,17 +305,38 @@ func UpdateResourceProfileController() *cobra.Command {
 	)
 	cmd.Flags().StringVarP(
 		&scalingPolicyStr,
-		"scaling-policy",
-		"s",
+		"policy",
+		"p",
 		"",
 		"ScalingPolicy",
 	)
 	cmd.Flags().Uint64VarP(
 		&scalingThreshold,
-		"scaling-threshold",
+		"threshold",
 		"t",
 		0,
 		"ScalingThreshold",
+	)
+	cmd.Flags().Uint64VarP(
+		&scalingMaxDurationSecs,
+		"max-duration",
+		"d",
+		0,
+		"ScalingMaxDurationSecs",
+	)
+	cmd.Flags().Uint64VarP(
+		&scalingIntervalSecs,
+		"interval",
+		"i",
+		0,
+		"ScalingIntervalSecs",
+	)
+	cmd.Flags().Float64VarP(
+		&hostMinCapacityPercent,
+		"min-capacity",
+		"c",
+		0,
+		"HostMinCapacityPercent",
 	)
 	return cmd
 }
