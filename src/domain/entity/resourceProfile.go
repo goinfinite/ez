@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"errors"
-
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
@@ -29,18 +27,6 @@ func NewResourceProfile(
 	scalingIntervalSecs *uint64,
 	hostMinCapacityPercent valueObject.HostMinCapacity,
 ) (ResourceProfile, error) {
-	if scalingThreshold != nil && *scalingThreshold == 0 {
-		return ResourceProfile{}, errors.New("ScalingThresholdInvalid")
-	}
-
-	if scalingMaxDurationSecs != nil && *scalingMaxDurationSecs == 0 {
-		scalingMaxDurationSecs = nil
-	}
-
-	if scalingIntervalSecs != nil && *scalingIntervalSecs == 0 {
-		scalingIntervalSecs = nil
-	}
-
 	return ResourceProfile{
 		Id:                     id,
 		Name:                   name,
