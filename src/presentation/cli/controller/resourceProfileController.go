@@ -173,7 +173,7 @@ func AddResourceProfileController() *cobra.Command {
 	cmd.Flags().Uint64VarP(
 		&scalingIntervalSecs,
 		"interval",
-		"i",
+		"v",
 		0,
 		"ScalingIntervalSecs",
 	)
@@ -327,7 +327,7 @@ func UpdateResourceProfileController() *cobra.Command {
 	cmd.Flags().Uint64VarP(
 		&scalingIntervalSecs,
 		"interval",
-		"i",
+		"v",
 		0,
 		"ScalingIntervalSecs",
 	)
