@@ -6,12 +6,15 @@ import (
 )
 
 type ResourceProfile struct {
-	ID               uint   `gorm:"primarykey"`
-	Name             string `gorm:"not null"`
-	BaseSpecs        string `gorm:"not null"`
-	MaxSpecs         *string
-	ScalingPolicy    *string
-	ScalingThreshold *uint64
+	ID                     uint   `gorm:"primarykey"`
+	Name                   string `gorm:"not null"`
+	BaseSpecs              string `gorm:"not null"`
+	MaxSpecs               *string
+	ScalingPolicy          *string
+	ScalingThreshold       *uint64
+	ScalingMaxDurationSecs *uint64
+	ScalingIntervalSecs    *uint64
+	HostMinCapacityPercent *float64
 }
 
 func (ResourceProfile) TableName() string {
@@ -37,13 +40,34 @@ func (ResourceProfile) ToModel(entity entity.ResourceProfile) (ResourceProfile, 
 		scalingThresholdPtr = &scalingThreshold
 	}
 
+	var scalingMaxDurationSecsPtr *uint64
+	if entity.ScalingMaxDurationSecs != nil {
+		scalingMaxDurationSecs := uint64(*entity.ScalingMaxDurationSecs)
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
+
+	var scalingIntervalSecsPtr *uint64
+	if entity.ScalingIntervalSecs != nil {
+		scalingIntervalSecs := uint64(*entity.ScalingIntervalSecs)
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+
+	var hostMinCapacityPercentPtr *float64
+	if entity.HostMinCapacityPercent != nil {
+		hostMinCapacityPercent := float64(*entity.HostMinCapacityPercent)
+		hostMinCapacityPercentPtr = &hostMinCapacityPercent
+	}
+
 	return ResourceProfile{
-		ID:               uint(entity.Id.Get()),
-		Name:             entity.Name.String(),
-		BaseSpecs:        entity.BaseSpecs.String(),
-		MaxSpecs:         maxSpecsPtr,
-		ScalingPolicy:    scalingPolicyPtr,
-		ScalingThreshold: scalingThresholdPtr,
+		ID:                     uint(entity.Id.Get()),
+		Name:                   entity.Name.String(),
+		BaseSpecs:              entity.BaseSpecs.String(),
+		MaxSpecs:               maxSpecsPtr,
+		ScalingPolicy:          scalingPolicyPtr,
+		ScalingThreshold:       scalingThresholdPtr,
+		ScalingMaxDurationSecs: scalingMaxDurationSecsPtr,
+		ScalingIntervalSecs:    scalingIntervalSecsPtr,
+		HostMinCapacityPercent: hostMinCapacityPercentPtr,
 	}, nil
 }
 
@@ -87,6 +111,27 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 		scalingThresholdPtr = &scalingThreshold
 	}
 
+	var scalingMaxDurationSecsPtr *uint64
+	if model.ScalingMaxDurationSecs != nil {
+		scalingMaxDurationSecs := uint64(*model.ScalingMaxDurationSecs)
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
+
+	var scalingIntervalSecsPtr *uint64
+	if model.ScalingIntervalSecs != nil {
+		scalingIntervalSecs := uint64(*model.ScalingIntervalSecs)
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+
+	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
+	if model.HostMinCapacityPercent != nil {
+		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(*model.HostMinCapacityPercent)
+		if err != nil {
+			return entity.ResourceProfile{}, err
+		}
+		hostMinCapacityPercentPtr = &hostMinCapacityPercent
+	}
+
 	return entity.NewResourceProfile(
 		rpId,
 		name,
@@ -94,5 +139,8 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 		maxSpecsPtr,
 		scalingPolicyPtr,
 		scalingThresholdPtr,
-	), nil
+		scalingMaxDurationSecsPtr,
+		scalingIntervalSecsPtr,
+		hostMinCapacityPercentPtr,
+	)
 }
