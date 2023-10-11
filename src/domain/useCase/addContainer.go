@@ -16,7 +16,7 @@ func AddContainer(
 	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
 	addContainer dto.AddContainer,
 ) error {
-	defaultResourceProfileId := valueObject.ResourceProfileId(0)
+	defaultResourceProfileId := valueObject.ResourceProfileId(1)
 
 	if addContainer.ResourceProfileId == nil {
 		addContainer.ResourceProfileId = &defaultResourceProfileId

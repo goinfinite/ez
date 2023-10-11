@@ -20,7 +20,7 @@ func DeleteResourceProfile(
 		return errors.New("ResourceProfileNotFound")
 	}
 
-	defaultResourceProfileId := valueObject.ResourceProfileId(0)
+	defaultResourceProfileId := valueObject.ResourceProfileId(1)
 	if profileId == defaultResourceProfileId {
 		return errors.New("CannotDeleteDefaultResourceProfile")
 	}
