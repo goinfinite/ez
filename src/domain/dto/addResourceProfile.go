@@ -10,7 +10,7 @@ type AddResourceProfile struct {
 	ScalingThreshold       *uint64                         `json:"scalingThreshold"`
 	ScalingMaxDurationSecs *uint64                         `json:"scalingMaxDurationSecs"`
 	ScalingIntervalSecs    *uint64                         `json:"scalingIntervalSecs"`
-	HostMinCapacityPercent valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
+	HostMinCapacityPercent *valueObject.HostMinCapacity    `json:"hostMinCapacityPercent"`
 }
 
 func NewAddResourceProfile(
@@ -21,7 +21,7 @@ func NewAddResourceProfile(
 	scalingThreshold *uint64,
 	scalingMaxDurationSecs *uint64,
 	scalingIntervalSecs *uint64,
-	hostMinCapacityPercent valueObject.HostMinCapacity,
+	hostMinCapacityPercent *valueObject.HostMinCapacity,
 ) AddResourceProfile {
 	return AddResourceProfile{
 		Name:                   name,
