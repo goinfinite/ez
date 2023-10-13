@@ -1,12 +1,10 @@
 package dbModel
 
 import (
-	"errors"
 	"time"
 
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
-	"gorm.io/gorm"
 )
 
 type Account struct {
@@ -81,27 +79,4 @@ func (model Account) ToEntity() (entity.Account, error) {
 		valueObject.UnixTime(model.CreatedAt.Unix()),
 		valueObject.UnixTime(model.UpdatedAt.Unix()),
 	), nil
-}
-
-func (model Account) Delete(dbSvc *gorm.DB) error {
-	relatedTables := []string{
-		AccountQuota{}.TableName(),
-		AccountQuotaUsage{}.TableName(),
-	}
-
-	for _, tableName := range relatedTables {
-		err := dbSvc.Exec(
-			"DELETE FROM "+tableName+" WHERE account_id = ?", model.ID,
-		).Error
-		if err != nil {
-			return errors.New("DeleteAccRelatedTablesDbError")
-		}
-	}
-
-	err := dbSvc.Delete(model, model.ID).Error
-	if err != nil {
-		return errors.New("DeleteAccDbError")
-	}
-
-	return nil
 }
