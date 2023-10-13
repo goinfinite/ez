@@ -18,7 +18,7 @@ func NewResourceProfileCmdRepo(dbSvc *gorm.DB) *ResourceProfileCmdRepo {
 func (repo ResourceProfileCmdRepo) Add(
 	addDto dto.AddResourceProfile,
 ) error {
-	resourceProfileModel, err := dbModel.ResourceProfile{}.ToModel(addDto)
+	resourceProfileModel, err := dbModel.ResourceProfile{}.FromAddDtoToModel(addDto)
 	if err != nil {
 		return err
 	}
