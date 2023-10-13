@@ -39,3 +39,21 @@ func NewResourceProfile(
 		HostMinCapacityPercent: hostMinCapacityPercent,
 	}, nil
 }
+
+func DefaultResourceProfile() ResourceProfile {
+	profileId, _ := valueObject.NewResourceProfileId(1)
+	profileName, _ := valueObject.NewResourceProfileName("default")
+	baseSpecs, _ := valueObject.NewContainerSpecsFromString("0.5:1073741824")
+
+	return ResourceProfile{
+		Id:                     profileId,
+		Name:                   profileName,
+		BaseSpecs:              baseSpecs,
+		MaxSpecs:               nil,
+		ScalingPolicy:          nil,
+		ScalingThreshold:       nil,
+		ScalingMaxDurationSecs: nil,
+		ScalingIntervalSecs:    nil,
+		HostMinCapacityPercent: nil,
+	}
+}
