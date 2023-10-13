@@ -2,6 +2,7 @@ package infra
 
 import (
 	"encoding/hex"
+	"errors"
 	"os"
 	"os/exec"
 	"os/user"
@@ -163,9 +164,26 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 		return err
 	}
 
-	err = dbModel.Account{ID: uint(accId.Get())}.Delete(repo.dbSvc)
+	model := dbModel.Account{}
+	modelId := accId.Get()
+
+	relatedTables := []string{
+		dbModel.AccountQuota{}.TableName(),
+		dbModel.AccountQuotaUsage{}.TableName(),
+	}
+
+	for _, tableName := range relatedTables {
+		err := repo.dbSvc.Exec(
+			"DELETE FROM "+tableName+" WHERE account_id = ?", modelId,
+		).Error
+		if err != nil {
+			return errors.New("DeleteAccRelatedTablesDbError")
+		}
+	}
+
+	err = repo.dbSvc.Delete(model, modelId).Error
 	if err != nil {
-		return err
+		return errors.New("DeleteAccDbError")
 	}
 
 	return nil
