@@ -22,6 +22,12 @@ func (ResourceProfile) TableName() string {
 	return "resource_profiles"
 }
 
+func (model ResourceProfile) DefaultEntry() ResourceProfile {
+	defaultEntity := entity.DefaultResourceProfile()
+	defaultModel, _ := model.ToModel(defaultEntity)
+	return defaultModel
+}
+
 func (ResourceProfile) ToModel(entity entity.ResourceProfile) (ResourceProfile, error) {
 	var maxSpecsPtr *string
 	if entity.MaxSpecs != nil {
