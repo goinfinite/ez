@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/repository"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
@@ -20,7 +21,7 @@ func DeleteResourceProfile(
 		return errors.New("ResourceProfileNotFound")
 	}
 
-	defaultResourceProfileId := valueObject.ResourceProfileId(1)
+	defaultResourceProfileId := entity.DefaultResourceProfile().Id
 	if profileId == defaultResourceProfileId {
 		return errors.New("CannotDeleteDefaultResourceProfile")
 	}

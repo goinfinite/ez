@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/speedianet/sfm/src/domain/dto"
+	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/repository"
-	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
 func AddContainer(
@@ -16,8 +16,7 @@ func AddContainer(
 	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
 	addContainer dto.AddContainer,
 ) error {
-	defaultResourceProfileId := valueObject.ResourceProfileId(1)
-
+	defaultResourceProfileId := entity.DefaultResourceProfile().Id
 	if addContainer.ResourceProfileId == nil {
 		addContainer.ResourceProfileId = &defaultResourceProfileId
 	}
