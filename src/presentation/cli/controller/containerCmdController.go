@@ -122,7 +122,7 @@ func AddContainerController() *cobra.Command {
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
+			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
 
 			err := useCase.AddContainer(
 				containerCmdRepo,
@@ -196,7 +196,7 @@ func UpdateContainerController() *cobra.Command {
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			resourceProfileQueryRepo := infra.ResourceProfileQueryRepo{}
+			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
