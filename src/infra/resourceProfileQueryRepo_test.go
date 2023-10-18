@@ -17,4 +17,11 @@ func TestResourceProfileQueryRepo(t *testing.T) {
 			t.Errorf("GetResourceProfilesFailed: %v", err)
 		}
 	})
+
+	t.Run("GetResourceProfileById", func(t *testing.T) {
+		_, err := profileQueryRepo.GetById(1)
+		if err != nil {
+			t.Errorf("GetResourceProfileByIdFailed: %v", err)
+		}
+	})
 }

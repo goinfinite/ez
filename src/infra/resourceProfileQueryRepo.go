@@ -24,7 +24,7 @@ func (repo ResourceProfileQueryRepo) Get() ([]entity.ResourceProfile, error) {
 
 	err := repo.dbSvc.Model(&dbModel.ResourceProfile{}).Find(&profileModels).Error
 	if err != nil {
-		return profileEntities, errors.New("DatabaseQueryResourceProfileError")
+		return profileEntities, errors.New("DbQueryResourceProfilesError")
 	}
 
 	for _, profileModel := range profileModels {
@@ -43,5 +43,16 @@ func (repo ResourceProfileQueryRepo) Get() ([]entity.ResourceProfile, error) {
 func (repo ResourceProfileQueryRepo) GetById(
 	id valueObject.ResourceProfileId,
 ) (entity.ResourceProfile, error) {
-	return entity.ResourceProfile{}, nil
+	var profileModel dbModel.ResourceProfile
+	err := repo.dbSvc.Model(&dbModel.ResourceProfile{}).First(&profileModel).Error
+	if err != nil {
+		return entity.ResourceProfile{}, errors.New("DbQueryResourceProfileError")
+	}
+
+	profileEntity, err := profileModel.ToEntity()
+	if err != nil {
+		return entity.ResourceProfile{}, errors.New("ProfileModelToEntityError")
+	}
+
+	return profileEntity, nil
 }
