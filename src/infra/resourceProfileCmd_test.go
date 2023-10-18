@@ -74,4 +74,13 @@ func TestResourceProfileCmdRepo(t *testing.T) {
 			t.Errorf("UpdateResourceProfileFailed: %v", err)
 		}
 	})
+
+	t.Run("DeleteResourceProfile", func(t *testing.T) {
+		id := valueObject.NewResourceProfileIdPanic(2)
+
+		err := resourceProfileCmdRepo.Delete(id)
+		if err != nil {
+			t.Errorf("DeleteResourceProfileFailed: %v", err)
+		}
+	})
 }

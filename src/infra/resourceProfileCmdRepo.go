@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"errors"
+
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
@@ -85,5 +87,10 @@ func (repo ResourceProfileCmdRepo) Update(
 func (repo ResourceProfileCmdRepo) Delete(
 	profileId valueObject.ResourceProfileId,
 ) error {
+	err := repo.dbSvc.Delete(dbModel.ResourceProfile{}, profileId.Get()).Error
+	if err != nil {
+		return errors.New("DeleteResourceProfileDbError")
+	}
+
 	return nil
 }
