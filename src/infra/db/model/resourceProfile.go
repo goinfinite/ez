@@ -28,7 +28,9 @@ func (model ResourceProfile) DefaultEntry() ResourceProfile {
 	return defaultModel
 }
 
-func (ResourceProfile) ToModel(entity entity.ResourceProfile) (ResourceProfile, error) {
+func (ResourceProfile) ToModel(
+	entity entity.ResourceProfile,
+) (ResourceProfile, error) {
 	var maxSpecsPtr *string
 	if entity.MaxSpecs != nil {
 		maxSpecs := entity.MaxSpecs.String()
@@ -132,7 +134,9 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
 	if model.HostMinCapacityPercent != nil {
-		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(*model.HostMinCapacityPercent)
+		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
+			*model.HostMinCapacityPercent,
+		)
 		if err != nil {
 			return entity.ResourceProfile{}, err
 		}
@@ -152,7 +156,9 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 	)
 }
 
-func (ResourceProfile) FromAddDtoToModel(dto dto.AddResourceProfile) (ResourceProfile, error) {
+func (ResourceProfile) FromAddDtoToModel(
+	dto dto.AddResourceProfile,
+) (ResourceProfile, error) {
 	var maxSpecsPtr *string
 	if dto.MaxSpecs != nil {
 		maxSpecs := dto.MaxSpecs.String()
