@@ -14,6 +14,8 @@ func TestResourceProfileCmdRepo(t *testing.T) {
 	resourceProfileCmdRepo := NewResourceProfileCmdRepo(dbSvc)
 
 	t.Run("AddResourceProfile", func(t *testing.T) {
+		name := valueObject.NewResourceProfileNamePanic("testResourceProfile")
+
 		baseSpecs := valueObject.NewContainerSpecs(
 			valueObject.NewCpuCoresCountPanic(1),
 			valueObject.NewBytePanic(1073741824),
@@ -30,20 +32,46 @@ func TestResourceProfileCmdRepo(t *testing.T) {
 		interval := uint64(86400)
 		hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(10)
 
-		addDto := dto.AddResourceProfile{
-			Name:                   "testResourceProfile",
-			BaseSpecs:              baseSpecs,
-			MaxSpecs:               &maxSpecs,
-			ScalingPolicy:          &scalingPolicy,
-			ScalingThreshold:       &threshold,
-			ScalingMaxDurationSecs: &maxDuration,
-			ScalingIntervalSecs:    &interval,
-			HostMinCapacityPercent: &hostMinCapacityPercent,
-		}
+		addDto := dto.NewAddResourceProfile(
+			name,
+			baseSpecs,
+			&maxSpecs,
+			&scalingPolicy,
+			&threshold,
+			&maxDuration,
+			&interval,
+			&hostMinCapacityPercent,
+		)
 
 		err := resourceProfileCmdRepo.Add(addDto)
 		if err != nil {
 			t.Errorf("AddResourceProfileFailed: %v", err)
+		}
+	})
+
+	t.Run("UpdateResourceProfile", func(t *testing.T) {
+		id := valueObject.NewResourceProfileIdPanic(2)
+
+		maxSpecs := valueObject.NewContainerSpecs(
+			valueObject.NewCpuCoresCountPanic(4),
+			valueObject.NewBytePanic(4294967296),
+		)
+
+		addDto := dto.NewUpdateResourceProfile(
+			id,
+			nil,
+			nil,
+			&maxSpecs,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+		)
+
+		err := resourceProfileCmdRepo.Update(addDto)
+		if err != nil {
+			t.Errorf("UpdateResourceProfileFailed: %v", err)
 		}
 	})
 }

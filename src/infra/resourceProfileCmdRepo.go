@@ -34,6 +34,51 @@ func (repo ResourceProfileCmdRepo) Add(
 func (repo ResourceProfileCmdRepo) Update(
 	updateDto dto.UpdateResourceProfile,
 ) error {
+	updateMap := map[string]interface{}{}
+
+	if updateDto.Name != nil {
+		updateMap["name"] = updateDto.Name.String()
+	}
+
+	if updateDto.BaseSpecs != nil {
+		updateMap["base_specs"] = updateDto.BaseSpecs.String()
+	}
+
+	if updateDto.MaxSpecs != nil {
+		updateMap["max_specs"] = updateDto.MaxSpecs.String()
+	}
+
+	if updateDto.ScalingPolicy != nil {
+		updateMap["scaling_policy"] = updateDto.ScalingPolicy.String()
+	}
+
+	if updateDto.ScalingThreshold != nil {
+		updateMap["scaling_threshold"] = uint64(*updateDto.ScalingThreshold)
+	}
+
+	if updateDto.ScalingMaxDurationSecs != nil {
+		updateMap["scaling_max_duration_secs"] = uint64(
+			*updateDto.ScalingMaxDurationSecs,
+		)
+	}
+
+	if updateDto.ScalingIntervalSecs != nil {
+		updateMap["scaling_interval_secs"] = uint64(
+			*updateDto.ScalingIntervalSecs,
+		)
+	}
+
+	if updateDto.HostMinCapacityPercent != nil {
+		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Get()
+	}
+
+	err := repo.dbSvc.Table(dbModel.ResourceProfile{}.TableName()).
+		Where("id = ?", updateDto.Id.String()).
+		Updates(updateMap).Error
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
