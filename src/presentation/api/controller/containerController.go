@@ -2,6 +2,7 @@ package apiController
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/sfm/src/domain/dto"
@@ -165,4 +166,75 @@ func AddContainerController(c echo.Context) error {
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusCreated, "ContainerCreated")
+}
+
+// UpdateContainer godoc
+// @Summary      UpdateContainer
+// @Description  Update an container.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accId and containerId are required.)"
+// @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
+// @Router       /container/ [put]
+func UpdateContainerController(c echo.Context) error {
+	requiredParams := []string{"accId", "containerId"}
+	requestBody, _ := apiHelper.GetRequestBody(c)
+
+	apiHelper.CheckMissingParams(requestBody, requiredParams)
+
+	accId := valueObject.NewAccountIdPanic(requestBody["accId"])
+	containerId := valueObject.NewContainerIdPanic(
+		requestBody["containerId"].(string),
+	)
+
+	var containerStatusPtr *bool
+	if requestBody["status"] != nil {
+		containerStatus, err := strconv.ParseBool(requestBody["status"].(string))
+		if err != nil {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, "InvalidContainerStatus",
+			)
+		}
+		containerStatusPtr = &containerStatus
+	}
+
+	var resourceProfileIdPtr *valueObject.ResourceProfileId
+	if requestBody["resourceProfileId"] != nil {
+		resourceProfileId := valueObject.NewResourceProfileIdPanic(
+			requestBody["resourceProfileId"],
+		)
+		resourceProfileIdPtr = &resourceProfileId
+	}
+
+	updateContainerDto := dto.NewUpdateContainer(
+		accId,
+		containerId,
+		containerStatusPtr,
+		resourceProfileIdPtr,
+	)
+
+	dbSvc := c.Get("dbSvc").(*gorm.DB)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	containerCmdRepo := infra.ContainerCmdRepo{}
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+	resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
+
+	err := useCase.UpdateContainer(
+		containerQueryRepo,
+		containerCmdRepo,
+		accQueryRepo,
+		accCmdRepo,
+		resourceProfileQueryRepo,
+		updateContainerDto,
+	)
+	if err != nil {
+		return apiHelper.ResponseWrapper(
+			c, http.StatusInternalServerError, err.Error(),
+		)
+	}
+
+	return apiHelper.ResponseWrapper(c, http.StatusOK, "ContainerUpdated")
 }
