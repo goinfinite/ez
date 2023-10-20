@@ -1,6 +1,7 @@
 package cliController
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/speedianet/sfm/src/domain/dto"
@@ -164,7 +165,7 @@ func UpdateContainerController() *cobra.Command {
 
 	var accId uint64
 	var containerIdStr string
-	var containerStatus bool
+	var containerStatusStr string
 	var resourceProfileId uint64
 
 	cmd := &cobra.Command{
@@ -177,6 +178,15 @@ func UpdateContainerController() *cobra.Command {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
+			var containerStatusPtr *bool
+			if containerStatusStr != "" {
+				containerStatus, err := strconv.ParseBool(containerStatusStr)
+				if err != nil {
+					panic("InvalidContainerStatus")
+				}
+				containerStatusPtr = &containerStatus
+			}
+
 			var resourceProfileIdPtr *valueObject.ResourceProfileId
 			if resourceProfileId != 0 {
 				resourceProfileId := valueObject.NewResourceProfileIdPanic(
@@ -188,7 +198,7 @@ func UpdateContainerController() *cobra.Command {
 			updateContainerDto := dto.NewUpdateContainer(
 				accId,
 				containerId,
-				containerStatus,
+				containerStatusPtr,
 				resourceProfileIdPtr,
 			)
 
@@ -218,7 +228,7 @@ func UpdateContainerController() *cobra.Command {
 	cmd.MarkFlagRequired("acc-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
-	cmd.Flags().BoolVarP(&containerStatus, "status", "s", false, "ContainerStatus")
+	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "ContainerStatus (true or false)")
 	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
 	return cmd
 }
