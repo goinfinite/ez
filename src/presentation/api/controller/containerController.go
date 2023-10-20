@@ -170,7 +170,7 @@ func AddContainerController(c echo.Context) error {
 
 // UpdateContainer godoc
 // @Summary      UpdateContainer
-// @Description  Update an container.
+// @Description  Update a container.
 // @Tags         container
 // @Accept       json
 // @Produce      json
@@ -237,4 +237,38 @@ func UpdateContainerController(c echo.Context) error {
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "ContainerUpdated")
+}
+
+// DeleteContainer godoc
+// @Summary      DeleteContainer
+// @Description  Delete a container.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        accId 	  path   string  true  "AccountId"
+// @Param        containerId 	  path   string  true  "ContainerId"
+// @Success      200 {object} object{} "ContainerDeleted"
+// @Router       /container/{accId}/{containerId}/ [delete]
+func DeleteContainerController(c echo.Context) error {
+	accId := valueObject.NewAccountIdPanic(c.Param("accId"))
+	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
+
+	dbSvc := c.Get("dbSvc").(*gorm.DB)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	containerCmdRepo := infra.ContainerCmdRepo{}
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+
+	err := useCase.DeleteContainer(
+		containerQueryRepo,
+		containerCmdRepo,
+		accCmdRepo,
+		accId,
+		containerId,
+	)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	return apiHelper.ResponseWrapper(c, http.StatusOK, "ContainerDeleted")
 }
