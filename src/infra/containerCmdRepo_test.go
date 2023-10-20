@@ -92,7 +92,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		updateContainer := dto.NewUpdateContainer(
 			accId,
 			containers[0].Id,
-			false,
+			nil,
 			nil,
 		)
 

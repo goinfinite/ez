@@ -110,10 +110,14 @@ func (repo ContainerCmdRepo) Update(
 	currentContainer entity.Container,
 	updateContainer dto.UpdateContainer,
 ) error {
-	shouldUpdateStatus := updateContainer.Status != currentContainer.Status
-	if shouldUpdateStatus {
+	if updateContainer.Status != nil {
+		shouldUpdateStatus := updateContainer.Status != &currentContainer.Status
+		if !shouldUpdateStatus {
+			return nil
+		}
+
 		actionToPerform := "start"
-		if !updateContainer.Status {
+		if !*updateContainer.Status {
 			actionToPerform = "stop"
 		}
 
