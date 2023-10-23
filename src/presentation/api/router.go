@@ -28,17 +28,17 @@ func authRoutes(baseRoute *echo.Group) {
 	authGroup.POST("/login/", apiController.AuthLoginController)
 }
 
-func o11yRoutes(baseRoute *echo.Group) {
-	o11yGroup := baseRoute.Group("/o11y")
-	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
-}
-
 func accountRoutes(baseRoute *echo.Group) {
 	accountGroup := baseRoute.Group("/account")
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
 	go apiController.AutoUpdateAccountsQuotaUsageController()
+}
+
+func o11yRoutes(baseRoute *echo.Group) {
+	o11yGroup := baseRoute.Group("/o11y")
+	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
 func registerApiRoutes(baseRoute *echo.Group) {
