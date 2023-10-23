@@ -36,6 +36,17 @@ func accountRoutes(baseRoute *echo.Group) {
 	go apiController.AutoUpdateAccountsQuotaUsageController()
 }
 
+func containerRoutes(baseRoute *echo.Group) {
+	containerGroup := baseRoute.Group("/container")
+	containerGroup.GET("/", apiController.GetContainersController)
+	containerGroup.POST("/", apiController.AddContainerController)
+	containerGroup.PUT("/", apiController.UpdateContainerController)
+	containerGroup.DELETE(
+		"/:accId/:containerId",
+		apiController.DeleteContainerController,
+	)
+}
+
 func o11yRoutes(baseRoute *echo.Group) {
 	o11yGroup := baseRoute.Group("/o11y")
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
@@ -44,6 +55,7 @@ func o11yRoutes(baseRoute *echo.Group) {
 func registerApiRoutes(baseRoute *echo.Group) {
 	swaggerRoute(baseRoute)
 	authRoutes(baseRoute)
-	o11yRoutes(baseRoute)
 	accountRoutes(baseRoute)
+	containerRoutes(baseRoute)
+	o11yRoutes(baseRoute)
 }
