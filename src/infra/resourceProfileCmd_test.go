@@ -8,13 +8,13 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-func TestResourceProfileCmdRepo(t *testing.T) {
+func TestContainerProfileCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	dbSvc := testHelpers.GetDbSvc()
-	resourceProfileCmdRepo := NewResourceProfileCmdRepo(dbSvc)
+	containerProfileCmdRepo := NewContainerProfileCmdRepo(dbSvc)
 
-	t.Run("AddResourceProfile", func(t *testing.T) {
-		name := valueObject.NewResourceProfileNamePanic("testResourceProfile")
+	t.Run("AddContainerProfile", func(t *testing.T) {
+		name := valueObject.NewContainerProfileNamePanic("testContainerProfile")
 
 		baseSpecs := valueObject.NewContainerSpecs(
 			valueObject.NewCpuCoresCountPanic(1),
@@ -32,7 +32,7 @@ func TestResourceProfileCmdRepo(t *testing.T) {
 		interval := uint64(86400)
 		hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(10)
 
-		addDto := dto.NewAddResourceProfile(
+		addDto := dto.NewAddContainerProfile(
 			name,
 			baseSpecs,
 			&maxSpecs,
@@ -43,21 +43,21 @@ func TestResourceProfileCmdRepo(t *testing.T) {
 			&hostMinCapacityPercent,
 		)
 
-		err := resourceProfileCmdRepo.Add(addDto)
+		err := containerProfileCmdRepo.Add(addDto)
 		if err != nil {
-			t.Errorf("AddResourceProfileFailed: %v", err)
+			t.Errorf("AddContainerProfileFailed: %v", err)
 		}
 	})
 
-	t.Run("UpdateResourceProfile", func(t *testing.T) {
-		id := valueObject.NewResourceProfileIdPanic(2)
+	t.Run("UpdateContainerProfile", func(t *testing.T) {
+		id := valueObject.NewContainerProfileIdPanic(2)
 
 		maxSpecs := valueObject.NewContainerSpecs(
 			valueObject.NewCpuCoresCountPanic(4),
 			valueObject.NewBytePanic(4294967296),
 		)
 
-		addDto := dto.NewUpdateResourceProfile(
+		addDto := dto.NewUpdateContainerProfile(
 			id,
 			nil,
 			nil,
@@ -69,18 +69,18 @@ func TestResourceProfileCmdRepo(t *testing.T) {
 			nil,
 		)
 
-		err := resourceProfileCmdRepo.Update(addDto)
+		err := containerProfileCmdRepo.Update(addDto)
 		if err != nil {
-			t.Errorf("UpdateResourceProfileFailed: %v", err)
+			t.Errorf("UpdateContainerProfileFailed: %v", err)
 		}
 	})
 
-	t.Run("DeleteResourceProfile", func(t *testing.T) {
-		id := valueObject.NewResourceProfileIdPanic(2)
+	t.Run("DeleteContainerProfile", func(t *testing.T) {
+		id := valueObject.NewContainerProfileIdPanic(2)
 
-		err := resourceProfileCmdRepo.Delete(id)
+		err := containerProfileCmdRepo.Delete(id)
 		if err != nil {
-			t.Errorf("DeleteResourceProfileFailed: %v", err)
+			t.Errorf("DeleteContainerProfileFailed: %v", err)
 		}
 	})
 }

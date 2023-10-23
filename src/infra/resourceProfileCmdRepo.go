@@ -9,23 +9,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type ResourceProfileCmdRepo struct {
+type ContainerProfileCmdRepo struct {
 	dbSvc *gorm.DB
 }
 
-func NewResourceProfileCmdRepo(dbSvc *gorm.DB) *ResourceProfileCmdRepo {
-	return &ResourceProfileCmdRepo{dbSvc: dbSvc}
+func NewContainerProfileCmdRepo(dbSvc *gorm.DB) *ContainerProfileCmdRepo {
+	return &ContainerProfileCmdRepo{dbSvc: dbSvc}
 }
 
-func (repo ResourceProfileCmdRepo) Add(
-	addDto dto.AddResourceProfile,
+func (repo ContainerProfileCmdRepo) Add(
+	addDto dto.AddContainerProfile,
 ) error {
-	resourceProfileModel, err := dbModel.ResourceProfile{}.FromAddDtoToModel(addDto)
+	containerProfileModel, err := dbModel.ContainerProfile{}.FromAddDtoToModel(addDto)
 	if err != nil {
 		return err
 	}
 
-	err = repo.dbSvc.Create(&resourceProfileModel).Error
+	err = repo.dbSvc.Create(&containerProfileModel).Error
 	if err != nil {
 		return err
 	}
@@ -33,8 +33,8 @@ func (repo ResourceProfileCmdRepo) Add(
 	return nil
 }
 
-func (repo ResourceProfileCmdRepo) Update(
-	updateDto dto.UpdateResourceProfile,
+func (repo ContainerProfileCmdRepo) Update(
+	updateDto dto.UpdateContainerProfile,
 ) error {
 	updateMap := map[string]interface{}{}
 
@@ -74,7 +74,7 @@ func (repo ResourceProfileCmdRepo) Update(
 		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Get()
 	}
 
-	err := repo.dbSvc.Table(dbModel.ResourceProfile{}.TableName()).
+	err := repo.dbSvc.Table(dbModel.ContainerProfile{}.TableName()).
 		Where("id = ?", updateDto.Id.String()).
 		Updates(updateMap).Error
 	if err != nil {
@@ -84,12 +84,12 @@ func (repo ResourceProfileCmdRepo) Update(
 	return nil
 }
 
-func (repo ResourceProfileCmdRepo) Delete(
-	profileId valueObject.ResourceProfileId,
+func (repo ContainerProfileCmdRepo) Delete(
+	profileId valueObject.ContainerProfileId,
 ) error {
-	err := repo.dbSvc.Delete(dbModel.ResourceProfile{}, profileId.Get()).Error
+	err := repo.dbSvc.Delete(dbModel.ContainerProfile{}, profileId.Get()).Error
 	if err != nil {
-		return errors.New("DeleteResourceProfileDbError")
+		return errors.New("DeleteContainerProfileDbError")
 	}
 
 	return nil

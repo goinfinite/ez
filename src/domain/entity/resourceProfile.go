@@ -4,21 +4,21 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-type ResourceProfile struct {
-	Id                     valueObject.ResourceProfileId   `json:"id"`
-	Name                   valueObject.ResourceProfileName `json:"name"`
-	BaseSpecs              valueObject.ContainerSpecs      `json:"baseSpecs"`
-	MaxSpecs               *valueObject.ContainerSpecs     `json:"maxSpecs"`
-	ScalingPolicy          *valueObject.ScalingPolicy      `json:"scalingPolicy"`
-	ScalingThreshold       *uint64                         `json:"scalingThreshold"`
-	ScalingMaxDurationSecs *uint64                         `json:"scalingMaxDurationSecs"`
-	ScalingIntervalSecs    *uint64                         `json:"scalingIntervalSecs"`
-	HostMinCapacityPercent *valueObject.HostMinCapacity    `json:"hostMinCapacityPercent"`
+type ContainerProfile struct {
+	Id                     valueObject.ContainerProfileId   `json:"id"`
+	Name                   valueObject.ContainerProfileName `json:"name"`
+	BaseSpecs              valueObject.ContainerSpecs       `json:"baseSpecs"`
+	MaxSpecs               *valueObject.ContainerSpecs      `json:"maxSpecs"`
+	ScalingPolicy          *valueObject.ScalingPolicy       `json:"scalingPolicy"`
+	ScalingThreshold       *uint64                          `json:"scalingThreshold"`
+	ScalingMaxDurationSecs *uint64                          `json:"scalingMaxDurationSecs"`
+	ScalingIntervalSecs    *uint64                          `json:"scalingIntervalSecs"`
+	HostMinCapacityPercent *valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
 }
 
-func NewResourceProfile(
-	id valueObject.ResourceProfileId,
-	name valueObject.ResourceProfileName,
+func NewContainerProfile(
+	id valueObject.ContainerProfileId,
+	name valueObject.ContainerProfileName,
 	baseSpecs valueObject.ContainerSpecs,
 	maxSpecs *valueObject.ContainerSpecs,
 	scalingPolicy *valueObject.ScalingPolicy,
@@ -26,8 +26,8 @@ func NewResourceProfile(
 	scalingMaxDurationSecs *uint64,
 	scalingIntervalSecs *uint64,
 	hostMinCapacityPercent *valueObject.HostMinCapacity,
-) (ResourceProfile, error) {
-	return ResourceProfile{
+) (ContainerProfile, error) {
+	return ContainerProfile{
 		Id:                     id,
 		Name:                   name,
 		BaseSpecs:              baseSpecs,
@@ -40,12 +40,12 @@ func NewResourceProfile(
 	}, nil
 }
 
-func DefaultResourceProfile() ResourceProfile {
-	profileId, _ := valueObject.NewResourceProfileId(1)
-	profileName, _ := valueObject.NewResourceProfileName("default")
+func DefaultContainerProfile() ContainerProfile {
+	profileId, _ := valueObject.NewContainerProfileId(1)
+	profileName, _ := valueObject.NewContainerProfileName("default")
 	baseSpecs, _ := valueObject.NewContainerSpecsFromString("0.5:1073741824")
 
-	return ResourceProfile{
+	return ContainerProfile{
 		Id:                     profileId,
 		Name:                   profileName,
 		BaseSpecs:              baseSpecs,

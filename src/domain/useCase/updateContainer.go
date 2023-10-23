@@ -13,7 +13,7 @@ func UpdateContainer(
 	containerCmdRepo repository.ContainerCmdRepo,
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
-	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
+	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	updateContainer dto.UpdateContainer,
 ) error {
 	currentContainer, err := containerQueryRepo.GetById(
@@ -24,13 +24,13 @@ func UpdateContainer(
 		return errors.New("ContainerNotFound")
 	}
 
-	shouldUpdateQuota := updateContainer.ResourceProfileId != nil
+	shouldUpdateQuota := updateContainer.ProfileId != nil
 	if shouldUpdateQuota {
 		err = CheckAccountQuota(
 			accQueryRepo,
 			updateContainer.AccountId,
-			resourceProfileQueryRepo,
-			*updateContainer.ResourceProfileId,
+			containerProfileQueryRepo,
+			*updateContainer.ProfileId,
 		)
 		if err != nil {
 			return err

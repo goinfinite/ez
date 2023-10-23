@@ -13,20 +13,20 @@ type ContainerCmdRepo struct {
 }
 
 func (repo ContainerCmdRepo) getBaseSpecs(
-	resourceProfileId valueObject.ResourceProfileId,
+	profileId valueObject.ContainerProfileId,
 ) (valueObject.ContainerSpecs, error) {
-	resourceProfile, err := ResourceProfileQueryRepo{}.GetById(
-		resourceProfileId,
+	containerProfile, err := ContainerProfileQueryRepo{}.GetById(
+		profileId,
 	)
 	if err != nil {
 		return valueObject.ContainerSpecs{}, err
 	}
 
-	return resourceProfile.BaseSpecs, nil
+	return containerProfile.BaseSpecs, nil
 }
 
 func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
-	containerName := addContainer.ResourceProfileId.String() +
+	containerName := addContainer.ProfileId.String() +
 		"-" + addContainer.Hostname.String()
 
 	runParams := []string{
@@ -50,7 +50,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, envFlags...)
 	}
 
-	baseSpecs, err := repo.getBaseSpecs(*addContainer.ResourceProfileId)
+	baseSpecs, err := repo.getBaseSpecs(*addContainer.ProfileId)
 	if err != nil {
 		return err
 	}
@@ -132,8 +132,8 @@ func (repo ContainerCmdRepo) Update(
 		}
 	}
 
-	if updateContainer.ResourceProfileId != nil {
-		newSpecs, err := repo.getBaseSpecs(*updateContainer.ResourceProfileId)
+	if updateContainer.ProfileId != nil {
+		newSpecs, err := repo.getBaseSpecs(*updateContainer.ProfileId)
 		if err != nil {
 			return err
 		}

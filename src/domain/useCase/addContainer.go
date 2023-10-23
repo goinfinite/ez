@@ -13,19 +13,19 @@ func AddContainer(
 	containerCmdRepo repository.ContainerCmdRepo,
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
-	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
+	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	addContainer dto.AddContainer,
 ) error {
-	defaultResourceProfileId := entity.DefaultResourceProfile().Id
-	if addContainer.ResourceProfileId == nil {
-		addContainer.ResourceProfileId = &defaultResourceProfileId
+	defaultContainerProfileId := entity.DefaultContainerProfile().Id
+	if addContainer.ProfileId == nil {
+		addContainer.ProfileId = &defaultContainerProfileId
 	}
 
 	err := CheckAccountQuota(
 		accQueryRepo,
 		addContainer.AccountId,
-		resourceProfileQueryRepo,
-		*addContainer.ResourceProfileId,
+		containerProfileQueryRepo,
+		*addContainer.ProfileId,
 	)
 	if err != nil {
 		log.Printf("QuotaCheckError: %s", err)

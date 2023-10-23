@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-type ResourceProfileCmdRepo interface {
-	Add(addDto dto.AddResourceProfile) error
-	Update(updateDto dto.UpdateResourceProfile) error
-	Delete(profileId valueObject.ResourceProfileId) error
+type ContainerProfileCmdRepo interface {
+	Add(addDto dto.AddContainerProfile) error
+	Update(updateDto dto.UpdateContainerProfile) error
+	Delete(profileId valueObject.ContainerProfileId) error
 }

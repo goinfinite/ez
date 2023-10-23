@@ -61,14 +61,14 @@ func DatabaseService() (*gorm.DB, error) {
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
-		&dbModel.ResourceProfile{},
+		&dbModel.ContainerProfile{},
 	)
 	if err != nil {
 		return nil, errors.New("DatabaseMigrationError")
 	}
 
 	modelsWithDefaultEntries := []interface{}{
-		&dbModel.ResourceProfile{},
+		&dbModel.ContainerProfile{},
 	}
 
 	err = seedDatabase(dbSvc, modelsWithDefaultEntries...)

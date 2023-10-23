@@ -32,7 +32,7 @@ func TestContainerCmdRepo(t *testing.T) {
 
 		restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
 
-		resourceProfileId := valueObject.NewResourceProfileIdPanic(0)
+		profileId := valueObject.NewContainerProfileIdPanic(0)
 
 		envs := []valueObject.ContainerEnv{
 			valueObject.NewContainerEnvPanic("SFM_ENV1=testing"),
@@ -48,7 +48,7 @@ func TestContainerCmdRepo(t *testing.T) {
 			portBindings,
 			&restartPolicy,
 			nil,
-			&resourceProfileId,
+			&profileId,
 			envs,
 		)
 

@@ -3,22 +3,22 @@ package dto
 import "github.com/speedianet/sfm/src/domain/valueObject"
 
 type UpdateContainer struct {
-	AccountId         valueObject.AccountId          `json:"accountId"`
-	ContainerId       valueObject.ContainerId        `json:"id"`
-	Status            *bool                          `json:"status"`
-	ResourceProfileId *valueObject.ResourceProfileId `json:"resourceProfileId"`
+	AccountId   valueObject.AccountId           `json:"accountId"`
+	ContainerId valueObject.ContainerId         `json:"id"`
+	Status      *bool                           `json:"status"`
+	ProfileId   *valueObject.ContainerProfileId `json:"profileId"`
 }
 
 func NewUpdateContainer(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 	status *bool,
-	resourceProfileId *valueObject.ResourceProfileId,
+	profileId *valueObject.ContainerProfileId,
 ) UpdateContainer {
 	return UpdateContainer{
-		AccountId:         accountId,
-		ContainerId:       containerId,
-		Status:            status,
-		ResourceProfileId: resourceProfileId,
+		AccountId:   accountId,
+		ContainerId: containerId,
+		Status:      status,
+		ProfileId:   profileId,
 	}
 }

@@ -61,7 +61,7 @@ func AddContainerController() *cobra.Command {
 	var portBindingsSlice []string
 	var restartPolicyStr string
 	var entrypointStr string
-	var resourceProfileId uint64
+	var profileId uint64
 	var envsSlice []string
 
 	cmd := &cobra.Command{
@@ -96,12 +96,12 @@ func AddContainerController() *cobra.Command {
 				entrypointPtr = &entrypoint
 			}
 
-			var resourceProfileIdPtr *valueObject.ResourceProfileId
-			if resourceProfileId != 0 {
-				resourceProfileId := valueObject.NewResourceProfileIdPanic(
-					resourceProfileId,
+			var profileIdPtr *valueObject.ContainerProfileId
+			if profileId != 0 {
+				profileId := valueObject.NewContainerProfileIdPanic(
+					profileId,
 				)
-				resourceProfileIdPtr = &resourceProfileId
+				profileIdPtr = &profileId
 			}
 
 			envs := []valueObject.ContainerEnv{}
@@ -116,20 +116,20 @@ func AddContainerController() *cobra.Command {
 				portBindings,
 				restartPolicyPtr,
 				entrypointPtr,
-				resourceProfileIdPtr,
+				profileIdPtr,
 				envs,
 			)
 
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
 
 			err := useCase.AddContainer(
 				containerCmdRepo,
 				accQueryRepo,
 				accCmdRepo,
-				resourceProfileQueryRepo,
+				containerProfileQueryRepo,
 				addContainerDto,
 			)
 			if err != nil {
@@ -153,9 +153,9 @@ func AddContainerController() *cobra.Command {
 		[]string{},
 		"PortBindings (hostPort:containerPort[/protocol])",
 	)
-	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "p", "", "RestartPolicy")
+	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
-	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
+	cmd.Flags().Uint64VarP(&profileId, "profile-id", "p", 0, "ContainerProfileId")
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs (key=value)")
 	return cmd
 }
@@ -166,7 +166,7 @@ func UpdateContainerController() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 	var containerStatusStr string
-	var resourceProfileId uint64
+	var profileId uint64
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -187,33 +187,33 @@ func UpdateContainerController() *cobra.Command {
 				containerStatusPtr = &containerStatus
 			}
 
-			var resourceProfileIdPtr *valueObject.ResourceProfileId
-			if resourceProfileId != 0 {
-				resourceProfileId := valueObject.NewResourceProfileIdPanic(
-					resourceProfileId,
+			var profileIdPtr *valueObject.ContainerProfileId
+			if profileId != 0 {
+				profileId := valueObject.NewContainerProfileIdPanic(
+					profileId,
 				)
-				resourceProfileIdPtr = &resourceProfileId
+				profileIdPtr = &profileId
 			}
 
 			updateContainerDto := dto.NewUpdateContainer(
 				accId,
 				containerId,
 				containerStatusPtr,
-				resourceProfileIdPtr,
+				profileIdPtr,
 			)
 
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
 				containerCmdRepo,
 				accQueryRepo,
 				accCmdRepo,
-				resourceProfileQueryRepo,
+				containerProfileQueryRepo,
 				updateContainerDto,
 			)
 			if err != nil {
@@ -229,7 +229,7 @@ func UpdateContainerController() *cobra.Command {
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
 	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "ContainerStatus (true or false)")
-	cmd.Flags().Uint64VarP(&resourceProfileId, "resource-profile-id", "r", 0, "ResourceProfileId")
+	cmd.Flags().Uint64VarP(&profileId, "profile-id", "p", 0, "ContainerProfileId")
 	return cmd
 }
 

@@ -124,12 +124,12 @@ func AddContainerController(c echo.Context) error {
 		entrypointPtr = &entrypoint
 	}
 
-	var resourceProfileIdPtr *valueObject.ResourceProfileId
-	if requestBody["resourceProfileId"] != nil {
-		resourceProfileId := valueObject.NewResourceProfileIdPanic(
-			requestBody["resourceProfileId"],
+	var profileIdPtr *valueObject.ContainerProfileId
+	if requestBody["profileId"] != nil {
+		profileId := valueObject.NewContainerProfileIdPanic(
+			requestBody["profileId"],
 		)
-		resourceProfileIdPtr = &resourceProfileId
+		profileIdPtr = &profileId
 	}
 
 	envs := []valueObject.ContainerEnv{}
@@ -144,7 +144,7 @@ func AddContainerController(c echo.Context) error {
 		portBindings,
 		restartPolicyPtr,
 		entrypointPtr,
-		resourceProfileIdPtr,
+		profileIdPtr,
 		envs,
 	)
 
@@ -152,13 +152,13 @@ func AddContainerController(c echo.Context) error {
 	containerCmdRepo := infra.ContainerCmdRepo{}
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
 
 	err := useCase.AddContainer(
 		containerCmdRepo,
 		accQueryRepo,
 		accCmdRepo,
-		resourceProfileQueryRepo,
+		containerProfileQueryRepo,
 		addContainerDto,
 	)
 	if err != nil {
@@ -200,19 +200,19 @@ func UpdateContainerController(c echo.Context) error {
 		containerStatusPtr = &containerStatus
 	}
 
-	var resourceProfileIdPtr *valueObject.ResourceProfileId
-	if requestBody["resourceProfileId"] != nil {
-		resourceProfileId := valueObject.NewResourceProfileIdPanic(
-			requestBody["resourceProfileId"],
+	var profileIdPtr *valueObject.ContainerProfileId
+	if requestBody["profileId"] != nil {
+		profileId := valueObject.NewContainerProfileIdPanic(
+			requestBody["profileId"],
 		)
-		resourceProfileIdPtr = &resourceProfileId
+		profileIdPtr = &profileId
 	}
 
 	updateContainerDto := dto.NewUpdateContainer(
 		accId,
 		containerId,
 		containerStatusPtr,
-		resourceProfileIdPtr,
+		profileIdPtr,
 	)
 
 	dbSvc := c.Get("dbSvc").(*gorm.DB)
@@ -220,14 +220,14 @@ func UpdateContainerController(c echo.Context) error {
 	containerCmdRepo := infra.ContainerCmdRepo{}
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
 
 	err := useCase.UpdateContainer(
 		containerQueryRepo,
 		containerCmdRepo,
 		accQueryRepo,
 		accCmdRepo,
-		resourceProfileQueryRepo,
+		containerProfileQueryRepo,
 		updateContainerDto,
 	)
 	if err != nil {

@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/sfm/src/domain/repository"
 )
 
-func GetResourceProfiles(
-	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
-) ([]entity.ResourceProfile, error) {
-	return resourceProfileQueryRepo.Get()
+func GetContainerProfiles(
+	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
+) ([]entity.ContainerProfile, error) {
+	return containerProfileQueryRepo.Get()
 }

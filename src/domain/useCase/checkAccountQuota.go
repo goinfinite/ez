@@ -11,8 +11,8 @@ import (
 func CheckAccountQuota(
 	accQueryRepo repository.AccQueryRepo,
 	accId valueObject.AccountId,
-	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
-	resourceProfileId valueObject.ResourceProfileId,
+	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
+	profileId valueObject.ContainerProfileId,
 ) error {
 	accEntity, err := accQueryRepo.GetById(accId)
 	if err != nil {
@@ -20,10 +20,10 @@ func CheckAccountQuota(
 		return errors.New("GetAccountInfoInfraError")
 	}
 
-	resourceProfileEntity, err := resourceProfileQueryRepo.GetById(resourceProfileId)
+	containerProfileEntity, err := containerProfileQueryRepo.GetById(profileId)
 	if err != nil {
-		log.Printf("GetResourceProfileError: %s", err)
-		return errors.New("GetResourceProfileInfraError")
+		log.Printf("GetContainerProfileError: %s", err)
+		return errors.New("GetContainerProfileInfraError")
 	}
 
 	quotaCpu := accEntity.Quota.CpuCores
@@ -32,8 +32,8 @@ func CheckAccountQuota(
 	quotaUsageCpu := accEntity.QuotaUsage.CpuCores
 	quotaUsageMemory := accEntity.QuotaUsage.MemoryBytes
 
-	containerCpuLimit := resourceProfileEntity.BaseSpecs.CpuCores
-	containerMemoryLimit := resourceProfileEntity.BaseSpecs.MemoryBytes
+	containerCpuLimit := containerProfileEntity.BaseSpecs.CpuCores
+	containerMemoryLimit := containerProfileEntity.BaseSpecs.MemoryBytes
 
 	if quotaUsageCpu+containerCpuLimit > quotaCpu {
 		log.Printf("CpuQuotaUsageExceeded: %s", err)

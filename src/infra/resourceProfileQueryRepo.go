@@ -10,21 +10,21 @@ import (
 	"gorm.io/gorm"
 )
 
-type ResourceProfileQueryRepo struct {
+type ContainerProfileQueryRepo struct {
 	dbSvc *gorm.DB
 }
 
-func NewResourceProfileQueryRepo(dbSvc *gorm.DB) *ResourceProfileQueryRepo {
-	return &ResourceProfileQueryRepo{dbSvc: dbSvc}
+func NewContainerProfileQueryRepo(dbSvc *gorm.DB) *ContainerProfileQueryRepo {
+	return &ContainerProfileQueryRepo{dbSvc: dbSvc}
 }
 
-func (repo ResourceProfileQueryRepo) Get() ([]entity.ResourceProfile, error) {
-	var profileEntities []entity.ResourceProfile
-	var profileModels []dbModel.ResourceProfile
+func (repo ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
+	var profileEntities []entity.ContainerProfile
+	var profileModels []dbModel.ContainerProfile
 
-	err := repo.dbSvc.Model(&dbModel.ResourceProfile{}).Find(&profileModels).Error
+	err := repo.dbSvc.Model(&dbModel.ContainerProfile{}).Find(&profileModels).Error
 	if err != nil {
-		return profileEntities, errors.New("DbQueryResourceProfilesError")
+		return profileEntities, errors.New("DbQueryContainerProfilesError")
 	}
 
 	for _, profileModel := range profileModels {
@@ -40,18 +40,18 @@ func (repo ResourceProfileQueryRepo) Get() ([]entity.ResourceProfile, error) {
 	return profileEntities, nil
 }
 
-func (repo ResourceProfileQueryRepo) GetById(
-	id valueObject.ResourceProfileId,
-) (entity.ResourceProfile, error) {
-	var profileModel dbModel.ResourceProfile
-	err := repo.dbSvc.Model(&dbModel.ResourceProfile{}).First(&profileModel).Error
+func (repo ContainerProfileQueryRepo) GetById(
+	id valueObject.ContainerProfileId,
+) (entity.ContainerProfile, error) {
+	var profileModel dbModel.ContainerProfile
+	err := repo.dbSvc.Model(&dbModel.ContainerProfile{}).First(&profileModel).Error
 	if err != nil {
-		return entity.ResourceProfile{}, errors.New("DbQueryResourceProfileError")
+		return entity.ContainerProfile{}, errors.New("DbQueryContainerProfileError")
 	}
 
 	profileEntity, err := profileModel.ToEntity()
 	if err != nil {
-		return entity.ResourceProfile{}, errors.New("ProfileModelToEntityError")
+		return entity.ContainerProfile{}, errors.New("ProfileModelToEntityError")
 	}
 
 	return profileEntity, nil

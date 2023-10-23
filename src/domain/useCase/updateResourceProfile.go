@@ -9,10 +9,10 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-func updateContainerResourceProfileId(
+func updateContainerContainerProfileId(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	profileId valueObject.ResourceProfileId,
+	profileId valueObject.ContainerProfileId,
 ) error {
 	containers, err := containerQueryRepo.Get()
 	if err != nil {
@@ -21,20 +21,20 @@ func updateContainerResourceProfileId(
 	}
 
 	for _, container := range containers {
-		if container.ResourceProfileId != profileId {
+		if container.ProfileId != profileId {
 			continue
 		}
 
 		updateContainerDto := dto.NewUpdateContainer(
 			container.AccountId,
 			container.Id,
-			container.Status,
+			&container.Status,
 			&profileId,
 		)
 
 		err := containerCmdRepo.Update(container, updateContainerDto)
 		if err != nil {
-			log.Printf("UpdateContainerResourceProfileError: %s", err)
+			log.Printf("UpdateContainerContainerProfileError: %s", err)
 			continue
 		}
 	}
@@ -42,37 +42,37 @@ func updateContainerResourceProfileId(
 	return nil
 }
 
-func UpdateResourceProfile(
-	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
-	resourceProfileCmdRepo repository.ResourceProfileCmdRepo,
+func UpdateContainerProfile(
+	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
+	containerProfileCmdRepo repository.ContainerProfileCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	updateResourceProfileDto dto.UpdateResourceProfile,
+	updateContainerProfileDto dto.UpdateContainerProfile,
 ) error {
-	_, err := resourceProfileQueryRepo.GetById(updateResourceProfileDto.Id)
+	_, err := containerProfileQueryRepo.GetById(updateContainerProfileDto.Id)
 	if err != nil {
-		return errors.New("ResourceProfileNotFound")
+		return errors.New("ContainerProfileNotFound")
 	}
 
-	err = resourceProfileCmdRepo.Update(updateResourceProfileDto)
+	err = containerProfileCmdRepo.Update(updateContainerProfileDto)
 	if err != nil {
-		log.Printf("UpdateResourceProfileError: %s", err)
-		return errors.New("UpdateResourceProfileInfraError")
+		log.Printf("UpdateContainerProfileError: %s", err)
+		return errors.New("UpdateContainerProfileInfraError")
 	}
 
-	shouldUpdateContainers := updateResourceProfileDto.BaseSpecs != nil
+	shouldUpdateContainers := updateContainerProfileDto.BaseSpecs != nil
 	if !shouldUpdateContainers {
 		return nil
 	}
 
-	err = updateContainerResourceProfileId(
+	err = updateContainerContainerProfileId(
 		containerQueryRepo,
 		containerCmdRepo,
-		updateResourceProfileDto.Id,
+		updateContainerProfileDto.Id,
 	)
 	if err != nil {
-		log.Printf("UpdateResourceProfileContainersError: %s", err)
-		return errors.New("UpdateResourceProfileContainersInfraError")
+		log.Printf("UpdateContainerProfileContainersError: %s", err)
+		return errors.New("UpdateContainerProfileContainersInfraError")
 	}
 
 	return nil

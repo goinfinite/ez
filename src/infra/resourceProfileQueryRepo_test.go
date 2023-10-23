@@ -6,22 +6,22 @@ import (
 	testHelpers "github.com/speedianet/sfm/src/devUtils"
 )
 
-func TestResourceProfileQueryRepo(t *testing.T) {
+func TestContainerProfileQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	dbSvc := testHelpers.GetDbSvc()
-	profileQueryRepo := NewResourceProfileQueryRepo(dbSvc)
+	profileQueryRepo := NewContainerProfileQueryRepo(dbSvc)
 
-	t.Run("GetResourceProfiles", func(t *testing.T) {
+	t.Run("GetContainerProfiles", func(t *testing.T) {
 		_, err := profileQueryRepo.Get()
 		if err != nil {
-			t.Errorf("GetResourceProfilesFailed: %v", err)
+			t.Errorf("GetContainerProfilesFailed: %v", err)
 		}
 	})
 
-	t.Run("GetResourceProfileById", func(t *testing.T) {
+	t.Run("GetContainerProfileById", func(t *testing.T) {
 		_, err := profileQueryRepo.GetById(1)
 		if err != nil {
-			t.Errorf("GetResourceProfileByIdFailed: %v", err)
+			t.Errorf("GetContainerProfileByIdFailed: %v", err)
 		}
 	})
 }

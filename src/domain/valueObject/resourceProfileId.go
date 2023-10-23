@@ -7,29 +7,29 @@ import (
 	voHelper "github.com/speedianet/sfm/src/domain/valueObject/helper"
 )
 
-type ResourceProfileId uint64
+type ContainerProfileId uint64
 
-func NewResourceProfileId(value interface{}) (ResourceProfileId, error) {
+func NewContainerProfileId(value interface{}) (ContainerProfileId, error) {
 	rpId, err := voHelper.InterfaceToUint(value)
 	if err != nil {
-		return 0, errors.New("InvalidResourceProfileId")
+		return 0, errors.New("InvalidContainerProfileId")
 	}
 
-	return ResourceProfileId(rpId), nil
+	return ContainerProfileId(rpId), nil
 }
 
-func NewResourceProfileIdPanic(value interface{}) ResourceProfileId {
-	rpId, err := NewResourceProfileId(value)
+func NewContainerProfileIdPanic(value interface{}) ContainerProfileId {
+	rpId, err := NewContainerProfileId(value)
 	if err != nil {
 		panic(err)
 	}
 	return rpId
 }
 
-func (id ResourceProfileId) Get() uint64 {
+func (id ContainerProfileId) Get() uint64 {
 	return uint64(id)
 }
 
-func (id ResourceProfileId) String() string {
+func (id ContainerProfileId) String() string {
 	return strconv.FormatUint(uint64(id), 10)
 }

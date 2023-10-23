@@ -8,17 +8,17 @@ import (
 	"github.com/speedianet/sfm/src/domain/repository"
 )
 
-func AddResourceProfile(
-	resourceProfileCmdRepo repository.ResourceProfileCmdRepo,
-	addResourceProfile dto.AddResourceProfile,
+func AddContainerProfile(
+	containerProfileCmdRepo repository.ContainerProfileCmdRepo,
+	addContainerProfile dto.AddContainerProfile,
 ) error {
-	err := resourceProfileCmdRepo.Add(addResourceProfile)
+	err := containerProfileCmdRepo.Add(addContainerProfile)
 	if err != nil {
-		log.Printf("AddResourceProfileError: %s", err)
-		return errors.New("AddResourceProfileInfraError")
+		log.Printf("AddContainerProfileError: %s", err)
+		return errors.New("AddContainerProfileInfraError")
 	}
 
-	log.Printf("ResourceProfile '%v' added.", addResourceProfile.Name.String())
+	log.Printf("ContainerProfile '%v' added.", addContainerProfile.Name.String())
 
 	return nil
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-type ResourceProfile struct {
+type ContainerProfile struct {
 	ID                     uint   `gorm:"primarykey"`
 	Name                   string `gorm:"not null"`
 	BaseSpecs              string `gorm:"not null"`
@@ -18,19 +18,19 @@ type ResourceProfile struct {
 	HostMinCapacityPercent *float64
 }
 
-func (ResourceProfile) TableName() string {
+func (ContainerProfile) TableName() string {
 	return "resource_profiles"
 }
 
-func (model ResourceProfile) DefaultEntry() ResourceProfile {
-	defaultEntity := entity.DefaultResourceProfile()
+func (model ContainerProfile) DefaultEntry() ContainerProfile {
+	defaultEntity := entity.DefaultContainerProfile()
 	defaultModel, _ := model.ToModel(defaultEntity)
 	return defaultModel
 }
 
-func (ResourceProfile) ToModel(
-	entity entity.ResourceProfile,
-) (ResourceProfile, error) {
+func (ContainerProfile) ToModel(
+	entity entity.ContainerProfile,
+) (ContainerProfile, error) {
 	var maxSpecsPtr *string
 	if entity.MaxSpecs != nil {
 		maxSpecs := entity.MaxSpecs.String()
@@ -67,7 +67,7 @@ func (ResourceProfile) ToModel(
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
-	return ResourceProfile{
+	return ContainerProfile{
 		ID:                     uint(entity.Id.Get()),
 		Name:                   entity.Name.String(),
 		BaseSpecs:              entity.BaseSpecs.String(),
@@ -80,27 +80,27 @@ func (ResourceProfile) ToModel(
 	}, nil
 }
 
-func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
-	rpId, err := valueObject.NewResourceProfileId(model.ID)
+func (model ContainerProfile) ToEntity() (entity.ContainerProfile, error) {
+	rpId, err := valueObject.NewContainerProfileId(model.ID)
 	if err != nil {
-		return entity.ResourceProfile{}, err
+		return entity.ContainerProfile{}, err
 	}
 
-	name, err := valueObject.NewResourceProfileName(model.Name)
+	name, err := valueObject.NewContainerProfileName(model.Name)
 	if err != nil {
-		return entity.ResourceProfile{}, err
+		return entity.ContainerProfile{}, err
 	}
 
 	baseSpecs, err := valueObject.NewContainerSpecsFromString(model.BaseSpecs)
 	if err != nil {
-		return entity.ResourceProfile{}, err
+		return entity.ContainerProfile{}, err
 	}
 
 	var maxSpecsPtr *valueObject.ContainerSpecs
 	if model.MaxSpecs != nil {
 		maxSpecs, err := valueObject.NewContainerSpecsFromString(*model.MaxSpecs)
 		if err != nil {
-			return entity.ResourceProfile{}, err
+			return entity.ContainerProfile{}, err
 		}
 		maxSpecsPtr = &maxSpecs
 	}
@@ -109,7 +109,7 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 	if model.ScalingPolicy != nil {
 		scalingPolicy, err := valueObject.NewScalingPolicy(*model.ScalingPolicy)
 		if err != nil {
-			return entity.ResourceProfile{}, err
+			return entity.ContainerProfile{}, err
 		}
 		scalingPolicyPtr = &scalingPolicy
 	}
@@ -138,12 +138,12 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 			*model.HostMinCapacityPercent,
 		)
 		if err != nil {
-			return entity.ResourceProfile{}, err
+			return entity.ContainerProfile{}, err
 		}
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
-	return entity.NewResourceProfile(
+	return entity.NewContainerProfile(
 		rpId,
 		name,
 		baseSpecs,
@@ -156,9 +156,9 @@ func (model ResourceProfile) ToEntity() (entity.ResourceProfile, error) {
 	)
 }
 
-func (ResourceProfile) FromAddDtoToModel(
-	dto dto.AddResourceProfile,
-) (ResourceProfile, error) {
+func (ContainerProfile) FromAddDtoToModel(
+	dto dto.AddContainerProfile,
+) (ContainerProfile, error) {
 	var maxSpecsPtr *string
 	if dto.MaxSpecs != nil {
 		maxSpecs := dto.MaxSpecs.String()
@@ -195,7 +195,7 @@ func (ResourceProfile) FromAddDtoToModel(
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
-	return ResourceProfile{
+	return ContainerProfile{
 		Name:                   dto.Name.String(),
 		BaseSpecs:              dto.BaseSpecs.String(),
 		MaxSpecs:               maxSpecsPtr,

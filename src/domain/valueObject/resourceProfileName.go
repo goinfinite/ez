@@ -5,31 +5,31 @@ import (
 	"regexp"
 )
 
-const resourceProfileNameRegex string = `^\w[\w -]{1,30}\w$`
+const containerProfileNameRegex string = `^\w[\w -]{1,30}\w$`
 
-type ResourceProfileName string
+type ContainerProfileName string
 
-func NewResourceProfileName(value string) (ResourceProfileName, error) {
-	user := ResourceProfileName(value)
+func NewContainerProfileName(value string) (ContainerProfileName, error) {
+	user := ContainerProfileName(value)
 	if !user.isValid() {
-		return "", errors.New("InvalidResourceProfileName")
+		return "", errors.New("InvalidContainerProfileName")
 	}
 	return user, nil
 }
 
-func NewResourceProfileNamePanic(value string) ResourceProfileName {
-	user := ResourceProfileName(value)
+func NewContainerProfileNamePanic(value string) ContainerProfileName {
+	user := ContainerProfileName(value)
 	if !user.isValid() {
-		panic("InvalidResourceProfileName")
+		panic("InvalidContainerProfileName")
 	}
 	return user
 }
 
-func (user ResourceProfileName) isValid() bool {
-	re := regexp.MustCompile(resourceProfileNameRegex)
+func (user ContainerProfileName) isValid() bool {
+	re := regexp.MustCompile(containerProfileNameRegex)
 	return re.MatchString(string(user))
 }
 
-func (user ResourceProfileName) String() string {
+func (user ContainerProfileName) String() string {
 	return string(user)
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-type ResourceProfileQueryRepo interface {
-	Get() ([]entity.ResourceProfile, error)
-	GetById(id valueObject.ResourceProfileId) (entity.ResourceProfile, error)
+type ContainerProfileQueryRepo interface {
+	Get() ([]entity.ContainerProfile, error)
+	GetById(id valueObject.ContainerProfileId) (entity.ContainerProfile, error)
 }

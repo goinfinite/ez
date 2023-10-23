@@ -14,25 +14,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetResourceProfilesController() *cobra.Command {
+func GetContainerProfilesController() *cobra.Command {
 	var dbSvc *gorm.DB
 
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "GetResourceProfiles",
+		Short: "GetContainerProfiles",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
-			resourceProfilesList, err := useCase.GetResourceProfiles(
-				resourceProfileQueryRepo,
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+			containerProfilesList, err := useCase.GetContainerProfiles(
+				containerProfileQueryRepo,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			cliHelper.ResponseWrapper(true, resourceProfilesList)
+			cliHelper.ResponseWrapper(true, containerProfilesList)
 		},
 	}
 
@@ -61,7 +61,7 @@ func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 	)
 }
 
-func AddResourceProfileController() *cobra.Command {
+func AddContainerProfileController() *cobra.Command {
 	var dbSvc *gorm.DB
 
 	var nameStr string
@@ -75,12 +75,12 @@ func AddResourceProfileController() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "add",
-		Short: "AddNewResourceProfile",
+		Short: "AddNewContainerProfile",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			name := valueObject.NewResourceProfileNamePanic(nameStr)
+			name := valueObject.NewContainerProfileNamePanic(nameStr)
 
 			baseSpecs := parseContainerSpecs(baseSpecsStr)
 
@@ -117,7 +117,7 @@ func AddResourceProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr = &hostMinCapacityPercent
 			}
 
-			dto := dto.NewAddResourceProfile(
+			dto := dto.NewAddContainerProfile(
 				name,
 				baseSpecs,
 				maxSpecsPtr,
@@ -128,17 +128,17 @@ func AddResourceProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr,
 			)
 
-			resourceProfileCmdRepo := infra.NewResourceProfileCmdRepo(dbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
 
-			err := useCase.AddResourceProfile(
-				resourceProfileCmdRepo,
+			err := useCase.AddContainerProfile(
+				containerProfileCmdRepo,
 				dto,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			cliHelper.ResponseWrapper(true, "ResourceProfileAdded")
+			cliHelper.ResponseWrapper(true, "ContainerProfileAdded")
 		},
 	}
 
@@ -197,7 +197,7 @@ func AddResourceProfileController() *cobra.Command {
 	return cmd
 }
 
-func UpdateResourceProfileController() *cobra.Command {
+func UpdateContainerProfileController() *cobra.Command {
 	var dbSvc *gorm.DB
 
 	var profileIdUint uint64
@@ -212,16 +212,16 @@ func UpdateResourceProfileController() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "UpdateResourceProfile",
+		Short: "UpdateContainerProfile",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
+			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
 
-			var namePtr *valueObject.ResourceProfileName
+			var namePtr *valueObject.ContainerProfileName
 			if nameStr != "" {
-				name := valueObject.NewResourceProfileNamePanic(nameStr)
+				name := valueObject.NewContainerProfileNamePanic(nameStr)
 				namePtr = &name
 			}
 
@@ -264,8 +264,8 @@ func UpdateResourceProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr = &hostMinCapacityPercent
 			}
 
-			dto := dto.NewUpdateResourceProfile(
-				resourceProfileId,
+			dto := dto.NewUpdateContainerProfile(
+				profileId,
 				namePtr,
 				baseSpecsPtr,
 				maxSpecsPtr,
@@ -276,14 +276,14 @@ func UpdateResourceProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr,
 			)
 
-			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
-			resourceProfileCmdRepo := infra.NewResourceProfileCmdRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
-			err := useCase.UpdateResourceProfile(
-				resourceProfileQueryRepo,
-				resourceProfileCmdRepo,
+			err := useCase.UpdateContainerProfile(
+				containerProfileQueryRepo,
+				containerProfileCmdRepo,
 				containerQueryRepo,
 				containerCmdRepo,
 				dto,
@@ -292,11 +292,11 @@ func UpdateResourceProfileController() *cobra.Command {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			cliHelper.ResponseWrapper(true, "ResourceProfileUpdated")
+			cliHelper.ResponseWrapper(true, "ContainerProfileUpdated")
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ResourceProfileId")
+	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ContainerProfileId")
 	cmd.MarkFlagRequired("id")
 	cmd.Flags().StringVarP(&nameStr, "name", "n", "", "Name")
 	cmd.Flags().StringVarP(
@@ -351,41 +351,41 @@ func UpdateResourceProfileController() *cobra.Command {
 	return cmd
 }
 
-func DeleteResourceProfileController() *cobra.Command {
+func DeleteContainerProfileController() *cobra.Command {
 	var dbSvc *gorm.DB
 
 	var profileIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "DeleteResourceProfile",
+		Short: "DeleteContainerProfile",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			resourceProfileId := valueObject.NewResourceProfileIdPanic(profileIdUint)
+			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
 
-			resourceProfileQueryRepo := infra.NewResourceProfileQueryRepo(dbSvc)
-			resourceProfileCmdRepo := infra.NewResourceProfileCmdRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.ContainerCmdRepo{}
 
-			err := useCase.DeleteResourceProfile(
-				resourceProfileQueryRepo,
-				resourceProfileCmdRepo,
+			err := useCase.DeleteContainerProfile(
+				containerProfileQueryRepo,
+				containerProfileCmdRepo,
 				containerQueryRepo,
 				containerCmdRepo,
-				resourceProfileId,
+				profileId,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			cliHelper.ResponseWrapper(true, "ResourceProfileDeleted")
+			cliHelper.ResponseWrapper(true, "ContainerProfileDeleted")
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ResourceProfileId")
+	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ContainerProfileId")
 	cmd.MarkFlagRequired("id")
 	return cmd
 }

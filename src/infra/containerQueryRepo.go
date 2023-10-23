@@ -214,7 +214,7 @@ func (repo ContainerQueryRepo) GetById(
 		return entity.Container{}, errors.New("ContainerNameParseError")
 	}
 
-	resourceProfileId, err := valueObject.NewResourceProfileId(containerNameParts[0])
+	profileId, err := valueObject.NewContainerProfileId(containerNameParts[0])
 	if err != nil {
 		return entity.Container{}, err
 	}
@@ -245,7 +245,7 @@ func (repo ContainerQueryRepo) GetById(
 		entrypoint,
 		createdAt,
 		startedAtPtr,
-		resourceProfileId,
+		profileId,
 		envs,
 	), nil
 }

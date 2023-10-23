@@ -9,37 +9,37 @@ import (
 	"github.com/speedianet/sfm/src/domain/valueObject"
 )
 
-func DeleteResourceProfile(
-	resourceProfileQueryRepo repository.ResourceProfileQueryRepo,
-	resourceProfileCmdRepo repository.ResourceProfileCmdRepo,
+func DeleteContainerProfile(
+	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
+	containerProfileCmdRepo repository.ContainerProfileCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	profileId valueObject.ResourceProfileId,
+	profileId valueObject.ContainerProfileId,
 ) error {
-	_, err := resourceProfileQueryRepo.GetById(profileId)
+	_, err := containerProfileQueryRepo.GetById(profileId)
 	if err != nil {
-		return errors.New("ResourceProfileNotFound")
+		return errors.New("ContainerProfileNotFound")
 	}
 
-	defaultResourceProfileId := entity.DefaultResourceProfile().Id
-	if profileId == defaultResourceProfileId {
-		return errors.New("CannotDeleteDefaultResourceProfile")
+	defaultContainerProfileId := entity.DefaultContainerProfile().Id
+	if profileId == defaultContainerProfileId {
+		return errors.New("CannotDeleteDefaultContainerProfile")
 	}
 
-	err = resourceProfileCmdRepo.Delete(profileId)
+	err = containerProfileCmdRepo.Delete(profileId)
 	if err != nil {
-		log.Printf("DeleteResourceProfileError: %s", err)
-		return errors.New("DeleteResourceProfileInfraError")
+		log.Printf("DeleteContainerProfileError: %s", err)
+		return errors.New("DeleteContainerProfileInfraError")
 	}
 
-	err = updateContainerResourceProfileId(
+	err = updateContainerContainerProfileId(
 		containerQueryRepo,
 		containerCmdRepo,
-		defaultResourceProfileId,
+		defaultContainerProfileId,
 	)
 	if err != nil {
-		log.Printf("UpdateContainerResourceProfileError: %s", err)
-		return errors.New("UpdateContainerResourceProfileInfraError")
+		log.Printf("UpdateContainerContainerProfileError: %s", err)
+		return errors.New("UpdateContainerContainerProfileInfraError")
 	}
 
 	return nil
