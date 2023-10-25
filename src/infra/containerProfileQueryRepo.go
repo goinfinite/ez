@@ -6,15 +6,15 @@ import (
 
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
-	"gorm.io/gorm"
 )
 
 type ContainerProfileQueryRepo struct {
-	dbSvc *gorm.DB
+	dbSvc *db.DatabaseService
 }
 
-func NewContainerProfileQueryRepo(dbSvc *gorm.DB) *ContainerProfileQueryRepo {
+func NewContainerProfileQueryRepo(dbSvc *db.DatabaseService) *ContainerProfileQueryRepo {
 	return &ContainerProfileQueryRepo{dbSvc: dbSvc}
 }
 
@@ -22,7 +22,7 @@ func (repo ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
 	var profileEntities []entity.ContainerProfile
 	var profileModels []dbModel.ContainerProfile
 
-	err := repo.dbSvc.Model(&dbModel.ContainerProfile{}).Find(&profileModels).Error
+	err := repo.dbSvc.Orm.Model(&dbModel.ContainerProfile{}).Find(&profileModels).Error
 	if err != nil {
 		return profileEntities, errors.New("DbQueryContainerProfilesError")
 	}
@@ -44,7 +44,7 @@ func (repo ContainerProfileQueryRepo) GetById(
 	id valueObject.ContainerProfileId,
 ) (entity.ContainerProfile, error) {
 	var profileModel dbModel.ContainerProfile
-	err := repo.dbSvc.Model(&dbModel.ContainerProfile{}).First(&profileModel).Error
+	err := repo.dbSvc.Orm.Model(&dbModel.ContainerProfile{}).First(&profileModel).Error
 	if err != nil {
 		return entity.ContainerProfile{}, errors.New("DbQueryContainerProfileError")
 	}

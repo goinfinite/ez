@@ -13,18 +13,18 @@ import (
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
-	"gorm.io/gorm"
 )
 
 type AccCmdRepo struct {
-	dbSvc *gorm.DB
+	dbSvc *db.DatabaseService
 }
 
-func NewAccCmdRepo(dbSvc *gorm.DB) *AccCmdRepo {
+func NewAccCmdRepo(dbSvc *db.DatabaseService) *AccCmdRepo {
 	return &AccCmdRepo{dbSvc: dbSvc}
 }
 
@@ -112,7 +112,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	err = repo.dbSvc.Create(&accModel).Error
+	err = repo.dbSvc.Orm.Create(&accModel).Error
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 	}
 
 	for _, tableName := range relatedTables {
-		err := repo.dbSvc.Exec(
+		err := repo.dbSvc.Orm.Exec(
 			"DELETE FROM "+tableName+" WHERE account_id = ?", modelId,
 		).Error
 		if err != nil {
@@ -181,7 +181,7 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 		}
 	}
 
-	err = repo.dbSvc.Delete(model, modelId).Error
+	err = repo.dbSvc.Orm.Delete(model, modelId).Error
 	if err != nil {
 		return errors.New("DeleteAccDbError")
 	}
@@ -217,7 +217,7 @@ func (repo AccCmdRepo) UpdatePassword(
 		return err
 	}
 
-	err = repo.dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
+	err = repo.dbSvc.Orm.Model(&dbModel.Account{ID: uint(accId.Get())}).
 		Update("updated_at", time.Now()).Error
 	if err != nil {
 		return err
@@ -247,7 +247,7 @@ func (repo AccCmdRepo) UpdateApiKey(
 	hash.Write([]byte(uuid.String()))
 	uuidHash := hex.EncodeToString(hash.Sum(nil))
 
-	err = repo.dbSvc.Model(&dbModel.Account{ID: uint(accId.Get())}).
+	err = repo.dbSvc.Orm.Model(&dbModel.Account{ID: uint(accId.Get())}).
 		Update("key_hash", uuidHash).Error
 	if err != nil {
 		return "", err
@@ -279,7 +279,7 @@ func (repo AccCmdRepo) updateQuotaTable(
 		updateMap["inodes"] = quota.Inodes.Get()
 	}
 
-	err := repo.dbSvc.Table(tableName).
+	err := repo.dbSvc.Orm.Table(tableName).
 		Where("account_id = ?", uint(accId.Get())).
 		Updates(updateMap).Error
 	if err != nil {

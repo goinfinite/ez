@@ -9,15 +9,15 @@ import (
 
 	"github.com/speedianet/sfm/src/domain/entity"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra/db"
 	infraHelper "github.com/speedianet/sfm/src/infra/helper"
-	"gorm.io/gorm"
 )
 
 type ContainerQueryRepo struct {
-	dbSvc *gorm.DB
+	dbSvc *db.DatabaseService
 }
 
-func NewContainerQueryRepo(dbSvc *gorm.DB) *ContainerQueryRepo {
+func NewContainerQueryRepo(dbSvc *db.DatabaseService) *ContainerQueryRepo {
 	return &ContainerQueryRepo{dbSvc: dbSvc}
 }
 

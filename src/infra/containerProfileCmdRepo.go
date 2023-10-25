@@ -5,15 +5,15 @@ import (
 
 	"github.com/speedianet/sfm/src/domain/dto"
 	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/speedianet/sfm/src/infra/db"
 	dbModel "github.com/speedianet/sfm/src/infra/db/model"
-	"gorm.io/gorm"
 )
 
 type ContainerProfileCmdRepo struct {
-	dbSvc *gorm.DB
+	dbSvc *db.DatabaseService
 }
 
-func NewContainerProfileCmdRepo(dbSvc *gorm.DB) *ContainerProfileCmdRepo {
+func NewContainerProfileCmdRepo(dbSvc *db.DatabaseService) *ContainerProfileCmdRepo {
 	return &ContainerProfileCmdRepo{dbSvc: dbSvc}
 }
 
@@ -25,7 +25,7 @@ func (repo ContainerProfileCmdRepo) Add(
 		return err
 	}
 
-	err = repo.dbSvc.Create(&containerProfileModel).Error
+	err = repo.dbSvc.Orm.Create(&containerProfileModel).Error
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (repo ContainerProfileCmdRepo) Update(
 		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Get()
 	}
 
-	err := repo.dbSvc.Table(dbModel.ContainerProfile{}.TableName()).
+	err := repo.dbSvc.Orm.Table(dbModel.ContainerProfile{}.TableName()).
 		Where("id = ?", updateDto.Id.String()).
 		Updates(updateMap).Error
 	if err != nil {
@@ -87,7 +87,7 @@ func (repo ContainerProfileCmdRepo) Update(
 func (repo ContainerProfileCmdRepo) Delete(
 	profileId valueObject.ContainerProfileId,
 ) error {
-	err := repo.dbSvc.Delete(dbModel.ContainerProfile{}, profileId.Get()).Error
+	err := repo.dbSvc.Orm.Delete(dbModel.ContainerProfile{}, profileId.Get()).Error
 	if err != nil {
 		return errors.New("DeleteContainerProfileDbError")
 	}
