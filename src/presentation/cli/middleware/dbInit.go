@@ -5,11 +5,10 @@ import (
 	"os"
 
 	"github.com/speedianet/sfm/src/infra/db"
-	"gorm.io/gorm"
 )
 
-func DatabaseInit() *gorm.DB {
-	dbSvc, err := db.DatabaseService()
+func DatabaseInit() *db.DatabaseService {
+	dbSvc, err := db.NewDatabaseService()
 	if err != nil {
 		fmt.Println("DatabaseConnectionError")
 		os.Exit(1)
