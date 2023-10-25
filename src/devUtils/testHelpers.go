@@ -7,7 +7,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/speedianet/sfm/src/infra/db"
-	"gorm.io/gorm"
 )
 
 func LoadEnvVars() {
@@ -21,8 +20,8 @@ func LoadEnvVars() {
 	}
 }
 
-func GetDbSvc() *gorm.DB {
-	dbSvc, err := db.DatabaseService()
+func GetDbSvc() *db.DatabaseService {
+	dbSvc, err := db.NewDatabaseService()
 	if err != nil {
 		panic(fmt.Errorf("GetDbSvcError: %s", err))
 	}
