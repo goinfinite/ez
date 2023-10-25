@@ -12,7 +12,6 @@ import (
 	"github.com/speedianet/sfm/src/infra"
 	"github.com/speedianet/sfm/src/infra/db"
 	apiHelper "github.com/speedianet/sfm/src/presentation/api/helper"
-	"gorm.io/gorm"
 )
 
 // GetAccounts	 godoc
@@ -25,7 +24,8 @@ import (
 // @Success      200 {array} entity.Account
 // @Router       /account/ [get]
 func GetAccountsController(c echo.Context) error {
-	accsQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	accsQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accsList, err := useCase.GetAccounts(accsQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -107,8 +107,9 @@ func AddAccountController(c echo.Context) error {
 		quota,
 	)
 
-	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
-	accCmdRepo := infra.NewAccCmdRepo(c.Get("dbSvc").(*gorm.DB))
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 	err := useCase.AddAccount(
 		accQueryRepo,
@@ -135,8 +136,9 @@ func AddAccountController(c echo.Context) error {
 func DeleteAccountController(c echo.Context) error {
 	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 
-	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
-	accCmdRepo := infra.NewAccCmdRepo(c.Get("dbSvc").(*gorm.DB))
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 	err := useCase.DeleteAccount(
 		accQueryRepo,
@@ -196,8 +198,9 @@ func UpdateAccountController(c echo.Context) error {
 		quotaPtr,
 	)
 
-	accQueryRepo := infra.NewAccQueryRepo(c.Get("dbSvc").(*gorm.DB))
-	accCmdRepo := infra.NewAccCmdRepo(c.Get("dbSvc").(*gorm.DB))
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 	if updateAccountDto.ShouldUpdateApiKey != nil && *updateAccountDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
@@ -233,7 +236,7 @@ func AutoUpdateAccountsQuotaUsageController() {
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
-	dbSvc, err := db.DatabaseService()
+	dbSvc, err := db.NewDatabaseService()
 	if err != nil {
 		return
 	}

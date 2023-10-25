@@ -9,8 +9,8 @@ import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
+	"github.com/speedianet/sfm/src/infra/db"
 	apiHelper "github.com/speedianet/sfm/src/presentation/api/helper"
-	"gorm.io/gorm"
 )
 
 // GetContainers	 godoc
@@ -23,7 +23,8 @@ import (
 // @Success      200 {array} entity.Container
 // @Router       /container/ [get]
 func GetContainersController(c echo.Context) error {
-	containerQueryRepo := infra.NewContainerQueryRepo(c.Get("dbSvc").(*gorm.DB))
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 	containerList, err := useCase.GetContainers(containerQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -148,7 +149,7 @@ func AddContainerController(c echo.Context) error {
 		envs,
 	)
 
-	dbSvc := c.Get("dbSvc").(*gorm.DB)
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	containerCmdRepo := infra.ContainerCmdRepo{}
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
@@ -215,7 +216,7 @@ func UpdateContainerController(c echo.Context) error {
 		profileIdPtr,
 	)
 
-	dbSvc := c.Get("dbSvc").(*gorm.DB)
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 	containerCmdRepo := infra.ContainerCmdRepo{}
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
@@ -254,7 +255,7 @@ func DeleteContainerController(c echo.Context) error {
 	accId := valueObject.NewAccountIdPanic(c.Param("accId"))
 	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
 
-	dbSvc := c.Get("dbSvc").(*gorm.DB)
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 	containerCmdRepo := infra.ContainerCmdRepo{}
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
