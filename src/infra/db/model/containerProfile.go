@@ -19,7 +19,7 @@ type ContainerProfile struct {
 }
 
 func (ContainerProfile) TableName() string {
-	return "resource_profiles"
+	return "container_profiles"
 }
 
 func (model ContainerProfile) DefaultEntry() ContainerProfile {
