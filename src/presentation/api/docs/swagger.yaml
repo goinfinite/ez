@@ -9,6 +9,48 @@ definitions:
       username:
         type: string
     type: object
+  dto.AddContainer:
+    properties:
+      accountId:
+        type: integer
+      entrypoint:
+        type: string
+      envs:
+        items:
+          type: string
+        type: array
+      hostname:
+        type: string
+      image:
+        type: string
+      portBindings:
+        items:
+          $ref: '#/definitions/valueObject.PortBinding'
+        type: array
+      profileId:
+        type: integer
+      restartPolicy:
+        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+    type: object
+  dto.AddContainerProfile:
+    properties:
+      baseSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      hostMinCapacityPercent:
+        type: number
+      maxSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      name:
+        type: string
+      scalingIntervalSecs:
+        type: integer
+      scalingMaxDurationSecs:
+        type: integer
+      scalingPolicy:
+        $ref: '#/definitions/valueObject.ScalingPolicy'
+      scalingThreshold:
+        type: integer
+    type: object
   dto.Login:
     properties:
       password:
@@ -26,6 +68,38 @@ definitions:
         $ref: '#/definitions/valueObject.AccountQuota'
       shouldUpdateApiKey:
         type: boolean
+    type: object
+  dto.UpdateContainer:
+    properties:
+      accountId:
+        type: integer
+      id:
+        type: string
+      profileId:
+        type: integer
+      status:
+        type: boolean
+    type: object
+  dto.UpdateContainerProfile:
+    properties:
+      baseSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      hostMinCapacityPercent:
+        type: number
+      id:
+        type: integer
+      maxSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      name:
+        type: string
+      scalingIntervalSecs:
+        type: integer
+      scalingMaxDurationSecs:
+        type: integer
+      scalingPolicy:
+        $ref: '#/definitions/valueObject.ScalingPolicy'
+      scalingThreshold:
+        type: integer
     type: object
   entity.AccessToken:
     properties:
@@ -52,6 +126,62 @@ definitions:
         type: integer
       username:
         type: string
+    type: object
+  entity.Container:
+    properties:
+      accountId:
+        type: integer
+      createdAt:
+        type: integer
+      entrypoint:
+        type: string
+      envs:
+        items:
+          type: string
+        type: array
+      hostname:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      imageHash:
+        type: string
+      portBindings:
+        items:
+          $ref: '#/definitions/valueObject.PortBinding'
+        type: array
+      privateIp:
+        type: string
+      profileId:
+        type: integer
+      restartPolicy:
+        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+      startedAt:
+        type: integer
+      status:
+        type: boolean
+    type: object
+  entity.ContainerProfile:
+    properties:
+      baseSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      hostMinCapacityPercent:
+        type: number
+      id:
+        type: integer
+      maxSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      name:
+        type: string
+      scalingIntervalSecs:
+        type: integer
+      scalingMaxDurationSecs:
+        type: integer
+      scalingPolicy:
+        $ref: '#/definitions/valueObject.ScalingPolicy'
+      scalingThreshold:
+        type: integer
     type: object
   entity.O11yOverview:
     properties:
@@ -82,6 +212,25 @@ definitions:
         type: integer
       inodes:
         type: integer
+      memoryBytes:
+        type: integer
+    type: object
+  valueObject.ContainerRestartPolicy:
+    enum:
+    - "no"
+    - on-failure
+    - always
+    - unless-stopped
+    type: string
+    x-enum-varnames:
+    - "no"
+    - onFailure
+    - always
+    - unlessStopped
+  valueObject.ContainerSpecs:
+    properties:
+      cpuCores:
+        type: number
       memoryBytes:
         type: integer
     type: object
@@ -131,6 +280,33 @@ definitions:
       sentBytes:
         type: integer
     type: object
+  valueObject.NetworkProtocol:
+    enum:
+    - tcp
+    - udp
+    type: string
+    x-enum-varnames:
+    - tcp
+    - udp
+  valueObject.PortBinding:
+    properties:
+      containerPort:
+        type: integer
+      hostPort:
+        type: integer
+      protocol:
+        $ref: '#/definitions/valueObject.NetworkProtocol'
+    type: object
+  valueObject.ScalingPolicy:
+    enum:
+    - connection
+    - cpu
+    - memory
+    type: string
+    x-enum-varnames:
+    - connection
+    - cpu
+    - memory
 host: localhost:10001
 info:
   contact:
@@ -259,6 +435,187 @@ paths:
       summary: GenerateJwtWithCredentials
       tags:
       - auth
+  /container/:
+    get:
+      consumes:
+      - application/json
+      description: List containers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Container'
+            type: array
+      security:
+      - Bearer: []
+      summary: GetContainers
+      tags:
+      - container
+    post:
+      consumes:
+      - application/json
+      description: Add a new container.
+      parameters:
+      - description: NewContainer (Only accId, hostname and imgAddr are required.)
+        in: body
+        name: addContainerDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddContainer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ContainerCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: AddNewContainer
+      tags:
+      - container
+    put:
+      consumes:
+      - application/json
+      description: Update a container.
+      parameters:
+      - description: UpdateContainer (Only accId and containerId are required.)
+        in: body
+        name: updateContainerDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContainer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ContainerUpdated message or NewKeyString
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateContainer
+      tags:
+      - container
+  /container/{accId}/{containerId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a container.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accId
+        required: true
+        type: string
+      - description: ContainerId
+        in: path
+        name: containerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ContainerDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteContainer
+      tags:
+      - container
+  /container/profile/:
+    get:
+      consumes:
+      - application/json
+      description: List container profiles.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.ContainerProfile'
+            type: array
+      security:
+      - Bearer: []
+      summary: GetContainerProfiles
+      tags:
+      - container
+    post:
+      consumes:
+      - application/json
+      description: Add a new container profile.
+      parameters:
+      - description: NewContainerProfile (Only name and baseSpecs are required.)
+        in: body
+        name: addContainerProfileDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddContainerProfile'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ContainerProfileCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: AddNewContainerProfile
+      tags:
+      - container
+    put:
+      consumes:
+      - application/json
+      description: Update a container profile.
+      parameters:
+      - description: UpdateContainerProfile (Only id is required.)
+        in: body
+        name: updateContainerProfileDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContainerProfile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ContainerProfileUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateContainerProfile
+      tags:
+      - container
+  /container/profile/{profileId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a container profile.
+      parameters:
+      - description: ProfileId
+        in: path
+        name: profileId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ContainerProfileDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteContainerProfile
+      tags:
+      - container
   /o11y/overview/:
     get:
       consumes:

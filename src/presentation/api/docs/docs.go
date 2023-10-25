@@ -207,6 +207,297 @@ const docTemplate = `{
                 }
             }
         },
+        "/container/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List containers.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Container"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a container.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "UpdateContainer",
+                "parameters": [
+                    {
+                        "description": "UpdateContainer (Only accId and containerId are required.)",
+                        "name": "updateContainerDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateContainer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerUpdated message or NewKeyString",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Add a new container.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "AddNewContainer",
+                "parameters": [
+                    {
+                        "description": "NewContainer (Only accId, hostname and imgAddr are required.)",
+                        "name": "addContainerDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddContainer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/container/profile/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List container profiles.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainerProfiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.ContainerProfile"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a container profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "UpdateContainerProfile",
+                "parameters": [
+                    {
+                        "description": "UpdateContainerProfile (Only id is required.)",
+                        "name": "updateContainerProfileDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateContainerProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerProfileUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Add a new container profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "AddNewContainerProfile",
+                "parameters": [
+                    {
+                        "description": "NewContainerProfile (Only name and baseSpecs are required.)",
+                        "name": "addContainerProfileDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddContainerProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerProfileCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/container/profile/{profileId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a container profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "DeleteContainerProfile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ProfileId",
+                        "name": "profileId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerProfileDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/container/{accId}/{containerId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a container.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "DeleteContainer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/o11y/overview/": {
             "get": {
                 "security": [
@@ -251,6 +542,70 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AddContainer": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "restartPolicy": {
+                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                }
+            }
+        },
+        "dto.AddContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                },
+                "scalingThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.Login": {
             "type": "object",
             "properties": {
@@ -276,6 +631,55 @@ const docTemplate = `{
                 },
                 "shouldUpdateApiKey": {
                     "type": "boolean"
+                }
+            }
+        },
+        "dto.UpdateContainer": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.UpdateContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                },
+                "scalingThreshold": {
+                    "type": "integer"
                 }
             }
         },
@@ -316,6 +720,91 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.Container": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "privateIp": {
+                    "type": "string"
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "restartPolicy": {
+                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "startedAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "entity.ContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                },
+                "scalingThreshold": {
+                    "type": "integer"
                 }
             }
         },
@@ -361,6 +850,32 @@ const docTemplate = `{
                 },
                 "inodes": {
                     "type": "integer"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.ContainerRestartPolicy": {
+            "type": "string",
+            "enum": [
+                "no",
+                "on-failure",
+                "always",
+                "unless-stopped"
+            ],
+            "x-enum-varnames": [
+                "no",
+                "onFailure",
+                "always",
+                "unlessStopped"
+            ]
+        },
+        "valueObject.ContainerSpecs": {
+            "type": "object",
+            "properties": {
+                "cpuCores": {
+                    "type": "number"
                 },
                 "memoryBytes": {
                     "type": "integer"
@@ -437,6 +952,44 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "valueObject.NetworkProtocol": {
+            "type": "string",
+            "enum": [
+                "tcp",
+                "udp"
+            ],
+            "x-enum-varnames": [
+                "tcp",
+                "udp"
+            ]
+        },
+        "valueObject.PortBinding": {
+            "type": "object",
+            "properties": {
+                "containerPort": {
+                    "type": "integer"
+                },
+                "hostPort": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "$ref": "#/definitions/valueObject.NetworkProtocol"
+                }
+            }
+        },
+        "valueObject.ScalingPolicy": {
+            "type": "string",
+            "enum": [
+                "connection",
+                "cpu",
+                "memory"
+            ],
+            "x-enum-varnames": [
+                "connection",
+                "cpu",
+                "memory"
+            ]
         }
     },
     "securityDefinitions": {
