@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
-	"github.com/speedianet/sfm/src/presentation/shared"
+	cliMiddleware "github.com/goinfinite/fleet/src/presentation/cli/middleware"
+	"github.com/goinfinite/fleet/src/presentation/shared"
 	"github.com/spf13/cobra"
 )
 

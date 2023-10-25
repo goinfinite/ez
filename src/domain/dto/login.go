@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/speedianet/sfm/src/domain/valueObject"
+import "github.com/goinfinite/fleet/src/domain/valueObject"
 
 type Login struct {
 	Username valueObject.Username `json:"username"`

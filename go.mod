@@ -1,4 +1,4 @@
-module github.com/speedianet/sfm
+module github.com/goinfinite/fleet
 
 go 1.20
 

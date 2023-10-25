@@ -3,7 +3,7 @@ package useCase
 import (
 	"log"
 
-	"github.com/speedianet/sfm/src/domain/repository"
+	"github.com/goinfinite/fleet/src/domain/repository"
 )
 
 func AutoUpdateAccountsQuotaUsage(

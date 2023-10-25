@@ -3,10 +3,10 @@ package infra
 import (
 	"time"
 
-	"github.com/speedianet/sfm/src/domain/dto"
-	"github.com/speedianet/sfm/src/domain/entity"
-	"github.com/speedianet/sfm/src/domain/valueObject"
-	infraHelper "github.com/speedianet/sfm/src/infra/helper"
+	"github.com/goinfinite/fleet/src/domain/dto"
+	"github.com/goinfinite/fleet/src/domain/entity"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
+	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
 )
 
 type ContainerCmdRepo struct {

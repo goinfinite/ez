@@ -1,6 +1,6 @@
 package main
 
-import "github.com/speedianet/sfm/src/presentation/cli"
+import "github.com/goinfinite/fleet/src/presentation/cli"
 
 func main() {
 	cli.CliInit()

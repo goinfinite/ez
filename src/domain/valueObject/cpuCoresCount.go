@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	voHelper "github.com/speedianet/sfm/src/domain/valueObject/helper"
+	voHelper "github.com/goinfinite/fleet/src/domain/valueObject/helper"
 )
 
 type CpuCoresCount float64

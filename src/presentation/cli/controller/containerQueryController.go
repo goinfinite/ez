@@ -1,11 +1,11 @@
 package cliController
 
 import (
-	"github.com/speedianet/sfm/src/domain/useCase"
-	"github.com/speedianet/sfm/src/infra"
-	"github.com/speedianet/sfm/src/infra/db"
-	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
-	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
+	"github.com/goinfinite/fleet/src/domain/useCase"
+	"github.com/goinfinite/fleet/src/infra"
+	"github.com/goinfinite/fleet/src/infra/db"
+	cliHelper "github.com/goinfinite/fleet/src/presentation/cli/helper"
+	cliMiddleware "github.com/goinfinite/fleet/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 

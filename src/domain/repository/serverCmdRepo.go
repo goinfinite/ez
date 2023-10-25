@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/speedianet/sfm/src/domain/valueObject"
+import "github.com/goinfinite/fleet/src/domain/valueObject"
 
 type ServerCmdRepo interface {
 	Reboot() error

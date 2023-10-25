@@ -1,8 +1,8 @@
 package useCase
 
 import (
-	"github.com/speedianet/sfm/src/domain/entity"
-	"github.com/speedianet/sfm/src/domain/repository"
+	"github.com/goinfinite/fleet/src/domain/entity"
+	"github.com/goinfinite/fleet/src/domain/repository"
 )
 
 func GetO11yOverview(

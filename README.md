@@ -66,7 +66,7 @@ go install github.com/swaggo/swag/cmd/swag@latest
 go install github.com/cosmtrek/air@latest
 git config --global user.name "yourgithubnick"
 git config --global user.email yourgithubemail
-git clone git@github.com:speedianet/sfm.git
+git clone git@github.com:goinfinite/fleet.git
 ```
 
 10. Build the project and run the installer:

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 
-	"github.com/speedianet/sfm/src/domain/entity"
-	"github.com/speedianet/sfm/src/domain/repository"
+	"github.com/goinfinite/fleet/src/domain/entity"
+	"github.com/goinfinite/fleet/src/domain/repository"
 )
 
 func GetAccounts(

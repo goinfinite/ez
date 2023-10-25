@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/speedianet/sfm/src/domain/entity"
-	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra/db"
-	infraHelper "github.com/speedianet/sfm/src/infra/helper"
+	"github.com/goinfinite/fleet/src/domain/entity"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/infra/db"
+	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
 )
 
 type ContainerQueryRepo struct {

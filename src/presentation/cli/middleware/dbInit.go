@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/speedianet/sfm/src/infra/db"
+	"github.com/goinfinite/fleet/src/infra/db"
 )
 
 func DatabaseInit() *db.DatabaseService {

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"log"
 
-	"github.com/speedianet/sfm/src/domain/entity"
-	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra/db"
-	dbModel "github.com/speedianet/sfm/src/infra/db/model"
+	"github.com/goinfinite/fleet/src/domain/entity"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/infra/db"
+	dbModel "github.com/goinfinite/fleet/src/infra/db/model"
 )
 
 type ContainerProfileQueryRepo struct {

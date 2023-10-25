@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/goinfinite/fleet/src/domain/dto"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/infra/db"
+	dbModel "github.com/goinfinite/fleet/src/infra/db/model"
+	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
 	"github.com/golang-jwt/jwt"
-	"github.com/speedianet/sfm/src/domain/dto"
-	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra/db"
-	dbModel "github.com/speedianet/sfm/src/infra/db/model"
-	infraHelper "github.com/speedianet/sfm/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
 )

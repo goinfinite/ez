@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
 )
 
 type CommandError struct {

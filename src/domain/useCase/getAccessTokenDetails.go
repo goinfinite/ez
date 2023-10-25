@@ -3,9 +3,9 @@ package useCase
 import (
 	"errors"
 
-	"github.com/speedianet/sfm/src/domain/dto"
-	"github.com/speedianet/sfm/src/domain/repository"
-	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/domain/dto"
+	"github.com/goinfinite/fleet/src/domain/repository"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
 )
 
 func GetAccessTokenDetails(

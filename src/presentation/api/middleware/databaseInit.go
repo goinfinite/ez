@@ -3,8 +3,8 @@ package apiMiddleware
 import (
 	"net/http"
 
+	"github.com/goinfinite/fleet/src/infra/db"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/sfm/src/infra/db"
 )
 
 func DatabaseInit() echo.MiddlewareFunc {

@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	api "github.com/speedianet/sfm/src/presentation/api"
-	cliController "github.com/speedianet/sfm/src/presentation/cli/controller"
+	api "github.com/goinfinite/fleet/src/presentation/api"
+	cliController "github.com/goinfinite/fleet/src/presentation/cli/controller"
 	"github.com/spf13/cobra"
 )
 

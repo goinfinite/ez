@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	infraHelper "github.com/speedianet/sfm/src/infra/helper"
+	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
 )
 
 type SysInstallCmdRepo struct {

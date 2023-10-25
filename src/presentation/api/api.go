@@ -1,11 +1,11 @@
 package api
 
 import (
+	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/infra"
+	apiMiddleware "github.com/goinfinite/fleet/src/presentation/api/middleware"
+	"github.com/goinfinite/fleet/src/presentation/shared"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/sfm/src/domain/valueObject"
-	"github.com/speedianet/sfm/src/infra"
-	apiMiddleware "github.com/speedianet/sfm/src/presentation/api/middleware"
-	"github.com/speedianet/sfm/src/presentation/shared"
 	_ "github.com/swaggo/echo-swagger/example/docs"
 )
 

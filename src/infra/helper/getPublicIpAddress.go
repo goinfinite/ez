@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/speedianet/sfm/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
 )
 
 func GetPublicIpAddress() (valueObject.IpAddress, error) {
