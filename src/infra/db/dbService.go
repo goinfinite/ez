@@ -9,9 +9,28 @@ import (
 	"gorm.io/gorm"
 )
 
-func isTableEmpty(dbSvc *gorm.DB, model interface{}) (bool, error) {
+type DatabaseService struct {
+	Orm *gorm.DB
+}
+
+func NewDatabaseService() (*DatabaseService, error) {
+	ormSvc, err := gorm.Open(sqlite.Open("/var/speedia/sfm.db"), &gorm.Config{})
+	if err != nil {
+		return nil, errors.New("DatabaseConnectionError")
+	}
+
+	dbSvc := &DatabaseService{Orm: ormSvc}
+	err = dbSvc.dbMigrate()
+	if err != nil {
+		return nil, err
+	}
+
+	return dbSvc, nil
+}
+
+func (dbSvc DatabaseService) isTableEmpty(model interface{}) (bool, error) {
 	var count int64
-	err := dbSvc.Model(&model).Count(&count).Error
+	err := dbSvc.Orm.Model(&model).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
@@ -19,9 +38,9 @@ func isTableEmpty(dbSvc *gorm.DB, model interface{}) (bool, error) {
 	return count == 0, nil
 }
 
-func seedDatabase(dbSvc *gorm.DB, seedModels ...interface{}) error {
+func (dbSvc DatabaseService) seedDatabase(seedModels ...interface{}) error {
 	for _, seedModel := range seedModels {
-		isTableEmpty, err := isTableEmpty(dbSvc, seedModel)
+		isTableEmpty, err := dbSvc.isTableEmpty(seedModel)
 		if err != nil {
 			return err
 		}
@@ -33,16 +52,20 @@ func seedDatabase(dbSvc *gorm.DB, seedModels ...interface{}) error {
 		seedModelType := reflect.TypeOf(seedModel).Elem()
 		seedModelFieldsAndMethods := reflect.ValueOf(seedModel)
 
-		defaultEntryMethod := seedModelFieldsAndMethods.MethodByName("DefaultEntry")
-		defaultEntryMethodResults := defaultEntryMethod.Call([]reflect.Value{})
-		actualDefaultEntry := defaultEntryMethodResults[0].Interface()
-		defaultEntryInnerStructure := reflect.ValueOf(actualDefaultEntry)
+		seedModelDefaultEntryMethod := seedModelFieldsAndMethods.MethodByName(
+			"DefaultEntry",
+		)
+		seedModelDefaultEntryMethodResults := seedModelDefaultEntryMethod.Call(
+			[]reflect.Value{},
+		)
+		firstAndOnlyResult := seedModelDefaultEntryMethodResults[0].Interface()
+		defaultEntryInnerStructure := reflect.ValueOf(firstAndOnlyResult)
 
 		defaultEntryFormatOrmWillAccept := reflect.New(seedModelType)
 		defaultEntryFormatOrmWillAccept.Elem().Set(defaultEntryInnerStructure)
-		newDefaultEntry := defaultEntryFormatOrmWillAccept.Interface()
+		adjustedDefaultEntry := defaultEntryFormatOrmWillAccept.Interface()
 
-		err = dbSvc.Create(newDefaultEntry).Error
+		err = dbSvc.Orm.Create(adjustedDefaultEntry).Error
 		if err != nil {
 			return err
 		}
@@ -51,30 +74,25 @@ func seedDatabase(dbSvc *gorm.DB, seedModels ...interface{}) error {
 	return nil
 }
 
-func DatabaseService() (*gorm.DB, error) {
-	dbSvc, err := gorm.Open(sqlite.Open("/var/speedia/sfm.db"), &gorm.Config{})
-	if err != nil {
-		return nil, errors.New("DatabaseConnectionError")
-	}
-
-	err = dbSvc.AutoMigrate(
+func (dbSvc DatabaseService) dbMigrate() error {
+	err := dbSvc.Orm.AutoMigrate(
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
 		&dbModel.ContainerProfile{},
 	)
 	if err != nil {
-		return nil, errors.New("DatabaseMigrationError")
+		return errors.New("DatabaseMigrationError")
 	}
 
 	modelsWithDefaultEntries := []interface{}{
 		&dbModel.ContainerProfile{},
 	}
 
-	err = seedDatabase(dbSvc, modelsWithDefaultEntries...)
+	err = dbSvc.seedDatabase(modelsWithDefaultEntries...)
 	if err != nil {
-		return nil, errors.New("AddDefaultDatabaseEntriesError")
+		return errors.New("AddDefaultDatabaseEntriesError")
 	}
 
-	return dbSvc, nil
+	return nil
 }
