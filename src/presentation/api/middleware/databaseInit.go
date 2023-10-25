@@ -10,7 +10,7 @@ import (
 func DatabaseInit() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			dbSvc, err := db.DatabaseService()
+			dbSvc, err := db.NewDatabaseService()
 			if err != nil {
 				return echo.NewHTTPError(
 					http.StatusInternalServerError,

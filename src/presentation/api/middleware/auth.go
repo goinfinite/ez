@@ -11,7 +11,7 @@ import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
-	"gorm.io/gorm"
+	"github.com/speedianet/sfm/src/infra/db"
 )
 
 func getAccountIdFromAccessToken(
@@ -61,7 +61,8 @@ func Auth(basePath string) echo.MiddlewareFunc {
 				})
 			}
 
-			authQueryRepo := infra.NewAuthQueryRepo(c.Get("dbSvc").(*gorm.DB))
+			dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+			authQueryRepo := infra.NewAuthQueryRepo(dbSvc)
 			tokenWithoutPrefix := token[7:]
 			accountId, err := getAccountIdFromAccessToken(
 				authQueryRepo,
