@@ -8,10 +8,10 @@ import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
+	"github.com/speedianet/sfm/src/infra/db"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
 	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
-	"gorm.io/gorm"
 )
 
 func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
@@ -53,7 +53,7 @@ func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
 }
 
 func AddContainerController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var accId uint64
 	var hostnameStr string
@@ -161,7 +161,7 @@ func AddContainerController() *cobra.Command {
 }
 
 func UpdateContainerController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var accId uint64
 	var containerIdStr string
@@ -234,7 +234,7 @@ func UpdateContainerController() *cobra.Command {
 }
 
 func DeleteContainerController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var accId uint64
 	var containerIdStr string

@@ -3,14 +3,14 @@ package cliController
 import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/infra"
+	"github.com/speedianet/sfm/src/infra/db"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
 	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
-	"gorm.io/gorm"
 )
 
 func GetContainersController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	cmd := &cobra.Command{
 		Use:   "get",

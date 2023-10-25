@@ -8,14 +8,14 @@ import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
+	"github.com/speedianet/sfm/src/infra/db"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
 	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
-	"gorm.io/gorm"
 )
 
 func GetContainerProfilesController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -62,7 +62,7 @@ func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 }
 
 func AddContainerProfileController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var nameStr string
 	var baseSpecsStr string
@@ -198,7 +198,7 @@ func AddContainerProfileController() *cobra.Command {
 }
 
 func UpdateContainerProfileController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var profileIdUint uint64
 	var nameStr string
@@ -352,7 +352,7 @@ func UpdateContainerProfileController() *cobra.Command {
 }
 
 func DeleteContainerProfileController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var profileIdUint uint64
 

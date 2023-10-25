@@ -5,14 +5,14 @@ import (
 	"github.com/speedianet/sfm/src/domain/useCase"
 	"github.com/speedianet/sfm/src/domain/valueObject"
 	"github.com/speedianet/sfm/src/infra"
+	"github.com/speedianet/sfm/src/infra/db"
 	cliHelper "github.com/speedianet/sfm/src/presentation/cli/helper"
 	cliMiddleware "github.com/speedianet/sfm/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
-	"gorm.io/gorm"
 )
 
 func GetAccountsController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -75,7 +75,7 @@ func accQuotaFactory(
 }
 
 func AddAccountController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var usernameStr string
 	var passwordStr string
@@ -139,7 +139,7 @@ func AddAccountController() *cobra.Command {
 }
 
 func UpdateAccountController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 
 	var accountIdStr string
 	var passwordStr string
@@ -232,7 +232,7 @@ func UpdateAccountController() *cobra.Command {
 }
 
 func DeleteAccountController() *cobra.Command {
-	var dbSvc *gorm.DB
+	var dbSvc *db.DatabaseService
 	var accountIdStr string
 
 	cmd := &cobra.Command{
