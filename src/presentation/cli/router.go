@@ -18,7 +18,7 @@ var versionCmd = &cobra.Command{
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Start the SFM server (default to port 10001)",
+	Short: "Start the FLEET server (default to port 10001)",
 	Run: func(cmd *cobra.Command, args []string) {
 		api.ApiInit()
 	},

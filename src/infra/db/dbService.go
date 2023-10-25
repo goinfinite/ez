@@ -14,7 +14,7 @@ type DatabaseService struct {
 }
 
 func NewDatabaseService() (*DatabaseService, error) {
-	ormSvc, err := gorm.Open(sqlite.Open("/var/infinite/sfm.db"), &gorm.Config{})
+	ormSvc, err := gorm.Open(sqlite.Open("/var/infinite/fleet.db"), &gorm.Config{})
 	if err != nil {
 		return nil, errors.New("DatabaseConnectionError")
 	}

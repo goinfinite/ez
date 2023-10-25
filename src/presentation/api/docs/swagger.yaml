@@ -318,7 +318,7 @@ info:
     name: INFINITE WEB SERVICES © 2023. All Rights Reserved.
     url: https://goinfinite.net/tos/
   termsOfService: https://goinfinite.net/tos/
-  title: SfmApi
+  title: FleetApi
   version: 0.0.1
 paths:
   /account/:

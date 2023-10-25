@@ -9,7 +9,7 @@ import (
 	_ "github.com/swaggo/echo-swagger/example/docs"
 )
 
-// @title			SfmApi
+// @title			FleetApi
 // @version			0.0.1
 // @description		Infinite FleetManager API
 // @termsOfService	https://goinfinite.net/tos/
@@ -48,7 +48,7 @@ func ApiInit() {
 
 	infra.ServerCmdRepo{}.AddServerLog(
 		valueObject.NewServerLogLevelPanic("info"),
-		valueObject.NewServerLogOperationPanic("sfm"),
-		valueObject.NewServerLogPayloadPanic("SFM backend is up and running!"),
+		valueObject.NewServerLogOperationPanic("fleet"),
+		valueObject.NewServerLogPayloadPanic("FLEET backend is up and running!"),
 	)
 }

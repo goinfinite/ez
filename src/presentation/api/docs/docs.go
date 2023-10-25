@@ -1008,7 +1008,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:10001",
 	BasePath:         "/v1",
 	Schemes:          []string{},
-	Title:            "SfmApi",
+	Title:            "FleetApi",
 	Description:      "Infinite FleetManager API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

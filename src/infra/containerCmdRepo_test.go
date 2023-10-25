@@ -35,8 +35,8 @@ func TestContainerCmdRepo(t *testing.T) {
 		profileId := valueObject.NewContainerProfileIdPanic(0)
 
 		envs := []valueObject.ContainerEnv{
-			valueObject.NewContainerEnvPanic("SFM_ENV1=testing"),
-			valueObject.NewContainerEnvPanic("SFM_ENV2=testing"),
+			valueObject.NewContainerEnvPanic("FLEET_ENV1=testing"),
+			valueObject.NewContainerEnvPanic("FLEET_ENV2=testing"),
 		}
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))

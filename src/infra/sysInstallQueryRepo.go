@@ -10,7 +10,7 @@ type SysInstallQueryRepo struct {
 }
 
 func (repo SysInstallQueryRepo) IsInstalled() bool {
-	out, err := infraHelper.RunCmd("grep", "alias sfm=", "/root/.bashrc")
+	out, err := infraHelper.RunCmd("grep", "alias fleet=", "/root/.bashrc")
 	if err != nil || out == "" {
 		return false
 	}

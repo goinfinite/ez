@@ -4,7 +4,7 @@ This project is under active development and is not ready for production use.
 
 # Infinite FleetManager
 
-Infinite FleetManager (SFM) is a proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
+Infinite FleetManager (FLEET) is a proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
 
 ## Running
 
@@ -16,7 +16,7 @@ To run this project during development you must install [Air](https://github.com
 
 ### Unit Testing
 
-Since SFM relies on the operational system being openSUSE MicroOS, the entire development and testing should be done in a VM. The VM can be created with the following steps:
+Since FLEET relies on the operational system being openSUSE MicroOS, the entire development and testing should be done in a VM. The VM can be created with the following steps:
 
 1. Install VMWare Player;
 
@@ -44,7 +44,7 @@ curl -L https://go.dev/dl/go1.20.5.linux-amd64.tar.gz -o go.tar.gz
 tar -C /usr/local -xzf go.tar.gz
 rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
-echo 'alias sfm-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
+echo 'alias fleet-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
 systemctl reboot
 ```
 
@@ -59,7 +59,7 @@ Host github.com
 
 Replace `the_github_key` with the path to your private key and remember to chmod the key to 400.
 
-9. Install a few Go packages and clone the SFM repository:
+9. Install a few Go packages and clone the FLEET repository:
 
 ```
 go install github.com/swaggo/swag/cmd/swag@latest
@@ -72,8 +72,8 @@ git clone git@github.com:goinfinite/fleet.git
 10. Build the project and run the installer:
 
 ```
-cd sfm; air
-/var/infinite/sfm sys-install
+cd fleet; air
+/var/infinite/fleet sys-install
 ```
 
 11. The system will reboot and once you get the final success message, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
@@ -89,7 +89,7 @@ If you add a new env var that is required to run the apis, please add it to the 
 When running in production, the `/var/infinite/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
 
 ```
-ENV1=XXX /var/infinite/sfm
+ENV1=XXX /var/infinite/fleet
 ```
 
 ### Dev Utils
@@ -100,18 +100,18 @@ For instance there you'll find a `testHelpers.go` file that is used to read the 
 
 ### Building
 
-SFM is likely on the marketplace of your cloud provider already, but if you want to build it yourself.
+FLEET is likely on the marketplace of your cloud provider already, but if you want to build it yourself.
 
 The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
 1. Once you have uploaded the openSUSE MicroOS cloud-init image to your provider, attach a secondary unformatted disk and deploy the VM.
 
-2. Get the SFM binary and download it to the `/var/infinite/` directory.
+2. Get the FLEET binary and download it to the `/var/infinite/` directory.
 
 3. Then run the installer, the system will reboot and once you get the success message, you are good to go:
 
 ```
-sfm sys-install
+fleet sys-install
 ```
 
 ## REST API

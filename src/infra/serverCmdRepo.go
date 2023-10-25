@@ -187,7 +187,7 @@ func (repo ServerCmdRepo) AddServerLog(
 	payload valueObject.ServerLogPayload,
 ) {
 	logEntity := entity.NewServerLog(level, operation, payload)
-	logFilePath := "/var/log/sfm.log"
+	logFilePath := "/var/log/fleet.log"
 	jsonLogEntry, err := json.Marshal(logEntity)
 	if err != nil {
 		return

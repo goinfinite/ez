@@ -39,7 +39,7 @@ func SysInstall(
 		logAction(
 			serverCmdRepo,
 			"Installation started. The server will reboot a few times. "+
-				"Check /var/log/sfm.log for the installation progress.",
+				"Check /var/log/fleet.log for the installation progress.",
 		)
 
 		err := sysInstallCmdRepo.Install()
@@ -50,7 +50,7 @@ func SysInstall(
 
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
-			valueObject.NewSvcCmdPanic("/var/infinite/sfm sys-install"),
+			valueObject.NewSvcCmdPanic("/var/infinite/fleet sys-install"),
 		)
 
 		logAction(serverCmdRepo, "Packages installed. Rebooting...")
@@ -67,8 +67,8 @@ func SysInstall(
 
 	logAction(serverCmdRepo, "Adding core services...")
 	err = serverCmdRepo.AddSvc(
-		valueObject.NewSvcNamePanic("sfm"),
-		valueObject.NewSvcCmdPanic("/var/infinite/sfm serve"),
+		valueObject.NewSvcNamePanic("fleet"),
+		valueObject.NewSvcCmdPanic("/var/infinite/fleet serve"),
 	)
 	if err != nil {
 		logAction(serverCmdRepo, err.Error())

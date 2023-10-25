@@ -29,10 +29,10 @@ func (repo SysInstallCmdRepo) Install() error {
 	_, err = infraHelper.RunCmd(
 		"bash",
 		"-c",
-		"echo \"alias sfm='/var/infinite/sfm'\" >> /root/.bashrc",
+		"echo \"alias fleet='/var/infinite/fleet'\" >> /root/.bashrc",
 	)
 	if err != nil {
-		return errors.New("AddSfmAliasFailed")
+		return errors.New("AddFleetAliasFailed")
 	}
 
 	return nil
