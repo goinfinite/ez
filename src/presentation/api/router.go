@@ -45,6 +45,15 @@ func containerRoutes(baseRoute *echo.Group) {
 		"/:accId/:containerId",
 		apiController.DeleteContainerController,
 	)
+
+	containerProfileGroup := containerGroup.Group("/profile")
+	containerProfileGroup.GET("/", apiController.GetContainerProfilesController)
+	containerProfileGroup.POST("/", apiController.AddContainerProfileController)
+	containerProfileGroup.PUT("/", apiController.UpdateContainerProfileController)
+	containerProfileGroup.DELETE(
+		"/:profileId",
+		apiController.DeleteContainerProfileController,
+	)
 }
 
 func o11yRoutes(baseRoute *echo.Group) {
