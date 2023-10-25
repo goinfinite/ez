@@ -11,15 +11,15 @@ import (
 
 // @title			SfmApi
 // @version			0.0.1
-// @description		Speedia FleetManager API
-// @termsOfService	https://speedia.net/tos/
+// @description		Infinite FleetManager API
+// @termsOfService	https://goinfinite.net/tos/
 
-// @contact.name	Speedia Engineering
-// @contact.url		https://speedia.net/
-// @contact.email	eng+swagger@speedia.net
+// @contact.name	Infinite Engineering
+// @contact.url		https://goinfinite.net/
+// @contact.email	eng+swagger@goinfinite.net
 
-// @license.name  SPEEDIA WEB SERVICES © 2023. All Rights Reserved.
-// @license.url   https://speedia.net/tos/
+// @license.name  INFINITE CLOUD COMPUTING © 2023. All Rights Reserved.
+// @license.url   https://goinfinite.net/tos/
 
 // @securityDefinitions.apikey	Bearer
 // @in 							header

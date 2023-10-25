@@ -43,8 +43,8 @@ func TestContainerCmdRepo(t *testing.T) {
 
 		addContainer := dto.NewAddContainer(
 			accountId,
-			valueObject.NewFqdnPanic("speedia.net"),
-			valueObject.NewContainerImgAddressPanic("docker.io/speedia/sam:latest"),
+			valueObject.NewFqdnPanic("goinfinite.net"),
+			valueObject.NewContainerImgAddressPanic("docker.io/infinite/sam:latest"),
 			portBindings,
 			&restartPolicy,
 			nil,

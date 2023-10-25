@@ -3,12 +3,12 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-bin = "/var/speedia/sfm"
-cmd = "go build -o /var/speedia/sfm ./sfm.go"
+bin = "/var/infinite/sfm"
+cmd = "go build -o /var/infinite/sfm ./sfm.go"
 delay = 1000
 exclude_dir = [".git", "bin", "logs", "tmp", "vendor", "src/devUtils"]
 follow_symlink = false
-full_bin = "export $(grep -v '^#' .env | xargs); /var/speedia/sfm"
+full_bin = "export $(grep -v '^#' .env | xargs); /var/infinite/sfm"
 ignore = ["*_test.go", "testHelpers.go"]
 
 [[watcher]]

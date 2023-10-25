@@ -9,7 +9,7 @@ import (
 )
 
 func GetPublicIpAddress() (valueObject.IpAddress, error) {
-	resp, err := http.Get("https://speedia.net/ip")
+	resp, err := http.Get("https://goinfinite.net/ip")
 	if err != nil {
 		return "", errors.New("GetPublicIpAddressFailed")
 	}

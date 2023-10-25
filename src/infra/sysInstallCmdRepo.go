@@ -25,11 +25,11 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
-	_ = os.MkdirAll("/var/speedia", 0755)
+	_ = os.MkdirAll("/var/infinite", 0755)
 	_, err = infraHelper.RunCmd(
 		"bash",
 		"-c",
-		"echo \"alias sfm='/var/speedia/sfm'\" >> /root/.bashrc",
+		"echo \"alias sfm='/var/infinite/sfm'\" >> /root/.bashrc",
 	)
 	if err != nil {
 		return errors.New("AddSfmAliasFailed")

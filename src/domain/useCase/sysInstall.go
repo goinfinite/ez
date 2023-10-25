@@ -50,7 +50,7 @@ func SysInstall(
 
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
-			valueObject.NewSvcCmdPanic("/var/speedia/sfm sys-install"),
+			valueObject.NewSvcCmdPanic("/var/infinite/sfm sys-install"),
 		)
 
 		logAction(serverCmdRepo, "Packages installed. Rebooting...")
@@ -68,7 +68,7 @@ func SysInstall(
 	logAction(serverCmdRepo, "Adding core services...")
 	err = serverCmdRepo.AddSvc(
 		valueObject.NewSvcNamePanic("sfm"),
-		valueObject.NewSvcCmdPanic("/var/speedia/sfm serve"),
+		valueObject.NewSvcCmdPanic("/var/infinite/sfm serve"),
 	)
 	if err != nil {
 		logAction(serverCmdRepo, err.Error())
