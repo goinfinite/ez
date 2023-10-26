@@ -308,32 +308,36 @@ func (repo AccCmdRepo) UpdateQuota(
 func (repo AccCmdRepo) getStorageUsage(
 	accId valueObject.AccountId,
 ) (valueObject.AccountQuota, error) {
-	quotaUsage := valueObject.AccountQuota{}
+	var quotaUsage valueObject.AccountQuota
 
 	xfsReportUsage, err := infraHelper.RunCmd(
 		"bash",
 		"-c",
 		"xfs_quota -x -c 'report -nbiN' /var/data | awk '/#"+
-			accId.String()+"/{print $1, $2, $7}'",
+			accId.String()+" /{print $1, $2, $7; exit;}'",
 	)
 	if err != nil {
 		return quotaUsage, err
 	}
 
 	if xfsReportUsage == "" {
-		return quotaUsage, nil
+		return quotaUsage, errors.New("InvalidXfsReportUsage")
 	}
 
 	xfsReportUsage = strings.TrimSpace(xfsReportUsage)
 	if xfsReportUsage == "" {
-		return quotaUsage, nil
+		return quotaUsage, errors.New("InvalidXfsReportUsage")
 	}
 
 	usageColumns := strings.Split(xfsReportUsage, " ")
+	if len(usageColumns) < 3 {
+		return quotaUsage, errors.New("InvalidXfsReportUsage")
+	}
+
 	diskUsageKilobytesStr := usageColumns[1]
 	inodesUsageStr := usageColumns[2]
 	if diskUsageKilobytesStr == "" || inodesUsageStr == "" {
-		return quotaUsage, nil
+		return quotaUsage, errors.New("InvalidXfsReportUsage")
 	}
 
 	diskUsageBytesStr := diskUsageKilobytesStr + "000"
