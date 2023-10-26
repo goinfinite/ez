@@ -120,7 +120,7 @@ func AddContainerController() *cobra.Command {
 				envs,
 			)
 
-			containerCmdRepo := infra.ContainerCmdRepo{}
+			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
@@ -203,7 +203,7 @@ func UpdateContainerController() *cobra.Command {
 			)
 
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.ContainerCmdRepo{}
+			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
@@ -250,7 +250,7 @@ func DeleteContainerController() *cobra.Command {
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.ContainerCmdRepo{}
+			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 			err := useCase.DeleteContainer(

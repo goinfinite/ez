@@ -150,7 +150,7 @@ func AddContainerController(c echo.Context) error {
 	)
 
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	containerCmdRepo := infra.ContainerCmdRepo{}
+	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
@@ -218,7 +218,7 @@ func UpdateContainerController(c echo.Context) error {
 
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.ContainerCmdRepo{}
+	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
@@ -257,7 +257,7 @@ func DeleteContainerController(c echo.Context) error {
 
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.ContainerCmdRepo{}
+	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
 	err := useCase.DeleteContainer(

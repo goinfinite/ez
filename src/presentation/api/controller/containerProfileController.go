@@ -277,7 +277,7 @@ func UpdateContainerProfileController(c echo.Context) error {
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.ContainerCmdRepo{}
+	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 
 	err := useCase.UpdateContainerProfile(
 		containerProfileQueryRepo,
@@ -310,7 +310,7 @@ func DeleteContainerProfileController(c echo.Context) error {
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.ContainerCmdRepo{}
+	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 
 	err := useCase.DeleteContainerProfile(
 		containerProfileQueryRepo,
