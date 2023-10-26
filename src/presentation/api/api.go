@@ -1,8 +1,6 @@
 package api
 
 import (
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	"github.com/goinfinite/fleet/src/infra"
 	apiMiddleware "github.com/goinfinite/fleet/src/presentation/api/middleware"
 	"github.com/goinfinite/fleet/src/presentation/shared"
 	"github.com/labstack/echo/v4"
@@ -26,7 +24,7 @@ import (
 // @name						Authorization
 // @description					Type "Bearer" + JWT token or API key.
 
-// @host		localhost:10001
+// @host		localhost:10000
 // @BasePath	/v1
 func ApiInit() {
 	shared.CheckEnvs()
@@ -44,11 +42,5 @@ func ApiInit() {
 
 	registerApiRoutes(baseRoute)
 
-	e.Start(":10001")
-
-	infra.ServerCmdRepo{}.AddServerLog(
-		valueObject.NewServerLogLevelPanic("info"),
-		valueObject.NewServerLogOperationPanic("fleet"),
-		valueObject.NewServerLogPayloadPanic("FLEET backend is up and running!"),
-	)
+	e.Start(":10000")
 }
