@@ -169,6 +169,9 @@ func (repo ContainerQueryRepo) GetById(
 		return entity.Container{}, errors.New("RestartPolicyParseError")
 	}
 	rawRestartPolicyName := rawRestartPolicy["Name"].(string)
+	if rawRestartPolicyName == "" {
+		rawRestartPolicyName = "no"
+	}
 	restartPolicyName, err := valueObject.NewContainerRestartPolicy(rawRestartPolicyName)
 	if err != nil {
 		return entity.Container{}, err
