@@ -261,6 +261,7 @@ func (repo ContainerQueryRepo) GetByAccId(
 		"podman",
 		"container",
 		"list",
+		"--all",
 		"--format",
 		"{{.ID}}",
 	)
