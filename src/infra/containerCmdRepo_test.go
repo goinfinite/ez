@@ -43,7 +43,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		addContainer := dto.NewAddContainer(
 			accountId,
 			valueObject.NewFqdnPanic("goinfinite.net"),
-			valueObject.NewContainerImgAddressPanic("docker.io/nginx:latest"),
+			valueObject.NewContainerImgAddressPanic("https://docker.io/nginx:latest"),
 			portBindings,
 			&restartPolicy,
 			nil,
@@ -65,7 +65,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		}
 
 		if len(containers) == 0 {
-			t.Errorf("NoContainersFound: %v", err)
+			t.Error("NoContainersFound")
 		}
 
 		updateContainer := dto.NewUpdateContainer(
@@ -89,7 +89,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		}
 
 		if len(containers) == 0 {
-			t.Errorf("NoContainersFound: %v", err)
+			t.Error("NoContainersFound")
 		}
 
 		err = containerCmdRepo.Delete(
