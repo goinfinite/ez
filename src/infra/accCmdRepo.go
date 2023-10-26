@@ -369,7 +369,7 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 	}
 
 	containerQueryRepo := NewContainerQueryRepo(repo.dbSvc)
-	containers, err := containerQueryRepo.Get()
+	containers, err := containerQueryRepo.GetByAccId(accId)
 	if err != nil {
 		return err
 	}
@@ -379,10 +379,6 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.dbSvc)
 
 	for _, container := range containers {
-		if container.AccountId.Get() != accId.Get() {
-			continue
-		}
-
 		containerProfile, err := profileQueryRepo.GetById(
 			container.ProfileId,
 		)
