@@ -13,10 +13,9 @@ func TestContainerCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	dbSvc := testHelpers.GetDbSvc()
 	containerQueryRepo := NewContainerQueryRepo(dbSvc)
+	containerCmdRepo := NewContainerCmdRepo(dbSvc)
 
 	t.Run("AddContainer", func(t *testing.T) {
-		repo := ContainerCmdRepo{}
-
 		portBindings := []valueObject.PortBinding{
 			valueObject.NewPortBinding(
 				valueObject.NewNetworkProtocolPanic("tcp"),
@@ -44,7 +43,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		addContainer := dto.NewAddContainer(
 			accountId,
 			valueObject.NewFqdnPanic("goinfinite.net"),
-			valueObject.NewContainerImgAddressPanic("docker.io/infinite/sam:latest"),
+			valueObject.NewContainerImgAddressPanic("docker.io/nginx:latest"),
 			portBindings,
 			&restartPolicy,
 			nil,
@@ -52,29 +51,9 @@ func TestContainerCmdRepo(t *testing.T) {
 			envs,
 		)
 
-		err := repo.Add(addContainer)
+		err := containerCmdRepo.Add(addContainer)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
-		}
-	})
-
-	t.Run("DeleteContainer", func(t *testing.T) {
-		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		containers, err := containerQueryRepo.GetByAccId(accId)
-		if err != nil {
-			t.Errorf("GetContainersFailed: %v", err)
-		}
-
-		if len(containers) == 0 {
-			t.Errorf("NoContainersFound: %v", err)
-		}
-
-		err = ContainerCmdRepo{}.Delete(
-			accId,
-			containers[0].Id,
-		)
-		if err != nil {
-			t.Errorf("DeleteContainerFailed: %v", err)
 		}
 	})
 
@@ -96,9 +75,29 @@ func TestContainerCmdRepo(t *testing.T) {
 			nil,
 		)
 
-		err = ContainerCmdRepo{}.Update(containers[0], updateContainer)
+		err = containerCmdRepo.Update(containers[0], updateContainer)
 		if err != nil {
 			t.Errorf("UpdateContainerFailed: %v", err)
+		}
+	})
+
+	t.Run("DeleteContainer", func(t *testing.T) {
+		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		containers, err := containerQueryRepo.GetByAccId(accId)
+		if err != nil {
+			t.Errorf("GetContainersFailed: %v", err)
+		}
+
+		if len(containers) == 0 {
+			t.Errorf("NoContainersFound: %v", err)
+		}
+
+		err = containerCmdRepo.Delete(
+			accId,
+			containers[0].Id,
+		)
+		if err != nil {
+			t.Errorf("DeleteContainerFailed: %v", err)
 		}
 	})
 }
