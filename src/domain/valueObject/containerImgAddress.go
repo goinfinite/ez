@@ -3,74 +3,37 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
-const containerImgAddressRegex string = `^(?P<registryScheme>https?://)?(?P<registryHostname>\w{1,10}\.\w{1,10}\.?\w{0,10})?/?(?P<orgName>\w{1,100})/(?P<repoName>\w{1,100}):?(?P<repoTag>\w{1,100})$`
+const containerImgAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)(?::(?P<port>\d{1,6}))?/(?:(?P<orgName>\w{1,128})/)?(?P<imageName>\w{1,128}):?(?P<imageTag>\w{1,128})?$`
 
 type ContainerImgAddress string
 
 func NewContainerImgAddress(value string) (ContainerImgAddress, error) {
-	cntrImgAddr := ContainerImgAddress(value)
-	if !cntrImgAddr.isValid() {
+	imgAddr := ContainerImgAddress(value)
+	if !imgAddr.isValid() {
 		return "", errors.New("InvalidContainerImgAddress")
 	}
-	return cntrImgAddr, nil
+
+	imgAddrWithoutSchema := strings.TrimPrefix(string(imgAddr), "http://")
+	imgAddrWithoutSchema = strings.TrimPrefix(imgAddrWithoutSchema, "https://")
+	return ContainerImgAddress(imgAddrWithoutSchema), nil
 }
 
 func NewContainerImgAddressPanic(value string) ContainerImgAddress {
-	cntrImgAddr := ContainerImgAddress(value)
-	if !cntrImgAddr.isValid() {
-		panic("InvalidContainerImgAddress")
+	imgAddr, err := NewContainerImgAddress(value)
+	if err != nil {
+		panic(err)
 	}
-	return cntrImgAddr
+	return imgAddr
 }
 
-func (cntrImgAddr ContainerImgAddress) isValid() bool {
+func (imgAddr ContainerImgAddress) isValid() bool {
 	re := regexp.MustCompile(containerImgAddressRegex)
-	return re.MatchString(string(cntrImgAddr))
+	return re.MatchString(string(imgAddr))
 }
 
-func (cntrImgAddr ContainerImgAddress) getRegexParts() map[string]string {
-	re := regexp.MustCompile(containerImgAddressRegex)
-	match := re.FindStringSubmatch(string(cntrImgAddr))
-
-	groupNames := re.SubexpNames()
-	groupMap := make(map[string]string)
-
-	for i, name := range groupNames {
-		if i != 0 && name != "" {
-			groupMap[name] = match[i]
-		}
-	}
-
-	return groupMap
-}
-
-func (cntrImgAddr ContainerImgAddress) GetRegistryScheme() string {
-	parts := cntrImgAddr.getRegexParts()
-	return parts["registryScheme"]
-}
-
-func (cntrImgAddr ContainerImgAddress) GetRegistryHostname() string {
-	parts := cntrImgAddr.getRegexParts()
-	return parts["registryHostname"]
-}
-
-func (cntrImgAddr ContainerImgAddress) GetOrgName() string {
-	parts := cntrImgAddr.getRegexParts()
-	return parts["orgName"]
-}
-
-func (cntrImgAddr ContainerImgAddress) GetRepoName() string {
-	parts := cntrImgAddr.getRegexParts()
-	return parts["repoName"]
-}
-
-func (cntrImgAddr ContainerImgAddress) GetRepoTag() string {
-	parts := cntrImgAddr.getRegexParts()
-	return parts["repoTag"]
-}
-
-func (cntrImgAddr ContainerImgAddress) String() string {
-	return string(cntrImgAddr)
+func (imgAddr ContainerImgAddress) String() string {
+	return string(imgAddr)
 }
