@@ -6,16 +6,23 @@ import (
 	"github.com/goinfinite/fleet/src/domain/dto"
 	"github.com/goinfinite/fleet/src/domain/entity"
 	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/goinfinite/fleet/src/infra/db"
 	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
 )
 
 type ContainerCmdRepo struct {
+	dbSvc *db.DatabaseService
+}
+
+func NewContainerCmdRepo(dbSvc *db.DatabaseService) *ContainerCmdRepo {
+	return &ContainerCmdRepo{dbSvc: dbSvc}
 }
 
 func (repo ContainerCmdRepo) getBaseSpecs(
 	profileId valueObject.ContainerProfileId,
 ) (valueObject.ContainerSpecs, error) {
-	containerProfile, err := ContainerProfileQueryRepo{}.GetById(
+	profileQueryRepo := NewContainerProfileQueryRepo(repo.dbSvc)
+	containerProfile, err := profileQueryRepo.GetById(
 		profileId,
 	)
 	if err != nil {
