@@ -48,12 +48,22 @@ func SysInstall(
 			return err
 		}
 
+		logAction(serverCmdRepo, "Packages installed.")
+
+		logAction(serverCmdRepo, "Disabling default softwares...")
+		err = sysInstallCmdRepo.DisableDefaultSoftwares()
+		if err != nil {
+			logAction(serverCmdRepo, err.Error())
+			return err
+		}
+
+		logAction(serverCmdRepo, "Default softwares disabled. Rebooting...")
+
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
 			valueObject.NewSvcCmdPanic("/var/infinite/fleet sys-install"),
 		)
 
-		logAction(serverCmdRepo, "Packages installed. Rebooting...")
 		serverCmdRepo.Reboot()
 		return nil
 	}
@@ -70,13 +80,6 @@ func SysInstall(
 		valueObject.NewSvcNamePanic("fleet"),
 		valueObject.NewSvcCmdPanic("/var/infinite/fleet serve"),
 	)
-	if err != nil {
-		logAction(serverCmdRepo, err.Error())
-		return err
-	}
-
-	logAction(serverCmdRepo, "Disabling default softwares...")
-	err = sysInstallCmdRepo.DisableDefaultSoftwares()
 	if err != nil {
 		logAction(serverCmdRepo, err.Error())
 		return err
