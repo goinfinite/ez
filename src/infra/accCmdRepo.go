@@ -372,12 +372,14 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 	cpuCores, _ := valueObject.NewCpuCoresCount(0)
 	memoryBytes, _ := valueObject.NewByte(0)
 
+	profileQueryRepo := NewContainerProfileQueryRepo(repo.dbSvc)
+
 	for _, container := range containers {
 		if container.AccountId.Get() != accId.Get() {
 			continue
 		}
 
-		containerProfile, err := ContainerProfileQueryRepo{}.GetById(
+		containerProfile, err := profileQueryRepo.GetById(
 			container.ProfileId,
 		)
 		if err != nil {
