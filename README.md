@@ -23,7 +23,9 @@ Since FLEET relies on the operational system being openSUSE MicroOS, the entire 
 2. Download the VMware `.vmx` and `.vmdk` files from "Base System + Container Runtime" column on MicroOS download page:
    https://en.opensuse.org/Portal:MicroOS/Downloads
 
-3. Add the VM to the VMWare Player interface and then:
+3. Extract the `.vmdk` file if it came compressed.
+
+4. Add the VM to the VMWare Player interface and then:
 
    1. Change the resources to 4GB RAM // 2vCPU;
    2. Remove the default disk;
@@ -32,15 +34,15 @@ Since FLEET relies on the operational system being openSUSE MicroOS, the entire 
    5. Add a secondary disk (5GB minimal - do not format);
    6. Add a Network Adapter (keep set to NAT mode);
 
-4. Run the VM. The first boot will allow you to set up a root password. After the first reboot, login with the password you set.
+5. Run the VM. The first boot will allow you to set up a root password. After the first reboot, login with the password you set.
 
-5. Add your public SSH key to "/root/.ssh/authorized_keys" file. I would recommend uploading your .pub to a Pastebin or similar service and then using curl to download it to the VM as curl is installed by default.
+6. Add your public SSH key to "/root/.ssh/authorized_keys" file. I would recommend uploading your .pub to a Pastebin or similar service and then using curl to download it to the VM as curl is installed by default.
 
-6. Install git and Go and reboot:
+7. Install git and Go and reboot:
 
 ```
 transactional-update pkg install git
-curl -L https://go.dev/dl/go1.20.5.linux-amd64.tar.gz -o go.tar.gz
+curl -L https://go.dev/dl/go1.21.3.linux-amd64.tar.gz -o go.tar.gz
 tar -C /usr/local -xzf go.tar.gz
 rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
