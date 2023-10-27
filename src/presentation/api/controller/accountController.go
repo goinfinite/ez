@@ -92,19 +92,19 @@ func AddAccountController(c echo.Context) error {
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
-	quota := valueObject.NewAccountQuotaWithDefaultValues()
+	var quotaPtr *valueObject.AccountQuota
 	if requestBody["quota"] != nil {
-		quotaReceived, err := accQuotaFactory(requestBody["quota"], true)
+		quota, err := accQuotaFactory(requestBody["quota"], true)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
-		quota = quotaReceived
+		quotaPtr = &quota
 	}
 
 	addAccountDto := dto.NewAddAccount(
 		valueObject.NewUsernamePanic(requestBody["username"].(string)),
 		valueObject.NewPasswordPanic(requestBody["password"].(string)),
-		quota,
+		quotaPtr,
 	)
 
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
