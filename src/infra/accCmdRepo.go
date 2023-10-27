@@ -263,19 +263,19 @@ func (repo AccCmdRepo) updateQuotaTable(
 ) error {
 	updateMap := map[string]interface{}{}
 
-	if quota.CpuCores.Get() > 0 {
+	if quota.CpuCores.Get() >= 0 {
 		updateMap["cpu_cores"] = quota.CpuCores.Get()
 	}
 
-	if quota.MemoryBytes.Get() > 0 {
+	if quota.MemoryBytes.Get() >= 0 {
 		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Get())
 	}
 
-	if quota.DiskBytes.Get() > 0 {
+	if quota.DiskBytes.Get() >= 0 {
 		updateMap["disk_bytes"] = uint64(quota.DiskBytes.Get())
 	}
 
-	if quota.Inodes.Get() > 0 {
+	if quota.Inodes.Get() >= 0 {
 		updateMap["inodes"] = quota.Inodes.Get()
 	}
 
