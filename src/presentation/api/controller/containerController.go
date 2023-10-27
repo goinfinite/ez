@@ -89,16 +89,16 @@ func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accId, hostname and imgAddr are required.)"
+// @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imgAddr are required.)"
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /container/ [post]
 func AddContainerController(c echo.Context) error {
-	requiredParams := []string{"accId", "hostname", "imgAddr"}
+	requiredParams := []string{"accountId", "hostname", "imgAddr"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
-	accId := valueObject.NewAccountIdPanic(requestBody["accId"])
+	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
 	hostname := valueObject.NewFqdnPanic(requestBody["hostname"].(string))
 	imgAddr := valueObject.NewContainerImgAddressPanic(
 		requestBody["imgAddr"].(string),
@@ -180,12 +180,12 @@ func AddContainerController(c echo.Context) error {
 // @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
 // @Router       /container/ [put]
 func UpdateContainerController(c echo.Context) error {
-	requiredParams := []string{"accId", "containerId"}
+	requiredParams := []string{"accountId", "containerId"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
-	accId := valueObject.NewAccountIdPanic(requestBody["accId"])
+	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
 	containerId := valueObject.NewContainerIdPanic(
 		requestBody["containerId"].(string),
 	)
