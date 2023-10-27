@@ -21,7 +21,7 @@ func updateContainersWithProfileId(
 	}
 
 	for _, container := range containers {
-		if container.ProfileId != profileId {
+		if container.ProfileId == profileId {
 			continue
 		}
 
