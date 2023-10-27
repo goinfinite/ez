@@ -373,8 +373,8 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 	if err != nil {
 		return err
 	}
-	cpuCores, _ := valueObject.NewCpuCoresCount(0)
-	memoryBytes, _ := valueObject.NewByte(0)
+	cpuCoresUsage := float64(0)
+	memoryBytesUsage := int64(0)
 
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.dbSvc)
 
@@ -389,13 +389,12 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 		containerCpuCores := containerProfile.BaseSpecs.CpuCores.Get()
 		containerMemoryBytes := containerProfile.BaseSpecs.MemoryBytes.Get()
 
-		cpuCores = valueObject.CpuCoresCount(
-			cpuCores.Get() + containerCpuCores,
-		)
-		memoryBytes = valueObject.Byte(
-			memoryBytes.Get() + containerMemoryBytes,
-		)
+		cpuCoresUsage += containerCpuCores
+		memoryBytesUsage += containerMemoryBytes
 	}
+
+	cpuCores, _ := valueObject.NewCpuCoresCount(cpuCoresUsage)
+	memoryBytes, _ := valueObject.NewByte(memoryBytesUsage)
 
 	quota := valueObject.NewAccountQuota(
 		cpuCores,
