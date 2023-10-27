@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/fleet/src/domain/dto"
 	"github.com/goinfinite/fleet/src/domain/repository"
+	"github.com/goinfinite/fleet/src/domain/valueObject"
 )
 
 func AddAccount(
@@ -16,6 +17,11 @@ func AddAccount(
 	_, err := accQueryRepo.GetByUsername(addAccount.Username)
 	if err == nil {
 		return errors.New("AccountAlreadyExists")
+	}
+
+	defaultQuota := valueObject.NewAccountQuotaWithDefaultValues()
+	if addAccount.Quota == nil {
+		addAccount.Quota = &defaultQuota
 	}
 
 	err = accCmdRepo.Add(addAccount)

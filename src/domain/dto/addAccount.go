@@ -3,15 +3,15 @@ package dto
 import "github.com/goinfinite/fleet/src/domain/valueObject"
 
 type AddAccount struct {
-	Username valueObject.Username     `json:"username"`
-	Password valueObject.Password     `json:"password"`
-	Quota    valueObject.AccountQuota `json:"quota"`
+	Username valueObject.Username      `json:"username"`
+	Password valueObject.Password      `json:"password"`
+	Quota    *valueObject.AccountQuota `json:"quota"`
 }
 
 func NewAddAccount(
 	username valueObject.Username,
 	password valueObject.Password,
-	quota valueObject.AccountQuota,
+	quota *valueObject.AccountQuota,
 ) AddAccount {
 	return AddAccount{
 		Username: username,
