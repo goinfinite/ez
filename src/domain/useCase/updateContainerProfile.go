@@ -9,7 +9,7 @@ import (
 	"github.com/goinfinite/fleet/src/domain/valueObject"
 )
 
-func updateContainerContainerProfileId(
+func updateContainersWithProfileId(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 	profileId valueObject.ContainerProfileId,
@@ -34,7 +34,7 @@ func updateContainerContainerProfileId(
 
 		err := containerCmdRepo.Update(container, updateContainerDto)
 		if err != nil {
-			log.Printf("UpdateContainerContainerProfileError: %s", err)
+			log.Printf("UpdateContainersWithProfileIdError: %s", err)
 			continue
 		}
 	}
@@ -65,14 +65,14 @@ func UpdateContainerProfile(
 		return nil
 	}
 
-	err = updateContainerContainerProfileId(
+	err = updateContainersWithProfileId(
 		containerQueryRepo,
 		containerCmdRepo,
 		updateContainerProfileDto.Id,
 	)
 	if err != nil {
-		log.Printf("UpdateContainerProfileContainersError: %s", err)
-		return errors.New("UpdateContainerProfileContainersInfraError")
+		log.Printf("UpdateContainersAfterProfileUpdateError: %s", err)
+		return errors.New("UpdateContainersAfterProfileUpdate")
 	}
 
 	return nil
