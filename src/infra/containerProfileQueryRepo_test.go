@@ -24,4 +24,11 @@ func TestContainerProfileQueryRepo(t *testing.T) {
 			t.Errorf("GetContainerProfileByIdFailed: %v", err)
 		}
 	})
+
+	t.Run("GetProfileByIdWithInvalidId", func(t *testing.T) {
+		_, err := profileQueryRepo.GetById(100)
+		if err == nil {
+			t.Errorf("GetProfileByIdWithInvalidIdFailed: %v", err)
+		}
+	})
 }
