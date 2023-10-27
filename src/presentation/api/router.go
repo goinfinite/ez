@@ -33,7 +33,7 @@ func accountRoutes(baseRoute *echo.Group) {
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
-	accountGroup.DELETE("/:accountId", apiController.DeleteAccountController)
+	accountGroup.DELETE("/:accountId/", apiController.DeleteAccountController)
 	go apiController.AutoUpdateAccountsQuotaUsageController()
 }
 
@@ -43,7 +43,7 @@ func containerRoutes(baseRoute *echo.Group) {
 	containerGroup.POST("/", apiController.AddContainerController)
 	containerGroup.PUT("/", apiController.UpdateContainerController)
 	containerGroup.DELETE(
-		"/:accountId/:containerId",
+		"/:accountId/:containerId/",
 		apiController.DeleteContainerController,
 	)
 
@@ -52,7 +52,7 @@ func containerRoutes(baseRoute *echo.Group) {
 	containerProfileGroup.POST("/", apiController.AddContainerProfileController)
 	containerProfileGroup.PUT("/", apiController.UpdateContainerProfileController)
 	containerProfileGroup.DELETE(
-		"/:profileId",
+		"/:profileId/",
 		apiController.DeleteContainerProfileController,
 	)
 }
