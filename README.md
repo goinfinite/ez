@@ -82,6 +82,13 @@ cd fleet; air
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found with the `ip a` command on the VM terminal.
 
+12. The install process also creates a systemd unit to run the project. Use the following commands to disable the service so you can run the project manually with Air during development:
+
+```
+systemctl disable fleet
+systemctl stop fleet
+```
+
 ### Environment Variables
 
 You must have an `.env` file in the root of the git directory **during development**. You can use the `.env.example` file as a template. Air will read the `.env` file and use it to run the project during development.
