@@ -43,10 +43,10 @@ func (repo ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
 func (repo ContainerProfileQueryRepo) GetById(
 	id valueObject.ContainerProfileId,
 ) (entity.ContainerProfile, error) {
-	var profileModel dbModel.ContainerProfile
-	err := repo.dbSvc.Orm.Model(&dbModel.ContainerProfile{}).First(&profileModel).Error
+	profileModel := dbModel.ContainerProfile{ID: uint(id.Get())}
+	err := repo.dbSvc.Orm.Model(&profileModel).First(&profileModel).Error
 	if err != nil {
-		return entity.ContainerProfile{}, errors.New("DbQueryContainerProfileError")
+		return entity.ContainerProfile{}, err
 	}
 
 	profileEntity, err := profileModel.ToEntity()
