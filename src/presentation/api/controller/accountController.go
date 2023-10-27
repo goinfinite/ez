@@ -202,23 +202,6 @@ func UpdateAccountController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountUpdated")
 }
 
-func AutoUpdateAccountsQuotaUsageController() {
-	taskInterval := time.Duration(15) * time.Minute
-	timer := time.NewTicker(taskInterval)
-	defer timer.Stop()
-
-	dbSvc, err := db.NewDatabaseService()
-	if err != nil {
-		return
-	}
-
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	for range timer.C {
-		useCase.AutoUpdateAccountsQuotaUsage(accQueryRepo, accCmdRepo)
-	}
-}
-
 // DeleteAccount godoc
 // @Summary      DeleteAccount
 // @Description  Delete an account.
@@ -246,4 +229,21 @@ func DeleteAccountController(c echo.Context) error {
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountDeleted")
+}
+
+func AutoUpdateAccountsQuotaUsageController() {
+	taskInterval := time.Duration(15) * time.Minute
+	timer := time.NewTicker(taskInterval)
+	defer timer.Stop()
+
+	dbSvc, err := db.NewDatabaseService()
+	if err != nil {
+		return
+	}
+
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+	for range timer.C {
+		useCase.AutoUpdateAccountsQuotaUsage(accQueryRepo, accCmdRepo)
+	}
 }
