@@ -123,35 +123,6 @@ func AddAccountController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusCreated, "AccountCreated")
 }
 
-// DeleteAccount godoc
-// @Summary      DeleteAccount
-// @Description  Delete an account.
-// @Tags         account
-// @Accept       json
-// @Produce      json
-// @Security     Bearer
-// @Param        accountId 	  path   string  true  "AccountId"
-// @Success      200 {object} object{} "AccountDeleted"
-// @Router       /account/{accountId}/ [delete]
-func DeleteAccountController(c echo.Context) error {
-	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
-
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-
-	err := useCase.DeleteAccount(
-		accQueryRepo,
-		accCmdRepo,
-		accountId,
-	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountDeleted")
-}
-
 // UpdateAccount godoc
 // @Summary      UpdateAccount
 // @Description  Update an account.
@@ -159,7 +130,7 @@ func DeleteAccountController(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        updateAccountDto 	  body dto.UpdateAccount  true  "UpdateAccount"
+// @Param        updateAccountDto 	  body dto.UpdateAccount  true  "UpdateAccount (Only accountId is required.)"
 // @Success      200 {object} object{} "AccountUpdated message or NewKeyString"
 // @Router       /account/ [put]
 func UpdateAccountController(c echo.Context) error {
@@ -246,4 +217,33 @@ func AutoUpdateAccountsQuotaUsageController() {
 	for range timer.C {
 		useCase.AutoUpdateAccountsQuotaUsage(accQueryRepo, accCmdRepo)
 	}
+}
+
+// DeleteAccount godoc
+// @Summary      DeleteAccount
+// @Description  Delete an account.
+// @Tags         account
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        accountId 	  path   string  true  "AccountId"
+// @Success      200 {object} object{} "AccountDeleted"
+// @Router       /account/{accountId}/ [delete]
+func DeleteAccountController(c echo.Context) error {
+	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
+
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+
+	err := useCase.DeleteAccount(
+		accQueryRepo,
+		accCmdRepo,
+		accountId,
+	)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountDeleted")
 }
