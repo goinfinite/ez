@@ -34,55 +34,12 @@ func GetAccountsController() *cobra.Command {
 	return cmd
 }
 
-func accQuotaFactory(
-	cpuCores float64,
-	memoryBytesUint uint64,
-	diskBytesUint uint64,
-	inodes uint64,
-	withDefaults bool,
-) (valueObject.AccountQuota, error) {
-	accQuotaDefaults := valueObject.NewAccountQuotaWithDefaultValues()
-	if !withDefaults {
-		accQuotaDefaults = valueObject.NewAccountQuotaWithBlankValues()
-	}
-
-	cpuCoresCount := accQuotaDefaults.CpuCores
-	if cpuCores != 0 {
-		cpuCoresCount = valueObject.NewCpuCoresCountPanic(cpuCores)
-	}
-
-	memoryBytes := accQuotaDefaults.MemoryBytes
-	if memoryBytesUint != 0 {
-		memoryBytes = valueObject.NewBytePanic(memoryBytesUint)
-	}
-
-	diskBytes := accQuotaDefaults.DiskBytes
-	if diskBytesUint != 0 {
-		diskBytes = valueObject.NewBytePanic(diskBytesUint)
-	}
-
-	inodesCount := accQuotaDefaults.Inodes
-	if inodes != 0 {
-		inodesCount = valueObject.NewInodesCountPanic(inodes)
-	}
-
-	return valueObject.NewAccountQuota(
-		cpuCoresCount,
-		memoryBytes,
-		diskBytes,
-		inodesCount,
-	), nil
-}
-
 func AddAccountController() *cobra.Command {
 	var dbSvc *db.DatabaseService
 
 	var usernameStr string
 	var passwordStr string
-	var cpuCores float64
-	var memoryBytesUint uint64
-	var diskBytesUint uint64
-	var inodes uint64
+	var quotaStr string
 
 	cmd := &cobra.Command{
 		Use:   "add",
@@ -94,27 +51,25 @@ func AddAccountController() *cobra.Command {
 			username := valueObject.NewUsernamePanic(usernameStr)
 			password := valueObject.NewPasswordPanic(passwordStr)
 
-			quota, err := accQuotaFactory(
-				cpuCores,
-				memoryBytesUint,
-				diskBytesUint,
-				inodes,
-				true,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
+			var quotaPtr *valueObject.AccountQuota
+			if quotaStr != "" {
+				quota, err := valueObject.NewAccountQuotaFromString(quotaStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+				quotaPtr = &quota
 			}
 
 			addAccountDto := dto.NewAddAccount(
 				username,
 				password,
-				quota,
+				quotaPtr,
 			)
 
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 
-			err = useCase.AddAccount(
+			err := useCase.AddAccount(
 				accQueryRepo,
 				accCmdRepo,
 				addAccountDto,
@@ -131,10 +86,7 @@ func AddAccountController() *cobra.Command {
 	cmd.MarkFlagRequired("username")
 	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
 	cmd.MarkFlagRequired("password")
-	cmd.Flags().Float64VarP(&cpuCores, "cpu", "c", 0, "CpuCores")
-	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory", "m", 0, "MemoryInBytes")
-	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
-	cmd.Flags().Uint64VarP(&inodes, "inodes", "n", 0, "Inodes")
+	cmd.Flags().StringVarP(&quotaStr, "quota", "q", "", "AccountQuota (cpu:memory:disk:inodes)")
 	return cmd
 }
 
@@ -144,10 +96,7 @@ func UpdateAccountController() *cobra.Command {
 	var accountIdStr string
 	var passwordStr string
 	shouldUpdateApiKeyBool := false
-	var cpuCores float64
-	var memoryBytesUint uint64
-	var diskBytesUint uint64
-	var inodes uint64
+	var quotaStr string
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -169,22 +118,20 @@ func UpdateAccountController() *cobra.Command {
 				shouldUpdateApiKeyPtr = &shouldUpdateApiKeyBool
 			}
 
-			quota, err := accQuotaFactory(
-				cpuCores,
-				memoryBytesUint,
-				diskBytesUint,
-				inodes,
-				false,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
+			var quotaPtr *valueObject.AccountQuota
+			if quotaStr != "" {
+				quota, err := valueObject.NewAccountQuotaFromString(quotaStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+				quotaPtr = &quota
 			}
 
 			updateAccountDto := dto.NewUpdateAccount(
 				accountId,
 				passPtr,
 				shouldUpdateApiKeyPtr,
-				&quota,
+				quotaPtr,
 			)
 
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
@@ -203,7 +150,7 @@ func UpdateAccountController() *cobra.Command {
 				cliHelper.ResponseWrapper(true, newKey)
 			}
 
-			err = useCase.UpdateAccount(
+			err := useCase.UpdateAccount(
 				accQueryRepo,
 				accCmdRepo,
 				updateAccountDto,
@@ -224,10 +171,7 @@ func UpdateAccountController() *cobra.Command {
 		false,
 		"ShouldUpdateApiKey",
 	)
-	cmd.Flags().Float64VarP(&cpuCores, "cpu", "c", 0, "CpuCores")
-	cmd.Flags().Uint64VarP(&memoryBytesUint, "memory", "m", 0, "MemoryInBytes")
-	cmd.Flags().Uint64VarP(&diskBytesUint, "disk", "d", 0, "DiskInBytes")
-	cmd.Flags().Uint64VarP(&inodes, "inodes", "n", 0, "Inodes")
+	cmd.Flags().StringVarP(&quotaStr, "quota", "q", "", "AccountQuota (cpu:memory:disk:inodes)")
 	return cmd
 }
 
