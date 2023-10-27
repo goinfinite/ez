@@ -24,7 +24,7 @@ import (
 // @name						Authorization
 // @description					Type "Bearer" + JWT token or API key.
 
-// @host		localhost:10000
+// @host		localhost:3141
 // @BasePath	/v1
 func ApiInit() {
 	shared.CheckEnvs()
@@ -42,5 +42,5 @@ func ApiInit() {
 
 	registerApiRoutes(baseRoute)
 
-	e.Start(":10000")
+	e.Start(":3141")
 }
