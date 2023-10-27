@@ -250,9 +250,9 @@ func UpdateContainerController(c echo.Context) error {
 // @Param        accId 	  path   string  true  "AccountId"
 // @Param        containerId 	  path   string  true  "ContainerId"
 // @Success      200 {object} object{} "ContainerDeleted"
-// @Router       /container/{accId}/{containerId}/ [delete]
+// @Router       /container/{accountId}/{containerId}/ [delete]
 func DeleteContainerController(c echo.Context) error {
-	accId := valueObject.NewAccountIdPanic(c.Param("accId"))
+	accId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
 
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)

@@ -43,7 +43,7 @@ func containerRoutes(baseRoute *echo.Group) {
 	containerGroup.POST("/", apiController.AddContainerController)
 	containerGroup.PUT("/", apiController.UpdateContainerController)
 	containerGroup.DELETE(
-		"/:accId/:containerId",
+		"/:accountId/:containerId",
 		apiController.DeleteContainerController,
 	)
 
