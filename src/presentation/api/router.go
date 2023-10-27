@@ -33,6 +33,7 @@ func accountRoutes(baseRoute *echo.Group) {
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
+	accountGroup.DELETE("/:accountId", apiController.DeleteAccountController)
 	go apiController.AutoUpdateAccountsQuotaUsageController()
 }
 
