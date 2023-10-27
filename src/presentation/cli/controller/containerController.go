@@ -14,6 +14,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func GetContainersController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "GetContainers",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+			containersList, err := useCase.GetContainers(containerQueryRepo)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, containersList)
+		},
+	}
+
+	return cmd
+}
+
 func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
 	for _, portBindingStr := range portBindingsSlice {
