@@ -14,7 +14,7 @@ func addDummyUser() error {
 	username := valueObject.NewUsernamePanic(os.Getenv("DUMMY_USER_NAME"))
 	password := valueObject.NewPasswordPanic(os.Getenv("DUMMY_USER_PASS"))
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
-	addAccount := dto.NewAddAccount(username, password, quota)
+	addAccount := dto.NewAddAccount(username, password, &quota)
 
 	accCmdRepo := NewAccCmdRepo(testHelpers.GetDbSvc())
 	err := accCmdRepo.Add(addAccount)
@@ -60,7 +60,7 @@ func TestAccCmdRepo(t *testing.T) {
 		username := valueObject.NewUsernamePanic("root")
 		password := valueObject.NewPasswordPanic("invalid")
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
-		addAccount := dto.NewAddAccount(username, password, quota)
+		addAccount := dto.NewAddAccount(username, password, &quota)
 
 		err := accCmdRepo.Add(addAccount)
 		if err == nil {

@@ -101,7 +101,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		accId,
 		gid,
 		addAccount.Username,
-		addAccount.Quota,
+		*addAccount.Quota,
 		valueObject.NewAccountQuotaWithBlankValues(),
 		nowUnixTime,
 		nowUnixTime,
@@ -117,7 +117,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	err = repo.updateFilesystemQuota(accId, addAccount.Quota)
+	err = repo.updateFilesystemQuota(accId, *addAccount.Quota)
 	if err != nil {
 		return err
 	}
