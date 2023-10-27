@@ -176,7 +176,7 @@ func AddContainerController(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accId and containerId are required.)"
+// @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accountId and containerId are required.)"
 // @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
 // @Router       /container/ [put]
 func UpdateContainerController(c echo.Context) error {
@@ -192,11 +192,15 @@ func UpdateContainerController(c echo.Context) error {
 
 	var containerStatusPtr *bool
 	if requestBody["status"] != nil {
-		containerStatus, err := strconv.ParseBool(requestBody["status"].(string))
-		if err != nil {
-			return apiHelper.ResponseWrapper(
-				c, http.StatusBadRequest, "InvalidContainerStatus",
-			)
+		containerStatus, assertOk := requestBody["status"].(bool)
+		if !assertOk {
+			var err error
+			containerStatus, err = strconv.ParseBool(requestBody["status"].(string))
+			if err != nil {
+				return apiHelper.ResponseWrapper(
+					c, http.StatusBadRequest, "InvalidContainerStatus",
+				)
+			}
 		}
 		containerStatusPtr = &containerStatus
 	}
