@@ -147,42 +147,40 @@ func (repo ContainerCmdRepo) Update(
 		}
 	}
 
-	if updateContainer.ProfileId != nil {
-		newSpecs, err := repo.getBaseSpecs(*updateContainer.ProfileId)
-		if err != nil {
-			return err
-		}
-
-		_, err = infraHelper.RunCmdAsUser(
-			updateContainer.AccountId,
-			"podman",
-			"update",
-			"--cpus",
-			newSpecs.CpuCores.String(),
-			"--memory",
-			newSpecs.MemoryBytes.String(),
-			updateContainer.ContainerId.String(),
-		)
-		if err != nil {
-			return err
-		}
-
-		newContainerName := updateContainer.ProfileId.String() +
-			"-" + currentContainer.Hostname.String()
-
-		_, err = infraHelper.RunCmdAsUser(
-			updateContainer.AccountId,
-			"podman",
-			"rename",
-			updateContainer.ContainerId.String(),
-			newContainerName,
-		)
-		if err != nil {
-			return err
-		}
+	if updateContainer.ProfileId == nil {
+		return nil
 	}
 
-	return nil
+	newSpecs, err := repo.getBaseSpecs(*updateContainer.ProfileId)
+	if err != nil {
+		return err
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		updateContainer.AccountId,
+		"podman",
+		"update",
+		"--cpus",
+		newSpecs.CpuCores.String(),
+		"--memory",
+		newSpecs.MemoryBytes.String(),
+		updateContainer.ContainerId.String(),
+	)
+	if err != nil {
+		return err
+	}
+
+	newContainerName := updateContainer.ProfileId.String() +
+		"-" + currentContainer.Hostname.String()
+
+	_, err = infraHelper.RunCmdAsUser(
+		updateContainer.AccountId,
+		"podman",
+		"rename",
+		updateContainer.ContainerId.String(),
+		newContainerName,
+	)
+	return err
 }
 
 func (repo ContainerCmdRepo) Delete(
