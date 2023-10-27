@@ -113,27 +113,35 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	return nil
 }
 
+func (repo ContainerCmdRepo) updateContainerStatus(
+	currentContainer entity.Container,
+	updateContainer dto.UpdateContainer,
+) error {
+	actionToPerform := "start"
+	if !*updateContainer.Status {
+		actionToPerform = "stop"
+	}
+
+	shouldUpdateStatus := updateContainer.Status != &currentContainer.Status
+	if !shouldUpdateStatus {
+		return nil
+	}
+
+	_, err := infraHelper.RunCmdAsUser(
+		updateContainer.AccountId,
+		"podman",
+		actionToPerform,
+		updateContainer.ContainerId.String(),
+	)
+	return err
+}
+
 func (repo ContainerCmdRepo) Update(
 	currentContainer entity.Container,
 	updateContainer dto.UpdateContainer,
 ) error {
 	if updateContainer.Status != nil {
-		shouldUpdateStatus := updateContainer.Status != &currentContainer.Status
-		if !shouldUpdateStatus {
-			return nil
-		}
-
-		actionToPerform := "start"
-		if !*updateContainer.Status {
-			actionToPerform = "stop"
-		}
-
-		_, err := infraHelper.RunCmdAsUser(
-			updateContainer.AccountId,
-			"podman",
-			actionToPerform,
-			updateContainer.ContainerId.String(),
-		)
+		err := repo.updateContainerStatus(currentContainer, updateContainer)
 		if err != nil {
 			return err
 		}
@@ -161,6 +169,7 @@ func (repo ContainerCmdRepo) Update(
 
 		newContainerName := updateContainer.ProfileId.String() +
 			"-" + currentContainer.Hostname.String()
+
 		_, err = infraHelper.RunCmdAsUser(
 			updateContainer.AccountId,
 			"podman",
