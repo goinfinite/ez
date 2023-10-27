@@ -158,6 +158,19 @@ func (repo ContainerCmdRepo) Update(
 		if err != nil {
 			return err
 		}
+
+		newContainerName := updateContainer.ProfileId.String() +
+			"-" + currentContainer.Hostname.String()
+		_, err = infraHelper.RunCmdAsUser(
+			updateContainer.AccountId,
+			"podman",
+			"rename",
+			updateContainer.ContainerId.String(),
+			newContainerName,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
