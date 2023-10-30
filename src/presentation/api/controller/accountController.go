@@ -231,15 +231,10 @@ func DeleteAccountController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountDeleted")
 }
 
-func AutoUpdateAccountsQuotaUsageController() {
+func AutoUpdateAccountsQuotaUsageController(dbSvc *db.DatabaseService) {
 	taskInterval := time.Duration(15) * time.Minute
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
-
-	dbSvc, err := db.NewDatabaseService()
-	if err != nil {
-		return
-	}
 
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)

@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"net/http"
 
+	"github.com/goinfinite/fleet/src/infra/db"
 	apiController "github.com/goinfinite/fleet/src/presentation/api/controller"
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -28,13 +29,13 @@ func authRoutes(baseRoute *echo.Group) {
 	authGroup.POST("/login/", apiController.AuthLoginController)
 }
 
-func accountRoutes(baseRoute *echo.Group) {
+func accountRoutes(baseRoute *echo.Group, dbSvc *db.DatabaseService) {
 	accountGroup := baseRoute.Group("/account")
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
 	accountGroup.DELETE("/:accountId/", apiController.DeleteAccountController)
-	go apiController.AutoUpdateAccountsQuotaUsageController()
+	go apiController.AutoUpdateAccountsQuotaUsageController(dbSvc)
 }
 
 func containerRoutes(baseRoute *echo.Group) {
@@ -62,10 +63,10 @@ func o11yRoutes(baseRoute *echo.Group) {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
-func registerApiRoutes(baseRoute *echo.Group) {
+func registerApiRoutes(baseRoute *echo.Group, dbSvc *db.DatabaseService) {
 	swaggerRoute(baseRoute)
 	authRoutes(baseRoute)
-	accountRoutes(baseRoute)
+	accountRoutes(baseRoute, dbSvc)
 	containerRoutes(baseRoute)
 	o11yRoutes(baseRoute)
 }
