@@ -190,11 +190,13 @@ func DeleteAccountController() *cobra.Command {
 
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 
 			err := useCase.DeleteAccount(
 				accQueryRepo,
 				accCmdRepo,
 				accountId,
+				containerQueryRepo,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())

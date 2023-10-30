@@ -218,11 +218,13 @@ func DeleteAccountController(c echo.Context) error {
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 
 	err := useCase.DeleteAccount(
 		accQueryRepo,
 		accCmdRepo,
 		accountId,
+		containerQueryRepo,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
