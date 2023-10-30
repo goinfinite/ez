@@ -1,6 +1,7 @@
 package api
 
 import (
+	apiInit "github.com/goinfinite/fleet/src/presentation/api/init"
 	apiMiddleware "github.com/goinfinite/fleet/src/presentation/api/middleware"
 	"github.com/goinfinite/fleet/src/presentation/shared"
 	"github.com/labstack/echo/v4"
@@ -37,10 +38,13 @@ func ApiInit() {
 	e.Pre(apiMiddleware.TrailingSlash(basePath))
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
-	e.Use(apiMiddleware.DatabaseInit())
+
+	dbSvc := apiInit.DatabaseService()
+	e.Use(apiMiddleware.SetDatabaseService(dbSvc))
+
 	e.Use(apiMiddleware.Auth(basePath))
 
-	registerApiRoutes(baseRoute)
+	registerApiRoutes(baseRoute, dbSvc)
 
 	e.Start(":3141")
 }
