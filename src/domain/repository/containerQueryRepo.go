@@ -11,4 +11,5 @@ type ContainerQueryRepo interface {
 		accId valueObject.AccountId,
 		containerId valueObject.ContainerId,
 	) (entity.Container, error)
+	GetByAccId(accId valueObject.AccountId) ([]entity.Container, error)
 }
