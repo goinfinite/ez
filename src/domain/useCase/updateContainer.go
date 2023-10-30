@@ -37,6 +37,13 @@ func UpdateContainer(
 		}
 	}
 
+	// Current OCI implementations does not support permanent container resources update.
+	// Therefore, when updating container status, we also need to update the container
+	// profile to guarantee that the container resources are up-to-date.
+	if updateContainer.ProfileId == nil {
+		updateContainer.ProfileId = &currentContainer.ProfileId
+	}
+
 	err = containerCmdRepo.Update(currentContainer, updateContainer)
 	if err != nil {
 		log.Printf("UpdateContainerError: %s", err)
