@@ -42,6 +42,8 @@ func ApiInit() {
 	dbSvc := apiInit.DatabaseService()
 	e.Use(apiMiddleware.SetDatabaseService(dbSvc))
 
+	apiInit.BootContainers(dbSvc)
+
 	e.Use(apiMiddleware.Auth(basePath))
 
 	registerApiRoutes(baseRoute, dbSvc)
