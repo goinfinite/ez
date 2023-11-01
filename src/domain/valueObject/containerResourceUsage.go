@@ -1,43 +1,46 @@
 package valueObject
 
 type ContainerResourceUsage struct {
-	CurrentCpuPercent   float64 `json:"currentCpuPercent"`
-	AverageCpuPercent   float64 `json:"avgCpuPercent"`
-	MemoryBytes         uint64  `json:"memoryBytes"`
-	MemoryPercent       float64 `json:"memoryPercent"`
-	StorageInputBytes   uint64  `json:"storageInputBytes"`
-	StorageOutputBytes  uint64  `json:"storageOutputBytes"`
-	StorageSpaceBytes   uint64  `json:"storageSpaceBytes"`
-	StorageSpacePercent float64 `json:"storageSpacePercent"`
-	StorageInodesCount  uint64  `json:"storageInodesCount"`
-	NetInputBytes       uint64  `json:"netInputBytes"`
-	NetOutputBytes      uint64  `json:"netOutputBytes"`
+	AccountId          AccountId   `json:"-"`
+	ContainerId        ContainerId `json:"-"`
+	CurrentCpuPercent  float64     `json:"currentCpuPercent"`
+	AverageCpuPercent  float64     `json:"avgCpuPercent"`
+	MemoryBytes        Byte        `json:"memoryBytes"`
+	MemoryPercent      float64     `json:"memoryPercent"`
+	StorageInputBytes  Byte        `json:"storageInputBytes"`
+	StorageOutputBytes Byte        `json:"storageOutputBytes"`
+	StorageSpaceBytes  Byte        `json:"storageSpaceBytes"`
+	StorageInodesCount InodesCount `json:"storageInodesCount"`
+	NetInputBytes      Byte        `json:"netInputBytes"`
+	NetOutputBytes     Byte        `json:"netOutputBytes"`
 }
 
 func NewContainerResourceUsage(
+	accountId AccountId,
+	containerId ContainerId,
 	currentCpuPercent float64,
 	averageCpuPercent float64,
-	memoryBytes uint64,
+	memoryBytes Byte,
 	memoryPercent float64,
-	storageInputBytes uint64,
-	storageOutputBytes uint64,
-	storageSpaceBytes uint64,
-	storageSpacePercent float64,
-	storageInodesCount uint64,
-	netInputBytes uint64,
-	netOutputBytes uint64,
+	storageInputBytes Byte,
+	storageOutputBytes Byte,
+	storageSpaceBytes Byte,
+	storageInodesCount InodesCount,
+	netInputBytes Byte,
+	netOutputBytes Byte,
 ) ContainerResourceUsage {
 	return ContainerResourceUsage{
-		CurrentCpuPercent:   currentCpuPercent,
-		AverageCpuPercent:   averageCpuPercent,
-		MemoryBytes:         memoryBytes,
-		MemoryPercent:       memoryPercent,
-		StorageInputBytes:   storageInputBytes,
-		StorageOutputBytes:  storageOutputBytes,
-		StorageSpaceBytes:   storageSpaceBytes,
-		StorageSpacePercent: storageSpacePercent,
-		StorageInodesCount:  storageInodesCount,
-		NetInputBytes:       netInputBytes,
-		NetOutputBytes:      netOutputBytes,
+		AccountId:          accountId,
+		ContainerId:        containerId,
+		CurrentCpuPercent:  currentCpuPercent,
+		AverageCpuPercent:  averageCpuPercent,
+		MemoryBytes:        memoryBytes,
+		MemoryPercent:      memoryPercent,
+		StorageInputBytes:  storageInputBytes,
+		StorageOutputBytes: storageOutputBytes,
+		StorageSpaceBytes:  storageSpaceBytes,
+		StorageInodesCount: storageInodesCount,
+		NetInputBytes:      netInputBytes,
+		NetOutputBytes:     netOutputBytes,
 	}
 }
