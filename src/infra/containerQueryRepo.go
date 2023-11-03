@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -268,7 +267,7 @@ func (repo ContainerQueryRepo) GetByAccId(
 		"{{.ID}}",
 	)
 	if err != nil {
-		return []entity.Container{}, err
+		return []entity.Container{}, errors.New("AccPodmanListError" + err.Error())
 	}
 	containersIdsList := strings.Split(containersIds, "\n")
 	if len(containersIdsList) == 0 {
@@ -336,54 +335,81 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 		return containersUsage, errors.New("ContainersUsageParseError")
 	}
 
-	for _, containerUsageStr := range containersUsageList {
-		containerUsageStr = strings.TrimSpace(containerUsageStr)
-		containerUsageParts := strings.Split(containerUsageStr, " ")
-		if len(containerUsageParts) != 9 {
-			continue
-		}
-
-		containerId, err := valueObject.NewContainerId(containerUsageParts[0])
+	for _, containerUsageJson := range containersUsageList {
+		containerUsageInfo := map[string]interface{}{}
+		err := json.Unmarshal([]byte(containerUsageJson), &containerUsageInfo)
 		if err != nil {
 			continue
 		}
 
-		cpuPerc, err := strconv.ParseFloat(containerUsageParts[1], 64)
+		rawContainerId, assertOk := containerUsageInfo["ContainerID"].(string)
+		if !assertOk {
+			continue
+		}
+		if len(rawContainerId) > 12 {
+			rawContainerId = rawContainerId[:12]
+		}
+		containerId, err := valueObject.NewContainerId(rawContainerId)
 		if err != nil {
 			continue
 		}
 
-		avgCpu, err := strconv.ParseFloat(containerUsageParts[2], 64)
+		cpuPerc, assertOk := containerUsageInfo["CPU"].(float64)
+		if !assertOk {
+			continue
+		}
+
+		avgCpu, assertOk := containerUsageInfo["AvgCPU"].(float64)
+		if !assertOk {
+			continue
+		}
+
+		memPerc, assertOk := containerUsageInfo["MemPerc"].(float64)
+		if !assertOk {
+			continue
+		}
+
+		rawMemBytes, assertOk := containerUsageInfo["MemUsage"].(float64)
+		if !assertOk {
+			continue
+		}
+		memBytes, err := valueObject.NewByte(rawMemBytes)
 		if err != nil {
 			continue
 		}
 
-		memPerc, err := strconv.ParseFloat(containerUsageParts[3], 64)
+		rawBlockInput, assertOk := containerUsageInfo["BlockInput"].(float64)
+		if !assertOk {
+			continue
+		}
+		blockInput, err := valueObject.NewByte(rawBlockInput)
 		if err != nil {
 			continue
 		}
 
-		memBytes, err := valueObject.NewByte(containerUsageParts[4])
+		rawBlockOutput, assertOk := containerUsageInfo["BlockOutput"].(float64)
+		if !assertOk {
+			continue
+		}
+		blockOutput, err := valueObject.NewByte(rawBlockOutput)
 		if err != nil {
 			continue
 		}
 
-		blockInput, err := valueObject.NewByte(containerUsageParts[5])
+		rawNetInput, assertOk := containerUsageInfo["NetInput"].(float64)
+		if !assertOk {
+			continue
+		}
+		netInput, err := valueObject.NewByte(rawNetInput)
 		if err != nil {
 			continue
 		}
 
-		blockOutput, err := valueObject.NewByte(containerUsageParts[6])
-		if err != nil {
+		rawNetOutput, assertOk := containerUsageInfo["NetOutput"].(float64)
+		if !assertOk {
 			continue
 		}
-
-		netInput, err := valueObject.NewByte(containerUsageParts[7])
-		if err != nil {
-			continue
-		}
-
-		netOutput, err := valueObject.NewByte(containerUsageParts[8])
+		netOutput, err := valueObject.NewByte(rawNetOutput)
 		if err != nil {
 			continue
 		}
@@ -447,10 +473,7 @@ func (repo ContainerQueryRepo) getWithUsageByAccId(
 		"--no-stream",
 		"--no-reset",
 		"--format",
-		"{{.ID}} {{.ContainerStats.CPU}} {{.ContainerStats.AvgCPU}} "+
-			"{{.ContainerStats.MemPerc}} {{.ContainerStats.MemUsage}} "+
-			"{{.ContainerStats.BlockInput}} {{.ContainerStats.BlockOutput}} "+
-			"{{.ContainerStats.NetInput}} {{.ContainerStats.NetOutput}}",
+		"{{json .ContainerStats}}",
 	)
 	if err != nil {
 		return containersWithUsage, errors.New("AccPodmanStatsError" + err.Error())
