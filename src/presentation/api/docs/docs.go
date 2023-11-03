@@ -898,7 +898,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "currentUsage": {
-                    "$ref": "#/definitions/valueObject.CurrentResourceUsage"
+                    "$ref": "#/definitions/valueObject.HostResourceUsage"
                 },
                 "hostname": {
                     "type": "string"
@@ -1003,7 +1003,7 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.CurrentResourceUsage": {
+        "valueObject.HostResourceUsage": {
             "type": "object",
             "properties": {
                 "cpuUsagePercent": {

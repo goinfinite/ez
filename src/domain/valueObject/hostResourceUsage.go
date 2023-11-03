@@ -1,19 +1,19 @@
 package valueObject
 
-type CurrentResourceUsage struct {
+type HostResourceUsage struct {
 	CpuUsagePercent float64    `json:"cpuUsagePercent"`
 	MemUsagePercent float64    `json:"memUsagePercent"`
 	StorageUsage    []DiskInfo `json:"storageUsage"`
 	NetUsage        NetUsage   `json:"netUsage"`
 }
 
-func NewCurrentResourceUsage(
+func NewHostResourceUsage(
 	cpuUsagePercent float64,
 	memUsagePercent float64,
 	storageUsage []DiskInfo,
 	netUsage NetUsage,
-) CurrentResourceUsage {
-	return CurrentResourceUsage{
+) HostResourceUsage {
+	return HostResourceUsage{
 		CpuUsagePercent: cpuUsagePercent,
 		MemUsagePercent: memUsagePercent,
 		StorageUsage:    storageUsage,

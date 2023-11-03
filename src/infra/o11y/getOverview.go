@@ -190,30 +190,30 @@ func (repo GetOverview) getNetUsage() (valueObject.NetUsage, error) {
 	), nil
 }
 
-func (repo GetOverview) getCurrentResourceUsage() (
-	valueObject.CurrentResourceUsage,
+func (repo GetOverview) getHostResourceUsage() (
+	valueObject.HostResourceUsage,
 	error,
 ) {
 	cpuUsagePercent, err := repo.getCpuUsagePercent()
 	if err != nil {
-		return valueObject.CurrentResourceUsage{}, err
+		return valueObject.HostResourceUsage{}, err
 	}
 	memUsagePercent, err := repo.getMemUsagePercent()
 	if err != nil {
-		return valueObject.CurrentResourceUsage{}, err
+		return valueObject.HostResourceUsage{}, err
 	}
 
 	diskInfos, err := repo.getDiskInfos()
 	if err != nil {
-		return valueObject.CurrentResourceUsage{}, errors.New("GetStorageInfoFailed")
+		return valueObject.HostResourceUsage{}, errors.New("GetStorageInfoFailed")
 	}
 
 	netUsage, err := repo.getNetUsage()
 	if err != nil {
-		return valueObject.CurrentResourceUsage{}, errors.New("GetNetUsageFailed")
+		return valueObject.HostResourceUsage{}, errors.New("GetNetUsageFailed")
 	}
 
-	return valueObject.NewCurrentResourceUsage(
+	return valueObject.NewHostResourceUsage(
 		cpuUsagePercent,
 		memUsagePercent,
 		diskInfos,
@@ -248,10 +248,10 @@ func (repo GetOverview) Get() (entity.O11yOverview, error) {
 		return entity.O11yOverview{}, errors.New("GetHardwareSpecsFailed")
 	}
 
-	currentResourceUsage, err := repo.getCurrentResourceUsage()
+	currentResourceUsage, err := repo.getHostResourceUsage()
 	if err != nil {
-		log.Printf("GetCurrentResourceUsageFailed: %v", err)
-		return entity.O11yOverview{}, errors.New("GetCurrentResourceUsageFailed")
+		log.Printf("GetHostResourceUsageFailed: %v", err)
+		return entity.O11yOverview{}, errors.New("GetHostResourceUsageFailed")
 	}
 
 	return entity.NewO11yOverview(
