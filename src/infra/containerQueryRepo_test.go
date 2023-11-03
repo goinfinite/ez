@@ -21,4 +21,15 @@ func TestContainerQueryRepo(t *testing.T) {
 			t.Error("NoContainersFound")
 		}
 	})
+
+	t.Run("GetContainersWithUsage", func(t *testing.T) {
+		containerList, err := containerQueryRepo.GetWithUsage()
+		if err != nil {
+			t.Error(err)
+		}
+
+		if len(containerList) == 0 {
+			t.Error("NoContainersFound")
+		}
+	})
 }

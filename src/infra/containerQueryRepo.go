@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/goinfinite/fleet/src/domain/dto"
 	"github.com/goinfinite/fleet/src/domain/entity"
 	"github.com/goinfinite/fleet/src/domain/valueObject"
 	"github.com/goinfinite/fleet/src/infra/db"
@@ -318,4 +320,189 @@ func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 	}
 
 	return allContainers, nil
+}
+
+func (repo ContainerQueryRepo) containerResourceUsageFactory(
+	accountId valueObject.AccountId,
+	containersUsageStr string,
+) ([]valueObject.ContainerResourceUsage, error) {
+	var containersUsage []valueObject.ContainerResourceUsage
+	if len(containersUsageStr) == 0 {
+		return containersUsage, nil
+	}
+
+	containersUsageList := strings.Split(containersUsageStr, "\n")
+	if len(containersUsageList) == 0 {
+		return containersUsage, errors.New("ContainersUsageParseError")
+	}
+
+	for _, containerUsageStr := range containersUsageList {
+		containerUsageStr = strings.TrimSpace(containerUsageStr)
+		containerUsageParts := strings.Split(containerUsageStr, " ")
+		if len(containerUsageParts) != 9 {
+			continue
+		}
+
+		containerId, err := valueObject.NewContainerId(containerUsageParts[0])
+		if err != nil {
+			continue
+		}
+
+		cpuPerc, err := strconv.ParseFloat(containerUsageParts[1], 64)
+		if err != nil {
+			continue
+		}
+
+		avgCpu, err := strconv.ParseFloat(containerUsageParts[2], 64)
+		if err != nil {
+			continue
+		}
+
+		memPerc, err := strconv.ParseFloat(containerUsageParts[3], 64)
+		if err != nil {
+			continue
+		}
+
+		memBytes, err := valueObject.NewByte(containerUsageParts[4])
+		if err != nil {
+			continue
+		}
+
+		blockInput, err := valueObject.NewByte(containerUsageParts[5])
+		if err != nil {
+			continue
+		}
+
+		blockOutput, err := valueObject.NewByte(containerUsageParts[6])
+		if err != nil {
+			continue
+		}
+
+		netInput, err := valueObject.NewByte(containerUsageParts[7])
+		if err != nil {
+			continue
+		}
+
+		netOutput, err := valueObject.NewByte(containerUsageParts[8])
+		if err != nil {
+			continue
+		}
+
+		blockUsageStr, err := infraHelper.RunCmdAsUser(
+			accountId,
+			"bash",
+			"-c",
+			"timeout 1 podman exec -it "+containerId.String()+
+				" df --output=used,iused / | tail -n 1",
+		)
+		if err != nil {
+			blockUsageStr = "0 0"
+		}
+		blockUsageStr = strings.TrimSpace(blockUsageStr)
+		blockUsageParts := strings.Split(blockUsageStr, " ")
+		if len(blockUsageParts) != 2 {
+			blockUsageParts = []string{"0", "0"}
+		}
+
+		blockBytes, err := valueObject.NewByte(blockUsageParts[0])
+		if err != nil {
+			blockBytes, _ = valueObject.NewByte(0)
+		}
+
+		inodesCount, err := valueObject.NewInodesCount(blockUsageParts[1])
+		if err != nil {
+			inodesCount, _ = valueObject.NewInodesCount(0)
+		}
+
+		containerUsage := valueObject.NewContainerResourceUsage(
+			accountId,
+			containerId,
+			cpuPerc,
+			avgCpu,
+			memBytes,
+			memPerc,
+			blockInput,
+			blockOutput,
+			blockBytes,
+			inodesCount,
+			netInput,
+			netOutput,
+		)
+
+		containersUsage = append(containersUsage, containerUsage)
+	}
+
+	return containersUsage, nil
+}
+
+func (repo ContainerQueryRepo) getWithUsageByAccId(
+	accId valueObject.AccountId,
+) ([]dto.ContainerWithUsage, error) {
+	var containersWithUsage []dto.ContainerWithUsage
+
+	containersUsageStr, err := infraHelper.RunCmdAsUser(
+		accId,
+		"podman",
+		"stats",
+		"--no-stream",
+		"--no-reset",
+		"--format",
+		"{{.ID}} {{.ContainerStats.CPU}} {{.ContainerStats.AvgCPU}} "+
+			"{{.ContainerStats.MemPerc}} {{.ContainerStats.MemUsage}} "+
+			"{{.ContainerStats.BlockInput}} {{.ContainerStats.BlockOutput}} "+
+			"{{.ContainerStats.NetInput}} {{.ContainerStats.NetOutput}}",
+	)
+	if err != nil {
+		return containersWithUsage, errors.New("AccPodmanStatsError" + err.Error())
+	}
+
+	containersUsage, err := repo.containerResourceUsageFactory(
+		accId,
+		containersUsageStr,
+	)
+	if err != nil {
+		return containersWithUsage, err
+	}
+
+	containerEntities, err := repo.GetByAccId(accId)
+	if err != nil {
+		return containersWithUsage, err
+	}
+
+	for _, container := range containerEntities {
+		for _, containerUsage := range containersUsage {
+			if containerUsage.ContainerId != container.Id {
+				continue
+			}
+
+			containerWithUsage := dto.NewContainerWithUsage(
+				container,
+				containerUsage,
+			)
+			containersWithUsage = append(containersWithUsage, containerWithUsage)
+		}
+	}
+
+	return containersWithUsage, nil
+}
+
+func (repo ContainerQueryRepo) GetWithUsage() ([]dto.ContainerWithUsage, error) {
+	var containersWithUsage []dto.ContainerWithUsage
+
+	accsList, err := NewAccQueryRepo(repo.dbSvc).Get()
+	if err != nil {
+		return containersWithUsage, err
+	}
+
+	for _, acc := range accsList {
+		accContainersWithUsage, err := repo.getWithUsageByAccId(acc.Id)
+		if err != nil {
+			log.Printf("AccId '%s' skipped: %s", acc.Id.String(), err.Error())
+			continue
+		}
+
+		containersWithUsage = append(containersWithUsage, accContainersWithUsage...)
+	}
+
+	return containersWithUsage, nil
 }
