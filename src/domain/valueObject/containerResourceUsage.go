@@ -1,8 +1,6 @@
 package valueObject
 
 type ContainerResourceUsage struct {
-	AccountId          AccountId   `json:"-"`
-	ContainerId        ContainerId `json:"-"`
 	CurrentCpuPercent  float64     `json:"currentCpuPercent"`
 	AverageCpuPercent  float64     `json:"avgCpuPercent"`
 	MemoryBytes        Byte        `json:"memoryBytes"`
@@ -16,8 +14,6 @@ type ContainerResourceUsage struct {
 }
 
 func NewContainerResourceUsage(
-	accountId AccountId,
-	containerId ContainerId,
 	currentCpuPercent float64,
 	averageCpuPercent float64,
 	memoryBytes Byte,
@@ -30,8 +26,6 @@ func NewContainerResourceUsage(
 	netOutputBytes Byte,
 ) ContainerResourceUsage {
 	return ContainerResourceUsage{
-		AccountId:          accountId,
-		ContainerId:        containerId,
 		CurrentCpuPercent:  currentCpuPercent,
 		AverageCpuPercent:  averageCpuPercent,
 		MemoryBytes:        memoryBytes,
@@ -47,8 +41,6 @@ func NewContainerResourceUsage(
 
 func NewContainerResourceUsageWithBlankValues() ContainerResourceUsage {
 	return ContainerResourceUsage{
-		AccountId:          NewAccountIdPanic(0),
-		ContainerId:        NewContainerIdPanic("ExampleContainerId"),
 		CurrentCpuPercent:  0,
 		AverageCpuPercent:  0,
 		MemoryBytes:        0,
