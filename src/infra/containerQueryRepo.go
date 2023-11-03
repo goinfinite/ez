@@ -479,7 +479,7 @@ func (repo ContainerQueryRepo) getWithUsageByAccId(
 		return containersWithUsage, errors.New("AccPodmanStatsError" + err.Error())
 	}
 
-	containersUsage, err := repo.containerResourceUsageFactory(
+	runningContainersUsage, err := repo.containerResourceUsageFactory(
 		accId,
 		containersUsageStr,
 	)
@@ -493,17 +493,20 @@ func (repo ContainerQueryRepo) getWithUsageByAccId(
 	}
 
 	for _, container := range containerEntities {
-		for _, containerUsage := range containersUsage {
-			if containerUsage.ContainerId != container.Id {
+		containerUsage := valueObject.NewContainerResourceUsageWithBlankValues()
+
+		for _, runningContainerUsage := range runningContainersUsage {
+			if runningContainerUsage.ContainerId != container.Id {
 				continue
 			}
-
-			containerWithUsage := dto.NewContainerWithUsage(
-				container,
-				containerUsage,
-			)
-			containersWithUsage = append(containersWithUsage, containerWithUsage)
+			containerUsage = runningContainerUsage
 		}
+
+		containerWithUsage := dto.NewContainerWithUsage(
+			container,
+			containerUsage,
+		)
+		containersWithUsage = append(containersWithUsage, containerWithUsage)
 	}
 
 	return containersWithUsage, nil
