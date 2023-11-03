@@ -255,7 +255,7 @@ const docTemplate = `{
                 "summary": "UpdateContainer",
                 "parameters": [
                     {
-                        "description": "UpdateContainer (Only accId and containerId are required.)",
+                        "description": "UpdateContainer (Only accountId and containerId are required.)",
                         "name": "updateContainerDto",
                         "in": "body",
                         "required": true,
@@ -453,6 +453,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/container/with-usage/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List containers with usage.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainersWithUsage",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ContainerWithUsage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/container/{accountId}/{containerId}/": {
             "delete": {
                 "security": [
@@ -602,6 +633,62 @@ const docTemplate = `{
                 },
                 "scalingThreshold": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.ContainerWithUsage": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "privateIp": {
+                    "type": "string"
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "resourceUsage": {
+                    "$ref": "#/definitions/valueObject.ContainerResourceUsage"
+                },
+                "restartPolicy": {
+                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "startedAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
                 }
             }
         },
@@ -851,6 +938,41 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "memoryBytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.ContainerResourceUsage": {
+            "type": "object",
+            "properties": {
+                "avgCpuPercent": {
+                    "type": "number"
+                },
+                "currentCpuPercent": {
+                    "type": "number"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                },
+                "memoryPercent": {
+                    "type": "number"
+                },
+                "netInputBytes": {
+                    "type": "integer"
+                },
+                "netOutputBytes": {
+                    "type": "integer"
+                },
+                "storageInodesCount": {
+                    "type": "integer"
+                },
+                "storageInputBytes": {
+                    "type": "integer"
+                },
+                "storageOutputBytes": {
+                    "type": "integer"
+                },
+                "storageSpaceBytes": {
                     "type": "integer"
                 }
             }

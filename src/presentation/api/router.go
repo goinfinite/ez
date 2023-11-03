@@ -41,6 +41,7 @@ func accountRoutes(baseRoute *echo.Group, dbSvc *db.DatabaseService) {
 func containerRoutes(baseRoute *echo.Group) {
 	containerGroup := baseRoute.Group("/container")
 	containerGroup.GET("/", apiController.GetContainersController)
+	containerGroup.GET("/with-usage/", apiController.GetContainersWithUsageController)
 	containerGroup.POST("/", apiController.AddContainerController)
 	containerGroup.PUT("/", apiController.UpdateContainerController)
 	containerGroup.DELETE(

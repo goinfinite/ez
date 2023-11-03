@@ -33,6 +33,26 @@ func GetContainersController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
 }
 
+// GetContainersWithUsage	 godoc
+// @Summary      GetContainersWithUsage
+// @Description  List containers with usage.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Success      200 {array} dto.ContainerWithUsage
+// @Router       /container/with-usage/ [get]
+func GetContainersWithUsageController(c echo.Context) error {
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	containerList, err := useCase.GetContainersWithUsage(containerQueryRepo)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
+}
+
 func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
 	portBindingsList := []valueObject.PortBinding{}
 	for _, portBinding := range portBindings {
