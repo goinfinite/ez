@@ -324,8 +324,8 @@ func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 func (repo ContainerQueryRepo) containerResourceUsageFactory(
 	accountId valueObject.AccountId,
 	containersUsageStr string,
-) ([]valueObject.ContainerResourceUsage, error) {
-	var containersUsage []valueObject.ContainerResourceUsage
+) (map[valueObject.ContainerId]valueObject.ContainerResourceUsage, error) {
+	var containersUsage = map[valueObject.ContainerId]valueObject.ContainerResourceUsage{}
 	if len(containersUsageStr) == 0 {
 		return containersUsage, nil
 	}
@@ -441,8 +441,6 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 		}
 
 		containerUsage := valueObject.NewContainerResourceUsage(
-			accountId,
-			containerId,
 			cpuPerc,
 			avgCpu,
 			memBytes,
@@ -455,7 +453,7 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			netOutput,
 		)
 
-		containersUsage = append(containersUsage, containerUsage)
+		containersUsage[containerId] = containerUsage
 	}
 
 	return containersUsage, nil
@@ -495,8 +493,8 @@ func (repo ContainerQueryRepo) getWithUsageByAccId(
 	for _, container := range containerEntities {
 		containerUsage := valueObject.NewContainerResourceUsageWithBlankValues()
 
-		for _, runningContainerUsage := range runningContainersUsage {
-			if runningContainerUsage.ContainerId != container.Id {
+		for runningContainerId, runningContainerUsage := range runningContainersUsage {
+			if runningContainerId != container.Id {
 				continue
 			}
 			containerUsage = runningContainerUsage
