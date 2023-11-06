@@ -897,14 +897,14 @@ const docTemplate = `{
         "entity.O11yOverview": {
             "type": "object",
             "properties": {
-                "currentUsage": {
-                    "$ref": "#/definitions/valueObject.HostResourceUsage"
-                },
                 "hostname": {
                     "type": "string"
                 },
                 "publicIp": {
                     "type": "string"
+                },
+                "resourceUsage": {
+                    "$ref": "#/definitions/valueObject.HostResourceUsage"
                 },
                 "specs": {
                     "$ref": "#/definitions/valueObject.HardwareSpecs"
@@ -1003,26 +1003,6 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.HostResourceUsage": {
-            "type": "object",
-            "properties": {
-                "cpuUsagePercent": {
-                    "type": "number"
-                },
-                "memUsagePercent": {
-                    "type": "number"
-                },
-                "netUsage": {
-                    "$ref": "#/definitions/valueObject.NetUsage"
-                },
-                "storageUsage": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/valueObject.DiskInfo"
-                    }
-                }
-            }
-        },
         "valueObject.DiskInfo": {
             "type": "object",
             "properties": {
@@ -1056,6 +1036,26 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "storageTotal": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.DiskInfo"
+                    }
+                }
+            }
+        },
+        "valueObject.HostResourceUsage": {
+            "type": "object",
+            "properties": {
+                "cpuPercent": {
+                    "type": "number"
+                },
+                "memoryPercent": {
+                    "type": "number"
+                },
+                "netUsage": {
+                    "$ref": "#/definitions/valueObject.NetUsage"
+                },
+                "storageUsage": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/valueObject.DiskInfo"
