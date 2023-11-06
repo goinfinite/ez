@@ -57,7 +57,7 @@ func (repo GetOverview) getStorageDeviceInfos() ([]valueObject.StorageDeviceInfo
 	}
 
 	disks := strings.Split(disksList, "\n")
-	diskInfos := []valueObject.StorageDeviceInfo{}
+	deviceInfos := []valueObject.StorageDeviceInfo{}
 	for _, disk := range disks {
 		if disk == "" {
 			continue
@@ -68,15 +68,15 @@ func (repo GetOverview) getStorageDeviceInfos() ([]valueObject.StorageDeviceInfo
 			continue
 		}
 
-		diskInfo, err := repo.getStorageDeviceInfo(deviceName)
+		deviceInfo, err := repo.getStorageDeviceInfo(deviceName)
 		if err != nil {
 			return []valueObject.StorageDeviceInfo{}, errors.New("GetStorageDeviceInfoFailed")
 		}
 
-		diskInfos = append(diskInfos, diskInfo)
+		deviceInfos = append(deviceInfos, deviceInfo)
 	}
 
-	return diskInfos, nil
+	return deviceInfos, nil
 }
 
 func (repo GetOverview) getMemLimit() (uint64, error) {
@@ -173,34 +173,65 @@ func (repo GetOverview) getNetUsage() (valueObject.NetUsage, error) {
 	), nil
 }
 
-func (repo GetOverview) getHostResourceUsage() (
-	valueObject.HostResourceUsage,
-	error,
-) {
-	cpuUsagePercent, err := repo.getCpuUsagePercent()
-	if err != nil {
-		return valueObject.HostResourceUsage{}, err
-	}
-	memUsagePercent, err := repo.getMemUsagePercent()
-	if err != nil {
-		return valueObject.HostResourceUsage{}, err
+type HostResourceUsageResult struct {
+	cpuUsagePercent float64
+	memUsagePercent float64
+	deviceInfos     []valueObject.StorageDeviceInfo
+	netUsage        valueObject.NetUsage
+	err             error
+}
+
+func (repo GetOverview) getHostResourceUsage() (valueObject.HostResourceUsage, error) {
+	cpuChan := make(chan HostResourceUsageResult)
+	memChan := make(chan HostResourceUsageResult)
+	deviceChan := make(chan HostResourceUsageResult)
+	netChan := make(chan HostResourceUsageResult)
+
+	go func() {
+		cpuUsagePercent, err := repo.getCpuUsagePercent()
+		cpuChan <- HostResourceUsageResult{cpuUsagePercent: cpuUsagePercent, err: err}
+	}()
+
+	go func() {
+		memUsagePercent, err := repo.getMemUsagePercent()
+		memChan <- HostResourceUsageResult{memUsagePercent: memUsagePercent, err: err}
+	}()
+
+	go func() {
+		deviceInfos, err := repo.getStorageDeviceInfos()
+		deviceChan <- HostResourceUsageResult{deviceInfos: deviceInfos, err: err}
+	}()
+
+	go func() {
+		netUsage, err := repo.getNetUsage()
+		netChan <- HostResourceUsageResult{netUsage: netUsage, err: err}
+	}()
+
+	cpuResult := <-cpuChan
+	if cpuResult.err != nil {
+		return valueObject.HostResourceUsage{}, cpuResult.err
 	}
 
-	diskInfos, err := repo.getStorageDeviceInfos()
-	if err != nil {
+	memResult := <-memChan
+	if memResult.err != nil {
+		return valueObject.HostResourceUsage{}, memResult.err
+	}
+
+	deviceResult := <-deviceChan
+	if deviceResult.err != nil {
 		return valueObject.HostResourceUsage{}, errors.New("GetStorageInfoFailed")
 	}
 
-	netUsage, err := repo.getNetUsage()
-	if err != nil {
+	netResult := <-netChan
+	if netResult.err != nil {
 		return valueObject.HostResourceUsage{}, errors.New("GetNetUsageFailed")
 	}
 
 	return valueObject.NewHostResourceUsage(
-		cpuUsagePercent,
-		memUsagePercent,
-		diskInfos,
-		netUsage,
+		cpuResult.cpuUsagePercent,
+		memResult.memUsagePercent,
+		deviceResult.deviceInfos,
+		netResult.netUsage,
 	), nil
 }
 
