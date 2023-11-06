@@ -4,8 +4,6 @@ import (
 	"errors"
 	"log"
 	"os"
-	"os/exec"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -30,49 +28,49 @@ func (repo GetOverview) getUptime() (uint64, error) {
 	return uint64(sysinfo.Uptime), nil
 }
 
-func (repo GetOverview) getDiskInfo(
-	diskName valueObject.DiskName,
-) (valueObject.DiskInfo, error) {
+func (repo GetOverview) getStorageDeviceInfo(
+	deviceName valueObject.DeviceName,
+) (valueObject.StorageDeviceInfo, error) {
 	var stat syscall.Statfs_t
 	err := syscall.Statfs("/", &stat)
 	if err != nil {
-		return valueObject.DiskInfo{}, errors.New("StorageInfoError")
+		return valueObject.StorageDeviceInfo{}, errors.New("StorageInfoError")
 	}
 
 	storageTotal := stat.Blocks * uint64(stat.Bsize)
 	storageAvailable := stat.Bavail * uint64(stat.Bsize)
 	storageUsed := storageTotal - storageAvailable
 
-	return valueObject.NewDiskInfo(
-		diskName,
+	return valueObject.NewStorageDeviceInfo(
+		deviceName,
 		valueObject.Byte(storageTotal),
 		valueObject.Byte(storageAvailable),
 		valueObject.Byte(storageUsed),
 	), nil
 }
 
-func (repo GetOverview) getDiskInfos() ([]valueObject.DiskInfo, error) {
+func (repo GetOverview) getStorageDeviceInfos() ([]valueObject.StorageDeviceInfo, error) {
 	disksList, err := infraHelper.RunCmd("lsblk", "-ndp", "-e", "7", "--output", "KNAME")
 	if err != nil {
 		log.Printf("GetDisksFailed: %v", err)
-		return []valueObject.DiskInfo{}, errors.New("GetDisksFailed")
+		return []valueObject.StorageDeviceInfo{}, errors.New("GetDisksFailed")
 	}
 
 	disks := strings.Split(disksList, "\n")
-	diskInfos := []valueObject.DiskInfo{}
+	diskInfos := []valueObject.StorageDeviceInfo{}
 	for _, disk := range disks {
 		if disk == "" {
 			continue
 		}
 
-		diskName, err := valueObject.NewDiskName(disk)
+		deviceName, err := valueObject.NewDeviceName(disk)
 		if err != nil {
 			continue
 		}
 
-		diskInfo, err := repo.getDiskInfo(diskName)
+		diskInfo, err := repo.getStorageDeviceInfo(deviceName)
 		if err != nil {
-			return []valueObject.DiskInfo{}, errors.New("GetDiskInfoFailed")
+			return []valueObject.StorageDeviceInfo{}, errors.New("GetStorageDeviceInfoFailed")
 		}
 
 		diskInfos = append(diskInfos, diskInfo)
@@ -91,42 +89,27 @@ func (repo GetOverview) getMemLimit() (uint64, error) {
 }
 
 func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
-	cmd := exec.Command(
-		"awk",
-		"-F:",
-		"/vendor_id/{vendor=$2} /cpu MHz/{freq=$2} END{print vendor freq}",
-		"/proc/cpuinfo",
-	)
-	output, err := cmd.Output()
+	var hardwareSpecs valueObject.HardwareSpecs
+
+	cpuInfo, err := cpu.Info()
 	if err != nil {
-		log.Printf("GetCpuSpecsFailed: %v", err)
-		return valueObject.HardwareSpecs{}, errors.New("GetCpuSpecsFailed")
-	}
-	trimmedOutput := strings.TrimSpace(string(output))
-	if trimmedOutput == "" {
-		return valueObject.HardwareSpecs{}, errors.New("EmptyCpuSpecs")
+		return hardwareSpecs, errors.New("GetCpuInfoFailed")
 	}
 
-	cpuInfo := strings.Split(trimmedOutput, " ")
-	if len(cpuInfo) < 2 {
-		return valueObject.HardwareSpecs{}, errors.New("ParseCpuSpecsFailed")
+	if len(cpuInfo) == 0 {
+		return hardwareSpecs, errors.New("CpuInfoEmpty")
 	}
 
-	cpuModel := strings.TrimSpace(cpuInfo[0])
-	cpuFrequency := strings.TrimSpace(cpuInfo[1])
-	cpuFrequencyFloat, err := strconv.ParseFloat(cpuFrequency, 64)
+	cpuModel, err := valueObject.NewCpuModelName(cpuInfo[0].ModelName)
 	if err != nil {
-		log.Printf("GetCpuFrequencyFailed: %v", err)
-		return valueObject.HardwareSpecs{}, errors.New("GetCpuFrequencyFailed")
+		return hardwareSpecs, errors.New("GetCpuModelNameFailed")
 	}
 
-	cpuCoresStr, err := infraHelper.RunCmd("nproc")
+	cpuFrequency := cpuInfo[0].Mhz
+
+	cpuCores, err := valueObject.NewCpuCoresCount(cpuInfo[0].Cores)
 	if err != nil {
-		return valueObject.HardwareSpecs{}, errors.New("GetCpuCoresStrFailed")
-	}
-	cpuCores, err := strconv.ParseUint(cpuCoresStr, 10, 64)
-	if err != nil {
-		return valueObject.HardwareSpecs{}, errors.New("GetCpuCoresFailed")
+		return hardwareSpecs, errors.New("GetCpuCoresCountFailed")
 	}
 
 	memoryLimit, err := repo.getMemLimit()
@@ -134,7 +117,7 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 		return valueObject.HardwareSpecs{}, err
 	}
 
-	storageInfo, err := repo.getDiskInfos()
+	storageInfo, err := repo.getStorageDeviceInfos()
 	if err != nil {
 		return valueObject.HardwareSpecs{}, err
 	}
@@ -142,7 +125,7 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 	return valueObject.NewHardwareSpecs(
 		cpuModel,
 		cpuCores,
-		cpuFrequencyFloat,
+		cpuFrequency,
 		valueObject.Byte(memoryLimit),
 		storageInfo,
 	), nil
@@ -203,7 +186,7 @@ func (repo GetOverview) getHostResourceUsage() (
 		return valueObject.HostResourceUsage{}, err
 	}
 
-	diskInfos, err := repo.getDiskInfos()
+	diskInfos, err := repo.getStorageDeviceInfos()
 	if err != nil {
 		return valueObject.HostResourceUsage{}, errors.New("GetStorageInfoFailed")
 	}

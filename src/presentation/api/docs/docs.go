@@ -1003,7 +1003,7 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.DiskInfo": {
+        "valueObject.StorageDeviceInfo": {
             "type": "object",
             "properties": {
                 "availableBytes": {
@@ -1038,7 +1038,7 @@ const docTemplate = `{
                 "storageTotal": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/valueObject.DiskInfo"
+                        "$ref": "#/definitions/valueObject.StorageDeviceInfo"
                     }
                 }
             }
@@ -1058,7 +1058,7 @@ const docTemplate = `{
                 "storageUsage": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/valueObject.DiskInfo"
+                        "$ref": "#/definitions/valueObject.StorageDeviceInfo"
                     }
                 }
             }
