@@ -1003,39 +1003,22 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.StorageDeviceInfo": {
-            "type": "object",
-            "properties": {
-                "availableBytes": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "totalBytes": {
-                    "type": "integer"
-                },
-                "usedBytes": {
-                    "type": "integer"
-                }
-            }
-        },
         "valueObject.HardwareSpecs": {
             "type": "object",
             "properties": {
-                "cpuCores": {
-                    "type": "integer"
+                "cpuCoresCount": {
+                    "type": "number"
                 },
                 "cpuFrequency": {
                     "type": "number"
                 },
-                "cpuModel": {
+                "cpuModelName": {
                     "type": "string"
                 },
-                "memoryTotal": {
+                "memoryTotalBytes": {
                     "type": "integer"
                 },
-                "storageTotal": {
+                "storageInfo": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/valueObject.StorageDeviceInfo"
@@ -1111,6 +1094,23 @@ const docTemplate = `{
                 "cpu",
                 "memory"
             ]
+        },
+        "valueObject.StorageDeviceInfo": {
+            "type": "object",
+            "properties": {
+                "availableBytes": {
+                    "type": "integer"
+                },
+                "deviceName": {
+                    "type": "string"
+                },
+                "totalBytes": {
+                    "type": "integer"
+                },
+                "usedBytes": {
+                    "type": "integer"
+                }
+            }
         }
     },
     "securityDefinitions": {
