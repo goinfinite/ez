@@ -107,7 +107,7 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 
 	cpuFrequency := cpuInfo[0].Mhz
 
-	cpuCores, err := valueObject.NewCpuCoresCount(cpuInfo[0].Cores)
+	cpuCores, err := valueObject.NewCpuCoresCount(len(cpuInfo))
 	if err != nil {
 		return hardwareSpecs, errors.New("GetCpuCoresCountFailed")
 	}
