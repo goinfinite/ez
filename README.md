@@ -115,13 +115,21 @@ The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
 1. Once you have uploaded the openSUSE MicroOS cloud-init image to your provider, attach a secondary unformatted disk and deploy the VM.
 
-2. Get the FLEET binary and download it to the `/var/infinite/` directory.
+_If you are running locally, follow steps 1 to 6 of the "Unit Testing" title above._
 
-3. Then run the installer, the system will reboot and once you get the success message, you are good to go:
+2. Get the FLEET binary, download it to the `/var/infinite/` directory and give it execution permission:
 
 ```
-fleet sys-install
+chmod +x /var/infinite/fleet
 ```
+
+3. Run the installer:
+
+```
+/var/infinite/fleet sys-install
+```
+
+4. The system will reboot and once you get the success message on the logs (check file `/var/log/fleet.log`), you are good to go.
 
 ## REST API
 
