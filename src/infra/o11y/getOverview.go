@@ -117,17 +117,11 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 		return valueObject.HardwareSpecs{}, err
 	}
 
-	storageInfo, err := repo.getStorageDeviceInfos()
-	if err != nil {
-		return valueObject.HardwareSpecs{}, err
-	}
-
 	return valueObject.NewHardwareSpecs(
 		cpuModel,
 		cpuCores,
 		cpuFrequency,
 		valueObject.Byte(memoryLimit),
-		storageInfo,
 	), nil
 }
 
