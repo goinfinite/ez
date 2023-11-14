@@ -4,13 +4,14 @@ import (
 	"errors"
 	"log"
 	"os"
-	"strings"
+	"slices"
 	"syscall"
 	"time"
 
 	"github.com/goinfinite/fleet/src/domain/entity"
 	"github.com/goinfinite/fleet/src/domain/valueObject"
 	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
+	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
@@ -28,54 +29,91 @@ func (repo GetOverview) getUptime() (uint64, error) {
 	return uint64(sysinfo.Uptime), nil
 }
 
-func (repo GetOverview) getStorageUnitInfo(
-	deviceName valueObject.DeviceName,
-) (valueObject.StorageUnitInfo, error) {
-	var stat syscall.Statfs_t
-	err := syscall.Statfs("/", &stat)
-	if err != nil {
-		return valueObject.StorageUnitInfo{}, errors.New("StorageInfoError")
-	}
-
-	storageTotal := stat.Blocks * uint64(stat.Bsize)
-	storageAvailable := stat.Bavail * uint64(stat.Bsize)
-	storageUsedBytes := storageTotal - storageAvailable
-	storageUsedPercent := float64(storageUsedBytes) / float64(storageTotal) * 100
-
-	return valueObject.NewStorageUnitInfo(
-		deviceName,
-		valueObject.Byte(storageTotal),
-		valueObject.Byte(storageAvailable),
-		valueObject.Byte(storageUsedBytes),
-		storageUsedPercent,
-	), nil
-}
-
 func (repo GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
-	disksList, err := infraHelper.RunCmd("lsblk", "-ndp", "-e", "7", "--output", "KNAME")
+	var storageInfos []valueObject.StorageUnitInfo
+
+	initialStats, err := disk.IOCounters()
 	if err != nil {
-		log.Printf("GetDisksFailed: %v", err)
-		return []valueObject.StorageUnitInfo{}, errors.New("GetDisksFailed")
+		log.Printf("GetInitialStorageStatsFailed: %v", err)
+		return storageInfos, errors.New("GetInitialStorageStatsFailed")
 	}
 
-	disks := strings.Split(disksList, "\n")
-	storageInfos := []valueObject.StorageUnitInfo{}
-	for _, disk := range disks {
-		if disk == "" {
+	time.Sleep(time.Second)
+
+	finalStats, err := disk.IOCounters()
+	if err != nil {
+		log.Printf("GetFinalStorageStatsFailed: %v", err)
+		return storageInfos, errors.New("GetFinalStorageStatsFailed")
+	}
+
+	partitions, err := disk.Partitions(false)
+	if err != nil {
+		log.Printf("GetPartitionsFailed: %v", err)
+		return storageInfos, errors.New("GetPartitionsFailed")
+	}
+
+	desireableFileSystems := []string{
+		"xfs",
+		"btrfs",
+		"ext4",
+		"ext3",
+		"ext2",
+		"zfs",
+		"vfat",
+		"ntfs",
+	}
+	for _, partition := range partitions {
+		if !slices.Contains(desireableFileSystems, partition.Fstype) {
 			continue
 		}
 
-		deviceName, err := valueObject.NewDeviceName(disk)
+		usageStat, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
 			continue
 		}
 
-		storageInfo, err := repo.getStorageUnitInfo(deviceName)
+		initialStats := initialStats[partition.Device]
+		finalStats := finalStats[partition.Device]
+
+		deviceName, err := valueObject.NewDeviceName(partition.Device)
 		if err != nil {
-			return []valueObject.StorageUnitInfo{}, errors.New("GetStorageInfoFailed")
+			continue
 		}
 
-		storageInfos = append(storageInfos, storageInfo)
+		mountPoint, err := valueObject.NewUnixFilePath(partition.Mountpoint)
+		if err != nil {
+			continue
+		}
+
+		fileSystem, err := valueObject.NewUnixFileSystem(partition.Fstype)
+		if err != nil {
+			continue
+		}
+
+		readBytes := finalStats.ReadBytes - initialStats.ReadBytes
+		readOpsCount := finalStats.ReadCount - initialStats.ReadCount
+		writeBytes := finalStats.WriteBytes - initialStats.WriteBytes
+		writeOpsCount := finalStats.WriteCount - initialStats.WriteCount
+
+		storageUnitInfo := valueObject.NewStorageUnitInfo(
+			deviceName,
+			mountPoint,
+			fileSystem,
+			valueObject.Byte(usageStat.Total),
+			valueObject.Byte(usageStat.Free),
+			valueObject.Byte(usageStat.Used),
+			usageStat.UsedPercent,
+			valueObject.InodesCount(usageStat.InodesTotal),
+			valueObject.InodesCount(usageStat.InodesFree),
+			valueObject.InodesCount(usageStat.InodesUsed),
+			usageStat.InodesUsedPercent,
+			valueObject.Byte(readBytes),
+			readOpsCount,
+			valueObject.Byte(writeBytes),
+			writeOpsCount,
+		)
+
+		storageInfos = append(storageInfos, storageUnitInfo)
 	}
 
 	return storageInfos, nil
