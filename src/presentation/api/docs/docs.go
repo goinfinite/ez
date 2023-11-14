@@ -11,12 +11,12 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "termsOfService": "https://speedia.net/tos/",
         "contact": {
-            "name": "Infinite Engineering",
+            "name": "Speedia Engineering",
             "url": "https://speedia.net/",
             "email": "eng+swagger@speedia.net"
         },
         "license": {
-            "name": "INFINITE CLOUD COMPUTING © 2023. All Rights Reserved.",
+            "name": "SPEEDIA WEB SERVICES, LLC © 2023. All Rights Reserved.",
             "url": "https://speedia.net/tos/"
         },
         "version": "{{.Version}}"
@@ -1170,7 +1170,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "ControlApi",
-	Description:      "Infinite ControlManager API",
+	Description:      "Speedia Control API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

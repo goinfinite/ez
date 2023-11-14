@@ -12,7 +12,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   filepath.Base(os.Args[0]),
-	Short: "Infinite ControlManager CLI",
+	Short: "Speedia Control CLI",
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	},

@@ -12,7 +12,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print software version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Infinite ControlManager v0.0.1")
+		fmt.Println("Speedia Control v0.0.1")
 	},
 }
 

@@ -10,14 +10,14 @@ import (
 
 // @title			ControlApi
 // @version			0.0.1
-// @description		Infinite ControlManager API
+// @description		Speedia Control API
 // @termsOfService	https://speedia.net/tos/
 
-// @contact.name	Infinite Engineering
+// @contact.name	Speedia Engineering
 // @contact.url		https://speedia.net/
 // @contact.email	eng+swagger@speedia.net
 
-// @license.name  INFINITE CLOUD COMPUTING © 2023. All Rights Reserved.
+// @license.name  SPEEDIA WEB SERVICES, LLC © 2023. All Rights Reserved.
 // @license.url   https://speedia.net/tos/
 
 // @securityDefinitions.apikey	Bearer
