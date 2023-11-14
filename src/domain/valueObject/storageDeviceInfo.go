@@ -5,18 +5,21 @@ type StorageDeviceInfo struct {
 	TotalBytes     Byte       `json:"totalBytes"`
 	AvailableBytes Byte       `json:"availableBytes"`
 	UsedBytes      Byte       `json:"usedBytes"`
+	UsedPercent    float64    `json:"usedPercent"`
 }
 
 func NewStorageDeviceInfo(
 	deviceName DeviceName,
 	total Byte,
 	available Byte,
-	used Byte,
+	usedBytes Byte,
+	usedPercent float64,
 ) StorageDeviceInfo {
 	return StorageDeviceInfo{
 		DeviceName:     deviceName,
 		TotalBytes:     total,
 		AvailableBytes: available,
-		UsedBytes:      used,
+		UsedBytes:      usedBytes,
+		UsedPercent:    usedPercent,
 	}
 }

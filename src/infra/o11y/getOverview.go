@@ -39,13 +39,15 @@ func (repo GetOverview) getStorageDeviceInfo(
 
 	storageTotal := stat.Blocks * uint64(stat.Bsize)
 	storageAvailable := stat.Bavail * uint64(stat.Bsize)
-	storageUsed := storageTotal - storageAvailable
+	storageUsedBytes := storageTotal - storageAvailable
+	storageUsedPercent := float64(storageUsedBytes) / float64(storageTotal) * 100
 
 	return valueObject.NewStorageDeviceInfo(
 		deviceName,
 		valueObject.Byte(storageTotal),
 		valueObject.Byte(storageAvailable),
-		valueObject.Byte(storageUsed),
+		valueObject.Byte(storageUsedBytes),
+		storageUsedPercent,
 	), nil
 }
 
