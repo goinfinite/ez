@@ -1017,12 +1017,6 @@ const docTemplate = `{
                 },
                 "memoryTotalBytes": {
                     "type": "integer"
-                },
-                "storageInfo": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/valueObject.StorageUnitInfo"
-                    }
                 }
             }
         },
@@ -1035,10 +1029,13 @@ const docTemplate = `{
                 "memoryPercent": {
                     "type": "number"
                 },
-                "netUsage": {
-                    "$ref": "#/definitions/valueObject.NetUsage"
+                "netInfo": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.NetInterfaceInfo"
+                    }
                 },
-                "storageUsage": {
+                "storageInfo": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/valueObject.StorageUnitInfo"
@@ -1046,27 +1043,37 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.NetUsage": {
+        "valueObject.NetInterfaceInfo": {
             "type": "object",
             "properties": {
-                "receivedBytes": {
+                "deviceName": {
+                    "type": "string"
+                },
+                "recvBytes": {
+                    "type": "integer"
+                },
+                "recvDropPackets": {
+                    "type": "integer"
+                },
+                "recvErrs": {
+                    "type": "integer"
+                },
+                "recvPackets": {
                     "type": "integer"
                 },
                 "sentBytes": {
                     "type": "integer"
+                },
+                "sentDropPackets": {
+                    "type": "integer"
+                },
+                "sentErrs": {
+                    "type": "integer"
+                },
+                "sentPackets": {
+                    "type": "integer"
                 }
             }
-        },
-        "valueObject.NetworkProtocol": {
-            "type": "string",
-            "enum": [
-                "tcp",
-                "udp"
-            ],
-            "x-enum-varnames": [
-                "tcp",
-                "udp"
-            ]
         },
         "valueObject.PortBinding": {
             "type": "object",
@@ -1078,7 +1085,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "protocol": {
-                    "$ref": "#/definitions/valueObject.NetworkProtocol"
+                    "type": "string"
                 }
             }
         },
@@ -1098,16 +1105,49 @@ const docTemplate = `{
         "valueObject.StorageUnitInfo": {
             "type": "object",
             "properties": {
-                "availableBytes": {
-                    "type": "integer"
-                },
                 "deviceName": {
                     "type": "string"
+                },
+                "fileSystem": {
+                    "type": "string"
+                },
+                "freeBytes": {
+                    "type": "integer"
+                },
+                "freeInodes": {
+                    "type": "integer"
+                },
+                "mountPoint": {
+                    "type": "string"
+                },
+                "readBytes": {
+                    "type": "integer"
+                },
+                "readOpsCount": {
+                    "type": "integer"
                 },
                 "totalBytes": {
                     "type": "integer"
                 },
+                "totalInodes": {
+                    "type": "integer"
+                },
                 "usedBytes": {
+                    "type": "integer"
+                },
+                "usedInodes": {
+                    "type": "integer"
+                },
+                "usedInodesPercent": {
+                    "type": "number"
+                },
+                "usedPercent": {
+                    "type": "number"
+                },
+                "writeBytes": {
+                    "type": "integer"
+                },
+                "writeOpsCount": {
                     "type": "integer"
                 }
             }
