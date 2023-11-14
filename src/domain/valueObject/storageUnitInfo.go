@@ -1,6 +1,6 @@
 package valueObject
 
-type StorageDeviceInfo struct {
+type StorageUnitInfo struct {
 	DeviceName     DeviceName `json:"deviceName"`
 	TotalBytes     Byte       `json:"totalBytes"`
 	AvailableBytes Byte       `json:"availableBytes"`
@@ -8,14 +8,14 @@ type StorageDeviceInfo struct {
 	UsedPercent    float64    `json:"usedPercent"`
 }
 
-func NewStorageDeviceInfo(
+func NewStorageUnitInfo(
 	deviceName DeviceName,
 	total Byte,
 	available Byte,
 	usedBytes Byte,
 	usedPercent float64,
-) StorageDeviceInfo {
-	return StorageDeviceInfo{
+) StorageUnitInfo {
+	return StorageUnitInfo{
 		DeviceName:     deviceName,
 		TotalBytes:     total,
 		AvailableBytes: available,

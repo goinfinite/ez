@@ -5,7 +5,7 @@ definitions:
       password:
         type: string
       quota:
-        $ref: '#/definitions/valueObject.AccountQuota'
+        $ref: "#/definitions/valueObject.AccountQuota"
       username:
         type: string
     type: object
@@ -25,21 +25,21 @@ definitions:
         type: string
       portBindings:
         items:
-          $ref: '#/definitions/valueObject.PortBinding'
+          $ref: "#/definitions/valueObject.PortBinding"
         type: array
       profileId:
         type: integer
       restartPolicy:
-        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+        $ref: "#/definitions/valueObject.ContainerRestartPolicy"
     type: object
   dto.AddContainerProfile:
     properties:
       baseSpecs:
-        $ref: '#/definitions/valueObject.ContainerSpecs'
+        $ref: "#/definitions/valueObject.ContainerSpecs"
       hostMinCapacityPercent:
         type: number
       maxSpecs:
-        $ref: '#/definitions/valueObject.ContainerSpecs'
+        $ref: "#/definitions/valueObject.ContainerSpecs"
       name:
         type: string
       scalingIntervalSecs:
@@ -47,7 +47,7 @@ definitions:
       scalingMaxDurationSecs:
         type: integer
       scalingPolicy:
-        $ref: '#/definitions/valueObject.ScalingPolicy'
+        $ref: "#/definitions/valueObject.ScalingPolicy"
       scalingThreshold:
         type: integer
     type: object
@@ -73,16 +73,16 @@ definitions:
         type: string
       portBindings:
         items:
-          $ref: '#/definitions/valueObject.PortBinding'
+          $ref: "#/definitions/valueObject.PortBinding"
         type: array
       privateIp:
         type: string
       profileId:
         type: integer
       resourceUsage:
-        $ref: '#/definitions/valueObject.ContainerResourceUsage'
+        $ref: "#/definitions/valueObject.ContainerResourceUsage"
       restartPolicy:
-        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+        $ref: "#/definitions/valueObject.ContainerRestartPolicy"
       startedAt:
         type: integer
       status:
@@ -102,7 +102,7 @@ definitions:
       password:
         type: string
       quota:
-        $ref: '#/definitions/valueObject.AccountQuota'
+        $ref: "#/definitions/valueObject.AccountQuota"
       shouldUpdateApiKey:
         type: boolean
     type: object
@@ -120,13 +120,13 @@ definitions:
   dto.UpdateContainerProfile:
     properties:
       baseSpecs:
-        $ref: '#/definitions/valueObject.ContainerSpecs'
+        $ref: "#/definitions/valueObject.ContainerSpecs"
       hostMinCapacityPercent:
         type: number
       id:
         type: integer
       maxSpecs:
-        $ref: '#/definitions/valueObject.ContainerSpecs'
+        $ref: "#/definitions/valueObject.ContainerSpecs"
       name:
         type: string
       scalingIntervalSecs:
@@ -134,7 +134,7 @@ definitions:
       scalingMaxDurationSecs:
         type: integer
       scalingPolicy:
-        $ref: '#/definitions/valueObject.ScalingPolicy'
+        $ref: "#/definitions/valueObject.ScalingPolicy"
       scalingThreshold:
         type: integer
     type: object
@@ -145,7 +145,7 @@ definitions:
       tokenStr:
         type: string
       type:
-        $ref: '#/definitions/valueObject.AccessTokenType'
+        $ref: "#/definitions/valueObject.AccessTokenType"
     type: object
   entity.Account:
     properties:
@@ -156,9 +156,9 @@ definitions:
       id:
         type: integer
       quota:
-        $ref: '#/definitions/valueObject.AccountQuota'
+        $ref: "#/definitions/valueObject.AccountQuota"
       quotaUsage:
-        $ref: '#/definitions/valueObject.AccountQuota'
+        $ref: "#/definitions/valueObject.AccountQuota"
       updatedAt:
         type: integer
       username:
@@ -186,14 +186,14 @@ definitions:
         type: string
       portBindings:
         items:
-          $ref: '#/definitions/valueObject.PortBinding'
+          $ref: "#/definitions/valueObject.PortBinding"
         type: array
       privateIp:
         type: string
       profileId:
         type: integer
       restartPolicy:
-        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+        $ref: "#/definitions/valueObject.ContainerRestartPolicy"
       startedAt:
         type: integer
       status:
@@ -202,13 +202,13 @@ definitions:
   entity.ContainerProfile:
     properties:
       baseSpecs:
-        $ref: '#/definitions/valueObject.ContainerSpecs'
+        $ref: "#/definitions/valueObject.ContainerSpecs"
       hostMinCapacityPercent:
         type: number
       id:
         type: integer
       maxSpecs:
-        $ref: '#/definitions/valueObject.ContainerSpecs'
+        $ref: "#/definitions/valueObject.ContainerSpecs"
       name:
         type: string
       scalingIntervalSecs:
@@ -216,7 +216,7 @@ definitions:
       scalingMaxDurationSecs:
         type: integer
       scalingPolicy:
-        $ref: '#/definitions/valueObject.ScalingPolicy'
+        $ref: "#/definitions/valueObject.ScalingPolicy"
       scalingThreshold:
         type: integer
     type: object
@@ -227,20 +227,20 @@ definitions:
       publicIp:
         type: string
       resourceUsage:
-        $ref: '#/definitions/valueObject.HostResourceUsage'
+        $ref: "#/definitions/valueObject.HostResourceUsage"
       specs:
-        $ref: '#/definitions/valueObject.HardwareSpecs'
+        $ref: "#/definitions/valueObject.HardwareSpecs"
       uptimeSecs:
         type: integer
     type: object
   valueObject.AccessTokenType:
     enum:
-    - sessionToken
-    - accountApiKey
+      - sessionToken
+      - accountApiKey
     type: string
     x-enum-varnames:
-    - sessionToken
-    - accountApiKey
+      - sessionToken
+      - accountApiKey
   valueObject.AccountQuota:
     properties:
       cpuCores:
@@ -277,16 +277,16 @@ definitions:
     type: object
   valueObject.ContainerRestartPolicy:
     enum:
-    - "no"
-    - on-failure
-    - always
-    - unless-stopped
+      - "no"
+      - on-failure
+      - always
+      - unless-stopped
     type: string
     x-enum-varnames:
-    - "no"
-    - onFailure
-    - always
-    - unlessStopped
+      - "no"
+      - onFailure
+      - always
+      - unlessStopped
   valueObject.ContainerSpecs:
     properties:
       cpuCores:
@@ -306,7 +306,7 @@ definitions:
         type: integer
       storageInfo:
         items:
-          $ref: '#/definitions/valueObject.StorageDeviceInfo'
+          $ref: "#/definitions/valueObject.StorageUnitInfo"
         type: array
     type: object
   valueObject.HostResourceUsage:
@@ -316,10 +316,10 @@ definitions:
       memoryPercent:
         type: number
       netUsage:
-        $ref: '#/definitions/valueObject.NetUsage'
+        $ref: "#/definitions/valueObject.NetUsage"
       storageUsage:
         items:
-          $ref: '#/definitions/valueObject.StorageDeviceInfo'
+          $ref: "#/definitions/valueObject.StorageUnitInfo"
         type: array
     type: object
   valueObject.NetUsage:
@@ -331,12 +331,12 @@ definitions:
     type: object
   valueObject.NetworkProtocol:
     enum:
-    - tcp
-    - udp
+      - tcp
+      - udp
     type: string
     x-enum-varnames:
-    - tcp
-    - udp
+      - tcp
+      - udp
   valueObject.PortBinding:
     properties:
       containerPort:
@@ -344,19 +344,19 @@ definitions:
       hostPort:
         type: integer
       protocol:
-        $ref: '#/definitions/valueObject.NetworkProtocol'
+        $ref: "#/definitions/valueObject.NetworkProtocol"
     type: object
   valueObject.ScalingPolicy:
     enum:
-    - connection
-    - cpu
-    - memory
+      - connection
+      - cpu
+      - memory
     type: string
     x-enum-varnames:
-    - connection
-    - cpu
-    - memory
-  valueObject.StorageDeviceInfo:
+      - connection
+      - cpu
+      - memory
+  valueObject.StorageUnitInfo:
     properties:
       availableBytes:
         type: integer
@@ -384,334 +384,334 @@ paths:
   /account/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List accs.
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Account'
+              $ref: "#/definitions/entity.Account"
             type: array
       security:
-      - Bearer: []
+        - Bearer: []
       summary: GetAccounts
       tags:
-      - account
+        - account
     post:
       consumes:
-      - application/json
+        - application/json
       description: Add a new account.
       parameters:
-      - description: NewAccount
-        in: body
-        name: addAccountDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddAccount'
+        - description: NewAccount
+          in: body
+          name: addAccountDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.AddAccount"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: AccountCreated
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: AddNewAccount
       tags:
-      - account
+        - account
     put:
       consumes:
-      - application/json
+        - application/json
       description: Update an account.
       parameters:
-      - description: UpdateAccount (Only accountId is required.)
-        in: body
-        name: updateAccountDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateAccount'
+        - description: UpdateAccount (Only accountId is required.)
+          in: body
+          name: updateAccountDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.UpdateAccount"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: AccountUpdated message or NewKeyString
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: UpdateAccount
       tags:
-      - account
+        - account
   /account/{accountId}/:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete an account.
       parameters:
-      - description: AccountId
-        in: path
-        name: accountId
-        required: true
-        type: string
+        - description: AccountId
+          in: path
+          name: accountId
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: AccountDeleted
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: DeleteAccount
       tags:
-      - account
+        - account
   /auth/login/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Generate JWT with credentials
       parameters:
-      - description: Login
-        in: body
-        name: loginDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.Login'
+        - description: Login
+          in: body
+          name: loginDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.Login"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.AccessToken'
+            $ref: "#/definitions/entity.AccessToken"
         "401":
           description: Unauthorized
           schema:
             type: string
       summary: GenerateJwtWithCredentials
       tags:
-      - auth
+        - auth
   /container/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List containers.
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Container'
+              $ref: "#/definitions/entity.Container"
             type: array
       security:
-      - Bearer: []
+        - Bearer: []
       summary: GetContainers
       tags:
-      - container
+        - container
     post:
       consumes:
-      - application/json
+        - application/json
       description: Add a new container.
       parameters:
-      - description: NewContainer (Only accountId, hostname and imgAddr are required.)
-        in: body
-        name: addContainerDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddContainer'
+        - description: NewContainer (Only accountId, hostname and imgAddr are required.)
+          in: body
+          name: addContainerDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.AddContainer"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: ContainerCreated
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: AddNewContainer
       tags:
-      - container
+        - container
     put:
       consumes:
-      - application/json
+        - application/json
       description: Update a container.
       parameters:
-      - description: UpdateContainer (Only accountId and containerId are required.)
-        in: body
-        name: updateContainerDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateContainer'
+        - description: UpdateContainer (Only accountId and containerId are required.)
+          in: body
+          name: updateContainerDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.UpdateContainer"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: ContainerUpdated message or NewKeyString
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: UpdateContainer
       tags:
-      - container
+        - container
   /container/{accountId}/{containerId}/:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete a container.
       parameters:
-      - description: AccountId
-        in: path
-        name: accId
-        required: true
-        type: string
-      - description: ContainerId
-        in: path
-        name: containerId
-        required: true
-        type: string
+        - description: AccountId
+          in: path
+          name: accId
+          required: true
+          type: string
+        - description: ContainerId
+          in: path
+          name: containerId
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: ContainerDeleted
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: DeleteContainer
       tags:
-      - container
+        - container
   /container/profile/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List container profiles.
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.ContainerProfile'
+              $ref: "#/definitions/entity.ContainerProfile"
             type: array
       security:
-      - Bearer: []
+        - Bearer: []
       summary: GetContainerProfiles
       tags:
-      - container
+        - container
     post:
       consumes:
-      - application/json
+        - application/json
       description: Add a new container profile.
       parameters:
-      - description: NewContainerProfile (Only name and baseSpecs are required.)
-        in: body
-        name: addContainerProfileDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddContainerProfile'
+        - description: NewContainerProfile (Only name and baseSpecs are required.)
+          in: body
+          name: addContainerProfileDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.AddContainerProfile"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: ContainerProfileCreated
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: AddNewContainerProfile
       tags:
-      - container
+        - container
     put:
       consumes:
-      - application/json
+        - application/json
       description: Update a container profile.
       parameters:
-      - description: UpdateContainerProfile (Only id is required.)
-        in: body
-        name: updateContainerProfileDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateContainerProfile'
+        - description: UpdateContainerProfile (Only id is required.)
+          in: body
+          name: updateContainerProfileDto
+          required: true
+          schema:
+            $ref: "#/definitions/dto.UpdateContainerProfile"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: ContainerProfileUpdated
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: UpdateContainerProfile
       tags:
-      - container
+        - container
   /container/profile/{profileId}/:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Delete a container profile.
       parameters:
-      - description: ProfileId
-        in: path
-        name: profileId
-        required: true
-        type: string
+        - description: ProfileId
+          in: path
+          name: profileId
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: ContainerProfileDeleted
           schema:
             type: object
       security:
-      - Bearer: []
+        - Bearer: []
       summary: DeleteContainerProfile
       tags:
-      - container
+        - container
   /container/with-usage/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List containers with usage.
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.ContainerWithUsage'
+              $ref: "#/definitions/dto.ContainerWithUsage"
             type: array
       security:
-      - Bearer: []
+        - Bearer: []
       summary: GetContainersWithUsage
       tags:
-      - container
+        - container
   /o11y/overview/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Show system information and resource usage.
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.O11yOverview'
+            $ref: "#/definitions/entity.O11yOverview"
       security:
-      - Bearer: []
+        - Bearer: []
       summary: O11yOverview
       tags:
-      - o11y
+        - o11y
 securityDefinitions:
   Bearer:
     description: Type "Bearer" + JWT token or API key.

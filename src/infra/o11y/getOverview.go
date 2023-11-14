@@ -28,13 +28,13 @@ func (repo GetOverview) getUptime() (uint64, error) {
 	return uint64(sysinfo.Uptime), nil
 }
 
-func (repo GetOverview) getStorageDeviceInfo(
+func (repo GetOverview) getStorageUnitInfo(
 	deviceName valueObject.DeviceName,
-) (valueObject.StorageDeviceInfo, error) {
+) (valueObject.StorageUnitInfo, error) {
 	var stat syscall.Statfs_t
 	err := syscall.Statfs("/", &stat)
 	if err != nil {
-		return valueObject.StorageDeviceInfo{}, errors.New("StorageInfoError")
+		return valueObject.StorageUnitInfo{}, errors.New("StorageInfoError")
 	}
 
 	storageTotal := stat.Blocks * uint64(stat.Bsize)
@@ -42,7 +42,7 @@ func (repo GetOverview) getStorageDeviceInfo(
 	storageUsedBytes := storageTotal - storageAvailable
 	storageUsedPercent := float64(storageUsedBytes) / float64(storageTotal) * 100
 
-	return valueObject.NewStorageDeviceInfo(
+	return valueObject.NewStorageUnitInfo(
 		deviceName,
 		valueObject.Byte(storageTotal),
 		valueObject.Byte(storageAvailable),
@@ -51,15 +51,15 @@ func (repo GetOverview) getStorageDeviceInfo(
 	), nil
 }
 
-func (repo GetOverview) getStorageDeviceInfos() ([]valueObject.StorageDeviceInfo, error) {
+func (repo GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
 	disksList, err := infraHelper.RunCmd("lsblk", "-ndp", "-e", "7", "--output", "KNAME")
 	if err != nil {
 		log.Printf("GetDisksFailed: %v", err)
-		return []valueObject.StorageDeviceInfo{}, errors.New("GetDisksFailed")
+		return []valueObject.StorageUnitInfo{}, errors.New("GetDisksFailed")
 	}
 
 	disks := strings.Split(disksList, "\n")
-	storageInfos := []valueObject.StorageDeviceInfo{}
+	storageInfos := []valueObject.StorageUnitInfo{}
 	for _, disk := range disks {
 		if disk == "" {
 			continue
@@ -70,9 +70,9 @@ func (repo GetOverview) getStorageDeviceInfos() ([]valueObject.StorageDeviceInfo
 			continue
 		}
 
-		storageInfo, err := repo.getStorageDeviceInfo(deviceName)
+		storageInfo, err := repo.getStorageUnitInfo(deviceName)
 		if err != nil {
-			return []valueObject.StorageDeviceInfo{}, errors.New("GetStorageDeviceInfoFailed")
+			return []valueObject.StorageUnitInfo{}, errors.New("GetStorageInfoFailed")
 		}
 
 		storageInfos = append(storageInfos, storageInfo)
@@ -207,7 +207,7 @@ func (repo GetOverview) getNetInfos() ([]valueObject.NetInterfaceInfo, error) {
 type HostResourceUsageResult struct {
 	cpuUsagePercent float64
 	memUsagePercent float64
-	storageInfos    []valueObject.StorageDeviceInfo
+	storageInfos    []valueObject.StorageUnitInfo
 	netInfos        []valueObject.NetInterfaceInfo
 	err             error
 }
@@ -229,7 +229,7 @@ func (repo GetOverview) getHostResourceUsage() (valueObject.HostResourceUsage, e
 	}()
 
 	go func() {
-		storageInfos, err := repo.getStorageDeviceInfos()
+		storageInfos, err := repo.getStorageUnitInfos()
 		storageChan <- HostResourceUsageResult{storageInfos: storageInfos, err: err}
 	}()
 

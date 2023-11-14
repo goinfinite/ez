@@ -1021,7 +1021,7 @@ const docTemplate = `{
                 "storageInfo": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/valueObject.StorageDeviceInfo"
+                        "$ref": "#/definitions/valueObject.StorageUnitInfo"
                     }
                 }
             }
@@ -1041,7 +1041,7 @@ const docTemplate = `{
                 "storageUsage": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/valueObject.StorageDeviceInfo"
+                        "$ref": "#/definitions/valueObject.StorageUnitInfo"
                     }
                 }
             }
@@ -1095,7 +1095,7 @@ const docTemplate = `{
                 "memory"
             ]
         },
-        "valueObject.StorageDeviceInfo": {
+        "valueObject.StorageUnitInfo": {
             "type": "object",
             "properties": {
                 "availableBytes": {
