@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 type ServerCmdRepo struct {
@@ -33,7 +33,7 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/var/infinite
+WorkingDirectory=/var/speedia
 ExecStart=` + cmdStr + `
 Restart=always
 StandardOutput=journal
@@ -87,7 +87,7 @@ After=network.target
 [Service]
 Type=oneshot
 User=root
-WorkingDirectory=/var/infinite
+WorkingDirectory=/var/speedia
 Restart=no
 StandardOutput=journal
 StandardError=journal
@@ -187,7 +187,7 @@ func (repo ServerCmdRepo) AddServerLog(
 	payload valueObject.ServerLogPayload,
 ) {
 	logEntity := entity.NewServerLog(level, operation, payload)
-	logFilePath := "/var/log/fleet.log"
+	logFilePath := "/var/log/control.log"
 	jsonLogEntry, err := json.Marshal(logEntity)
 	if err != nil {
 		return

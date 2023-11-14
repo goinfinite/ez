@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type ContainerProfileCmdRepo interface {

@@ -14,7 +14,7 @@ func PreventRootless() {
 	}
 
 	if currentUser.Username != "root" {
-		fmt.Println("Only root can run FLEET.")
+		fmt.Println("Only root can run CONTROL.")
 		os.Exit(1)
 	}
 }

@@ -1,24 +1,24 @@
 package api
 
 import (
-	apiInit "github.com/goinfinite/fleet/src/presentation/api/init"
-	apiMiddleware "github.com/goinfinite/fleet/src/presentation/api/middleware"
-	"github.com/goinfinite/fleet/src/presentation/shared"
 	"github.com/labstack/echo/v4"
+	apiInit "github.com/speedianet/control/src/presentation/api/init"
+	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
+	"github.com/speedianet/control/src/presentation/shared"
 	_ "github.com/swaggo/echo-swagger/example/docs"
 )
 
-// @title			FleetApi
+// @title			ControlApi
 // @version			0.0.1
-// @description		Infinite FleetManager API
-// @termsOfService	https://goinfinite.net/tos/
+// @description		Infinite ControlManager API
+// @termsOfService	https://speedia.net/tos/
 
 // @contact.name	Infinite Engineering
-// @contact.url		https://goinfinite.net/
-// @contact.email	eng+swagger@goinfinite.net
+// @contact.url		https://speedia.net/
+// @contact.email	eng+swagger@speedia.net
 
 // @license.name  INFINITE CLOUD COMPUTING © 2023. All Rights Reserved.
-// @license.url   https://goinfinite.net/tos/
+// @license.url   https://speedia.net/tos/
 
 // @securityDefinitions.apikey	Bearer
 // @in 							header

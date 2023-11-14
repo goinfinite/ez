@@ -1,8 +1,8 @@
 package useCase
 
 import (
-	"github.com/goinfinite/fleet/src/domain/repository"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func logAction(
@@ -39,7 +39,7 @@ func SysInstall(
 		logAction(
 			serverCmdRepo,
 			"Installation started. The server will reboot a few times. "+
-				"Check /var/log/fleet.log for the installation progress.",
+				"Check /var/log/control.log for the installation progress.",
 		)
 
 		err := sysInstallCmdRepo.Install()
@@ -61,7 +61,7 @@ func SysInstall(
 
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
-			valueObject.NewSvcCmdPanic("/var/infinite/fleet sys-install"),
+			valueObject.NewSvcCmdPanic("/var/speedia/control sys-install"),
 		)
 
 		serverCmdRepo.Reboot()
@@ -77,8 +77,8 @@ func SysInstall(
 
 	logAction(serverCmdRepo, "Adding core services...")
 	err = serverCmdRepo.AddSvc(
-		valueObject.NewSvcNamePanic("fleet"),
-		valueObject.NewSvcCmdPanic("/var/infinite/fleet serve"),
+		valueObject.NewSvcNamePanic("control"),
+		valueObject.NewSvcCmdPanic("/var/speedia/control serve"),
 	)
 	if err != nil {
 		logAction(serverCmdRepo, err.Error())

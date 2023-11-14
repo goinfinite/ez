@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	testHelpers "github.com/goinfinite/fleet/src/devUtils"
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
+	testHelpers "github.com/speedianet/control/src/devUtils"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/valueObject"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 func addDummyUser() error {

@@ -1,9 +1,9 @@
 package cliController
 
 import (
-	"github.com/goinfinite/fleet/src/domain/useCase"
-	"github.com/goinfinite/fleet/src/infra"
-	cliHelper "github.com/goinfinite/fleet/src/presentation/cli/helper"
+	"github.com/speedianet/control/src/domain/useCase"
+	"github.com/speedianet/control/src/infra"
+	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
 	"github.com/spf13/cobra"
 )
 

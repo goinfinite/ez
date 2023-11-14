@@ -3,8 +3,8 @@ package dbModel
 import (
 	"time"
 
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type Account struct {

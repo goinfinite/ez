@@ -1,6 +1,6 @@
 package apiInit
 
-import "github.com/goinfinite/fleet/src/infra/db"
+import "github.com/speedianet/control/src/infra/db"
 
 func DatabaseService() *db.DatabaseService {
 	dbSvc, err := db.NewDatabaseService()

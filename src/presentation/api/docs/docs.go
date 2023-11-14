@@ -9,15 +9,15 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://goinfinite.net/tos/",
+        "termsOfService": "https://speedia.net/tos/",
         "contact": {
             "name": "Infinite Engineering",
-            "url": "https://goinfinite.net/",
-            "email": "eng+swagger@goinfinite.net"
+            "url": "https://speedia.net/",
+            "email": "eng+swagger@speedia.net"
         },
         "license": {
             "name": "INFINITE CLOUD COMPUTING © 2023. All Rights Reserved.",
-            "url": "https://goinfinite.net/tos/"
+            "url": "https://speedia.net/tos/"
         },
         "version": "{{.Version}}"
     },
@@ -1169,8 +1169,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:3141",
 	BasePath:         "/v1",
 	Schemes:          []string{},
-	Title:            "FleetApi",
-	Description:      "Infinite FleetManager API",
+	Title:            "ControlApi",
+	Description:      "Infinite ControlManager API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

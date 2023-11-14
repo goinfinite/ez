@@ -3,10 +3,10 @@ package infra
 import (
 	"errors"
 
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	"github.com/goinfinite/fleet/src/infra/db"
-	dbModel "github.com/goinfinite/fleet/src/infra/db/model"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/speedianet/control/src/infra/db"
+	dbModel "github.com/speedianet/control/src/infra/db/model"
 )
 
 type ContainerProfileCmdRepo struct {

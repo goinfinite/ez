@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/glebarez/sqlite"
-	dbModel "github.com/goinfinite/fleet/src/infra/db/model"
+	dbModel "github.com/speedianet/control/src/infra/db/model"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ type DatabaseService struct {
 }
 
 func NewDatabaseService() (*DatabaseService, error) {
-	ormSvc, err := gorm.Open(sqlite.Open("/var/infinite/fleet.db"), &gorm.Config{})
+	ormSvc, err := gorm.Open(sqlite.Open("/var/speedia/control.db"), &gorm.Config{})
 	if err != nil {
 		return nil, errors.New("DatabaseConnectionError")
 	}

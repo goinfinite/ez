@@ -1,8 +1,8 @@
 package dto
 
 import (
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type ContainerWithUsage struct {

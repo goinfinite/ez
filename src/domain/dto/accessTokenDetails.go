@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/goinfinite/fleet/src/domain/valueObject"
+import "github.com/speedianet/control/src/domain/valueObject"
 
 type AccessTokenDetails struct {
 	TokenType valueObject.AccessTokenType `json:"tokenType"`

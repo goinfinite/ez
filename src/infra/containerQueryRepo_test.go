@@ -3,7 +3,7 @@ package infra
 import (
 	"testing"
 
-	testHelpers "github.com/goinfinite/fleet/src/devUtils"
+	testHelpers "github.com/speedianet/control/src/devUtils"
 )
 
 func TestContainerQueryRepo(t *testing.T) {

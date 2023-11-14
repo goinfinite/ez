@@ -3,10 +3,10 @@ package apiController
 import (
 	"net/http"
 
-	"github.com/goinfinite/fleet/src/domain/useCase"
-	"github.com/goinfinite/fleet/src/infra"
-	apiHelper "github.com/goinfinite/fleet/src/presentation/api/helper"
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/domain/useCase"
+	"github.com/speedianet/control/src/infra"
+	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 )
 
 // O11yOverview  godoc

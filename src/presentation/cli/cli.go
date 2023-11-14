@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	cliMiddleware "github.com/goinfinite/fleet/src/presentation/cli/middleware"
-	"github.com/goinfinite/fleet/src/presentation/shared"
+	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
+	"github.com/speedianet/control/src/presentation/shared"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   filepath.Base(os.Args[0]),
-	Short: "Infinite FleetManager CLI",
+	Short: "Infinite ControlManager CLI",
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	},

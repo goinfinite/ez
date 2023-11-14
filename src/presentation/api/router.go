@@ -4,9 +4,9 @@ import (
 	_ "embed"
 	"net/http"
 
-	"github.com/goinfinite/fleet/src/infra/db"
-	apiController "github.com/goinfinite/fleet/src/presentation/api/controller"
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/infra/db"
+	apiController "github.com/speedianet/control/src/presentation/api/controller"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 

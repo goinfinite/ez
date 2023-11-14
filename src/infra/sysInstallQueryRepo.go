@@ -3,14 +3,14 @@ package infra
 import (
 	"os"
 
-	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 type SysInstallQueryRepo struct {
 }
 
 func (repo SysInstallQueryRepo) IsInstalled() bool {
-	out, err := infraHelper.RunCmd("grep", "alias fleet=", "/root/.bashrc")
+	out, err := infraHelper.RunCmd("grep", "alias control=", "/root/.bashrc")
 	if err != nil || out == "" {
 		return false
 	}

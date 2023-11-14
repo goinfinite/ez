@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/useCase"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	"github.com/goinfinite/fleet/src/infra"
-	"github.com/goinfinite/fleet/src/infra/db"
-	apiHelper "github.com/goinfinite/fleet/src/presentation/api/helper"
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/useCase"
+	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/speedianet/control/src/infra"
+	"github.com/speedianet/control/src/infra/db"
+	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 )
 
 // GetContainers	 godoc

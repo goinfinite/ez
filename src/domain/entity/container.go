@@ -1,6 +1,6 @@
 package entity
 
-import "github.com/goinfinite/fleet/src/domain/valueObject"
+import "github.com/speedianet/control/src/domain/valueObject"
 
 type Container struct {
 	Id               valueObject.ContainerId            `json:"id"`

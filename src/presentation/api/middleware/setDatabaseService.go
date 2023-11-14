@@ -1,8 +1,8 @@
 package apiMiddleware
 
 import (
-	"github.com/goinfinite/fleet/src/infra/db"
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/infra/db"
 )
 
 func SetDatabaseService(dbSvc *db.DatabaseService) echo.MiddlewareFunc {

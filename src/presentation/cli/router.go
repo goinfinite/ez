@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	api "github.com/goinfinite/fleet/src/presentation/api"
-	cliController "github.com/goinfinite/fleet/src/presentation/cli/controller"
+	api "github.com/speedianet/control/src/presentation/api"
+	cliController "github.com/speedianet/control/src/presentation/cli/controller"
 	"github.com/spf13/cobra"
 )
 
@@ -12,13 +12,13 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print software version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Infinite FleetManager v0.0.1")
+		fmt.Println("Infinite ControlManager v0.0.1")
 	},
 }
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Start the FLEET server (default to port 10001)",
+	Short: "Start the CONTROL server (default to port 10001)",
 	Run: func(cmd *cobra.Command, args []string) {
 		api.ApiInit()
 	},

@@ -8,13 +8,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 type GetOverview struct {

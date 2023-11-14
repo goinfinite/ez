@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 type SysInstallCmdRepo struct {
@@ -25,14 +25,14 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
-	_ = os.MkdirAll("/var/infinite", 0755)
+	_ = os.MkdirAll("/var/speedia", 0755)
 	_, err = infraHelper.RunCmd(
 		"bash",
 		"-c",
-		"echo \"alias fleet='/var/infinite/fleet'\" >> /root/.bashrc",
+		"echo \"alias control='/var/speedia/control'\" >> /root/.bashrc",
 	)
 	if err != nil {
-		return errors.New("AddFleetAliasFailed")
+		return errors.New("AddControlAliasFailed")
 	}
 
 	return nil

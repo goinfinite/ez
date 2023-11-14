@@ -1,8 +1,8 @@
 package infra
 
 import (
-	"github.com/goinfinite/fleet/src/domain/entity"
-	o11yInfra "github.com/goinfinite/fleet/src/infra/o11y"
+	"github.com/speedianet/control/src/domain/entity"
+	o11yInfra "github.com/speedianet/control/src/infra/o11y"
 )
 
 type O11yQueryRepo struct {

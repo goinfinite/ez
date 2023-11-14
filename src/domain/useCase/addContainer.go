@@ -4,9 +4,9 @@ import (
 	"errors"
 	"log"
 
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/repository"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/repository"
 )
 
 func AddContainer(

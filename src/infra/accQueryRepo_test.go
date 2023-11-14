@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	testHelpers "github.com/goinfinite/fleet/src/devUtils"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	testHelpers "github.com/speedianet/control/src/devUtils"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func TestAccQueryRepo(t *testing.T) {

@@ -5,11 +5,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func GetPublicIpAddress() (valueObject.IpAddress, error) {
-	resp, err := http.Get("https://goinfinite.net/ip")
+	resp, err := http.Get("https://speedia.net/ip")
 	if err != nil {
 		return "", errors.New("GetPublicIpAddressFailed")
 	}

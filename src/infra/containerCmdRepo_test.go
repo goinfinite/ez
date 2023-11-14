@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	testHelpers "github.com/goinfinite/fleet/src/devUtils"
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	testHelpers "github.com/speedianet/control/src/devUtils"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func TestContainerCmdRepo(t *testing.T) {
@@ -34,15 +34,15 @@ func TestContainerCmdRepo(t *testing.T) {
 		profileId := valueObject.NewContainerProfileIdPanic(0)
 
 		envs := []valueObject.ContainerEnv{
-			valueObject.NewContainerEnvPanic("FLEET_ENV1=testing"),
-			valueObject.NewContainerEnvPanic("FLEET_ENV2=testing"),
+			valueObject.NewContainerEnvPanic("CONTROL_ENV1=testing"),
+			valueObject.NewContainerEnvPanic("CONTROL_ENV2=testing"),
 		}
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
 		addContainer := dto.NewAddContainer(
 			accountId,
-			valueObject.NewFqdnPanic("goinfinite.net"),
+			valueObject.NewFqdnPanic("speedia.net"),
 			valueObject.NewContainerImgAddressPanic("https://docker.io/nginx:latest"),
 			portBindings,
 			&restartPolicy,

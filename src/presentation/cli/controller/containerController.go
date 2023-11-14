@@ -4,13 +4,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/useCase"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	"github.com/goinfinite/fleet/src/infra"
-	"github.com/goinfinite/fleet/src/infra/db"
-	cliHelper "github.com/goinfinite/fleet/src/presentation/cli/helper"
-	cliMiddleware "github.com/goinfinite/fleet/src/presentation/cli/middleware"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/useCase"
+	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/speedianet/control/src/infra"
+	"github.com/speedianet/control/src/infra/db"
+	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
+	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 

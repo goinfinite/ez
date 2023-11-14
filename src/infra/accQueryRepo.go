@@ -4,10 +4,10 @@ import (
 	"errors"
 	"log"
 
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	"github.com/goinfinite/fleet/src/infra/db"
-	dbModel "github.com/goinfinite/fleet/src/infra/db/model"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/speedianet/control/src/infra/db"
+	dbModel "github.com/speedianet/control/src/infra/db/model"
 )
 
 type AccQueryRepo struct {

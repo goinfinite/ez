@@ -1,8 +1,8 @@
 package useCase
 
 import (
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/repository"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/repository"
 )
 
 func GetContainersWithUsage(

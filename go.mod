@@ -1,4 +1,4 @@
-module github.com/goinfinite/fleet
+module github.com/speedianet/control
 
 go 1.21
 

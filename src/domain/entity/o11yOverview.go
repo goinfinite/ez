@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"github.com/goinfinite/fleet/src/domain/valueObject"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type O11yOverview struct {

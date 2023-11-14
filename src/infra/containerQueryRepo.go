@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goinfinite/fleet/src/domain/dto"
-	"github.com/goinfinite/fleet/src/domain/entity"
-	"github.com/goinfinite/fleet/src/domain/valueObject"
-	"github.com/goinfinite/fleet/src/infra/db"
-	infraHelper "github.com/goinfinite/fleet/src/infra/helper"
+	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/speedianet/control/src/infra/db"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 type ContainerQueryRepo struct {
