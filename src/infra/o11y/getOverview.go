@@ -62,8 +62,13 @@ func (repo GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, er
 		"vfat",
 		"ntfs",
 	}
+	scannedDevices := []string{}
 	for _, partition := range partitions {
 		if !slices.Contains(desireableFileSystems, partition.Fstype) {
+			continue
+		}
+
+		if slices.Contains(scannedDevices, partition.Device) {
 			continue
 		}
 
@@ -114,6 +119,7 @@ func (repo GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, er
 		)
 
 		storageInfos = append(storageInfos, storageUnitInfo)
+		scannedDevices = append(scannedDevices, partition.Device)
 	}
 
 	return storageInfos, nil
