@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-const unixFilePathRegexExpression = `^\/(?:[\w\p{Latin}\. \-]+\/)*[\w\p{Latin}\. \-]+$`
+const unixFilePathRegexExpression = `^\/(?:[\w\p{Latin}\. \-]+\/)*[\w\p{Latin}\. \-]*$`
 
 type UnixFilePath string
 
