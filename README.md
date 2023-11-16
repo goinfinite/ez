@@ -36,7 +36,7 @@ Since CONTROL relies on the operational system being openSUSE MicroOS, the entir
 
 5. Run the VM. The first boot will allow you to set up a root password. Keep the keyboard to US layout to avoid issues. After the first reboot, login with the password you set.
 
-6. Add your public SSH key to "/root/.ssh/authorized_keys" file. I would recommend uploading your .pub to a Pastebin or similar service and then using curl to download it to the VM as curl is installed by default.
+6. Add your public SSH key to `/root/.ssh/authorized_keys` file. I would recommend uploading your .pub to a Pastebin, File.io or similar service and then using curl to download it to the VM as curl is installed by default.
 
 Note: If you use Pastebin, make sure you're downloading the raw file and not the HTML page.
 
@@ -76,14 +76,31 @@ git clone git@github.com:speedianet/control.git
 10. Build the project and run the installer:
 
 ```
-cd control; air
+cd control; air # hit CTRL-C after running this
 chmod +x /var/speedia/control
 /var/speedia/control sys-install
 ```
 
-11. The system will reboot and once you get the final success message, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
+11. The system will reboot and once you get the final success message on the logs, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found on the VMWare interface which you used to SSH. If you don't see it, just use `exit` to return to the login screen and the IP will be displayed there.
+
+You should also install these VSCode extensions during development:
+
+```
+EditorConfig.EditorConfig
+GitHub.copilot
+GitHub.vscode-pull-request-github
+esbenp.prettier-vscode
+foxundermoon.shell-format
+golang.go
+hbenl.vscode-test-explorer
+ms-vscode.test-adapter-converter
+redhat.vscode-yaml
+streetsidesoftware.code-spell-checker
+streetsidesoftware.code-spell-checker-portuguese-brazilian
+timonwong.shellcheck
+```
 
 12. The install process also creates a systemd unit to run the project. Use the following commands to disable the service so you can run the project manually with Air during development:
 
