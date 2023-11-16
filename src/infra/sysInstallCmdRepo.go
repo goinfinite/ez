@@ -25,6 +25,11 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
+	_, err = infraHelper.RunCmd("transactional-update", "apply")
+	if err != nil {
+		return err
+	}
+
 	_ = os.MkdirAll("/var/speedia", 0755)
 	_, err = infraHelper.RunCmd(
 		"bash",
