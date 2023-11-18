@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	apiInit "github.com/speedianet/control/src/presentation/api/init"
 	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
-	"github.com/speedianet/control/src/presentation/shared"
+	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 	_ "github.com/swaggo/echo-swagger/example/docs"
 )
 
@@ -28,7 +28,7 @@ import (
 // @host		localhost:3141
 // @BasePath	/v1
 func ApiInit() {
-	shared.CheckEnvs()
+	sharedMiddleware.CheckEnvs()
 
 	e := echo.New()
 
