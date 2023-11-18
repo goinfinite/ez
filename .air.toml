@@ -8,7 +8,6 @@ cmd = "go build -o /var/speedia/control ./control.go"
 delay = 1000
 exclude_dir = [".git", "bin", "logs", "tmp", "vendor", "src/devUtils"]
 follow_symlink = false
-full_bin = "export $(grep -v '^#' .env | xargs); /var/speedia/control"
 ignore = ["*_test.go", "testHelpers.go"]
 
 [[watcher]]
