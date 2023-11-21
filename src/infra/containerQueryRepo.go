@@ -511,7 +511,7 @@ func (repo ContainerQueryRepo) getWithMetricsByAccId(
 }
 
 func (repo ContainerQueryRepo) GetWithMetrics() ([]dto.ContainerWithMetrics, error) {
-	var containersWithMetrics []dto.ContainerWithMetrics
+	containersWithMetrics := []dto.ContainerWithMetrics{}
 
 	accsList, err := NewAccQueryRepo(repo.dbSvc).Get()
 	if err != nil {
