@@ -7,7 +7,7 @@ import (
 
 type ContainerWithMetrics struct {
 	entity.Container
-	ResourceUsage valueObject.ContainerMetrics `json:"resourceUsage"`
+	Metrics valueObject.ContainerMetrics `json:"metrics"`
 }
 
 func NewContainerWithMetrics(
@@ -15,7 +15,7 @@ func NewContainerWithMetrics(
 	containerMetrics valueObject.ContainerMetrics,
 ) ContainerWithMetrics {
 	return ContainerWithMetrics{
-		Container:     container,
-		ResourceUsage: containerMetrics,
+		Container: container,
+		Metrics:   containerMetrics,
 	}
 }
