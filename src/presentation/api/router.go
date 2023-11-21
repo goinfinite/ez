@@ -2,26 +2,18 @@ package api
 
 import (
 	_ "embed"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
 	apiController "github.com/speedianet/control/src/presentation/api/controller"
 	echoSwagger "github.com/swaggo/echo-swagger"
-)
 
-//go:embed docs/swagger.json
-var swaggerJson []byte
+	_ "github.com/speedianet/control/src/presentation/api/docs"
+)
 
 func swaggerRoute(baseRoute *echo.Group) {
 	swaggerGroup := baseRoute.Group("/swagger")
-
-	swaggerGroup.GET("/swagger.json", func(c echo.Context) error {
-		return c.Blob(http.StatusOK, echo.MIMEApplicationJSON, swaggerJson)
-	})
-
-	swaggerUrl := echoSwagger.URL("swagger.json")
-	swaggerGroup.GET("/*", echoSwagger.EchoWrapHandler(swaggerUrl))
+	swaggerGroup.GET("/*", echoSwagger.WrapHandler)
 }
 
 func authRoutes(baseRoute *echo.Group) {
