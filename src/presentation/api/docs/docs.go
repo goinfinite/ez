@@ -506,7 +506,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "AccountId",
-                        "name": "accId",
+                        "name": "accountId",
                         "in": "path",
                         "required": true
                     },

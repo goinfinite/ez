@@ -598,7 +598,7 @@ paths:
       parameters:
       - description: AccountId
         in: path
-        name: accId
+        name: accountId
         required: true
         type: string
       - description: ContainerId

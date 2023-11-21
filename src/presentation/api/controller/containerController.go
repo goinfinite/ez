@@ -271,7 +271,7 @@ func UpdateContainerController(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        accId 	  path   string  true  "AccountId"
+// @Param        accountId 	  path   string  true  "AccountId"
 // @Param        containerId 	  path   string  true  "ContainerId"
 // @Success      200 {object} object{} "ContainerDeleted"
 // @Router       /container/{accountId}/{containerId}/ [delete]
