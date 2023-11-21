@@ -178,6 +178,12 @@ func (repo ContainerQueryRepo) GetById(
 		return entity.Container{}, err
 	}
 
+	rawRestartCount, assertOk := containerInfo["RestartCount"].(float64)
+	if !assertOk {
+		return entity.Container{}, errors.New("RestartCountParseError")
+	}
+	restartCount := uint64(rawRestartCount)
+
 	rawEntryPoint, assertOk := rawConfig["Entrypoint"].(string)
 	if !assertOk {
 		return entity.Container{}, errors.New("EntrypointParseError")
@@ -246,6 +252,7 @@ func (repo ContainerQueryRepo) GetById(
 		privateIpAddress,
 		portBindings,
 		restartPolicyName,
+		restartCount,
 		entrypoint,
 		createdAt,
 		startedAtPtr,

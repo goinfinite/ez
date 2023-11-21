@@ -666,6 +666,9 @@ const docTemplate = `{
                 "imageHash": {
                     "type": "string"
                 },
+                "metrics": {
+                    "$ref": "#/definitions/valueObject.ContainerMetrics"
+                },
                 "portBindings": {
                     "type": "array",
                     "items": {
@@ -678,8 +681,8 @@ const docTemplate = `{
                 "profileId": {
                     "type": "integer"
                 },
-                "resourceUsage": {
-                    "$ref": "#/definitions/valueObject.ContainerMetrics"
+                "restartCount": {
+                    "type": "integer"
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
@@ -849,6 +852,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "profileId": {
+                    "type": "integer"
+                },
+                "restartCount": {
                     "type": "integer"
                 },
                 "restartPolicy": {

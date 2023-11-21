@@ -12,6 +12,7 @@ type Container struct {
 	PrivateIpAddress valueObject.IpAddress              `json:"privateIp"`
 	PortBindings     []valueObject.PortBinding          `json:"portBindings"`
 	RestartPolicy    valueObject.ContainerRestartPolicy `json:"restartPolicy"`
+	RestartCount     uint64                             `json:"restartCount"`
 	Entrypoint       valueObject.ContainerEntrypoint    `json:"entrypoint"`
 	CreatedAt        valueObject.UnixTime               `json:"createdAt"`
 	StartedAt        *valueObject.UnixTime              `json:"startedAt"`
@@ -29,6 +30,7 @@ func NewContainer(
 	privateIpAddress valueObject.IpAddress,
 	portBindings []valueObject.PortBinding,
 	restartPolicy valueObject.ContainerRestartPolicy,
+	restartCount uint64,
 	entrypoint valueObject.ContainerEntrypoint,
 	createdAt valueObject.UnixTime,
 	startedAt *valueObject.UnixTime,
@@ -45,6 +47,7 @@ func NewContainer(
 		PrivateIpAddress: privateIpAddress,
 		PortBindings:     portBindings,
 		RestartPolicy:    restartPolicy,
+		RestartCount:     restartCount,
 		Entrypoint:       entrypoint,
 		CreatedAt:        createdAt,
 		StartedAt:        startedAt,

@@ -71,6 +71,8 @@ definitions:
         type: string
       imageHash:
         type: string
+      metrics:
+        $ref: '#/definitions/valueObject.ContainerMetrics'
       portBindings:
         items:
           $ref: '#/definitions/valueObject.PortBinding'
@@ -79,8 +81,8 @@ definitions:
         type: string
       profileId:
         type: integer
-      resourceUsage:
-        $ref: '#/definitions/valueObject.ContainerMetrics'
+      restartCount:
+        type: integer
       restartPolicy:
         $ref: '#/definitions/valueObject.ContainerRestartPolicy'
       startedAt:
@@ -191,6 +193,8 @@ definitions:
       privateIp:
         type: string
       profileId:
+        type: integer
+      restartCount:
         type: integer
       restartPolicy:
         $ref: '#/definitions/valueObject.ContainerRestartPolicy'
