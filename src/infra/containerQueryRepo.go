@@ -321,28 +321,28 @@ func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 	return allContainers, nil
 }
 
-func (repo ContainerQueryRepo) containerResourceUsageFactory(
+func (repo ContainerQueryRepo) containerMetricsFactory(
 	accountId valueObject.AccountId,
-	containersUsageStr string,
-) (map[valueObject.ContainerId]valueObject.ContainerResourceUsage, error) {
-	var containersUsage = map[valueObject.ContainerId]valueObject.ContainerResourceUsage{}
-	if len(containersUsageStr) == 0 {
-		return containersUsage, nil
+	containersMetricsStr string,
+) (map[valueObject.ContainerId]valueObject.ContainerMetrics, error) {
+	var containersMetrics = map[valueObject.ContainerId]valueObject.ContainerMetrics{}
+	if len(containersMetricsStr) == 0 {
+		return containersMetrics, nil
 	}
 
-	containersUsageList := strings.Split(containersUsageStr, "\n")
-	if len(containersUsageList) == 0 {
-		return containersUsage, errors.New("ContainersUsageParseError")
+	containersMetricsList := strings.Split(containersMetricsStr, "\n")
+	if len(containersMetricsList) == 0 {
+		return containersMetrics, errors.New("ContainersMetricsParseError")
 	}
 
-	for _, containerUsageJson := range containersUsageList {
-		containerUsageInfo := map[string]interface{}{}
-		err := json.Unmarshal([]byte(containerUsageJson), &containerUsageInfo)
+	for _, containerMetricsJson := range containersMetricsList {
+		containerMetricsInfo := map[string]interface{}{}
+		err := json.Unmarshal([]byte(containerMetricsJson), &containerMetricsInfo)
 		if err != nil {
 			continue
 		}
 
-		rawContainerId, assertOk := containerUsageInfo["ContainerID"].(string)
+		rawContainerId, assertOk := containerMetricsInfo["ContainerID"].(string)
 		if !assertOk {
 			continue
 		}
@@ -354,22 +354,22 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			continue
 		}
 
-		cpuPerc, assertOk := containerUsageInfo["CPU"].(float64)
+		cpuPerc, assertOk := containerMetricsInfo["CPU"].(float64)
 		if !assertOk {
 			continue
 		}
 
-		avgCpu, assertOk := containerUsageInfo["AvgCPU"].(float64)
+		avgCpu, assertOk := containerMetricsInfo["AvgCPU"].(float64)
 		if !assertOk {
 			continue
 		}
 
-		memPerc, assertOk := containerUsageInfo["MemPerc"].(float64)
+		memPerc, assertOk := containerMetricsInfo["MemPerc"].(float64)
 		if !assertOk {
 			continue
 		}
 
-		rawMemBytes, assertOk := containerUsageInfo["MemUsage"].(float64)
+		rawMemBytes, assertOk := containerMetricsInfo["MemUsage"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -378,7 +378,7 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			continue
 		}
 
-		rawBlockInput, assertOk := containerUsageInfo["BlockInput"].(float64)
+		rawBlockInput, assertOk := containerMetricsInfo["BlockInput"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -387,7 +387,7 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			continue
 		}
 
-		rawBlockOutput, assertOk := containerUsageInfo["BlockOutput"].(float64)
+		rawBlockOutput, assertOk := containerMetricsInfo["BlockOutput"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -396,7 +396,7 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			continue
 		}
 
-		rawNetInput, assertOk := containerUsageInfo["NetInput"].(float64)
+		rawNetInput, assertOk := containerMetricsInfo["NetInput"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -405,7 +405,7 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			continue
 		}
 
-		rawNetOutput, assertOk := containerUsageInfo["NetOutput"].(float64)
+		rawNetOutput, assertOk := containerMetricsInfo["NetOutput"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -440,7 +440,7 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			inodesCount, _ = valueObject.NewInodesCount(0)
 		}
 
-		containerUsage := valueObject.NewContainerResourceUsage(
+		containerMetrics := valueObject.NewContainerMetrics(
 			cpuPerc,
 			avgCpu,
 			memBytes,
@@ -453,18 +453,18 @@ func (repo ContainerQueryRepo) containerResourceUsageFactory(
 			netOutput,
 		)
 
-		containersUsage[containerId] = containerUsage
+		containersMetrics[containerId] = containerMetrics
 	}
 
-	return containersUsage, nil
+	return containersMetrics, nil
 }
 
-func (repo ContainerQueryRepo) getWithUsageByAccId(
+func (repo ContainerQueryRepo) getWithMetricsByAccId(
 	accId valueObject.AccountId,
-) ([]dto.ContainerWithUsage, error) {
-	var containersWithUsage []dto.ContainerWithUsage
+) ([]dto.ContainerWithMetrics, error) {
+	var containersWithMetrics []dto.ContainerWithMetrics
 
-	containersUsageStr, err := infraHelper.RunCmdAsUser(
+	containersMetricsStr, err := infraHelper.RunCmdAsUser(
 		accId,
 		"podman",
 		"stats",
@@ -474,59 +474,59 @@ func (repo ContainerQueryRepo) getWithUsageByAccId(
 		"{{json .ContainerStats}}",
 	)
 	if err != nil {
-		return containersWithUsage, errors.New("AccPodmanStatsError" + err.Error())
+		return containersWithMetrics, errors.New("AccPodmanStatsError" + err.Error())
 	}
 
-	runningContainersUsage, err := repo.containerResourceUsageFactory(
+	runningContainersMetrics, err := repo.containerMetricsFactory(
 		accId,
-		containersUsageStr,
+		containersMetricsStr,
 	)
 	if err != nil {
-		return containersWithUsage, err
+		return containersWithMetrics, err
 	}
 
 	containerEntities, err := repo.GetByAccId(accId)
 	if err != nil {
-		return containersWithUsage, err
+		return containersWithMetrics, err
 	}
 
 	for _, container := range containerEntities {
-		containerUsage := valueObject.NewContainerResourceUsageWithBlankValues()
+		containerMetrics := valueObject.NewContainerMetricsWithBlankValues()
 
-		for runningContainerId, runningContainerUsage := range runningContainersUsage {
+		for runningContainerId, runningContainerMetrics := range runningContainersMetrics {
 			if runningContainerId != container.Id {
 				continue
 			}
-			containerUsage = runningContainerUsage
+			containerMetrics = runningContainerMetrics
 		}
 
-		containerWithUsage := dto.NewContainerWithUsage(
+		containerWithMetrics := dto.NewContainerWithMetrics(
 			container,
-			containerUsage,
+			containerMetrics,
 		)
-		containersWithUsage = append(containersWithUsage, containerWithUsage)
+		containersWithMetrics = append(containersWithMetrics, containerWithMetrics)
 	}
 
-	return containersWithUsage, nil
+	return containersWithMetrics, nil
 }
 
-func (repo ContainerQueryRepo) GetWithUsage() ([]dto.ContainerWithUsage, error) {
-	var containersWithUsage []dto.ContainerWithUsage
+func (repo ContainerQueryRepo) GetWithMetrics() ([]dto.ContainerWithMetrics, error) {
+	var containersWithMetrics []dto.ContainerWithMetrics
 
 	accsList, err := NewAccQueryRepo(repo.dbSvc).Get()
 	if err != nil {
-		return containersWithUsage, err
+		return containersWithMetrics, err
 	}
 
 	for _, acc := range accsList {
-		accContainersWithUsage, err := repo.getWithUsageByAccId(acc.Id)
+		accContainersWithMetrics, err := repo.getWithMetricsByAccId(acc.Id)
 		if err != nil {
 			log.Printf("AccId '%s' skipped: %s", acc.Id.String(), err.Error())
 			continue
 		}
 
-		containersWithUsage = append(containersWithUsage, accContainersWithUsage...)
+		containersWithMetrics = append(containersWithMetrics, accContainersWithMetrics...)
 	}
 
-	return containersWithUsage, nil
+	return containersWithMetrics, nil
 }

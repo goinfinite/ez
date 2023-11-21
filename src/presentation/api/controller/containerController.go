@@ -33,19 +33,19 @@ func GetContainersController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
 }
 
-// GetContainersWithUsage	 godoc
-// @Summary      GetContainersWithUsage
-// @Description  List containers with usage.
+// GetContainersWithMetrics	 godoc
+// @Summary      GetContainersWithMetrics
+// @Description  List containers with metrics.
 // @Tags         container
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Success      200 {array} dto.ContainerWithUsage
-// @Router       /container/with-usage/ [get]
-func GetContainersWithUsageController(c echo.Context) error {
+// @Success      200 {array} dto.ContainerWithMetrics
+// @Router       /container/metrics/ [get]
+func GetContainersWithMetricsController(c echo.Context) error {
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerList, err := useCase.GetContainersWithUsage(containerQueryRepo)
+	containerList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
 	}

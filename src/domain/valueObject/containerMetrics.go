@@ -1,6 +1,6 @@
 package valueObject
 
-type ContainerResourceUsage struct {
+type ContainerMetrics struct {
 	CurrentCpuPercent  float64     `json:"currentCpuPercent"`
 	AverageCpuPercent  float64     `json:"avgCpuPercent"`
 	MemoryBytes        Byte        `json:"memoryBytes"`
@@ -13,7 +13,7 @@ type ContainerResourceUsage struct {
 	NetOutputBytes     Byte        `json:"netOutputBytes"`
 }
 
-func NewContainerResourceUsage(
+func NewContainerMetrics(
 	currentCpuPercent float64,
 	averageCpuPercent float64,
 	memoryBytes Byte,
@@ -24,8 +24,8 @@ func NewContainerResourceUsage(
 	storageInodesCount InodesCount,
 	netInputBytes Byte,
 	netOutputBytes Byte,
-) ContainerResourceUsage {
-	return ContainerResourceUsage{
+) ContainerMetrics {
+	return ContainerMetrics{
 		CurrentCpuPercent:  currentCpuPercent,
 		AverageCpuPercent:  averageCpuPercent,
 		MemoryBytes:        memoryBytes,
@@ -39,8 +39,8 @@ func NewContainerResourceUsage(
 	}
 }
 
-func NewContainerResourceUsageWithBlankValues() ContainerResourceUsage {
-	return ContainerResourceUsage{
+func NewContainerMetricsWithBlankValues() ContainerMetrics {
+	return ContainerMetrics{
 		CurrentCpuPercent:  0,
 		AverageCpuPercent:  0,
 		MemoryBytes:        0,

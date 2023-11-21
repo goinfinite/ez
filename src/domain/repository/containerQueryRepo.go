@@ -8,7 +8,7 @@ import (
 
 type ContainerQueryRepo interface {
 	Get() ([]entity.Container, error)
-	GetWithUsage() ([]dto.ContainerWithUsage, error)
+	GetWithMetrics() ([]dto.ContainerWithMetrics, error)
 	GetById(
 		accId valueObject.AccountId,
 		containerId valueObject.ContainerId,

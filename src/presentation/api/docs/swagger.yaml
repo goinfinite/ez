@@ -51,7 +51,7 @@ definitions:
       scalingThreshold:
         type: integer
     type: object
-  dto.ContainerWithUsage:
+  dto.ContainerWithMetrics:
     properties:
       accountId:
         type: integer
@@ -80,7 +80,7 @@ definitions:
       profileId:
         type: integer
       resourceUsage:
-        $ref: '#/definitions/valueObject.ContainerResourceUsage'
+        $ref: '#/definitions/valueObject.ContainerMetrics'
       restartPolicy:
         $ref: '#/definitions/valueObject.ContainerRestartPolicy'
       startedAt:
@@ -252,7 +252,7 @@ definitions:
       memoryBytes:
         type: integer
     type: object
-  valueObject.ContainerResourceUsage:
+  valueObject.ContainerMetrics:
     properties:
       avgCpuPercent:
         type: number
@@ -614,6 +614,25 @@ paths:
       summary: DeleteContainer
       tags:
       - container
+  /container/metrics/:
+    get:
+      consumes:
+      - application/json
+      description: List containers with metrics.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ContainerWithMetrics'
+            type: array
+      security:
+      - Bearer: []
+      summary: GetContainersWithMetrics
+      tags:
+      - container
   /container/profile/:
     get:
       consumes:
@@ -700,25 +719,6 @@ paths:
       security:
       - Bearer: []
       summary: DeleteContainerProfile
-      tags:
-      - container
-  /container/with-usage/:
-    get:
-      consumes:
-      - application/json
-      description: List containers with usage.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.ContainerWithUsage'
-            type: array
-      security:
-      - Bearer: []
-      summary: GetContainersWithUsage
       tags:
       - container
   /o11y/overview/:

@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetContainersWithUsage(
+func GetContainersWithMetrics(
 	containerQueryRepo repository.ContainerQueryRepo,
-) ([]dto.ContainerWithUsage, error) {
-	return containerQueryRepo.GetWithUsage()
+) ([]dto.ContainerWithMetrics, error) {
+	return containerQueryRepo.GetWithMetrics()
 }

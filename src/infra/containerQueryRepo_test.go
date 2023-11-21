@@ -22,8 +22,8 @@ func TestContainerQueryRepo(t *testing.T) {
 		}
 	})
 
-	t.Run("GetContainersWithUsage", func(t *testing.T) {
-		containerList, err := containerQueryRepo.GetWithUsage()
+	t.Run("GetContainersWithMetrics", func(t *testing.T) {
+		containerList, err := containerQueryRepo.GetWithMetrics()
 		if err != nil {
 			t.Error(err)
 		}

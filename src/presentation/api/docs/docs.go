@@ -311,6 +311,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/container/metrics/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List containers with metrics.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainersWithMetrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ContainerWithMetrics"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/container/profile/": {
             "get": {
                 "security": [
@@ -448,37 +479,6 @@ const docTemplate = `{
                         "description": "ContainerProfileDeleted",
                         "schema": {
                             "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/container/with-usage/": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "List containers with usage.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "container"
-                ],
-                "summary": "GetContainersWithUsage",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ContainerWithUsage"
-                            }
                         }
                     }
                 }
@@ -636,7 +636,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ContainerWithUsage": {
+        "dto.ContainerWithMetrics": {
             "type": "object",
             "properties": {
                 "accountId": {
@@ -679,7 +679,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "resourceUsage": {
-                    "$ref": "#/definitions/valueObject.ContainerResourceUsage"
+                    "$ref": "#/definitions/valueObject.ContainerMetrics"
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
@@ -942,7 +942,7 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.ContainerResourceUsage": {
+        "valueObject.ContainerMetrics": {
             "type": "object",
             "properties": {
                 "avgCpuPercent": {
