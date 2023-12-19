@@ -40,6 +40,49 @@ func (repo SysInstallCmdRepo) Install() error {
 		return errors.New("AddControlAliasFailed")
 	}
 
+	//cspell:disable
+	hidepidSvc := `[Unit]
+Description=Hide Pids on /proc
+
+[Service]
+Type=oneshot
+ExecStart=/bin/mount -o remount,rw,nosuid,nodev,noexec,relatime,hidepid=invisible /proc
+
+[Timer]
+OnBootSec=60
+
+[Install]
+WantedBy=multi-user.target
+`
+	//cspell:enable
+
+	err = infraHelper.UpdateFile(
+		"/etc/systemd/system/hidepid.service",
+		hidepidSvc,
+		true,
+	)
+	if err != nil {
+		return errors.New("UpdateHidepidSvcFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"daemon-reload",
+	)
+	if err != nil {
+		return errors.New("SystemctlDaemonReloadFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"enable",
+		"hidepid.service",
+		"--now",
+	)
+	if err != nil {
+		return errors.New("EnableHidepidSvcFailed")
+	}
+
 	return nil
 }
 
