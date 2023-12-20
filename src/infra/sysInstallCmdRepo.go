@@ -97,6 +97,16 @@ func (repo SysInstallCmdRepo) DisableDefaultSoftwares() error {
 		return errors.New("DisableSelinuxFailed")
 	}
 
+	_, err = infraHelper.RunCmd(
+		"sed",
+		"-i",
+		"s/GRUB_TIMEOUT=10/GRUB_TIMEOUT=5/g",
+		"/etc/default/grub",
+	)
+	if err != nil {
+		return errors.New("ReduceGrubTimeoutFailed")
+	}
+
 	_, err = infraHelper.RunCmd("transactional-update", "grub.cfg")
 	if err != nil {
 		return errors.New("UpdateGrubFailed")
