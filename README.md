@@ -23,6 +23,8 @@ Since CONTROL relies on the operational system being openSUSE MicroOS, the entir
 2. Download the VMware `.vmx` and `.vmdk` files from "Base System + Container Runtime" column on MicroOS download page:
    https://en.opensuse.org/Portal:MicroOS/Downloads
 
+Note: make sure you downloaded the "Base System + Container Runtime" files and not the "Base System" files.
+
 3. Extract the `.vmdk` file if it came compressed.
 
 4. Add the VM to the VMWare Player interface and then:
@@ -153,15 +155,11 @@ chmod +x /var/speedia/control
 
 ## REST API
 
-### Authentication
+The REST API is exposed on port 3141.
 
-The API accepts two types of tokens and uses the standard "Authorization: Bearer \<token\>" header:
+### Swagger // OpenAPI
 
-- **sessionToken**: is a JWT, used for dashboard access and generated with the user login credentials. The token contains the accountId, IP address and expiration date. It expires in 3 hours and only the IP address used on the token generation is allowed to use it.
-
-- **accountApiKey**: is a token meant for M2M communication. The token is a _AES-256-CTR-Encrypted-Base64-Encoded_ string, but only the SHA3-256 hash of the key is stored in the server. The accountId is retrieved during key decoding, thus you don't need to provide it. The token never expires, but the user can update it at any time.
-
-### OpenApi // Swagger
+The API is documented using Swagger/OpenAPI 2.0 and the documentation can be found on the `/v1/swagger` endpoint.
 
 To generate the swagger documentation, you must use the following command:
 
@@ -170,3 +168,12 @@ swag init -g src/presentation/api/api.go -o src/presentation/api/docs
 ```
 
 The annotations are in the controller files. The reference file can be found [here](https://github.com/swaggo/swag#attribute).
+
+
+### Authentication
+
+The API accepts two types of tokens and uses the standard "Authorization: Bearer \<token\>" header:
+
+- **sessionToken**: is a JWT, used for dashboard access and generated with the user login credentials. The token contains the accountId, IP address and expiration date. It expires in 3 hours and only the IP address used on the token generation is allowed to use it.
+
+- **accountApiKey**: is a token meant for M2M communication. The token is a _AES-256-CTR-Encrypted-Base64-Encoded_ string, but only the SHA3-256 hash of the key is stored in the server. The accountId is retrieved during key decoding, thus you don't need to provide it. The token never expires, but the user can update it at any time.
