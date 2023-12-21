@@ -26,12 +26,6 @@ func DeleteContainerProfile(
 		return errors.New("CannotDeleteDefaultContainerProfile")
 	}
 
-	err = containerProfileCmdRepo.Delete(profileId)
-	if err != nil {
-		log.Printf("DeleteContainerProfileError: %s", err)
-		return errors.New("DeleteContainerProfileInfraError")
-	}
-
 	err = updateContainersWithProfileId(
 		containerQueryRepo,
 		containerCmdRepo,
@@ -40,6 +34,12 @@ func DeleteContainerProfile(
 	if err != nil {
 		log.Printf("UpdateContainersBackToDefaultProfileError: %s", err)
 		return errors.New("UpdateContainersBackToDefaultProfileInfraError")
+	}
+
+	err = containerProfileCmdRepo.Delete(profileId)
+	if err != nil {
+		log.Printf("DeleteContainerProfileError: %s", err)
+		return errors.New("DeleteContainerProfileInfraError")
 	}
 
 	return nil
