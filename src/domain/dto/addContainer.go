@@ -5,7 +5,7 @@ import "github.com/speedianet/control/src/domain/valueObject"
 type AddContainer struct {
 	AccountId     valueObject.AccountId               `json:"accountId"`
 	Hostname      valueObject.Fqdn                    `json:"hostname"`
-	Image         valueObject.ContainerImgAddress     `json:"image"`
+	ImgAddr       valueObject.ContainerImgAddress     `json:"imgAddr"`
 	PortBindings  []valueObject.PortBinding           `json:"portBindings"`
 	RestartPolicy *valueObject.ContainerRestartPolicy `json:"restartPolicy"`
 	Entrypoint    *valueObject.ContainerEntrypoint    `json:"entrypoint"`
@@ -16,7 +16,7 @@ type AddContainer struct {
 func NewAddContainer(
 	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
-	image valueObject.ContainerImgAddress,
+	imgAddr valueObject.ContainerImgAddress,
 	portBindings []valueObject.PortBinding,
 	restartPolicy *valueObject.ContainerRestartPolicy,
 	entrypoint *valueObject.ContainerEntrypoint,
@@ -26,7 +26,7 @@ func NewAddContainer(
 	return AddContainer{
 		AccountId:     accountId,
 		Hostname:      hostname,
-		Image:         image,
+		ImgAddr:       imgAddr,
 		PortBindings:  portBindings,
 		RestartPolicy: restartPolicy,
 		Entrypoint:    entrypoint,
