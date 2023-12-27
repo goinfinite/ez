@@ -1,0 +1,31 @@
+package useCase
+
+import (
+	"errors"
+	"log"
+
+	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
+)
+
+func DeleteMapping(
+	mappingQueryRepo repository.MappingQueryRepo,
+	mappingCmdRepo repository.MappingCmdRepo,
+	accCmdRepo repository.AccCmdRepo,
+	accId valueObject.AccountId,
+	mappingId valueObject.MappingId,
+) error {
+	_, err := mappingQueryRepo.GetById(mappingId)
+	if err != nil {
+		return errors.New("MappingNotFound")
+	}
+
+	err = mappingCmdRepo.Delete(mappingId)
+	if err != nil {
+		return errors.New("DeleteMappingError")
+	}
+
+	log.Printf("MappingId '%v' deleted.", mappingId)
+
+	return nil
+}
