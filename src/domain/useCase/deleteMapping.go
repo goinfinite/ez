@@ -11,8 +11,6 @@ import (
 func DeleteMapping(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
-	accCmdRepo repository.AccCmdRepo,
-	accId valueObject.AccountId,
 	mappingId valueObject.MappingId,
 ) error {
 	_, err := mappingQueryRepo.GetById(mappingId)
