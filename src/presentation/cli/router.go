@@ -61,6 +61,18 @@ func containerRoutes() {
 	containerProfileCmd.AddCommand(cliController.DeleteContainerProfileController())
 }
 
+func mappingRoutes() {
+	var mappingCmd = &cobra.Command{
+		Use:   "mapping",
+		Short: "MappingManagement",
+	}
+
+	rootCmd.AddCommand(mappingCmd)
+	mappingCmd.AddCommand(cliController.GetMappingsController())
+	mappingCmd.AddCommand(cliController.AddMappingController())
+	mappingCmd.AddCommand(cliController.DeleteMappingController())
+}
+
 func o11yRoutes() {
 	var o11yCmd = &cobra.Command{
 		Use:   "o11y",
@@ -77,5 +89,6 @@ func registerCliRoutes() {
 	rootCmd.AddCommand(cliController.SysInstallController())
 	accountRoutes()
 	containerRoutes()
+	mappingRoutes()
 	o11yRoutes()
 }
