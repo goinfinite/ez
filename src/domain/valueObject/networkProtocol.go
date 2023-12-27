@@ -2,13 +2,20 @@ package valueObject
 
 import (
 	"errors"
-	"slices"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 type NetworkProtocol string
 
-var validNetworkProtocols = []string{
+var ValidNetworkProtocols = []string{
+	"http",
+	"https",
+	"ws",
+	"wss",
+	"grpc",
+	"grpcs",
 	"tcp",
 	"udp",
 }
@@ -16,7 +23,7 @@ var validNetworkProtocols = []string{
 func NewNetworkProtocol(value string) (NetworkProtocol, error) {
 	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
-	if !slices.Contains(validNetworkProtocols, value) {
+	if !slices.Contains(ValidNetworkProtocols, value) {
 		return "", errors.New("InvalidNetworkProtocol")
 	}
 	return NetworkProtocol(value), nil
