@@ -93,7 +93,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, portBindingsParams...)
 	}
 
-	runParams = append(runParams, addContainer.Image.String())
+	runParams = append(runParams, addContainer.ImgAddr.String())
 
 	err = infraHelper.EnableLingering(addContainer.AccountId)
 	if err != nil {
