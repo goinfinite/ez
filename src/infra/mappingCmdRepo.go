@@ -44,10 +44,12 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) error {
 }
 
 func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
-	err := repo.dbSvc.Orm.Delete(dbModel.Mapping{}, id.Get()).Error
+	ormSvc := repo.dbSvc.Orm
+
+	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Get()).Error
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
 }
