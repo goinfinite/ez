@@ -1,6 +1,7 @@
 package cliController
 
 import (
+	"log"
 	"strings"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -60,6 +61,7 @@ func parseMappingTargets(
 		idPortProtocolParts := strings.Split(idPortProtocol, ":")
 		containerId, err := valueObject.NewContainerId(idPortProtocolParts[0])
 		if err != nil {
+			log.Printf("ContainerIdParseError: %v", err.Error())
 			continue
 		}
 
@@ -70,11 +72,13 @@ func parseMappingTargets(
 			portProtocolMap := parsePortProtocol(idPortProtocolParts[1])
 			port, err = valueObject.NewNetworkPort(portProtocolMap["port"])
 			if err != nil {
+				log.Printf("PortParseError: %v", err.Error())
 				continue
 			}
 
 			protocol, err = valueObject.NewNetworkProtocol(portProtocolMap["protocol"])
 			if err != nil {
+				log.Printf("ProtocolParseError: %v", err.Error())
 				continue
 			}
 		}
