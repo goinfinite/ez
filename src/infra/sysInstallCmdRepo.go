@@ -10,6 +10,101 @@ import (
 type SysInstallCmdRepo struct {
 }
 
+func (repo SysInstallCmdRepo) installNginx() error {
+	necessaryPkgs := []string{
+		"nginx",
+	}
+	err := infraHelper.InstallPkgs(necessaryPkgs)
+	if err != nil {
+		return err
+	}
+
+	_, err = infraHelper.RunCmd("transactional-update", "apply")
+	if err != nil {
+		return err
+	}
+
+	nginxConf := `
+user nginx;
+pid /run/nginx.pid;
+worker_processes auto;
+worker_rlimit_nofile 65535;
+
+load_module lib64/nginx/modules/ngx_stream_module.so;
+
+events {
+	multi_accept on;
+	worker_connections 8192;
+	use epoll;
+}
+
+http {
+    charset utf-8;
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    server_tokens off;
+    log_not_found off;
+    types_hash_max_size 2048;
+    types_hash_bucket_size 64;
+    client_max_body_size 1G;
+
+    include mime.types;
+    default_type application/octet-stream;
+
+    access_log off;
+    error_log /var/log/nginx/error.log warn;
+
+	include /var/nginx/http.d/*.conf;
+}
+
+stream {
+	include /var/nginx/stream.d/*.conf;
+}
+`
+
+	err = infraHelper.UpdateFile(
+		"/etc/nginx/nginx.conf",
+		nginxConf,
+		true,
+	)
+	if err != nil {
+		return errors.New("UpdateNginxConfFailed")
+	}
+
+	err = infraHelper.MakeDir("/var/nginx/http.d")
+	if err != nil {
+		return errors.New("MakeNginxHttpDirFailed")
+	}
+
+	err = infraHelper.MakeDir("/var/nginx/stream.d")
+	if err != nil {
+		return errors.New("MakeNginxStreamDirFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"chown",
+		"-R",
+		"nginx:nginx",
+		"/var/nginx",
+	)
+	if err != nil {
+		return errors.New("ChownNginxDirFailed")
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"enable",
+		"nginx.service",
+		"--now",
+	)
+	if err != nil {
+		return errors.New("EnableNginxSvcFailed")
+	}
+
+	return nil
+}
+
 func (repo SysInstallCmdRepo) Install() error {
 	necessaryPkgs := []string{
 		"git",
@@ -81,6 +176,11 @@ WantedBy=multi-user.target
 	)
 	if err != nil {
 		return errors.New("EnableHidepidSvcFailed")
+	}
+
+	err = repo.installNginx()
+	if err != nil {
+		return err
 	}
 
 	return nil
