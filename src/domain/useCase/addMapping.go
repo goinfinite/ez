@@ -22,6 +22,16 @@ func AddMapping(
 		return errors.New("MappingAlreadyExists")
 	}
 
+	wasHostnameSent := addMapping.Hostname != nil
+
+	isTcp := addMapping.Protocol.String() == "tcp"
+	isUdp := addMapping.Protocol.String() == "udp"
+	isProtocolTransportLayer := isTcp || isUdp
+
+	if wasHostnameSent && isProtocolTransportLayer {
+		return errors.New("TransportLayerCannotHaveHostname")
+	}
+
 	err = mappingCmdRepo.Add(addMapping)
 	if err != nil {
 		log.Printf("AddMappingError: %s", err)
