@@ -1,9 +1,13 @@
 package infra
 
 import (
+	"errors"
+	"log"
+
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
+	dbModel "github.com/speedianet/control/src/infra/db/model"
 )
 
 type MappingQueryRepo struct {
@@ -15,11 +19,43 @@ func NewMappingQueryRepo(dbSvc *db.DatabaseService) *MappingQueryRepo {
 }
 
 func (repo MappingQueryRepo) Get() ([]entity.Mapping, error) {
-	return []entity.Mapping{}, nil
+	mappingEntities := []entity.Mapping{}
+
+	var mappingModels []dbModel.Mapping
+
+	err := repo.dbSvc.Orm.Model(&dbModel.Mapping{}).
+		Preload("Targets").
+		Find(&mappingModels).Error
+	if err != nil {
+		return mappingEntities, errors.New("DbQueryMappingError")
+	}
+
+	for _, mappingModel := range mappingModels {
+		mappingEntity, err := mappingModel.ToEntity()
+		if err != nil {
+			log.Printf("MappingModelToEntityError: %v", err.Error())
+			continue
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
 }
 
 func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, error) {
-	return entity.Mapping{}, nil
+	var mapping entity.Mapping
+
+	mappingModel := dbModel.Mapping{ID: uint(id.Get())}
+
+	err := repo.dbSvc.Orm.Model(&mappingModel).
+		Preload("Targets").
+		First(&mappingModel).Error
+	if err != nil {
+		return mapping, errors.New("MappingNotFound")
+	}
+
+	return mappingModel.ToEntity()
 }
 
 func (repo MappingQueryRepo) GetByHostPortProtocol(
@@ -27,5 +63,27 @@ func (repo MappingQueryRepo) GetByHostPortProtocol(
 	port valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
 ) (entity.Mapping, error) {
-	return entity.Mapping{}, nil
+	var mapping entity.Mapping
+
+	mappingModel := dbModel.Mapping{
+		Port:     uint(port.Get()),
+		Protocol: protocol.String(),
+	}
+	if hostname != nil {
+		hostnameStr := hostname.String()
+		mappingModel.Hostname = &hostnameStr
+	}
+
+	queryResult := repo.dbSvc.Orm.Model(&mappingModel).
+		Preload("Targets").
+		Find(&mappingModel)
+	if queryResult.Error != nil {
+		return mapping, errors.New("DbQueryMappingError")
+	}
+
+	if queryResult.RowsAffected == 0 {
+		return mapping, errors.New("MappingNotFound")
+	}
+
+	return mappingModel.ToEntity()
 }
