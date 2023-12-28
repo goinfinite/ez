@@ -7,16 +7,23 @@ import (
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra"
+	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
+	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 
 func GetMappingsController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetMappings",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-			mappingQueryRepo := infra.MappingQueryRepo{}
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
 			mappingsList, err := useCase.GetMappings(mappingQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -88,6 +95,9 @@ func parseMappingTargets(
 }
 
 func AddMappingController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+
+	var accId uint64
 	var hostnameStr string
 	var hostPortUint uint64
 	var hostProtocolStr string
@@ -96,7 +106,11 @@ func AddMappingController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddMapping",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
+			accId := valueObject.NewAccountIdPanic(accId)
 			var hostnamePtr *valueObject.Fqdn
 			if hostnameStr != "" {
 				hostname := valueObject.NewFqdnPanic(hostnameStr)
@@ -117,14 +131,15 @@ func AddMappingController() *cobra.Command {
 			)
 
 			addMappingDto := dto.NewAddMapping(
+				accId,
 				hostnamePtr,
 				hostPort,
 				hostProtocol,
 				mappingTargets,
 			)
 
-			mappingQueryRepo := infra.MappingQueryRepo{}
-			mappingCmdRepo := infra.MappingCmdRepo{}
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
 
 			err := useCase.AddMapping(
 				mappingQueryRepo,
@@ -138,6 +153,8 @@ func AddMappingController() *cobra.Command {
 			cliHelper.ResponseWrapper(true, "MappingAdded")
 		},
 	}
+	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("acc-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.Flags().Uint64VarP(&hostPortUint, "port", "p", 0, "Host Port")
 	cmd.MarkFlagRequired("port")
@@ -154,16 +171,21 @@ func AddMappingController() *cobra.Command {
 }
 
 func DeleteMappingController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+
 	var mappingIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteMapping",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
 
-			mappingQueryRepo := infra.MappingQueryRepo{}
-			mappingCmdRepo := infra.MappingCmdRepo{}
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
 
 			err := useCase.DeleteMapping(
 				mappingQueryRepo,
