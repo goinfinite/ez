@@ -23,11 +23,23 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) error {
 		return createResult.Error
 	}
 
+	mappingId, err := valueObject.NewMappingId(mappingModel.ID)
+	if err != nil {
+		return err
+	}
+
+	return repo.AddTargets(mappingId, mappingDto.Targets)
+}
+
+func (repo MappingCmdRepo) AddTargets(
+	mappingId valueObject.MappingId,
+	targets []valueObject.MappingTarget,
+) error {
 	targetModels := []dbModel.MappingTarget{}
-	for _, targetVo := range mappingDto.Targets {
+	for _, targetVo := range targets {
 		model := dbModel.NewMappingTarget(
 			0,
-			mappingModel.ID,
+			uint(mappingId.Get()),
 			targetVo.ContainerId.String(),
 			uint(targetVo.Port.Get()),
 			targetVo.Protocol.String(),
@@ -35,7 +47,7 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) error {
 		targetModels = append(targetModels, model)
 	}
 
-	createResult = repo.dbSvc.Orm.Create(&targetModels)
+	createResult := repo.dbSvc.Orm.Create(&targetModels)
 	if createResult.Error != nil {
 		return createResult.Error
 	}
