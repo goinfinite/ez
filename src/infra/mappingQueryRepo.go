@@ -74,9 +74,12 @@ func (repo MappingQueryRepo) FindOne(
 		mappingModel.Hostname = &hostnameStr
 	}
 
-	queryResult := repo.dbSvc.Orm.Model(&mappingModel).
-		Preload("Targets").
-		Find(&mappingModel)
+	query := repo.dbSvc.Orm.Model(&mappingModel).Preload("Targets")
+	if hostname == nil {
+		query = query.Where("hostname IS NULL")
+	}
+
+	queryResult := query.Find(&mappingModel)
 	if queryResult.Error != nil {
 		return mapping, errors.New("DbQueryMappingError")
 	}
