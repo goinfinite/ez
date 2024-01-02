@@ -58,12 +58,12 @@ func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, 
 	return mappingModel.ToEntity()
 }
 
-func (repo MappingQueryRepo) GetByHostPortProtocol(
+func (repo MappingQueryRepo) FindOne(
 	hostname *valueObject.Fqdn,
 	port valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
-) (entity.Mapping, error) {
-	var mapping entity.Mapping
+) (*entity.Mapping, error) {
+	var mapping *entity.Mapping
 
 	mappingModel := dbModel.Mapping{
 		Port:     uint(port.Get()),
@@ -85,5 +85,10 @@ func (repo MappingQueryRepo) GetByHostPortProtocol(
 		return mapping, errors.New("MappingNotFound")
 	}
 
-	return mappingModel.ToEntity()
+	mappingEntity, err := mappingModel.ToEntity()
+	if err != nil {
+		return mapping, err
+	}
+
+	return &mappingEntity, nil
 }

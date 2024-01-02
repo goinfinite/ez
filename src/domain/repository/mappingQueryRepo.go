@@ -8,9 +8,9 @@ import (
 type MappingQueryRepo interface {
 	Get() ([]entity.Mapping, error)
 	GetById(id valueObject.MappingId) (entity.Mapping, error)
-	GetByHostPortProtocol(
+	FindOne(
 		hostname *valueObject.Fqdn,
 		port valueObject.NetworkPort,
 		protocol valueObject.NetworkProtocol,
-	) (entity.Mapping, error)
+	) (*entity.Mapping, error)
 }
