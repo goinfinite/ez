@@ -41,9 +41,20 @@ func (repo MappingCmdRepo) AddTargets(
 			0,
 			uint(mappingId.Get()),
 			targetVo.ContainerId.String(),
-			uint(targetVo.Port.Get()),
-			targetVo.Protocol.String(),
+			nil,
+			nil,
 		)
+
+		if targetVo.Port != nil {
+			portUint := uint(targetVo.Port.Get())
+			model.Port = &portUint
+		}
+
+		if targetVo.Protocol != nil {
+			protocolStr := targetVo.Protocol.String()
+			model.Protocol = &protocolStr
+		}
+
 		targetModels = append(targetModels, model)
 	}
 
