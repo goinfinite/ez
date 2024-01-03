@@ -8,7 +8,7 @@ type Mapping struct {
 	Hostname  *valueObject.Fqdn           `json:"hostname"`
 	Port      valueObject.NetworkPort     `json:"port"`
 	Protocol  valueObject.NetworkProtocol `json:"protocol"`
-	Targets   []valueObject.MappingTarget `json:"targets"`
+	Targets   []MappingTarget             `json:"targets"`
 }
 
 func NewMapping(
@@ -17,7 +17,7 @@ func NewMapping(
 	hostname *valueObject.Fqdn,
 	port valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
-	targets []valueObject.MappingTarget,
+	targets []MappingTarget,
 ) Mapping {
 	return Mapping{
 		Id:        id,

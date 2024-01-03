@@ -5,73 +5,22 @@ import (
 	"log"
 
 	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
-
-func mappingTargetAlreadyExists(
-	mapping *entity.Mapping,
-	target valueObject.MappingTarget,
-) bool {
-	if len(mapping.Targets) == 0 {
-		return false
-	}
-
-	for _, currentTarget := range mapping.Targets {
-		isSameContainerId := currentTarget.ContainerId == target.ContainerId
-		isSamePort := currentTarget.Port == target.Port
-		if isSameContainerId && isSamePort {
-			return true
-		}
-	}
-
-	return false
-}
-
-func addNewMappingTargets(
-	mappingCmdRepo repository.MappingCmdRepo,
-	existingMapping *entity.Mapping,
-	newTargets []valueObject.MappingTarget,
-) error {
-	targetsToAdd := []valueObject.MappingTarget{}
-	for _, newTarget := range newTargets {
-		if mappingTargetAlreadyExists(existingMapping, newTarget) {
-			continue
-		}
-
-		targetsToAdd = append(targetsToAdd, newTarget)
-	}
-
-	if len(targetsToAdd) == 0 {
-		return errors.New("NoNewTargetsToAdd")
-	}
-
-	err := mappingCmdRepo.AddTargets(
-		existingMapping.Id,
-		targetsToAdd,
-	)
-	if err != nil {
-		log.Printf("AddMappingTargetsError: %s", err)
-		return errors.New("AddMappingTargetsInfraError")
-	}
-
-	return nil
-}
 
 func AddMapping(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
-	addMapping dto.AddMapping,
+	addDto dto.AddMapping,
 ) error {
-	if len(addMapping.Targets) == 0 {
+	if len(addDto.Targets) == 0 {
 		return errors.New("NoTargetsToAdd")
 	}
 
-	wasHostnameSent := addMapping.Hostname != nil
+	wasHostnameSent := addDto.Hostname != nil
 
-	isTcp := addMapping.Protocol.String() == "tcp"
-	isUdp := addMapping.Protocol.String() == "udp"
+	isTcp := addDto.Protocol.String() == "tcp"
+	isUdp := addDto.Protocol.String() == "udp"
 	isTransportLayer := isTcp || isUdp
 
 	if wasHostnameSent && isTransportLayer {
@@ -79,34 +28,47 @@ func AddMapping(
 	}
 
 	existingMapping, err := mappingQueryRepo.FindOne(
-		addMapping.Hostname,
-		addMapping.Port,
-		addMapping.Protocol,
+		addDto.Hostname,
+		addDto.Port,
+		addDto.Protocol,
 	)
 	if err != nil && err.Error() != "MappingNotFound" {
 		log.Printf("FindExistingMappingError: %s", err)
 		return errors.New("FindExistingMappingInfraError")
 	}
 
-	if existingMapping != nil {
-		return addNewMappingTargets(
-			mappingCmdRepo,
-			existingMapping,
-			addMapping.Targets,
+	mappingExists := existingMapping == nil
+	if !mappingExists {
+		err = mappingCmdRepo.Add(addDto)
+		if err != nil {
+			log.Printf("AddMappingError: %s", err)
+			return errors.New("AddMappingInfraError")
+		}
+
+		log.Printf(
+			"Mapping for port '%v/%v' added.",
+			addDto.Port,
+			addDto.Protocol.String(),
 		)
 	}
 
-	err = mappingCmdRepo.Add(addMapping)
-	if err != nil {
-		log.Printf("AddMappingError: %s", err)
-		return errors.New("AddMappingInfraError")
-	}
+	for _, target := range addDto.Targets {
+		addTargetDto := dto.NewAddMappingTarget(
+			existingMapping.Id,
+			target.ContainerId,
+			target.Port,
+			target.Protocol,
+		)
 
-	log.Printf(
-		"Mapping for port '%v/%v' added.",
-		addMapping.Port,
-		addMapping.Protocol.String(),
-	)
+		err = AddMappingTarget(
+			mappingQueryRepo,
+			mappingCmdRepo,
+			addTargetDto,
+		)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

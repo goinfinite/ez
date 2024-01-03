@@ -6,7 +6,6 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func AddMappingTarget(
@@ -14,24 +13,21 @@ func AddMappingTarget(
 	mappingCmdRepo repository.MappingCmdRepo,
 	addDto dto.AddMappingTarget,
 ) error {
-	mapping, err := mappingQueryRepo.GetById(addDto.MappingId)
+	_, err := mappingQueryRepo.GetById(addDto.MappingId)
 	if err != nil {
 		log.Printf("GetMappingError: %s", err)
 		return errors.New("GetMappingInfraError")
 	}
 
-	err = addNewMappingTargets(
-		mappingCmdRepo,
-		&mapping,
-		[]valueObject.MappingTarget{addDto.Target},
-	)
+	err = mappingCmdRepo.AddTarget(addDto)
 	if err != nil {
-		return err
+		log.Printf("AddMappingTargetError: %s", err)
+		return errors.New("AddMappingTargetInfraError")
 	}
 
 	log.Printf(
 		"'%s' added as target for mapping with ID '%s'.",
-		addDto.Target.ContainerId,
+		addDto.ContainerId,
 		addDto.MappingId,
 	)
 
