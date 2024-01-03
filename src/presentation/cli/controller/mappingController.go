@@ -64,9 +64,9 @@ func AddMappingController() *cobra.Command {
 			}
 			hostProtocol := valueObject.NewNetworkProtocolPanic(hostProtocolStr)
 
-			mappingTargets := []valueObject.MappingTarget{}
+			mappingTargets := []dto.AddMappingTargetWithoutMappingId{}
 			for _, targetStr := range targetsSlice {
-				target, err := valueObject.NewMappingTargetFromString(targetStr)
+				target, err := dto.NewAddMappingTargetWithoutMappingIdFromString(targetStr)
 				if err != nil {
 					cliHelper.ResponseWrapper(false, err.Error())
 				}
@@ -151,7 +151,6 @@ func DeleteMappingController() *cobra.Command {
 func AddMappingTargetController() *cobra.Command {
 	var dbSvc *db.DatabaseService
 
-	var accIdUint uint64
 	var mappingIdUint uint64
 	var targetStr string
 
@@ -162,17 +161,17 @@ func AddMappingTargetController() *cobra.Command {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accIdUint)
 			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
-			target, err := valueObject.NewMappingTargetFromString(targetStr)
+			target, err := dto.NewAddMappingTargetWithoutMappingIdFromString(targetStr)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
 			addTargetDto := dto.NewAddMappingTarget(
-				accId,
 				mappingId,
-				target,
+				target.ContainerId,
+				target.Port,
+				target.Protocol,
 			)
 
 			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
@@ -190,8 +189,7 @@ func AddMappingTargetController() *cobra.Command {
 			cliHelper.ResponseWrapper(true, "MappingTargetAdded")
 		},
 	}
-	cmd.Flags().Uint64VarP(&accIdUint, "acc-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("acc-id")
+
 	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
 	cmd.MarkFlagRequired("mapping-id")
 	cmd.Flags().StringVarP(
