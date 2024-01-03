@@ -62,8 +62,8 @@ func (repo MappingQueryRepo) FindOne(
 	hostname *valueObject.Fqdn,
 	port valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
-) (*entity.Mapping, error) {
-	var mapping *entity.Mapping
+) (entity.Mapping, error) {
+	var mapping entity.Mapping
 
 	mappingModel := dbModel.Mapping{
 		Port:     uint(port.Get()),
@@ -93,5 +93,5 @@ func (repo MappingQueryRepo) FindOne(
 		return mapping, err
 	}
 
-	return &mappingEntity, nil
+	return mappingEntity, nil
 }

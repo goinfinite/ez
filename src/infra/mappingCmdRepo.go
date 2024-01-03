@@ -15,9 +15,17 @@ func NewMappingCmdRepo(dbSvc *db.DatabaseService) *MappingCmdRepo {
 	return &MappingCmdRepo{dbSvc: dbSvc}
 }
 
-func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) error {
+func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
+	var mappingId valueObject.MappingId
+
 	mappingModel := dbModel.NewMappingWithAddDto(mappingDto)
-	return repo.dbSvc.Orm.Create(&mappingModel).Error
+
+	createResult := repo.dbSvc.Orm.Create(&mappingModel)
+	if createResult.Error != nil {
+		return mappingId, createResult.Error
+	}
+
+	return valueObject.NewMappingId(mappingModel.ID)
 }
 
 func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {

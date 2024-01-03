@@ -12,5 +12,5 @@ type MappingQueryRepo interface {
 		hostname *valueObject.Fqdn,
 		port valueObject.NetworkPort,
 		protocol valueObject.NetworkProtocol,
-	) (*entity.Mapping, error)
+	) (entity.Mapping, error)
 }

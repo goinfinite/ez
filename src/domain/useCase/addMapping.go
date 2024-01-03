@@ -37,9 +37,10 @@ func AddMapping(
 		return errors.New("FindExistingMappingInfraError")
 	}
 
-	mappingExists := existingMapping == nil
-	if !mappingExists {
-		err = mappingCmdRepo.Add(addDto)
+	mappingId := existingMapping.Id
+	mappingAlreadyExists := mappingId != 0
+	if !mappingAlreadyExists {
+		mappingId, err = mappingCmdRepo.Add(addDto)
 		if err != nil {
 			log.Printf("AddMappingError: %s", err)
 			return errors.New("AddMappingInfraError")
@@ -54,7 +55,7 @@ func AddMapping(
 
 	for _, target := range addDto.Targets {
 		addTargetDto := dto.NewAddMappingTarget(
-			existingMapping.Id,
+			mappingId,
 			target.ContainerId,
 			target.Port,
 			target.Protocol,
