@@ -202,3 +202,38 @@ func AddMappingTargetController() *cobra.Command {
 	cmd.MarkFlagRequired("target")
 	return cmd
 }
+
+func DeleteMappingTargetController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+
+	var targetIdUint uint64
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteMappingTarget",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			targetId := valueObject.NewMappingTargetIdPanic(targetIdUint)
+
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+
+			err := useCase.DeleteMappingTarget(
+				mappingQueryRepo,
+				mappingCmdRepo,
+				targetId,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, "MappingTargetDeleted")
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&targetIdUint, "id", "i", 0, "MappingTargetId")
+	cmd.MarkFlagRequired("id")
+	return cmd
+}

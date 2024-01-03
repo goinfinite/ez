@@ -58,6 +58,22 @@ func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, 
 	return mappingModel.ToEntity()
 }
 
+func (repo MappingQueryRepo) GetTargetById(
+	id valueObject.MappingTargetId,
+) (entity.MappingTarget, error) {
+	var mappingTarget entity.MappingTarget
+
+	mappingTargetModel := dbModel.MappingTarget{ID: uint(id.Get())}
+
+	err := repo.dbSvc.Orm.Model(&mappingTargetModel).
+		First(&mappingTargetModel).Error
+	if err != nil {
+		return mappingTarget, errors.New("MappingTargetNotFound")
+	}
+
+	return mappingTargetModel.ToEntity()
+}
+
 func (repo MappingQueryRepo) FindOne(
 	hostname *valueObject.Fqdn,
 	port valueObject.NetworkPort,

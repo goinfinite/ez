@@ -65,3 +65,7 @@ func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
 
 	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
 }
+
+func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
+	return repo.dbSvc.Orm.Delete(dbModel.MappingTarget{}, id.Get()).Error
+}
