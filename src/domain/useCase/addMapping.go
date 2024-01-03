@@ -11,7 +11,7 @@ import (
 )
 
 func mappingTargetAlreadyExists(
-	mapping entity.Mapping,
+	mapping *entity.Mapping,
 	target valueObject.MappingTarget,
 ) bool {
 	if len(mapping.Targets) == 0 {
@@ -36,7 +36,7 @@ func addNewMappingTargets(
 ) error {
 	targetsToAdd := []valueObject.MappingTarget{}
 	for _, newTarget := range newTargets {
-		if mappingTargetAlreadyExists(*existingMapping, newTarget) {
+		if mappingTargetAlreadyExists(existingMapping, newTarget) {
 			continue
 		}
 
@@ -84,8 +84,8 @@ func AddMapping(
 		addMapping.Protocol,
 	)
 	if err != nil && err.Error() != "MappingNotFound" {
-		log.Printf("FindOneMappingError: %s", err)
-		return errors.New("FindOneMappingInfraError")
+		log.Printf("FindExistingMappingError: %s", err)
+		return errors.New("FindExistingMappingInfraError")
 	}
 
 	if existingMapping != nil {
