@@ -157,7 +157,7 @@ func AddMappingTargetController() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "add",
-		Short: "AddMapping",
+		Short: "AddMappingTarget",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},

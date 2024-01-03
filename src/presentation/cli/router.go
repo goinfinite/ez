@@ -71,7 +71,14 @@ func mappingRoutes() {
 	mappingCmd.AddCommand(cliController.GetMappingsController())
 	mappingCmd.AddCommand(cliController.AddMappingController())
 	mappingCmd.AddCommand(cliController.DeleteMappingController())
-	mappingCmd.AddCommand(cliController.AddMappingTargetController())
+
+	var mappingTargetCmd = &cobra.Command{
+		Use:   "target",
+		Short: "MappingTargetManagement",
+	}
+
+	mappingCmd.AddCommand(mappingTargetCmd)
+	mappingTargetCmd.AddCommand(cliController.AddMappingTargetController())
 }
 
 func o11yRoutes() {
