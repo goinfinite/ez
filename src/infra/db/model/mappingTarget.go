@@ -3,6 +3,7 @@ package dbModel
 import (
 	"time"
 
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -41,8 +42,18 @@ func NewMappingTarget(
 	return mappingTargetStruct
 }
 
-func (model MappingTarget) ToValueObject() (valueObject.MappingTarget, error) {
-	var mappingTarget valueObject.MappingTarget
+func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
+	var mappingTarget entity.MappingTarget
+
+	id, err := valueObject.NewMappingTargetId(model.ID)
+	if err != nil {
+		return mappingTarget, err
+	}
+
+	mappingId, err := valueObject.NewMappingId(model.MappingID)
+	if err != nil {
+		return mappingTarget, err
+	}
 
 	containerId, err := valueObject.NewContainerId(model.ContainerId)
 	if err != nil {
@@ -67,7 +78,9 @@ func (model MappingTarget) ToValueObject() (valueObject.MappingTarget, error) {
 		protocolPtr = &protocol
 	}
 
-	return valueObject.NewMappingTarget(
+	return entity.NewMappingTarget(
+		id,
+		mappingId,
 		containerId,
 		portPtr,
 		protocolPtr,

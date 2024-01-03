@@ -17,48 +17,29 @@ func NewMappingCmdRepo(dbSvc *db.DatabaseService) *MappingCmdRepo {
 
 func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) error {
 	mappingModel := dbModel.NewMappingWithAddDto(mappingDto)
-
-	createResult := repo.dbSvc.Orm.Create(&mappingModel)
-	if createResult.Error != nil {
-		return createResult.Error
-	}
-
-	mappingId, err := valueObject.NewMappingId(mappingModel.ID)
-	if err != nil {
-		return err
-	}
-
-	return repo.AddTargets(mappingId, mappingDto.Targets)
+	return repo.dbSvc.Orm.Create(&mappingModel).Error
 }
 
-func (repo MappingCmdRepo) AddTargets(
-	mappingId valueObject.MappingId,
-	targets []valueObject.MappingTarget,
-) error {
-	targetModels := []dbModel.MappingTarget{}
-	for _, targetVo := range targets {
-		model := dbModel.NewMappingTarget(
-			0,
-			uint(mappingId.Get()),
-			targetVo.ContainerId.String(),
-			nil,
-			nil,
-		)
+func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
+	model := dbModel.NewMappingTarget(
+		0,
+		uint(addDto.MappingId),
+		addDto.ContainerId.String(),
+		nil,
+		nil,
+	)
 
-		if targetVo.Port != nil {
-			portUint := uint(targetVo.Port.Get())
-			model.Port = &portUint
-		}
-
-		if targetVo.Protocol != nil {
-			protocolStr := targetVo.Protocol.String()
-			model.Protocol = &protocolStr
-		}
-
-		targetModels = append(targetModels, model)
+	if addDto.Port != nil {
+		portUint := uint(addDto.Port.Get())
+		model.Port = &portUint
 	}
 
-	createResult := repo.dbSvc.Orm.Create(&targetModels)
+	if addDto.Protocol != nil {
+		protocolStr := addDto.Protocol.String()
+		model.Protocol = &protocolStr
+	}
+
+	createResult := repo.dbSvc.Orm.Create(&model)
 	if createResult.Error != nil {
 		return createResult.Error
 	}

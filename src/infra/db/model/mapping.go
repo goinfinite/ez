@@ -97,13 +97,13 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		return mapping, err
 	}
 
-	var targets []valueObject.MappingTarget
+	var targets []entity.MappingTarget
 	for _, target := range model.Targets {
-		targetVo, err := target.ToValueObject()
+		targetEntity, err := target.ToEntity()
 		if err != nil {
 			return mapping, err
 		}
-		targets = append(targets, targetVo)
+		targets = append(targets, targetEntity)
 	}
 
 	return entity.NewMapping(
