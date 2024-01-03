@@ -71,6 +71,7 @@ func mappingRoutes() {
 	mappingCmd.AddCommand(cliController.GetMappingsController())
 	mappingCmd.AddCommand(cliController.AddMappingController())
 	mappingCmd.AddCommand(cliController.DeleteMappingController())
+	mappingCmd.AddCommand(cliController.AddMappingTargetController())
 }
 
 func o11yRoutes() {

@@ -1,9 +1,6 @@
 package cliController
 
 import (
-	"log"
-	"strings"
-
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -37,71 +34,10 @@ func GetMappingsController() *cobra.Command {
 	return cmd
 }
 
-func parsePortProtocol(portProtocol string) map[string]string {
-	portProtocolParts := strings.Split(portProtocol, "/")
-	hostPortStr := portProtocolParts[0]
-	hostProtocolStr := "tcp"
-	if len(portProtocolParts) == 2 {
-		hostProtocolStr = portProtocolParts[1]
-	}
-
-	return map[string]string{
-		"port":     hostPortStr,
-		"protocol": hostProtocolStr,
-	}
-}
-
-func parseMappingTargets(
-	targetsStrSlice []string,
-	hostPort valueObject.NetworkPort,
-	hostProtocol valueObject.NetworkProtocol,
-) []valueObject.MappingTarget {
-	var mappingTargets []valueObject.MappingTarget
-	for _, idPortProtocol := range targetsStrSlice {
-		idPortProtocolParts := strings.Split(idPortProtocol, ":")
-		containerId, err := valueObject.NewContainerId(idPortProtocolParts[0])
-		if err != nil {
-			log.Printf("ContainerIdParseError: %v", err.Error())
-			continue
-		}
-
-		port := hostPort
-		protocol := hostProtocol
-
-		if len(idPortProtocolParts) > 1 {
-			portProtocolMap := parsePortProtocol(idPortProtocolParts[1])
-			port, err = valueObject.NewNetworkPort(portProtocolMap["port"])
-			if err != nil {
-				log.Printf("PortParseError: %v", err.Error())
-				continue
-			}
-
-			protocol, err = valueObject.NewNetworkProtocol(portProtocolMap["protocol"])
-			if err != nil {
-				log.Printf("ProtocolParseError: %v", err.Error())
-				continue
-			}
-		}
-
-		mappingTarget := valueObject.NewMappingTarget(
-			containerId,
-			port,
-			protocol,
-		)
-
-		mappingTargets = append(
-			mappingTargets,
-			mappingTarget,
-		)
-	}
-
-	return mappingTargets
-}
-
 func AddMappingController() *cobra.Command {
 	var dbSvc *db.DatabaseService
 
-	var accId uint64
+	var accIdUint uint64
 	var hostnameStr string
 	var hostPortUint uint64
 	var hostProtocolStr string
@@ -114,7 +50,7 @@ func AddMappingController() *cobra.Command {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accId)
+			accId := valueObject.NewAccountIdPanic(accIdUint)
 			var hostnamePtr *valueObject.Fqdn
 			if hostnameStr != "" {
 				hostname := valueObject.NewFqdnPanic(hostnameStr)
@@ -128,11 +64,14 @@ func AddMappingController() *cobra.Command {
 			}
 			hostProtocol := valueObject.NewNetworkProtocolPanic(hostProtocolStr)
 
-			mappingTargets := parseMappingTargets(
-				targetsSlice,
-				hostPort,
-				hostProtocol,
-			)
+			mappingTargets := []valueObject.MappingTarget{}
+			for _, targetStr := range targetsSlice {
+				target, err := valueObject.NewMappingTargetFromString(targetStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+				mappingTargets = append(mappingTargets, target)
+			}
 
 			addMappingDto := dto.NewAddMapping(
 				accId,
@@ -157,7 +96,7 @@ func AddMappingController() *cobra.Command {
 			cliHelper.ResponseWrapper(true, "MappingAdded")
 		},
 	}
-	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
+	cmd.Flags().Uint64VarP(&accIdUint, "acc-id", "a", 0, "AccountId")
 	cmd.MarkFlagRequired("acc-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.Flags().Uint64VarP(&hostPortUint, "port", "p", 0, "Host Port")
@@ -206,5 +145,62 @@ func DeleteMappingController() *cobra.Command {
 
 	cmd.Flags().Uint64VarP(&mappingIdUint, "id", "i", 0, "MappingId")
 	cmd.MarkFlagRequired("id")
+	return cmd
+}
+
+func AddMappingTargetController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+
+	var accIdUint uint64
+	var mappingIdUint uint64
+	var targetStr string
+
+	cmd := &cobra.Command{
+		Use:   "add",
+		Short: "AddMapping",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			accId := valueObject.NewAccountIdPanic(accIdUint)
+			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
+			target, err := valueObject.NewMappingTargetFromString(targetStr)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			addTargetDto := dto.NewAddMappingTarget(
+				accId,
+				mappingId,
+				target,
+			)
+
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+
+			err = useCase.AddMappingTarget(
+				mappingQueryRepo,
+				mappingCmdRepo,
+				addTargetDto,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, "MappingTargetAdded")
+		},
+	}
+	cmd.Flags().Uint64VarP(&accIdUint, "acc-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
+	cmd.MarkFlagRequired("mapping-id")
+	cmd.Flags().StringVarP(
+		&targetStr,
+		"target",
+		"t",
+		"",
+		"ContainerId (required), Port and Protocol (format: containerId:containerPort/protocol)",
+	)
+	cmd.MarkFlagRequired("target")
 	return cmd
 }
