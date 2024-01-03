@@ -26,15 +26,12 @@ func AddMappingTarget(
 		[]valueObject.MappingTarget{addDto.Target},
 	)
 	if err != nil {
-		log.Printf("AddMappingTargetsError: %s", err)
-		return errors.New("AddMappingTargetsInfraError")
+		return err
 	}
 
 	log.Printf(
-		"Target '%s/%s/%s' added for mapping with ID '%s'.",
+		"'%s' added as target for mapping with ID '%s'.",
 		addDto.Target.ContainerId,
-		addDto.Target.Port.String(),
-		addDto.Target.Protocol.String(),
 		addDto.MappingId,
 	)
 
