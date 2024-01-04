@@ -19,13 +19,8 @@ func TestContainerCmdRepo(t *testing.T) {
 		portBindings := []valueObject.PortBinding{
 			valueObject.NewPortBinding(
 				valueObject.NewNetworkProtocolPanic("tcp"),
-				8080,
-				8080,
-			),
-			valueObject.NewPortBinding(
-				valueObject.NewNetworkProtocolPanic("tcp"),
-				8443,
-				8443,
+				50001,
+				80,
 			),
 		}
 
