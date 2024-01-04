@@ -109,6 +109,7 @@ func (repo MappingCmdRepo) nginxConfigFactory(
 			containerPort.String() + ";\n"
 	}
 
+	serversList = strings.TrimSpace(serversList)
 	upstreamName := "mapping_" + mappingId.String() + "_backend"
 	upstreamBlock := `
 upstream ` + upstreamName + ` {
