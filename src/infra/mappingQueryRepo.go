@@ -111,3 +111,44 @@ func (repo MappingQueryRepo) FindOne(
 
 	return mappingEntity, nil
 }
+
+func (repo MappingQueryRepo) FindAll(
+	hostname *valueObject.Fqdn,
+	port *valueObject.NetworkPort,
+	protocol *valueObject.NetworkProtocol,
+) ([]entity.Mapping, error) {
+	mappingEntities := []entity.Mapping{}
+
+	mappingModel := dbModel.Mapping{}
+	if hostname != nil {
+		hostnameStr := hostname.String()
+		mappingModel.Hostname = &hostnameStr
+	}
+
+	if port != nil {
+		mappingModel.Port = uint(port.Get())
+	}
+
+	if protocol != nil {
+		mappingModel.Protocol = protocol.String()
+	}
+
+	var mappingModels []dbModel.Mapping
+	query := repo.dbSvc.Orm.Model(&mappingModel).Preload("Targets")
+	queryResult := query.Find(&mappingModels)
+	if queryResult.Error != nil {
+		return mappingEntities, errors.New("DbQueryMappingError")
+	}
+
+	for _, mappingModel := range mappingModels {
+		mappingEntity, err := mappingModel.ToEntity()
+		if err != nil {
+			log.Printf("MappingModelToEntityError: %v", err.Error())
+			continue
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
+}
