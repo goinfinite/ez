@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
 )
 
@@ -16,11 +15,6 @@ func AddContainer(
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	addContainer dto.AddContainer,
 ) error {
-	defaultContainerProfileId := entity.DefaultContainerProfile().Id
-	if addContainer.ProfileId == nil {
-		addContainer.ProfileId = &defaultContainerProfileId
-	}
-
 	err := CheckAccountQuota(
 		accQueryRepo,
 		addContainer.AccountId,

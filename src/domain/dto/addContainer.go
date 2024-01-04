@@ -1,11 +1,14 @@
 package dto
 
-import "github.com/speedianet/control/src/domain/valueObject"
+import (
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
+)
 
 type AddContainer struct {
 	AccountId     valueObject.AccountId               `json:"accountId"`
 	Hostname      valueObject.Fqdn                    `json:"hostname"`
-	ImgAddr       valueObject.ContainerImgAddress     `json:"imgAddr"`
+	ImageAddr     valueObject.ContainerImgAddress     `json:"imageAddr"`
 	PortBindings  []valueObject.PortBinding           `json:"portBindings"`
 	RestartPolicy *valueObject.ContainerRestartPolicy `json:"restartPolicy"`
 	Entrypoint    *valueObject.ContainerEntrypoint    `json:"entrypoint"`
@@ -16,19 +19,29 @@ type AddContainer struct {
 func NewAddContainer(
 	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
-	imgAddr valueObject.ContainerImgAddress,
+	imageAddr valueObject.ContainerImgAddress,
 	portBindings []valueObject.PortBinding,
-	restartPolicy *valueObject.ContainerRestartPolicy,
+	restartPolicyPtr *valueObject.ContainerRestartPolicy,
 	entrypoint *valueObject.ContainerEntrypoint,
 	profileId *valueObject.ContainerProfileId,
 	envs []valueObject.ContainerEnv,
 ) AddContainer {
+	if restartPolicyPtr == nil {
+		restartPolicy, _ := valueObject.NewContainerRestartPolicy("unless-stopped")
+		restartPolicyPtr = &restartPolicy
+	}
+
+	defaultContainerProfileId := entity.DefaultContainerProfile().Id
+	if profileId == nil {
+		profileId = &defaultContainerProfileId
+	}
+
 	return AddContainer{
 		AccountId:     accountId,
 		Hostname:      hostname,
-		ImgAddr:       imgAddr,
+		ImageAddr:     imageAddr,
 		PortBindings:  portBindings,
-		RestartPolicy: restartPolicy,
+		RestartPolicy: restartPolicyPtr,
 		Entrypoint:    entrypoint,
 		ProfileId:     profileId,
 		Envs:          envs,
