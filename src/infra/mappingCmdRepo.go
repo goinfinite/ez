@@ -192,7 +192,7 @@ server {
 func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
 	var mappingId valueObject.MappingId
 
-	mappingModel := dbModel.NewMappingWithAddDto(mappingDto)
+	mappingModel := dbModel.Mapping{}.AddDtoToModel(mappingDto)
 
 	createResult := repo.dbSvc.Orm.Create(&mappingModel)
 	if createResult.Error != nil {
@@ -203,28 +203,9 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 }
 
 func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
+	targetModel := dbModel.MappingTarget{}.AddDtoToModel(addDto)
 
-	// Levar isso para um FromAddDtoToModel como está no Container
-	// fazer o mesmo no Add normal
-	model := dbModel.NewMappingTarget(
-		0,
-		uint(addDto.MappingId),
-		addDto.ContainerId.String(),
-		nil,
-		nil,
-	)
-
-	if addDto.ContainerPort != nil {
-		containerPortUint := uint(addDto.ContainerPort.Get())
-		model.ContainerPort = &containerPortUint
-	}
-
-	if addDto.Protocol != nil {
-		protocolStr := addDto.Protocol.String()
-		model.Protocol = &protocolStr
-	}
-
-	createResult := repo.dbSvc.Orm.Create(&model)
+	createResult := repo.dbSvc.Orm.Create(&targetModel)
 	if createResult.Error != nil {
 		return createResult.Error
 	}

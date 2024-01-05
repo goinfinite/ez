@@ -46,25 +46,6 @@ func NewMapping(
 	return mappingModel
 }
 
-func NewMappingWithAddDto(addDto dto.AddMapping) Mapping {
-	var hostnamePtr *string
-	if addDto.Hostname != nil {
-		hostnameStr := addDto.Hostname.String()
-		hostnamePtr = &hostnameStr
-	}
-
-	mappingStruct := NewMapping(
-		0,
-		uint(addDto.AccountId.Get()),
-		hostnamePtr,
-		uint(addDto.PublicPort.Get()),
-		addDto.Protocol.String(),
-		[]MappingTarget{},
-	)
-
-	return mappingStruct
-}
-
 func (model Mapping) ToEntity() (entity.Mapping, error) {
 	var mapping entity.Mapping
 
@@ -114,4 +95,21 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		protocol,
 		targets,
 	), nil
+}
+
+func (Mapping) AddDtoToModel(addDto dto.AddMapping) Mapping {
+	var hostnamePtr *string
+	if addDto.Hostname != nil {
+		hostnameStr := addDto.Hostname.String()
+		hostnamePtr = &hostnameStr
+	}
+
+	return NewMapping(
+		0,
+		uint(addDto.AccountId.Get()),
+		hostnamePtr,
+		uint(addDto.PublicPort.Get()),
+		addDto.Protocol.String(),
+		[]MappingTarget{},
+	)
 }
