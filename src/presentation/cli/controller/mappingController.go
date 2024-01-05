@@ -59,7 +59,10 @@ func AddMappingController() *cobra.Command {
 
 			publicPort := valueObject.NewNetworkPortPanic(publicPortUint)
 
-			if publicPort == 443 {
+			switch publicPort.Get() {
+			case 80:
+				hostProtocolStr = "http"
+			case 443:
 				hostProtocolStr = "https"
 			}
 			hostProtocol := valueObject.NewNetworkProtocolPanic(hostProtocolStr)
