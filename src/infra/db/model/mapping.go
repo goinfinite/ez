@@ -9,14 +9,14 @@ import (
 )
 
 type Mapping struct {
-	ID        uint `gorm:"primarykey"`
-	AccountID uint
-	Hostname  *string
-	Port      uint
-	Protocol  string
-	Targets   []MappingTarget
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         uint `gorm:"primarykey"`
+	AccountID  uint
+	Hostname   *string
+	PublicPort uint
+	Protocol   string
+	Targets    []MappingTarget
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (Mapping) TableName() string {
@@ -27,23 +27,23 @@ func NewMapping(
 	id uint,
 	accountId uint,
 	hostname *string,
-	port uint,
+	publicPort uint,
 	protocol string,
 	targets []MappingTarget,
 ) Mapping {
-	mappingStruct := Mapping{
-		AccountID: accountId,
-		Hostname:  hostname,
-		Port:      port,
-		Protocol:  protocol,
-		Targets:   targets,
+	mappingModel := Mapping{
+		AccountID:  accountId,
+		Hostname:   hostname,
+		PublicPort: publicPort,
+		Protocol:   protocol,
+		Targets:    targets,
 	}
 
 	if id != 0 {
-		mappingStruct.ID = id
+		mappingModel.ID = id
 	}
 
-	return mappingStruct
+	return mappingModel
 }
 
 func NewMappingWithAddDto(addDto dto.AddMapping) Mapping {
@@ -57,7 +57,7 @@ func NewMappingWithAddDto(addDto dto.AddMapping) Mapping {
 		0,
 		uint(addDto.AccountId.Get()),
 		hostnamePtr,
-		uint(addDto.Port.Get()),
+		uint(addDto.PublicPort.Get()),
 		addDto.Protocol.String(),
 		[]MappingTarget{},
 	)
@@ -87,7 +87,7 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		hostnamePtr = &hostname
 	}
 
-	port, err := valueObject.NewNetworkPort(model.Port)
+	port, err := valueObject.NewNetworkPort(model.PublicPort)
 	if err != nil {
 		return mapping, err
 	}

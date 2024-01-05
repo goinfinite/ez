@@ -39,7 +39,7 @@ func AddMappingController() *cobra.Command {
 
 	var accIdUint uint64
 	var hostnameStr string
-	var hostPortUint uint64
+	var publicPortUint uint64
 	var hostProtocolStr string
 	var targetsSlice []string
 
@@ -57,9 +57,9 @@ func AddMappingController() *cobra.Command {
 				hostnamePtr = &hostname
 			}
 
-			hostPort := valueObject.NewNetworkPortPanic(hostPortUint)
+			publicPort := valueObject.NewNetworkPortPanic(publicPortUint)
 
-			if hostPort == 443 {
+			if publicPort == 443 {
 				hostProtocolStr = "https"
 			}
 			hostProtocol := valueObject.NewNetworkProtocolPanic(hostProtocolStr)
@@ -76,7 +76,7 @@ func AddMappingController() *cobra.Command {
 			addMappingDto := dto.NewAddMapping(
 				accId,
 				hostnamePtr,
-				hostPort,
+				publicPort,
 				hostProtocol,
 				mappingTargets,
 			)
@@ -99,7 +99,7 @@ func AddMappingController() *cobra.Command {
 	cmd.Flags().Uint64VarP(&accIdUint, "acc-id", "a", 0, "AccountId")
 	cmd.MarkFlagRequired("acc-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
-	cmd.Flags().Uint64VarP(&hostPortUint, "port", "p", 0, "Host Port")
+	cmd.Flags().Uint64VarP(&publicPortUint, "port", "p", 0, "Public Port")
 	cmd.MarkFlagRequired("port")
 	cmd.Flags().StringVarP(&hostProtocolStr, "protocol", "l", "tcp", "Host Protocol")
 	cmd.Flags().StringSliceVarP(
@@ -170,7 +170,7 @@ func AddMappingTargetController() *cobra.Command {
 			addTargetDto := dto.NewAddMappingTarget(
 				mappingId,
 				target.ContainerId,
-				target.Port,
+				target.ContainerPort,
 				target.Protocol,
 			)
 

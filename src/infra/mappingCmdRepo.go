@@ -49,7 +49,7 @@ func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
 
 	portHostUpstreamMap := map[string][]hostUpstream{}
 	for _, mapping := range allHttpsMappings {
-		hostPort := mapping.Port.String()
+		hostPort := mapping.PublicPort.String()
 		hostname := "default"
 		if mapping.Hostname != nil {
 			hostname = mapping.Hostname.String()
@@ -98,9 +98,9 @@ func (repo MappingCmdRepo) nginxConfigFactory(
 
 	serversList := ""
 	for _, target := range mappingEntity.Targets {
-		containerPort := mappingEntity.Port
-		if target.Port != nil {
-			containerPort = *target.Port
+		containerPort := mappingEntity.PublicPort
+		if target.ContainerPort != nil {
+			containerPort = *target.ContainerPort
 		}
 
 		serversList += "server " +
@@ -117,7 +117,7 @@ upstream ` + upstreamName + ` {
 }
 `
 
-	hostPort := mappingEntity.Port.String()
+	hostPort := mappingEntity.PublicPort.String()
 
 	serverNameLine := ``
 	if mappingEntity.Hostname != nil {
@@ -203,6 +203,9 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 }
 
 func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
+
+	// Levar isso para um FromAddDtoToModel como está no Container
+	// fazer o mesmo no Add normal
 	model := dbModel.NewMappingTarget(
 		0,
 		uint(addDto.MappingId),
@@ -211,9 +214,9 @@ func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 		nil,
 	)
 
-	if addDto.Port != nil {
-		portUint := uint(addDto.Port.Get())
-		model.Port = &portUint
+	if addDto.ContainerPort != nil {
+		containerPortUint := uint(addDto.ContainerPort.Get())
+		model.ContainerPort = &containerPortUint
 	}
 
 	if addDto.Protocol != nil {

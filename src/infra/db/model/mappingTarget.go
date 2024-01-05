@@ -8,13 +8,13 @@ import (
 )
 
 type MappingTarget struct {
-	ID          uint `gorm:"primarykey"`
-	MappingID   uint
-	ContainerId string
-	Port        *uint
-	Protocol    *string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID            uint `gorm:"primarykey"`
+	MappingID     uint
+	ContainerId   string
+	ContainerPort *uint
+	Protocol      *string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (MappingTarget) TableName() string {
@@ -25,14 +25,14 @@ func NewMappingTarget(
 	id uint,
 	mappingId uint,
 	containerId string,
-	port *uint,
+	containerPort *uint,
 	protocol *string,
 ) MappingTarget {
 	mappingTargetStruct := MappingTarget{
-		MappingID:   mappingId,
-		ContainerId: containerId,
-		Port:        port,
-		Protocol:    protocol,
+		MappingID:     mappingId,
+		ContainerId:   containerId,
+		ContainerPort: containerPort,
+		Protocol:      protocol,
 	}
 
 	if id != 0 {
@@ -60,13 +60,13 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 		return mappingTarget, err
 	}
 
-	var portPtr *valueObject.NetworkPort
-	if model.Port != nil {
-		port, err := valueObject.NewNetworkPort(*model.Port)
+	var containerPortPtr *valueObject.NetworkPort
+	if model.ContainerPort != nil {
+		containerPort, err := valueObject.NewNetworkPort(*model.ContainerPort)
 		if err != nil {
 			return mappingTarget, err
 		}
-		portPtr = &port
+		containerPortPtr = &containerPort
 	}
 
 	var protocolPtr *valueObject.NetworkProtocol
@@ -82,7 +82,7 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 		id,
 		mappingId,
 		containerId,
-		portPtr,
+		containerPortPtr,
 		protocolPtr,
 	), nil
 }

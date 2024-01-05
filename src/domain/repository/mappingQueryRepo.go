@@ -11,7 +11,7 @@ type MappingQueryRepo interface {
 	GetTargetById(id valueObject.MappingTargetId) (entity.MappingTarget, error)
 	FindOne(
 		hostname *valueObject.Fqdn,
-		port valueObject.NetworkPort,
+		publicPort valueObject.NetworkPort,
 		protocol valueObject.NetworkProtocol,
 	) (entity.Mapping, error)
 }

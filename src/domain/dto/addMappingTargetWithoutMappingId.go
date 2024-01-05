@@ -7,23 +7,24 @@ import (
 )
 
 type AddMappingTargetWithoutMappingId struct {
-	ContainerId valueObject.ContainerId      `json:"containerId"`
-	Port        *valueObject.NetworkPort     `json:"port"`
-	Protocol    *valueObject.NetworkProtocol `json:"protocol"`
+	ContainerId   valueObject.ContainerId      `json:"containerId"`
+	ContainerPort *valueObject.NetworkPort     `json:"containerPort"`
+	Protocol      *valueObject.NetworkProtocol `json:"protocol"`
 }
 
 func NewAddMappingTargetWithoutMappingId(
 	containerId valueObject.ContainerId,
-	port *valueObject.NetworkPort,
+	containerPort *valueObject.NetworkPort,
 	protocol *valueObject.NetworkProtocol,
 ) AddMappingTargetWithoutMappingId {
 	return AddMappingTargetWithoutMappingId{
-		ContainerId: containerId,
-		Port:        port,
-		Protocol:    protocol,
+		ContainerId:   containerId,
+		ContainerPort: containerPort,
+		Protocol:      protocol,
 	}
 }
 
+// format: containerId:containerPort/protocol
 func NewAddMappingTargetWithoutMappingIdFromString(
 	value string,
 ) (AddMappingTargetWithoutMappingId, error) {
@@ -44,18 +45,18 @@ func NewAddMappingTargetWithoutMappingIdFromString(
 	}
 
 	portProtocolParts := strings.Split(targetParts[1], "/")
-	hostPortStr := portProtocolParts[0]
-	hostProtocolStr := "tcp"
+	containerPortStr := portProtocolParts[0]
+	protocolStr := "tcp"
 	if len(portProtocolParts) == 2 {
-		hostProtocolStr = portProtocolParts[1]
+		protocolStr = portProtocolParts[1]
 	}
 
-	port, err := valueObject.NewNetworkPort(hostPortStr)
+	port, err := valueObject.NewNetworkPort(containerPortStr)
 	if err != nil {
 		return target, err
 	}
 
-	protocol, err := valueObject.NewNetworkProtocol(hostProtocolStr)
+	protocol, err := valueObject.NewNetworkProtocol(protocolStr)
 	if err != nil {
 		return target, err
 	}

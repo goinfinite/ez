@@ -76,14 +76,14 @@ func (repo MappingQueryRepo) GetTargetById(
 
 func (repo MappingQueryRepo) FindOne(
 	hostname *valueObject.Fqdn,
-	port valueObject.NetworkPort,
+	publicPort valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
 ) (entity.Mapping, error) {
 	var mapping entity.Mapping
 
 	mappingModel := dbModel.Mapping{
-		Port:     uint(port.Get()),
-		Protocol: protocol.String(),
+		PublicPort: uint(publicPort.Get()),
+		Protocol:   protocol.String(),
 	}
 	if hostname != nil {
 		hostnameStr := hostname.String()
@@ -114,7 +114,7 @@ func (repo MappingQueryRepo) FindOne(
 
 func (repo MappingQueryRepo) FindAll(
 	hostname *valueObject.Fqdn,
-	port *valueObject.NetworkPort,
+	publicPort *valueObject.NetworkPort,
 	protocol *valueObject.NetworkProtocol,
 ) ([]entity.Mapping, error) {
 	mappingEntities := []entity.Mapping{}
@@ -125,8 +125,8 @@ func (repo MappingQueryRepo) FindAll(
 		mappingModel.Hostname = &hostnameStr
 	}
 
-	if port != nil {
-		mappingModel.Port = uint(port.Get())
+	if publicPort != nil {
+		mappingModel.PublicPort = uint(publicPort.Get())
 	}
 
 	if protocol != nil {

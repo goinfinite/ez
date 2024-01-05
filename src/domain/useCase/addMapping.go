@@ -29,7 +29,7 @@ func AddMapping(
 
 	existingMapping, err := mappingQueryRepo.FindOne(
 		addDto.Hostname,
-		addDto.Port,
+		addDto.PublicPort,
 		addDto.Protocol,
 	)
 	if err != nil && err.Error() != "MappingNotFound" {
@@ -48,7 +48,7 @@ func AddMapping(
 
 		log.Printf(
 			"Mapping for port '%v/%v' added.",
-			addDto.Port,
+			addDto.PublicPort,
 			addDto.Protocol.String(),
 		)
 	}
@@ -57,7 +57,7 @@ func AddMapping(
 		addTargetDto := dto.NewAddMappingTarget(
 			mappingId,
 			target.ContainerId,
-			target.Port,
+			target.ContainerPort,
 			target.Protocol,
 		)
 
