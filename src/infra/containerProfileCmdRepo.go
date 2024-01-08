@@ -20,7 +20,7 @@ func NewContainerProfileCmdRepo(dbSvc *db.DatabaseService) *ContainerProfileCmdR
 func (repo ContainerProfileCmdRepo) Add(
 	addDto dto.AddContainerProfile,
 ) error {
-	containerProfileModel, err := dbModel.ContainerProfile{}.FromAddDtoToModel(addDto)
+	containerProfileModel, err := dbModel.ContainerProfile{}.AddDtoToModel(addDto)
 	if err != nil {
 		return err
 	}

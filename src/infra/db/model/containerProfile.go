@@ -156,7 +156,7 @@ func (model ContainerProfile) ToEntity() (entity.ContainerProfile, error) {
 	)
 }
 
-func (ContainerProfile) FromAddDtoToModel(
+func (ContainerProfile) AddDtoToModel(
 	dto dto.AddContainerProfile,
 ) (ContainerProfile, error) {
 	var maxSpecsPtr *string
