@@ -12,6 +12,7 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
+	"gorm.io/gorm"
 )
 
 type ContainerCmdRepo struct {
@@ -192,10 +193,12 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 		*addDto.RestartPolicy,
 		0,
 		addDto.Entrypoint,
-		nowUnixTime,
-		&nowUnixTime,
 		*addDto.ProfileId,
 		addDto.Envs,
+		nowUnixTime,
+		nowUnixTime,
+		&nowUnixTime,
+		nil,
 	)
 
 	containerModel := dbModel.Container{}.ToModel(containerEntity)
@@ -225,8 +228,19 @@ func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer
 	}
 
 	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
-	updateResult := repo.dbSvc.Orm.Model(&containerModel).
-		Update("status", *updateDto.Status)
+	updateMap := map[string]interface{}{
+		"status":     *updateDto.Status,
+		"started_at": time.Now(),
+		"stopped_at": gorm.Expr("NULL"),
+		"updated_at": time.Now(),
+	}
+
+	if !*updateDto.Status {
+		updateMap["started_at"] = gorm.Expr("NULL")
+		updateMap["stopped_at"] = time.Now()
+	}
+
+	updateResult := repo.dbSvc.Orm.Model(&containerModel).Updates(updateMap)
 	return updateResult.Error
 }
 
