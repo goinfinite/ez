@@ -243,7 +243,7 @@ func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	if updateDto.Status != nil && *updateDto.Status != currentContainer.Status {
 		err := repo.updateContainerStatus(updateDto)
 		if err != nil {
-			return err
+			return errors.New("FailedToUpdateContainerStatus: " + err.Error())
 		}
 
 		// Current OCI implementations does not support permanent container resources
@@ -273,7 +273,10 @@ func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		updateDto.ContainerId.String(),
 	)
 	if err != nil {
-		return err
+		ignorableError := "error opening file"
+		if !strings.Contains(err.Error(), ignorableError) {
+			return errors.New("FailedToUpdateContainerSpecs: " + err.Error())
+		}
 	}
 
 	newContainerName := updateDto.ProfileId.String() +
@@ -287,7 +290,7 @@ func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		newContainerName,
 	)
 	if err != nil {
-		return err
+		return errors.New("FailedToRenameContainer: " + err.Error())
 	}
 
 	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
