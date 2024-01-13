@@ -27,11 +27,10 @@ func (repo ContainerQueryRepo) GetById(
 	containerId valueObject.ContainerId,
 ) (entity.Container, error) {
 	var containerModel dbModel.Container
-	err := repo.dbSvc.Orm.Where(
-		"account_id = ? AND id = ?",
-		accId.Get(),
-		containerId.String(),
-	).First(&containerModel).Error
+	err := repo.dbSvc.Orm.
+		Preload("PortBindings").
+		Where("id = ?", containerId.String()).
+		First(&containerModel).Error
 	if err != nil {
 		return entity.Container{}, err
 	}
@@ -50,10 +49,10 @@ func (repo ContainerQueryRepo) GetByAccId(
 	containers := []entity.Container{}
 
 	containerModels := []dbModel.Container{}
-	err := repo.dbSvc.Orm.Where(
-		"account_id = ?",
-		accId.Get(),
-	).Find(&containerModels).Error
+	err := repo.dbSvc.Orm.
+		Preload("PortBindings").
+		Where("account_id = ?", accId.Get()).
+		Find(&containerModels).Error
 	if err != nil {
 		return containers, err
 	}
@@ -74,7 +73,9 @@ func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 	containers := []entity.Container{}
 
 	containerModels := []dbModel.Container{}
-	err := repo.dbSvc.Orm.Find(&containerModels).Error
+	err := repo.dbSvc.Orm.
+		Preload("PortBindings").
+		Find(&containerModels).Error
 	if err != nil {
 		return containers, err
 	}
