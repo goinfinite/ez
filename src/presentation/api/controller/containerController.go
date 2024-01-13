@@ -57,6 +57,20 @@ func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
 	portBindingsList := []valueObject.PortBinding{}
 	for _, portBinding := range portBindings {
 		portBindingMap := portBinding.(map[string]interface{})
+		publicPort, err := valueObject.NewNetworkPort(
+			portBindingMap["publicPort"],
+		)
+		if err != nil {
+			continue
+		}
+
+		containerPort, err := valueObject.NewNetworkPort(
+			portBindingMap["containerPort"],
+		)
+		if err != nil {
+			continue
+		}
+
 		protocol, err := valueObject.NewNetworkProtocol(
 			portBindingMap["protocol"].(string),
 		)
@@ -64,24 +78,22 @@ func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
 			continue
 		}
 
-		containerPort, err := valueObject.NewNetworkPort(
-			portBindingMap["containerPort"].(string),
-		)
-		if err != nil {
-			continue
-		}
-
-		hostPort, err := valueObject.NewNetworkPort(
-			portBindingMap["hostPort"].(string),
-		)
-		if err != nil {
-			continue
+		var privatePortPtr *valueObject.NetworkPort
+		if portBindingMap["privatePort"] != nil {
+			privatePort, err := valueObject.NewNetworkPort(
+				portBindingMap["privatePort"],
+			)
+			if err != nil {
+				continue
+			}
+			privatePortPtr = &privatePort
 		}
 
 		newPortBinding := valueObject.NewPortBinding(
-			protocol,
+			publicPort,
 			containerPort,
-			hostPort,
+			protocol,
+			privatePortPtr,
 		)
 		portBindingsList = append(portBindingsList, newPortBinding)
 	}

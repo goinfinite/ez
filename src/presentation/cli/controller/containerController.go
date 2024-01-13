@@ -2,7 +2,6 @@ package cliController
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
@@ -40,25 +39,11 @@ func GetContainersController() *cobra.Command {
 func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
 	for _, portBindingStr := range portBindingsSlice {
-		protocol := valueObject.NewNetworkProtocolPanic("tcp")
-
-		portBindingParts := strings.Split(portBindingStr, ":")
-		hostPort, err := valueObject.NewNetworkPort(portBindingParts[0])
+		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
 		if err != nil {
-			panic("InvalidPortBindingHostPort")
-		}
-		containerPortStr := portBindingParts[1]
-
-		containerPortParts := strings.Split(containerPortStr, "/")
-		containerPort, err := valueObject.NewNetworkPort(containerPortParts[0])
-		if err != nil {
-			panic("InvalidPortBindingContainerPort")
-		}
-		if len(containerPortParts) == 1 {
-			protocol = valueObject.NewNetworkProtocolPanic(containerPortParts[1])
+			panic(err.Error() + ": " + portBindingStr)
 		}
 
-		portBinding := valueObject.NewPortBinding(protocol, hostPort, containerPort)
 		portBindings = append(portBindings, portBinding)
 	}
 
@@ -174,7 +159,7 @@ func AddContainerController() *cobra.Command {
 		"port-bindings",
 		"b",
 		[]string{},
-		"PortBindings (hostPort:containerPort[/protocol])",
+		"PortBindings (publicPort:containerPort/protocol[:privatePort])",
 	)
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
