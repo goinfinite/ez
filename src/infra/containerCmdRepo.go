@@ -36,9 +36,9 @@ func (repo ContainerCmdRepo) getBaseSpecs(
 	return containerProfile.BaseSpecs, nil
 }
 
-func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
-	containerName := addContainer.ProfileId.String() +
-		"-" + addContainer.Hostname.String()
+func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
+	containerName := addDto.ProfileId.String() +
+		"-" + addDto.Hostname.String()
 
 	runParams := []string{
 		"run",
@@ -46,14 +46,14 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		"--name",
 		containerName,
 		"--hostname",
-		addContainer.Hostname.String(),
+		addDto.Hostname.String(),
 		"--env",
-		"VIRTUAL_HOST=" + addContainer.Hostname.String(),
+		"VIRTUAL_HOST=" + addDto.Hostname.String(),
 	}
 
-	if len(addContainer.Envs) > 0 {
+	if len(addDto.Envs) > 0 {
 		envFlags := []string{}
-		for _, env := range addContainer.Envs {
+		for _, env := range addDto.Envs {
 			envFlags = append(envFlags, "--env")
 			envFlags = append(envFlags, env.String())
 		}
@@ -61,7 +61,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, envFlags...)
 	}
 
-	baseSpecs, err := repo.getBaseSpecs(*addContainer.ProfileId)
+	baseSpecs, err := repo.getBaseSpecs(*addDto.ProfileId)
 	if err != nil {
 		return err
 	}
@@ -74,19 +74,19 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	}
 	runParams = append(runParams, baseSpecsParams...)
 
-	if addContainer.RestartPolicy != nil {
-		runParams = append(runParams, "--restart", addContainer.RestartPolicy.String())
+	if addDto.RestartPolicy != nil {
+		runParams = append(runParams, "--restart", addDto.RestartPolicy.String())
 	}
 
-	if addContainer.Entrypoint != nil {
-		runParams = append(runParams, "--entrypoint", addContainer.Entrypoint.String())
+	if addDto.Entrypoint != nil {
+		runParams = append(runParams, "--entrypoint", addDto.Entrypoint.String())
 	}
 
-	if len(addContainer.PortBindings) > 0 {
+	if len(addDto.PortBindings) > 0 {
 		portBindingsParams := []string{}
 		usedPrivatePorts := []valueObject.NetworkPort{}
 
-		for pbIndex, portBindingVo := range addContainer.PortBindings {
+		for pbIndex, portBindingVo := range addDto.PortBindings {
 			portBindingModel := dbModel.ContainerPortBinding{
 				ContainerPort: uint(portBindingVo.ContainerPort),
 				PublicPort:    uint(portBindingVo.PublicPort),
@@ -103,7 +103,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 			usedPrivatePorts = append(usedPrivatePorts, nextPrivatePort)
 
 			portBindingModel.PrivatePort = uint(nextPrivatePort.Get())
-			addContainer.PortBindings[pbIndex].PrivatePort = &nextPrivatePort
+			addDto.PortBindings[pbIndex].PrivatePort = &nextPrivatePort
 
 			portBindingsParams = append(portBindingsParams, "--publish")
 			portBindingsString := nextPrivatePort.String() +
@@ -121,16 +121,16 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams = append(runParams, portBindingsParams...)
 	}
 
-	runParams = append(runParams, addContainer.ImageAddr.String())
+	runParams = append(runParams, addDto.ImageAddr.String())
 
-	err = infraHelper.EnableLingering(addContainer.AccountId)
+	err = infraHelper.EnableLingering(addDto.AccountId)
 	if err != nil {
 		return errors.New("FailedToEnableLingering: " + err.Error())
 	}
 	time.Sleep(1 * time.Second)
 
 	_, err = infraHelper.RunCmdAsUser(
-		addContainer.AccountId,
+		addDto.AccountId,
 		"podman",
 		runParams...,
 	)
@@ -139,7 +139,7 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	}
 
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
-		addContainer.AccountId,
+		addDto.AccountId,
 		"podman",
 		"container",
 		"inspect",
@@ -181,19 +181,19 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	containerEntity := entity.NewContainer(
 		containerId,
-		addContainer.AccountId,
-		addContainer.Hostname,
+		addDto.AccountId,
+		addDto.Hostname,
 		true,
-		addContainer.ImageAddr,
+		addDto.ImageAddr,
 		imageHash,
-		addContainer.PortBindings,
-		*addContainer.RestartPolicy,
+		addDto.PortBindings,
+		*addDto.RestartPolicy,
 		0,
-		addContainer.Entrypoint,
+		addDto.Entrypoint,
 		nowUnixTime,
 		&nowUnixTime,
-		*addContainer.ProfileId,
-		addContainer.Envs,
+		*addDto.ProfileId,
+		addDto.Envs,
 	)
 
 	containerModel := dbModel.Container{}.ToModel(containerEntity)
