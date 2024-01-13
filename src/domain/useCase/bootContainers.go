@@ -32,7 +32,7 @@ func BootContainers(
 			&currentContainer.ProfileId,
 		)
 
-		err = containerCmdRepo.Update(currentContainer, updateDto)
+		err = containerCmdRepo.Update(updateDto)
 		if err != nil {
 			log.Printf(
 				"[ContainerId: %s] UpdateContainerError: %s",

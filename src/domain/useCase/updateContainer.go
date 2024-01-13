@@ -14,44 +14,37 @@ func UpdateContainer(
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
-	updateContainer dto.UpdateContainer,
+	updateDto dto.UpdateContainer,
 ) error {
-	currentContainer, err := containerQueryRepo.GetById(
-		updateContainer.AccountId,
-		updateContainer.ContainerId,
+	_, err := containerQueryRepo.GetById(
+		updateDto.AccountId,
+		updateDto.ContainerId,
 	)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}
 
-	shouldUpdateQuota := updateContainer.ProfileId != nil
+	shouldUpdateQuota := updateDto.ProfileId != nil
 	if shouldUpdateQuota {
 		err = CheckAccountQuota(
 			accQueryRepo,
-			updateContainer.AccountId,
+			updateDto.AccountId,
 			containerProfileQueryRepo,
-			*updateContainer.ProfileId,
+			*updateDto.ProfileId,
 		)
 		if err != nil {
 			return err
 		}
 	}
 
-	// Current OCI implementations does not support permanent container resources update.
-	// Therefore, when updating container status, we also need to update the container
-	// profile to guarantee that the container resources are up-to-date.
-	if updateContainer.ProfileId == nil {
-		updateContainer.ProfileId = &currentContainer.ProfileId
-	}
-
-	err = containerCmdRepo.Update(currentContainer, updateContainer)
+	err = containerCmdRepo.Update(updateDto)
 	if err != nil {
 		log.Printf("UpdateContainerError: %s", err)
 		return errors.New("UpdateContainerInfraError")
 	}
 
 	if shouldUpdateQuota {
-		err = accCmdRepo.UpdateQuotaUsage(updateContainer.AccountId)
+		err = accCmdRepo.UpdateQuotaUsage(updateDto.AccountId)
 		if err != nil {
 			log.Printf("UpdateAccountQuotaError: %s", err)
 			return errors.New("UpdateAccountQuotaError")

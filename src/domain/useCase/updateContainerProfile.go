@@ -32,7 +32,7 @@ func updateContainersWithProfileId(
 			&profileId,
 		)
 
-		err := containerCmdRepo.Update(container, updateContainerDto)
+		err := containerCmdRepo.Update(updateContainerDto)
 		if err != nil {
 			log.Printf("UpdateContainersWithProfileIdError: %s", err)
 			continue
