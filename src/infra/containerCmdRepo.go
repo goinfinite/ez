@@ -158,9 +158,11 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 	}
 
 	rawContainerId, assertOk := containerInfo["Id"].(string)
-	if !assertOk {
+	if !assertOk || len(rawContainerId) < 12 {
 		return errors.New("ContainerIdParseError")
 	}
+
+	rawContainerId = rawContainerId[:12]
 	containerId, err := valueObject.NewContainerId(rawContainerId)
 	if err != nil {
 		return err
@@ -309,7 +311,17 @@ func (repo ContainerCmdRepo) Delete(
 		return err
 	}
 
+	portBindingModel := dbModel.ContainerPortBinding{}
+	deleteResult := repo.dbSvc.Orm.Delete(
+		portBindingModel,
+		"container_id = ?",
+		containerId.String(),
+	)
+	if deleteResult.Error != nil {
+		return err
+	}
+
 	containerModel := dbModel.Container{ID: containerId.String()}
-	deleteResult := repo.dbSvc.Orm.Delete(&containerModel)
+	deleteResult = repo.dbSvc.Orm.Delete(&containerModel)
 	return deleteResult.Error
 }
