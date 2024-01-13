@@ -54,15 +54,16 @@ func (repo ContainerQueryRepo) parsePortBindings(
 				return portBindings, errors.New("HostPortParseError")
 			}
 
-			networkPort, err := valueObject.NewNetworkPort(rawHostPort)
+			privatePort, err := valueObject.NewNetworkPort(rawHostPort)
 			if err != nil {
 				return portBindings, err
 			}
 
 			portBinding := valueObject.NewPortBinding(
-				networkProtocol,
 				containerPort,
-				networkPort,
+				containerPort,
+				networkProtocol,
+				&privatePort,
 			)
 			portBindings = append(portBindings, portBinding)
 		}
@@ -118,11 +119,11 @@ func (repo ContainerQueryRepo) GetById(
 		return entity.Container{}, errors.New("StatusParseError")
 	}
 
-	rawImage, assertOk := containerInfo["ImageName"].(string)
+	rawImageAddr, assertOk := containerInfo["ImageName"].(string)
 	if !assertOk {
 		return entity.Container{}, errors.New("ImageParseError")
 	}
-	image, err := valueObject.NewContainerImgAddress(rawImage)
+	imageAddr, err := valueObject.NewContainerImgAddress(rawImageAddr)
 	if err != nil {
 		return entity.Container{}, err
 	}
@@ -135,20 +136,6 @@ func (repo ContainerQueryRepo) GetById(
 	imageHash, err := valueObject.NewHash(rawImageHash)
 	if err != nil {
 		return entity.Container{}, err
-	}
-
-	rawNetworkSettings, assertOk := containerInfo["NetworkSettings"].(map[string]interface{})
-	if !assertOk {
-		return entity.Container{}, errors.New("NetworkSettingsParseError")
-	}
-
-	rawPrivateIpAddress, assertOk := rawNetworkSettings["IPAddress"].(string)
-	if !assertOk {
-		return entity.Container{}, errors.New("PrivateIpAddressParseError")
-	}
-	privateIpAddress, err := valueObject.NewIpAddress(rawPrivateIpAddress)
-	if err != nil {
-		privateIpAddress, _ = valueObject.NewIpAddress("0.0.0.0")
 	}
 
 	rawHostConfig, assertOk := containerInfo["HostConfig"].(map[string]interface{})
@@ -184,13 +171,14 @@ func (repo ContainerQueryRepo) GetById(
 	}
 	restartCount := uint64(rawRestartCount)
 
+	var entrypointPtr *valueObject.ContainerEntrypoint
 	rawEntryPoint, assertOk := rawConfig["Entrypoint"].(string)
-	if !assertOk {
-		return entity.Container{}, errors.New("EntrypointParseError")
-	}
-	entrypoint, err := valueObject.NewContainerEntrypoint(rawEntryPoint)
-	if err != nil {
-		return entity.Container{}, err
+	if assertOk {
+		entrypoint, err := valueObject.NewContainerEntrypoint(rawEntryPoint)
+		if err != nil {
+			return entity.Container{}, err
+		}
+		entrypointPtr = &entrypoint
 	}
 
 	rawCreatedAt, assertOk := containerInfo["Created"].(string)
@@ -247,13 +235,12 @@ func (repo ContainerQueryRepo) GetById(
 		accId,
 		hostname,
 		status,
-		image,
+		imageAddr,
 		imageHash,
-		privateIpAddress,
 		portBindings,
 		restartPolicyName,
 		restartCount,
-		entrypoint,
+		entrypointPtr,
 		createdAt,
 		startedAtPtr,
 		profileId,

@@ -79,6 +79,8 @@ func (dbSvc DatabaseService) dbMigrate() error {
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
+		&dbModel.Container{},
+		&dbModel.ContainerPortBinding{},
 		&dbModel.ContainerProfile{},
 		&dbModel.Mapping{},
 		&dbModel.MappingTarget{},
