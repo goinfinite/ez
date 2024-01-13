@@ -217,13 +217,11 @@ func (repo AccCmdRepo) UpdatePassword(
 		return err
 	}
 
-	err = repo.dbSvc.Orm.Model(&dbModel.Account{ID: uint(accId.Get())}).
-		Update("updated_at", time.Now()).Error
-	if err != nil {
-		return err
-	}
+	accModel := dbModel.Account{ID: uint(accId.Get())}
+	updateResult := repo.dbSvc.Orm.Model(&accModel).
+		Update("updated_at", time.Now())
 
-	return nil
+	return updateResult.Error
 }
 
 func (repo AccCmdRepo) UpdateApiKey(
@@ -247,9 +245,10 @@ func (repo AccCmdRepo) UpdateApiKey(
 	hash.Write([]byte(uuid.String()))
 	uuidHash := hex.EncodeToString(hash.Sum(nil))
 
-	err = repo.dbSvc.Orm.Model(&dbModel.Account{ID: uint(accId.Get())}).
-		Update("key_hash", uuidHash).Error
-	if err != nil {
+	accModel := dbModel.Account{ID: uint(accId.Get())}
+	updateResult := repo.dbSvc.Orm.Model(&accModel).
+		Update("key_hash", uuidHash)
+	if updateResult.Error != nil {
 		return "", err
 	}
 
