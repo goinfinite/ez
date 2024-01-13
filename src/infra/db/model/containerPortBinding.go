@@ -90,15 +90,20 @@ func (model ContainerPortBinding) GetNextAvailablePrivatePort(
 
 	nextPort := initialPort
 	for _, port := range usedPrivatePorts {
-		if port != nextPort {
-			model.PrivatePort = nextPort
+		if port == nextPort {
+			nextPort++
+			continue
 		}
-		nextPort++
+		break
+	}
+
+	if nextPort < initialPort {
+		return 0, errors.New("PrivatePortTooLow")
 	}
 
 	if nextPort > 60000 {
 		return 0, errors.New("NoAvailablePrivatePort")
 	}
 
-	return valueObject.NewNetworkPort(model.PrivatePort)
+	return valueObject.NewNetworkPort(nextPort)
 }
