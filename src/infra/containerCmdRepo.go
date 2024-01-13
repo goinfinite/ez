@@ -1,12 +1,16 @@
 package infra
 
 import (
+	"encoding/json"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
+	dbModel "github.com/speedianet/control/src/infra/db/model"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
@@ -80,24 +84,48 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 
 	if len(addContainer.PortBindings) > 0 {
 		portBindingsParams := []string{}
-		for _, portBinding := range addContainer.PortBindings {
-			portBindingsParams = append(portBindingsParams, "--publish")
-			portBindingsString := portBinding.HostPort.String() +
-				":" + portBinding.ContainerPort.String()
-			if portBinding.GetProtocol().String() != "" {
-				portBindingsString += "/" + portBinding.GetProtocol().String()
+		usedPrivatePorts := []valueObject.NetworkPort{}
+
+		for pbIndex, portBindingVo := range addContainer.PortBindings {
+			portBindingModel := dbModel.ContainerPortBinding{
+				ContainerPort: uint(portBindingVo.ContainerPort),
+				PublicPort:    uint(portBindingVo.PublicPort),
 			}
+
+			nextPrivatePort, err := portBindingModel.GetNextAvailablePrivatePort(
+				repo.dbSvc.Orm,
+				usedPrivatePorts,
+			)
+			if err != nil {
+				return errors.New("FailedToGetNextAvailablePrivatePort")
+			}
+
+			usedPrivatePorts = append(usedPrivatePorts, nextPrivatePort)
+
+			portBindingModel.PrivatePort = uint(nextPrivatePort.Get())
+			addContainer.PortBindings[pbIndex].PrivatePort = &nextPrivatePort
+
+			portBindingsParams = append(portBindingsParams, "--publish")
+			portBindingsString := nextPrivatePort.String() +
+				":" + portBindingVo.ContainerPort.String()
+
+			protocolStr := portBindingVo.Protocol.String()
+			if protocolStr != "" {
+				portBindingModel.Protocol = protocolStr
+				portBindingsString += "/" + protocolStr
+			}
+
 			portBindingsParams = append(portBindingsParams, portBindingsString)
 		}
 
 		runParams = append(runParams, portBindingsParams...)
 	}
 
-	runParams = append(runParams, addContainer.ImgAddr.String())
+	runParams = append(runParams, addContainer.ImageAddr.String())
 
 	err = infraHelper.EnableLingering(addContainer.AccountId)
 	if err != nil {
-		return err
+		return errors.New("FailedToEnableLingering: " + err.Error())
 	}
 	time.Sleep(1 * time.Second)
 
@@ -107,7 +135,72 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 		runParams...,
 	)
 	if err != nil {
+		return errors.New("ContainerRunError: " + err.Error())
+	}
+
+	containerInfoJson, err := infraHelper.RunCmdAsUser(
+		addContainer.AccountId,
+		"podman",
+		"container",
+		"inspect",
+		containerName,
+		"--format",
+		"{{json .}}",
+	)
+	if err != nil {
+		return errors.New("GetContainerInfoError")
+	}
+
+	containerInfo := map[string]interface{}{}
+	err = json.Unmarshal([]byte(containerInfoJson), &containerInfo)
+	if err != nil {
+		return errors.New("ContainerInfoParseError")
+	}
+
+	rawContainerId, assertOk := containerInfo["Id"].(string)
+	if !assertOk {
+		return errors.New("ContainerIdParseError")
+	}
+	containerId, err := valueObject.NewContainerId(rawContainerId)
+	if err != nil {
 		return err
+	}
+
+	rawImageHash, assertOk := containerInfo["ImageDigest"].(string)
+	if !assertOk {
+		return errors.New("ImageHashParseError")
+	}
+	rawImageHash = strings.TrimPrefix(rawImageHash, "sha256:")
+
+	imageHash, err := valueObject.NewHash(rawImageHash)
+	if err != nil {
+		return err
+	}
+
+	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+
+	containerEntity := entity.NewContainer(
+		containerId,
+		addContainer.AccountId,
+		addContainer.Hostname,
+		true,
+		addContainer.ImageAddr,
+		imageHash,
+		addContainer.PortBindings,
+		*addContainer.RestartPolicy,
+		0,
+		addContainer.Entrypoint,
+		nowUnixTime,
+		&nowUnixTime,
+		*addContainer.ProfileId,
+		addContainer.Envs,
+	)
+
+	containerModel := dbModel.Container{}.ToModel(containerEntity)
+
+	createResult := repo.dbSvc.Orm.Create(&containerModel)
+	if createResult.Error != nil {
+		return createResult.Error
 	}
 
 	return nil
