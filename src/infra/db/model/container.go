@@ -20,10 +20,12 @@ type Container struct {
 	RestartPolicy string `gorm:"not null"`
 	RestartCount  uint
 	Entrypoint    *string
-	CreatedAt     time.Time `gorm:"not null"`
-	StartedAt     *time.Time
 	ProfileID     uint `gorm:"not null"`
 	Envs          *string
+	CreatedAt     time.Time `gorm:"not null"`
+	UpdatedAt     time.Time `gorm:"not null"`
+	StartedAt     *time.Time
+	StoppedAt     *time.Time
 }
 
 func (Container) TableName() string {
@@ -84,11 +86,18 @@ func (model Container) ToEntity() (entity.Container, error) {
 	}
 
 	createdAt := valueObject.UnixTime(model.CreatedAt.Unix())
+	updatedAt := valueObject.UnixTime(model.UpdatedAt.Unix())
 
 	var startedAtPtr *valueObject.UnixTime
 	if model.StartedAt != nil {
 		startedAt := valueObject.UnixTime(model.StartedAt.Unix())
 		startedAtPtr = &startedAt
+	}
+
+	var stoppedAtPtr *valueObject.UnixTime
+	if model.StoppedAt != nil {
+		stoppedAt := valueObject.UnixTime(model.StoppedAt.Unix())
+		stoppedAtPtr = &stoppedAt
 	}
 
 	profileId, err := valueObject.NewContainerProfileId(model.ProfileID)
@@ -123,10 +132,12 @@ func (model Container) ToEntity() (entity.Container, error) {
 		restartPolicy,
 		uint64(model.RestartCount),
 		entryPointPtr,
-		createdAt,
-		startedAtPtr,
 		profileId,
 		envs,
+		createdAt,
+		updatedAt,
+		startedAtPtr,
+		stoppedAtPtr,
 	), nil
 }
 

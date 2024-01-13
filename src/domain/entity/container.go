@@ -13,10 +13,12 @@ type Container struct {
 	RestartPolicy valueObject.ContainerRestartPolicy `json:"restartPolicy"`
 	RestartCount  uint64                             `json:"restartCount"`
 	Entrypoint    *valueObject.ContainerEntrypoint   `json:"entrypoint"`
-	CreatedAt     valueObject.UnixTime               `json:"createdAt"`
-	StartedAt     *valueObject.UnixTime              `json:"startedAt"`
 	ProfileId     valueObject.ContainerProfileId     `json:"profileId"`
 	Envs          []valueObject.ContainerEnv         `json:"envs"`
+	CreatedAt     valueObject.UnixTime               `json:"createdAt"`
+	UpdatedAt     valueObject.UnixTime               `json:"updatedAt"`
+	StartedAt     *valueObject.UnixTime              `json:"startedAt"`
+	StoppedAt     *valueObject.UnixTime              `json:"stoppedAt"`
 }
 
 func NewContainer(
@@ -30,10 +32,12 @@ func NewContainer(
 	restartPolicy valueObject.ContainerRestartPolicy,
 	restartCount uint64,
 	entrypoint *valueObject.ContainerEntrypoint,
-	createdAt valueObject.UnixTime,
-	startedAt *valueObject.UnixTime,
 	profileId valueObject.ContainerProfileId,
 	envs []valueObject.ContainerEnv,
+	createdAt valueObject.UnixTime,
+	updatedAt valueObject.UnixTime,
+	startedAt *valueObject.UnixTime,
+	stoppedAt *valueObject.UnixTime,
 ) Container {
 	return Container{
 		Id:            id,
@@ -46,9 +50,11 @@ func NewContainer(
 		RestartPolicy: restartPolicy,
 		RestartCount:  restartCount,
 		Entrypoint:    entrypoint,
-		CreatedAt:     createdAt,
-		StartedAt:     startedAt,
 		ProfileId:     profileId,
 		Envs:          envs,
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt,
+		StartedAt:     startedAt,
+		StoppedAt:     stoppedAt,
 	}
 }
