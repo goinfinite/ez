@@ -206,74 +206,92 @@ func (repo ContainerCmdRepo) Add(addContainer dto.AddContainer) error {
 	return nil
 }
 
-func (repo ContainerCmdRepo) updateContainerStatus(
-	currentContainer entity.Container,
-	updateContainer dto.UpdateContainer,
-) error {
+func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
 	actionToPerform := "start"
-	if !*updateContainer.Status {
+	if !*updateDto.Status {
 		actionToPerform = "stop"
 	}
 
-	shouldUpdateStatus := updateContainer.Status != &currentContainer.Status
-	if !shouldUpdateStatus {
-		return nil
-	}
-
 	_, err := infraHelper.RunCmdAsUser(
-		updateContainer.AccountId,
+		updateDto.AccountId,
 		"podman",
 		actionToPerform,
-		updateContainer.ContainerId.String(),
+		updateDto.ContainerId.String(),
 	)
-	return err
+	if err != nil {
+		return err
+	}
+
+	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
+	updateResult := repo.dbSvc.Orm.Model(&containerModel).
+		Update("status", *updateDto.Status)
+	return updateResult.Error
 }
 
-func (repo ContainerCmdRepo) Update(
-	currentContainer entity.Container,
-	updateContainer dto.UpdateContainer,
-) error {
-	if updateContainer.Status != nil {
-		err := repo.updateContainerStatus(currentContainer, updateContainer)
+func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
+	containerQueryRepo := NewContainerQueryRepo(repo.dbSvc)
+	currentContainer, err := containerQueryRepo.GetById(
+		updateDto.AccountId,
+		updateDto.ContainerId,
+	)
+	if err != nil {
+		return errors.New("ContainerNotFound")
+	}
+
+	if updateDto.Status != nil && *updateDto.Status != currentContainer.Status {
+		err := repo.updateContainerStatus(updateDto)
 		if err != nil {
 			return err
 		}
+
+		// Current OCI implementations does not support permanent container resources
+		// update. Therefore, when updating container status (on/off), it is also
+		// necessary to update the container profile to guarantee that the container
+		// resources are in accordance with the profile.
+		updateDto.ProfileId = &currentContainer.ProfileId
 	}
 
-	if updateContainer.ProfileId == nil {
+	if updateDto.ProfileId == nil {
 		return nil
 	}
 
-	newSpecs, err := repo.getBaseSpecs(*updateContainer.ProfileId)
+	newSpecs, err := repo.getBaseSpecs(*updateDto.ProfileId)
 	if err != nil {
 		return err
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
-		updateContainer.AccountId,
+		updateDto.AccountId,
 		"podman",
 		"update",
 		"--cpus",
 		newSpecs.CpuCores.String(),
 		"--memory",
 		newSpecs.MemoryBytes.String(),
-		updateContainer.ContainerId.String(),
+		updateDto.ContainerId.String(),
 	)
 	if err != nil {
 		return err
 	}
 
-	newContainerName := updateContainer.ProfileId.String() +
+	newContainerName := updateDto.ProfileId.String() +
 		"-" + currentContainer.Hostname.String()
 
 	_, err = infraHelper.RunCmdAsUser(
-		updateContainer.AccountId,
+		updateDto.AccountId,
 		"podman",
 		"rename",
-		updateContainer.ContainerId.String(),
+		updateDto.ContainerId.String(),
 		newContainerName,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+
+	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
+	updateResult := repo.dbSvc.Orm.Model(&containerModel).
+		Update("profile_id", updateDto.ProfileId.String())
+	return updateResult.Error
 }
 
 func (repo ContainerCmdRepo) Delete(
@@ -291,5 +309,7 @@ func (repo ContainerCmdRepo) Delete(
 		return err
 	}
 
-	return nil
+	containerModel := dbModel.Container{ID: containerId.String()}
+	deleteResult := repo.dbSvc.Orm.Delete(&containerModel)
+	return deleteResult.Error
 }
