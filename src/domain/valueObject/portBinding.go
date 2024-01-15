@@ -40,20 +40,12 @@ func NewPortBindingFromString(value string) (PortBinding, error) {
 		return portBinding, err
 	}
 
-	protocolStr := "tcp"
-	switch publicPort.Get() {
-	case 80:
-		protocolStr = "http"
-	case 443:
-		protocolStr = "https"
-	}
-	defaultProtocol, _ := NewNetworkProtocol(protocolStr)
-
+	protocol := GuessNetworkProtocolByPort(publicPort)
 	if len(bindingParts) == 1 {
 		return NewPortBinding(
 			publicPort,
 			publicPort,
-			defaultProtocol,
+			protocol,
 			nil,
 		), nil
 	}
@@ -66,11 +58,11 @@ func NewPortBindingFromString(value string) (PortBinding, error) {
 		return portBinding, err
 	}
 
-	protocolStr = defaultProtocol.String()
+	protocolStr := protocol.String()
 	if len(containerPortProtocolParts) == 2 {
 		protocolStr = containerPortProtocolParts[1]
 	}
-	protocol, err := NewNetworkProtocol(protocolStr)
+	protocol, err = NewNetworkProtocol(protocolStr)
 	if err != nil {
 		return portBinding, err
 	}

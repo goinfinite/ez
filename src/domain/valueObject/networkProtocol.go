@@ -40,3 +40,18 @@ func NewNetworkProtocolPanic(value string) NetworkProtocol {
 func (np NetworkProtocol) String() string {
 	return string(np)
 }
+
+func GuessNetworkProtocolByPort(port NetworkPort) NetworkProtocol {
+	protocolStr := "tcp"
+	switch port.Get() {
+	case 53:
+		protocolStr = "udp"
+	case 80:
+		protocolStr = "http"
+	case 443:
+		protocolStr = "https"
+	}
+
+	networkProtocol, _ := NewNetworkProtocol(protocolStr)
+	return networkProtocol
+}

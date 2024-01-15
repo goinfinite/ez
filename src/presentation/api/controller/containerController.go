@@ -75,15 +75,7 @@ func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
 			}
 		}
 
-		protocolStr := "tcp"
-		switch publicPort.Get() {
-		case 80:
-			protocolStr = "http"
-		case 443:
-			protocolStr = "https"
-		}
-		protocol := valueObject.NewNetworkProtocolPanic(protocolStr)
-
+		protocol := valueObject.GuessNetworkProtocolByPort(publicPort)
 		if portBindingMap["protocol"] != nil {
 			protocol, err = valueObject.NewNetworkProtocol(
 				portBindingMap["protocol"].(string),
