@@ -59,29 +59,26 @@ func AddMappingController() *cobra.Command {
 
 			publicPort := valueObject.NewNetworkPortPanic(publicPortUint)
 
-			switch publicPort.Get() {
-			case 80:
-				hostProtocolStr = "http"
-			case 443:
-				hostProtocolStr = "https"
+			protocolStr := valueObject.GuessNetworkProtocolByPort(publicPort).String()
+			if hostProtocolStr != "" {
+				protocolStr = hostProtocolStr
 			}
-			hostProtocol := valueObject.NewNetworkProtocolPanic(hostProtocolStr)
+			hostProtocol := valueObject.NewNetworkProtocolPanic(protocolStr)
 
-			mappingTargets := []dto.AddMappingTargetWithoutMappingId{}
+			targets := []valueObject.ContainerId{}
 			for _, targetStr := range targetsSlice {
-				target, err := dto.NewAddMappingTargetWithoutMappingIdFromString(targetStr)
+				containerId, err := valueObject.NewContainerId(targetStr)
 				if err != nil {
 					cliHelper.ResponseWrapper(false, err.Error())
 				}
-				mappingTargets = append(mappingTargets, target)
+				targets = append(targets, containerId)
 			}
-
 			addMappingDto := dto.NewAddMapping(
 				accId,
 				hostnamePtr,
 				publicPort,
 				hostProtocol,
-				mappingTargets,
+				targets,
 			)
 
 			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
@@ -110,7 +107,7 @@ func AddMappingController() *cobra.Command {
 		"target",
 		"t",
 		[]string{},
-		"ContainerId (required), Port and Protocol (format: containerId:containerPort/protocol)",
+		"ContainerIds",
 	)
 	cmd.MarkFlagRequired("target")
 	return cmd
@@ -165,16 +162,14 @@ func AddMappingTargetController() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
-			target, err := dto.NewAddMappingTargetWithoutMappingIdFromString(targetStr)
+			target, err := valueObject.NewContainerId(targetStr)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
 			addTargetDto := dto.NewAddMappingTarget(
 				mappingId,
-				target.ContainerId,
-				target.ContainerPort,
-				target.Protocol,
+				target,
 			)
 
 			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
@@ -200,7 +195,7 @@ func AddMappingTargetController() *cobra.Command {
 		"target",
 		"t",
 		"",
-		"ContainerId (required), Port and Protocol (format: containerId:containerPort/protocol)",
+		"ContainerId",
 	)
 	cmd.MarkFlagRequired("target")
 	return cmd
