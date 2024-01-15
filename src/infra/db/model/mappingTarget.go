@@ -9,13 +9,11 @@ import (
 )
 
 type MappingTarget struct {
-	ID            uint `gorm:"primarykey"`
-	MappingID     uint
-	ContainerId   string
-	ContainerPort *uint
-	Protocol      *string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID          uint `gorm:"primarykey"`
+	MappingID   uint
+	ContainerId string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func (MappingTarget) TableName() string {
@@ -30,10 +28,8 @@ func NewMappingTarget(
 	protocol *string,
 ) MappingTarget {
 	targetModel := MappingTarget{
-		MappingID:     mappingId,
-		ContainerId:   containerId,
-		ContainerPort: containerPort,
-		Protocol:      protocol,
+		MappingID:   mappingId,
+		ContainerId: containerId,
 	}
 
 	if id != 0 {
@@ -61,30 +57,10 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 		return mappingTarget, err
 	}
 
-	var containerPortPtr *valueObject.NetworkPort
-	if model.ContainerPort != nil {
-		containerPort, err := valueObject.NewNetworkPort(*model.ContainerPort)
-		if err != nil {
-			return mappingTarget, err
-		}
-		containerPortPtr = &containerPort
-	}
-
-	var protocolPtr *valueObject.NetworkProtocol
-	if model.Protocol != nil {
-		protocol, err := valueObject.NewNetworkProtocol(*model.Protocol)
-		if err != nil {
-			return mappingTarget, err
-		}
-		protocolPtr = &protocol
-	}
-
 	return entity.NewMappingTarget(
 		id,
 		mappingId,
 		containerId,
-		containerPortPtr,
-		protocolPtr,
 	), nil
 }
 
@@ -96,16 +72,6 @@ func (MappingTarget) AddDtoToModel(addDto dto.AddMappingTarget) MappingTarget {
 		nil,
 		nil,
 	)
-
-	if addDto.ContainerPort != nil {
-		containerPortUint := uint(addDto.ContainerPort.Get())
-		model.ContainerPort = &containerPortUint
-	}
-
-	if addDto.Protocol != nil {
-		protocolStr := addDto.Protocol.String()
-		model.Protocol = &protocolStr
-	}
 
 	return model
 }
