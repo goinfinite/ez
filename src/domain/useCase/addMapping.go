@@ -56,9 +56,7 @@ func AddMapping(
 	for _, target := range addDto.Targets {
 		addTargetDto := dto.NewAddMappingTarget(
 			mappingId,
-			target.ContainerId,
-			target.ContainerPort,
-			target.Protocol,
+			target,
 		)
 
 		err = AddMappingTarget(
