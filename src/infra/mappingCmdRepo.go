@@ -2,9 +2,11 @@ package infra
 
 import (
 	"errors"
+	"os"
 	"strings"
 
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
@@ -24,6 +26,19 @@ func NewMappingCmdRepo(dbSvc *db.DatabaseService) *MappingCmdRepo {
 		dbSvc:     dbSvc,
 		queryRepo: NewMappingQueryRepo(dbSvc),
 	}
+}
+
+func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
+	var mappingId valueObject.MappingId
+
+	mappingModel := dbModel.Mapping{}.AddDtoToModel(mappingDto)
+
+	createResult := repo.dbSvc.Orm.Create(&mappingModel)
+	if createResult.Error != nil {
+		return mappingId, createResult.Error
+	}
+
+	return valueObject.NewMappingId(mappingModel.ID)
 }
 
 func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
@@ -85,32 +100,53 @@ func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
 }
 
 func (repo MappingCmdRepo) nginxConfigFactory(
-	mappingId valueObject.MappingId,
+	mappingEntity entity.Mapping,
 ) (string, error) {
-	mappingEntity, err := repo.queryRepo.GetById(mappingId)
+	containerIdTargetEntityMap := map[valueObject.ContainerId]entity.MappingTarget{}
+	for _, mappingTarget := range mappingEntity.Targets {
+		containerIdTargetEntityMap[mappingTarget.ContainerId] = mappingTarget
+	}
+
+	containerQueryRepo := NewContainerQueryRepo(repo.dbSvc)
+	containerEntities, err := containerQueryRepo.Get()
 	if err != nil {
 		return "", err
 	}
 
-	if len(mappingEntity.Targets) == 0 {
-		return "", errors.New("NoTargetSent")
+	if len(containerEntities) == 0 {
+		return "", errors.New("NoContainersFound")
+	}
+
+	containerIdContainerEntityMap := map[valueObject.ContainerId]entity.Container{}
+	for _, containerEntity := range containerEntities {
+		containerIdContainerEntityMap[containerEntity.Id] = containerEntity
 	}
 
 	serversList := ""
-	for _, target := range mappingEntity.Targets {
-		containerPort := mappingEntity.PublicPort
-		if target.ContainerPort != nil {
-			containerPort = *target.ContainerPort
+	for containerId, containerEntity := range containerIdContainerEntityMap {
+		_, isContainerTarget := containerIdTargetEntityMap[containerId]
+		if !isContainerTarget {
+			continue
 		}
 
-		serversList += "server " +
-			target.ContainerId.String() +
-			":" +
-			containerPort.String() + ";\n"
-	}
+		for _, containerPortBinding := range containerEntity.PortBindings {
+			if containerPortBinding.PrivatePort == nil {
+				continue
+			}
 
+			if containerPortBinding.PublicPort != mappingEntity.PublicPort {
+				continue
+			}
+
+			serversList += "server " +
+				containerEntity.Id.String() +
+				":" +
+				containerPortBinding.PrivatePort.String() + ";\n"
+		}
+	}
 	serversList = strings.TrimSpace(serversList)
-	upstreamName := "mapping_" + mappingId.String() + "_backend"
+
+	upstreamName := "mapping_" + mappingEntity.Id.String() + "_backend"
 	upstreamBlock := `
 upstream ` + upstreamName + ` {
 	` + serversList + `
@@ -189,17 +225,48 @@ server {
 	return strings.TrimSpace(upstreamBlock + nginxConf), nil
 }
 
-func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
-	var mappingId valueObject.MappingId
-
-	mappingModel := dbModel.Mapping{}.AddDtoToModel(mappingDto)
-
-	createResult := repo.dbSvc.Orm.Create(&mappingModel)
-	if createResult.Error != nil {
-		return mappingId, createResult.Error
+func (repo MappingCmdRepo) getNginxConfDirByProtocol(
+	protocol valueObject.NetworkProtocol,
+) string {
+	switch protocol.String() {
+	case "http", "grpc", "ws":
+		return nginxHttpConfDir
 	}
 
-	return valueObject.NewMappingId(mappingModel.ID)
+	return nginxStreamConfDir
+}
+
+func (repo MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) error {
+	mappingEntity, err := repo.queryRepo.GetById(mappingId)
+	if err != nil {
+		return err
+	}
+
+	if len(mappingEntity.Targets) == 0 {
+		return errors.New("NoTargetSent")
+	}
+
+	nginxConf, err := repo.nginxConfigFactory(mappingEntity)
+	if err != nil {
+		return err
+	}
+
+	nginxConfDir := repo.getNginxConfDirByProtocol(mappingEntity.Protocol)
+	err = infraHelper.UpdateFile(
+		nginxConfDir+"/mapping_"+mappingEntity.Id.String()+".conf",
+		nginxConf,
+		true,
+	)
+	if err != nil {
+		return errors.New("UpdateNginxConfFailed: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd("nginx", "-s", "reload")
+	if err != nil {
+		return errors.New("ReloadNginxFailed: " + err.Error())
+	}
+
+	return nil
 }
 
 func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
@@ -210,21 +277,19 @@ func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 		return createResult.Error
 	}
 
-	nginxConf, err := repo.nginxConfigFactory(addDto.MappingId)
+	return repo.updateMappingFile(addDto.MappingId)
+}
+
+func (repo MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) error {
+	mappingEntity, err := repo.queryRepo.GetById(mappingId)
 	if err != nil {
 		return err
 	}
-	if nginxConf == "" {
-		return errors.New("EmptyNginxConf")
-	}
 
-	err = infraHelper.UpdateFile(
-		nginxStreamConfDir+"/mapping_"+addDto.MappingId.String()+".conf",
-		nginxConf,
-		true,
-	)
-	if err != nil {
-		return errors.New("UpdateNginxConfFailed: " + err.Error())
+	nginxConfDir := repo.getNginxConfDirByProtocol(mappingEntity.Protocol)
+	err = os.Remove(nginxConfDir + "/mapping_" + mappingId.String() + ".conf")
+	if err != nil && !os.IsNotExist(err) {
+		return err
 	}
 
 	_, err = infraHelper.RunCmd("nginx", "-s", "reload")
@@ -243,9 +308,34 @@ func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
 		return err
 	}
 
-	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
+	mappingEntity, err := repo.queryRepo.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	err = ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
+	if err != nil {
+		return err
+	}
+
+	return repo.deleteMappingFile(mappingEntity.Id)
 }
 
 func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
-	return repo.dbSvc.Orm.Delete(dbModel.MappingTarget{}, id.Get()).Error
+	targetEntity, err := repo.queryRepo.GetTargetById(id)
+	if err != nil {
+		return err
+	}
+
+	err = repo.dbSvc.Orm.Delete(dbModel.MappingTarget{}, id.Get()).Error
+	if err != nil {
+		return err
+	}
+
+	mappingTargetEntity, err := repo.queryRepo.GetTargetById(targetEntity.Id)
+	if err != nil {
+		return err
+	}
+
+	return repo.updateMappingFile(mappingTargetEntity.MappingId)
 }
