@@ -57,6 +57,7 @@ func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
 	portBindingsList := []valueObject.PortBinding{}
 	for _, portBinding := range portBindings {
 		portBindingMap := portBinding.(map[string]interface{})
+
 		publicPort, err := valueObject.NewNetworkPort(
 			portBindingMap["publicPort"],
 		)
@@ -64,18 +65,32 @@ func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
 			continue
 		}
 
-		containerPort, err := valueObject.NewNetworkPort(
-			portBindingMap["containerPort"],
-		)
-		if err != nil {
-			continue
+		containerPort := publicPort
+		if portBindingMap["containerPort"] != nil {
+			containerPort, err = valueObject.NewNetworkPort(
+				portBindingMap["containerPort"],
+			)
+			if err != nil {
+				continue
+			}
 		}
 
-		protocol, err := valueObject.NewNetworkProtocol(
-			portBindingMap["protocol"].(string),
-		)
-		if err != nil {
-			continue
+		protocolStr := "tcp"
+		switch publicPort.Get() {
+		case 80:
+			protocolStr = "http"
+		case 443:
+			protocolStr = "https"
+		}
+		protocol := valueObject.NewNetworkProtocolPanic(protocolStr)
+
+		if portBindingMap["protocol"] != nil {
+			protocol, err = valueObject.NewNetworkProtocol(
+				portBindingMap["protocol"].(string),
+			)
+			if err != nil {
+				continue
+			}
 		}
 
 		var privatePortPtr *valueObject.NetworkPort
@@ -121,7 +136,7 @@ func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imgAddr are required.)"
+// @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imgAddr are required.)<br />When specifying portBindings, only publicPort is required."
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /container/ [post]
 func AddContainerController(c echo.Context) error {

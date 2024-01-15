@@ -21,7 +21,7 @@ definitions:
         type: array
       hostname:
         type: string
-      image:
+      imageAddr:
         type: string
       portBindings:
         items:
@@ -67,7 +67,7 @@ definitions:
         type: string
       id:
         type: string
-      image:
+      imageAddr:
         type: string
       imageHash:
         type: string
@@ -77,8 +77,6 @@ definitions:
         items:
           $ref: '#/definitions/valueObject.PortBinding'
         type: array
-      privateIp:
-        type: string
       profileId:
         type: integer
       restartCount:
@@ -89,6 +87,10 @@ definitions:
         type: integer
       status:
         type: boolean
+      stoppedAt:
+        type: integer
+      updatedAt:
+        type: integer
     type: object
   dto.Login:
     properties:
@@ -182,7 +184,7 @@ definitions:
         type: string
       id:
         type: string
-      image:
+      imageAddr:
         type: string
       imageHash:
         type: string
@@ -190,8 +192,6 @@ definitions:
         items:
           $ref: '#/definitions/valueObject.PortBinding'
         type: array
-      privateIp:
-        type: string
       profileId:
         type: integer
       restartCount:
@@ -202,6 +202,10 @@ definitions:
         type: integer
       status:
         type: boolean
+      stoppedAt:
+        type: integer
+      updatedAt:
+        type: integer
     type: object
   entity.ContainerProfile:
     properties:
@@ -349,10 +353,12 @@ definitions:
     properties:
       containerPort:
         type: integer
-      hostPort:
+      privatePort:
         type: integer
       protocol:
         type: string
+      publicPort:
+        type: integer
     type: object
   valueObject.ScalingPolicy:
     enum:
@@ -549,7 +555,8 @@ paths:
       - application/json
       description: Add a new container.
       parameters:
-      - description: NewContainer (Only accountId, hostname and imgAddr are required.)
+      - description: NewContainer (Only accountId, hostname and imgAddr are required.)<br
+          />When specifying portBindings, only publicPort is required.
         in: body
         name: addContainerDto
         required: true

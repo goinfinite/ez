@@ -292,7 +292,7 @@ const docTemplate = `{
                 "summary": "AddNewContainer",
                 "parameters": [
                     {
-                        "description": "NewContainer (Only accountId, hostname and imgAddr are required.)",
+                        "description": "NewContainer (Only accountId, hostname and imgAddr are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
                         "name": "addContainerDto",
                         "in": "body",
                         "required": true,
@@ -590,7 +590,7 @@ const docTemplate = `{
                 "hostname": {
                     "type": "string"
                 },
-                "image": {
+                "imageAddr": {
                     "type": "string"
                 },
                 "portBindings": {
@@ -660,7 +660,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "image": {
+                "imageAddr": {
                     "type": "string"
                 },
                 "imageHash": {
@@ -674,9 +674,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/valueObject.PortBinding"
                     }
-                },
-                "privateIp": {
-                    "type": "string"
                 },
                 "profileId": {
                     "type": "integer"
@@ -692,6 +689,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "boolean"
+                },
+                "stoppedAt": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },
@@ -836,7 +839,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "image": {
+                "imageAddr": {
                     "type": "string"
                 },
                 "imageHash": {
@@ -847,9 +850,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/valueObject.PortBinding"
                     }
-                },
-                "privateIp": {
-                    "type": "string"
                 },
                 "profileId": {
                     "type": "integer"
@@ -865,6 +865,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "boolean"
+                },
+                "stoppedAt": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },
@@ -1087,11 +1093,14 @@ const docTemplate = `{
                 "containerPort": {
                     "type": "integer"
                 },
-                "hostPort": {
+                "privatePort": {
                     "type": "integer"
                 },
                 "protocol": {
                     "type": "string"
+                },
+                "publicPort": {
+                    "type": "integer"
                 }
             }
         },

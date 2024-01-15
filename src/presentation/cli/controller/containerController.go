@@ -159,7 +159,7 @@ func AddContainerController() *cobra.Command {
 		"port-bindings",
 		"b",
 		[]string{},
-		"PortBindings (publicPort:containerPort/protocol[:privatePort])",
+		"PortBindings (publicPort[:containerPort][/protocol][:privatePort])",
 	)
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
@@ -236,7 +236,7 @@ func UpdateContainerController() *cobra.Command {
 	cmd.MarkFlagRequired("acc-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
-	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "ContainerStatus (true or false)")
+	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "Status (true/false)")
 	cmd.Flags().Uint64VarP(&profileId, "profile-id", "p", 0, "ContainerProfileId")
 	return cmd
 }
