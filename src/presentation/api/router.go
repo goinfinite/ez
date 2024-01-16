@@ -51,13 +51,13 @@ func containerRoutes(baseRoute *echo.Group) {
 	)
 }
 
-func mappingsRoutes(baseRoute *echo.Group) {
-	mappingsGroup := baseRoute.Group("/mappings")
-	mappingsGroup.GET("/", apiController.GetMappingsController)
-	mappingsGroup.POST("/", apiController.AddMappingController)
-	mappingsGroup.DELETE("/:mappingId/", apiController.DeleteMappingController)
-	mappingsGroup.POST("/target/", apiController.AddMappingTargetController)
-	mappingsGroup.DELETE(
+func mappingRoutes(baseRoute *echo.Group) {
+	mappingGroup := baseRoute.Group("/mapping")
+	mappingGroup.GET("/", apiController.GetMappingsController)
+	mappingGroup.POST("/", apiController.AddMappingController)
+	mappingGroup.DELETE("/:mappingId/", apiController.DeleteMappingController)
+	mappingGroup.POST("/target/", apiController.AddMappingTargetController)
+	mappingGroup.DELETE(
 		"/:mappingId/target/:targetId/",
 		apiController.DeleteMappingTargetController,
 	)
@@ -73,5 +73,6 @@ func registerApiRoutes(baseRoute *echo.Group, dbSvc *db.DatabaseService) {
 	authRoutes(baseRoute)
 	accountRoutes(baseRoute, dbSvc)
 	containerRoutes(baseRoute)
+	mappingRoutes(baseRoute)
 	o11yRoutes(baseRoute)
 }
