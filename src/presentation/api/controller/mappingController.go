@@ -58,7 +58,10 @@ func AddMappingController(c echo.Context) error {
 
 	publicPort := valueObject.NewNetworkPortPanic(requestBody["publicPort"])
 
-	protocol := valueObject.NewNetworkProtocolPanic(requestBody["protocol"].(string))
+	protocol := valueObject.GuessNetworkProtocolByPort(publicPort)
+	if requestBody["protocol"] != nil {
+		protocol = valueObject.NewNetworkProtocolPanic(requestBody["protocol"].(string))
+	}
 
 	targets := []valueObject.ContainerId{}
 	for _, targetStr := range requestBody["targets"].([]interface{}) {
