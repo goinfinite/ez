@@ -101,7 +101,7 @@ func AddMappingController() *cobra.Command {
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.Flags().Uint64VarP(&publicPortUint, "port", "p", 0, "Public Port")
 	cmd.MarkFlagRequired("port")
-	cmd.Flags().StringVarP(&hostProtocolStr, "protocol", "l", "tcp", "Host Protocol")
+	cmd.Flags().StringVarP(&hostProtocolStr, "protocol", "l", "", "Host Protocol")
 	cmd.Flags().StringSliceVarP(
 		&targetsSlice,
 		"target",
