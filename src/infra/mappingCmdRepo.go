@@ -334,7 +334,7 @@ func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
 		return err
 	}
 
-	if len(mappingEntity.Targets) < 2 {
+	if len(mappingEntity.Targets) < 1 {
 		return repo.deleteMappingFile(targetEntity.MappingId)
 	}
 
