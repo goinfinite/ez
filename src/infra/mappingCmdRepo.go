@@ -130,7 +130,8 @@ func (repo MappingCmdRepo) nginxConfigFactory(
 		}
 
 		for _, containerPortBinding := range containerEntity.PortBindings {
-			if containerPortBinding.PrivatePort == nil {
+			privatePort := containerPortBinding.PrivatePort
+			if privatePort == nil {
 				continue
 			}
 
@@ -138,13 +139,14 @@ func (repo MappingCmdRepo) nginxConfigFactory(
 				continue
 			}
 
-			serversList += "server " +
-				containerEntity.Id.String() +
-				":" +
-				containerPortBinding.PrivatePort.String() + ";\n"
+			serversList += "server localhost:" + privatePort.String() + ";\n"
 		}
 	}
 	serversList = strings.TrimSpace(serversList)
+
+	if serversList == "" {
+		return "", errors.New("UpstreamServersListEmpty")
+	}
 
 	upstreamName := "mapping_" + mappingEntity.Id.String() + "_backend"
 	upstreamBlock := `
@@ -222,7 +224,7 @@ server {
 		nginxConf = tcpNginxConf
 	}
 
-	return strings.TrimSpace(upstreamBlock + nginxConf), nil
+	return strings.TrimSpace(upstreamBlock+nginxConf) + "\n", nil
 }
 
 func (repo MappingCmdRepo) getNginxConfDirByProtocol(
@@ -243,7 +245,7 @@ func (repo MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) er
 	}
 
 	if len(mappingEntity.Targets) == 0 {
-		return errors.New("NoTargetSent")
+		return errors.New("MappingHasNoTarget")
 	}
 
 	nginxConf, err := repo.nginxConfigFactory(mappingEntity)
@@ -253,7 +255,7 @@ func (repo MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) er
 
 	nginxConfDir := repo.getNginxConfDirByProtocol(mappingEntity.Protocol)
 	err = infraHelper.UpdateFile(
-		nginxConfDir+"/mapping_"+mappingEntity.Id.String()+".conf",
+		nginxConfDir+"/mapping_"+mappingId.String()+".conf",
 		nginxConf,
 		true,
 	)
@@ -308,17 +310,12 @@ func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
 		return err
 	}
 
-	mappingEntity, err := repo.queryRepo.GetById(id)
+	err = repo.deleteMappingFile(id)
 	if err != nil {
 		return err
 	}
 
-	err = ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
-	if err != nil {
-		return err
-	}
-
-	return repo.deleteMappingFile(mappingEntity.Id)
+	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
 }
 
 func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
@@ -332,10 +329,14 @@ func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
 		return err
 	}
 
-	mappingTargetEntity, err := repo.queryRepo.GetTargetById(targetEntity.Id)
+	mappingEntity, err := repo.queryRepo.GetById(targetEntity.MappingId)
 	if err != nil {
 		return err
 	}
 
-	return repo.updateMappingFile(mappingTargetEntity.MappingId)
+	if len(mappingEntity.Targets) < 2 {
+		return repo.deleteMappingFile(targetEntity.MappingId)
+	}
+
+	return repo.updateMappingFile(targetEntity.MappingId)
 }
