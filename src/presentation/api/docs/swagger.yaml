@@ -51,6 +51,28 @@ definitions:
       scalingThreshold:
         type: integer
     type: object
+  dto.AddMapping:
+    properties:
+      accountId:
+        type: integer
+      hostname:
+        type: string
+      protocol:
+        type: string
+      publicPort:
+        type: integer
+      targets:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.AddMappingTarget:
+    properties:
+      containerId:
+        type: string
+      mappingId:
+        type: integer
+    type: object
   dto.ContainerWithMetrics:
     properties:
       accountId:
@@ -226,6 +248,32 @@ definitions:
       scalingPolicy:
         $ref: '#/definitions/valueObject.ScalingPolicy'
       scalingThreshold:
+        type: integer
+    type: object
+  entity.Mapping:
+    properties:
+      accountId:
+        type: integer
+      hostname:
+        type: string
+      id:
+        type: integer
+      protocol:
+        type: string
+      publicPort:
+        type: integer
+      targets:
+        items:
+          $ref: '#/definitions/entity.MappingTarget'
+        type: array
+    type: object
+  entity.MappingTarget:
+    properties:
+      containerId:
+        type: string
+      id:
+        type: integer
+      mappingId:
         type: integer
     type: object
   entity.O11yOverview:
@@ -732,6 +780,123 @@ paths:
       summary: DeleteContainerProfile
       tags:
       - container
+  /mapping/:
+    get:
+      consumes:
+      - application/json
+      description: List mapping.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Mapping'
+            type: array
+      security:
+      - Bearer: []
+      summary: GetMappings
+      tags:
+      - mapping
+    post:
+      consumes:
+      - application/json
+      description: Add a new mapping.
+      parameters:
+      - description: NewMapping
+        in: body
+        name: addMappingDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddMapping'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: MappingCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: AddNewMapping
+      tags:
+      - mapping
+  /mapping/{mappingId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a mapping.
+      parameters:
+      - description: MappingId
+        in: path
+        name: mappingId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MappingDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteMapping
+      tags:
+      - mapping
+  /mapping/{mappingId}/target/{targetId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a mapping target.
+      parameters:
+      - description: MappingId
+        in: path
+        name: mappingId
+        required: true
+        type: string
+      - description: TargetId
+        in: path
+        name: targetId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MappingTargetDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteMappingTarget
+      tags:
+      - mapping
+  /mapping/target/:
+    post:
+      consumes:
+      - application/json
+      description: Add a new mapping target.
+      parameters:
+      - description: NewMappingTarget
+        in: body
+        name: addMappingTargetDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddMappingTarget'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: MappingTargetAdded
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: AddMappingTarget
+      tags:
+      - mapping
   /o11y/overview/:
     get:
       consumes:
