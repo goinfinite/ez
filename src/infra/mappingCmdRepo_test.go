@@ -22,9 +22,9 @@ func TestMappingCmdRepo(t *testing.T) {
 		addMapping := dto.NewAddMapping(
 			accountId,
 			&hostname,
-			valueObject.NewNetworkPortPanic(443),
-			valueObject.NewNetworkProtocolPanic("https"),
-			[]dto.AddMappingTargetWithoutMappingId{},
+			valueObject.NewNetworkPortPanic(80),
+			valueObject.NewNetworkProtocolPanic("http"),
+			[]valueObject.ContainerId{},
 		)
 
 		_, err := mappingCmdRepo.Add(addMapping)
@@ -51,11 +51,58 @@ func TestMappingCmdRepo(t *testing.T) {
 		addMappingTarget := dto.NewAddMappingTarget(
 			mappingId,
 			containerId,
-			nil,
-			nil,
 		)
 
 		err = mappingCmdRepo.AddTarget(addMappingTarget)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
+	t.Run("DeleteTargets", func(t *testing.T) {
+		queryRepo := NewMappingQueryRepo(dbSvc)
+
+		mappings, err := queryRepo.Get()
+		if err != nil {
+			t.Errorf("GetMappingsFailed: %v", err)
+			return
+		}
+
+		if len(mappings) == 0 {
+			t.Errorf("NoMappingFound")
+			return
+		}
+
+		if len(mappings[0].Targets) == 0 {
+			t.Errorf("NoTargetFound")
+			return
+		}
+
+		targetId := mappings[0].Targets[0].Id
+
+		err = mappingCmdRepo.DeleteTarget(targetId)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
+	t.Run("DeleteMapping", func(t *testing.T) {
+		queryRepo := NewMappingQueryRepo(dbSvc)
+
+		mappings, err := queryRepo.Get()
+		if err != nil {
+			t.Errorf("GetMappingsFailed: %v", err)
+			return
+		}
+
+		if len(mappings) == 0 {
+			t.Errorf("NoMappingFound")
+			return
+		}
+
+		mappingId := mappings[0].Id
+
+		err = mappingCmdRepo.Delete(mappingId)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
