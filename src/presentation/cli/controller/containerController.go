@@ -275,11 +275,15 @@ func DeleteContainerController() *cobra.Command {
 			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
 
 			err := useCase.DeleteContainer(
 				containerQueryRepo,
 				containerCmdRepo,
 				accCmdRepo,
+				mappingQueryRepo,
+				mappingCmdRepo,
 				accId,
 				containerId,
 			)
