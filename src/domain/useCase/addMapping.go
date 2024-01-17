@@ -14,10 +14,6 @@ func AddMapping(
 	containerQueryRepo repository.ContainerQueryRepo,
 	addDto dto.AddMapping,
 ) error {
-	if len(addDto.Targets) == 0 {
-		return errors.New("NoTargetsToAdd")
-	}
-
 	wasHostnameSent := addDto.Hostname != nil
 
 	isTcp := addDto.Protocol.String() == "tcp"
@@ -25,6 +21,7 @@ func AddMapping(
 	isTransportLayer := isTcp || isUdp
 
 	if wasHostnameSent && isTransportLayer {
+		log.Printf("TransportLayerCannotHaveHostname")
 		return errors.New("TransportLayerCannotHaveHostname")
 	}
 
