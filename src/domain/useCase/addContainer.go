@@ -43,10 +43,10 @@ func AddContainer(
 	}
 
 	log.Printf(
-		"Container ID '%s' with image '%s' created for account '%s'.",
-		containerId,
-		addContainerDto.AccountId.String(),
+		"Container ID '%s' with image '%s' created for account ID '%s'.",
+		containerId.String(),
 		addContainerDto.ImageAddr.String(),
+		addContainerDto.AccountId.String(),
 	)
 
 	if !addContainerDto.AutoCreateMappings {
