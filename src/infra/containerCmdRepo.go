@@ -246,10 +246,7 @@ func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer
 
 func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	containerQueryRepo := NewContainerQueryRepo(repo.dbSvc)
-	currentContainer, err := containerQueryRepo.GetById(
-		updateDto.AccountId,
-		updateDto.ContainerId,
-	)
+	currentContainer, err := containerQueryRepo.GetById(updateDto.ContainerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}

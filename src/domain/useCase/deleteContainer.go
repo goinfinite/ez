@@ -15,7 +15,7 @@ func DeleteContainer(
 	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
-	_, err := containerQueryRepo.GetById(accId, containerId)
+	_, err := containerQueryRepo.GetById(containerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}

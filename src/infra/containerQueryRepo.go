@@ -23,7 +23,6 @@ func NewContainerQueryRepo(dbSvc *db.DatabaseService) *ContainerQueryRepo {
 }
 
 func (repo ContainerQueryRepo) GetById(
-	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) (entity.Container, error) {
 	var containerModel dbModel.Container

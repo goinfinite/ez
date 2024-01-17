@@ -9,9 +9,6 @@ import (
 type ContainerQueryRepo interface {
 	Get() ([]entity.Container, error)
 	GetWithMetrics() ([]dto.ContainerWithMetrics, error)
-	GetById(
-		accId valueObject.AccountId,
-		containerId valueObject.ContainerId,
-	) (entity.Container, error)
+	GetById(containerId valueObject.ContainerId) (entity.Container, error)
 	GetByAccId(accId valueObject.AccountId) ([]entity.Container, error)
 }
