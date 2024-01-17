@@ -101,6 +101,34 @@ func (repo MappingQueryRepo) GetTargetById(
 	return mappingTargetModel.ToEntity()
 }
 
+func (repo MappingQueryRepo) GetTargetsByContainerId(
+	containerId valueObject.ContainerId,
+) ([]entity.MappingTarget, error) {
+	mappingTargets := []entity.MappingTarget{}
+
+	var mappingTargetModels []dbModel.MappingTarget
+
+	err := repo.dbSvc.Orm.
+		Model(&dbModel.MappingTarget{}).
+		Where("container_id = ?", containerId.String()).
+		Find(&mappingTargetModels).Error
+	if err != nil {
+		return mappingTargets, errors.New("GetTargetsFromDatabaseError")
+	}
+
+	for _, mappingTargetModel := range mappingTargetModels {
+		mappingTargetEntity, err := mappingTargetModel.ToEntity()
+		if err != nil {
+			log.Printf("MappingTargetModelToEntityError: %v", err.Error())
+			continue
+		}
+
+		mappingTargets = append(mappingTargets, mappingTargetEntity)
+	}
+
+	return mappingTargets, nil
+}
+
 func (repo MappingQueryRepo) FindOne(
 	hostname *valueObject.Fqdn,
 	publicPort valueObject.NetworkPort,
