@@ -109,21 +109,21 @@ func (repo MappingQueryRepo) FindOne(
 	var mapping entity.Mapping
 
 	mappingModel := dbModel.Mapping{
+		Hostname:   nil,
 		PublicPort: uint(publicPort.Get()),
 		Protocol:   protocol.String(),
 	}
-
-	query := repo.dbSvc.Orm.Model(&mappingModel).Preload("Targets")
-
-	whereHostname := "hostname IS NULL"
 	if hostname != nil {
-		whereHostname = "hostname = '" + hostname.String() + "'"
+		hostnameStr := hostname.String()
+		mappingModel.Hostname = &hostnameStr
 	}
-	query = query.Where(whereHostname)
 
-	queryResult := query.Find(&mappingModel)
+	queryResult := repo.dbSvc.Orm.
+		Preload("Targets").
+		Where(&mappingModel).
+		Find(&mappingModel)
 	if queryResult.Error != nil {
-		return mapping, errors.New("DbQueryMappingError")
+		return mapping, errors.New("FindOneMappingInDatabaseError")
 	}
 
 	if queryResult.RowsAffected == 0 {

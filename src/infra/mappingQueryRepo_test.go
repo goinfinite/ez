@@ -80,4 +80,16 @@ func TestMappingQueryRepo(t *testing.T) {
 			return
 		}
 	})
+
+	t.Run("FindOneMappingWithUnpublishedPort", func(t *testing.T) {
+		_, err := mappingQueryRepo.FindOne(
+			nil,
+			valueObject.NewNetworkPortPanic(8080),
+			valueObject.NewNetworkProtocolPanic("http"),
+		)
+		if err == nil {
+			t.Error("ShouldNotFindAnyMapping")
+			return
+		}
+	})
 }
