@@ -145,6 +145,11 @@ func AddContainerController(c echo.Context) error {
 
 	portBindings := []valueObject.PortBinding{}
 	if requestBody["portBindings"] != nil {
+		_, isMapStringInterface := requestBody["portBindings"].(map[string]interface{})
+		if isMapStringInterface {
+			requestBody["portBindings"] = []interface{}{requestBody["portBindings"]}
+		}
+
 		portBindings = parsePortBindings(requestBody["portBindings"].([]interface{}))
 	}
 
