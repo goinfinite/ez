@@ -760,6 +760,9 @@
                 "accountId": {
                     "type": "integer"
                 },
+                "autoCreateMappings": {
+                    "type": "boolean"
+                },
                 "entrypoint": {
                     "type": "string"
                 },

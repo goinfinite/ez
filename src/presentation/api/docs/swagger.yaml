@@ -13,6 +13,8 @@ definitions:
     properties:
       accountId:
         type: integer
+      autoCreateMappings:
+        type: boolean
       entrypoint:
         type: string
       envs:

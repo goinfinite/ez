@@ -766,6 +766,9 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "autoCreateMappings": {
+                    "type": "boolean"
+                },
                 "entrypoint": {
                     "type": "string"
                 },
