@@ -6,34 +6,34 @@ import (
 	"strings"
 )
 
-const containerImgAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)(?::(?P<port>\d{1,6}))?/(?:(?P<orgName>\w{1,128})/)?(?P<imageName>\w{1,128}):?(?P<imageTag>\w{1,128})?$`
+const containerImgAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)(?::(?P<port>\d{1,6}))?/(?:(?P<orgName>\w{1,128})/)?(?P<imageName>\w{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
 
 type ContainerImgAddress string
 
 func NewContainerImgAddress(value string) (ContainerImgAddress, error) {
-	imgAddr := ContainerImgAddress(value)
-	if !imgAddr.isValid() {
-		return "", errors.New("InvalidContainerImgAddress")
+	imageAddr := ContainerImgAddress(value)
+	if !imageAddr.isValid() {
+		return "", errors.New("InvalidContainerImageAddress")
 	}
 
-	imgAddrWithoutSchema := strings.TrimPrefix(string(imgAddr), "http://")
-	imgAddrWithoutSchema = strings.TrimPrefix(imgAddrWithoutSchema, "https://")
-	return ContainerImgAddress(imgAddrWithoutSchema), nil
+	imageAddrWithoutSchema := strings.TrimPrefix(string(imageAddr), "http://")
+	imageAddrWithoutSchema = strings.TrimPrefix(imageAddrWithoutSchema, "https://")
+	return ContainerImgAddress(imageAddrWithoutSchema), nil
 }
 
 func NewContainerImgAddressPanic(value string) ContainerImgAddress {
-	imgAddr, err := NewContainerImgAddress(value)
+	imageAddr, err := NewContainerImgAddress(value)
 	if err != nil {
 		panic(err)
 	}
-	return imgAddr
+	return imageAddr
 }
 
-func (imgAddr ContainerImgAddress) isValid() bool {
+func (imageAddr ContainerImgAddress) isValid() bool {
 	re := regexp.MustCompile(containerImgAddressRegex)
-	return re.MatchString(string(imgAddr))
+	return re.MatchString(string(imageAddr))
 }
 
-func (imgAddr ContainerImgAddress) String() string {
-	return string(imgAddr)
+func (imageAddr ContainerImgAddress) String() string {
+	return string(imageAddr)
 }
