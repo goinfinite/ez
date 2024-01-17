@@ -36,7 +36,7 @@ func AddMappingTarget(
 
 	if !publicPortMatches {
 		log.Printf(
-			"Container ID '%s' does not bind to public port '%d'.",
+			"ContainerId '%s' does not bind to public port '%d'.",
 			addDto.ContainerId,
 			mappingEntity.PublicPort,
 		)
@@ -50,7 +50,7 @@ func AddMappingTarget(
 	}
 
 	log.Printf(
-		"Container ID '%s' added as target for mapping ID '%s'.",
+		"ContainerId '%s' added as target for mapping ID '%s'.",
 		addDto.ContainerId,
 		addDto.MappingId,
 	)
