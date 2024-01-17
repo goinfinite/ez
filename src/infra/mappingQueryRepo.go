@@ -85,15 +85,14 @@ func (repo MappingQueryRepo) FindOne(
 		PublicPort: uint(publicPort.Get()),
 		Protocol:   protocol.String(),
 	}
-	if hostname != nil {
-		hostnameStr := hostname.String()
-		mappingModel.Hostname = &hostnameStr
-	}
 
 	query := repo.dbSvc.Orm.Model(&mappingModel).Preload("Targets")
-	if hostname == nil {
-		query = query.Where("hostname IS NULL")
+
+	whereHostname := "hostname IS NULL"
+	if hostname != nil {
+		whereHostname = "hostname = '" + hostname.String() + "'"
 	}
+	query = query.Where(whereHostname)
 
 	queryResult := query.Find(&mappingModel)
 	if queryResult.Error != nil {
