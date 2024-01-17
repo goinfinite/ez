@@ -11,6 +11,7 @@ import (
 func AddMapping(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
+	containerQueryRepo repository.ContainerQueryRepo,
 	addDto dto.AddMapping,
 ) error {
 	if len(addDto.Targets) == 0 {
@@ -62,6 +63,7 @@ func AddMapping(
 		err = AddMappingTarget(
 			mappingQueryRepo,
 			mappingCmdRepo,
+			containerQueryRepo,
 			addTargetDto,
 		)
 		if err != nil {

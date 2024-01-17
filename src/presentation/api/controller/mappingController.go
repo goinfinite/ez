@@ -83,10 +83,12 @@ func AddMappingController(c echo.Context) error {
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 
 	err := useCase.AddMapping(
 		mappingQueryRepo,
 		mappingCmdRepo,
+		containerQueryRepo,
 		addMappingDto,
 	)
 	if err != nil {
@@ -152,10 +154,12 @@ func AddMappingTargetController(c echo.Context) error {
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
 	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 
 	err := useCase.AddMappingTarget(
 		mappingQueryRepo,
 		mappingCmdRepo,
+		containerQueryRepo,
 		addTargetDto,
 	)
 	if err != nil {
