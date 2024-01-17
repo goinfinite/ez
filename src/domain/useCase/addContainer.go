@@ -6,36 +6,64 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func AddContainer(
+	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
-	addContainer dto.AddContainer,
+	mappingQueryRepo repository.MappingQueryRepo,
+	mappingCmdRepo repository.MappingCmdRepo,
+	addContainerDto dto.AddContainer,
 ) error {
 	err := CheckAccountQuota(
 		accQueryRepo,
-		addContainer.AccountId,
+		addContainerDto.AccountId,
 		containerProfileQueryRepo,
-		*addContainer.ProfileId,
+		*addContainerDto.ProfileId,
 	)
 	if err != nil {
 		log.Printf("QuotaCheckError: %s", err)
 		return err
 	}
 
-	err = containerCmdRepo.Add(addContainer)
+	containerId, err := containerCmdRepo.Add(addContainerDto)
 	if err != nil {
 		log.Printf("AddContainerError: %s", err)
 		return errors.New("AddContainerInfraError")
 	}
 
-	err = accCmdRepo.UpdateQuotaUsage(addContainer.AccountId)
+	err = accCmdRepo.UpdateQuotaUsage(addContainerDto.AccountId)
 	if err != nil {
 		log.Printf("UpdateAccountQuotaError: %s", err)
 		return errors.New("UpdateAccountQuotaError")
+	}
+
+	if !addContainerDto.AutoCreateMappings {
+		return nil
+	}
+
+	for _, portBinding := range addContainerDto.PortBindings {
+		addMappingDto := dto.NewAddMapping(
+			addContainerDto.AccountId,
+			&addContainerDto.Hostname,
+			portBinding.PublicPort,
+			portBinding.Protocol,
+			[]valueObject.ContainerId{containerId},
+		)
+		err = AddMapping(
+			mappingQueryRepo,
+			mappingCmdRepo,
+			containerQueryRepo,
+			addMappingDto,
+		)
+		if err != nil {
+			log.Printf("AddMappingError: %s", err)
+			return errors.New("AddMappingError")
+		}
 	}
 
 	return nil
