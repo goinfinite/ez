@@ -41,7 +41,7 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 	return valueObject.NewMappingId(mappingModel.ID)
 }
 
-func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
+func (repo MappingCmdRepo) httpsPreReadBlockFactory() (string, error) {
 	httpsProtocol, _ := valueObject.NewNetworkProtocol("https")
 
 	httpsMappings, err := repo.queryRepo.GetByProtocol(httpsProtocol)
@@ -58,17 +58,18 @@ func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
 		upstream string
 	}
 
-	portHostUpstreamMap := map[string][]hostUpstream{}
+	publicPortUpstreamMap := map[string][]hostUpstream{}
 	for _, mapping := range httpsMappings {
-		hostPort := mapping.PublicPort.String()
 		hostname := "default"
 		if mapping.Hostname != nil {
 			hostname = mapping.Hostname.String()
 		}
 
 		upstreamName := "mapping_" + mapping.Id.String() + "_backend"
-		portHostUpstreamMap[hostPort] = append(
-			portHostUpstreamMap[hostPort],
+
+		publicPort := mapping.PublicPort.String()
+		publicPortUpstreamMap[publicPort] = append(
+			publicPortUpstreamMap[publicPort],
 			hostUpstream{
 				hostname: hostname,
 				upstream: upstreamName,
@@ -77,12 +78,12 @@ func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
 	}
 
 	preReadBlock := ""
-	for hostPort, hostUpstreams := range portHostUpstreamMap {
+	for hostPort, hostUpstreams := range publicPortUpstreamMap {
 		if len(hostUpstreams) == 0 {
 			continue
 		}
 
-		varName := "https_" + hostPort + "_container_name"
+		varName := "https_" + hostPort + "_vhost_upstream_map"
 		preReadBlock += "map $ssl_preread_server_name $" + varName + " {\n"
 
 		for _, hostUpstream := range hostUpstreams {
@@ -155,7 +156,7 @@ upstream ` + upstreamName + ` {
 
 	serverNameLine := ``
 	if mappingEntity.Hostname != nil {
-		serverNameLine = "server_name " + mappingEntity.Hostname.String() + ";\n"
+		serverNameLine = "server_name " + mappingEntity.Hostname.String() + ";"
 	}
 
 	httpNginxConf := `
@@ -171,7 +172,7 @@ server {
 
 	httpsPreReadBlock := ""
 	if mappingEntity.Protocol.String() == "https" {
-		httpsPreReadBlock, err = repo.getHttpsPreReadBlock()
+		httpsPreReadBlock, err = repo.httpsPreReadBlockFactory()
 		if err != nil {
 			return "", err
 		}
@@ -189,7 +190,7 @@ server {
 	httpsConf := `
 server {
 	listen      ` + hostPort + `;
-	proxy_pass  $https_` + hostPort + `_container_name;
+	proxy_pass  $https_` + hostPort + `_vhost_upstream_map;
 	ssl_preread on;
 }
 `
