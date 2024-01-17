@@ -37,7 +37,11 @@ func (repo ContainerCmdRepo) getBaseSpecs(
 	return containerProfile.BaseSpecs, nil
 }
 
-func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
+func (repo ContainerCmdRepo) Add(
+	addDto dto.AddContainer,
+) (valueObject.ContainerId, error) {
+	var containerId valueObject.ContainerId
+
 	containerName := addDto.ProfileId.String() +
 		"-" + addDto.Hostname.String()
 
@@ -64,7 +68,7 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 
 	baseSpecs, err := repo.getBaseSpecs(*addDto.ProfileId)
 	if err != nil {
-		return err
+		return containerId, err
 	}
 
 	baseSpecsParams := []string{
@@ -98,7 +102,7 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 				usedPrivatePorts,
 			)
 			if err != nil {
-				return errors.New("FailedToGetNextAvailablePrivatePort")
+				return containerId, errors.New("FailedToGetNextAvailablePrivatePort")
 			}
 
 			usedPrivatePorts = append(usedPrivatePorts, nextPrivatePort)
@@ -126,7 +130,7 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 
 	err = infraHelper.EnableLingering(addDto.AccountId)
 	if err != nil {
-		return errors.New("FailedToEnableLingering: " + err.Error())
+		return containerId, errors.New("FailedToEnableLingering: " + err.Error())
 	}
 	time.Sleep(1 * time.Second)
 
@@ -136,7 +140,7 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 		runParams...,
 	)
 	if err != nil {
-		return errors.New("ContainerRunError: " + err.Error())
+		return containerId, errors.New("ContainerRunError: " + err.Error())
 	}
 
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
@@ -149,35 +153,35 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 		"{{json .}}",
 	)
 	if err != nil {
-		return errors.New("GetContainerInfoError")
+		return containerId, errors.New("GetContainerInfoError")
 	}
 
 	containerInfo := map[string]interface{}{}
 	err = json.Unmarshal([]byte(containerInfoJson), &containerInfo)
 	if err != nil {
-		return errors.New("ContainerInfoParseError")
+		return containerId, errors.New("ContainerInfoParseError")
 	}
 
 	rawContainerId, assertOk := containerInfo["Id"].(string)
 	if !assertOk || len(rawContainerId) < 12 {
-		return errors.New("ContainerIdParseError")
+		return containerId, errors.New("ContainerIdParseError")
 	}
 
 	rawContainerId = rawContainerId[:12]
-	containerId, err := valueObject.NewContainerId(rawContainerId)
+	containerId, err = valueObject.NewContainerId(rawContainerId)
 	if err != nil {
-		return err
+		return containerId, err
 	}
 
 	rawImageHash, assertOk := containerInfo["ImageDigest"].(string)
 	if !assertOk {
-		return errors.New("ImageHashParseError")
+		return containerId, errors.New("ImageHashParseError")
 	}
 	rawImageHash = strings.TrimPrefix(rawImageHash, "sha256:")
 
 	imageHash, err := valueObject.NewHash(rawImageHash)
 	if err != nil {
-		return err
+		return containerId, err
 	}
 
 	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
@@ -205,10 +209,10 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 
 	createResult := repo.dbSvc.Orm.Create(&containerModel)
 	if createResult.Error != nil {
-		return createResult.Error
+		return containerId, createResult.Error
 	}
 
-	return nil
+	return containerId, nil
 }
 
 func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
