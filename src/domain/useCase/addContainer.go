@@ -42,6 +42,13 @@ func AddContainer(
 		return errors.New("UpdateAccountQuotaError")
 	}
 
+	log.Printf(
+		"Container ID '%s' with image '%s' created for account '%s'.",
+		containerId,
+		addContainerDto.AccountId.String(),
+		addContainerDto.ImageAddr.String(),
+	)
+
 	if !addContainerDto.AutoCreateMappings {
 		return nil
 	}
