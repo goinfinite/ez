@@ -11,12 +11,36 @@ import (
 func AddMappingTarget(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
+	containerQueryRepo repository.ContainerQueryRepo,
 	addDto dto.AddMappingTarget,
 ) error {
-	_, err := mappingQueryRepo.GetById(addDto.MappingId)
+	mappingEntity, err := mappingQueryRepo.GetById(addDto.MappingId)
 	if err != nil {
 		log.Printf("GetMappingError: %s", err)
 		return errors.New("GetMappingInfraError")
+	}
+
+	containerEntity, err := containerQueryRepo.GetById(addDto.ContainerId)
+	if err != nil {
+		log.Printf("GetContainerError: %s", err)
+		return errors.New("GetContainerInfraError")
+	}
+
+	publicPortMatches := false
+	for _, portBinding := range containerEntity.PortBindings {
+		if portBinding.PublicPort != mappingEntity.PublicPort {
+			continue
+		}
+		publicPortMatches = true
+	}
+
+	if !publicPortMatches {
+		log.Printf(
+			"Container ID '%s' does not bind to public port '%d'.",
+			addDto.ContainerId,
+			mappingEntity.PublicPort,
+		)
+		return errors.New("ContainerDoesNotBindToMappingPublicPort")
 	}
 
 	err = mappingCmdRepo.AddTarget(addDto)
@@ -26,7 +50,7 @@ func AddMappingTarget(
 	}
 
 	log.Printf(
-		"'%s' added as target for mapping with ID '%s'.",
+		"Container ID '%s' added as target for mapping ID '%s'.",
 		addDto.ContainerId,
 		addDto.MappingId,
 	)
