@@ -182,6 +182,23 @@ func AddContainerController(c echo.Context) error {
 		envs = parseContainerEnvs(requestBody["envs"].([]interface{}))
 	}
 
+	autoCreateMappings := true
+	if requestBody["autoCreateMappings"] != nil {
+		var assertOk bool
+		autoCreateMappings, assertOk = requestBody["autoCreateMappings"].(bool)
+		if !assertOk {
+			var err error
+			autoCreateMappings, err = strconv.ParseBool(
+				requestBody["autoCreateMappings"].(string),
+			)
+			if err != nil {
+				return apiHelper.ResponseWrapper(
+					c, http.StatusBadRequest, "InvalidAutoCreateMappings",
+				)
+			}
+		}
+	}
+
 	addContainerDto := dto.NewAddContainer(
 		accId,
 		hostname,
@@ -191,19 +208,26 @@ func AddContainerController(c echo.Context) error {
 		entrypointPtr,
 		profileIdPtr,
 		envs,
+		autoCreateMappings,
 	)
 
 	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
 
 	err := useCase.AddContainer(
+		containerQueryRepo,
 		containerCmdRepo,
 		accQueryRepo,
 		accCmdRepo,
 		containerProfileQueryRepo,
+		mappingQueryRepo,
+		mappingCmdRepo,
 		addContainerDto,
 	)
 	if err != nil {

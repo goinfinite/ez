@@ -6,14 +6,15 @@ import (
 )
 
 type AddContainer struct {
-	AccountId     valueObject.AccountId               `json:"accountId"`
-	Hostname      valueObject.Fqdn                    `json:"hostname"`
-	ImageAddr     valueObject.ContainerImgAddress     `json:"imageAddr"`
-	PortBindings  []valueObject.PortBinding           `json:"portBindings"`
-	RestartPolicy *valueObject.ContainerRestartPolicy `json:"restartPolicy"`
-	Entrypoint    *valueObject.ContainerEntrypoint    `json:"entrypoint"`
-	ProfileId     *valueObject.ContainerProfileId     `json:"profileId"`
-	Envs          []valueObject.ContainerEnv          `json:"envs"`
+	AccountId          valueObject.AccountId               `json:"accountId"`
+	Hostname           valueObject.Fqdn                    `json:"hostname"`
+	ImageAddr          valueObject.ContainerImgAddress     `json:"imageAddr"`
+	PortBindings       []valueObject.PortBinding           `json:"portBindings"`
+	RestartPolicy      *valueObject.ContainerRestartPolicy `json:"restartPolicy"`
+	Entrypoint         *valueObject.ContainerEntrypoint    `json:"entrypoint"`
+	ProfileId          *valueObject.ContainerProfileId     `json:"profileId"`
+	Envs               []valueObject.ContainerEnv          `json:"envs"`
+	AutoCreateMappings bool                                `json:"autoCreateMappings"`
 }
 
 func NewAddContainer(
@@ -25,6 +26,7 @@ func NewAddContainer(
 	entrypoint *valueObject.ContainerEntrypoint,
 	profileId *valueObject.ContainerProfileId,
 	envs []valueObject.ContainerEnv,
+	autoCreateMappings bool,
 ) AddContainer {
 	if restartPolicyPtr == nil {
 		restartPolicy, _ := valueObject.NewContainerRestartPolicy("unless-stopped")
@@ -37,13 +39,14 @@ func NewAddContainer(
 	}
 
 	return AddContainer{
-		AccountId:     accountId,
-		Hostname:      hostname,
-		ImageAddr:     imageAddr,
-		PortBindings:  portBindings,
-		RestartPolicy: restartPolicyPtr,
-		Entrypoint:    entrypoint,
-		ProfileId:     profileId,
-		Envs:          envs,
+		AccountId:          accountId,
+		Hostname:           hostname,
+		ImageAddr:          imageAddr,
+		PortBindings:       portBindings,
+		RestartPolicy:      restartPolicyPtr,
+		Entrypoint:         entrypoint,
+		ProfileId:          profileId,
+		Envs:               envs,
+		AutoCreateMappings: autoCreateMappings,
 	}
 }

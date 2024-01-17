@@ -71,6 +71,7 @@ func AddContainerController() *cobra.Command {
 	var entrypointStr string
 	var profileId uint64
 	var envsSlice []string
+	var autoCreateMappings bool
 
 	cmd := &cobra.Command{
 		Use:   "add",
@@ -126,18 +127,25 @@ func AddContainerController() *cobra.Command {
 				entrypointPtr,
 				profileIdPtr,
 				envs,
+				autoCreateMappings,
 			)
 
+			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
 			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
 			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
 			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
 
 			err := useCase.AddContainer(
+				containerQueryRepo,
 				containerCmdRepo,
 				accQueryRepo,
 				accCmdRepo,
 				containerProfileQueryRepo,
+				mappingQueryRepo,
+				mappingCmdRepo,
 				addContainerDto,
 			)
 			if err != nil {
@@ -165,6 +173,13 @@ func AddContainerController() *cobra.Command {
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
 	cmd.Flags().Uint64VarP(&profileId, "profile-id", "p", 0, "ContainerProfileId")
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs (key=value)")
+	cmd.Flags().BoolVarP(
+		&autoCreateMappings,
+		"auto-create-mappings",
+		"m",
+		true,
+		"AutoCreateMappings",
+	)
 	return cmd
 }
 

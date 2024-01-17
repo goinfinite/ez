@@ -45,9 +45,10 @@ func TestContainerCmdRepo(t *testing.T) {
 			nil,
 			&profileId,
 			envs,
+			false,
 		)
 
-		err := containerCmdRepo.Add(addContainer)
+		_, err := containerCmdRepo.Add(addContainer)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
