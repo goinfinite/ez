@@ -58,6 +58,33 @@ func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, 
 	return mappingModel.ToEntity()
 }
 
+func (repo MappingQueryRepo) GetByProtocol(
+	protocol valueObject.NetworkProtocol,
+) ([]entity.Mapping, error) {
+	mappingEntities := []entity.Mapping{}
+
+	var mappingModels []dbModel.Mapping
+	err := repo.dbSvc.Orm.Model(dbModel.Mapping{}).
+		Preload("Targets").
+		Where("protocol = ?", protocol.String()).
+		Find(&mappingModels).Error
+	if err != nil {
+		return mappingEntities, errors.New("GetMappingsFromDatabaseError")
+	}
+
+	for _, mappingModel := range mappingModels {
+		mappingEntity, err := mappingModel.ToEntity()
+		if err != nil {
+			log.Printf("MappingModelToEntityError: %v", err.Error())
+			continue
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
+}
+
 func (repo MappingQueryRepo) GetTargetById(
 	id valueObject.MappingTargetId,
 ) (entity.MappingTarget, error) {
@@ -109,47 +136,4 @@ func (repo MappingQueryRepo) FindOne(
 	}
 
 	return mappingEntity, nil
-}
-
-func (repo MappingQueryRepo) FindAll(
-	hostname *valueObject.Fqdn,
-	publicPort *valueObject.NetworkPort,
-	protocol *valueObject.NetworkProtocol,
-) ([]entity.Mapping, error) {
-	mappingEntities := []entity.Mapping{}
-
-	mappingModel := dbModel.Mapping{}
-	if publicPort != nil {
-		mappingModel.PublicPort = uint(publicPort.Get())
-	}
-
-	if protocol != nil {
-		mappingModel.Protocol = protocol.String()
-	}
-
-	var mappingModels []dbModel.Mapping
-	query := repo.dbSvc.Orm.Model(&mappingModel).Preload("Targets")
-
-	whereHostname := "hostname IS NULL"
-	if hostname != nil {
-		whereHostname = "hostname = '" + hostname.String() + "'"
-	}
-	query = query.Where(whereHostname)
-
-	queryResult := query.Find(&mappingModels)
-	if queryResult.Error != nil {
-		return mappingEntities, errors.New("DbQueryMappingError")
-	}
-
-	for _, mappingModel := range mappingModels {
-		mappingEntity, err := mappingModel.ToEntity()
-		if err != nil {
-			log.Printf("MappingModelToEntityError: %v", err.Error())
-			continue
-		}
-
-		mappingEntities = append(mappingEntities, mappingEntity)
-	}
-
-	return mappingEntities, nil
 }

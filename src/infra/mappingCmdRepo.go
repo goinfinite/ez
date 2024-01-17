@@ -44,16 +44,12 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
 	httpsProtocol, _ := valueObject.NewNetworkProtocol("https")
 
-	allHttpsMappings, err := repo.queryRepo.FindAll(
-		nil,
-		nil,
-		&httpsProtocol,
-	)
+	httpsMappings, err := repo.queryRepo.GetByProtocol(httpsProtocol)
 	if err != nil {
 		return "", err
 	}
 
-	if len(allHttpsMappings) == 0 {
+	if len(httpsMappings) == 0 {
 		return "", nil
 	}
 
@@ -63,7 +59,7 @@ func (repo MappingCmdRepo) getHttpsPreReadBlock() (string, error) {
 	}
 
 	portHostUpstreamMap := map[string][]hostUpstream{}
-	for _, mapping := range allHttpsMappings {
+	for _, mapping := range httpsMappings {
 		hostPort := mapping.PublicPort.String()
 		hostname := "default"
 		if mapping.Hostname != nil {

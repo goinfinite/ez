@@ -46,6 +46,15 @@ func TestMappingQueryRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("GetByProtocol", func(t *testing.T) {
+		protocol := valueObject.NewNetworkProtocolPanic("http")
+		_, err := mappingQueryRepo.GetByProtocol(protocol)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	})
+
 	t.Run("FindOneMappingWithoutHostname", func(t *testing.T) {
 		_, err := mappingQueryRepo.FindOne(
 			nil,
@@ -65,37 +74,6 @@ func TestMappingQueryRepo(t *testing.T) {
 			&hostname,
 			valueObject.NewNetworkPortPanic(80),
 			valueObject.NewNetworkProtocolPanic("http"),
-		)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-	})
-
-	t.Run("FindAllMappingWithoutHostname", func(t *testing.T) {
-		publicPort := valueObject.NewNetworkPortPanic(80)
-		protocol := valueObject.NewNetworkProtocolPanic("http")
-
-		_, err := mappingQueryRepo.FindAll(
-			nil,
-			&publicPort,
-			&protocol,
-		)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-	})
-
-	t.Run("FindAllMappingWithHostname", func(t *testing.T) {
-		hostname := valueObject.NewFqdnPanic("speedia.net")
-		publicPort := valueObject.NewNetworkPortPanic(80)
-		protocol := valueObject.NewNetworkProtocolPanic("http")
-
-		_, err := mappingQueryRepo.FindAll(
-			&hostname,
-			&publicPort,
-			&protocol,
 		)
 		if err != nil {
 			t.Error(err)
