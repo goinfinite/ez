@@ -119,11 +119,6 @@ func (repo MappingQueryRepo) FindAll(
 	mappingEntities := []entity.Mapping{}
 
 	mappingModel := dbModel.Mapping{}
-	if hostname != nil {
-		hostnameStr := hostname.String()
-		mappingModel.Hostname = &hostnameStr
-	}
-
 	if publicPort != nil {
 		mappingModel.PublicPort = uint(publicPort.Get())
 	}
@@ -134,6 +129,13 @@ func (repo MappingQueryRepo) FindAll(
 
 	var mappingModels []dbModel.Mapping
 	query := repo.dbSvc.Orm.Model(&mappingModel).Preload("Targets")
+
+	whereHostname := "hostname IS NULL"
+	if hostname != nil {
+		whereHostname = "hostname = '" + hostname.String() + "'"
+	}
+	query = query.Where(whereHostname)
+
 	queryResult := query.Find(&mappingModels)
 	if queryResult.Error != nil {
 		return mappingEntities, errors.New("DbQueryMappingError")
