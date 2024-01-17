@@ -111,9 +111,9 @@ func (repo ContainerCmdRepo) Add(addDto dto.AddContainer) error {
 				":" + portBindingVo.ContainerPort.String()
 
 			protocolStr := portBindingVo.Protocol.String()
-			if protocolStr != "" {
-				portBindingModel.Protocol = protocolStr
-				portBindingsString += "/" + protocolStr
+			if protocolStr != "" && protocolStr != "tcp" {
+				portBindingModel.Protocol = "udp"
+				portBindingsString += "/udp"
 			}
 
 			portBindingsParams = append(portBindingsParams, portBindingsString)
