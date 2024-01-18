@@ -7,7 +7,7 @@ type Container struct {
 	AccountId     valueObject.AccountId              `json:"accountId"`
 	Hostname      valueObject.Fqdn                   `json:"hostname"`
 	Status        bool                               `json:"status"`
-	ImageAddr     valueObject.ContainerImgAddress    `json:"imageAddr"`
+	ImageAddr     valueObject.ContainerImageAddress  `json:"imageAddr"`
 	ImageHash     valueObject.Hash                   `json:"imageHash"`
 	PortBindings  []valueObject.PortBinding          `json:"portBindings"`
 	RestartPolicy valueObject.ContainerRestartPolicy `json:"restartPolicy"`
@@ -26,7 +26,7 @@ func NewContainer(
 	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
 	status bool,
-	imageAddr valueObject.ContainerImgAddress,
+	imageAddr valueObject.ContainerImageAddress,
 	imageHash valueObject.Hash,
 	portBindings []valueObject.PortBinding,
 	restartPolicy valueObject.ContainerRestartPolicy,

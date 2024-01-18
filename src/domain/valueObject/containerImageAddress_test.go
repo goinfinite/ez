@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-func TestNewContainerImgAddress(t *testing.T) {
-	t.Run("ValidContainerImgAddress", func(t *testing.T) {
-		validContainerImgAddresses := []string{
+func TestNewContainerImageAddress(t *testing.T) {
+	t.Run("ValidContainerImageAddress", func(t *testing.T) {
+		validContainerImageAddresses := []string{
 			"nginx",
 			"docker.io/nginx",
 			"docker.io/nginx:latest",
@@ -21,16 +21,16 @@ func TestNewContainerImgAddress(t *testing.T) {
 			"speedianet/os:0.0.1-alpha",
 		}
 
-		for _, path := range validContainerImgAddresses {
-			_, err := NewContainerImgAddress(path)
+		for _, path := range validContainerImageAddresses {
+			_, err := NewContainerImageAddress(path)
 			if err != nil {
 				t.Errorf("ExpectingNoErrorButGot: %s [%s]", err.Error(), path)
 			}
 		}
 	})
 
-	t.Run("InvalidContainerImgAddress", func(t *testing.T) {
-		invalidContainerImgAddresses := []string{
+	t.Run("InvalidContainerImageAddress", func(t *testing.T) {
+		invalidContainerImageAddresses := []string{
 			"",
 			"UNION SELECT * FROM USERS",
 			"/path\n/path",
@@ -39,8 +39,8 @@ func TestNewContainerImgAddress(t *testing.T) {
 			"/path/'; DROP TABLE users; --",
 		}
 
-		for _, path := range invalidContainerImgAddresses {
-			_, err := NewContainerImgAddress(path)
+		for _, path := range invalidContainerImageAddresses {
+			_, err := NewContainerImageAddress(path)
 			if err == nil {
 				t.Errorf("ExpectingErrorButDidNotGetFor: %v", path)
 			}

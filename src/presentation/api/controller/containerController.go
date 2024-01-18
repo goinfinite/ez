@@ -149,7 +149,7 @@ func AddContainerController(c echo.Context) error {
 			)
 		}
 	}
-	imageAddr := valueObject.NewContainerImgAddressPanic(imageAddrStr)
+	imageAddr := valueObject.NewContainerImageAddressPanic(imageAddrStr)
 
 	portBindings := []valueObject.PortBinding{}
 	if requestBody["portBindings"] != nil {

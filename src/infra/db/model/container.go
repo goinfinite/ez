@@ -50,7 +50,7 @@ func (model Container) ToEntity() (entity.Container, error) {
 		return containerEntity, err
 	}
 
-	imageAddr, err := valueObject.NewContainerImgAddress(model.ImageAddr)
+	imageAddr, err := valueObject.NewContainerImageAddress(model.ImageAddr)
 	if err != nil {
 		return containerEntity, err
 	}

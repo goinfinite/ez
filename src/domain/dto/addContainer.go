@@ -8,7 +8,7 @@ import (
 type AddContainer struct {
 	AccountId          valueObject.AccountId               `json:"accountId"`
 	Hostname           valueObject.Fqdn                    `json:"hostname"`
-	ImageAddr          valueObject.ContainerImgAddress     `json:"imageAddr"`
+	ImageAddr          valueObject.ContainerImageAddress   `json:"imageAddr"`
 	PortBindings       []valueObject.PortBinding           `json:"portBindings"`
 	RestartPolicy      *valueObject.ContainerRestartPolicy `json:"restartPolicy"`
 	Entrypoint         *valueObject.ContainerEntrypoint    `json:"entrypoint"`
@@ -20,7 +20,7 @@ type AddContainer struct {
 func NewAddContainer(
 	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
-	imageAddr valueObject.ContainerImgAddress,
+	imageAddr valueObject.ContainerImageAddress,
 	portBindings []valueObject.PortBinding,
 	restartPolicyPtr *valueObject.ContainerRestartPolicy,
 	entrypoint *valueObject.ContainerEntrypoint,
