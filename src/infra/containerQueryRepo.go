@@ -48,13 +48,47 @@ func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 func (repo ContainerQueryRepo) GetById(
 	containerId valueObject.ContainerId,
 ) (entity.Container, error) {
+	var containerEntity entity.Container
+
 	var containerModel dbModel.Container
-	err := repo.dbSvc.Orm.
+	queryResult := repo.dbSvc.Orm.
 		Preload("PortBindings").
 		Where("id = ?", containerId.String()).
-		First(&containerModel).Error
+		Limit(1).
+		Find(&containerModel)
+	if queryResult.Error != nil {
+		return containerEntity, queryResult.Error
+	}
+
+	if queryResult.RowsAffected == 0 {
+		return containerEntity, errors.New("ContainerNotFound")
+	}
+
+	containerEntity, err := containerModel.ToEntity()
 	if err != nil {
-		return entity.Container{}, err
+		return containerEntity, err
+	}
+
+	return containerEntity, nil
+}
+
+func (repo ContainerQueryRepo) GetByHostname(
+	hostname valueObject.Fqdn,
+) (entity.Container, error) {
+	var containerEntity entity.Container
+
+	var containerModel dbModel.Container
+	queryResult := repo.dbSvc.Orm.
+		Preload("PortBindings").
+		Where("hostname = ?", hostname.String()).
+		Limit(1).
+		Find(&containerModel)
+	if queryResult.Error != nil {
+		return containerEntity, queryResult.Error
+	}
+
+	if queryResult.RowsAffected == 0 {
+		return containerEntity, errors.New("ContainerNotFound")
 	}
 
 	containerEntity, err := containerModel.ToEntity()
