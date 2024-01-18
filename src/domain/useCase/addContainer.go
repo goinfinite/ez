@@ -43,7 +43,7 @@ func AddContainer(
 	}
 
 	log.Printf(
-		"ContainerId '%s' ('%s') created for AccountId '%s'.",
+		"ContainerId '%s' (%s) created for AccountId '%s'.",
 		containerId.String(),
 		addContainerDto.ImageAddress.String(),
 		addContainerDto.AccountId.String(),
