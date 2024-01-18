@@ -25,12 +25,9 @@ func NewContainerImgAddress(value string) (ContainerImgAddress, error) {
 	if valueParts["fqdn"] == "" {
 		value = "docker.io/" + value
 	}
-	value = "https://" + value
 
-	slashesCount := strings.Count(value, "/")
-	minSlashesAmount := 3
-	if slashesCount < minSlashesAmount {
-		return "", errors.New("ImageAddressDoesNotContainEnoughSlashes")
+	if !strings.Contains(value, "/") {
+		return "", errors.New("ImageAddressMustContainOrgAndImageName")
 	}
 
 	imageAddr := ContainerImgAddress(value)
