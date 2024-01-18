@@ -50,7 +50,7 @@ func AddMappingTarget(
 	}
 
 	log.Printf(
-		"ContainerId '%s' added as target for mapping ID '%s'.",
+		"ContainerId '%s' added as target for MappingId '%s'.",
 		addDto.ContainerId,
 		addDto.MappingId,
 	)

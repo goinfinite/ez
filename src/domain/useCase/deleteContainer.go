@@ -50,7 +50,7 @@ func DeleteContainer(
 			return errors.New("DeleteTargetInfraError")
 		}
 
-		log.Printf("Mapping target '%v' deleted.", target.Id)
+		log.Printf("TargetId '%v' deleted.", target.Id)
 	}
 
 	return nil

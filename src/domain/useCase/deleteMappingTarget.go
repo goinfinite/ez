@@ -23,7 +23,7 @@ func DeleteMappingTarget(
 		return errors.New("DeleteMappingTargetError")
 	}
 
-	log.Printf("Mapping target '%v' deleted.", targetId)
+	log.Printf("TargetId '%v' deleted.", targetId)
 
 	return nil
 }
