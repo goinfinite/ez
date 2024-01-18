@@ -22,6 +22,29 @@ func NewContainerQueryRepo(dbSvc *db.DatabaseService) *ContainerQueryRepo {
 	return &ContainerQueryRepo{dbSvc: dbSvc}
 }
 
+func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
+	containers := []entity.Container{}
+
+	containerModels := []dbModel.Container{}
+	err := repo.dbSvc.Orm.
+		Preload("PortBindings").
+		Find(&containerModels).Error
+	if err != nil {
+		return containers, err
+	}
+
+	for _, containerModel := range containerModels {
+		containerEntity, err := containerModel.ToEntity()
+		if err != nil {
+			log.Printf("[%s] %s", containerModel.ID, err.Error())
+			continue
+		}
+		containers = append(containers, containerEntity)
+	}
+
+	return containers, nil
+}
+
 func (repo ContainerQueryRepo) GetById(
 	containerId valueObject.ContainerId,
 ) (entity.Container, error) {
@@ -51,29 +74,6 @@ func (repo ContainerQueryRepo) GetByAccId(
 	err := repo.dbSvc.Orm.
 		Preload("PortBindings").
 		Where("account_id = ?", accId.Get()).
-		Find(&containerModels).Error
-	if err != nil {
-		return containers, err
-	}
-
-	for _, containerModel := range containerModels {
-		containerEntity, err := containerModel.ToEntity()
-		if err != nil {
-			log.Printf("[%s] %s", containerModel.ID, err.Error())
-			continue
-		}
-		containers = append(containers, containerEntity)
-	}
-
-	return containers, nil
-}
-
-func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
-	containers := []entity.Container{}
-
-	containerModels := []dbModel.Container{}
-	err := repo.dbSvc.Orm.
-		Preload("PortBindings").
 		Find(&containerModels).Error
 	if err != nil {
 		return containers, err
