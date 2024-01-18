@@ -30,6 +30,12 @@ func AddContainer(
 		return err
 	}
 
+	_, err = containerQueryRepo.GetByHostname(addContainerDto.Hostname)
+	if err == nil {
+		log.Printf("ContainerHostnameAlreadyExists: %s", addContainerDto.Hostname)
+		return errors.New("ContainerHostnameAlreadyExists")
+	}
+
 	containerId, err := containerCmdRepo.Add(addContainerDto)
 	if err != nil {
 		log.Printf("AddContainerError: %s", err)
