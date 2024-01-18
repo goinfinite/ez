@@ -82,7 +82,7 @@ func AddContainerController() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			hostname := valueObject.NewFqdnPanic(hostnameStr)
-			imageAddr := valueObject.NewContainerImageAddressPanic(
+			imgAddr := valueObject.NewContainerImageAddressPanic(
 				containerImageAddressStr,
 			)
 
@@ -121,7 +121,7 @@ func AddContainerController() *cobra.Command {
 			addContainerDto := dto.NewAddContainer(
 				accId,
 				hostname,
-				imageAddr,
+				imgAddr,
 				portBindings,
 				restartPolicyPtr,
 				entrypointPtr,

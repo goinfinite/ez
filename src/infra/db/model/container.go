@@ -14,7 +14,7 @@ type Container struct {
 	AccountID     uint   `gorm:"not null"`
 	Hostname      string `gorm:"not null"`
 	Status        bool   `gorm:"not null"`
-	ImageAddr     string `gorm:"not null"`
+	ImageAddress  string `gorm:"not null"`
 	ImageHash     string `gorm:"not null"`
 	PortBindings  []ContainerPortBinding
 	RestartPolicy string `gorm:"not null"`
@@ -50,7 +50,7 @@ func (model Container) ToEntity() (entity.Container, error) {
 		return containerEntity, err
 	}
 
-	imageAddr, err := valueObject.NewContainerImageAddress(model.ImageAddr)
+	imageAddress, err := valueObject.NewContainerImageAddress(model.ImageAddress)
 	if err != nil {
 		return containerEntity, err
 	}
@@ -126,7 +126,7 @@ func (model Container) ToEntity() (entity.Container, error) {
 		accountId,
 		hostname,
 		model.Status,
-		imageAddr,
+		imageAddress,
 		imageHash,
 		portBindings,
 		restartPolicy,
@@ -177,7 +177,7 @@ func (Container) ToModel(entity entity.Container) Container {
 		AccountID:     uint(entity.AccountId.Get()),
 		Hostname:      entity.Hostname.String(),
 		Status:        entity.Status,
-		ImageAddr:     entity.ImageAddr.String(),
+		ImageAddress:  entity.ImageAddress.String(),
 		ImageHash:     entity.ImageHash.String(),
 		PortBindings:  portBindingModels,
 		RestartPolicy: entity.RestartPolicy.String(),

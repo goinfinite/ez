@@ -126,7 +126,7 @@ func (repo ContainerCmdRepo) Add(
 		runParams = append(runParams, portBindingsParams...)
 	}
 
-	runParams = append(runParams, addDto.ImageAddr.String())
+	runParams = append(runParams, addDto.ImageAddress.String())
 
 	err = infraHelper.EnableLingering(addDto.AccountId)
 	if err != nil {
@@ -191,7 +191,7 @@ func (repo ContainerCmdRepo) Add(
 		addDto.AccountId,
 		addDto.Hostname,
 		true,
-		addDto.ImageAddr,
+		addDto.ImageAddress,
 		imageHash,
 		addDto.PortBindings,
 		*addDto.RestartPolicy,

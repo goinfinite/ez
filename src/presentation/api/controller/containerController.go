@@ -128,7 +128,7 @@ func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imageAddr are required.)<br />When specifying portBindings, only publicPort is required."
+// @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required."
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /container/ [post]
 func AddContainerController(c echo.Context) error {
@@ -140,16 +140,16 @@ func AddContainerController(c echo.Context) error {
 	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
 	hostname := valueObject.NewFqdnPanic(requestBody["hostname"].(string))
 
-	imageAddrStr, assertOk := requestBody["imageAddr"].(string)
+	imgAddrStr, assertOk := requestBody["imageAddress"].(string)
 	if !assertOk {
-		imageAddrStr, assertOk = requestBody["imgAddr"].(string)
+		imgAddrStr, assertOk = requestBody["imgAddr"].(string)
 		if !assertOk {
 			return apiHelper.ResponseWrapper(
-				c, http.StatusBadRequest, "MissingImageAddr",
+				c, http.StatusBadRequest, "MissingImageAddress",
 			)
 		}
 	}
-	imageAddr := valueObject.NewContainerImageAddressPanic(imageAddrStr)
+	imgAddr := valueObject.NewContainerImageAddressPanic(imgAddrStr)
 
 	portBindings := []valueObject.PortBinding{}
 	if requestBody["portBindings"] != nil {
@@ -210,7 +210,7 @@ func AddContainerController(c echo.Context) error {
 	addContainerDto := dto.NewAddContainer(
 		accId,
 		hostname,
-		imageAddr,
+		imgAddr,
 		portBindings,
 		restartPolicyPtr,
 		entrypointPtr,

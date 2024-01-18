@@ -23,7 +23,7 @@ definitions:
         type: array
       hostname:
         type: string
-      imageAddr:
+      imageAddress:
         type: string
       portBindings:
         items:
@@ -91,7 +91,7 @@ definitions:
         type: string
       id:
         type: string
-      imageAddr:
+      imageAddress:
         type: string
       imageHash:
         type: string
@@ -208,7 +208,7 @@ definitions:
         type: string
       id:
         type: string
-      imageAddr:
+      imageAddress:
         type: string
       imageHash:
         type: string
@@ -605,7 +605,7 @@ paths:
       - application/json
       description: Add a new container.
       parameters:
-      - description: NewContainer (Only accountId, hostname and imgAddr are required.)<br
+      - description: NewContainer (Only accountId, hostname and imageAddress are required.)<br
           />When specifying portBindings, only publicPort is required.
         in: body
         name: addContainerDto

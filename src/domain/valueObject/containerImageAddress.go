@@ -30,27 +30,27 @@ func NewContainerImageAddress(value string) (ContainerImageAddress, error) {
 		return "", errors.New("ImageAddressMustContainOrgAndImageName")
 	}
 
-	imageAddr := ContainerImageAddress(value)
-	if !imageAddr.isValid() {
+	imageAddress := ContainerImageAddress(value)
+	if !imageAddress.isValid() {
 		return "", errors.New("InvalidContainerImageAddress")
 	}
 
-	return imageAddr, nil
+	return imageAddress, nil
 }
 
 func NewContainerImageAddressPanic(value string) ContainerImageAddress {
-	imageAddr, err := NewContainerImageAddress(value)
+	imageAddress, err := NewContainerImageAddress(value)
 	if err != nil {
 		panic(err)
 	}
-	return imageAddr
+	return imageAddress
 }
 
-func (imageAddr ContainerImageAddress) isValid() bool {
+func (imageAddress ContainerImageAddress) isValid() bool {
 	re := regexp.MustCompile(containerImgAddressRegex)
-	return re.MatchString(string(imageAddr))
+	return re.MatchString(string(imageAddress))
 }
 
-func (imageAddr ContainerImageAddress) String() string {
-	return string(imageAddr)
+func (imageAddress ContainerImageAddress) String() string {
+	return string(imageAddress)
 }

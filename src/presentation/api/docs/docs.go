@@ -292,7 +292,7 @@ const docTemplate = `{
                 "summary": "AddNewContainer",
                 "parameters": [
                     {
-                        "description": "NewContainer (Only accountId, hostname and imgAddr are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
+                        "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
                         "name": "addContainerDto",
                         "in": "body",
                         "required": true,
@@ -781,7 +781,7 @@ const docTemplate = `{
                 "hostname": {
                     "type": "string"
                 },
-                "imageAddr": {
+                "imageAddress": {
                     "type": "string"
                 },
                 "portBindings": {
@@ -885,7 +885,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "imageAddr": {
+                "imageAddress": {
                     "type": "string"
                 },
                 "imageHash": {
@@ -1064,7 +1064,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "imageAddr": {
+                "imageAddress": {
                     "type": "string"
                 },
                 "imageHash": {
