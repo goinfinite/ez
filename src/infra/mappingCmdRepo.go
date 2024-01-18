@@ -3,6 +3,7 @@ package infra
 import (
 	"errors"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -41,15 +42,23 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 	return valueObject.NewMappingId(mappingModel.ID)
 }
 
-func (repo MappingCmdRepo) httpsPreReadBlockFactory() (string, error) {
-	httpsProtocol, _ := valueObject.NewNetworkProtocol("https")
-
-	httpsMappings, err := repo.queryRepo.GetByProtocol(httpsProtocol)
+func (repo MappingCmdRepo) sslPreReadBlockFactory() (string, error) {
+	mappings, err := repo.queryRepo.Get()
 	if err != nil {
 		return "", err
 	}
 
-	if len(httpsMappings) == 0 {
+	validSslProtocolos := []string{"https", "grpcs", "wss"}
+
+	sslMappings := []entity.Mapping{}
+	for _, mapping := range mappings {
+		if !slices.Contains(validSslProtocolos, mapping.Protocol.String()) {
+			continue
+		}
+
+		sslMappings = append(sslMappings, mapping)
+	}
+	if len(sslMappings) == 0 {
 		return "", nil
 	}
 
@@ -59,7 +68,7 @@ func (repo MappingCmdRepo) httpsPreReadBlockFactory() (string, error) {
 	}
 
 	publicPortUpstreamMap := map[string][]hostUpstream{}
-	for _, mapping := range httpsMappings {
+	for _, mapping := range sslMappings {
 		hostname := "default"
 		if mapping.Hostname != nil {
 			hostname = mapping.Hostname.String()
@@ -83,7 +92,7 @@ func (repo MappingCmdRepo) httpsPreReadBlockFactory() (string, error) {
 			continue
 		}
 
-		varName := "https_" + hostPort + "_vhost_upstream_map"
+		varName := "ssl_" + hostPort + "_vhost_upstream_map"
 		preReadBlock += "map $ssl_preread_server_name $" + varName + " {\n"
 
 		for _, hostUpstream := range hostUpstreams {
@@ -91,6 +100,14 @@ func (repo MappingCmdRepo) httpsPreReadBlockFactory() (string, error) {
 		}
 
 		preReadBlock += "}\n"
+
+		preReadBlock += `
+server {
+	listen      ` + hostPort + `;
+	proxy_pass  $ssl_` + hostPort + `_vhost_upstream_map;
+	ssl_preread on;
+}
+`
 	}
 
 	return preReadBlock, nil
@@ -170,31 +187,6 @@ server {
 }
 `
 
-	httpsPreReadBlock := ""
-	if mappingEntity.Protocol.String() == "https" {
-		httpsPreReadBlock, err = repo.httpsPreReadBlockFactory()
-		if err != nil {
-			return "", err
-		}
-
-		err = infraHelper.UpdateFile(
-			nginxStreamConfDir+"/https_pre_read.conf",
-			httpsPreReadBlock,
-			true,
-		)
-		if err != nil {
-			return "", errors.New("UpdateNginxPreReadBlockFailed: " + err.Error())
-		}
-	}
-
-	httpsConf := `
-server {
-	listen      ` + hostPort + `;
-	proxy_pass  $https_` + hostPort + `_vhost_upstream_map;
-	ssl_preread on;
-}
-`
-
 	tcpNginxConf := `
 server {
 	listen      ` + hostPort + `;
@@ -214,7 +206,19 @@ server {
 	case "http", "grpc", "ws":
 		nginxConf = httpNginxConf
 	case "https", "grpcs", "wss":
-		nginxConf = httpsConf
+		sslPreReadBlock, err := repo.sslPreReadBlockFactory()
+		if err != nil {
+			return "", err
+		}
+
+		err = infraHelper.UpdateFile(
+			nginxStreamConfDir+"/ssl_pre_read.conf",
+			sslPreReadBlock,
+			true,
+		)
+		if err != nil {
+			return "", errors.New("UpdateNginxPreReadBlockFailed: " + err.Error())
+		}
 	case "udp":
 		nginxConf = udpNginxConf
 	default:
