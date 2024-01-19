@@ -52,22 +52,25 @@ func (dbSvc DatabaseService) seedDatabase(seedModels ...interface{}) error {
 		seedModelType := reflect.TypeOf(seedModel).Elem()
 		seedModelFieldsAndMethods := reflect.ValueOf(seedModel)
 
-		seedModelDefaultEntryMethod := seedModelFieldsAndMethods.MethodByName(
-			"DefaultEntry",
+		seedModelInitialEntriesMethod := seedModelFieldsAndMethods.MethodByName(
+			"InitialEntries",
 		)
-		seedModelDefaultEntryMethodResults := seedModelDefaultEntryMethod.Call(
+		seedModelInitialEntriesMethodResults := seedModelInitialEntriesMethod.Call(
 			[]reflect.Value{},
 		)
-		firstAndOnlyResult := seedModelDefaultEntryMethodResults[0].Interface()
-		defaultEntryInnerStructure := reflect.ValueOf(firstAndOnlyResult)
+		initialEntries := seedModelInitialEntriesMethodResults[0].Interface()
 
-		defaultEntryFormatOrmWillAccept := reflect.New(seedModelType)
-		defaultEntryFormatOrmWillAccept.Elem().Set(defaultEntryInnerStructure)
-		adjustedDefaultEntry := defaultEntryFormatOrmWillAccept.Interface()
+		for _, entry := range initialEntries.([]interface{}) {
+			entryInnerStructure := reflect.ValueOf(entry)
 
-		err = dbSvc.Orm.Create(adjustedDefaultEntry).Error
-		if err != nil {
-			return err
+			entryFormatOrmWillAccept := reflect.New(seedModelType)
+			entryFormatOrmWillAccept.Elem().Set(entryInnerStructure)
+			adjustedEntry := entryFormatOrmWillAccept.Interface()
+
+			err = dbSvc.Orm.Create(adjustedEntry).Error
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -89,11 +92,11 @@ func (dbSvc DatabaseService) dbMigrate() error {
 		return errors.New("DatabaseMigrationError")
 	}
 
-	modelsWithDefaultEntries := []interface{}{
+	modelsWithInitialEntries := []interface{}{
 		&dbModel.ContainerProfile{},
 	}
 
-	err = dbSvc.seedDatabase(modelsWithDefaultEntries...)
+	err = dbSvc.seedDatabase(modelsWithInitialEntries...)
 	if err != nil {
 		return errors.New("AddDefaultDatabaseEntriesError")
 	}
