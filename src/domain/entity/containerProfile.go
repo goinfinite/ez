@@ -57,3 +57,67 @@ func DefaultContainerProfile() ContainerProfile {
 		HostMinCapacityPercent: nil,
 	}
 }
+
+func InitialContainerProfiles() []ContainerProfile {
+	defaultProfile := DefaultContainerProfile()
+
+	profileId, _ := valueObject.NewContainerProfileId(2)
+	profileName, _ := valueObject.NewContainerProfileName("small")
+	baseSpecs, _ := valueObject.NewContainerSpecsFromString("1:2147483648")
+
+	smallProfile := ContainerProfile{
+		Id:        profileId,
+		Name:      profileName,
+		BaseSpecs: baseSpecs,
+	}
+
+	profileId, _ = valueObject.NewContainerProfileId(3)
+	profileName, _ = valueObject.NewContainerProfileName("smallWithAutoScaling")
+	baseSpecs, _ = valueObject.NewContainerSpecsFromString("1:2147483648")
+	maxSpecs, _ := valueObject.NewContainerSpecsFromString("2:4294967296")
+	scalingPolicy, _ := valueObject.NewScalingPolicy("cpu")
+	scalingThreshold := uint64(80)
+	scalingMaxDurationSecs := uint64(3600)
+	scalingIntervalSecs := uint64(86400)
+	hostMinCapacityPercent, _ := valueObject.NewHostMinCapacity(20)
+
+	smallWithAutoScalingProfile, _ := NewContainerProfile(
+		profileId,
+		profileName,
+		baseSpecs,
+		&maxSpecs,
+		&scalingPolicy,
+		&scalingThreshold,
+		&scalingMaxDurationSecs,
+		&scalingIntervalSecs,
+		&hostMinCapacityPercent,
+	)
+
+	profileId, _ = valueObject.NewContainerProfileId(4)
+	profileName, _ = valueObject.NewContainerProfileName("medium")
+	baseSpecs, _ = valueObject.NewContainerSpecsFromString("2:4294967296")
+
+	mediumProfile := ContainerProfile{
+		Id:        profileId,
+		Name:      profileName,
+		BaseSpecs: baseSpecs,
+	}
+
+	profileId, _ = valueObject.NewContainerProfileId(5)
+	profileName, _ = valueObject.NewContainerProfileName("large")
+	baseSpecs, _ = valueObject.NewContainerSpecsFromString("4:8589934592")
+
+	largeProfile := ContainerProfile{
+		Id:        profileId,
+		Name:      profileName,
+		BaseSpecs: baseSpecs,
+	}
+
+	return []ContainerProfile{
+		defaultProfile,
+		smallProfile,
+		smallWithAutoScalingProfile,
+		mediumProfile,
+		largeProfile,
+	}
+}

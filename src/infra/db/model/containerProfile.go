@@ -22,10 +22,16 @@ func (ContainerProfile) TableName() string {
 	return "container_profiles"
 }
 
-func (model ContainerProfile) DefaultEntry() ContainerProfile {
-	defaultEntity := entity.DefaultContainerProfile()
-	defaultModel, _ := model.ToModel(defaultEntity)
-	return defaultModel
+func (model ContainerProfile) InitialEntries() []interface{} {
+	initialProfilesEntities := entity.InitialContainerProfiles()
+
+	initialProfiles := []interface{}{}
+	for _, profileEntity := range initialProfilesEntities {
+		profileModel, _ := model.ToModel(profileEntity)
+		initialProfiles = append(initialProfiles, profileModel)
+	}
+
+	return initialProfiles
 }
 
 func (ContainerProfile) ToModel(
