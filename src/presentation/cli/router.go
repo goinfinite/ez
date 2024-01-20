@@ -59,6 +59,14 @@ func containerRoutes() {
 	containerProfileCmd.AddCommand(cliController.AddContainerProfileController())
 	containerProfileCmd.AddCommand(cliController.UpdateContainerProfileController())
 	containerProfileCmd.AddCommand(cliController.DeleteContainerProfileController())
+
+	var containerRegistryCmd = &cobra.Command{
+		Use:   "registry",
+		Short: "ContainerRegistryManagement",
+	}
+
+	containerCmd.AddCommand(containerRegistryCmd)
+	containerRegistryCmd.AddCommand(cliController.GetRegistryImagesController())
 }
 
 func mappingRoutes() {
