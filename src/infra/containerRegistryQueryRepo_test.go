@@ -13,7 +13,7 @@ func TestContainerRegistryQueryRepo(t *testing.T) {
 	containerQueryRepo := NewContainerRegistryQueryRepo(dbSvc)
 
 	t.Run("GetRegistryImages", func(t *testing.T) {
-		imageName, _ := valueObject.NewRegistryImageName("nginx")
+		imageName, _ := valueObject.NewRegistryImageName("speedianet/os")
 
 		registryImages, err := containerQueryRepo.GetImages(&imageName)
 		if err != nil {
