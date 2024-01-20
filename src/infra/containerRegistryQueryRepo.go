@@ -192,6 +192,33 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 	), nil
 }
 
+func (repo ContainerRegistryQueryRepo) queryJsonApi(
+	apiUrl string,
+) (map[string]interface{}, error) {
+	var parsedResponse map[string]interface{}
+
+	httpClient := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	httpResponse, err := httpClient.Get(apiUrl)
+	if err != nil {
+		return parsedResponse, errors.New("HttpRequestError: " + err.Error())
+	}
+	defer httpResponse.Body.Close()
+
+	responseBody, err := io.ReadAll(httpResponse.Body)
+	if err != nil {
+		return parsedResponse, errors.New("HttpResponseError: " + err.Error())
+	}
+
+	err = json.Unmarshal(responseBody, &parsedResponse)
+	if err != nil {
+		return parsedResponse, errors.New("HttpResponseError: " + err.Error())
+	}
+
+	return parsedResponse, nil
+}
+
 func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 	imageName *valueObject.RegistryImageName,
 ) ([]entity.RegistryImage, error) {
@@ -202,36 +229,28 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 		imageNameStr = imageName.String()
 	}
 
-	apiUrl := "https://hub.docker.com/api/content/v1/products/search?q=" +
-		imageNameStr +
-		"&image_filter=store%2Cofficial%2Copen_source&page=1&page_size=4"
-
-	httpClient := &http.Client{
-		Timeout: time.Second * 10,
-	}
-	httpResponse, err := httpClient.Get(apiUrl)
-	if err != nil {
-		return registryImages, errors.New("DockerHubRequestError: " + err.Error())
-	}
-	defer httpResponse.Body.Close()
-
-	responseBody, err := io.ReadAll(httpResponse.Body)
-	if err != nil {
-		return registryImages, errors.New("ReadDockerHubResponseError: " + err.Error())
+	hubApiBase := "https://hub.docker.com/api/content/v1/products/search?q=" + imageNameStr
+	apiUrls := []string{
+		hubApiBase + "&image_filter=store%2Cofficial%2Copen_source&page=1&page_size=10",
+		hubApiBase + "&source=community&page=1&page_size=10",
 	}
 
-	var parsedResponse map[string]interface{}
-	err = json.Unmarshal(responseBody, &parsedResponse)
-	if err != nil {
-		return registryImages, errors.New("ParseDockerHubResponseError: " + err.Error())
+	rawImagesMetadata := []interface{}{}
+	for _, apiUrl := range apiUrls {
+		parsedResponse, err := repo.queryJsonApi(apiUrl)
+		if err != nil {
+			return registryImages, err
+		}
+
+		summariesMap, assertOk := parsedResponse["summaries"].([]interface{})
+		if !assertOk {
+			return registryImages, nil
+		}
+
+		rawImagesMetadata = append(rawImagesMetadata, summariesMap...)
 	}
 
-	summariesMap, assertOk := parsedResponse["summaries"].(map[string]interface{})
-	if !assertOk {
-		return registryImages, nil
-	}
-
-	for _, image := range summariesMap["results"].([]interface{}) {
+	for _, image := range rawImagesMetadata {
 		imageMap, assertOk := image.(map[string]interface{})
 		if !assertOk {
 			log.Printf("ParseDockerHubImageError: %v", image)
@@ -240,7 +259,7 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 
 		registryImage, err := repo.dockerHubImageFactory(imageMap)
 		if err != nil {
-			log.Printf("DockerHubImageFactoryError: %v", err)
+			log.Printf("DockerHubImageFactoryError: %v | %v", err, imageMap)
 			continue
 		}
 
