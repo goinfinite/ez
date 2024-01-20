@@ -2,6 +2,7 @@ package infra
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 )
 
@@ -13,6 +14,8 @@ func NewContainerRegistryQueryRepo(dbSvc *db.DatabaseService) *ContainerRegistry
 	return &ContainerRegistryQueryRepo{dbSvc: dbSvc}
 }
 
-func (repo ContainerRegistryQueryRepo) GetImages() ([]entity.RegistryImage, error) {
+func (repo ContainerRegistryQueryRepo) GetImages(
+	imageName *valueObject.RegistryImageName,
+) ([]entity.RegistryImage, error) {
 	return []entity.RegistryImage{}, nil
 }

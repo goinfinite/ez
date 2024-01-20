@@ -2,8 +2,11 @@ package repository
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type ContainerRegistryQueryRepo interface {
-	GetImages() ([]entity.RegistryImage, error)
+	GetImages(
+		imageName *valueObject.RegistryImageName,
+	) ([]entity.RegistryImage, error)
 }
