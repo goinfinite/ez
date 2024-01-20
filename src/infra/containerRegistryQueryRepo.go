@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/speedianet/control/src/domain/entity"
@@ -33,6 +34,43 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 	}
 	imageName, err := valueObject.NewRegistryImageName(rawImageName)
 	if err != nil {
+		return registryImage, errors.New(err.Error() + ": " + rawImageName)
+	}
+
+	publisherNameStr := "docker"
+	imageNameHasPublisherName := strings.Contains(imageName.String(), "/")
+	if imageNameHasPublisherName {
+		imageNameParts := strings.Split(imageName.String(), "/")
+		publisherNameStr = imageNameParts[0]
+	}
+
+	if imageMap["publisher"] != nil {
+		rawPublisherDetails, assertOk := imageMap["publisher"].(map[string]interface{})
+		if !assertOk {
+			return registryImage, errors.New("ParsePublisherDetailsError")
+		}
+		rawPublisherName, assertOk := rawPublisherDetails["name"].(string)
+		if assertOk && !strings.Contains(rawPublisherName, " ") {
+			publisherNameStr = rawPublisherName
+		}
+	}
+
+	publisherName, err := valueObject.NewRegistryPublisherName(publisherNameStr)
+	if err != nil {
+		return registryImage, err
+	}
+
+	registryName, _ := valueObject.NewRegistryName("DockerHub")
+
+	rawImageAddress, assertOk := imageMap["slug"].(string)
+	if !assertOk {
+		return registryImage, errors.New("ParseImageAddressError")
+	}
+	if rawImageAddress == "" {
+		rawImageAddress = imageName.String()
+	}
+	imageAddress, err := valueObject.NewContainerImageAddress(rawImageAddress)
+	if err != nil {
 		return registryImage, err
 	}
 
@@ -47,30 +85,6 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 			return registryImage, err
 		}
 		descriptionPtr = &description
-	}
-
-	registryName, _ := valueObject.NewRegistryName("DockerHub")
-
-	rawPublisherDetails, assertOk := imageMap["publisher"].(map[string]interface{})
-	if !assertOk {
-		return registryImage, errors.New("ParsePublisherDetailsError")
-	}
-	rawPublisherName, assertOk := rawPublisherDetails["name"].(string)
-	if !assertOk {
-		return registryImage, errors.New("ParsePublisherNameError")
-	}
-	publisherName, err := valueObject.NewRegistryPublisherName(rawPublisherName)
-	if err != nil {
-		return registryImage, err
-	}
-
-	rawImageAddress, assertOk := imageMap["slug"].(string)
-	if !assertOk {
-		return registryImage, errors.New("ParseImageAddressError")
-	}
-	imageAddress, err := valueObject.NewContainerImageAddress(rawImageAddress)
-	if err != nil {
-		return registryImage, err
 	}
 
 	rawIsas, assertOk := imageMap["architectures"].([]interface{})
@@ -133,20 +147,18 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 	}
 
 	var logoUrlPtr *valueObject.Url
-	logoMap, assertOk := imageMap["logo_url"].(map[string]interface{})
-	if !assertOk {
-		return registryImage, errors.New("ParseLogoUrlError")
-	}
-	rawLogoUrl, assertOk := logoMap["large"].(string)
-	if !assertOk {
-		return registryImage, errors.New("ParseLogoUrlError")
-	}
-	if rawLogoUrl != "" {
-		logoUrl, err := valueObject.NewUrl(rawLogoUrl)
-		if err != nil {
-			return registryImage, err
+	if imageMap["logo_url"] != nil {
+		logoMap, assertOk := imageMap["logo_url"].(map[string]interface{})
+		if assertOk && logoMap["large"] != nil {
+			rawLogoUrl, assertOk := logoMap["large"].(string)
+			if assertOk && rawLogoUrl != "" {
+				logoUrl, err := valueObject.NewUrl(rawLogoUrl)
+				if err != nil {
+					return registryImage, err
+				}
+				logoUrlPtr = &logoUrl
+			}
 		}
-		logoUrlPtr = &logoUrl
 	}
 
 	var createdAtPtr *valueObject.UnixTime
@@ -179,10 +191,10 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 
 	return entity.NewRegistryImage(
 		imageName,
-		descriptionPtr,
-		registryName,
 		publisherName,
+		registryName,
 		imageAddress,
+		descriptionPtr,
 		isas,
 		pullCount,
 		&starCount,
@@ -197,23 +209,29 @@ func (repo ContainerRegistryQueryRepo) queryJsonApi(
 ) (map[string]interface{}, error) {
 	var parsedResponse map[string]interface{}
 
+	httpRequest, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	if err != nil {
+		return parsedResponse, errors.New("HttpRequestError: " + err.Error())
+	}
+	httpRequest.Header.Set("Search-Version", "v3")
+
 	httpClient := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	httpResponse, err := httpClient.Get(apiUrl)
+	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
-		return parsedResponse, errors.New("HttpRequestError: " + err.Error())
+		return parsedResponse, errors.New("HttpResponseError: " + err.Error())
 	}
 	defer httpResponse.Body.Close()
 
 	responseBody, err := io.ReadAll(httpResponse.Body)
 	if err != nil {
-		return parsedResponse, errors.New("HttpResponseError: " + err.Error())
+		return parsedResponse, errors.New("ReadResponseBodyError: " + err.Error())
 	}
 
 	err = json.Unmarshal(responseBody, &parsedResponse)
 	if err != nil {
-		return parsedResponse, errors.New("HttpResponseError: " + err.Error())
+		return parsedResponse, errors.New("ParseResponseBodyError: " + err.Error())
 	}
 
 	return parsedResponse, nil
@@ -229,10 +247,12 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 		imageNameStr = imageName.String()
 	}
 
-	hubApiBase := "https://hub.docker.com/api/content/v1/products/search?q=" + imageNameStr
+	hubApiBase := "https://hub.docker.com/api/content/v1/products/search?q=" +
+		imageNameStr +
+		"&page=1&page_size=10"
 	apiUrls := []string{
-		hubApiBase + "&image_filter=store%2Cofficial%2Copen_source&page=1&page_size=10",
-		hubApiBase + "&source=community&page=1&page_size=10",
+		hubApiBase + "&image_filter=store%2Cofficial%2Copen_source",
+		hubApiBase + "&source=community",
 	}
 
 	rawImagesMetadata := []interface{}{}
@@ -254,6 +274,11 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 		imageMap, assertOk := image.(map[string]interface{})
 		if !assertOk {
 			log.Printf("ParseDockerHubImageError: %v", image)
+			continue
+		}
+
+		rawType, assertOk := imageMap["type"].(string)
+		if !assertOk || rawType != "image" {
 			continue
 		}
 
