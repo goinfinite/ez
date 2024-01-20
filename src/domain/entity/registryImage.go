@@ -4,10 +4,10 @@ import "github.com/speedianet/control/src/domain/valueObject"
 
 type RegistryImage struct {
 	Name          valueObject.RegistryImageName            `json:"name"`
-	Description   *valueObject.RegistryImageDescription    `json:"description"`
-	RegistryName  valueObject.RegistryName                 `json:"registryName"`
 	PublisherName valueObject.RegistryPublisherName        `json:"publisherName"`
+	RegistryName  valueObject.RegistryName                 `json:"registryName"`
 	ImageAddress  valueObject.ContainerImageAddress        `json:"imageAddress"`
+	Description   *valueObject.RegistryImageDescription    `json:"description"`
 	Isas          []valueObject.InstructionSetArchitecture `json:"isas"`
 	PullCount     uint64                                   `json:"pullCount"`
 	StarCount     *uint64                                  `json:"starCount"`
@@ -18,10 +18,10 @@ type RegistryImage struct {
 
 func NewRegistryImage(
 	name valueObject.RegistryImageName,
-	description *valueObject.RegistryImageDescription,
-	registryName valueObject.RegistryName,
 	publisherName valueObject.RegistryPublisherName,
+	registryName valueObject.RegistryName,
 	imageAddress valueObject.ContainerImageAddress,
+	description *valueObject.RegistryImageDescription,
 	isas []valueObject.InstructionSetArchitecture,
 	pullCount uint64,
 	starCount *uint64,
@@ -31,10 +31,10 @@ func NewRegistryImage(
 ) RegistryImage {
 	return RegistryImage{
 		Name:          name,
-		Description:   description,
-		RegistryName:  registryName,
 		PublisherName: publisherName,
+		RegistryName:  registryName,
 		ImageAddress:  imageAddress,
+		Description:   description,
 		Isas:          isas,
 		PullCount:     pullCount,
 		StarCount:     starCount,
