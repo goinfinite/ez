@@ -484,6 +484,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/container/registry/image/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get container registry images.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainerRegistryImages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ImageName",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.RegistryImage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/container/{accountId}/{containerId}/": {
             "delete": {
                 "security": [
@@ -1187,6 +1226,50 @@ const docTemplate = `{
                     "$ref": "#/definitions/valueObject.HardwareSpecs"
                 },
                 "uptimeSecs": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.RegistryImage": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "isVerified": {
+                    "type": "boolean"
+                },
+                "isa": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "logoUrl": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "publisherName": {
+                    "type": "string"
+                },
+                "pullCount": {
+                    "type": "integer"
+                },
+                "registryName": {
+                    "type": "string"
+                },
+                "starCount": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "integer"
                 }
             }

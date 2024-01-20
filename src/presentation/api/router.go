@@ -49,6 +49,9 @@ func containerRoutes(baseRoute *echo.Group) {
 		"/:profileId/",
 		apiController.DeleteContainerProfileController,
 	)
+
+	containerRegistryGroup := containerGroup.Group("/registry")
+	containerRegistryGroup.GET("/image/", apiController.GetContainerRegistryImagesController)
 }
 
 func mappingRoutes(baseRoute *echo.Group) {
