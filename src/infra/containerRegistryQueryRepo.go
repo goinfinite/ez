@@ -264,7 +264,7 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 
 		summariesMap, assertOk := parsedResponse["summaries"].([]interface{})
 		if !assertOk {
-			return registryImages, nil
+			continue
 		}
 
 		rawImagesMetadata = append(rawImagesMetadata, summariesMap...)
