@@ -54,3 +54,33 @@ func (imageAddress ContainerImageAddress) isValid() bool {
 func (imageAddress ContainerImageAddress) String() string {
 	return string(imageAddress)
 }
+
+func (imageAddress ContainerImageAddress) getParts() map[string]string {
+	return voHelper.FindNamedGroupsMatches(containerImgAddressRegex, string(imageAddress))
+}
+
+func (imageAddress ContainerImageAddress) GetFqdn() (Fqdn, error) {
+	return NewFqdn(imageAddress.getParts()["fqdn"])
+}
+
+func (imageAddress ContainerImageAddress) GetOrgName() (RegistryPublisherName, error) {
+	orgNameStr, exists := imageAddress.getParts()["orgName"]
+	if !exists || orgNameStr == "" || orgNameStr == "_" {
+		orgNameStr = "library"
+	}
+
+	return NewRegistryPublisherName(orgNameStr)
+}
+
+func (imageAddress ContainerImageAddress) GetImageName() (RegistryImageName, error) {
+	return NewRegistryImageName(imageAddress.getParts()["imageName"])
+}
+
+func (imageAddress ContainerImageAddress) GetImageTag() (RegistryImageTag, error) {
+	imageTagStr, exists := imageAddress.getParts()["imageTag"]
+	if !exists || imageTagStr == "" {
+		imageTagStr = "latest"
+	}
+
+	return NewRegistryImageTag(imageTagStr)
+}
