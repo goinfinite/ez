@@ -1,8 +1,9 @@
 package valueObject
 
 import (
-	"errors"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type PortBinding struct {
@@ -30,63 +31,41 @@ func NewPortBinding(
 func NewPortBindingFromString(value string) (PortBinding, error) {
 	var portBinding PortBinding
 
-	bindingParts := strings.Split(value, ":")
-	if len(bindingParts) == 0 {
-		return portBinding, errors.New("InvalidPortBinding")
+	portBindingRegex := `^(?P<publicPort>\d{1,5})(?::(?P<containerPort>\d{1,5}))?(?:\/(?P<protocol>\w{1,5}))?(?::(?P<privatePort>\d+))?$`
+	portBindingParts := voHelper.FindNamedGroupsMatches(portBindingRegex, string(value))
+
+	publicPort, err := NewNetworkPort(portBindingParts["publicPort"])
+	if err != nil {
+		return portBinding, err
 	}
 
-	publicPort, err := NewNetworkPort(bindingParts[0])
+	if portBindingParts["containerPort"] == "" {
+		portBindingParts["containerPort"] = portBindingParts["publicPort"]
+	}
+
+	containerPort, err := NewNetworkPort(portBindingParts["containerPort"])
 	if err != nil {
 		return portBinding, err
 	}
 
 	protocol := GuessNetworkProtocolByPort(publicPort)
-	if len(bindingParts) == 1 {
-		return NewPortBinding(
-			publicPort,
-			publicPort,
-			protocol,
-			nil,
-		), nil
+	if portBindingParts["protocol"] != "" {
+		protocol, err = NewNetworkProtocol(portBindingParts["protocol"])
+		if err != nil {
+			return portBinding, err
+		}
 	}
 
-	containerPortProtocolParts := strings.Split(bindingParts[1], "/")
-
-	containerPortStr := containerPortProtocolParts[0]
-	containerPort, err := NewNetworkPort(containerPortStr)
-	if err != nil {
-		return portBinding, err
+	var privatePortPtr *NetworkPort
+	if portBindingParts["privatePort"] != "" {
+		privatePort, err := NewNetworkPort(portBindingParts["privatePort"])
+		if err != nil {
+			return portBinding, err
+		}
+		privatePortPtr = &privatePort
 	}
 
-	protocolStr := protocol.String()
-	if len(containerPortProtocolParts) == 2 {
-		protocolStr = containerPortProtocolParts[1]
-	}
-	protocol, err = NewNetworkProtocol(protocolStr)
-	if err != nil {
-		return portBinding, err
-	}
-
-	if len(bindingParts) == 2 {
-		return NewPortBinding(
-			publicPort,
-			containerPort,
-			protocol,
-			nil,
-		), nil
-	}
-
-	privatePort, err := NewNetworkPort(bindingParts[2])
-	if err != nil {
-		return portBinding, err
-	}
-
-	return NewPortBinding(
-		publicPort,
-		containerPort,
-		protocol,
-		&privatePort,
-	), nil
+	return NewPortBinding(publicPort, containerPort, protocol, privatePortPtr), nil
 }
 
 func (portBinding PortBinding) GetPublicPort() NetworkPort {
