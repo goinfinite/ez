@@ -24,4 +24,13 @@ func TestContainerRegistryQueryRepo(t *testing.T) {
 			t.Error("NoImagesFound")
 		}
 	})
+
+	t.Run("GetRegistryTaggedImage", func(t *testing.T) {
+		imageAddress, _ := valueObject.NewContainerImageAddress("speedianet/os")
+
+		_, err := containerQueryRepo.GetTaggedImage(imageAddress)
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }

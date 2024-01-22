@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -307,4 +308,181 @@ func (repo ContainerRegistryQueryRepo) GetImages(
 	registryImages = append(registryImages, dockerHubImages...)
 
 	return registryImages, nil
+}
+
+func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
+	imageAddress valueObject.ContainerImageAddress,
+) (entity.RegistryTaggedImage, error) {
+	var registryTaggedImage entity.RegistryTaggedImage
+
+	orgName, err := imageAddress.GetOrgName()
+	if err != nil {
+		return registryTaggedImage, err
+	}
+
+	imageName, err := imageAddress.GetImageName()
+	if err != nil {
+		return registryTaggedImage, err
+	}
+
+	imageTag, err := imageAddress.GetImageTag()
+	if err != nil {
+		return registryTaggedImage, err
+	}
+
+	hubApi := "https://hub.docker.com/v2/namespaces/" +
+		orgName.String() +
+		"/repositories/" +
+		imageName.String() +
+		"/tags/" +
+		imageTag.String() +
+		"/images"
+
+	httpClient := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	httpResponse, err := httpClient.Get(hubApi)
+	if err != nil {
+		return registryTaggedImage, errors.New("HttpResponseError: " + err.Error())
+	}
+	defer httpResponse.Body.Close()
+
+	responseBody, err := io.ReadAll(httpResponse.Body)
+	if err != nil {
+		return registryTaggedImage, errors.New("ReadResponseBodyError: " + err.Error())
+	}
+
+	var parsedResponse []interface{}
+	err = json.Unmarshal(responseBody, &parsedResponse)
+	if err != nil {
+		return registryTaggedImage, errors.New("ParseResponseBodyError: " + err.Error())
+	}
+
+	if len(parsedResponse) == 0 {
+		return registryTaggedImage, errors.New("ImageNotFound")
+	}
+
+	var desiredImageMap map[string]interface{}
+	for _, image := range parsedResponse {
+		imageMap, assertOk := image.(map[string]interface{})
+		if !assertOk {
+			log.Printf("ParseDockerHubImageError: %v", image)
+			continue
+		}
+
+		rawArchitecture, assertOk := imageMap["architecture"].(string)
+		if !assertOk {
+			continue
+		}
+
+		if rawArchitecture != "amd64" {
+			continue
+		}
+
+		desiredImageMap = imageMap
+	}
+
+	if desiredImageMap == nil {
+		return registryTaggedImage, errors.New("ImageNotFound")
+	}
+
+	rawImageSize, assertOk := desiredImageMap["size"].(float64)
+	if !assertOk {
+		return registryTaggedImage, errors.New("ParseImageSizeError")
+	}
+	sizeBytes, err := valueObject.NewByte(rawImageSize)
+	if err != nil {
+		return registryTaggedImage, err
+	}
+
+	rawImageHash, assertOk := desiredImageMap["digest"].(string)
+	if !assertOk {
+		return registryTaggedImage, errors.New("ParseImageHashError")
+	}
+	if rawImageHash == "" {
+		return registryTaggedImage, errors.New("ImageHashEmpty")
+	}
+	rawImageHash = strings.ReplaceAll(rawImageHash, "sha256:", "")
+
+	imageHash, err := valueObject.NewHash(rawImageHash)
+	if err != nil {
+		return registryTaggedImage, err
+	}
+
+	rawUpdatedAt, assertOk := desiredImageMap["last_pushed"].(string)
+	if !assertOk {
+		return registryTaggedImage, errors.New("ParseUpdatedAtError")
+	}
+	updatedAtUnix, err := time.Parse(time.RFC3339, rawUpdatedAt)
+	if err != nil {
+		return registryTaggedImage, err
+	}
+	updatedAt := valueObject.UnixTime(updatedAtUnix.Unix())
+
+	portBindings := []valueObject.PortBinding{}
+	portBindingsRegex := `\d+\/\w{1,4}`
+	for _, layer := range desiredImageMap["layers"].([]interface{}) {
+		layerMap, assertOk := layer.(map[string]interface{})
+		if !assertOk {
+			continue
+		}
+
+		rawInstruction, assertOk := layerMap["instruction"].(string)
+		if !assertOk {
+			continue
+		}
+
+		if !strings.HasPrefix(rawInstruction, "EXPOSE") {
+			continue
+		}
+
+		bindingsRegex, err := regexp.Compile(portBindingsRegex)
+		if err != nil {
+			continue
+		}
+
+		rawPortBindings := bindingsRegex.FindAllString(rawInstruction, -1)
+		for _, rawPortBinding := range rawPortBindings {
+			portBinding, err := valueObject.NewPortBindingFromString(rawPortBinding)
+			if err != nil {
+				continue
+			}
+
+			portBindings = append(portBindings, portBinding)
+		}
+	}
+
+	registryName, _ := valueObject.NewRegistryName("DockerHub")
+	isa, _ := valueObject.NewInstructionSetArchitecture("amd64")
+
+	return entity.NewRegistryTaggedImage(
+		imageTag,
+		imageName,
+		orgName,
+		registryName,
+		imageAddress,
+		imageHash,
+		isa,
+		sizeBytes,
+		portBindings,
+		updatedAt,
+	), nil
+}
+
+func (repo ContainerRegistryQueryRepo) GetTaggedImage(
+	imageAddress valueObject.ContainerImageAddress,
+) (entity.RegistryTaggedImage, error) {
+	var registryTaggedImage entity.RegistryTaggedImage
+
+	registryName, err := imageAddress.GetFqdn()
+	if err != nil {
+		return registryTaggedImage, err
+	}
+
+	switch registryName.String() {
+	case "docker.io", "registry-1.docker.io":
+		return repo.getTaggedImageFromDockerHub(imageAddress)
+	default:
+		return registryTaggedImage, errors.New("UnknownRegistry")
+	}
 }
