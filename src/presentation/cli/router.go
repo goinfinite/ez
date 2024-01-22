@@ -67,6 +67,7 @@ func containerRoutes() {
 
 	containerCmd.AddCommand(containerRegistryCmd)
 	containerRegistryCmd.AddCommand(cliController.GetRegistryImagesController())
+	containerRegistryCmd.AddCommand(cliController.GetRegistryTaggedImageController())
 }
 
 func mappingRoutes() {

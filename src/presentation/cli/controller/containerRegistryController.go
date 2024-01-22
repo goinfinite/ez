@@ -44,3 +44,35 @@ func GetRegistryImagesController() *cobra.Command {
 	cmd.Flags().StringVarP(&imageNameStr, "image-name", "n", "", "ImageName")
 	return cmd
 }
+
+func GetRegistryTaggedImageController() *cobra.Command {
+	var dbSvc *db.DatabaseService
+	var imageAddressStr string
+
+	cmd := &cobra.Command{
+		Use:   "get-tagged",
+		Short: "GetRegistryTaggedImage",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			dbSvc = cliMiddleware.DatabaseInit()
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(dbSvc)
+
+			imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
+
+			image, err := useCase.GetRegistryTaggedImage(
+				containerRegistryQueryRepo,
+				imageAddress,
+			)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, image)
+		},
+	}
+
+	cmd.Flags().StringVarP(&imageAddressStr, "image-address", "a", "", "ImageAddress")
+	cmd.MarkFlagRequired("image-address")
+	return cmd
+}
