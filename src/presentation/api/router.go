@@ -52,6 +52,10 @@ func containerRoutes(baseRoute *echo.Group) {
 
 	containerRegistryGroup := containerGroup.Group("/registry")
 	containerRegistryGroup.GET("/image/", apiController.GetContainerRegistryImagesController)
+	containerRegistryGroup.GET(
+		"/image/tagged/",
+		apiController.GetContainerRegistryTaggedImageController,
+	)
 }
 
 func mappingRoutes(baseRoute *echo.Group) {

@@ -299,9 +299,7 @@ definitions:
         type: string
       imageAddress:
         type: string
-      isVerified:
-        type: boolean
-      isa:
+      isas:
         items:
           type: string
         type: array
@@ -317,6 +315,31 @@ definitions:
         type: string
       starCount:
         type: integer
+      updatedAt:
+        type: integer
+    type: object
+  entity.RegistryTaggedImage:
+    properties:
+      imageAddress:
+        type: string
+      imageHash:
+        type: string
+      imageName:
+        type: string
+      isa:
+        type: string
+      portBindings:
+        items:
+          $ref: '#/definitions/valueObject.PortBinding'
+        type: array
+      publisherName:
+        type: string
+      registryName:
+        type: string
+      sizeBytes:
+        type: integer
+      tagName:
+        type: string
       updatedAt:
         type: integer
     type: object
@@ -833,6 +856,29 @@ paths:
       security:
       - Bearer: []
       summary: GetContainerRegistryImages
+      tags:
+      - container
+  /container/registry/image/tagged/:
+    get:
+      consumes:
+      - application/json
+      description: Get container registry tagged image.
+      parameters:
+      - description: ImageAddress
+        in: query
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.RegistryTaggedImage'
+      security:
+      - Bearer: []
+      summary: GetContainerRegistryTaggedImage
       tags:
       - container
   /mapping/:

@@ -523,6 +523,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/container/registry/image/tagged/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get container registry tagged image.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainerRegistryTaggedImage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ImageAddress",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.RegistryTaggedImage"
+                        }
+                    }
+                }
+            }
+        },
         "/container/{accountId}/{containerId}/": {
             "delete": {
                 "security": [
@@ -1242,10 +1279,7 @@ const docTemplate = `{
                 "imageAddress": {
                     "type": "string"
                 },
-                "isVerified": {
-                    "type": "boolean"
-                },
-                "isa": {
+                "isas": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1268,6 +1302,44 @@ const docTemplate = `{
                 },
                 "starCount": {
                     "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.RegistryTaggedImage": {
+            "type": "object",
+            "properties": {
+                "imageAddress": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "imageName": {
+                    "type": "string"
+                },
+                "isa": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "publisherName": {
+                    "type": "string"
+                },
+                "registryName": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "tagName": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "integer"

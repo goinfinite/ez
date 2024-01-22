@@ -42,3 +42,31 @@ func GetContainerRegistryImagesController(c echo.Context) error {
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, imagesList)
 }
+
+// GetContainerRegistryTaggedImage	 godoc
+// @Summary      GetContainerRegistryTaggedImage
+// @Description  Get container registry tagged image.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        address    query     string  true  "ImageAddress"
+// @Success      200 {object} entity.RegistryTaggedImage
+// @Router       /container/registry/image/tagged/ [get]
+func GetContainerRegistryTaggedImageController(c echo.Context) error {
+	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
+
+	imageAddressStr := c.QueryParam("address")
+	imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
+
+	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(dbSvc)
+	taggedImage, err := useCase.GetRegistryTaggedImage(
+		containerRegistryQueryRepo,
+		imageAddress,
+	)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return apiHelper.ResponseWrapper(c, http.StatusOK, taggedImage)
+}
