@@ -207,12 +207,12 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 
 func (repo ContainerRegistryQueryRepo) queryJsonApi(
 	apiUrl string,
-) (map[string]interface{}, error) {
-	var parsedResponse map[string]interface{}
+) ([]byte, error) {
+	var responseBody []byte
 
 	httpRequest, err := http.NewRequest(http.MethodGet, apiUrl, nil)
 	if err != nil {
-		return parsedResponse, errors.New("HttpRequestError: " + err.Error())
+		return responseBody, errors.New("HttpRequestError: " + err.Error())
 	}
 	httpRequest.Header.Set("Search-Version", "v3")
 
@@ -221,21 +221,11 @@ func (repo ContainerRegistryQueryRepo) queryJsonApi(
 	}
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
-		return parsedResponse, errors.New("HttpResponseError: " + err.Error())
+		return responseBody, errors.New("HttpResponseError: " + err.Error())
 	}
 	defer httpResponse.Body.Close()
 
-	responseBody, err := io.ReadAll(httpResponse.Body)
-	if err != nil {
-		return parsedResponse, errors.New("ReadResponseBodyError: " + err.Error())
-	}
-
-	err = json.Unmarshal(responseBody, &parsedResponse)
-	if err != nil {
-		return parsedResponse, errors.New("ParseResponseBodyError: " + err.Error())
-	}
-
-	return parsedResponse, nil
+	return io.ReadAll(httpResponse.Body)
 }
 
 func (repo ContainerRegistryQueryRepo) getDockerHubImages(
@@ -258,9 +248,13 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 
 	rawImagesMetadata := []interface{}{}
 	for _, apiUrl := range apiUrls {
-		parsedResponse, err := repo.queryJsonApi(apiUrl)
+		apiResponse, err := repo.queryJsonApi(apiUrl)
+
+		var parsedResponse map[string]interface{}
+		err = json.Unmarshal(apiResponse, &parsedResponse)
 		if err != nil {
-			return registryImages, err
+			log.Printf("ParseDockerHubResponseError: %v", err)
+			continue
 		}
 
 		summariesMap, assertOk := parsedResponse["summaries"].([]interface{})
@@ -338,22 +332,13 @@ func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		imageTag.String() +
 		"/images"
 
-	httpClient := &http.Client{
-		Timeout: time.Second * 10,
-	}
-	httpResponse, err := httpClient.Get(hubApi)
+	apiResponse, err := repo.queryJsonApi(hubApi)
 	if err != nil {
-		return registryTaggedImage, errors.New("HttpResponseError: " + err.Error())
-	}
-	defer httpResponse.Body.Close()
-
-	responseBody, err := io.ReadAll(httpResponse.Body)
-	if err != nil {
-		return registryTaggedImage, errors.New("ReadResponseBodyError: " + err.Error())
+		return registryTaggedImage, err
 	}
 
 	var parsedResponse []interface{}
-	err = json.Unmarshal(responseBody, &parsedResponse)
+	err = json.Unmarshal(apiResponse, &parsedResponse)
 	if err != nil {
 		return registryTaggedImage, errors.New("ParseResponseBodyError: " + err.Error())
 	}
