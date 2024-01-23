@@ -49,7 +49,7 @@ func NewPortBindingFromString(value string) (PortBinding, error) {
 	}
 
 	protocol := GuessNetworkProtocolByPort(publicPort)
-	if portBindingParts["protocol"] != "" {
+	if portBindingParts["protocol"] != "" && protocol.String() == "tcp" {
 		protocol, err = NewNetworkProtocol(portBindingParts["protocol"])
 		if err != nil {
 			return portBinding, err
