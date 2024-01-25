@@ -8,18 +8,24 @@ import (
 type ServiceBinding string
 
 type serviceBindingInternal struct {
-	ServiceNames []string
-	PortBindings []string
+	ServiceNames       []string
+	PortBindings       []string
+	PublicPortInterval []string
 }
+
+var httpPublicPortInterval = []string{"80", "443"}
+var databasePublicPortInterval = []string{"30000-39999"}
 
 var KnownServiceBindings = []serviceBindingInternal{
 	{
-		ServiceNames: []string{"ftp"},
-		PortBindings: []string{"21"},
+		ServiceNames:       []string{"ftp"},
+		PortBindings:       []string{"21"},
+		PublicPortInterval: []string{"21000-21999"},
 	},
 	{
-		ServiceNames: []string{"ssh", "sftp"},
-		PortBindings: []string{"22"},
+		ServiceNames:       []string{"ssh", "sftp"},
+		PortBindings:       []string{"22"},
+		PublicPortInterval: []string{"22000-22999"},
 	},
 	{
 		ServiceNames: []string{"telnet"},
@@ -38,8 +44,10 @@ var KnownServiceBindings = []serviceBindingInternal{
 		PortBindings: []string{"43"},
 	},
 	{
-		ServiceNames: []string{"http"},
-		PortBindings: []string{"80", "8080", "8081"},
+		ServiceNames: []string{
+			"http", "nginx", "caddy", "apache", "httpd", "php",
+		},
+		PortBindings: []string{"80", "8080"},
 	},
 	{
 		ServiceNames: []string{"kerberos"},
@@ -62,7 +70,9 @@ var KnownServiceBindings = []serviceBindingInternal{
 		PortBindings: []string{"389"},
 	},
 	{
-		ServiceNames: []string{"https"},
+		ServiceNames: []string{
+			"https", "wss", "grpcs", "nginx", "caddy", "apache", "httpd", "php",
+		},
 		PortBindings: []string{"443", "8443"},
 	},
 	{
@@ -78,16 +88,18 @@ var KnownServiceBindings = []serviceBindingInternal{
 		PortBindings: []string{"853"},
 	},
 	{
-		ServiceNames: []string{"rsync"},
-		PortBindings: []string{"873"},
-	},
-	{
 		ServiceNames: []string{"openvpn"},
 		PortBindings: []string{"1194"},
 	},
 	{
-		ServiceNames: []string{"oracledb", "oracle-db", "oracle"},
-		PortBindings: []string{"1521", "2483", "2484"},
+		ServiceNames:       []string{"ms-sql", "mssql", "sqlserver", "sql-server"},
+		PortBindings:       []string{"1433"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"oracledb", "oracle-db", "oracle"},
+		PortBindings:       []string{"1521", "2483", "2484"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
 		ServiceNames: []string{"mqtt"},
@@ -98,80 +110,110 @@ var KnownServiceBindings = []serviceBindingInternal{
 		PortBindings: []string{"2049"},
 	},
 	{
-		ServiceNames: []string{"ghost"},
-		PortBindings: []string{"2368"},
+		ServiceNames:       []string{"ghost"},
+		PortBindings:       []string{"2368"},
+		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"node", "nodejs", "ruby-on-rails", "rails", "ruby"},
-		PortBindings: []string{"3000"},
+		ServiceNames: []string{
+			"node", "nodejs", "ruby-on-rails", "rails", "ruby",
+		},
+		PortBindings:       []string{"3000"},
+		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"mysql"},
-		PortBindings: []string{"3306"},
+		ServiceNames:       []string{"mysql"},
+		PortBindings:       []string{"3306"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"nats"},
-		PortBindings: []string{"4222", "6222", "8222"},
+		ServiceNames:       []string{"nsq"},
+		PortBindings:       []string{"4150", "4151", "4160", "4161"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"flask"},
-		PortBindings: []string{"5000"},
+		ServiceNames:       []string{"nats"},
+		PortBindings:       []string{"4222", "6222", "8222"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"kibana"},
-		PortBindings: []string{"5601"},
+		ServiceNames:       []string{"flask"},
+		PortBindings:       []string{"5000"},
+		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"postgres", "postgresql"},
-		PortBindings: []string{"5432"},
+		ServiceNames:       []string{"kibana"},
+		PortBindings:       []string{"5601"},
+		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"rabbitmq"},
-		PortBindings: []string{"5672"},
+		ServiceNames:       []string{"postgres", "postgresql"},
+		PortBindings:       []string{"5432"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"couchdb"},
-		PortBindings: []string{"5984"},
+		ServiceNames:       []string{"rabbitmq"},
+		PortBindings:       []string{"5672"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"cassandra"},
-		PortBindings: []string{"9042"},
+		ServiceNames:       []string{"couchdb"},
+		PortBindings:       []string{"5984"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"redis"},
-		PortBindings: []string{"6379"},
+		ServiceNames:       []string{"cassandra"},
+		PortBindings:       []string{"9042"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"neo4j"},
-		PortBindings: []string{"7474"},
+		ServiceNames:       []string{"kafka"},
+		PortBindings:       []string{"9092"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"django"},
-		PortBindings: []string{"8000"},
+		ServiceNames:       []string{"redis"},
+		PortBindings:       []string{"6379"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"kong"},
-		PortBindings: []string{"8001", "8444"},
+		ServiceNames:       []string{"neo4j"},
+		PortBindings:       []string{"7474"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"solr"},
-		PortBindings: []string{"8983"},
+		ServiceNames:       []string{"django"},
+		PortBindings:       []string{"8000"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"kong"},
+		PortBindings:       []string{"8001", "8444"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"solr"},
+		PortBindings:       []string{"8983"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
 		ServiceNames: []string{"sonarqube"},
 		PortBindings: []string{"9000"},
 	},
 	{
-		ServiceNames: []string{"elastic", "elasticsearch", "elk"},
-		PortBindings: []string{"9200"},
+		ServiceNames:       []string{"elastic", "elasticsearch", "elk"},
+		PortBindings:       []string{"9200"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"memcached", "memcache"},
-		PortBindings: []string{"11211"},
+		ServiceNames:       []string{"memcached", "memcache"},
+		PortBindings:       []string{"11211"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"mongodb", "mongo"},
-		PortBindings: []string{"27017"},
+		ServiceNames:       []string{"mongodb", "mongo"},
+		PortBindings:       []string{"27017"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
 		ServiceNames: []string{"wireguard"},
