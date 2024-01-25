@@ -24,7 +24,7 @@ func SysInstall(
 	isInstalled := sysInstallQueryRepo.IsInstalled()
 	isDataDiskMounted := sysInstallQueryRepo.IsDataDiskMounted()
 
-	svcInstallName := valueObject.NewSvcNamePanic("sys-install-continue")
+	svcInstallName := valueObject.NewServiceNamePanic("sys-install-continue")
 
 	if isInstalled && isDataDiskMounted {
 		_ = serverCmdRepo.DeleteOneTimerSvc(svcInstallName)
@@ -77,7 +77,7 @@ func SysInstall(
 
 	logAction(serverCmdRepo, "Adding core services...")
 	err = serverCmdRepo.AddSvc(
-		valueObject.NewSvcNamePanic("control"),
+		valueObject.NewServiceNamePanic("control"),
 		valueObject.NewSvcCmdPanic("/var/speedia/control serve"),
 	)
 	if err != nil {

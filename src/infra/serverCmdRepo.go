@@ -21,7 +21,7 @@ func (repo ServerCmdRepo) Reboot() error {
 }
 
 func (repo ServerCmdRepo) AddSvc(
-	name valueObject.SvcName,
+	name valueObject.ServiceName,
 	cmd valueObject.SvcCmd,
 ) error {
 	nameStr := name.String()
@@ -75,7 +75,7 @@ WantedBy=multi-user.target
 }
 
 func (repo ServerCmdRepo) AddOneTimerSvc(
-	svcName valueObject.SvcName,
+	svcName valueObject.ServiceName,
 	cmd valueObject.SvcCmd,
 ) error {
 	name := svcName.String()
@@ -155,7 +155,7 @@ WantedBy=multi-user.target
 	return nil
 }
 
-func (repo ServerCmdRepo) DeleteOneTimerSvc(svcName valueObject.SvcName) error {
+func (repo ServerCmdRepo) DeleteOneTimerSvc(svcName valueObject.ServiceName) error {
 	name := svcName.String()
 	_, _ = infraHelper.RunCmd("systemctl", "stop", name+".timer")
 	_, _ = infraHelper.RunCmd("systemctl", "disable", name+".timer")
