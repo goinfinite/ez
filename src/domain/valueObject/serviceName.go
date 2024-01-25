@@ -1,6 +1,11 @@
 package valueObject
 
-import "errors"
+import (
+	"errors"
+	"regexp"
+)
+
+const serviceNameRegex string = `^[\w\.\_\-]{1,128}$`
 
 type ServiceName string
 
@@ -21,9 +26,8 @@ func NewServiceNamePanic(value string) ServiceName {
 }
 
 func (name ServiceName) isValid() bool {
-	isTooShort := len(string(name)) < 3
-	isTooLong := len(string(name)) > 128
-	return !isTooShort && !isTooLong
+	re := regexp.MustCompile(serviceNameRegex)
+	return re.MatchString(string(name))
 }
 
 func (name ServiceName) String() string {
