@@ -865,6 +865,12 @@
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "serviceBindings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -978,6 +984,12 @@
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "serviceBindings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1154,6 +1166,12 @@
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "serviceBindings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "startedAt": {
                     "type": "integer"

@@ -151,6 +151,17 @@ func AddContainerController(c echo.Context) error {
 	}
 	imgAddr := valueObject.NewContainerImageAddressPanic(imgAddrStr)
 
+	serviceBindings := []valueObject.ServiceBinding{}
+	if requestBody["serviceBindings"] != nil {
+		for _, serviceBindingStr := range requestBody["serviceBindings"].([]string) {
+			serviceBinding, err := valueObject.NewServiceBinding(serviceBindingStr)
+			if err != nil {
+				continue
+			}
+			serviceBindings = append(serviceBindings, serviceBinding)
+		}
+	}
+
 	portBindings := []valueObject.PortBinding{}
 	if requestBody["portBindings"] != nil {
 		_, isMapStringInterface := requestBody["portBindings"].(map[string]interface{})
@@ -211,6 +222,7 @@ func AddContainerController(c echo.Context) error {
 		accId,
 		hostname,
 		imgAddr,
+		serviceBindings,
 		portBindings,
 		restartPolicyPtr,
 		entrypointPtr,

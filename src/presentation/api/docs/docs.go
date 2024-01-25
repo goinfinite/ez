@@ -871,6 +871,12 @@ const docTemplate = `{
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "serviceBindings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -984,6 +990,12 @@ const docTemplate = `{
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "serviceBindings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1160,6 +1172,12 @@ const docTemplate = `{
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                },
+                "serviceBindings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "startedAt": {
                     "type": "integer"
