@@ -37,6 +37,83 @@ func (repo ContainerCmdRepo) getBaseSpecs(
 	return containerProfile.BaseSpecs, nil
 }
 
+func (repo ContainerCmdRepo) calibratePortBindings(
+	originalPortBindings []valueObject.PortBinding,
+) ([]valueObject.PortBinding, error) {
+	calibratedPortBindings := []valueObject.PortBinding{}
+	usedPrivatePorts := []valueObject.NetworkPort{}
+	usedPublicPorts := []valueObject.NetworkPort{}
+	portBindingModel := dbModel.ContainerPortBinding{}
+
+	for _, originalPortBinding := range originalPortBindings {
+		nextPrivatePort, err := portBindingModel.GetNextAvailablePrivatePort(
+			repo.dbSvc.Orm,
+			usedPrivatePorts,
+		)
+		if err != nil {
+			return calibratedPortBindings, errors.New("GetNextPrivatePortError")
+		}
+
+		usedPrivatePorts = append(usedPrivatePorts, nextPrivatePort)
+
+		calibratedPortBinding := valueObject.NewPortBinding(
+			originalPortBinding.ServiceName,
+			originalPortBinding.PublicPort,
+			originalPortBinding.ContainerPort,
+			originalPortBinding.Protocol,
+			&nextPrivatePort,
+		)
+
+		if originalPortBinding.PublicPort.Get() == 0 {
+			calibratedPortBindings = append(
+				calibratedPortBindings,
+				calibratedPortBinding,
+			)
+			continue
+		}
+
+		nextPublicPort, err := portBindingModel.GetNextAvailablePublicPort(
+			repo.dbSvc.Orm,
+			calibratedPortBinding,
+			usedPublicPorts,
+		)
+		if err != nil {
+			return calibratedPortBindings, errors.New("GetNextPublicPortError")
+		}
+
+		usedPublicPorts = append(usedPublicPorts, nextPublicPort)
+
+		calibratedPortBinding.PublicPort = nextPublicPort
+
+		calibratedPortBindings = append(
+			calibratedPortBindings,
+			calibratedPortBinding,
+		)
+	}
+
+	return calibratedPortBindings, nil
+}
+
+func (repo ContainerCmdRepo) getPortBindingsParam(
+	portBindings []valueObject.PortBinding,
+) []string {
+	portBindingsParams := []string{}
+	for _, portBindingVo := range portBindings {
+		portBindingsParams = append(portBindingsParams, "--publish")
+		portBindingsString := portBindingVo.PublicPort.String() +
+			":" + portBindingVo.ContainerPort.String()
+
+		protocolStr := portBindingVo.Protocol.String()
+		if protocolStr != "" && protocolStr != "tcp" {
+			portBindingsString += "/udp"
+		}
+
+		portBindingsParams = append(portBindingsParams, portBindingsString)
+	}
+
+	return portBindingsParams
+}
+
 func (repo ContainerCmdRepo) Add(
 	addDto dto.AddContainer,
 ) (valueObject.ContainerId, error) {
@@ -88,40 +165,12 @@ func (repo ContainerCmdRepo) Add(
 	}
 
 	if len(addDto.PortBindings) > 0 {
-		portBindingsParams := []string{}
-		usedPrivatePorts := []valueObject.NetworkPort{}
-
-		for pbIndex, portBindingVo := range addDto.PortBindings {
-			portBindingModel := dbModel.ContainerPortBinding{
-				ContainerPort: uint(portBindingVo.ContainerPort),
-				PublicPort:    uint(portBindingVo.PublicPort),
-			}
-
-			nextPrivatePort, err := portBindingModel.GetNextAvailablePrivatePort(
-				repo.dbSvc.Orm,
-				usedPrivatePorts,
-			)
-			if err != nil {
-				return containerId, errors.New("FailedToGetNextAvailablePrivatePort")
-			}
-
-			usedPrivatePorts = append(usedPrivatePorts, nextPrivatePort)
-
-			portBindingModel.PrivatePort = uint(nextPrivatePort.Get())
-			addDto.PortBindings[pbIndex].PrivatePort = &nextPrivatePort
-
-			portBindingsParams = append(portBindingsParams, "--publish")
-			portBindingsString := nextPrivatePort.String() +
-				":" + portBindingVo.ContainerPort.String()
-
-			protocolStr := portBindingVo.Protocol.String()
-			if protocolStr != "" && protocolStr != "tcp" {
-				portBindingModel.Protocol = "udp"
-				portBindingsString += "/udp"
-			}
-
-			portBindingsParams = append(portBindingsParams, portBindingsString)
+		addDto.PortBindings, err = repo.calibratePortBindings(addDto.PortBindings)
+		if err != nil {
+			return containerId, err
 		}
+
+		portBindingsParams := repo.getPortBindingsParam(addDto.PortBindings)
 
 		runParams = append(runParams, portBindingsParams...)
 	}
