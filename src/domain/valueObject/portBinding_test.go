@@ -7,11 +7,12 @@ import (
 func TestNewPortBinding(t *testing.T) {
 	t.Run("ValidPortBindingFromString", func(t *testing.T) {
 		validPortBindings := []string{
-			"22",
-			"22/tcp",
-			"22:22",
-			"22:22/tcp",
-			"22:22/tcp:40000",
+			"ssh",
+			"ssh:22",
+			"ssh:22:22",
+			"ssh:22:22/tcp",
+			"ssh:0:22/tcp",
+			"ssh:22:22/tcp:40000",
 		}
 
 		for _, path := range validPortBindings {
@@ -25,6 +26,7 @@ func TestNewPortBinding(t *testing.T) {
 	t.Run("InvalidPortBindingFromString", func(t *testing.T) {
 		invalidPortBindings := []string{
 			"",
+			"22",
 			"UNION SELECT * FROM USERS",
 			"/path\n/path",
 			"?param=value",
