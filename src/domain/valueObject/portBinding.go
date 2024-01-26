@@ -392,18 +392,6 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 	}, nil
 }
 
-func (portBinding PortBinding) GetPublicPort() NetworkPort {
-	return portBinding.PublicPort
-}
-
-func (portBinding PortBinding) GetContainerPort() NetworkPort {
-	return portBinding.ContainerPort
-}
-
-func (portBinding PortBinding) GetProtocol() NetworkProtocol {
-	return portBinding.Protocol
-}
-
 func (portBinding PortBinding) String() string {
 	portBindingStr := portBinding.ServiceName.String()
 
@@ -424,4 +412,25 @@ func (portBinding PortBinding) String() string {
 	}
 
 	return portBindingStr
+}
+
+func (portBinding PortBinding) GetPublicPort() NetworkPort {
+	return portBinding.PublicPort
+}
+
+func (portBinding PortBinding) GetContainerPort() NetworkPort {
+	return portBinding.ContainerPort
+}
+
+func (portBinding PortBinding) GetProtocol() NetworkProtocol {
+	return portBinding.Protocol
+}
+
+func (portBinding PortBinding) GetPublicPortInterval() (string, error) {
+	serviceNameStr := portBinding.ServiceName.String()
+	serviceInfo, exists := ServiceNameInfoMap[serviceNameStr]
+	if !exists {
+		return "", errors.New("UnknownServiceName")
+	}
+	return serviceInfo.PublicPortInterval, nil
 }
