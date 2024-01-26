@@ -433,7 +433,7 @@ func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 				continue
 			}
 
-			portBindings = append(portBindings, portBinding)
+			portBindings = append(portBindings, portBinding...)
 		}
 	}
 
