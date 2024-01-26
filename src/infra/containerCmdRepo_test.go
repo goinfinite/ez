@@ -16,14 +16,7 @@ func TestContainerCmdRepo(t *testing.T) {
 	containerCmdRepo := NewContainerCmdRepo(dbSvc)
 
 	t.Run("AddContainer", func(t *testing.T) {
-		portBindings := []valueObject.PortBinding{
-			valueObject.NewPortBinding(
-				40001,
-				80,
-				valueObject.NewNetworkProtocolPanic("tcp"),
-				nil,
-			),
-		}
+		portBindings, _ := valueObject.NewPortBindingFromString("http")
 
 		restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
 
