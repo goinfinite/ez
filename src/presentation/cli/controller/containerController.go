@@ -44,7 +44,7 @@ func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 			panic(err.Error() + ": " + portBindingStr)
 		}
 
-		portBindings = append(portBindings, portBinding)
+		portBindings = append(portBindings, portBinding...)
 	}
 
 	return portBindings
@@ -66,7 +66,6 @@ func AddContainerController() *cobra.Command {
 	var accId uint64
 	var hostnameStr string
 	var containerImageAddressStr string
-	var serviceBindingsSlice []string
 	var portBindingsSlice []string
 	var restartPolicyStr string
 	var entrypointStr string
@@ -86,16 +85,6 @@ func AddContainerController() *cobra.Command {
 			imgAddr := valueObject.NewContainerImageAddressPanic(
 				containerImageAddressStr,
 			)
-
-			serviceBindings := []valueObject.ServiceBinding{}
-			if len(serviceBindingsSlice) > 0 {
-				for _, serviceBindingStr := range serviceBindingsSlice {
-					serviceBinding := valueObject.NewServiceBindingPanic(
-						serviceBindingStr,
-					)
-					serviceBindings = append(serviceBindings, serviceBinding)
-				}
-			}
 
 			portBindings := []valueObject.PortBinding{}
 			if len(portBindingsSlice) > 0 {
@@ -133,7 +122,6 @@ func AddContainerController() *cobra.Command {
 				accId,
 				hostname,
 				imgAddr,
-				serviceBindings,
 				portBindings,
 				restartPolicyPtr,
 				entrypointPtr,
@@ -175,18 +163,11 @@ func AddContainerController() *cobra.Command {
 	cmd.Flags().StringVarP(&containerImageAddressStr, "image", "i", "", "ImageAddress")
 	cmd.MarkFlagRequired("image")
 	cmd.Flags().StringSliceVarP(
-		&serviceBindingsSlice,
-		"service-bindings",
-		"S",
-		[]string{},
-		"ServiceBindings",
-	)
-	cmd.Flags().StringSliceVarP(
 		&portBindingsSlice,
 		"port-bindings",
-		"P",
+		"b",
 		[]string{},
-		"PortBindings (publicPort[:containerPort][/protocol][:privatePort])",
+		"PortBindings (serviceName[:publicPort][:containerPort][/protocol][:privatePort])",
 	)
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
