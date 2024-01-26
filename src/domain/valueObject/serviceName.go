@@ -3,13 +3,17 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
-const serviceNameRegex string = `^[\w\.\_\-]{1,128}$`
+const serviceNameRegex string = `^[a-z][\w\.\_\-]{0,128}$`
 
 type ServiceName string
 
 func NewServiceName(value string) (ServiceName, error) {
+	value = strings.TrimSpace(value)
+	value = strings.ToLower(value)
+
 	name := ServiceName(value)
 	if !name.isValid() {
 		return "", errors.New("InvalidServiceName")
