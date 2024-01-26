@@ -10,6 +10,7 @@ import (
 type ContainerPortBinding struct {
 	ID            uint   `gorm:"primarykey"`
 	ContainerID   string `gorm:"not null"`
+	ServiceName   string `gorm:"not null"`
 	PublicPort    uint   `gorm:"not null"`
 	ContainerPort uint   `gorm:"not null"`
 	Protocol      string `gorm:"not null"`
@@ -26,6 +27,7 @@ func (ContainerPortBinding) ToModel(
 ) ContainerPortBinding {
 	return ContainerPortBinding{
 		ContainerID:   containerId.String(),
+		ServiceName:   vo.ServiceName.String(),
 		PublicPort:    uint(vo.PublicPort.Get()),
 		ContainerPort: uint(vo.ContainerPort.Get()),
 		Protocol:      vo.Protocol.String(),
@@ -35,6 +37,11 @@ func (ContainerPortBinding) ToModel(
 
 func (model ContainerPortBinding) ToValueObject() (valueObject.PortBinding, error) {
 	var portBinding valueObject.PortBinding
+
+	serviceName, err := valueObject.NewServiceName(model.ServiceName)
+	if err != nil {
+		return portBinding, err
+	}
 
 	publicPort, err := valueObject.NewNetworkPort(model.PublicPort)
 	if err != nil {
@@ -57,6 +64,7 @@ func (model ContainerPortBinding) ToValueObject() (valueObject.PortBinding, erro
 	}
 
 	return valueObject.NewPortBinding(
+		serviceName,
 		publicPort,
 		containerPort,
 		protocol,
