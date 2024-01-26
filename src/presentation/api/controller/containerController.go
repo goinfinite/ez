@@ -1,6 +1,7 @@
 package apiController
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -53,59 +54,77 @@ func GetContainersWithMetricsController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
 }
 
-func parsePortBindings(portBindings []interface{}) []valueObject.PortBinding {
-	portBindingsList := []valueObject.PortBinding{}
-	for _, portBinding := range portBindings {
-		portBindingMap := portBinding.(map[string]interface{})
+func parsePortBindings(rawPortBindings []interface{}) []valueObject.PortBinding {
+	portBindings := []valueObject.PortBinding{}
+	for rawPortBindingIndex, rawPortBinding := range rawPortBindings {
+		errMsgSuffix := ": (item " + strconv.Itoa(rawPortBindingIndex) + ")"
 
-		publicPort, err := valueObject.NewNetworkPort(
-			portBindingMap["publicPort"],
-		)
-		if err != nil {
+		rawPortBindingMap, assertOk := rawPortBinding.(map[string]interface{})
+		if !assertOk {
+			log.Print("InvalidPortBindingStructure" + errMsgSuffix)
 			continue
 		}
 
-		containerPort := publicPort
-		if portBindingMap["containerPort"] != nil {
-			containerPort, err = valueObject.NewNetworkPort(
-				portBindingMap["containerPort"],
-			)
-			if err != nil {
-				continue
-			}
+		portBindingStr := ""
+
+		rawServiceName, assertOk := rawPortBindingMap["serviceName"].(string)
+		if !assertOk {
+			log.Print("InvalidServiceName" + errMsgSuffix)
+			continue
 		}
 
-		protocol := valueObject.GuessNetworkProtocolByPort(publicPort)
-		if portBindingMap["protocol"] != nil {
-			protocol, err = valueObject.NewNetworkProtocol(
-				portBindingMap["protocol"].(string),
-			)
+		portBindingStr = rawServiceName
+
+		rawPublicPort, exists := rawPortBindingMap["publicPort"]
+		if exists {
+			publicPort, err := valueObject.NewNetworkPort(rawPublicPort)
 			if err != nil {
+				log.Print(err.Error() + errMsgSuffix)
 				continue
 			}
+			portBindingStr += ":" + publicPort.String()
 		}
 
-		var privatePortPtr *valueObject.NetworkPort
-		if portBindingMap["privatePort"] != nil {
-			privatePort, err := valueObject.NewNetworkPort(
-				portBindingMap["privatePort"],
-			)
+		rawContainerPort, rawContainerPortExists := rawPortBindingMap["containerPort"]
+		if rawContainerPortExists {
+			containerPort, err := valueObject.NewNetworkPort(rawContainerPort)
 			if err != nil {
+				log.Print(err.Error() + errMsgSuffix)
 				continue
 			}
-			privatePortPtr = &privatePort
+			portBindingStr += ":" + containerPort.String()
 		}
 
-		newPortBinding := valueObject.NewPortBinding(
-			publicPort,
-			containerPort,
-			protocol,
-			privatePortPtr,
-		)
-		portBindingsList = append(portBindingsList, newPortBinding)
+		rawProtocol, assertOk := rawPortBindingMap["protocol"].(string)
+		if assertOk && rawContainerPortExists {
+			protocol, err := valueObject.NewNetworkProtocol(rawProtocol)
+			if err != nil {
+				log.Print(err.Error() + errMsgSuffix)
+				continue
+			}
+			portBindingStr += "/" + protocol.String()
+		}
+
+		rawPrivatePort, exists := rawPortBindingMap["privatePort"]
+		if exists {
+			privatePort, err := valueObject.NewNetworkPort(rawPrivatePort)
+			if err != nil {
+				log.Print(err.Error() + errMsgSuffix)
+				continue
+			}
+			portBindingStr += ":" + privatePort.String()
+		}
+
+		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
+		if err != nil {
+			log.Print(err.Error() + errMsgSuffix)
+			continue
+		}
+
+		portBindings = append(portBindings, portBinding...)
 	}
 
-	return portBindingsList
+	return portBindings
 }
 
 func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
@@ -150,17 +169,6 @@ func AddContainerController(c echo.Context) error {
 		}
 	}
 	imgAddr := valueObject.NewContainerImageAddressPanic(imgAddrStr)
-
-	serviceBindings := []valueObject.ServiceBinding{}
-	if requestBody["serviceBindings"] != nil {
-		for _, serviceBindingStr := range requestBody["serviceBindings"].([]string) {
-			serviceBinding, err := valueObject.NewServiceBinding(serviceBindingStr)
-			if err != nil {
-				continue
-			}
-			serviceBindings = append(serviceBindings, serviceBinding)
-		}
-	}
 
 	portBindings := []valueObject.PortBinding{}
 	if requestBody["portBindings"] != nil {
@@ -222,7 +230,6 @@ func AddContainerController(c echo.Context) error {
 		accId,
 		hostname,
 		imgAddr,
-		serviceBindings,
 		portBindings,
 		restartPolicyPtr,
 		entrypointPtr,
