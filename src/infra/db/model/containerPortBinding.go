@@ -2,6 +2,8 @@ package dbModel
 
 import (
 	"errors"
+	"strconv"
+	"strings"
 
 	"github.com/speedianet/control/src/domain/valueObject"
 	"gorm.io/gorm"
@@ -111,6 +113,70 @@ func (model ContainerPortBinding) GetNextAvailablePrivatePort(
 
 	if nextPort > 60000 {
 		return 0, errors.New("NoAvailablePrivatePort")
+	}
+
+	return valueObject.NewNetworkPort(nextPort)
+}
+
+func (model ContainerPortBinding) GetNextAvailablePublicPort(
+	ormSvc *gorm.DB,
+	portBinding valueObject.PortBinding,
+	portsToIgnore []valueObject.NetworkPort,
+) (valueObject.NetworkPort, error) {
+	usedPublicPorts := []uint{}
+
+	err := ormSvc.Model(model).
+		Select("public_port").
+		Order("public_port asc").
+		Find(&usedPublicPorts).Error
+	if err != nil {
+		return 0, err
+	}
+
+	if len(usedPublicPorts) > 0 {
+		portsToIgnoreUint := []uint{}
+		for _, port := range portsToIgnore {
+			portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
+		}
+		usedPublicPorts = append(usedPublicPorts, portsToIgnoreUint...)
+	}
+
+	publicPortInterval, err := portBinding.GetPublicPortInterval()
+	if err != nil {
+		return portBinding.ContainerPort, nil
+	}
+	intervalParts := strings.Split(publicPortInterval, "-")
+	if len(intervalParts) == 1 {
+		return valueObject.NewNetworkPort(intervalParts[0])
+	}
+
+	initialPortUint64, err := strconv.ParseUint(intervalParts[0], 10, 64)
+	if err != nil {
+		return 0, errors.New("InvalidPublicPortInterval")
+	}
+	initialPort := uint(initialPortUint64)
+
+	nextPort := uint(initialPort)
+	for _, port := range usedPublicPorts {
+		if port == nextPort {
+			nextPort++
+			continue
+		}
+		break
+	}
+
+	if nextPort < initialPort {
+		return 0, errors.New("PublicPortTooLow")
+	}
+
+	maxIntervalPortUint64, err := strconv.ParseUint(intervalParts[1], 10, 64)
+	if err != nil {
+		return 0, errors.New("InvalidPublicPortInterval")
+	}
+	maxIntervalPort := uint(maxIntervalPortUint64)
+
+	if nextPort > maxIntervalPort {
+		return 0, errors.New("NoAvailablePublicPort")
 	}
 
 	return valueObject.NewNetworkPort(nextPort)
