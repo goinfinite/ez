@@ -104,7 +104,7 @@ func (repo ContainerCmdRepo) getPortBindingsParam(
 	portBindingsParams := []string{}
 	for _, portBindingVo := range portBindings {
 		portBindingsParams = append(portBindingsParams, "--publish")
-		portBindingsString := portBindingVo.PublicPort.String() +
+		portBindingsString := portBindingVo.PrivatePort.String() +
 			":" + portBindingVo.ContainerPort.String()
 
 		protocolStr := portBindingVo.Protocol.String()
