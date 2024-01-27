@@ -68,12 +68,9 @@ func parsePortBindings(rawPortBindings []interface{}) []valueObject.PortBinding 
 		portBindingStr := ""
 
 		rawServiceName, assertOk := rawPortBindingMap["serviceName"].(string)
-		if !assertOk {
-			log.Print("InvalidServiceName" + errMsgSuffix)
-			continue
+		if assertOk {
+			portBindingStr += rawServiceName
 		}
-
-		portBindingStr = rawServiceName
 
 		rawPublicPort, exists := rawPortBindingMap["publicPort"]
 		if exists {
