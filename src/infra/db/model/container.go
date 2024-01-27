@@ -169,6 +169,7 @@ func (Container) ToModel(entity entity.Container) Container {
 		for _, env := range entity.Envs {
 			envs += env.String() + ";"
 		}
+		envs = strings.TrimSuffix(envs, ";")
 		envsPtr = &envs
 	}
 
