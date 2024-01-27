@@ -645,10 +645,40 @@ func (portBinding PortBinding) GetProtocol() NetworkProtocol {
 	return portBinding.Protocol
 }
 
-func (portBinding PortBinding) GetPublicPortInterval() (string, error) {
+func (portBinding PortBinding) GetPublicPortInterval() (NetworkPortInterval, error) {
+	var portInterval NetworkPortInterval
+
 	serviceInfo, err := findKnownServiceBindingByName(portBinding.ServiceName)
 	if err != nil {
-		return "", err
+		return portInterval, err
 	}
-	return serviceInfo.PublicPortInterval, nil
+
+	if serviceInfo.PublicPortInterval == "" {
+		return portInterval, errors.New("UnknownPublicPortInterval")
+	}
+
+	intervalParts := strings.Split(serviceInfo.PublicPortInterval, "-")
+	if len(intervalParts) == 0 {
+		preDefinedPublicPortStr := serviceInfo.PublicPortInterval
+		preDefinedPublicPort, err := NewNetworkPort(preDefinedPublicPortStr)
+		if err != nil {
+			return portInterval, err
+		}
+
+		return NewNetworkPortInterval(preDefinedPublicPort, nil)
+	}
+
+	minPublicPortStr := intervalParts[0]
+	minPublicPort, err := NewNetworkPort(minPublicPortStr)
+	if err != nil {
+		return portInterval, err
+	}
+
+	maxPublicPortStr := intervalParts[1]
+	maxPublicPort, err := NewNetworkPort(maxPublicPortStr)
+	if err != nil {
+		return portInterval, err
+	}
+
+	return NewNetworkPortInterval(minPublicPort, &maxPublicPort)
 }

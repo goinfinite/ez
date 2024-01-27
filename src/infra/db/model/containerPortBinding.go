@@ -2,8 +2,6 @@ package dbModel
 
 import (
 	"errors"
-	"strconv"
-	"strings"
 
 	"github.com/speedianet/control/src/domain/valueObject"
 	"gorm.io/gorm"
@@ -145,17 +143,11 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 	if err != nil {
 		return portBinding.ContainerPort, nil
 	}
-	intervalParts := strings.Split(publicPortInterval, "-")
-	if len(intervalParts) == 1 {
-		preDefinedPublicPort := intervalParts[0]
-		return valueObject.NewNetworkPort(preDefinedPublicPort)
+	if publicPortInterval.Max == nil {
+		return publicPortInterval.Min, nil
 	}
 
-	initialPortUint64, err := strconv.ParseUint(intervalParts[0], 10, 64)
-	if err != nil {
-		return 0, errors.New("InvalidPublicPortInterval")
-	}
-	initialPort := uint(initialPortUint64)
+	initialPort := uint(publicPortInterval.Min.Get())
 
 	nextPort := uint(initialPort)
 	for _, port := range usedPublicPorts {
@@ -170,13 +162,8 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 		return 0, errors.New("PublicPortTooLow")
 	}
 
-	maxIntervalPortUint64, err := strconv.ParseUint(intervalParts[1], 10, 64)
-	if err != nil {
-		return 0, errors.New("InvalidPublicPortInterval")
-	}
-	maxIntervalPort := uint(maxIntervalPortUint64)
-
-	if nextPort > maxIntervalPort {
+	maxPort := uint(publicPortInterval.Max.Get())
+	if nextPort > maxPort {
 		return 0, errors.New("NoAvailablePublicPort")
 	}
 
