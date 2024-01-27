@@ -405,7 +405,7 @@ func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	updatedAt := valueObject.UnixTime(updatedAtUnix.Unix())
 
 	portBindings := []valueObject.PortBinding{}
-	portBindingsRegex := `\d+\/\w{1,4}`
+	portBindingsRegex := `\d{1,5}(\/\w{1,4})?`
 	for _, layer := range desiredImageMap["layers"].([]interface{}) {
 		layerMap, assertOk := layer.(map[string]interface{})
 		if !assertOk {
@@ -416,6 +416,8 @@ func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		if !assertOk {
 			continue
 		}
+
+		rawInstruction = strings.TrimSpace(rawInstruction)
 
 		if !strings.HasPrefix(rawInstruction, "EXPOSE") {
 			continue
