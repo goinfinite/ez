@@ -41,22 +41,22 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PortBindings: []string{"23"},
 	},
 	{
-		ServiceNames: []string{"dns"},
-		PortBindings: []string{"53", "53/udp"},
-	},
-	{
 		ServiceNames: []string{"smtp"},
-		PortBindings: []string{"25", "465", "587", "2525"},
+		PortBindings: []string{"25"},
 	},
 	{
 		ServiceNames: []string{"whois"},
 		PortBindings: []string{"43"},
 	},
 	{
+		ServiceNames: []string{"dns"},
+		PortBindings: []string{"53", "53/udp"},
+	},
+	{
 		ServiceNames: []string{
-			"http", "nginx", "caddy", "apache", "httpd", "php",
+			"http", "ws", "grpc", "php",
 		},
-		PortBindings: []string{"80", "8080"},
+		PortBindings: []string{"80"},
 	},
 	{
 		ServiceNames: []string{"kerberos"},
@@ -84,13 +84,20 @@ var KnownServiceBindings = []serviceBindingInfo{
 			"wss",
 			"grpcs",
 			"php",
-			"kong-secure",
 		},
-		PortBindings: []string{"443", "8443"},
+		PortBindings: []string{"443"},
+	},
+	{
+		ServiceNames: []string{"smtps"},
+		PortBindings: []string{"465"},
 	},
 	{
 		ServiceNames: []string{"syslog"},
 		PortBindings: []string{"514/udp"},
+	},
+	{
+		ServiceNames: []string{"smtp-tls"},
+		PortBindings: []string{"587"},
 	},
 	{
 		ServiceNames: []string{"spamassasin", "spam-assassin"},
@@ -143,6 +150,10 @@ var KnownServiceBindings = []serviceBindingInfo{
 		ServiceNames:       []string{"ghost"},
 		PortBindings:       []string{"2368"},
 		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"smtp-tls-alt"},
+		PortBindings: []string{"2525"},
 	},
 	{
 		ServiceNames:       []string{"node", "nodejs", "ruby-on-rails", "rails", "ruby"},
@@ -207,8 +218,49 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"redis"},
+		PortBindings:       []string{"6379"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
 		ServiceNames: []string{"storm"},
 		PortBindings: []string{"6627"},
+	},
+	{
+		ServiceNames:       []string{"meilisearch", "meili"},
+		PortBindings:       []string{"7700"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"neo4j"},
+		PortBindings:       []string{"7474"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"django"},
+		PortBindings:       []string{"8000"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"kong"},
+		PortBindings:       []string{"8000", "8001", "8002"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"mattermost"},
+		PortBindings:       []string{"8065"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"odoo"},
+		PortBindings:       []string{"8069", "8072"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames: []string{
+			"http", "php",
+		},
+		PortBindings: []string{"8080"},
 	},
 	{
 		ServiceNames:       []string{"influxdb", "influx"},
@@ -240,73 +292,23 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames:       []string{"cassandra"},
-		PortBindings:       []string{"9042"},
-		PublicPortInterval: databasePublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"kafka"},
-		PortBindings:       []string{"9092"},
-		PublicPortInterval: databasePublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"redis"},
-		PortBindings:       []string{"6379"},
-		PublicPortInterval: databasePublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"meilisearch", "meili"},
-		PortBindings:       []string{"7700"},
-		PublicPortInterval: databasePublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"neo4j"},
-		PortBindings:       []string{"7474"},
-		PublicPortInterval: databasePublicPortInterval,
-	},
-	{
-		ServiceNames: []string{
-			"django", "kong",
-		},
-		PortBindings:       []string{"8000"},
-		PublicPortInterval: httpPublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"kong-admin"},
-		PortBindings:       []string{"8001"},
-		PublicPortInterval: httpPublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"kong-manager"},
-		PortBindings:       []string{"8002"},
-		PublicPortInterval: httpPublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"mattermost"},
-		PortBindings:       []string{"8065"},
-		PublicPortInterval: httpPublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"odoo"},
-		PortBindings:       []string{"8069", "8072"},
-		PublicPortInterval: httpPublicPortInterval,
-	},
-	{
 		ServiceNames:       []string{"clickhouse"},
 		PortBindings:       []string{"8123", "9000", "9009"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"kong-admin-secure"},
-		PortBindings: []string{
-			"8444",
+		ServiceNames: []string{
+			"https",
+			"wss",
+			"grpcs",
+			"php",
 		},
-		PublicPortInterval: httpsPublicPortInterval,
+		PortBindings: []string{"8443"},
 	},
 	{
-		ServiceNames: []string{"kong-manager-secure"},
+		ServiceNames: []string{"kong-secure"},
 		PortBindings: []string{
-			"8445",
+			"8444", "8445",
 		},
 		PublicPortInterval: httpsPublicPortInterval,
 	},
@@ -330,7 +332,12 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PortBindings: []string{"9000"},
 	},
 	{
-		ServiceNames:       []string{"kapacitor"},
+		ServiceNames:       []string{"cassandra"},
+		PortBindings:       []string{"9042"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"kafka", "kapacitor"},
 		PortBindings:       []string{"9092"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
