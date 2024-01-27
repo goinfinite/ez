@@ -86,7 +86,7 @@ func (model ContainerPortBinding) GetNextAvailablePrivatePort(
 		return 0, err
 	}
 
-	if len(usedPrivatePorts) > 0 {
+	if len(portsToIgnore) > 0 {
 		portsToIgnoreUint := []uint{}
 		for _, port := range portsToIgnore {
 			portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
@@ -131,7 +131,7 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 		return 0, err
 	}
 
-	if len(usedPublicPorts) > 0 {
+	if len(portsToIgnore) > 0 {
 		portsToIgnoreUint := []uint{}
 		for _, port := range portsToIgnore {
 			portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
