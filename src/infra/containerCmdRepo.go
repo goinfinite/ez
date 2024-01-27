@@ -51,7 +51,9 @@ func (repo ContainerCmdRepo) calibratePortBindings(
 			usedPrivatePorts,
 		)
 		if err != nil {
-			return calibratedPortBindings, errors.New("GetNextPrivatePortError")
+			return calibratedPortBindings, errors.New(
+				"GetNextPrivatePortError: + " + err.Error(),
+			)
 		}
 
 		usedPrivatePorts = append(usedPrivatePorts, nextPrivatePort)
@@ -78,7 +80,9 @@ func (repo ContainerCmdRepo) calibratePortBindings(
 			usedPublicPorts,
 		)
 		if err != nil {
-			return calibratedPortBindings, errors.New("GetNextPublicPortError")
+			return calibratedPortBindings, errors.New(
+				"GetNextPublicPortError: " + err.Error(),
+			)
 		}
 
 		usedPublicPorts = append(usedPublicPorts, nextPublicPort)
