@@ -48,7 +48,7 @@ func GuessNetworkProtocolByPort(port NetworkPort) NetworkProtocol {
 		protocolStr = "udp"
 	case 80, 2368, 3000, 5000, 5601, 8000, 8001, 8002, 8065:
 		protocolStr = "http"
-	case 443, 8443, 8444, 8445:
+	case 443, 1618, 8443, 8444, 8445:
 		protocolStr = "https"
 	}
 
