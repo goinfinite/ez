@@ -193,6 +193,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"meilisearch", "meili"},
+		PortBindings:       []string{"7700"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"neo4j"},
 		PortBindings:       []string{"7474"},
 		PublicPortInterval: databasePublicPortInterval,
@@ -213,6 +218,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		ServiceNames:       []string{"kong-manager"},
 		PortBindings:       []string{"8002"},
 		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"clickhouse"},
+		PortBindings:       []string{"8123", "9000", "9009"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
 		ServiceNames: []string{"kong-admin-secure"},
