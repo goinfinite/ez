@@ -44,11 +44,11 @@ func (np NetworkProtocol) String() string {
 func GuessNetworkProtocolByPort(port NetworkPort) NetworkProtocol {
 	protocolStr := "tcp"
 	switch port.Get() {
-	case 53:
+	case 53, 123, 514:
 		protocolStr = "udp"
-	case 80:
+	case 80, 2368, 3000, 5000, 5601, 8000, 8001, 8002, 8065:
 		protocolStr = "http"
-	case 443:
+	case 443, 8443, 8444, 8445:
 		protocolStr = "https"
 	}
 
