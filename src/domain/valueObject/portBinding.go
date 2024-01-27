@@ -220,6 +220,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"mattermost"},
+		PortBindings:       []string{"8065"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"clickhouse"},
 		PortBindings:       []string{"8123", "9000", "9009"},
 		PublicPortInterval: databasePublicPortInterval,
