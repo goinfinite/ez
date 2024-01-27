@@ -16,7 +16,7 @@ type PortBinding struct {
 }
 
 type serviceBindingInfo struct {
-	AltNames           []string
+	ServiceNames       []string
 	PortBindings       []string
 	PublicPortInterval string
 }
@@ -25,208 +25,210 @@ var httpPublicPortInterval = "80"
 var httpsPublicPortInterval = "443"
 var databasePublicPortInterval = "30000-39999"
 
-var ServiceNameInfoMap = map[string]serviceBindingInfo{
-	"ftp": {
-		AltNames:           []string{},
+var KnownServiceBindings = []serviceBindingInfo{
+	{
+		ServiceNames:       []string{"ftp"},
 		PortBindings:       []string{"21"},
 		PublicPortInterval: "21000-21999",
 	},
-	"ssh": {
-		AltNames:           []string{"sftp"},
+	{
+		ServiceNames:       []string{"ssh", "sftp"},
 		PortBindings:       []string{"22"},
 		PublicPortInterval: "22000-22999",
 	},
-	"telnet": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"telnet"},
 		PortBindings: []string{"23"},
 	},
-	"dns": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"dns"},
 		PortBindings: []string{"53", "53/udp"},
 	},
-	"smtp": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"smtp"},
 		PortBindings: []string{"25", "465", "587", "2525"},
 	},
-	"whois": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"whois"},
 		PortBindings: []string{"43"},
 	},
-	"http": {
-		AltNames: []string{
+	{
+		ServiceNames: []string{
 			"http", "nginx", "caddy", "apache", "httpd", "php",
 		},
 		PortBindings: []string{"80", "8080"},
 	},
-	"kerberos": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"kerberos"},
 		PortBindings: []string{"88"},
 	},
-	"pop3": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"pop3"},
 		PortBindings: []string{"110"},
 	},
-	"ntp": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"ntp"},
 		PortBindings: []string{"123/udp"},
 	},
-	"imap": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"imap"},
 		PortBindings: []string{"143"},
 	},
-	"ldap": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"ldap"},
 		PortBindings: []string{"389"},
 	},
-	"https": {
-		AltNames: []string{
-			"wss", "grpcs", "nginx", "caddy", "apache", "httpd", "php",
+	{
+		ServiceNames: []string{
+			"https", "wss", "grpcs", "nginx", "caddy", "apache", "httpd", "php",
 		},
 		PortBindings: []string{"443", "8443"},
 	},
-	"syslog": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"syslog"},
 		PortBindings: []string{"514/udp"},
 	},
-	"spamassasin": {
-		AltNames:     []string{"spam-assassin"},
+	{
+		ServiceNames: []string{"spamassasin", "spam-assassin"},
 		PortBindings: []string{"783"},
 	},
-	"dot": {
-		AltNames:     []string{"dns-over-tls"},
+	{
+		ServiceNames: []string{"dot", "dns-over-tls"},
 		PortBindings: []string{"853"},
 	},
-	"openvpn": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"openvpn"},
 		PortBindings: []string{"1194"},
 	},
-	"mssql": {
-		AltNames:           []string{"ms-sql", "sqlserver", "sql-server"},
+	{
+		ServiceNames: []string{
+			"mssql", "ms-sql", "sqlserver", "sql-server",
+		},
 		PortBindings:       []string{"1433"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"oracledb": {
-		AltNames:           []string{"oracle-db", "oracle"},
+	{
+		ServiceNames: []string{
+			"oracledb", "oracle-db", "oracle",
+		},
 		PortBindings:       []string{"1521", "2483", "2484"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"mqtt": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"mqtt"},
 		PortBindings:       []string{"1883"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"nfs": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"nfs"},
 		PortBindings: []string{"2049"},
 	},
-	"ghost": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"ghost"},
 		PortBindings:       []string{"2368"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
-	"node": {
-		AltNames: []string{
-			"nodejs", "ruby-on-rails", "rails", "ruby",
-		},
+	{
+		ServiceNames:       []string{"node", "nodejs", "ruby-on-rails", "rails", "ruby"},
 		PortBindings:       []string{"3000"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
-	"mysql": {
-		AltNames:           []string{"mariadb", "percona"},
+	{
+		ServiceNames:       []string{"mysql", "mariadb", "percona"},
 		PortBindings:       []string{"3306"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"nsq": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"nsq"},
 		PortBindings:       []string{"4150", "4151", "4160", "4161"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"nats": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"nats"},
 		PortBindings:       []string{"4222", "6222", "8222"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"flask": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"flask"},
 		PortBindings:       []string{"5000"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
-	"kibana": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"kibana"},
 		PortBindings:       []string{"5601"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
-	"postgresql": {
-		AltNames:           []string{"postgres"},
+	{
+		ServiceNames:       []string{"postgresql", "postgres"},
 		PortBindings:       []string{"5432"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"rabbitmq": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"rabbitmq"},
 		PortBindings:       []string{"5672"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"couchdb": {
-		AltNames:           []string{"couch"},
+	{
+		ServiceNames:       []string{"couchdb", "couch"},
 		PortBindings:       []string{"5984"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"cassandra": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"cassandra"},
 		PortBindings:       []string{"9042"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"kafka": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"kafka"},
 		PortBindings:       []string{"9092"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"redis": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"redis"},
 		PortBindings:       []string{"6379"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"neo4j": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"neo4j"},
 		PortBindings:       []string{"7474"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"django": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"django"},
 		PortBindings:       []string{"8000"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
-	"kong": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"kong"},
 		PortBindings:       []string{"8001", "8444"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
-	"solr": {
-		AltNames:           []string{},
+	{
+		ServiceNames:       []string{"solr"},
 		PortBindings:       []string{"8983"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"sonarqube": {
-		AltNames:     []string{"sonar"},
+	{
+		ServiceNames: []string{"sonarqube", "sonar"},
 		PortBindings: []string{"9000"},
 	},
-	"elasticsearch": {
-		AltNames:           []string{"elastic", "elk"},
+	{
+		ServiceNames:       []string{"elasticsearch", "elastic", "elk"},
 		PortBindings:       []string{"9200"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"memcached": {
-		AltNames:           []string{"memcache"},
+	{
+		ServiceNames:       []string{"memcached", "memcache"},
 		PortBindings:       []string{"11211"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"mongodb": {
-		AltNames:           []string{"mongo"},
+	{
+		ServiceNames:       []string{"mongodb", "mongo"},
 		PortBindings:       []string{"27017"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
-	"wireguard": {
-		AltNames:     []string{},
+	{
+		ServiceNames: []string{"wireguard"},
 		PortBindings: []string{"51820"},
 	},
 }
@@ -247,36 +249,48 @@ func NewPortBinding(
 	}
 }
 
-func NewPortBindingsByServiceName(serviceName ServiceName) ([]PortBinding, error) {
-	portBindings := []PortBinding{}
-	serviceNameStr := serviceName.String()
+func findKnownServiceBindingByName(
+	receivedServiceName ServiceName,
+) (serviceBindingInfo, error) {
+	var serviceBinding serviceBindingInfo
+	receivedServiceNameStr := receivedServiceName.String()
 
-	serviceInfo, exists := ServiceNameInfoMap[serviceNameStr]
-	if !exists {
-		serviceExists := false
-		for standardServiceName, bindingInfo := range ServiceNameInfoMap {
-			for _, altName := range bindingInfo.AltNames {
-				if serviceNameStr != altName {
-					continue
-				}
-				serviceNameStr = standardServiceName
-				serviceInfo = bindingInfo
-				serviceExists = true
-				break
-			}
+	desiredServiceBindingIndex := -1
+
+	for bindingIndex, bindingInfo := range KnownServiceBindings {
+		standardName := bindingInfo.ServiceNames[0]
+		if receivedServiceNameStr == standardName {
+			desiredServiceBindingIndex = bindingIndex
+			break
 		}
 
-		if !serviceExists {
-			return portBindings, errors.New("UnknownServiceName")
+		for _, altName := range bindingInfo.ServiceNames {
+			if receivedServiceNameStr != altName {
+				continue
+			}
+			desiredServiceBindingIndex = bindingIndex
+			break
 		}
 	}
 
-	serviceName, err := NewServiceName(serviceNameStr)
+	if desiredServiceBindingIndex == -1 {
+		return serviceBinding, errors.New("UnknownServiceName")
+	}
+
+	return KnownServiceBindings[desiredServiceBindingIndex], nil
+}
+
+func NewPortBindingsByServiceName(
+	receivedServiceName ServiceName,
+) ([]PortBinding, error) {
+	portBindings := []PortBinding{}
+
+	desiredServiceBinding, err := findKnownServiceBindingByName(receivedServiceName)
 	if err != nil {
 		return portBindings, err
 	}
 
-	for _, portBindingStr := range serviceInfo.PortBindings {
+	for _, portBindingStr := range desiredServiceBinding.PortBindings {
 		portBindingParts := strings.Split(portBindingStr, "/")
 		if len(portBindingParts) == 0 {
 			continue
@@ -300,7 +314,7 @@ func NewPortBindingsByServiceName(serviceName ServiceName) ([]PortBinding, error
 		var privatePortPtr *NetworkPort
 
 		portBinding := NewPortBinding(
-			serviceName,
+			receivedServiceName,
 			publicPort,
 			containerPort,
 			protocol,
@@ -427,10 +441,9 @@ func (portBinding PortBinding) GetProtocol() NetworkProtocol {
 }
 
 func (portBinding PortBinding) GetPublicPortInterval() (string, error) {
-	serviceNameStr := portBinding.ServiceName.String()
-	serviceInfo, exists := ServiceNameInfoMap[serviceNameStr]
-	if !exists {
-		return "", errors.New("UnknownServiceName")
+	serviceInfo, err := findKnownServiceBindingByName(portBinding.ServiceName)
+	if err != nil {
+		return "", err
 	}
 	return serviceInfo.PublicPortInterval, nil
 }
