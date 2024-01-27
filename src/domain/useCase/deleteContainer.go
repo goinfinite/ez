@@ -23,20 +23,6 @@ func DeleteContainer(
 		return errors.New("ContainerNotFound")
 	}
 
-	err = containerCmdRepo.Delete(accId, containerId)
-	if err != nil {
-		log.Printf("DeleteContainerError: %s", err)
-		return errors.New("DeleteContainerInfraError")
-	}
-
-	log.Printf("ContainerId '%v' deleted.", containerId)
-
-	err = accCmdRepo.UpdateQuotaUsage(accId)
-	if err != nil {
-		log.Printf("UpdateAccountQuotaError: %s", err)
-		return errors.New("UpdateAccountQuotaError")
-	}
-
 	targets, err := mappingQueryRepo.GetTargetsByContainerId(containerId)
 	if err != nil {
 		log.Printf("GetTargetByContainerIdError: %s", err)
@@ -51,6 +37,20 @@ func DeleteContainer(
 		}
 
 		log.Printf("TargetId '%v' deleted.", target.Id)
+	}
+
+	err = containerCmdRepo.Delete(accId, containerId)
+	if err != nil {
+		log.Printf("DeleteContainerError: %s", err)
+		return errors.New("DeleteContainerInfraError")
+	}
+
+	log.Printf("ContainerId '%v' deleted.", containerId)
+
+	err = accCmdRepo.UpdateQuotaUsage(accId)
+	if err != nil {
+		log.Printf("UpdateAccountQuotaError: %s", err)
+		return errors.New("UpdateAccountQuotaError")
 	}
 
 	return nil
