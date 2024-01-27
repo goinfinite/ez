@@ -80,7 +80,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 	},
 	{
 		ServiceNames: []string{
-			"https", "wss", "grpcs", "nginx", "caddy", "apache", "httpd", "php",
+			"https",
+			"wss",
+			"grpcs",
+			"php",
+			"kong-secure",
 		},
 		PortBindings: []string{"443", "8443"},
 	},
@@ -194,14 +198,35 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames:       []string{"django"},
+		ServiceNames: []string{
+			"django", "kong",
+		},
 		PortBindings:       []string{"8000"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
-		ServiceNames:       []string{"kong"},
-		PortBindings:       []string{"8001", "8444"},
+		ServiceNames:       []string{"kong-admin"},
+		PortBindings:       []string{"8001"},
 		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"kong-manager"},
+		PortBindings:       []string{"8002"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"kong-admin-secure"},
+		PortBindings: []string{
+			"8444",
+		},
+		PublicPortInterval: httpsPublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"kong-manager-secure"},
+		PortBindings: []string{
+			"8445",
+		},
+		PublicPortInterval: httpsPublicPortInterval,
 	},
 	{
 		ServiceNames:       []string{"solr"},
