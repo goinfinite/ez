@@ -6,7 +6,6 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func AddContainer(
@@ -59,25 +58,10 @@ func AddContainer(
 		return nil
 	}
 
-	for _, portBinding := range addContainerDto.PortBindings {
-		addMappingDto := dto.NewAddMapping(
-			addContainerDto.AccountId,
-			&addContainerDto.Hostname,
-			portBinding.PublicPort,
-			portBinding.Protocol,
-			[]valueObject.ContainerId{containerId},
-		)
-		err = AddMapping(
-			mappingQueryRepo,
-			mappingCmdRepo,
-			containerQueryRepo,
-			addMappingDto,
-		)
-		if err != nil {
-			log.Printf("AddMappingError: %s", err)
-			return errors.New("AddMappingError")
-		}
-	}
-
-	return nil
+	return AddMappingsWithContainerId(
+		containerQueryRepo,
+		mappingQueryRepo,
+		mappingCmdRepo,
+		containerId,
+	)
 }
