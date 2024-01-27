@@ -21,8 +21,7 @@ func AddMapping(
 	isTransportLayer := isTcp || isUdp
 
 	if wasHostnameSent && isTransportLayer {
-		log.Printf("TransportLayerCannotHaveHostname")
-		return errors.New("TransportLayerCannotHaveHostname")
+		addDto.Hostname = nil
 	}
 
 	existingMapping, err := mappingQueryRepo.FindOne(
