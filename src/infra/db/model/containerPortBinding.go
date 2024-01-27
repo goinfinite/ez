@@ -147,7 +147,8 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 	}
 	intervalParts := strings.Split(publicPortInterval, "-")
 	if len(intervalParts) == 1 {
-		return valueObject.NewNetworkPort(intervalParts[0])
+		preDefinedPublicPort := intervalParts[0]
+		return valueObject.NewNetworkPort(preDefinedPublicPort)
 	}
 
 	initialPortUint64, err := strconv.ParseUint(intervalParts[0], 10, 64)
