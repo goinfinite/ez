@@ -420,54 +420,45 @@ func NewPortBindingByPortAndProtocol(
 	return portBinding, errors.New("UnknownPortBinding")
 }
 
-// format: serviceName[:publicPort][:containerPort][/protocol][:privatePort]
+// format: [serviceName][:publicPort][:containerPort][/protocol][:privatePort]
 func NewPortBindingFromString(value string) ([]PortBinding, error) {
 	portBindings := []PortBinding{}
 
 	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
-	portBindingRegex := `^(?P<serviceName>[a-z][\w\.\_\-]{0,128})(?::(?P<publicPort>\d{1,5}))?(?::(?P<containerPort>\d{1,5}))?(?:\/(?P<protocol>\w{1,5}))?(?::(?P<privatePort>\d{1,5}))?$`
+	portBindingRegex := `^(?:(?P<serviceName>[a-z][\w\.\_\-]{0,128}))?(?::?(?P<publicPort>\d{1,5}))?(?::(?P<containerPort>\d{1,5}))?(?:\/(?P<protocol>\w{1,5}))?(?::(?P<privatePort>\d{1,5}))?$`
 	portBindingParts := voHelper.FindNamedGroupsMatches(portBindingRegex, string(value))
 
-	serviceName, err := NewServiceName(portBindingParts["serviceName"])
-	if err != nil {
-		return portBindings, err
+	serviceNameSent := portBindingParts["serviceName"] != ""
+	publicPortSent := portBindingParts["publicPort"] != ""
+	nothingSent := !serviceNameSent && !publicPortSent
+	if nothingSent {
+		return portBindings, errors.New("UnknownPortBinding")
 	}
 
-	isServiceUnmapped := false
-	servicePortBindings, err := NewPortBindingsByServiceName(serviceName)
-	if err != nil {
-		isServiceUnmapped = true
-	}
-
-	onlyServiceNameSent := portBindingParts["publicPort"] == "" &&
-		portBindingParts["containerPort"] == ""
-	if onlyServiceNameSent {
-		if isServiceUnmapped {
-			return portBindings, errors.New("UnknownServiceName")
+	var serviceName ServiceName
+	var err error
+	if serviceNameSent {
+		serviceName, err = NewServiceName(portBindingParts["serviceName"])
+		if err != nil {
+			return portBindings, err
 		}
-		return servicePortBindings, nil
-	}
 
-	rawPublicPortStr := portBindingParts["publicPort"]
-	if rawPublicPortStr == "" {
-		return portBindings, errors.New("UnknownPublicPort")
-	}
-
-	publicPort, err := NewNetworkPort(rawPublicPortStr)
-	if err != nil {
-		return portBindings, err
-	}
-
-	rawContainerPortStr := portBindingParts["containerPort"]
-	if rawContainerPortStr == "" {
-		if rawPublicPortStr == "0" {
-			return portBindings, errors.New("UnknownContainerPort")
+		isServiceUnmapped := false
+		servicePortBindings, err := NewPortBindingsByServiceName(serviceName)
+		if err != nil {
+			isServiceUnmapped = true
 		}
-		rawContainerPortStr = rawPublicPortStr
+
+		if !publicPortSent {
+			if isServiceUnmapped {
+				return portBindings, errors.New("UnknownServiceName")
+			}
+			return servicePortBindings, nil
+		}
 	}
 
-	containerPort, err := NewNetworkPort(rawContainerPortStr)
+	publicPort, err := NewNetworkPort(portBindingParts["publicPort"])
 	if err != nil {
 		return portBindings, err
 	}
@@ -478,6 +469,30 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		if err != nil {
 			return portBindings, err
 		}
+	}
+
+	if publicPortSent && !serviceNameSent {
+		portBinding, err := NewPortBindingByPortAndProtocol(
+			publicPort,
+			protocol,
+		)
+		if err != nil {
+			return portBindings, err
+		}
+		return []PortBinding{portBinding}, nil
+	}
+
+	rawContainerPortStr := portBindingParts["containerPort"]
+	if rawContainerPortStr == "" {
+		if publicPort.Get() == 0 {
+			return portBindings, errors.New("UnknownContainerPort")
+		}
+		rawContainerPortStr = publicPort.String()
+	}
+
+	containerPort, err := NewNetworkPort(rawContainerPortStr)
+	if err != nil {
+		return portBindings, err
 	}
 
 	var privatePortPtr *NetworkPort
