@@ -11,7 +11,7 @@ func NewNetworkPortInterval(
 	min NetworkPort,
 	max *NetworkPort,
 ) (NetworkPortInterval, error) {
-	if min.Get() > max.Get() {
+	if max != nil && min.Get() > max.Get() {
 		return NetworkPortInterval{}, errors.New("MinPortGreaterThanMaxPort")
 	}
 

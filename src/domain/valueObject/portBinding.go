@@ -80,10 +80,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 	},
 	{
 		ServiceNames: []string{
-			"https",
-			"wss",
-			"grpcs",
-			"php",
+			"https", "wss", "grpcs", "php",
 		},
 		PortBindings: []string{"443"},
 	},
@@ -665,9 +662,8 @@ func (portBinding PortBinding) GetPublicPortInterval() (NetworkPortInterval, err
 	}
 
 	intervalParts := strings.Split(serviceInfo.PublicPortInterval, "-")
-	if len(intervalParts) == 0 {
-		preDefinedPublicPortStr := serviceInfo.PublicPortInterval
-		preDefinedPublicPort, err := NewNetworkPort(preDefinedPublicPortStr)
+	if len(intervalParts) <= 1 {
+		preDefinedPublicPort, err := NewNetworkPort(serviceInfo.PublicPortInterval)
 		if err != nil {
 			return portInterval, err
 		}
