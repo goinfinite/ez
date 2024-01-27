@@ -135,6 +135,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PortBindings: []string{"2049"},
 	},
 	{
+		ServiceNames:       []string{"orientdb"},
+		PortBindings:       []string{"2424", "2480"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"ghost"},
 		PortBindings:       []string{"2368"},
 		PublicPortInterval: httpPublicPortInterval,
@@ -145,6 +150,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"aerospike"},
+		PortBindings:       []string{"3000", "3001", "3002"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"mysql", "mariadb", "percona"},
 		PortBindings:       []string{"3306"},
 		PublicPortInterval: databasePublicPortInterval,
@@ -152,6 +162,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 	{
 		ServiceNames:       []string{"nsq"},
 		PortBindings:       []string{"4150", "4151", "4160", "4161"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"cratedb", "crate"},
+		PortBindings:       []string{"4200", "4300"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
@@ -172,7 +187,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
-		ServiceNames:       []string{"postgresql", "postgres"},
+		ServiceNames:       []string{"postgresql", "postgres", "cratedb", "crate"},
 		PortBindings:       []string{"5432"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
@@ -182,8 +197,46 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames:       []string{"couchdb", "couch"},
+		ServiceNames:       []string{"couchdb"},
 		PortBindings:       []string{"5984"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"flink"},
+		PortBindings:       []string{"6123", "8081"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"storm"},
+		PortBindings: []string{"6627"},
+	},
+	{
+		ServiceNames:       []string{"influxdb", "influx"},
+		PortBindings:       []string{"8086"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"couchbase"},
+		PortBindings: []string{
+			"8091",
+			"8092",
+			"8093",
+			"8094",
+			"8095",
+			"8096",
+			"8097",
+			"9123",
+			"11207",
+			"11210",
+			"11280",
+			"18091",
+			"18092",
+			"18093",
+			"18094",
+			"18095",
+			"18096",
+			"18097",
+		},
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
@@ -234,6 +287,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: httpPublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"odoo"},
+		PortBindings:       []string{"8069", "8072"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"clickhouse"},
 		PortBindings:       []string{"8123", "9000", "9009"},
 		PublicPortInterval: databasePublicPortInterval,
@@ -253,18 +311,42 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: httpsPublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"arangodb", "arango"},
+		PortBindings:       []string{"8529"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"chronograf"},
+		PortBindings:       []string{"8888"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"solr"},
 		PortBindings:       []string{"8983"},
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames: []string{"sonarqube", "sonar"},
+		ServiceNames: []string{"sonarqube", "sonar", "sentry"},
 		PortBindings: []string{"9000"},
+	},
+	{
+		ServiceNames:       []string{"kapacitor"},
+		PortBindings:       []string{"9092"},
+		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
 		ServiceNames:       []string{"elasticsearch", "elastic", "elk"},
 		PortBindings:       []string{"9200"},
 		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"logstash"},
+		PortBindings:       []string{"9600"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"teamspeak", "ts3"},
+		PortBindings: []string{"9987/udp", "10011", "30033"},
 	},
 	{
 		ServiceNames:       []string{"memcached", "memcache"},
@@ -275,6 +357,15 @@ var KnownServiceBindings = []serviceBindingInfo{
 		ServiceNames:       []string{"mongodb", "mongo"},
 		PortBindings:       []string{"27017"},
 		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames:       []string{"rethinkdb", "rethink"},
+		PortBindings:       []string{"28015", "29015", "8080"},
+		PublicPortInterval: databasePublicPortInterval,
+	},
+	{
+		ServiceNames: []string{"jenkins"},
+		PortBindings: []string{"50000", "8080"},
 	},
 	{
 		ServiceNames: []string{"wireguard"},
