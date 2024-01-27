@@ -160,7 +160,9 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
-		ServiceNames:       []string{"flask"},
+		ServiceNames: []string{
+			"flask", "distribution",
+		},
 		PortBindings:       []string{"5000"},
 		PublicPortInterval: httpPublicPortInterval,
 	},
