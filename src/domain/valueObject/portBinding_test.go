@@ -15,6 +15,12 @@ func TestNewPortBinding(t *testing.T) {
 			"ssh:0:22/tcp",
 			"ssh:22:22/tcp:40000",
 			"53/udp",
+			"1618/tcp",
+			"unknown:12345",
+			"unknown:12345:12345",
+			"unknown:12345:12345/tcp",
+			"unknown:12345:12345/tcp:40000",
+			"dns-alt-name:53/udp",
 		}
 
 		for _, path := range validPortBindings {
@@ -33,6 +39,7 @@ func TestNewPortBinding(t *testing.T) {
 			"?param=value",
 			"https://www.google.com",
 			"/path/'; DROP TABLE users; --",
+			"uknown",
 		}
 
 		for _, path := range invalidPortBindings {

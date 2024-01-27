@@ -119,6 +119,13 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
+		ServiceNames: []string{
+			"sos", "speediaos", "speedia-os", "speedia",
+		},
+		PortBindings:       []string{"1618"},
+		PublicPortInterval: httpsPublicPortInterval,
+	},
+	{
 		ServiceNames:       []string{"mqtt"},
 		PortBindings:       []string{"1883"},
 		PublicPortInterval: databasePublicPortInterval,
@@ -328,7 +335,7 @@ func knownServiceBindingsPortBindingFactory(
 
 	portBindingParts := strings.Split(portBindingStr, "/")
 	if len(portBindingParts) == 0 {
-		return portBinding, errors.New("UnknownPortBinding")
+		return portBinding, errors.New("InvalidPortBindingStructure")
 	}
 
 	publicPort, err := NewNetworkPort(portBindingParts[0])
@@ -338,8 +345,10 @@ func knownServiceBindingsPortBindingFactory(
 
 	containerPort := publicPort
 
-	protocol := GuessNetworkProtocolByPort(publicPort)
-	if len(portBindingParts) > 1 && protocol.String() == "tcp" {
+	likelyProtocol := GuessNetworkProtocolByPort(publicPort)
+	isLikelyProtocolGeneric := likelyProtocol.String() == "tcp"
+	protocol := likelyProtocol
+	if len(portBindingParts) > 1 && isLikelyProtocolGeneric {
 		protocol, err = NewNetworkProtocol(portBindingParts[1])
 		if err != nil {
 			return portBinding, err
@@ -382,21 +391,13 @@ func NewPortBindingsByServiceName(
 	return portBindings, nil
 }
 
-func NewPortBindingByPortAndProtocol(
-	port NetworkPort,
-	protocol NetworkProtocol,
-) (PortBinding, error) {
+func NewPortBindingByPort(port NetworkPort) (PortBinding, error) {
 	portStr := port.String()
-	protocolStr := protocol.String()
 	portBinding := PortBinding{}
 
 	for _, serviceBinding := range KnownServiceBindings {
 		for _, portBindingStr := range serviceBinding.PortBindings {
 			if !strings.Contains(portBindingStr, portStr) {
-				continue
-			}
-
-			if protocolStr != "tcp" && !strings.Contains(portBindingStr, protocolStr) {
 				continue
 			}
 
@@ -417,7 +418,7 @@ func NewPortBindingByPortAndProtocol(
 		}
 	}
 
-	return portBinding, errors.New("UnknownPortBinding")
+	return portBinding, errors.New("UnknownPort")
 }
 
 // format: [serviceName][:publicPort][:containerPort][/protocol][:privatePort]
@@ -431,31 +432,28 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 
 	serviceNameSent := portBindingParts["serviceName"] != ""
 	publicPortSent := portBindingParts["publicPort"] != ""
+	protocolSent := portBindingParts["protocol"] != ""
 	nothingSent := !serviceNameSent && !publicPortSent
 	if nothingSent {
-		return portBindings, errors.New("UnknownPortBinding")
+		return portBindings, errors.New("ServiceNameOrPortRequired")
 	}
 
-	var serviceName ServiceName
-	var err error
+	serviceName, _ := NewServiceName("unmapped")
 	if serviceNameSent {
+		var err error
 		serviceName, err = NewServiceName(portBindingParts["serviceName"])
 		if err != nil {
 			return portBindings, err
 		}
+	}
 
-		isServiceUnmapped := false
+	if serviceNameSent && !publicPortSent {
 		servicePortBindings, err := NewPortBindingsByServiceName(serviceName)
 		if err != nil {
-			isServiceUnmapped = true
+			return portBindings, err
 		}
 
-		if !publicPortSent {
-			if isServiceUnmapped {
-				return portBindings, errors.New("UnknownServiceName")
-			}
-			return servicePortBindings, nil
-		}
+		return servicePortBindings, nil
 	}
 
 	publicPort, err := NewNetworkPort(portBindingParts["publicPort"])
@@ -463,23 +461,28 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		return portBindings, err
 	}
 
-	protocol := GuessNetworkProtocolByPort(publicPort)
-	if portBindingParts["protocol"] != "" && protocol.String() == "tcp" {
+	isKnownPublicPort := true
+	likelyPortBinding, err := NewPortBindingByPort(publicPort)
+	if err != nil {
+		isKnownPublicPort = false
+	}
+
+	if !serviceNameSent && !protocolSent && isKnownPublicPort {
+		return []PortBinding{likelyPortBinding}, nil
+	}
+
+	if isKnownPublicPort {
+		serviceName = likelyPortBinding.ServiceName
+	}
+
+	likelyProtocol := GuessNetworkProtocolByPort(publicPort)
+	isLikelyProtocolGeneric := likelyProtocol.String() == "tcp"
+	protocol := likelyProtocol
+	if protocolSent && isLikelyProtocolGeneric {
 		protocol, err = NewNetworkProtocol(portBindingParts["protocol"])
 		if err != nil {
 			return portBindings, err
 		}
-	}
-
-	if publicPortSent && !serviceNameSent {
-		portBinding, err := NewPortBindingByPortAndProtocol(
-			publicPort,
-			protocol,
-		)
-		if err != nil {
-			return portBindings, err
-		}
-		return []PortBinding{portBinding}, nil
 	}
 
 	rawContainerPortStr := portBindingParts["containerPort"]
