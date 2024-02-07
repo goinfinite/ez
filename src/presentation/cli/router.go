@@ -70,6 +70,16 @@ func containerRoutes() {
 	containerRegistryCmd.AddCommand(cliController.GetRegistryTaggedImageController())
 }
 
+func licenseRoutes() {
+	var licenseCmd = &cobra.Command{
+		Use:   "license",
+		Short: "LicenseManagement",
+	}
+
+	rootCmd.AddCommand(licenseCmd)
+	licenseCmd.AddCommand(cliController.GetLicenseStatusController())
+}
+
 func mappingRoutes() {
 	var mappingCmd = &cobra.Command{
 		Use:   "mapping",
@@ -107,6 +117,7 @@ func registerCliRoutes() {
 	rootCmd.AddCommand(cliController.SysInstallController())
 	accountRoutes()
 	containerRoutes()
+	licenseRoutes()
 	mappingRoutes()
 	o11yRoutes()
 }

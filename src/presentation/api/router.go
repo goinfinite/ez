@@ -58,6 +58,11 @@ func containerRoutes(baseRoute *echo.Group) {
 	)
 }
 
+func licenseRoutes(baseRoute *echo.Group) {
+	licenseGroup := baseRoute.Group("/license")
+	licenseGroup.GET("/", apiController.GetLicenseStatusController)
+}
+
 func mappingRoutes(baseRoute *echo.Group) {
 	mappingGroup := baseRoute.Group("/mapping")
 	mappingGroup.GET("/", apiController.GetMappingsController)
@@ -80,6 +85,7 @@ func registerApiRoutes(baseRoute *echo.Group, dbSvc *db.DatabaseService) {
 	authRoutes(baseRoute)
 	accountRoutes(baseRoute, dbSvc)
 	containerRoutes(baseRoute)
+	licenseRoutes(baseRoute)
 	mappingRoutes(baseRoute)
 	o11yRoutes(baseRoute)
 }

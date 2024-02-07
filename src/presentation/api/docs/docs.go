@@ -604,6 +604,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/license/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get license status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "license"
+                ],
+                "summary": "GetLicenseStatus",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.LicenseStatus"
+                        }
+                    }
+                }
+            }
+        },
         "/mapping/": {
             "get": {
                 "security": [
@@ -871,12 +899,6 @@ const docTemplate = `{
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
-                },
-                "serviceBindings": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -990,12 +1012,6 @@ const docTemplate = `{
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
-                },
-                "serviceBindings": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1173,12 +1189,6 @@ const docTemplate = `{
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
                 },
-                "serviceBindings": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "startedAt": {
                     "type": "integer"
                 },
@@ -1222,6 +1232,26 @@ const docTemplate = `{
                 },
                 "scalingThreshold": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.LicenseStatus": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "type": "integer"
+                },
+                "fingerprint": {
+                    "type": "string"
+                },
+                "lastCheckAt": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -1539,6 +1569,9 @@ const docTemplate = `{
                 },
                 "publicPort": {
                     "type": "integer"
+                },
+                "serviceName": {
+                    "type": "string"
                 }
             }
         },

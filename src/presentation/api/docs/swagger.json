@@ -598,6 +598,34 @@
                 }
             }
         },
+        "/license/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get license status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "license"
+                ],
+                "summary": "GetLicenseStatus",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.LicenseStatus"
+                        }
+                    }
+                }
+            }
+        },
         "/mapping/": {
             "get": {
                 "security": [
@@ -865,12 +893,6 @@
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
-                },
-                "serviceBindings": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -984,12 +1006,6 @@
                 },
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
-                },
-                "serviceBindings": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1167,12 +1183,6 @@
                 "restartPolicy": {
                     "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
                 },
-                "serviceBindings": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "startedAt": {
                     "type": "integer"
                 },
@@ -1216,6 +1226,26 @@
                 },
                 "scalingThreshold": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.LicenseStatus": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "type": "integer"
+                },
+                "fingerprint": {
+                    "type": "string"
+                },
+                "lastCheckAt": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -1533,6 +1563,9 @@
                 },
                 "publicPort": {
                     "type": "integer"
+                },
+                "serviceName": {
+                    "type": "string"
                 }
             }
         },
