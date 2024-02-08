@@ -13,8 +13,8 @@ var ValidLicenseStatuses = []string{
 	"ACTIVE",
 	"EXPIRED",
 	"SUSPENDED",
+	"REVOKED",
 	"TERMINATED",
-	"FRAUD",
 }
 
 func NewLicenseStatus(value string) (LicenseStatus, error) {
