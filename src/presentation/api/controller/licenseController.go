@@ -42,6 +42,9 @@ func AutoLicenseValidationController(dbSvc *db.DatabaseService) {
 	licenseCmdRepo := infra.NewLicenseCmdRepo(dbSvc)
 
 	for range timer.C {
-		useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)
+		err := useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

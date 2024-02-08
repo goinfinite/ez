@@ -1,6 +1,7 @@
 package useCase
 
 import (
+	"errors"
 	"log"
 
 	"github.com/speedianet/control/src/domain/repository"
@@ -16,7 +17,7 @@ const (
 func LicenseValidation(
 	licenseQueryRepo repository.LicenseQueryRepo,
 	licenseCmdRepo repository.LicenseCmdRepo,
-) {
+) error {
 	log.Print("LicenseValidationStarted")
 
 	err := licenseCmdRepo.RefreshStatus()
@@ -25,23 +26,23 @@ func LicenseValidation(
 
 		err := licenseCmdRepo.IncrementErrorCount()
 		if err != nil {
-			panic("IncrementLicenseErrorCountError")
+			return errors.New("IncrementLicenseErrorCountError: " + err.Error())
 		}
 	}
 
 	licenseStatus, err := licenseQueryRepo.GetStatus()
 	if err != nil {
-		panic("GetLicenseStatusError")
+		return errors.New("GetLicenseStatusError: " + err.Error())
 	}
 
 	licenseStatusStr := licenseStatus.Status.String()
 	if licenseStatusStr == "ACTIVE" {
 		err = licenseCmdRepo.ResetErrorCount()
 		if err != nil {
-			panic("ResetLicenseErrorCountError")
+			return errors.New("ResetLicenseErrorCountError: " + err.Error())
 		}
 		log.Print("LicenseValidatedSuccessfully")
-		return
+		return nil
 	}
 
 	maxErrorCountUntilSuspension := DaysUntilSuspension * LicenseValidationsPerDay
@@ -49,17 +50,17 @@ func LicenseValidation(
 
 	errorCount, err := licenseQueryRepo.GetErrorCount()
 	if err != nil {
-		panic("GetLicenseErrorCountError")
+		return errors.New("GetLicenseErrorCountError: " + err.Error())
 	}
 
 	var newLicenseStatus *valueObject.LicenseStatus
 	switch {
 	case errorCount > maxErrorCountUntilRevocation:
-		log.Print("LicenseErrorCountExceedsRevokeLimit")
+		log.Print("LicenseErrorCountExceedsRevocationTolerance")
 		status, _ := valueObject.NewLicenseStatus("REVOKED")
 		newLicenseStatus = &status
 	case errorCount > maxErrorCountUntilSuspension:
-		log.Print("LicenseErrorCountExceedsSuspendLimit")
+		log.Print("LicenseErrorCountExceedsSuspensionTolerance")
 		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
 		newLicenseStatus = &status
 	}
@@ -67,9 +68,10 @@ func LicenseValidation(
 	if newLicenseStatus != nil {
 		err = licenseCmdRepo.UpdateStatus(*newLicenseStatus)
 		if err != nil {
-			panic("UpdateLicenseStatusError")
+			return errors.New("UpdateLicenseStatusError: " + err.Error())
 		}
 	}
 
 	log.Print("LicenseValidationFinished")
+	return nil
 }
