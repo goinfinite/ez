@@ -48,10 +48,11 @@ func (router CliRouter) containerRoutes() {
 		Short: "ContainerProfileManagement",
 	}
 
-	containerProfileCmd.AddCommand(cliController.GetContainerProfilesController())
-	containerProfileCmd.AddCommand(cliController.AddContainerProfileController())
-	containerProfileCmd.AddCommand(cliController.UpdateContainerProfileController())
-	containerProfileCmd.AddCommand(cliController.DeleteContainerProfileController())
+	containerProfileController := cliController.NewContainerProfileController(router.dbSvc)
+	containerProfileCmd.AddCommand(containerProfileController.GetContainerProfiles())
+	containerProfileCmd.AddCommand(containerProfileController.AddContainerProfile())
+	containerProfileCmd.AddCommand(containerProfileController.UpdateContainerProfile())
+	containerProfileCmd.AddCommand(containerProfileController.DeleteContainerProfile())
 
 	var containerRegistryCmd = &cobra.Command{
 		Use:   "registry",

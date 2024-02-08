@@ -10,21 +10,25 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
-	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 
-func GetContainerProfilesController() *cobra.Command {
-	var dbSvc *db.DatabaseService
+type ContainerProfileController struct {
+	dbSvc *db.DatabaseService
+}
 
+func NewContainerProfileController(dbSvc *db.DatabaseService) ContainerProfileController {
+	return ContainerProfileController{dbSvc: dbSvc}
+}
+
+func (controller ContainerProfileController) GetContainerProfiles() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetContainerProfiles",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(
+				controller.dbSvc,
+			)
 			containerProfilesList, err := useCase.GetContainerProfiles(
 				containerProfileQueryRepo,
 			)
@@ -39,7 +43,9 @@ func GetContainerProfilesController() *cobra.Command {
 	return cmd
 }
 
-func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
+func (controller ContainerProfileController) parseContainerSpecs(
+	specStr string,
+) valueObject.ContainerSpecs {
 	specParts := strings.Split(specStr, ":")
 	if len(specParts) != 2 {
 		panic("InvalidContainerSpecs")
@@ -61,9 +67,7 @@ func parseContainerSpecs(specStr string) valueObject.ContainerSpecs {
 	)
 }
 
-func AddContainerProfileController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller ContainerProfileController) AddContainerProfile() *cobra.Command {
 	var nameStr string
 	var baseSpecsStr string
 	var maxSpecsStr string
@@ -76,17 +80,14 @@ func AddContainerProfileController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddNewContainerProfile",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			name := valueObject.NewContainerProfileNamePanic(nameStr)
 
-			baseSpecs := parseContainerSpecs(baseSpecsStr)
+			baseSpecs := controller.parseContainerSpecs(baseSpecsStr)
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
 			if maxSpecsStr != "" {
-				maxSpecs := parseContainerSpecs(maxSpecsStr)
+				maxSpecs := controller.parseContainerSpecs(maxSpecsStr)
 				maxSpecsPtr = &maxSpecs
 			}
 
@@ -128,7 +129,7 @@ func AddContainerProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr,
 			)
 
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.dbSvc)
 
 			err := useCase.AddContainerProfile(
 				containerProfileCmdRepo,
@@ -197,9 +198,7 @@ func AddContainerProfileController() *cobra.Command {
 	return cmd
 }
 
-func UpdateContainerProfileController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller ContainerProfileController) UpdateContainerProfile() *cobra.Command {
 	var profileIdUint uint64
 	var nameStr string
 	var baseSpecsStr string
@@ -213,9 +212,6 @@ func UpdateContainerProfileController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateContainerProfile",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
 
@@ -227,13 +223,13 @@ func UpdateContainerProfileController() *cobra.Command {
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
 			if baseSpecsStr != "" {
-				baseSpecs := parseContainerSpecs(baseSpecsStr)
+				baseSpecs := controller.parseContainerSpecs(baseSpecsStr)
 				baseSpecsPtr = &baseSpecs
 			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
 			if maxSpecsStr != "" {
-				maxSpecs := parseContainerSpecs(maxSpecsStr)
+				maxSpecs := controller.parseContainerSpecs(maxSpecsStr)
 				maxSpecsPtr = &maxSpecs
 			}
 
@@ -276,10 +272,10 @@ func UpdateContainerProfileController() *cobra.Command {
 				hostMinCapacityPercentPtr,
 			)
 
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.dbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
 
 			err := useCase.UpdateContainerProfile(
 				containerProfileQueryRepo,
@@ -351,24 +347,19 @@ func UpdateContainerProfileController() *cobra.Command {
 	return cmd
 }
 
-func DeleteContainerProfileController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller ContainerProfileController) DeleteContainerProfile() *cobra.Command {
 	var profileIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainerProfile",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
 
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(dbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.dbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
 
 			err := useCase.DeleteContainerProfile(
 				containerProfileQueryRepo,
