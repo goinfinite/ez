@@ -37,18 +37,17 @@ func (router CliRouter) containerRoutes() {
 		Short: "ContainerManagement",
 	}
 
-	rootCmd.AddCommand(containerCmd)
-	containerCmd.AddCommand(cliController.GetContainersController())
-	containerCmd.AddCommand(cliController.AddContainerController())
-	containerCmd.AddCommand(cliController.UpdateContainerController())
-	containerCmd.AddCommand(cliController.DeleteContainerController())
+	containerController := cliController.NewContainerController(router.dbSvc)
+	containerCmd.AddCommand(containerController.GetContainers())
+	containerCmd.AddCommand(containerController.AddContainer())
+	containerCmd.AddCommand(containerController.UpdateContainer())
+	containerCmd.AddCommand(containerController.DeleteContainer())
 
 	var containerProfileCmd = &cobra.Command{
 		Use:   "profile",
 		Short: "ContainerProfileManagement",
 	}
 
-	containerCmd.AddCommand(containerProfileCmd)
 	containerProfileCmd.AddCommand(cliController.GetContainerProfilesController())
 	containerProfileCmd.AddCommand(cliController.AddContainerProfileController())
 	containerProfileCmd.AddCommand(cliController.UpdateContainerProfileController())
@@ -59,9 +58,12 @@ func (router CliRouter) containerRoutes() {
 		Short: "ContainerRegistryManagement",
 	}
 
-	containerCmd.AddCommand(containerRegistryCmd)
 	containerRegistryCmd.AddCommand(cliController.GetRegistryImagesController())
 	containerRegistryCmd.AddCommand(cliController.GetRegistryTaggedImageController())
+
+	containerCmd.AddCommand(containerProfileCmd)
+	containerCmd.AddCommand(containerRegistryCmd)
+	rootCmd.AddCommand(containerCmd)
 }
 
 func (router CliRouter) licenseRoutes() {

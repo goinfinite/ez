@@ -9,21 +9,23 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
-	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 
-func GetContainersController() *cobra.Command {
-	var dbSvc *db.DatabaseService
+type ContainerController struct {
+	dbSvc *db.DatabaseService
+}
 
+func NewContainerController(dbSvc *db.DatabaseService) ContainerController {
+	return ContainerController{dbSvc: dbSvc}
+}
+
+func (controller ContainerController) GetContainers() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetContainers",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
 			containersList, err := useCase.GetContainers(containerQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -36,7 +38,9 @@ func GetContainersController() *cobra.Command {
 	return cmd
 }
 
-func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
+func (controller ContainerController) parsePortBindings(
+	portBindingsSlice []string,
+) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
 	for _, portBindingStr := range portBindingsSlice {
 		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
@@ -50,7 +54,9 @@ func parsePortBindings(portBindingsSlice []string) []valueObject.PortBinding {
 	return portBindings
 }
 
-func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
+func (controller ContainerController) parseContainerEnvs(
+	envsSlice []string,
+) []valueObject.ContainerEnv {
 	envs := []valueObject.ContainerEnv{}
 	for _, envStr := range envsSlice {
 		env := valueObject.NewContainerEnvPanic(envStr)
@@ -60,9 +66,7 @@ func parseContainerEnvs(envsSlice []string) []valueObject.ContainerEnv {
 	return envs
 }
 
-func AddContainerController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller ContainerController) AddContainer() *cobra.Command {
 	var accId uint64
 	var hostnameStr string
 	var containerImageAddressStr string
@@ -76,9 +80,6 @@ func AddContainerController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddNewContainer",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			hostname := valueObject.NewFqdnPanic(hostnameStr)
@@ -88,7 +89,7 @@ func AddContainerController() *cobra.Command {
 
 			portBindings := []valueObject.PortBinding{}
 			if len(portBindingsSlice) > 0 {
-				portBindings = parsePortBindings(portBindingsSlice)
+				portBindings = controller.parsePortBindings(portBindingsSlice)
 			}
 
 			var restartPolicyPtr *valueObject.ContainerRestartPolicy
@@ -115,7 +116,7 @@ func AddContainerController() *cobra.Command {
 
 			envs := []valueObject.ContainerEnv{}
 			if len(envsSlice) > 0 {
-				envs = parseContainerEnvs(envsSlice)
+				envs = controller.parseContainerEnvs(envsSlice)
 			}
 
 			addContainerDto := dto.NewAddContainer(
@@ -130,13 +131,13 @@ func AddContainerController() *cobra.Command {
 				autoCreateMappings,
 			)
 
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
-			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
-			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
 
 			err := useCase.AddContainer(
 				containerQueryRepo,
@@ -183,9 +184,7 @@ func AddContainerController() *cobra.Command {
 	return cmd
 }
 
-func UpdateContainerController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller ContainerController) UpdateContainer() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 	var containerStatusStr string
@@ -194,9 +193,6 @@ func UpdateContainerController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateContainer",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
@@ -225,11 +221,11 @@ func UpdateContainerController() *cobra.Command {
 				profileIdPtr,
 			)
 
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
-			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.dbSvc)
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
@@ -256,27 +252,22 @@ func UpdateContainerController() *cobra.Command {
 	return cmd
 }
 
-func DeleteContainerController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller ContainerController) DeleteContainer() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainer",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
 
 			err := useCase.DeleteContainer(
 				containerQueryRepo,
