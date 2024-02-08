@@ -5,6 +5,6 @@ import (
 )
 
 type LicenseQueryRepo interface {
-	GetStatus() (entity.LicenseStatus, error)
+	Get() (entity.LicenseInfo, error)
 	GetErrorCount() (int, error)
 }

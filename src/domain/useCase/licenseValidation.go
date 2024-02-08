@@ -30,12 +30,12 @@ func LicenseValidation(
 		}
 	}
 
-	licenseStatus, err := licenseQueryRepo.GetStatus()
+	licenseInfo, err := licenseQueryRepo.Get()
 	if err != nil {
 		return errors.New("GetLicenseStatusError: " + err.Error())
 	}
 
-	licenseStatusStr := licenseStatus.Status.String()
+	licenseStatusStr := licenseInfo.Status.String()
 	if licenseStatusStr == "ACTIVE" {
 		err = licenseCmdRepo.ResetErrorCount()
 		if err != nil {

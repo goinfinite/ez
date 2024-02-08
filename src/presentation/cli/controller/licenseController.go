@@ -9,18 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetLicenseStatusController() *cobra.Command {
+func GetLicenseInfoController() *cobra.Command {
 	var dbSvc *db.DatabaseService
 
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "GetLicenseStatus",
+		Short: "GetLicenseInfo",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			dbSvc = cliMiddleware.DatabaseInit()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			licenseQueryRepo := infra.NewLicenseQueryRepo(dbSvc)
-			licenseStatus, err := useCase.GetLicenseStatus(licenseQueryRepo)
+			licenseStatus, err := useCase.GetLicenseInfo(licenseQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}

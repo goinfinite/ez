@@ -77,7 +77,7 @@ func licenseRoutes() {
 	}
 
 	rootCmd.AddCommand(licenseCmd)
-	licenseCmd.AddCommand(cliController.GetLicenseStatusController())
+	licenseCmd.AddCommand(cliController.GetLicenseInfoController())
 }
 
 func mappingRoutes() {

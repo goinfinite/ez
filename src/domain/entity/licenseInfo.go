@@ -2,7 +2,7 @@ package entity
 
 import "github.com/speedianet/control/src/domain/valueObject"
 
-type LicenseStatus struct {
+type LicenseInfo struct {
 	Method      valueObject.LicenseMethod      `json:"method"`
 	Status      valueObject.LicenseStatus      `json:"status"`
 	Fingerprint valueObject.LicenseFingerprint `json:"fingerprint"`
@@ -10,14 +10,14 @@ type LicenseStatus struct {
 	LastCheckAt valueObject.UnixTime           `json:"lastCheckAt"`
 }
 
-func NewLicenseStatus(
+func NewLicenseInfo(
 	method valueObject.LicenseMethod,
 	status valueObject.LicenseStatus,
 	fingerprint valueObject.LicenseFingerprint,
 	expiresAt valueObject.UnixTime,
 	lastCheckAt valueObject.UnixTime,
-) LicenseStatus {
-	return LicenseStatus{
+) LicenseInfo {
+	return LicenseInfo{
 		Method:      method,
 		Status:      status,
 		Fingerprint: fingerprint,

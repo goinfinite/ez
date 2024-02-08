@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetLicenseStatus(
+func GetLicenseInfo(
 	licenseQueryRepo repository.LicenseQueryRepo,
-) (entity.LicenseStatus, error) {
-	return licenseQueryRepo.GetStatus()
+) (entity.LicenseInfo, error) {
+	return licenseQueryRepo.Get()
 }

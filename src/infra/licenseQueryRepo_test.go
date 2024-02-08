@@ -11,8 +11,8 @@ func TestLicenseQueryRepo(t *testing.T) {
 	dbSvc := testHelpers.GetDbSvc()
 	licenseQueryRepo := NewLicenseQueryRepo(dbSvc)
 
-	t.Run("GetLicenseStatus", func(t *testing.T) {
-		_, err := licenseQueryRepo.GetStatus()
+	t.Run("GetLicenseInfo", func(t *testing.T) {
+		_, err := licenseQueryRepo.Get()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}

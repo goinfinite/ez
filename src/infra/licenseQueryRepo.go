@@ -16,7 +16,7 @@ func NewLicenseQueryRepo(dbSvc *db.DatabaseService) LicenseQueryRepo {
 	return LicenseQueryRepo{dbSvc: dbSvc}
 }
 
-func (repo LicenseQueryRepo) GetStatus() (entity.LicenseStatus, error) {
+func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	licenseMethod, _ := valueObject.NewLicenseMethod("ip")
 	licenseStatus, _ := valueObject.NewLicenseStatus("active")
 	licenseFingerprint, _ := valueObject.NewLicenseFingerprint("fingerprint")
@@ -25,7 +25,7 @@ func (repo LicenseQueryRepo) GetStatus() (entity.LicenseStatus, error) {
 	expiresAt := valueObject.UnixTime(todayDate.AddDate(1, 0, 0).Unix())
 	lastCheckAt := valueObject.UnixTime(todayDate.Unix())
 
-	return entity.NewLicenseStatus(
+	return entity.NewLicenseInfo(
 		licenseMethod,
 		licenseStatus,
 		licenseFingerprint,

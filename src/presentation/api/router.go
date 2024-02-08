@@ -60,7 +60,7 @@ func containerRoutes(baseRoute *echo.Group) {
 
 func licenseRoutes(baseRoute *echo.Group, dbSvc *db.DatabaseService) {
 	licenseGroup := baseRoute.Group("/license")
-	licenseGroup.GET("/", apiController.GetLicenseStatusController)
+	licenseGroup.GET("/", apiController.GetLicenseInfoController)
 	go apiController.AutoLicenseValidationController(dbSvc)
 }
 
