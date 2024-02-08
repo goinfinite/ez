@@ -31,10 +31,10 @@ func GetLicenseStatusController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, licenseStatus)
 }
 
-func AutoLicenseCheckController(dbSvc *db.DatabaseService) {
-	licenseCheckIntervalInHours := 24 / useCase.LicenseChecksPerDay
+func AutoLicenseValidationController(dbSvc *db.DatabaseService) {
+	validationIntervalHours := 24 / useCase.LicenseValidationsPerDay
 
-	taskInterval := time.Duration(licenseCheckIntervalInHours) * time.Hour
+	taskInterval := time.Duration(validationIntervalHours) * time.Hour
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
@@ -42,6 +42,6 @@ func AutoLicenseCheckController(dbSvc *db.DatabaseService) {
 	licenseCmdRepo := infra.NewLicenseCmdRepo(dbSvc)
 
 	for range timer.C {
-		useCase.AutoCheckLicense(licenseQueryRepo, licenseCmdRepo)
+		useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)
 	}
 }

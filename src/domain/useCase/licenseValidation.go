@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	DaysUntilSuspension int = 7
-	DaysUntilRevocation int = 14
-	LicenseChecksPerDay int = 4
+	DaysUntilSuspension      int = 7
+	DaysUntilRevocation      int = 14
+	LicenseValidationsPerDay int = 4
 )
 
-func AutoCheckLicense(
+func LicenseValidation(
 	licenseQueryRepo repository.LicenseQueryRepo,
 	licenseCmdRepo repository.LicenseCmdRepo,
 ) {
@@ -44,8 +44,8 @@ func AutoCheckLicense(
 		return
 	}
 
-	maxErrorCountUntilSuspension := DaysUntilSuspension * LicenseChecksPerDay
-	maxErrorCountUntilRevocation := DaysUntilRevocation * LicenseChecksPerDay
+	maxErrorCountUntilSuspension := DaysUntilSuspension * LicenseValidationsPerDay
+	maxErrorCountUntilRevocation := DaysUntilRevocation * LicenseValidationsPerDay
 
 	errorCount, err := licenseQueryRepo.GetErrorCount()
 	if err != nil {
