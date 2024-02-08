@@ -7,7 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetO11yOverviewController() *cobra.Command {
+type O11yController struct {
+}
+
+func (O11yController) GetO11yOverview() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "overview",
 		Short: "GetOverview",

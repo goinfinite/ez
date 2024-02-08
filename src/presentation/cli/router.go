@@ -108,8 +108,9 @@ func (router CliRouter) o11yRoutes() {
 		Short: "O11yManagement",
 	}
 
+	o11yController := cliController.O11yController{}
+	o11yCmd.AddCommand(o11yController.GetO11yOverview())
 	rootCmd.AddCommand(o11yCmd)
-	o11yCmd.AddCommand(cliController.GetO11yOverviewController())
 }
 
 func (router CliRouter) systemRoutes() {
