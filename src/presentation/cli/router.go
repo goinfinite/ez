@@ -85,19 +85,21 @@ func (router CliRouter) mappingRoutes() {
 		Short: "MappingManagement",
 	}
 
-	rootCmd.AddCommand(mappingCmd)
-	mappingCmd.AddCommand(cliController.GetMappingsController())
-	mappingCmd.AddCommand(cliController.AddMappingController())
-	mappingCmd.AddCommand(cliController.DeleteMappingController())
+	mappingController := cliController.NewMappingController(router.dbSvc)
+	mappingCmd.AddCommand(mappingController.GetMappings())
+	mappingCmd.AddCommand(mappingController.AddMapping())
+	mappingCmd.AddCommand(mappingController.DeleteMapping())
 
 	var mappingTargetCmd = &cobra.Command{
 		Use:   "target",
 		Short: "MappingTargetManagement",
 	}
 
+	mappingTargetCmd.AddCommand(mappingController.AddMappingTarget())
+	mappingTargetCmd.AddCommand(mappingController.DeleteMappingTarget())
+
 	mappingCmd.AddCommand(mappingTargetCmd)
-	mappingTargetCmd.AddCommand(cliController.AddMappingTargetController())
-	mappingTargetCmd.AddCommand(cliController.DeleteMappingTargetController())
+	rootCmd.AddCommand(mappingCmd)
 }
 
 func (router CliRouter) o11yRoutes() {
