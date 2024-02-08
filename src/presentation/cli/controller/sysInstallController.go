@@ -7,7 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func SysInstallController() *cobra.Command {
+type SysInstallController struct {
+}
+
+func (SysInstallController) SysInstall() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sys-install",
 		Short: "SysInstall",
