@@ -1,6 +1,7 @@
 package apiController
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -44,7 +45,7 @@ func AutoLicenseValidationController(dbSvc *db.DatabaseService) {
 	for range timer.C {
 		err := useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 }
