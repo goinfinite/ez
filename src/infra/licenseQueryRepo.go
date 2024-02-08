@@ -12,8 +12,8 @@ type LicenseQueryRepo struct {
 	dbSvc *db.DatabaseService
 }
 
-func NewLicenseQueryRepo(dbSvc *db.DatabaseService) *LicenseQueryRepo {
-	return &LicenseQueryRepo{dbSvc: dbSvc}
+func NewLicenseQueryRepo(dbSvc *db.DatabaseService) LicenseQueryRepo {
+	return LicenseQueryRepo{dbSvc: dbSvc}
 }
 
 func (repo LicenseQueryRepo) GetStatus() (entity.LicenseStatus, error) {
@@ -32,4 +32,8 @@ func (repo LicenseQueryRepo) GetStatus() (entity.LicenseStatus, error) {
 		expiresAt,
 		lastCheckAt,
 	), nil
+}
+
+func (repo LicenseQueryRepo) GetErrorCount() (int, error) {
+	return 0, nil
 }
