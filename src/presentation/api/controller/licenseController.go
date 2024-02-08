@@ -2,6 +2,7 @@ package apiController
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/domain/useCase"
@@ -28,4 +29,19 @@ func GetLicenseStatusController(c echo.Context) error {
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, licenseStatus)
+}
+
+func AutoLicenseCheckController(dbSvc *db.DatabaseService) {
+	licenseCheckIntervalInHours := 24 / useCase.LicenseChecksPerDay
+
+	taskInterval := time.Duration(licenseCheckIntervalInHours) * time.Hour
+	timer := time.NewTicker(taskInterval)
+	defer timer.Stop()
+
+	licenseQueryRepo := infra.NewLicenseQueryRepo(dbSvc)
+	licenseCmdRepo := infra.NewLicenseCmdRepo(dbSvc)
+
+	for range timer.C {
+		useCase.AutoCheckLicense(licenseQueryRepo, licenseCmdRepo)
+	}
 }
