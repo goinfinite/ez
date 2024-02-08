@@ -74,8 +74,9 @@ func (router CliRouter) licenseRoutes() {
 		Short: "LicenseManagement",
 	}
 
+	licenseController := cliController.NewLicenseController(router.dbSvc)
+	licenseCmd.AddCommand(licenseController.GetLicenseInfo())
 	rootCmd.AddCommand(licenseCmd)
-	licenseCmd.AddCommand(cliController.GetLicenseInfoController())
 }
 
 func (router CliRouter) mappingRoutes() {
