@@ -24,6 +24,8 @@ func CliInit() {
 
 	sharedMiddleware.CheckEnvs()
 
+	cliMiddleware.SporadicLicenseValidation()
+
 	registerCliRoutes()
 
 	if err := rootCmd.Execute(); err != nil {
