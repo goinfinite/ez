@@ -9,15 +9,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CliRouter struct {
+type Router struct {
 	dbSvc *db.DatabaseService
 }
 
-func NewCliRouter(dbSvc *db.DatabaseService) CliRouter {
-	return CliRouter{dbSvc: dbSvc}
+func NewRouter(dbSvc *db.DatabaseService) Router {
+	return Router{dbSvc: dbSvc}
 }
 
-func (router CliRouter) accountRoutes() {
+func (router Router) accountRoutes() {
 	var accountCmd = &cobra.Command{
 		Use:   "account",
 		Short: "AccountManagement",
@@ -31,7 +31,7 @@ func (router CliRouter) accountRoutes() {
 	rootCmd.AddCommand(accountCmd)
 }
 
-func (router CliRouter) containerRoutes() {
+func (router Router) containerRoutes() {
 	var containerCmd = &cobra.Command{
 		Use:   "container",
 		Short: "ContainerManagement",
@@ -68,7 +68,7 @@ func (router CliRouter) containerRoutes() {
 	rootCmd.AddCommand(containerCmd)
 }
 
-func (router CliRouter) licenseRoutes() {
+func (router Router) licenseRoutes() {
 	var licenseCmd = &cobra.Command{
 		Use:   "license",
 		Short: "LicenseManagement",
@@ -79,7 +79,7 @@ func (router CliRouter) licenseRoutes() {
 	rootCmd.AddCommand(licenseCmd)
 }
 
-func (router CliRouter) mappingRoutes() {
+func (router Router) mappingRoutes() {
 	var mappingCmd = &cobra.Command{
 		Use:   "mapping",
 		Short: "MappingManagement",
@@ -102,7 +102,7 @@ func (router CliRouter) mappingRoutes() {
 	rootCmd.AddCommand(mappingCmd)
 }
 
-func (router CliRouter) o11yRoutes() {
+func (router Router) o11yRoutes() {
 	var o11yCmd = &cobra.Command{
 		Use:   "o11y",
 		Short: "O11yManagement",
@@ -113,7 +113,7 @@ func (router CliRouter) o11yRoutes() {
 	rootCmd.AddCommand(o11yCmd)
 }
 
-func (router CliRouter) systemRoutes() {
+func (router Router) systemRoutes() {
 	var versionCmd = &cobra.Command{
 		Use:   "version",
 		Short: "Print software version",
@@ -137,7 +137,7 @@ func (router CliRouter) systemRoutes() {
 	rootCmd.AddCommand(sysInstallController.SysInstall())
 }
 
-func (router CliRouter) RegisterRoutes() {
+func (router Router) RegisterRoutes() {
 	router.accountRoutes()
 	router.containerRoutes()
 	router.licenseRoutes()

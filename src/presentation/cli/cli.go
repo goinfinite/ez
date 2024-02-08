@@ -29,8 +29,8 @@ func CliInit() {
 
 	cliMiddleware.SporadicLicenseValidation(dbSvc)
 
-	cliRouter := NewCliRouter(dbSvc)
-	cliRouter.RegisterRoutes()
+	router := NewRouter(dbSvc)
+	router.RegisterRoutes()
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
