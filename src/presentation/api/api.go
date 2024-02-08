@@ -17,7 +17,7 @@ import (
 // @contact.url		https://speedia.net/
 // @contact.email	eng+swagger@speedia.net
 
-// @license.name  SPEEDIA WEB SERVICES, LLC © 2023. All Rights Reserved.
+// @license.name  SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.
 // @license.url   https://speedia.net/tos/
 
 // @securityDefinitions.apikey	Bearer

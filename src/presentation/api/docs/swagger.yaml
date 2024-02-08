@@ -252,7 +252,7 @@ definitions:
       scalingThreshold:
         type: integer
     type: object
-  entity.LicenseStatus:
+  entity.LicenseInfo:
     properties:
       expiresAt:
         type: integer
@@ -528,7 +528,7 @@ info:
     url: https://speedia.net/
   description: Speedia Control API
   license:
-    name: SPEEDIA WEB SERVICES, LLC © 2023. All Rights Reserved.
+    name: SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.
     url: https://speedia.net/tos/
   termsOfService: https://speedia.net/tos/
   title: ControlApi
@@ -900,17 +900,17 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get license status.
+      description: Get license info.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.LicenseStatus'
+            $ref: '#/definitions/entity.LicenseInfo'
       security:
       - Bearer: []
-      summary: GetLicenseStatus
+      summary: GetLicenseInfo
       tags:
       - license
   /mapping/:

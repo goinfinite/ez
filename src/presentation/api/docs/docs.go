@@ -16,7 +16,7 @@ const docTemplate = `{
             "email": "eng+swagger@speedia.net"
         },
         "license": {
-            "name": "SPEEDIA WEB SERVICES, LLC © 2023. All Rights Reserved.",
+            "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
             "url": "https://speedia.net/tos/"
         },
         "version": "{{.Version}}"
@@ -611,7 +611,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Get license status.",
+                "description": "Get license info.",
                 "consumes": [
                     "application/json"
                 ],
@@ -621,12 +621,12 @@ const docTemplate = `{
                 "tags": [
                     "license"
                 ],
-                "summary": "GetLicenseStatus",
+                "summary": "GetLicenseInfo",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.LicenseStatus"
+                            "$ref": "#/definitions/entity.LicenseInfo"
                         }
                     }
                 }
@@ -1235,7 +1235,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.LicenseStatus": {
+        "entity.LicenseInfo": {
             "type": "object",
             "properties": {
                 "expiresAt": {

@@ -10,7 +10,7 @@
             "email": "eng+swagger@speedia.net"
         },
         "license": {
-            "name": "SPEEDIA WEB SERVICES, LLC © 2023. All Rights Reserved.",
+            "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
             "url": "https://speedia.net/tos/"
         },
         "version": "0.0.1"
@@ -605,7 +605,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "Get license status.",
+                "description": "Get license info.",
                 "consumes": [
                     "application/json"
                 ],
@@ -615,12 +615,12 @@
                 "tags": [
                     "license"
                 ],
-                "summary": "GetLicenseStatus",
+                "summary": "GetLicenseInfo",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.LicenseStatus"
+                            "$ref": "#/definitions/entity.LicenseInfo"
                         }
                     }
                 }
@@ -1229,7 +1229,7 @@
                 }
             }
         },
-        "entity.LicenseStatus": {
+        "entity.LicenseInfo": {
             "type": "object",
             "properties": {
                 "expiresAt": {
