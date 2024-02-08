@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
+	sharedInit "github.com/speedianet/control/src/presentation/shared/init"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 	"github.com/spf13/cobra"
 )
@@ -24,9 +25,12 @@ func CliInit() {
 
 	sharedMiddleware.CheckEnvs()
 
-	cliMiddleware.SporadicLicenseValidation()
+	dbSvc := sharedInit.DatabaseService()
 
-	registerCliRoutes()
+	cliMiddleware.SporadicLicenseValidation(dbSvc)
+
+	cliRouter := NewCliRouter(dbSvc)
+	cliRouter.RegisterRoutes()
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

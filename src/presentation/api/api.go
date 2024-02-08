@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	apiInit "github.com/speedianet/control/src/presentation/api/init"
 	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
+	sharedInit "github.com/speedianet/control/src/presentation/shared/init"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 )
 
@@ -38,7 +39,7 @@ func ApiInit() {
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
 
-	dbSvc := apiInit.DatabaseService()
+	dbSvc := sharedInit.DatabaseService()
 	e.Use(apiMiddleware.SetDatabaseService(dbSvc))
 
 	apiInit.BootContainers(dbSvc)
