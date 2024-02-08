@@ -14,7 +14,7 @@ func TestLicenseQueryRepo(t *testing.T) {
 	t.Run("GetLicenseStatus", func(t *testing.T) {
 		_, err := licenseQueryRepo.GetStatus()
 		if err != nil {
-			t.Error("UnexpectedError")
+			t.Errorf("UnexpectedError: %v", err)
 		}
 	})
 }
