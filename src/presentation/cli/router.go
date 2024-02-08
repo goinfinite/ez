@@ -59,8 +59,9 @@ func (router CliRouter) containerRoutes() {
 		Short: "ContainerRegistryManagement",
 	}
 
-	containerRegistryCmd.AddCommand(cliController.GetRegistryImagesController())
-	containerRegistryCmd.AddCommand(cliController.GetRegistryTaggedImageController())
+	containerRegistryController := cliController.NewContainerRegistryController(router.dbSvc)
+	containerRegistryCmd.AddCommand(containerRegistryController.GetRegistryImages())
+	containerRegistryCmd.AddCommand(containerRegistryController.GetRegistryTaggedImage())
 
 	containerCmd.AddCommand(containerProfileCmd)
 	containerCmd.AddCommand(containerRegistryCmd)

@@ -6,22 +6,25 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
-	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 
-func GetRegistryImagesController() *cobra.Command {
-	var dbSvc *db.DatabaseService
+type ContainerRegistryController struct {
+	dbSvc *db.DatabaseService
+}
+
+func NewContainerRegistryController(dbSvc *db.DatabaseService) ContainerRegistryController {
+	return ContainerRegistryController{dbSvc: dbSvc}
+}
+
+func (controller ContainerRegistryController) GetRegistryImages() *cobra.Command {
 	var imageNameStr string
 
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetRegistryImages",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
-			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(dbSvc)
+			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.dbSvc)
 
 			var imageNamePtr *valueObject.RegistryImageName
 			if imageNameStr != "" {
@@ -45,18 +48,14 @@ func GetRegistryImagesController() *cobra.Command {
 	return cmd
 }
 
-func GetRegistryTaggedImageController() *cobra.Command {
-	var dbSvc *db.DatabaseService
+func (controller ContainerRegistryController) GetRegistryTaggedImage() *cobra.Command {
 	var imageAddressStr string
 
 	cmd := &cobra.Command{
 		Use:   "get-tagged",
 		Short: "GetRegistryTaggedImage",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
-			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(dbSvc)
+			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.dbSvc)
 
 			imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
 
