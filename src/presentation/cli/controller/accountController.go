@@ -7,21 +7,23 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
-	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 
-func GetAccountsController() *cobra.Command {
-	var dbSvc *db.DatabaseService
+type AccountController struct {
+	dbSvc *db.DatabaseService
+}
 
+func NewAccountController(dbSvc *db.DatabaseService) AccountController {
+	return AccountController{dbSvc: dbSvc}
+}
+
+func (controller AccountController) GetAccounts() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetAccounts",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
-			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
 			accsList, err := useCase.GetAccounts(accQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -34,9 +36,7 @@ func GetAccountsController() *cobra.Command {
 	return cmd
 }
 
-func AddAccountController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller AccountController) AddAccount() *cobra.Command {
 	var usernameStr string
 	var passwordStr string
 	var quotaStr string
@@ -44,9 +44,6 @@ func AddAccountController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "AddNewAccount",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			username := valueObject.NewUsernamePanic(usernameStr)
 			password := valueObject.NewPasswordPanic(passwordStr)
@@ -66,8 +63,8 @@ func AddAccountController() *cobra.Command {
 				quotaPtr,
 			)
 
-			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
 
 			err := useCase.AddAccount(
 				accQueryRepo,
@@ -90,9 +87,7 @@ func AddAccountController() *cobra.Command {
 	return cmd
 }
 
-func UpdateAccountController() *cobra.Command {
-	var dbSvc *db.DatabaseService
-
+func (controller AccountController) UpdateAccount() *cobra.Command {
 	var accountIdStr string
 	var passwordStr string
 	shouldUpdateApiKeyBool := false
@@ -101,9 +96,6 @@ func UpdateAccountController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateAccount (pass or apiKey)",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
@@ -134,8 +126,8 @@ func UpdateAccountController() *cobra.Command {
 				quotaPtr,
 			)
 
-			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
 
 			if shouldUpdateApiKeyBool {
 				newKey, err := useCase.UpdateAccountApiKey(
@@ -175,22 +167,18 @@ func UpdateAccountController() *cobra.Command {
 	return cmd
 }
 
-func DeleteAccountController() *cobra.Command {
-	var dbSvc *db.DatabaseService
+func (controller AccountController) DeleteAccount() *cobra.Command {
 	var accountIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteAccount",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			dbSvc = cliMiddleware.DatabaseInit()
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
-			accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
 
 			err := useCase.DeleteAccount(
 				accQueryRepo,
