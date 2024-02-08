@@ -17,6 +17,8 @@ func AutoCheckLicense(
 	licenseQueryRepo repository.LicenseQueryRepo,
 	licenseCmdRepo repository.LicenseCmdRepo,
 ) {
+	log.Print("LicenseValidationStarted")
+
 	err := licenseCmdRepo.RefreshStatus()
 	if err != nil {
 		log.Printf("RefreshLicenseStatusError: %s", err)
@@ -38,6 +40,7 @@ func AutoCheckLicense(
 		if err != nil {
 			panic("ResetLicenseErrorCountError")
 		}
+		log.Print("LicenseValidatedSuccessfully")
 		return
 	}
 
@@ -67,4 +70,6 @@ func AutoCheckLicense(
 			panic("UpdateLicenseStatusError")
 		}
 	}
+
+	log.Print("LicenseValidationFinished")
 }
