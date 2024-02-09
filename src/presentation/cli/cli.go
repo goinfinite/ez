@@ -27,6 +27,7 @@ func CliInit() {
 
 	dbSvc := sharedInit.DatabaseService()
 
+	sharedMiddleware.InvalidLicenseBlocker(dbSvc)
 	cliMiddleware.SporadicLicenseValidation(dbSvc)
 
 	router := NewRouter(dbSvc)

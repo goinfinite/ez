@@ -42,6 +42,8 @@ func ApiInit() {
 	dbSvc := sharedInit.DatabaseService()
 	e.Use(apiMiddleware.SetDatabaseService(dbSvc))
 
+	sharedMiddleware.InvalidLicenseBlocker(dbSvc)
+
 	apiInit.BootContainers(dbSvc)
 
 	e.Use(apiMiddleware.Auth(basePath))
