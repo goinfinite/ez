@@ -8,6 +8,7 @@ type LicenseInfo struct {
 	Fingerprint valueObject.LicenseFingerprint `json:"fingerprint"`
 	ExpiresAt   valueObject.UnixTime           `json:"expiresAt"`
 	LastCheckAt valueObject.UnixTime           `json:"lastCheckAt"`
+	UpdatedAt   valueObject.UnixTime           `json:"updatedAt"`
 }
 
 func NewLicenseInfo(
@@ -16,6 +17,7 @@ func NewLicenseInfo(
 	fingerprint valueObject.LicenseFingerprint,
 	expiresAt valueObject.UnixTime,
 	lastCheckAt valueObject.UnixTime,
+	updatedAt valueObject.UnixTime,
 ) LicenseInfo {
 	return LicenseInfo{
 		Method:      method,
@@ -23,5 +25,6 @@ func NewLicenseInfo(
 		Fingerprint: fingerprint,
 		ExpiresAt:   expiresAt,
 		LastCheckAt: lastCheckAt,
+		UpdatedAt:   updatedAt,
 	}
 }
