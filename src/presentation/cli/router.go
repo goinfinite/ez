@@ -116,7 +116,7 @@ func (router Router) o11yRoutes() {
 func (router Router) systemRoutes() {
 	var versionCmd = &cobra.Command{
 		Use:   "version",
-		Short: "Print software version",
+		Short: "PrintVersion",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Speedia Control v0.0.1")
 		},
@@ -124,7 +124,7 @@ func (router Router) systemRoutes() {
 
 	var serveCmd = &cobra.Command{
 		Use:   "serve",
-		Short: "Start the CONTROL server (default to port 3141)",
+		Short: "ServeApiDashboard",
 		Run: func(cmd *cobra.Command, args []string) {
 			api.ApiInit(router.dbSvc)
 		},
