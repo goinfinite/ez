@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	cliController "github.com/speedianet/control/src/presentation/cli/controller"
+	cliInit "github.com/speedianet/control/src/presentation/cli/init"
 	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
-	sharedInit "github.com/speedianet/control/src/presentation/shared/init"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 	"github.com/spf13/cobra"
 )
@@ -46,7 +46,7 @@ func CliInit() {
 
 	sharedMiddleware.CheckEnvs()
 
-	dbSvc := sharedInit.DatabaseService()
+	dbSvc := cliInit.DatabaseService()
 
 	sharedMiddleware.InvalidLicenseBlocker(dbSvc)
 	cliMiddleware.SporadicLicenseValidation(dbSvc)

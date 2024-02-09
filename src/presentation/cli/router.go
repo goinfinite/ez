@@ -126,7 +126,7 @@ func (router Router) systemRoutes() {
 		Use:   "serve",
 		Short: "Start the CONTROL server (default to port 3141)",
 		Run: func(cmd *cobra.Command, args []string) {
-			api.ApiInit()
+			api.ApiInit(router.dbSvc)
 		},
 	}
 

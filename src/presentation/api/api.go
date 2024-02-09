@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/infra/db"
 	apiInit "github.com/speedianet/control/src/presentation/api/init"
 	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
-	sharedInit "github.com/speedianet/control/src/presentation/shared/init"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 )
 
@@ -27,7 +27,7 @@ import (
 
 // @host		localhost:3141
 // @BasePath	/v1
-func ApiInit() {
+func ApiInit(dbSvc *db.DatabaseService) {
 	sharedMiddleware.CheckEnvs()
 
 	e := echo.New()
@@ -38,8 +38,6 @@ func ApiInit() {
 	e.Pre(apiMiddleware.TrailingSlash(basePath))
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
-
-	dbSvc := sharedInit.DatabaseService()
 	e.Use(apiMiddleware.SetDatabaseService(dbSvc))
 
 	sharedMiddleware.InvalidLicenseBlocker(dbSvc)

@@ -1,4 +1,4 @@
-package sharedInit
+package cliInit
 
 import "github.com/speedianet/control/src/infra/db"
 
