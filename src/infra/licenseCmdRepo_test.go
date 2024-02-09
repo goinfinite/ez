@@ -12,8 +12,8 @@ func TestLicenseCmdRepo(t *testing.T) {
 	dbSvc := testHelpers.GetDbSvc()
 	licenseCmdRepo := NewLicenseCmdRepo(dbSvc)
 
-	t.Run("RefreshStatus", func(t *testing.T) {
-		err := licenseCmdRepo.RefreshStatus()
+	t.Run("Refresh", func(t *testing.T) {
+		err := licenseCmdRepo.Refresh()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}

@@ -22,7 +22,7 @@ func NewLicenseCmdRepo(dbSvc *db.DatabaseService) LicenseCmdRepo {
 	return LicenseCmdRepo{dbSvc: dbSvc}
 }
 
-func (repo LicenseCmdRepo) RefreshStatus() error {
+func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 

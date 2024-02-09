@@ -20,9 +20,9 @@ func LicenseValidation(
 ) error {
 	log.Print("LicenseValidationStarted")
 
-	err := licenseCmdRepo.RefreshStatus()
+	err := licenseCmdRepo.Refresh()
 	if err != nil {
-		log.Printf("RefreshLicenseStatusError: %s", err)
+		log.Printf("RefreshLicenseInfoError: %s", err)
 
 		err := licenseCmdRepo.IncrementErrorCount()
 		if err != nil {
@@ -32,7 +32,7 @@ func LicenseValidation(
 
 	licenseInfo, err := licenseQueryRepo.Get()
 	if err != nil {
-		return errors.New("GetLicenseStatusError: " + err.Error())
+		return errors.New("GetLicenseInfoError: " + err.Error())
 	}
 
 	licenseStatusStr := licenseInfo.Status.String()
