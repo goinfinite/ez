@@ -87,6 +87,7 @@ func (dbSvc DatabaseService) dbMigrate() error {
 		&dbModel.ContainerProfile{},
 		&dbModel.Mapping{},
 		&dbModel.MappingTarget{},
+		&dbModel.LicenseInfo{},
 	)
 	if err != nil {
 		return errors.New("DatabaseMigrationError")
