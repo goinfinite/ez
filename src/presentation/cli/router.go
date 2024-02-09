@@ -132,9 +132,6 @@ func (router Router) systemRoutes() {
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(serveCmd)
-
-	sysInstallController := cliController.SysInstallController{}
-	rootCmd.AddCommand(sysInstallController.SysInstall())
 }
 
 func (router Router) RegisterRoutes() {

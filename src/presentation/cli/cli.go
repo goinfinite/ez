@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	cliController "github.com/speedianet/control/src/presentation/cli/controller"
 	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
 	sharedInit "github.com/speedianet/control/src/presentation/shared/init"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
@@ -19,9 +20,29 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func RunRootCmd() {
+	err := rootCmd.Execute()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	os.Exit(0)
+}
+
 func CliInit() {
 	defer cliMiddleware.PanicHandler()
 	cliMiddleware.PreventRootless()
+
+	isSystemInstall := false
+	if len(os.Args) > 1 {
+		isSystemInstall = os.Args[1] == "sys-install"
+	}
+
+	if isSystemInstall {
+		sysInstallController := cliController.SysInstallController{}
+		rootCmd.AddCommand(sysInstallController.SysInstall())
+		RunRootCmd()
+	}
 
 	sharedMiddleware.CheckEnvs()
 
@@ -33,8 +54,5 @@ func CliInit() {
 	router := NewRouter(dbSvc)
 	router.RegisterRoutes()
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	RunRootCmd()
 }
