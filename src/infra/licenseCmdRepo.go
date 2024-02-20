@@ -12,6 +12,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
+	"gorm.io/gorm"
 )
 
 type LicenseCmdRepo struct {
@@ -100,17 +101,25 @@ func (repo LicenseCmdRepo) Refresh() error {
 }
 
 func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
-	licenseModel := dbModel.LicenseInfo{}
-	updateResult := repo.dbSvc.Orm.Model(&licenseModel).
+	licenseInfoModel := dbModel.LicenseInfo{}
+	updateResult := repo.dbSvc.Orm.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		Update("status", status.String())
 	return updateResult.Error
 }
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
-	return nil
+	licenseInfoModel := dbModel.LicenseInfo{}
+	updateResult := repo.dbSvc.Orm.Model(&licenseInfoModel).
+		Where("id = ?", 1).
+		UpdateColumn("error_count", gorm.Expr("error_count + ?", 1))
+	return updateResult.Error
 }
 
 func (repo LicenseCmdRepo) ResetErrorCount() error {
-	return nil
+	licenseInfoModel := dbModel.LicenseInfo{}
+	updateResult := repo.dbSvc.Orm.Model(&licenseInfoModel).
+		Where("id = ?", 1).
+		Update("error_count", 0)
+	return updateResult.Error
 }
