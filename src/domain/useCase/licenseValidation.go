@@ -3,6 +3,7 @@ package useCase
 import (
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -13,6 +14,23 @@ const (
 	DaysUntilRevocation      int = 14
 	LicenseValidationsPerDay int = 4
 )
+
+func isLicenseNonceValid(
+	nonceHash valueObject.Hash,
+	fingerprint valueObject.LicenseFingerprint,
+) bool {
+	fingerprintParts := strings.Split(fingerprint.String(), "-")
+	if len(fingerprintParts) != 3 {
+		return false
+	}
+
+	fingerprintNonceHash, err := valueObject.NewHash(fingerprintParts[2])
+	if err != nil {
+		return false
+	}
+
+	return nonceHash == fingerprintNonceHash
+}
 
 func LicenseValidation(
 	licenseQueryRepo repository.LicenseQueryRepo,
@@ -35,6 +53,21 @@ func LicenseValidation(
 		return errors.New("GetLicenseInfoError: " + err.Error())
 	}
 
+	freshNonceHash, err := licenseQueryRepo.GetNonceHash()
+	if err != nil {
+		return errors.New("GetLicenseNonceHashError: " + err.Error())
+	}
+
+	if !isLicenseNonceValid(freshNonceHash, licenseInfo.Fingerprint) {
+		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
+		err = licenseCmdRepo.UpdateStatus(status)
+		if err != nil {
+			return errors.New("UpdateLicenseStatusError: " + err.Error())
+		}
+
+		return errors.New("LicenseIntegrityCheckFailed")
+	}
+
 	licenseStatusStr := licenseInfo.Status.String()
 	if licenseStatusStr == "ACTIVE" {
 		err = licenseCmdRepo.ResetErrorCount()
@@ -54,10 +87,12 @@ func LicenseValidation(
 		log.Print("LicenseErrorCountExceedsRevocationTolerance")
 		status, _ := valueObject.NewLicenseStatus("REVOKED")
 		newLicenseStatus = &status
+		break
 	case licenseInfo.ErrorCount > maxErrorCountUntilSuspension:
 		log.Print("LicenseErrorCountExceedsSuspensionTolerance")
 		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
 		newLicenseStatus = &status
+		break
 	}
 
 	if newLicenseStatus != nil {
