@@ -69,8 +69,11 @@ func (repo LicenseCmdRepo) Refresh() error {
 		return err
 	}
 
-	// TODO: Implement license fingerprint
-	licenseFingerprint, _ := valueObject.NewLicenseFingerprint("fingerprint")
+	licenseQueryRepo := NewLicenseQueryRepo(repo.dbSvc)
+	licenseFingerprint, err := licenseQueryRepo.GetLicenseFingerprint()
+	if err != nil {
+		return err
+	}
 
 	rawExpiresAt, assertOk := parsedBody["expiresAt"].(float64)
 	if !assertOk {
