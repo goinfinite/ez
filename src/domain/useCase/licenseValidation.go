@@ -48,18 +48,13 @@ func LicenseValidation(
 	maxErrorCountUntilSuspension := uint(DaysUntilSuspension * LicenseValidationsPerDay)
 	maxErrorCountUntilRevocation := uint(DaysUntilRevocation * LicenseValidationsPerDay)
 
-	errorCount, err := licenseQueryRepo.GetErrorCount()
-	if err != nil {
-		return errors.New("GetLicenseErrorCountError: " + err.Error())
-	}
-
 	var newLicenseStatus *valueObject.LicenseStatus
 	switch {
-	case errorCount > maxErrorCountUntilRevocation:
+	case licenseInfo.ErrorCount > maxErrorCountUntilRevocation:
 		log.Print("LicenseErrorCountExceedsRevocationTolerance")
 		status, _ := valueObject.NewLicenseStatus("REVOKED")
 		newLicenseStatus = &status
-	case errorCount > maxErrorCountUntilSuspension:
+	case licenseInfo.ErrorCount > maxErrorCountUntilSuspension:
 		log.Print("LicenseErrorCountExceedsSuspensionTolerance")
 		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
 		newLicenseStatus = &status
