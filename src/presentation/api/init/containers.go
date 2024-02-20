@@ -6,9 +6,9 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 )
 
-func BootContainers(dbSvc *db.DatabaseService) {
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
+func BootContainers(persistDbSvc *db.PersistentDatabaseService) {
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
 
 	useCase.BootContainers(
 		containerQueryRepo,

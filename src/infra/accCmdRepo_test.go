@@ -16,7 +16,7 @@ func addDummyUser() error {
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	addAccount := dto.NewAddAccount(username, password, &quota)
 
-	accCmdRepo := NewAccCmdRepo(testHelpers.GetDbSvc())
+	accCmdRepo := NewAccCmdRepo(testHelpers.GetPersistentDbSvc())
 	err := accCmdRepo.Add(addAccount)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func addDummyUser() error {
 func deleteDummyUser() error {
 	accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-	accCmdRepo := NewAccCmdRepo(testHelpers.GetDbSvc())
+	accCmdRepo := NewAccCmdRepo(testHelpers.GetPersistentDbSvc())
 	err := accCmdRepo.Delete(accountId)
 	if err != nil {
 		return err
@@ -45,9 +45,9 @@ func resetDummyUser() {
 
 func TestAccCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	accQueryRepo := NewAccQueryRepo(dbSvc)
-	accCmdRepo := NewAccCmdRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	accQueryRepo := NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := NewAccCmdRepo(persistDbSvc)
 
 	t.Run("AddValidAccount", func(t *testing.T) {
 		err := addDummyUser()

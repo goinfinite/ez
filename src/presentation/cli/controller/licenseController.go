@@ -9,11 +9,11 @@ import (
 )
 
 type LicenseController struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewLicenseController(dbSvc *db.DatabaseService) LicenseController {
-	return LicenseController{dbSvc: dbSvc}
+func NewLicenseController(persistDbSvc *db.PersistentDatabaseService) LicenseController {
+	return LicenseController{persistDbSvc: persistDbSvc}
 }
 
 func (controller LicenseController) GetLicenseInfo() *cobra.Command {
@@ -21,7 +21,7 @@ func (controller LicenseController) GetLicenseInfo() *cobra.Command {
 		Use:   "get",
 		Short: "GetLicenseInfo",
 		Run: func(cmd *cobra.Command, args []string) {
-			licenseQueryRepo := infra.NewLicenseQueryRepo(controller.dbSvc)
+			licenseQueryRepo := infra.NewLicenseQueryRepo(controller.persistDbSvc)
 			licenseStatus, err := useCase.GetLicenseInfo(licenseQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())

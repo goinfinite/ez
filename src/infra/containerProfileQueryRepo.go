@@ -11,18 +11,18 @@ import (
 )
 
 type ContainerProfileQueryRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerProfileQueryRepo(dbSvc *db.DatabaseService) *ContainerProfileQueryRepo {
-	return &ContainerProfileQueryRepo{dbSvc: dbSvc}
+func NewContainerProfileQueryRepo(persistDbSvc *db.PersistentDatabaseService) *ContainerProfileQueryRepo {
+	return &ContainerProfileQueryRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
 	var profileEntities []entity.ContainerProfile
 	var profileModels []dbModel.ContainerProfile
 
-	err := repo.dbSvc.Orm.Model(&dbModel.ContainerProfile{}).Find(&profileModels).Error
+	err := repo.persistDbSvc.Orm.Model(&dbModel.ContainerProfile{}).Find(&profileModels).Error
 	if err != nil {
 		return profileEntities, errors.New("DbQueryContainerProfilesError")
 	}
@@ -44,7 +44,7 @@ func (repo ContainerProfileQueryRepo) GetById(
 	id valueObject.ContainerProfileId,
 ) (entity.ContainerProfile, error) {
 	profileModel := dbModel.ContainerProfile{ID: uint(id.Get())}
-	err := repo.dbSvc.Orm.Model(&profileModel).First(&profileModel).Error
+	err := repo.persistDbSvc.Orm.Model(&profileModel).First(&profileModel).Error
 	if err != nil {
 		return entity.ContainerProfile{}, err
 	}

@@ -13,11 +13,11 @@ import (
 )
 
 type ContainerController struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerController(dbSvc *db.DatabaseService) ContainerController {
-	return ContainerController{dbSvc: dbSvc}
+func NewContainerController(persistDbSvc *db.PersistentDatabaseService) ContainerController {
+	return ContainerController{persistDbSvc: persistDbSvc}
 }
 
 func (controller ContainerController) GetContainers() *cobra.Command {
@@ -25,7 +25,7 @@ func (controller ContainerController) GetContainers() *cobra.Command {
 		Use:   "get",
 		Short: "GetContainers",
 		Run: func(cmd *cobra.Command, args []string) {
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
 			containersList, err := useCase.GetContainers(containerQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -131,13 +131,13 @@ func (controller ContainerController) AddContainer() *cobra.Command {
 				autoCreateMappings,
 			)
 
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
-			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.dbSvc)
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistDbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.persistDbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.persistDbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistDbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistDbSvc)
 
 			err := useCase.AddContainer(
 				containerQueryRepo,
@@ -221,11 +221,11 @@ func (controller ContainerController) UpdateContainer() *cobra.Command {
 				profileIdPtr,
 			)
 
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
-			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistDbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.persistDbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.persistDbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistDbSvc)
 
 			err := useCase.UpdateContainer(
 				containerQueryRepo,
@@ -263,11 +263,11 @@ func (controller ContainerController) DeleteContainer() *cobra.Command {
 			accId := valueObject.NewAccountIdPanic(accId)
 			containerId := valueObject.NewContainerIdPanic(containerIdStr)
 
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistDbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.persistDbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistDbSvc)
 
 			err := useCase.DeleteContainer(
 				containerQueryRepo,

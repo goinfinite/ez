@@ -11,11 +11,11 @@ import (
 )
 
 type MappingQueryRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewMappingQueryRepo(dbSvc *db.DatabaseService) *MappingQueryRepo {
-	return &MappingQueryRepo{dbSvc: dbSvc}
+func NewMappingQueryRepo(persistDbSvc *db.PersistentDatabaseService) *MappingQueryRepo {
+	return &MappingQueryRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo MappingQueryRepo) Get() ([]entity.Mapping, error) {
@@ -23,7 +23,7 @@ func (repo MappingQueryRepo) Get() ([]entity.Mapping, error) {
 
 	var mappingModels []dbModel.Mapping
 
-	err := repo.dbSvc.Orm.Model(&dbModel.Mapping{}).
+	err := repo.persistDbSvc.Orm.Model(&dbModel.Mapping{}).
 		Preload("Targets").
 		Find(&mappingModels).Error
 	if err != nil {
@@ -48,7 +48,7 @@ func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, 
 
 	mappingModel := dbModel.Mapping{ID: uint(id.Get())}
 
-	err := repo.dbSvc.Orm.Model(&mappingModel).
+	err := repo.persistDbSvc.Orm.Model(&mappingModel).
 		Preload("Targets").
 		First(&mappingModel).Error
 	if err != nil {
@@ -64,7 +64,7 @@ func (repo MappingQueryRepo) GetByProtocol(
 	mappingEntities := []entity.Mapping{}
 
 	var mappingModels []dbModel.Mapping
-	err := repo.dbSvc.Orm.Model(dbModel.Mapping{}).
+	err := repo.persistDbSvc.Orm.Model(dbModel.Mapping{}).
 		Preload("Targets").
 		Where("protocol = ?", protocol.String()).
 		Find(&mappingModels).Error
@@ -92,7 +92,7 @@ func (repo MappingQueryRepo) GetTargetById(
 
 	mappingTargetModel := dbModel.MappingTarget{ID: uint(id.Get())}
 
-	err := repo.dbSvc.Orm.Model(&mappingTargetModel).
+	err := repo.persistDbSvc.Orm.Model(&mappingTargetModel).
 		First(&mappingTargetModel).Error
 	if err != nil {
 		return mappingTarget, errors.New("MappingTargetNotFound")
@@ -108,7 +108,7 @@ func (repo MappingQueryRepo) GetTargetsByContainerId(
 
 	var mappingTargetModels []dbModel.MappingTarget
 
-	err := repo.dbSvc.Orm.
+	err := repo.persistDbSvc.Orm.
 		Model(&dbModel.MappingTarget{}).
 		Where("container_id = ?", containerId.String()).
 		Find(&mappingTargetModels).Error
@@ -146,7 +146,7 @@ func (repo MappingQueryRepo) FindOne(
 		mappingModel.Hostname = &hostnameStr
 	}
 
-	queryResult := repo.dbSvc.Orm.
+	queryResult := repo.persistDbSvc.Orm.
 		Preload("Targets").
 		Where(&mappingModel).
 		Find(&mappingModel)

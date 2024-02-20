@@ -11,11 +11,11 @@ import (
 )
 
 type MappingController struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewMappingController(dbSvc *db.DatabaseService) MappingController {
-	return MappingController{dbSvc: dbSvc}
+func NewMappingController(persistDbSvc *db.PersistentDatabaseService) MappingController {
+	return MappingController{persistDbSvc: persistDbSvc}
 }
 
 func (controller MappingController) GetMappings() *cobra.Command {
@@ -23,7 +23,7 @@ func (controller MappingController) GetMappings() *cobra.Command {
 		Use:   "get",
 		Short: "GetMappings",
 		Run: func(cmd *cobra.Command, args []string) {
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
 			mappingsList, err := useCase.GetMappings(mappingQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -78,9 +78,9 @@ func (controller MappingController) AddMapping() *cobra.Command {
 				targets,
 			)
 
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistDbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
 
 			err := useCase.AddMapping(
 				mappingQueryRepo,
@@ -121,8 +121,8 @@ func (controller MappingController) DeleteMapping() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
 
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistDbSvc)
 
 			err := useCase.DeleteMapping(
 				mappingQueryRepo,
@@ -161,9 +161,9 @@ func (controller MappingController) AddMappingTarget() *cobra.Command {
 				target,
 			)
 
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistDbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
 
 			err = useCase.AddMappingTarget(
 				mappingQueryRepo,
@@ -201,8 +201,8 @@ func (controller MappingController) DeleteMappingTarget() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			targetId := valueObject.NewMappingTargetIdPanic(targetIdUint)
 
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.dbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.dbSvc)
+			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistDbSvc)
+			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistDbSvc)
 
 			err := useCase.DeleteMappingTarget(
 				mappingQueryRepo,

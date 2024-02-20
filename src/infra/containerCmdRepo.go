@@ -16,17 +16,17 @@ import (
 )
 
 type ContainerCmdRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerCmdRepo(dbSvc *db.DatabaseService) *ContainerCmdRepo {
-	return &ContainerCmdRepo{dbSvc: dbSvc}
+func NewContainerCmdRepo(persistDbSvc *db.PersistentDatabaseService) *ContainerCmdRepo {
+	return &ContainerCmdRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo ContainerCmdRepo) getBaseSpecs(
 	profileId valueObject.ContainerProfileId,
 ) (valueObject.ContainerSpecs, error) {
-	profileQueryRepo := NewContainerProfileQueryRepo(repo.dbSvc)
+	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistDbSvc)
 	containerProfile, err := profileQueryRepo.GetById(
 		profileId,
 	)
@@ -47,7 +47,7 @@ func (repo ContainerCmdRepo) calibratePortBindings(
 
 	for _, originalPortBinding := range originalPortBindings {
 		nextPrivatePort, err := portBindingModel.GetNextAvailablePrivatePort(
-			repo.dbSvc.Orm,
+			repo.persistDbSvc.Orm,
 			usedPrivatePorts,
 		)
 		if err != nil {
@@ -75,7 +75,7 @@ func (repo ContainerCmdRepo) calibratePortBindings(
 		}
 
 		nextPublicPort, err := portBindingModel.GetNextAvailablePublicPort(
-			repo.dbSvc.Orm,
+			repo.persistDbSvc.Orm,
 			calibratedPortBinding,
 			usedPublicPorts,
 		)
@@ -260,7 +260,7 @@ func (repo ContainerCmdRepo) Add(
 
 	containerModel := dbModel.Container{}.ToModel(containerEntity)
 
-	createResult := repo.dbSvc.Orm.Create(&containerModel)
+	createResult := repo.persistDbSvc.Orm.Create(&containerModel)
 	if createResult.Error != nil {
 		return containerId, createResult.Error
 	}
@@ -297,12 +297,12 @@ func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer
 		updateMap["stopped_at"] = time.Now()
 	}
 
-	updateResult := repo.dbSvc.Orm.Model(&containerModel).Updates(updateMap)
+	updateResult := repo.persistDbSvc.Orm.Model(&containerModel).Updates(updateMap)
 	return updateResult.Error
 }
 
 func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
-	containerQueryRepo := NewContainerQueryRepo(repo.dbSvc)
+	containerQueryRepo := NewContainerQueryRepo(repo.persistDbSvc)
 	currentContainer, err := containerQueryRepo.GetById(updateDto.ContainerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
@@ -362,7 +362,7 @@ func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	}
 
 	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
-	updateResult := repo.dbSvc.Orm.Model(&containerModel).
+	updateResult := repo.persistDbSvc.Orm.Model(&containerModel).
 		Update("profile_id", updateDto.ProfileId.String())
 	return updateResult.Error
 }
@@ -383,7 +383,7 @@ func (repo ContainerCmdRepo) Delete(
 	}
 
 	portBindingModel := dbModel.ContainerPortBinding{}
-	deleteResult := repo.dbSvc.Orm.Delete(
+	deleteResult := repo.persistDbSvc.Orm.Delete(
 		portBindingModel,
 		"container_id = ?",
 		containerId.String(),
@@ -393,6 +393,6 @@ func (repo ContainerCmdRepo) Delete(
 	}
 
 	containerModel := dbModel.Container{ID: containerId.String()}
-	deleteResult = repo.dbSvc.Orm.Delete(&containerModel)
+	deleteResult = repo.persistDbSvc.Orm.Delete(&containerModel)
 	return deleteResult.Error
 }

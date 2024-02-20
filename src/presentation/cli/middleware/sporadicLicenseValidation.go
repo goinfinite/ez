@@ -9,14 +9,14 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 )
 
-func SporadicLicenseValidation(dbSvc *db.DatabaseService) {
+func SporadicLicenseValidation(persistDbSvc *db.PersistentDatabaseService) {
 	shouldRun := rand.Intn(30) == 0
 	if !shouldRun {
 		return
 	}
 
-	licenseQueryRepo := infra.NewLicenseQueryRepo(dbSvc)
-	licenseCmdRepo := infra.NewLicenseCmdRepo(dbSvc)
+	licenseQueryRepo := infra.NewLicenseQueryRepo(persistDbSvc)
+	licenseCmdRepo := infra.NewLicenseCmdRepo(persistDbSvc)
 
 	err := useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)
 	if err != nil {

@@ -10,8 +10,8 @@ import (
 
 func TestAccQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	accQueryRepo := NewAccQueryRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	accQueryRepo := NewAccQueryRepo(persistDbSvc)
 
 	t.Run("GetValidAccounts", func(t *testing.T) {
 		_, err := accQueryRepo.Get()

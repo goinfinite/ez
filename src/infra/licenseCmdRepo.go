@@ -16,18 +16,18 @@ import (
 )
 
 type LicenseCmdRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewLicenseCmdRepo(dbSvc *db.DatabaseService) LicenseCmdRepo {
-	return LicenseCmdRepo{dbSvc: dbSvc}
+func NewLicenseCmdRepo(persistDbSvc *db.PersistentDatabaseService) LicenseCmdRepo {
+	return LicenseCmdRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
-	licenseQueryRepo := NewLicenseQueryRepo(repo.dbSvc)
+	licenseQueryRepo := NewLicenseQueryRepo(repo.persistDbSvc)
 	freshLicenseFingerprint, err := licenseQueryRepo.GetLicenseFingerprint()
 	if err != nil {
 		return errors.New("GetLicenseFingerprintFailed")
@@ -108,12 +108,12 @@ func (repo LicenseCmdRepo) Refresh() error {
 	)
 
 	licenseInfoModel := dbModel.LicenseInfo{}.ToModel(licenseInfoEntity)
-	return repo.dbSvc.Orm.Save(&licenseInfoModel).Error
+	return repo.persistDbSvc.Orm.Save(&licenseInfoModel).Error
 }
 
 func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.dbSvc.Orm.Model(&licenseInfoModel).
+	updateResult := repo.persistDbSvc.Orm.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		Update("status", status.String())
 	return updateResult.Error
@@ -121,7 +121,7 @@ func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error 
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.dbSvc.Orm.Model(&licenseInfoModel).
+	updateResult := repo.persistDbSvc.Orm.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		UpdateColumn("error_count", gorm.Expr("error_count + ?", 1))
 	return updateResult.Error
@@ -129,7 +129,7 @@ func (repo LicenseCmdRepo) IncrementErrorCount() error {
 
 func (repo LicenseCmdRepo) ResetErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.dbSvc.Orm.Model(&licenseInfoModel).
+	updateResult := repo.persistDbSvc.Orm.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		Update("error_count", 0)
 	return updateResult.Error

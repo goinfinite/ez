@@ -8,8 +8,8 @@ import (
 
 func TestContainerQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	containerQueryRepo := NewContainerQueryRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	containerQueryRepo := NewContainerQueryRepo(persistDbSvc)
 
 	t.Run("GetContainers", func(t *testing.T) {
 		containerList, err := containerQueryRepo.Get()

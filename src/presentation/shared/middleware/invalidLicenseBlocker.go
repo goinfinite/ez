@@ -8,10 +8,10 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 )
 
-func InvalidLicenseBlocker(dbSvc *db.DatabaseService) {
-	licenseQueryRepo := infra.NewLicenseQueryRepo(dbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
+func InvalidLicenseBlocker(persistDbSvc *db.PersistentDatabaseService) {
+	licenseQueryRepo := infra.NewLicenseQueryRepo(persistDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
 
 	err := useCase.InvalidLicenseBlocker(
 		licenseQueryRepo,

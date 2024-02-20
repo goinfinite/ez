@@ -11,11 +11,11 @@ import (
 )
 
 type AccountController struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewAccountController(dbSvc *db.DatabaseService) AccountController {
-	return AccountController{dbSvc: dbSvc}
+func NewAccountController(persistDbSvc *db.PersistentDatabaseService) AccountController {
+	return AccountController{persistDbSvc: persistDbSvc}
 }
 
 func (controller AccountController) GetAccounts() *cobra.Command {
@@ -23,7 +23,7 @@ func (controller AccountController) GetAccounts() *cobra.Command {
 		Use:   "get",
 		Short: "GetAccounts",
 		Run: func(cmd *cobra.Command, args []string) {
-			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.persistDbSvc)
 			accsList, err := useCase.GetAccounts(accQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
@@ -63,8 +63,8 @@ func (controller AccountController) AddAccount() *cobra.Command {
 				quotaPtr,
 			)
 
-			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.persistDbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.persistDbSvc)
 
 			err := useCase.AddAccount(
 				accQueryRepo,
@@ -126,8 +126,8 @@ func (controller AccountController) UpdateAccount() *cobra.Command {
 				quotaPtr,
 			)
 
-			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.persistDbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.persistDbSvc)
 
 			if shouldUpdateApiKeyBool {
 				newKey, err := useCase.UpdateAccountApiKey(
@@ -176,9 +176,9 @@ func (controller AccountController) DeleteAccount() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			accountId := valueObject.NewAccountIdPanic(accountIdStr)
 
-			accQueryRepo := infra.NewAccQueryRepo(controller.dbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.dbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.dbSvc)
+			accQueryRepo := infra.NewAccQueryRepo(controller.persistDbSvc)
+			accCmdRepo := infra.NewAccCmdRepo(controller.persistDbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
 
 			err := useCase.DeleteAccount(
 				accQueryRepo,

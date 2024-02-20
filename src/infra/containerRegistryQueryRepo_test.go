@@ -9,8 +9,8 @@ import (
 
 func TestContainerRegistryQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	containerQueryRepo := NewContainerRegistryQueryRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	containerQueryRepo := NewContainerRegistryQueryRepo(persistDbSvc)
 
 	t.Run("GetRegistryImages", func(t *testing.T) {
 		imageName, _ := valueObject.NewRegistryImageName("speedianet/os")

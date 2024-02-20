@@ -20,10 +20,10 @@ func LoadEnvVars() {
 	}
 }
 
-func GetDbSvc() *db.DatabaseService {
-	dbSvc, err := db.NewDatabaseService()
+func GetPersistentDbSvc() *db.PersistentDatabaseService {
+	persistDbSvc, err := db.NewPersistentDatabaseService()
 	if err != nil {
-		panic(fmt.Errorf("GetDbSvcError: %s", err))
+		panic(fmt.Errorf("GetPersistentDbSvcError: %s", err))
 	}
-	return dbSvc
+	return persistDbSvc
 }

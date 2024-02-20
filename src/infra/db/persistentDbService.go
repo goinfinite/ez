@@ -13,28 +13,28 @@ const (
 	DatabaseFilePath = "/var/speedia/control.db"
 )
 
-type DatabaseService struct {
+type PersistentDatabaseService struct {
 	Orm *gorm.DB
 }
 
-func NewDatabaseService() (*DatabaseService, error) {
+func NewPersistentDatabaseService() (*PersistentDatabaseService, error) {
 	ormSvc, err := gorm.Open(sqlite.Open(DatabaseFilePath), &gorm.Config{})
 	if err != nil {
 		return nil, errors.New("DatabaseConnectionError")
 	}
 
-	dbSvc := &DatabaseService{Orm: ormSvc}
-	err = dbSvc.dbMigrate()
+	persistDbSvc := &PersistentDatabaseService{Orm: ormSvc}
+	err = persistDbSvc.dbMigrate()
 	if err != nil {
 		return nil, err
 	}
 
-	return dbSvc, nil
+	return persistDbSvc, nil
 }
 
-func (dbSvc DatabaseService) isTableEmpty(model interface{}) (bool, error) {
+func (persistDbSvc PersistentDatabaseService) isTableEmpty(model interface{}) (bool, error) {
 	var count int64
-	err := dbSvc.Orm.Model(&model).Count(&count).Error
+	err := persistDbSvc.Orm.Model(&model).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
@@ -42,9 +42,9 @@ func (dbSvc DatabaseService) isTableEmpty(model interface{}) (bool, error) {
 	return count == 0, nil
 }
 
-func (dbSvc DatabaseService) seedDatabase(seedModels ...interface{}) error {
+func (persistDbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) error {
 	for _, seedModel := range seedModels {
-		isTableEmpty, err := dbSvc.isTableEmpty(seedModel)
+		isTableEmpty, err := persistDbSvc.isTableEmpty(seedModel)
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func (dbSvc DatabaseService) seedDatabase(seedModels ...interface{}) error {
 			entryFormatOrmWillAccept.Elem().Set(entryInnerStructure)
 			adjustedEntry := entryFormatOrmWillAccept.Interface()
 
-			err = dbSvc.Orm.Create(adjustedEntry).Error
+			err = persistDbSvc.Orm.Create(adjustedEntry).Error
 			if err != nil {
 				return err
 			}
@@ -81,8 +81,8 @@ func (dbSvc DatabaseService) seedDatabase(seedModels ...interface{}) error {
 	return nil
 }
 
-func (dbSvc DatabaseService) dbMigrate() error {
-	err := dbSvc.Orm.AutoMigrate(
+func (persistDbSvc PersistentDatabaseService) dbMigrate() error {
+	err := persistDbSvc.Orm.AutoMigrate(
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
@@ -101,7 +101,7 @@ func (dbSvc DatabaseService) dbMigrate() error {
 		&dbModel.ContainerProfile{},
 	}
 
-	err = dbSvc.seedDatabase(modelsWithInitialEntries...)
+	err = persistDbSvc.seedDatabase(modelsWithInitialEntries...)
 	if err != nil {
 		return errors.New("AddDefaultDatabaseEntriesError")
 	}

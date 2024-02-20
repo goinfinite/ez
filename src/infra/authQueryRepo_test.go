@@ -12,9 +12,9 @@ import (
 
 func TestAuthQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	authQueryRepo := NewAuthQueryRepo(dbSvc)
-	accCmdRepo := NewAccCmdRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	authQueryRepo := NewAuthQueryRepo(persistDbSvc)
+	accCmdRepo := NewAccCmdRepo(persistDbSvc)
 
 	t.Run("ValidLoginCredentials", func(t *testing.T) {
 		login := dto.NewLogin(

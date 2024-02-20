@@ -10,11 +10,11 @@ import (
 )
 
 type ContainerRegistryController struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerRegistryController(dbSvc *db.DatabaseService) ContainerRegistryController {
-	return ContainerRegistryController{dbSvc: dbSvc}
+func NewContainerRegistryController(persistDbSvc *db.PersistentDatabaseService) ContainerRegistryController {
+	return ContainerRegistryController{persistDbSvc: persistDbSvc}
 }
 
 func (controller ContainerRegistryController) GetRegistryImages() *cobra.Command {
@@ -24,7 +24,7 @@ func (controller ContainerRegistryController) GetRegistryImages() *cobra.Command
 		Use:   "get",
 		Short: "GetRegistryImages",
 		Run: func(cmd *cobra.Command, args []string) {
-			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.dbSvc)
+			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.persistDbSvc)
 
 			var imageNamePtr *valueObject.RegistryImageName
 			if imageNameStr != "" {
@@ -55,7 +55,7 @@ func (controller ContainerRegistryController) GetRegistryTaggedImage() *cobra.Co
 		Use:   "get-tagged",
 		Short: "GetRegistryTaggedImage",
 		Run: func(cmd *cobra.Command, args []string) {
-			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.dbSvc)
+			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.persistDbSvc)
 
 			imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
 

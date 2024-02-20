@@ -11,11 +11,11 @@ import (
 )
 
 type AccQueryRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewAccQueryRepo(dbSvc *db.DatabaseService) *AccQueryRepo {
-	return &AccQueryRepo{dbSvc: dbSvc}
+func NewAccQueryRepo(persistDbSvc *db.PersistentDatabaseService) *AccQueryRepo {
+	return &AccQueryRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo AccQueryRepo) Get() ([]entity.Account, error) {
@@ -23,7 +23,7 @@ func (repo AccQueryRepo) Get() ([]entity.Account, error) {
 
 	var accModels []dbModel.Account
 
-	err := repo.dbSvc.Orm.Model(&dbModel.Account{}).
+	err := repo.persistDbSvc.Orm.Model(&dbModel.Account{}).
 		Preload("Quota").
 		Preload("QuotaUsage").Find(&accModels).Error
 	if err != nil {

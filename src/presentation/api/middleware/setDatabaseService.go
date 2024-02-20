@@ -5,10 +5,10 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 )
 
-func SetDatabaseService(dbSvc *db.DatabaseService) echo.MiddlewareFunc {
+func SetPersistentDatabaseService(persistDbSvc *db.PersistentDatabaseService) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Set("dbSvc", dbSvc)
+			c.Set("persistDbSvc", persistDbSvc)
 			return next(c)
 		}
 	}

@@ -15,18 +15,18 @@ import (
 )
 
 type ContainerQueryRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerQueryRepo(dbSvc *db.DatabaseService) *ContainerQueryRepo {
-	return &ContainerQueryRepo{dbSvc: dbSvc}
+func NewContainerQueryRepo(persistDbSvc *db.PersistentDatabaseService) *ContainerQueryRepo {
+	return &ContainerQueryRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo ContainerQueryRepo) Get() ([]entity.Container, error) {
 	containers := []entity.Container{}
 
 	containerModels := []dbModel.Container{}
-	err := repo.dbSvc.Orm.
+	err := repo.persistDbSvc.Orm.
 		Preload("PortBindings").
 		Find(&containerModels).Error
 	if err != nil {
@@ -51,7 +51,7 @@ func (repo ContainerQueryRepo) GetById(
 	var containerEntity entity.Container
 
 	var containerModel dbModel.Container
-	queryResult := repo.dbSvc.Orm.
+	queryResult := repo.persistDbSvc.Orm.
 		Preload("PortBindings").
 		Where("id = ?", containerId.String()).
 		Limit(1).
@@ -78,7 +78,7 @@ func (repo ContainerQueryRepo) GetByHostname(
 	var containerEntity entity.Container
 
 	var containerModel dbModel.Container
-	queryResult := repo.dbSvc.Orm.
+	queryResult := repo.persistDbSvc.Orm.
 		Preload("PortBindings").
 		Where("hostname = ?", hostname.String()).
 		Limit(1).
@@ -105,7 +105,7 @@ func (repo ContainerQueryRepo) GetByAccId(
 	containers := []entity.Container{}
 
 	containerModels := []dbModel.Container{}
-	err := repo.dbSvc.Orm.
+	err := repo.persistDbSvc.Orm.
 		Preload("PortBindings").
 		Where("account_id = ?", accId.Get()).
 		Find(&containerModels).Error
@@ -317,7 +317,7 @@ func (repo ContainerQueryRepo) getWithMetricsByAccId(
 func (repo ContainerQueryRepo) GetWithMetrics() ([]dto.ContainerWithMetrics, error) {
 	containersWithMetrics := []dto.ContainerWithMetrics{}
 
-	accsList, err := NewAccQueryRepo(repo.dbSvc).Get()
+	accsList, err := NewAccQueryRepo(repo.persistDbSvc).Get()
 	if err != nil {
 		return containersWithMetrics, err
 	}

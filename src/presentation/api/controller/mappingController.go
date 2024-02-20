@@ -22,8 +22,8 @@ import (
 // @Success      200 {array} entity.Mapping
 // @Router       /mapping/ [get]
 func GetMappingsController(c echo.Context) error {
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
 	mappingList, err := useCase.GetMappings(mappingQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -80,10 +80,10 @@ func AddMappingController(c echo.Context) error {
 		targets,
 	)
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(persistDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
 
 	err := useCase.AddMapping(
 		mappingQueryRepo,
@@ -111,9 +111,9 @@ func AddMappingController(c echo.Context) error {
 func DeleteMappingController(c echo.Context) error {
 	mappingId := valueObject.NewMappingIdPanic(c.Param("mappingId"))
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(persistDbSvc)
 
 	err := useCase.DeleteMapping(
 		mappingQueryRepo,
@@ -151,10 +151,10 @@ func AddMappingTargetController(c echo.Context) error {
 		target,
 	)
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(persistDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
 
 	err := useCase.AddMappingTarget(
 		mappingQueryRepo,
@@ -183,9 +183,9 @@ func AddMappingTargetController(c echo.Context) error {
 func DeleteMappingTargetController(c echo.Context) error {
 	targetId := valueObject.NewMappingTargetIdPanic(c.Param("targetId"))
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(persistDbSvc)
 
 	err := useCase.DeleteMappingTarget(
 		mappingQueryRepo,

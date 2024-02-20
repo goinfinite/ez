@@ -61,8 +61,8 @@ func Auth(basePath string) echo.MiddlewareFunc {
 				})
 			}
 
-			dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-			authQueryRepo := infra.NewAuthQueryRepo(dbSvc)
+			persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+			authQueryRepo := infra.NewAuthQueryRepo(persistDbSvc)
 			tokenWithoutPrefix := token[7:]
 			accountId, err := getAccountIdFromAccessToken(
 				authQueryRepo,

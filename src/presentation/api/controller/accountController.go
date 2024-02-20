@@ -24,8 +24,8 @@ import (
 // @Success      200 {array} entity.Account
 // @Router       /account/ [get]
 func GetAccountsController(c echo.Context) error {
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	accsQueryRepo := infra.NewAccQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	accsQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
 	accsList, err := useCase.GetAccounts(accsQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -107,9 +107,9 @@ func AddAccountController(c echo.Context) error {
 		quotaPtr,
 	)
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
 
 	err := useCase.AddAccount(
 		accQueryRepo,
@@ -169,9 +169,9 @@ func UpdateAccountController(c echo.Context) error {
 		quotaPtr,
 	)
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
 
 	if updateAccountDto.ShouldUpdateApiKey != nil && *updateAccountDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
@@ -215,10 +215,10 @@ func UpdateAccountController(c echo.Context) error {
 func DeleteAccountController(c echo.Context) error {
 	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
 
 	err := useCase.DeleteAccount(
 		accQueryRepo,
@@ -233,13 +233,13 @@ func DeleteAccountController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountDeleted")
 }
 
-func AutoUpdateAccountsQuotaUsageController(dbSvc *db.DatabaseService) {
+func AutoUpdateAccountsQuotaUsageController(persistDbSvc *db.PersistentDatabaseService) {
 	taskInterval := time.Duration(15) * time.Minute
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
+	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
 	for range timer.C {
 		useCase.AutoUpdateAccountsQuotaUsage(accQueryRepo, accCmdRepo)
 	}

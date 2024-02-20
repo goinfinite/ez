@@ -10,8 +10,8 @@ import (
 
 func TestContainerProfileCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	containerProfileCmdRepo := NewContainerProfileCmdRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	containerProfileCmdRepo := NewContainerProfileCmdRepo(persistDbSvc)
 
 	t.Run("AddContainerProfile", func(t *testing.T) {
 		name := valueObject.NewContainerProfileNamePanic("testContainerProfile")

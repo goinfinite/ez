@@ -9,8 +9,8 @@ import (
 
 func TestLicenseCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	licenseCmdRepo := NewLicenseCmdRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	licenseCmdRepo := NewLicenseCmdRepo(persistDbSvc)
 
 	t.Run("Refresh", func(t *testing.T) {
 		err := licenseCmdRepo.Refresh()

@@ -11,9 +11,9 @@ import (
 
 func TestContainerCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	dbSvc := testHelpers.GetDbSvc()
-	containerQueryRepo := NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := NewContainerCmdRepo(dbSvc)
+	persistDbSvc := testHelpers.GetPersistentDbSvc()
+	containerQueryRepo := NewContainerQueryRepo(persistDbSvc)
+	containerCmdRepo := NewContainerCmdRepo(persistDbSvc)
 
 	t.Run("AddContainer", func(t *testing.T) {
 		portBindings, _ := valueObject.NewPortBindingFromString("http")

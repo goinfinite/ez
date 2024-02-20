@@ -17,11 +17,11 @@ import (
 )
 
 type ContainerRegistryQueryRepo struct {
-	dbSvc *db.DatabaseService
+	persistDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerRegistryQueryRepo(dbSvc *db.DatabaseService) *ContainerRegistryQueryRepo {
-	return &ContainerRegistryQueryRepo{dbSvc: dbSvc}
+func NewContainerRegistryQueryRepo(persistDbSvc *db.PersistentDatabaseService) *ContainerRegistryQueryRepo {
+	return &ContainerRegistryQueryRepo{persistDbSvc: persistDbSvc}
 }
 
 func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(

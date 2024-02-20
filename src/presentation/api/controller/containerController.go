@@ -24,8 +24,8 @@ import (
 // @Success      200 {array} entity.Container
 // @Router       /container/ [get]
 func GetContainersController(c echo.Context) error {
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
 	containerList, err := useCase.GetContainers(containerQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -44,8 +44,8 @@ func GetContainersController(c echo.Context) error {
 // @Success      200 {array} dto.ContainerWithMetrics
 // @Router       /container/metrics/ [get]
 func GetContainersWithMetricsController(c echo.Context) error {
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
 	containerList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -235,14 +235,14 @@ func AddContainerController(c echo.Context) error {
 		autoCreateMappings,
 	)
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
+	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistDbSvc)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(persistDbSvc)
 
 	err := useCase.AddContainer(
 		containerQueryRepo,
@@ -312,12 +312,12 @@ func UpdateContainerController(c echo.Context) error {
 		profileIdPtr,
 	)
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
-	accQueryRepo := infra.NewAccQueryRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
+	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistDbSvc)
 
 	err := useCase.UpdateContainer(
 		containerQueryRepo,
@@ -351,12 +351,12 @@ func DeleteContainerController(c echo.Context) error {
 	accId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
 
-	dbSvc := c.Get("dbSvc").(*db.DatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(dbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(dbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(dbSvc)
-	mappingQueryRepo := infra.NewMappingQueryRepo(dbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(dbSvc)
+	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(persistDbSvc)
+	mappingQueryRepo := infra.NewMappingQueryRepo(persistDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(persistDbSvc)
 
 	err := useCase.DeleteContainer(
 		containerQueryRepo,

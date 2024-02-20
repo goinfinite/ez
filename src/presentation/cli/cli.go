@@ -46,12 +46,12 @@ func CliInit() {
 
 	sharedMiddleware.CheckEnvs()
 
-	dbSvc := cliInit.DatabaseService()
+	persistDbSvc := cliInit.PersistentDatabaseService()
 
-	sharedMiddleware.InvalidLicenseBlocker(dbSvc)
-	cliMiddleware.SporadicLicenseValidation(dbSvc)
+	sharedMiddleware.InvalidLicenseBlocker(persistDbSvc)
+	cliMiddleware.SporadicLicenseValidation(persistDbSvc)
 
-	router := NewRouter(dbSvc)
+	router := NewRouter(persistDbSvc)
 	router.RegisterRoutes()
 
 	RunRootCmd()
