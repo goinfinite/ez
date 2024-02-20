@@ -15,6 +15,7 @@
     "customfields",
     "DBUS",
     "dearmor",
+    "dgraph",
     "Dockerfiles",
     "fallocate",
     "Fstype",
