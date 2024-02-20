@@ -47,6 +47,10 @@ func RunCmd(command string, args ...string) (string, error) {
 	return runExecCmd(execCmd)
 }
 
+func RunCmdWithSubShell(command string) (string, error) {
+	return RunCmd("bash", "-c", "source /etc/profile; "+command)
+}
+
 func RunCmdAsUser(
 	accId valueObject.AccountId,
 	command string,
