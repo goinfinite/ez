@@ -18,6 +18,13 @@ func TestLicenseQueryRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("GetNonceHash", func(t *testing.T) {
+		_, err := licenseQueryRepo.GetNonceHash()
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
+
 	t.Run("GetLicenseFingerprint", func(t *testing.T) {
 		_, err := licenseQueryRepo.GetLicenseFingerprint()
 		if err != nil {

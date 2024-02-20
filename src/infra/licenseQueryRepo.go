@@ -53,6 +53,21 @@ func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	return licenseInfoModel.ToEntity()
 }
 
+func (repo LicenseQueryRepo) GetNonceHash() (valueObject.Hash, error) {
+	var nonceHash valueObject.Hash
+
+	currentHourInEpoch, err := infraHelper.RunCmdWithSubShell(
+		"date -d \"$(date +'%Y-%m-%d %H:00:00')\" +%s",
+	)
+	if err != nil {
+		return nonceHash, err
+	}
+
+	nonceHashStr := infraHelper.GenShortHash(currentHourInEpoch)
+
+	return valueObject.NewHash(nonceHashStr)
+}
+
 func (repo LicenseQueryRepo) GetLicenseFingerprint() (
 	valueObject.LicenseFingerprint,
 	error,
@@ -101,17 +116,14 @@ func (repo LicenseQueryRepo) GetLicenseFingerprint() (
 	fingerprintSecondPart := publicIp.String() + macAddress
 	secondPartShortHashStr := infraHelper.GenShortHash(fingerprintSecondPart)
 
-	currentHourInEpoch, err := infraHelper.RunCmdWithSubShell(
-		"date -d \"$(date +'%Y-%m-%d %H:00:00')\" +%s",
-	)
+	thirdPartShortHashStr, err := repo.GetNonceHash()
 	if err != nil {
 		return fingerprint, err
 	}
 
-	fingerprintThirdPart := currentHourInEpoch
-	thirdPartShortHashStr := infraHelper.GenShortHash(fingerprintThirdPart)
-
 	return valueObject.NewLicenseFingerprint(
-		firstPartShortHashStr + "-" + secondPartShortHashStr + "-" + thirdPartShortHashStr,
+		firstPartShortHashStr + "-" +
+			secondPartShortHashStr + "-" +
+			thirdPartShortHashStr.String(),
 	)
 }
