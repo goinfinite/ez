@@ -53,7 +53,7 @@ func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	return licenseInfoModel.ToEntity()
 }
 
-func (repo LicenseQueryRepo) GetErrorCount() (int, error) {
+func (repo LicenseQueryRepo) GetErrorCount() (uint, error) {
 	return 0, nil
 }
 

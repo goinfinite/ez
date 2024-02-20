@@ -45,8 +45,8 @@ func LicenseValidation(
 		return nil
 	}
 
-	maxErrorCountUntilSuspension := DaysUntilSuspension * LicenseValidationsPerDay
-	maxErrorCountUntilRevocation := DaysUntilRevocation * LicenseValidationsPerDay
+	maxErrorCountUntilSuspension := uint(DaysUntilSuspension * LicenseValidationsPerDay)
+	maxErrorCountUntilRevocation := uint(DaysUntilRevocation * LicenseValidationsPerDay)
 
 	errorCount, err := licenseQueryRepo.GetErrorCount()
 	if err != nil {
