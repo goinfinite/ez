@@ -16,18 +16,18 @@ import (
 )
 
 type LicenseCmdRepo struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewLicenseCmdRepo(persistDbSvc *db.PersistentDatabaseService) LicenseCmdRepo {
-	return LicenseCmdRepo{persistDbSvc: persistDbSvc}
+func NewLicenseCmdRepo(persistentDbSvc *db.PersistentDatabaseService) LicenseCmdRepo {
+	return LicenseCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
-	licenseQueryRepo := NewLicenseQueryRepo(repo.persistDbSvc)
+	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc)
 	freshLicenseFingerprint, err := licenseQueryRepo.GetLicenseFingerprint()
 	if err != nil {
 		return errors.New("GetLicenseFingerprintFailed")
@@ -108,12 +108,12 @@ func (repo LicenseCmdRepo) Refresh() error {
 	)
 
 	licenseInfoModel := dbModel.LicenseInfo{}.ToModel(licenseInfoEntity)
-	return repo.persistDbSvc.Orm.Save(&licenseInfoModel).Error
+	return repo.persistentDbSvc.Handler.Save(&licenseInfoModel).Error
 }
 
 func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.persistDbSvc.Orm.Model(&licenseInfoModel).
+	updateResult := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		Update("status", status.String())
 	return updateResult.Error
@@ -121,7 +121,7 @@ func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error 
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.persistDbSvc.Orm.Model(&licenseInfoModel).
+	updateResult := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		UpdateColumn("error_count", gorm.Expr("error_count + ?", 1))
 	return updateResult.Error
@@ -129,7 +129,7 @@ func (repo LicenseCmdRepo) IncrementErrorCount() error {
 
 func (repo LicenseCmdRepo) ResetErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.persistDbSvc.Orm.Model(&licenseInfoModel).
+	updateResult := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
 		Where("id = ?", 1).
 		Update("error_count", 0)
 	return updateResult.Error

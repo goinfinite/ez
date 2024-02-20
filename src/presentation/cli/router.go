@@ -10,11 +10,11 @@ import (
 )
 
 type Router struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewRouter(persistDbSvc *db.PersistentDatabaseService) Router {
-	return Router{persistDbSvc: persistDbSvc}
+func NewRouter(persistentDbSvc *db.PersistentDatabaseService) Router {
+	return Router{persistentDbSvc: persistentDbSvc}
 }
 
 func (router Router) accountRoutes() {
@@ -23,7 +23,7 @@ func (router Router) accountRoutes() {
 		Short: "AccountManagement",
 	}
 
-	accountController := cliController.NewAccountController(router.persistDbSvc)
+	accountController := cliController.NewAccountController(router.persistentDbSvc)
 	accountCmd.AddCommand(accountController.GetAccounts())
 	accountCmd.AddCommand(accountController.AddAccount())
 	accountCmd.AddCommand(accountController.UpdateAccount())
@@ -37,7 +37,7 @@ func (router Router) containerRoutes() {
 		Short: "ContainerManagement",
 	}
 
-	containerController := cliController.NewContainerController(router.persistDbSvc)
+	containerController := cliController.NewContainerController(router.persistentDbSvc)
 	containerCmd.AddCommand(containerController.GetContainers())
 	containerCmd.AddCommand(containerController.AddContainer())
 	containerCmd.AddCommand(containerController.UpdateContainer())
@@ -48,7 +48,7 @@ func (router Router) containerRoutes() {
 		Short: "ContainerProfileManagement",
 	}
 
-	containerProfileController := cliController.NewContainerProfileController(router.persistDbSvc)
+	containerProfileController := cliController.NewContainerProfileController(router.persistentDbSvc)
 	containerProfileCmd.AddCommand(containerProfileController.GetContainerProfiles())
 	containerProfileCmd.AddCommand(containerProfileController.AddContainerProfile())
 	containerProfileCmd.AddCommand(containerProfileController.UpdateContainerProfile())
@@ -59,7 +59,7 @@ func (router Router) containerRoutes() {
 		Short: "ContainerRegistryManagement",
 	}
 
-	containerRegistryController := cliController.NewContainerRegistryController(router.persistDbSvc)
+	containerRegistryController := cliController.NewContainerRegistryController(router.persistentDbSvc)
 	containerRegistryCmd.AddCommand(containerRegistryController.GetRegistryImages())
 	containerRegistryCmd.AddCommand(containerRegistryController.GetRegistryTaggedImage())
 
@@ -74,7 +74,7 @@ func (router Router) licenseRoutes() {
 		Short: "LicenseManagement",
 	}
 
-	licenseController := cliController.NewLicenseController(router.persistDbSvc)
+	licenseController := cliController.NewLicenseController(router.persistentDbSvc)
 	licenseCmd.AddCommand(licenseController.GetLicenseInfo())
 	rootCmd.AddCommand(licenseCmd)
 }
@@ -85,7 +85,7 @@ func (router Router) mappingRoutes() {
 		Short: "MappingManagement",
 	}
 
-	mappingController := cliController.NewMappingController(router.persistDbSvc)
+	mappingController := cliController.NewMappingController(router.persistentDbSvc)
 	mappingCmd.AddCommand(mappingController.GetMappings())
 	mappingCmd.AddCommand(mappingController.AddMapping())
 	mappingCmd.AddCommand(mappingController.DeleteMapping())
@@ -126,7 +126,7 @@ func (router Router) systemRoutes() {
 		Use:   "serve",
 		Short: "ServeApiDashboard",
 		Run: func(cmd *cobra.Command, args []string) {
-			api.ApiInit(router.persistDbSvc)
+			api.ApiInit(router.persistentDbSvc)
 		},
 	}
 

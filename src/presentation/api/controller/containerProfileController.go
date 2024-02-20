@@ -23,8 +23,8 @@ import (
 // @Success      200 {array} entity.ContainerProfile
 // @Router       /container/profile/ [get]
 func GetContainerProfilesController(c echo.Context) error {
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
-	queryRepo := infra.NewContainerProfileQueryRepo(persistDbSvc)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
+	queryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
 	profilesList, err := useCase.GetContainerProfiles(queryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -144,8 +144,8 @@ func AddContainerProfileController(c echo.Context) error {
 		hostMinCapacityPercentPtr,
 	)
 
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
-	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistDbSvc)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
+	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistentDbSvc)
 
 	err := useCase.AddContainerProfile(
 		containerProfileCmdRepo,
@@ -273,11 +273,11 @@ func UpdateContainerProfileController(c echo.Context) error {
 		hostMinCapacityPercentPtr,
 	)
 
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
-	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistDbSvc)
-	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistDbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
+	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistentDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
 
 	err := useCase.UpdateContainerProfile(
 		containerProfileQueryRepo,
@@ -306,11 +306,11 @@ func UpdateContainerProfileController(c echo.Context) error {
 func DeleteContainerProfileController(c echo.Context) error {
 	profileId := valueObject.NewContainerProfileIdPanic(c.Param("profileId"))
 
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
-	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistDbSvc)
-	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistDbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistDbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(persistDbSvc)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
+	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistentDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
 
 	err := useCase.DeleteContainerProfile(
 		containerProfileQueryRepo,

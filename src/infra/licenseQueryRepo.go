@@ -11,18 +11,18 @@ import (
 )
 
 type LicenseQueryRepo struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewLicenseQueryRepo(persistDbSvc *db.PersistentDatabaseService) LicenseQueryRepo {
-	return LicenseQueryRepo{persistDbSvc: persistDbSvc}
+func NewLicenseQueryRepo(persistentDbSvc *db.PersistentDatabaseService) LicenseQueryRepo {
+	return LicenseQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	var licenseInfo entity.LicenseInfo
 
 	var licenseInfoModel dbModel.LicenseInfo
-	queryResult := repo.persistDbSvc.Orm.
+	queryResult := repo.persistentDbSvc.Handler.
 		Where("id = ?", 1).
 		Limit(1).
 		Find(&licenseInfoModel)
@@ -31,14 +31,14 @@ func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	}
 
 	if queryResult.RowsAffected == 0 {
-		licenseCmdRepo := NewLicenseCmdRepo(repo.persistDbSvc)
+		licenseCmdRepo := NewLicenseCmdRepo(repo.persistentDbSvc)
 		err := licenseCmdRepo.Refresh()
 		if err != nil {
 			return licenseInfo, err
 		}
 	}
 
-	queryResult = repo.persistDbSvc.Orm.
+	queryResult = repo.persistentDbSvc.Handler.
 		Where("id = ?", 1).
 		Limit(1).
 		Find(&licenseInfoModel)

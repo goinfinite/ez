@@ -21,13 +21,13 @@ func authRoutes(baseRoute *echo.Group) {
 	authGroup.POST("/login/", apiController.AuthLoginController)
 }
 
-func accountRoutes(baseRoute *echo.Group, persistDbSvc *db.PersistentDatabaseService) {
+func accountRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
 	accountGroup := baseRoute.Group("/account")
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
 	accountGroup.DELETE("/:accountId/", apiController.DeleteAccountController)
-	go apiController.AutoUpdateAccountsQuotaUsageController(persistDbSvc)
+	go apiController.AutoUpdateAccountsQuotaUsageController(persistentDbSvc)
 }
 
 func containerRoutes(baseRoute *echo.Group) {
@@ -58,10 +58,10 @@ func containerRoutes(baseRoute *echo.Group) {
 	)
 }
 
-func licenseRoutes(baseRoute *echo.Group, persistDbSvc *db.PersistentDatabaseService) {
+func licenseRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
 	licenseGroup := baseRoute.Group("/license")
 	licenseGroup.GET("/", apiController.GetLicenseInfoController)
-	go apiController.AutoLicenseValidationController(persistDbSvc)
+	go apiController.AutoLicenseValidationController(persistentDbSvc)
 }
 
 func mappingRoutes(baseRoute *echo.Group) {
@@ -81,12 +81,12 @@ func o11yRoutes(baseRoute *echo.Group) {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
-func registerApiRoutes(baseRoute *echo.Group, persistDbSvc *db.PersistentDatabaseService) {
+func registerApiRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
 	swaggerRoute(baseRoute)
 	authRoutes(baseRoute)
-	accountRoutes(baseRoute, persistDbSvc)
+	accountRoutes(baseRoute, persistentDbSvc)
 	containerRoutes(baseRoute)
-	licenseRoutes(baseRoute, persistDbSvc)
+	licenseRoutes(baseRoute, persistentDbSvc)
 	mappingRoutes(baseRoute)
 	o11yRoutes(baseRoute)
 }

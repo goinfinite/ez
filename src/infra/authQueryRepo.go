@@ -17,11 +17,11 @@ import (
 )
 
 type AuthQueryRepo struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewAuthQueryRepo(persistDbSvc *db.PersistentDatabaseService) *AuthQueryRepo {
-	return &AuthQueryRepo{persistDbSvc: persistDbSvc}
+func NewAuthQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *AuthQueryRepo {
+	return &AuthQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo AuthQueryRepo) IsLoginValid(login dto.Login) bool {
@@ -91,7 +91,7 @@ func (repo AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
 	accModel := dbModel.Account{ID: uint(accountId.Get())}
-	err := repo.persistDbSvc.Orm.Model(&accModel).First(&accModel).Error
+	err := repo.persistentDbSvc.Handler.Model(&accModel).First(&accModel).Error
 	if err != nil {
 		return "", errors.New("AccountNotFound")
 	}

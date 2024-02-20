@@ -8,11 +8,11 @@ import (
 )
 
 func DatabaseInit() *db.PersistentDatabaseService {
-	persistDbSvc, err := db.NewPersistentDatabaseService()
+	persistentDbSvc, err := db.NewPersistentDatabaseService()
 	if err != nil {
 		fmt.Println("DatabaseConnectionError")
 		os.Exit(1)
 	}
 
-	return persistDbSvc
+	return persistentDbSvc
 }

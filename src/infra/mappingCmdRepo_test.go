@@ -11,9 +11,9 @@ import (
 
 func TestMappingCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	persistDbSvc := testHelpers.GetPersistentDbSvc()
-	mappingCmdRepo := NewMappingCmdRepo(persistDbSvc)
-	containerQueryRepo := NewContainerQueryRepo(persistDbSvc)
+	persistentDbSvc := testHelpers.GetPersistentDbSvc()
+	mappingCmdRepo := NewMappingCmdRepo(persistentDbSvc)
+	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
 
 	t.Run("AddMapping", func(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
@@ -60,7 +60,7 @@ func TestMappingCmdRepo(t *testing.T) {
 	})
 
 	t.Run("DeleteTargets", func(t *testing.T) {
-		queryRepo := NewMappingQueryRepo(persistDbSvc)
+		queryRepo := NewMappingQueryRepo(persistentDbSvc)
 
 		mappings, err := queryRepo.Get()
 		if err != nil {
@@ -87,7 +87,7 @@ func TestMappingCmdRepo(t *testing.T) {
 	})
 
 	t.Run("DeleteMapping", func(t *testing.T) {
-		queryRepo := NewMappingQueryRepo(persistDbSvc)
+		queryRepo := NewMappingQueryRepo(persistentDbSvc)
 
 		mappings, err := queryRepo.Get()
 		if err != nil {

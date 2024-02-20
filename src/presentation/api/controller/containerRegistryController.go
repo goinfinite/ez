@@ -22,7 +22,7 @@ import (
 // @Success      200 {array} entity.RegistryImage
 // @Router       /container/registry/image/ [get]
 func GetContainerRegistryImagesController(c echo.Context) error {
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 
 	imageNameStr := c.QueryParam("name")
 	var imageNamePtr *valueObject.RegistryImageName
@@ -31,7 +31,7 @@ func GetContainerRegistryImagesController(c echo.Context) error {
 		imageNamePtr = &imageName
 	}
 
-	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistDbSvc)
+	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistentDbSvc)
 	imagesList, err := useCase.GetRegistryImages(
 		containerRegistryQueryRepo,
 		imageNamePtr,
@@ -54,12 +54,12 @@ func GetContainerRegistryImagesController(c echo.Context) error {
 // @Success      200 {object} entity.RegistryTaggedImage
 // @Router       /container/registry/image/tagged/ [get]
 func GetContainerRegistryTaggedImageController(c echo.Context) error {
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 
 	imageAddressStr := c.QueryParam("address")
 	imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
 
-	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistDbSvc)
+	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistentDbSvc)
 	taggedImage, err := useCase.GetRegistryTaggedImage(
 		containerRegistryQueryRepo,
 		imageAddress,

@@ -21,11 +21,11 @@ import (
 )
 
 type AccCmdRepo struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewAccCmdRepo(persistDbSvc *db.PersistentDatabaseService) *AccCmdRepo {
-	return &AccCmdRepo{persistDbSvc: persistDbSvc}
+func NewAccCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *AccCmdRepo {
+	return &AccCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo AccCmdRepo) updateFilesystemQuota(
@@ -112,7 +112,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	err = repo.persistDbSvc.Orm.Create(&accModel).Error
+	err = repo.persistentDbSvc.Handler.Create(&accModel).Error
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (repo AccCmdRepo) Add(addAccount dto.AddAccount) error {
 func (repo AccCmdRepo) getUsernameById(
 	accId valueObject.AccountId,
 ) (valueObject.Username, error) {
-	accQuery := NewAccQueryRepo(repo.persistDbSvc)
+	accQuery := NewAccQueryRepo(repo.persistentDbSvc)
 	accDetails, err := accQuery.GetById(accId)
 	if err != nil {
 		return "", err
@@ -173,7 +173,7 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 	}
 
 	for _, tableName := range relatedTables {
-		err := repo.persistDbSvc.Orm.Exec(
+		err := repo.persistentDbSvc.Handler.Exec(
 			"DELETE FROM "+tableName+" WHERE account_id = ?", modelId,
 		).Error
 		if err != nil {
@@ -181,7 +181,7 @@ func (repo AccCmdRepo) Delete(accId valueObject.AccountId) error {
 		}
 	}
 
-	err = repo.persistDbSvc.Orm.Delete(model, modelId).Error
+	err = repo.persistentDbSvc.Handler.Delete(model, modelId).Error
 	if err != nil {
 		return errors.New("DeleteAccDbError")
 	}
@@ -218,7 +218,7 @@ func (repo AccCmdRepo) UpdatePassword(
 	}
 
 	accModel := dbModel.Account{ID: uint(accId.Get())}
-	updateResult := repo.persistDbSvc.Orm.Model(&accModel).
+	updateResult := repo.persistentDbSvc.Handler.Model(&accModel).
 		Update("updated_at", time.Now())
 
 	return updateResult.Error
@@ -246,7 +246,7 @@ func (repo AccCmdRepo) UpdateApiKey(
 	uuidHash := hex.EncodeToString(hash.Sum(nil))
 
 	accModel := dbModel.Account{ID: uint(accId.Get())}
-	updateResult := repo.persistDbSvc.Orm.Model(&accModel).
+	updateResult := repo.persistentDbSvc.Handler.Model(&accModel).
 		Update("key_hash", uuidHash)
 	if updateResult.Error != nil {
 		return "", err
@@ -278,7 +278,7 @@ func (repo AccCmdRepo) updateQuotaTable(
 		updateMap["inodes"] = quota.Inodes.Get()
 	}
 
-	err := repo.persistDbSvc.Orm.Table(tableName).
+	err := repo.persistentDbSvc.Handler.Table(tableName).
 		Where("account_id = ?", uint(accId.Get())).
 		Updates(updateMap).Error
 	if err != nil {
@@ -367,7 +367,7 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 		return err
 	}
 
-	containerQueryRepo := NewContainerQueryRepo(repo.persistDbSvc)
+	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
 	containers, err := containerQueryRepo.GetByAccId(accId)
 	if err != nil {
 		return err
@@ -375,7 +375,7 @@ func (repo AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 	cpuCoresUsage := float64(0)
 	memoryBytesUsage := int64(0)
 
-	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistDbSvc)
+	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
 
 	for _, container := range containers {
 		containerProfile, err := profileQueryRepo.GetById(

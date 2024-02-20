@@ -45,9 +45,9 @@ func resetDummyUser() {
 
 func TestAccCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	persistDbSvc := testHelpers.GetPersistentDbSvc()
-	accQueryRepo := NewAccQueryRepo(persistDbSvc)
-	accCmdRepo := NewAccCmdRepo(persistDbSvc)
+	persistentDbSvc := testHelpers.GetPersistentDbSvc()
+	accQueryRepo := NewAccQueryRepo(persistentDbSvc)
+	accCmdRepo := NewAccCmdRepo(persistentDbSvc)
 
 	t.Run("AddValidAccount", func(t *testing.T) {
 		err := addDummyUser()

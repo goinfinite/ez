@@ -9,8 +9,8 @@ import (
 
 func TestMappingQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	persistDbSvc := testHelpers.GetPersistentDbSvc()
-	mappingQueryRepo := NewMappingQueryRepo(persistDbSvc)
+	persistentDbSvc := testHelpers.GetPersistentDbSvc()
+	mappingQueryRepo := NewMappingQueryRepo(persistentDbSvc)
 
 	t.Run("GetMappings", func(t *testing.T) {
 		mappingList, err := mappingQueryRepo.Get()

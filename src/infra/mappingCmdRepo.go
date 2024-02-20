@@ -18,14 +18,14 @@ var nginxStreamConfDir = "/var/nginx/stream.d"
 var nginxHttpConfDir = "/var/nginx/http.d"
 
 type MappingCmdRepo struct {
-	persistDbSvc *db.PersistentDatabaseService
-	queryRepo    *MappingQueryRepo
+	persistentDbSvc *db.PersistentDatabaseService
+	queryRepo       *MappingQueryRepo
 }
 
-func NewMappingCmdRepo(persistDbSvc *db.PersistentDatabaseService) *MappingCmdRepo {
+func NewMappingCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingCmdRepo {
 	return &MappingCmdRepo{
-		persistDbSvc: persistDbSvc,
-		queryRepo:    NewMappingQueryRepo(persistDbSvc),
+		persistentDbSvc: persistentDbSvc,
+		queryRepo:       NewMappingQueryRepo(persistentDbSvc),
 	}
 }
 
@@ -34,7 +34,7 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 
 	mappingModel := dbModel.Mapping{}.AddDtoToModel(mappingDto)
 
-	createResult := repo.persistDbSvc.Orm.Create(&mappingModel)
+	createResult := repo.persistentDbSvc.Handler.Create(&mappingModel)
 	if createResult.Error != nil {
 		return mappingId, createResult.Error
 	}
@@ -121,7 +121,7 @@ func (repo MappingCmdRepo) nginxConfigFactory(
 		containerIdTargetEntityMap[mappingTarget.ContainerId] = mappingTarget
 	}
 
-	containerQueryRepo := NewContainerQueryRepo(repo.persistDbSvc)
+	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
 	containerEntities, err := containerQueryRepo.Get()
 	if err != nil {
 		return "", err
@@ -275,7 +275,7 @@ func (repo MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) er
 func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 	targetModel := dbModel.MappingTarget{}.AddDtoToModel(addDto)
 
-	createResult := repo.persistDbSvc.Orm.Create(&targetModel)
+	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)
 	if createResult.Error != nil {
 		return createResult.Error
 	}
@@ -304,7 +304,7 @@ func (repo MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) er
 }
 
 func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
-	ormSvc := repo.persistDbSvc.Orm
+	ormSvc := repo.persistentDbSvc.Handler
 
 	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Get()).Error
 	if err != nil {
@@ -325,7 +325,7 @@ func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
 		return err
 	}
 
-	err = repo.persistDbSvc.Orm.Delete(dbModel.MappingTarget{}, id.Get()).Error
+	err = repo.persistentDbSvc.Handler.Delete(dbModel.MappingTarget{}, id.Get()).Error
 	if err != nil {
 		return err
 	}

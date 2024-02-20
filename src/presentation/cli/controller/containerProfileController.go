@@ -14,11 +14,11 @@ import (
 )
 
 type ContainerProfileController struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerProfileController(persistDbSvc *db.PersistentDatabaseService) ContainerProfileController {
-	return ContainerProfileController{persistDbSvc: persistDbSvc}
+func NewContainerProfileController(persistentDbSvc *db.PersistentDatabaseService) ContainerProfileController {
+	return ContainerProfileController{persistentDbSvc: persistentDbSvc}
 }
 
 func (controller ContainerProfileController) GetContainerProfiles() *cobra.Command {
@@ -27,7 +27,7 @@ func (controller ContainerProfileController) GetContainerProfiles() *cobra.Comma
 		Short: "GetContainerProfiles",
 		Run: func(cmd *cobra.Command, args []string) {
 			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(
-				controller.persistDbSvc,
+				controller.persistentDbSvc,
 			)
 			containerProfilesList, err := useCase.GetContainerProfiles(
 				containerProfileQueryRepo,
@@ -129,7 +129,7 @@ func (controller ContainerProfileController) AddContainerProfile() *cobra.Comman
 				hostMinCapacityPercentPtr,
 			)
 
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistDbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
 
 			err := useCase.AddContainerProfile(
 				containerProfileCmdRepo,
@@ -272,10 +272,10 @@ func (controller ContainerProfileController) UpdateContainerProfile() *cobra.Com
 				hostMinCapacityPercentPtr,
 			)
 
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistDbSvc)
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistDbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistDbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistentDbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
 
 			err := useCase.UpdateContainerProfile(
 				containerProfileQueryRepo,
@@ -356,10 +356,10 @@ func (controller ContainerProfileController) DeleteContainerProfile() *cobra.Com
 		Run: func(cmd *cobra.Command, args []string) {
 			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
 
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistDbSvc)
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistDbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistDbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistDbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistentDbSvc)
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
+			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
+			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
 
 			err := useCase.DeleteContainerProfile(
 				containerProfileQueryRepo,

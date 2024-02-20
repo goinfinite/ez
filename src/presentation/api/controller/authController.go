@@ -33,10 +33,10 @@ func AuthLoginController(c echo.Context) error {
 		valueObject.NewPasswordPanic(requestBody["password"].(string)),
 	)
 
-	persistDbSvc := c.Get("persistDbSvc").(*db.PersistentDatabaseService)
-	authQueryRepo := infra.NewAuthQueryRepo(persistDbSvc)
+	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
+	authQueryRepo := infra.NewAuthQueryRepo(persistentDbSvc)
 	authCmdRepo := infra.AuthCmdRepo{}
-	accQueryRepo := infra.NewAccQueryRepo(persistDbSvc)
+	accQueryRepo := infra.NewAccQueryRepo(persistentDbSvc)
 
 	ipAddress := valueObject.NewIpAddressPanic(c.RealIP())
 

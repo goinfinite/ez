@@ -10,11 +10,11 @@ import (
 )
 
 type ContainerProfileCmdRepo struct {
-	persistDbSvc *db.PersistentDatabaseService
+	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerProfileCmdRepo(persistDbSvc *db.PersistentDatabaseService) *ContainerProfileCmdRepo {
-	return &ContainerProfileCmdRepo{persistDbSvc: persistDbSvc}
+func NewContainerProfileCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *ContainerProfileCmdRepo {
+	return &ContainerProfileCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo ContainerProfileCmdRepo) Add(
@@ -25,7 +25,7 @@ func (repo ContainerProfileCmdRepo) Add(
 		return err
 	}
 
-	err = repo.persistDbSvc.Orm.Create(&containerProfileModel).Error
+	err = repo.persistentDbSvc.Handler.Create(&containerProfileModel).Error
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (repo ContainerProfileCmdRepo) Update(
 		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Get()
 	}
 
-	err := repo.persistDbSvc.Orm.Table(dbModel.ContainerProfile{}.TableName()).
+	err := repo.persistentDbSvc.Handler.Table(dbModel.ContainerProfile{}.TableName()).
 		Where("id = ?", updateDto.Id.String()).
 		Updates(updateMap).Error
 	if err != nil {
@@ -87,7 +87,7 @@ func (repo ContainerProfileCmdRepo) Update(
 func (repo ContainerProfileCmdRepo) Delete(
 	profileId valueObject.ContainerProfileId,
 ) error {
-	err := repo.persistDbSvc.Orm.Delete(dbModel.ContainerProfile{}, profileId.Get()).Error
+	err := repo.persistentDbSvc.Handler.Delete(dbModel.ContainerProfile{}, profileId.Get()).Error
 	if err != nil {
 		return errors.New("DeleteContainerProfileDbError")
 	}
