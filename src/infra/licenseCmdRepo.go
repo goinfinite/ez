@@ -27,12 +27,20 @@ func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
+	licenseQueryRepo := NewLicenseQueryRepo(repo.dbSvc)
+	freshLicenseFingerprint, err := licenseQueryRepo.GetLicenseFingerprint()
+	if err != nil {
+		return errors.New("GetLicenseFingerprintFailed")
+	}
+
+	apiEndpoint += "?fingerprint=" + freshLicenseFingerprint.String()
+
 	licenseMethod, _ := valueObject.NewLicenseMethod("ip")
 
 	keyStr := os.Getenv("LICENSE_KEY")
 	if keyStr != "" {
 		licenseMethod, _ = valueObject.NewLicenseMethod("key")
-		apiEndpoint += "?key=" + keyStr
+		apiEndpoint += "&key=" + keyStr
 	}
 
 	httpResponse, err := http.Get(speediaApiUrl + apiEndpoint)
@@ -70,8 +78,11 @@ func (repo LicenseCmdRepo) Refresh() error {
 		return err
 	}
 
-	licenseQueryRepo := NewLicenseQueryRepo(repo.dbSvc)
-	licenseFingerprint, err := licenseQueryRepo.GetLicenseFingerprint()
+	rawLicenseFingerprint, assertOk := parsedBody["licenseFingerprint"].(string)
+	if !assertOk {
+		return errors.New("ParseLicenseFingerprintFailed")
+	}
+	licenseFingerprint, err := valueObject.NewLicenseFingerprint(rawLicenseFingerprint)
 	if err != nil {
 		return err
 	}
