@@ -26,18 +26,18 @@ func NewPersistentDatabaseService() (*PersistentDatabaseService, error) {
 		return nil, errors.New("DatabaseConnectionError")
 	}
 
-	persistentDbSvc := &PersistentDatabaseService{Handler: ormSvc}
-	err = persistentDbSvc.dbMigrate()
+	dbSvc := &PersistentDatabaseService{Handler: ormSvc}
+	err = dbSvc.dbMigrate()
 	if err != nil {
 		return nil, err
 	}
 
-	return persistentDbSvc, nil
+	return dbSvc, nil
 }
 
-func (persistentDbSvc PersistentDatabaseService) isTableEmpty(model interface{}) (bool, error) {
+func (dbSvc PersistentDatabaseService) isTableEmpty(model interface{}) (bool, error) {
 	var count int64
-	err := persistentDbSvc.Handler.Model(&model).Count(&count).Error
+	err := dbSvc.Handler.Model(&model).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
@@ -45,9 +45,9 @@ func (persistentDbSvc PersistentDatabaseService) isTableEmpty(model interface{})
 	return count == 0, nil
 }
 
-func (persistentDbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) error {
+func (dbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) error {
 	for _, seedModel := range seedModels {
-		isTableEmpty, err := persistentDbSvc.isTableEmpty(seedModel)
+		isTableEmpty, err := dbSvc.isTableEmpty(seedModel)
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func (persistentDbSvc PersistentDatabaseService) seedDatabase(seedModels ...inte
 			entryFormatHandlerWillAccept.Elem().Set(entryInnerStructure)
 			adjustedEntry := entryFormatHandlerWillAccept.Interface()
 
-			err = persistentDbSvc.Handler.Create(adjustedEntry).Error
+			err = dbSvc.Handler.Create(adjustedEntry).Error
 			if err != nil {
 				return err
 			}
@@ -84,8 +84,8 @@ func (persistentDbSvc PersistentDatabaseService) seedDatabase(seedModels ...inte
 	return nil
 }
 
-func (persistentDbSvc PersistentDatabaseService) dbMigrate() error {
-	err := persistentDbSvc.Handler.AutoMigrate(
+func (dbSvc PersistentDatabaseService) dbMigrate() error {
+	err := dbSvc.Handler.AutoMigrate(
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
@@ -104,7 +104,7 @@ func (persistentDbSvc PersistentDatabaseService) dbMigrate() error {
 		&dbModel.ContainerProfile{},
 	}
 
-	err = persistentDbSvc.seedDatabase(modelsWithInitialEntries...)
+	err = dbSvc.seedDatabase(modelsWithInitialEntries...)
 	if err != nil {
 		return errors.New("AddDefaultDatabaseEntriesError")
 	}
