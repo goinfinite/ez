@@ -98,8 +98,12 @@ func (repo LicenseCmdRepo) Refresh() error {
 	return repo.dbSvc.Orm.Save(&licenseInfoModel).Error
 }
 
-func (repo LicenseCmdRepo) UpdateStatus(valueObject.LicenseStatus) error {
-	return nil
+func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
+	licenseModel := dbModel.LicenseInfo{}
+	updateResult := repo.dbSvc.Orm.Model(&licenseModel).
+		Where("id = ?", 1).
+		Update("status", status.String())
+	return updateResult.Error
 }
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
