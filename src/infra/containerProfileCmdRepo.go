@@ -13,7 +13,9 @@ type ContainerProfileCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerProfileCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *ContainerProfileCmdRepo {
+func NewContainerProfileCmdRepo(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerProfileCmdRepo {
 	return &ContainerProfileCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
@@ -87,7 +89,10 @@ func (repo ContainerProfileCmdRepo) Update(
 func (repo ContainerProfileCmdRepo) Delete(
 	profileId valueObject.ContainerProfileId,
 ) error {
-	err := repo.persistentDbSvc.Handler.Delete(dbModel.ContainerProfile{}, profileId.Get()).Error
+	err := repo.persistentDbSvc.Handler.Delete(
+		dbModel.ContainerProfile{},
+		profileId.Get(),
+	).Error
 	if err != nil {
 		return errors.New("DeleteContainerProfileDbError")
 	}

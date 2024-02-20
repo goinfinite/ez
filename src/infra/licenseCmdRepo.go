@@ -19,8 +19,10 @@ type LicenseCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewLicenseCmdRepo(persistentDbSvc *db.PersistentDatabaseService) LicenseCmdRepo {
-	return LicenseCmdRepo{persistentDbSvc: persistentDbSvc}
+func NewLicenseCmdRepo(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *LicenseCmdRepo {
+	return &LicenseCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo LicenseCmdRepo) Refresh() error {

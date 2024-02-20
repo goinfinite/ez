@@ -14,7 +14,9 @@ type MappingQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewMappingQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingQueryRepo {
+func NewMappingQueryRepo(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *MappingQueryRepo {
 	return &MappingQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 

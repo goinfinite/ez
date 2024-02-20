@@ -14,8 +14,10 @@ type LicenseQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewLicenseQueryRepo(persistentDbSvc *db.PersistentDatabaseService) LicenseQueryRepo {
-	return LicenseQueryRepo{persistentDbSvc: persistentDbSvc}
+func NewLicenseQueryRepo(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *LicenseQueryRepo {
+	return &LicenseQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
 func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {

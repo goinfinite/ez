@@ -18,7 +18,9 @@ type ContainerQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *ContainerQueryRepo {
+func NewContainerQueryRepo(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerQueryRepo {
 	return &ContainerQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
