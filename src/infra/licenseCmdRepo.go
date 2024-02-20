@@ -89,6 +89,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 		licenseMethod,
 		licenseStatus,
 		licenseFingerprint,
+		0,
 		expiresAt,
 		lastCheckAt,
 		updatedAt,

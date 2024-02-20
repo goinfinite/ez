@@ -6,6 +6,7 @@ type LicenseInfo struct {
 	Method      valueObject.LicenseMethod      `json:"method"`
 	Status      valueObject.LicenseStatus      `json:"status"`
 	Fingerprint valueObject.LicenseFingerprint `json:"fingerprint"`
+	ErrorCount  uint                           `json:"errorCount"`
 	ExpiresAt   valueObject.UnixTime           `json:"expiresAt"`
 	LastCheckAt valueObject.UnixTime           `json:"lastCheckAt"`
 	UpdatedAt   valueObject.UnixTime           `json:"updatedAt"`
@@ -15,6 +16,7 @@ func NewLicenseInfo(
 	method valueObject.LicenseMethod,
 	status valueObject.LicenseStatus,
 	fingerprint valueObject.LicenseFingerprint,
+	errorCount uint,
 	expiresAt valueObject.UnixTime,
 	lastCheckAt valueObject.UnixTime,
 	updatedAt valueObject.UnixTime,
@@ -23,6 +25,7 @@ func NewLicenseInfo(
 		Method:      method,
 		Status:      status,
 		Fingerprint: fingerprint,
+		ErrorCount:  errorCount,
 		ExpiresAt:   expiresAt,
 		LastCheckAt: lastCheckAt,
 		UpdatedAt:   updatedAt,

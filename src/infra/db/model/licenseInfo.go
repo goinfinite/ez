@@ -12,6 +12,7 @@ type LicenseInfo struct {
 	Method      string
 	Status      string
 	Fingerprint string
+	ErrorCount  uint `gorm:"default:0"`
 	ExpiresAt   time.Time
 	LastCheckAt time.Time
 	UpdatedAt   time.Time
@@ -25,6 +26,7 @@ func NewLicenseInfo(
 	method string,
 	status string,
 	fingerprint string,
+	errorCount uint,
 	expiresAt time.Time,
 	lastCheckAt time.Time,
 ) LicenseInfo {
@@ -33,6 +35,7 @@ func NewLicenseInfo(
 		Method:      method,
 		Status:      status,
 		Fingerprint: fingerprint,
+		ErrorCount:  errorCount,
 		ExpiresAt:   expiresAt,
 		LastCheckAt: lastCheckAt,
 	}
@@ -48,6 +51,7 @@ func (LicenseInfo) ToModel(entity entity.LicenseInfo) LicenseInfo {
 		entity.Method.String(),
 		entity.Status.String(),
 		entity.Fingerprint.String(),
+		entity.ErrorCount,
 		expiresAt,
 		lastCheckAt,
 	)
@@ -79,6 +83,7 @@ func (model LicenseInfo) ToEntity() (entity.LicenseInfo, error) {
 		licenseMethod,
 		licenseStatus,
 		licenseFingerprint,
+		model.ErrorCount,
 		expiresAt,
 		lastCheckAt,
 		updatedAt,
