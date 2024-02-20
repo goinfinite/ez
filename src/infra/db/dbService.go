@@ -9,12 +9,16 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	DatabaseFilePath = "/var/speedia/control.db"
+)
+
 type DatabaseService struct {
 	Orm *gorm.DB
 }
 
 func NewDatabaseService() (*DatabaseService, error) {
-	ormSvc, err := gorm.Open(sqlite.Open("/var/speedia/control.db"), &gorm.Config{})
+	ormSvc, err := gorm.Open(sqlite.Open(DatabaseFilePath), &gorm.Config{})
 	if err != nil {
 		return nil, errors.New("DatabaseConnectionError")
 	}
