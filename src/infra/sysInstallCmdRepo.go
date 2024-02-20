@@ -114,6 +114,8 @@ func (repo SysInstallCmdRepo) Install() error {
 		"procps",
 		"xfsprogs",
 		"util-linux-tty-tools",
+		"dmidecode",
+		"whois",
 	}
 	err := infraHelper.InstallPkgs(necessaryPkgs)
 	if err != nil {
