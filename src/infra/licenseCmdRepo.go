@@ -12,17 +12,49 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 	"gorm.io/gorm"
 )
 
 type LicenseCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	transientDbSvc  *db.TransientDatabaseService
 }
 
 func NewLicenseCmdRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
 ) *LicenseCmdRepo {
-	return &LicenseCmdRepo{persistentDbSvc: persistentDbSvc}
+	return &LicenseCmdRepo{
+		persistentDbSvc: persistentDbSvc,
+		transientDbSvc:  transientDbSvc,
+	}
+}
+
+func (repo LicenseCmdRepo) UpdateLicenseHash() error {
+	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc)
+	licenseInfo, err := licenseQueryRepo.Get()
+	if err != nil {
+		return errors.New("GetLicenseInfoFailed: " + err.Error())
+	}
+
+	licenseInfoJson, err := json.Marshal(licenseInfo)
+	if err != nil {
+		return errors.New("MarshalLicenseInfoFailed: " + err.Error())
+	}
+
+	licenseInfoHashStr := infraHelper.GenHash(string(licenseInfoJson))
+	licenseInfoHash, err := valueObject.NewHash(licenseInfoHashStr)
+	if err != nil {
+		return err
+	}
+
+	err = repo.transientDbSvc.Set("licenseHash", licenseInfoHash.String())
+	if err != nil {
+		return errors.New("SetLicenseHashFailed: " + err.Error())
+	}
+
+	return nil
 }
 
 func (repo LicenseCmdRepo) Refresh() error {
@@ -110,29 +142,50 @@ func (repo LicenseCmdRepo) Refresh() error {
 	)
 
 	licenseInfoModel := dbModel.LicenseInfo{}.ToModel(licenseInfoEntity)
-	return repo.persistentDbSvc.Handler.Save(&licenseInfoModel).Error
+	err = repo.persistentDbSvc.Handler.Save(&licenseInfoModel).Error
+	if err != nil {
+		return errors.New("SaveLicenseInfoFailed: " + err.Error())
+	}
+
+	return repo.UpdateLicenseHash()
 }
 
 func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
+
+	err := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
 		Where("id = ?", 1).
-		Update("status", status.String())
-	return updateResult.Error
+		Update("status", status.String()).Error
+
+	if err != nil {
+		return err
+	}
+
+	return repo.UpdateLicenseHash()
 }
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
+
+	err := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
 		Where("id = ?", 1).
-		UpdateColumn("error_count", gorm.Expr("error_count + ?", 1))
-	return updateResult.Error
+		UpdateColumn("error_count", gorm.Expr("error_count + ?", 1)).Error
+	if err != nil {
+		return err
+	}
+
+	return repo.UpdateLicenseHash()
 }
 
 func (repo LicenseCmdRepo) ResetErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
-	updateResult := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
+
+	err := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
 		Where("id = ?", 1).
-		Update("error_count", 0)
-	return updateResult.Error
+		Update("error_count", 0).Error
+	if err != nil {
+		return err
+	}
+
+	return repo.UpdateLicenseHash()
 }
