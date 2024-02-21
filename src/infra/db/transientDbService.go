@@ -13,20 +13,20 @@ type TransientDatabaseService struct {
 func NewTransientDatabaseService() (*TransientDatabaseService, error) {
 	dbSvcOptions := badger.DefaultOptions("").
 		WithInMemory(true).
-		WithNumVersionsToKeep(1)
+		WithNumVersionsToKeep(1).
+		WithLoggingLevel(badger.ERROR)
 
 	dbSvc, err := badger.Open(dbSvcOptions)
 	if err != nil {
 		return nil, errors.New("TransientDatabaseConnectionError")
 	}
-	defer dbSvc.Close()
 
 	return &TransientDatabaseService{
 		Handler: dbSvc,
 	}, nil
 }
 
-func (dbSvc TransientDatabaseService) Has(key string) bool {
+func (dbSvc *TransientDatabaseService) Has(key string) bool {
 	hasKey := false
 	err := dbSvc.Handler.View(func(txn *badger.Txn) error {
 		_, err := txn.Get([]byte(key))
@@ -43,7 +43,7 @@ func (dbSvc TransientDatabaseService) Has(key string) bool {
 	return hasKey
 }
 
-func (dbSvc TransientDatabaseService) Get(key string) (string, error) {
+func (dbSvc *TransientDatabaseService) Get(key string) (string, error) {
 	var value string
 	err := dbSvc.Handler.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
@@ -68,7 +68,7 @@ func (dbSvc TransientDatabaseService) Get(key string) (string, error) {
 	return value, nil
 }
 
-func (dbSvc TransientDatabaseService) Set(key string, value string) error {
+func (dbSvc *TransientDatabaseService) Set(key string, value string) error {
 	err := dbSvc.Handler.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(key), []byte(value))
 		return err
