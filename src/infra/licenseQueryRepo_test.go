@@ -25,11 +25,4 @@ func TestLicenseQueryRepo(t *testing.T) {
 			t.Errorf("UnexpectedError: %v", err)
 		}
 	})
-
-	t.Run("GetFingerprint", func(t *testing.T) {
-		_, err := licenseQueryRepo.GetFingerprint()
-		if err != nil {
-			t.Errorf("UnexpectedError: %v", err)
-		}
-	})
 }

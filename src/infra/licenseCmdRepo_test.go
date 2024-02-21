@@ -33,8 +33,15 @@ func TestLicenseCmdRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("GenerateFingerprint", func(t *testing.T) {
+		_, err := licenseCmdRepo.generateFingerprint()
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
+
 	t.Run("UpdateIntegrityHash", func(t *testing.T) {
-		err := licenseCmdRepo.UpdateIntegrityHash()
+		err := licenseCmdRepo.updateIntegrityHash()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}

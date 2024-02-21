@@ -17,21 +17,17 @@ import (
 )
 
 type LicenseCmdRepo struct {
-	persistentDbSvc  *db.PersistentDatabaseService
-	transientDbSvc   *db.TransientDatabaseService
-	licenseQueryRepo *LicenseQueryRepo
+	persistentDbSvc *db.PersistentDatabaseService
+	transientDbSvc  *db.TransientDatabaseService
 }
 
 func NewLicenseCmdRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) *LicenseCmdRepo {
-	licenseQueryRepo := NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
-
 	return &LicenseCmdRepo{
-		persistentDbSvc:  persistentDbSvc,
-		transientDbSvc:   transientDbSvc,
-		licenseQueryRepo: licenseQueryRepo,
+		persistentDbSvc: persistentDbSvc,
+		transientDbSvc:  transientDbSvc,
 	}
 }
 
@@ -64,8 +60,71 @@ func (repo LicenseCmdRepo) GenerateNonceHash() (valueObject.Hash, error) {
 	return valueObject.NewHash(nonceHashStr)
 }
 
-func (repo LicenseCmdRepo) UpdateIntegrityHash() error {
-	licenseInfo, err := repo.licenseQueryRepo.Get()
+func (repo LicenseCmdRepo) generateFingerprint() (
+	valueObject.LicenseFingerprint,
+	error,
+) {
+	var fingerprint valueObject.LicenseFingerprint
+
+	hwUuid, err := infraHelper.RunCmdWithSubShell("dmidecode -t system | awk '/UUID/{print $2}'")
+	if err != nil {
+		return fingerprint, err
+	}
+
+	rootFsUuid, err := infraHelper.RunCmdWithSubShell(
+		"blkid $(df --output=source / | tail -1) | grep -oP '(?<= UUID=\")[a-fA-F0-9-]+'",
+	)
+	if err != nil {
+		return fingerprint, err
+	}
+
+	privateIp, err := infraHelper.RunCmdWithSubShell("hostname -I | awk '{print $1}'")
+	if err != nil {
+		return fingerprint, err
+	}
+
+	installationUnixTime, err := infraHelper.RunCmdWithSubShell(
+		"stat -c %W " + db.DatabaseFilePath,
+	)
+	if err != nil {
+		return fingerprint, err
+	}
+
+	fingerprintFirstPart := hwUuid + rootFsUuid + privateIp + installationUnixTime
+	firstPartShortHashStr := infraHelper.GenShortHash(fingerprintFirstPart)
+
+	publicIp, err := infraHelper.GetPublicIpAddress()
+	if err != nil {
+		return fingerprint, err
+	}
+
+	macAddress, err := infraHelper.RunCmdWithSubShell(
+		"ip link show | awk '/link\\/ether/{print $2}'",
+	)
+	if err != nil {
+		return fingerprint, err
+	}
+
+	fingerprintSecondPart := publicIp.String() + macAddress
+	secondPartShortHashStr := infraHelper.GenShortHash(fingerprintSecondPart)
+
+	licenseCmdRepo := NewLicenseCmdRepo(repo.persistentDbSvc, repo.transientDbSvc)
+	thirdPartShortHashStr, err := licenseCmdRepo.GenerateNonceHash()
+	if err != nil {
+		return fingerprint, err
+	}
+
+	return valueObject.NewLicenseFingerprint(
+		firstPartShortHashStr + "-" +
+			secondPartShortHashStr + "-" +
+			thirdPartShortHashStr.String(),
+	)
+}
+
+func (repo LicenseCmdRepo) updateIntegrityHash() error {
+	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc, repo.transientDbSvc)
+
+	licenseInfo, err := licenseQueryRepo.Get()
 	if err != nil {
 		return errors.New("GetLicenseInfoFailed: " + err.Error())
 	}
@@ -87,7 +146,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
-	freshLicenseFingerprint, err := repo.licenseQueryRepo.GetFingerprint()
+	freshLicenseFingerprint, err := repo.generateFingerprint()
 	if err != nil {
 		return errors.New("GetLicenseFingerprintFailed")
 	}
@@ -172,7 +231,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 		return errors.New("SaveLicenseInfoFailed: " + err.Error())
 	}
 
-	return repo.UpdateIntegrityHash()
+	return repo.updateIntegrityHash()
 }
 
 func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
@@ -186,7 +245,7 @@ func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error 
 		return err
 	}
 
-	return repo.UpdateIntegrityHash()
+	return repo.updateIntegrityHash()
 }
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
@@ -199,7 +258,7 @@ func (repo LicenseCmdRepo) IncrementErrorCount() error {
 		return err
 	}
 
-	return repo.UpdateIntegrityHash()
+	return repo.updateIntegrityHash()
 }
 
 func (repo LicenseCmdRepo) ResetErrorCount() error {
@@ -212,5 +271,5 @@ func (repo LicenseCmdRepo) ResetErrorCount() error {
 		return err
 	}
 
-	return repo.UpdateIntegrityHash()
+	return repo.updateIntegrityHash()
 }
