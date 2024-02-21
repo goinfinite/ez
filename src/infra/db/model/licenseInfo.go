@@ -22,6 +22,23 @@ func (LicenseInfo) TableName() string {
 	return "license_info"
 }
 
+func (LicenseInfo) InitialEntries() []interface{} {
+	initialEntry := LicenseInfo{
+		ID:          1,
+		Method:      "ip",
+		Status:      "ACTIVE",
+		Fingerprint: "fingerprint",
+		ErrorCount:  0,
+		ExpiresAt:   time.Now(),
+		LastCheckAt: time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	return []interface{}{
+		initialEntry,
+	}
+}
+
 func NewLicenseInfo(
 	method string,
 	status string,
