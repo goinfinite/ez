@@ -10,7 +10,15 @@ import (
 func TestLicenseCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
-	licenseCmdRepo := NewLicenseCmdRepo(persistentDbSvc)
+	transientDbSvc := testHelpers.GetTransientDbSvc()
+	licenseCmdRepo := NewLicenseCmdRepo(persistentDbSvc, transientDbSvc)
+
+	t.Run("UpdateLicenseHash", func(t *testing.T) {
+		err := licenseCmdRepo.UpdateLicenseHash()
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
 
 	t.Run("Refresh", func(t *testing.T) {
 		err := licenseCmdRepo.Refresh()

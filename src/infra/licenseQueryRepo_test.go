@@ -9,7 +9,8 @@ import (
 func TestLicenseQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
-	licenseQueryRepo := NewLicenseQueryRepo(persistentDbSvc)
+	transientDbSbc := testHelpers.GetTransientDbSvc()
+	licenseQueryRepo := NewLicenseQueryRepo(persistentDbSvc, transientDbSbc)
 
 	t.Run("GetLicenseInfo", func(t *testing.T) {
 		_, err := licenseQueryRepo.Get()
