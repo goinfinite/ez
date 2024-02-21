@@ -10,6 +10,10 @@ import (
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
+const (
+	LicenseInfoHashKey = "licenseInfoHash"
+)
+
 type LicenseQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 	transientDbSvc  *db.TransientDatabaseService
@@ -44,6 +48,22 @@ func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	return licenseInfoModel.ToEntity()
 }
 
+func (repo LicenseQueryRepo) GetIntegrityHash() (valueObject.Hash, error) {
+	var licenseInfoHash valueObject.Hash
+
+	licenseInfoHashStr, err := repo.transientDbSvc.Get(LicenseInfoHashKey)
+	if err != nil {
+		return licenseInfoHash, err
+	}
+
+	licenseInfoHash, err = valueObject.NewHash(licenseInfoHashStr)
+	if err != nil {
+		return licenseInfoHash, err
+	}
+
+	return licenseInfoHash, nil
+}
+
 func (repo LicenseQueryRepo) GetNonceHash() (valueObject.Hash, error) {
 	var nonceHash valueObject.Hash
 
@@ -59,7 +79,7 @@ func (repo LicenseQueryRepo) GetNonceHash() (valueObject.Hash, error) {
 	return valueObject.NewHash(nonceHashStr)
 }
 
-func (repo LicenseQueryRepo) GetLicenseFingerprint() (
+func (repo LicenseQueryRepo) GetFingerprint() (
 	valueObject.LicenseFingerprint,
 	error,
 ) {
