@@ -12,21 +12,21 @@ func TestLicenseQueryRepo(t *testing.T) {
 	transientDbSbc := testHelpers.GetTransientDbSvc()
 	licenseQueryRepo := NewLicenseQueryRepo(persistentDbSvc, transientDbSbc)
 
-	t.Run("GetLicenseInfo", func(t *testing.T) {
+	t.Run("Get", func(t *testing.T) {
 		_, err := licenseQueryRepo.Get()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}
 	})
 
-	t.Run("GetNonceHash", func(t *testing.T) {
-		_, err := licenseQueryRepo.GetNonceHash()
+	t.Run("GetIntegrityHash", func(t *testing.T) {
+		_, err := licenseQueryRepo.GetIntegrityHash()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}
 	})
 
-	t.Run("GetLicenseFingerprint", func(t *testing.T) {
+	t.Run("GetFingerprint", func(t *testing.T) {
 		_, err := licenseQueryRepo.GetFingerprint()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)

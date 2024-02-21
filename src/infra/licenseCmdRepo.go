@@ -35,21 +35,44 @@ func NewLicenseCmdRepo(
 	}
 }
 
+func (repo LicenseCmdRepo) GenerateIntegrityHash(
+	licenseInfo entity.LicenseInfo,
+) (valueObject.Hash, error) {
+	var integrityHash valueObject.Hash
+
+	licenseInfoJson, err := json.Marshal(licenseInfo)
+	if err != nil {
+		return integrityHash, errors.New("MarshalLicenseInfoFailed: " + err.Error())
+	}
+
+	licenseInfoHashStr := infraHelper.GenHash(string(licenseInfoJson))
+	return valueObject.NewHash(licenseInfoHashStr)
+}
+
+func (repo LicenseCmdRepo) GenerateNonceHash() (valueObject.Hash, error) {
+	var nonceHash valueObject.Hash
+
+	currentHourInEpoch, err := infraHelper.RunCmdWithSubShell(
+		"date -d \"$(date +'%Y-%m-%d %H:00:00')\" +%s",
+	)
+	if err != nil {
+		return nonceHash, err
+	}
+
+	nonceHashStr := infraHelper.GenShortHash(currentHourInEpoch)
+
+	return valueObject.NewHash(nonceHashStr)
+}
+
 func (repo LicenseCmdRepo) UpdateIntegrityHash() error {
 	licenseInfo, err := repo.licenseQueryRepo.Get()
 	if err != nil {
 		return errors.New("GetLicenseInfoFailed: " + err.Error())
 	}
 
-	licenseInfoJson, err := json.Marshal(licenseInfo)
+	licenseInfoHash, err := repo.GenerateIntegrityHash(licenseInfo)
 	if err != nil {
-		return errors.New("MarshalLicenseInfoFailed: " + err.Error())
-	}
-
-	licenseInfoHashStr := infraHelper.GenHash(string(licenseInfoJson))
-	licenseInfoHash, err := valueObject.NewHash(licenseInfoHashStr)
-	if err != nil {
-		return err
+		return errors.New("GenerateLicenseInfoHashFailed: " + err.Error())
 	}
 
 	err = repo.transientDbSvc.Set(LicenseInfoHashKey, licenseInfoHash.String())

@@ -13,6 +13,26 @@ func TestLicenseCmdRepo(t *testing.T) {
 	transientDbSvc := testHelpers.GetTransientDbSvc()
 	licenseCmdRepo := NewLicenseCmdRepo(persistentDbSvc, transientDbSvc)
 
+	t.Run("GenerateIntegrityHash", func(t *testing.T) {
+		licenseQueryRepo := NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
+		licenseInfo, err := licenseQueryRepo.Get()
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+
+		_, err = licenseCmdRepo.GenerateIntegrityHash(licenseInfo)
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
+
+	t.Run("GenerateNonceHash", func(t *testing.T) {
+		_, err := licenseCmdRepo.GenerateNonceHash()
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
+
 	t.Run("UpdateIntegrityHash", func(t *testing.T) {
 		err := licenseCmdRepo.UpdateIntegrityHash()
 		if err != nil {
