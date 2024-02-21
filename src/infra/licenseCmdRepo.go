@@ -17,23 +17,26 @@ import (
 )
 
 type LicenseCmdRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
-	transientDbSvc  *db.TransientDatabaseService
+	persistentDbSvc  *db.PersistentDatabaseService
+	transientDbSvc   *db.TransientDatabaseService
+	licenseQueryRepo *LicenseQueryRepo
 }
 
 func NewLicenseCmdRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) *LicenseCmdRepo {
+	licenseQueryRepo := NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
+
 	return &LicenseCmdRepo{
-		persistentDbSvc: persistentDbSvc,
-		transientDbSvc:  transientDbSvc,
+		persistentDbSvc:  persistentDbSvc,
+		transientDbSvc:   transientDbSvc,
+		licenseQueryRepo: licenseQueryRepo,
 	}
 }
 
 func (repo LicenseCmdRepo) UpdateLicenseHash() error {
-	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc)
-	licenseInfo, err := licenseQueryRepo.Get()
+	licenseInfo, err := repo.licenseQueryRepo.Get()
 	if err != nil {
 		return errors.New("GetLicenseInfoFailed: " + err.Error())
 	}
@@ -61,8 +64,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
-	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc)
-	freshLicenseFingerprint, err := licenseQueryRepo.GetLicenseFingerprint()
+	freshLicenseFingerprint, err := repo.licenseQueryRepo.GetLicenseFingerprint()
 	if err != nil {
 		return errors.New("GetLicenseFingerprintFailed")
 	}
