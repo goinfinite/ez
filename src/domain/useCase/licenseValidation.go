@@ -38,9 +38,11 @@ func LicenseValidation(
 ) error {
 	log.Print("LicenseValidationStarted")
 
+	refreshOk := true
 	err := licenseCmdRepo.Refresh()
 	if err != nil {
 		log.Printf("RefreshLicenseInfoError: %s", err)
+		refreshOk = false
 
 		err := licenseCmdRepo.IncrementErrorCount()
 		if err != nil {
@@ -58,7 +60,7 @@ func LicenseValidation(
 		return errors.New("GetLicenseNonceHashError: " + err.Error())
 	}
 
-	if !isLicenseNonceValid(freshNonceHash, licenseInfo.Fingerprint) {
+	if refreshOk && !isLicenseNonceValid(freshNonceHash, licenseInfo.Fingerprint) {
 		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
 		err = licenseCmdRepo.UpdateStatus(status)
 		if err != nil {
@@ -87,12 +89,10 @@ func LicenseValidation(
 		log.Print("LicenseErrorCountExceedsRevocationTolerance")
 		status, _ := valueObject.NewLicenseStatus("REVOKED")
 		newLicenseStatus = &status
-		break
 	case licenseInfo.ErrorCount > maxErrorCountUntilSuspension:
 		log.Print("LicenseErrorCountExceedsSuspensionTolerance")
 		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
 		newLicenseStatus = &status
-		break
 	}
 
 	if newLicenseStatus != nil {
