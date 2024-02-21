@@ -1,7 +1,6 @@
 package testHelpers
 
 import (
-	"fmt"
 	"path"
 	"runtime"
 
@@ -14,16 +13,24 @@ func LoadEnvVars() {
 	rootDir := path.Dir(path.Dir(path.Dir(fileDirectory)))
 	testEnvPath := rootDir + "/.env"
 
-	loadEnvErr := godotenv.Load(testEnvPath)
-	if loadEnvErr != nil {
-		panic(fmt.Errorf("LoadEnvFileError: %s", loadEnvErr))
+	err := godotenv.Load(testEnvPath)
+	if err != nil {
+		panic("LoadEnvFileError: " + err.Error())
 	}
 }
 
 func GetPersistentDbSvc() *db.PersistentDatabaseService {
 	persistentDbSvc, err := db.NewPersistentDatabaseService()
 	if err != nil {
-		panic(fmt.Errorf("GetPersistentDbSvcError: %s", err))
+		panic("GetPersistentDbSvcError: " + err.Error())
 	}
 	return persistentDbSvc
+}
+
+func GetTransientDbSvc() *db.TransientDatabaseService {
+	transientDbSvc, err := db.NewTransientDatabaseService()
+	if err != nil {
+		panic("GetTransientDbSvcError: " + err.Error())
+	}
+	return transientDbSvc
 }
