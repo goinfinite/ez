@@ -12,12 +12,17 @@ import (
 
 type LicenseQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	transientDbSvc  *db.TransientDatabaseService
 }
 
 func NewLicenseQueryRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
 ) *LicenseQueryRepo {
-	return &LicenseQueryRepo{persistentDbSvc: persistentDbSvc}
+	return &LicenseQueryRepo{
+		persistentDbSvc: persistentDbSvc,
+		transientDbSvc:  transientDbSvc,
+	}
 }
 
 func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
@@ -33,23 +38,7 @@ func (repo LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	}
 
 	if queryResult.RowsAffected == 0 {
-		licenseCmdRepo := NewLicenseCmdRepo(repo.persistentDbSvc)
-		err := licenseCmdRepo.Refresh()
-		if err != nil {
-			return licenseInfo, err
-		}
-	}
-
-	queryResult = repo.persistentDbSvc.Handler.
-		Where("id = ?", 1).
-		Limit(1).
-		Find(&licenseInfoModel)
-	if queryResult.Error != nil {
-		return licenseInfo, queryResult.Error
-	}
-
-	if queryResult.RowsAffected == 0 {
-		return licenseInfo, errors.New("GetLicenseInfoFailedRepeatedly")
+		return licenseInfo, errors.New("LicenseInfoNotFound")
 	}
 
 	return licenseInfoModel.ToEntity()
