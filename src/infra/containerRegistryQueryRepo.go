@@ -251,6 +251,10 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 	rawImagesMetadata := []interface{}{}
 	for _, apiUrl := range apiUrls {
 		apiResponse, err := repo.queryJsonApi(apiUrl)
+		if err != nil {
+			log.Printf("DockerHubApiError: %v", err)
+			continue
+		}
 
 		var parsedResponse map[string]interface{}
 		err = json.Unmarshal(apiResponse, &parsedResponse)

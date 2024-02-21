@@ -274,9 +274,7 @@ func (repo AccCmdRepo) updateQuotaTable(
 		updateMap["disk_bytes"] = uint64(quota.DiskBytes.Get())
 	}
 
-	if quota.Inodes.Get() >= 0 {
-		updateMap["inodes"] = quota.Inodes.Get()
-	}
+	updateMap["inodes"] = quota.Inodes.Get()
 
 	err := repo.persistentDbSvc.Handler.Table(tableName).
 		Where("account_id = ?", uint(accId.Get())).
