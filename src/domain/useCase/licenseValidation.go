@@ -60,9 +60,10 @@ func LicenseValidation(
 		return errors.New("GenerateLicenseNonceHashError: " + err.Error())
 	}
 
+	suspendedStatus, _ := valueObject.NewLicenseStatus("SUSPENDED")
+
 	if refreshOk && !isLicenseNonceValid(freshNonceHash, licenseInfo.Fingerprint) {
-		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
-		err = licenseCmdRepo.UpdateStatus(status)
+		err = licenseCmdRepo.UpdateStatus(suspendedStatus)
 		if err != nil {
 			return errors.New("UpdateLicenseStatusError: " + err.Error())
 		}
@@ -81,8 +82,7 @@ func LicenseValidation(
 	}
 
 	if integrityHash != persistedIntegrityHash {
-		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
-		err = licenseCmdRepo.UpdateStatus(status)
+		err = licenseCmdRepo.UpdateStatus(suspendedStatus)
 		if err != nil {
 			return errors.New("UpdateLicenseStatusError: " + err.Error())
 		}
@@ -90,8 +90,7 @@ func LicenseValidation(
 		return errors.New("LicenseIntegrityCheckFailed")
 	}
 
-	licenseStatusStr := licenseInfo.Status.String()
-	if licenseStatusStr == "ACTIVE" {
+	if licenseInfo.Status.String() == "ACTIVE" {
 		err = licenseCmdRepo.ResetErrorCount()
 		if err != nil {
 			return errors.New("ResetLicenseErrorCountError: " + err.Error())
@@ -111,8 +110,7 @@ func LicenseValidation(
 		newLicenseStatus = &status
 	case licenseInfo.ErrorCount > maxErrorCountUntilSuspension:
 		log.Print("LicenseErrorCountExceedsSuspensionTolerance")
-		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
-		newLicenseStatus = &status
+		newLicenseStatus = &suspendedStatus
 	}
 
 	if newLicenseStatus != nil {
