@@ -35,7 +35,7 @@ func NewLicenseCmdRepo(
 	}
 }
 
-func (repo LicenseCmdRepo) UpdateLicenseHash() error {
+func (repo LicenseCmdRepo) UpdateIntegrityHash() error {
 	licenseInfo, err := repo.licenseQueryRepo.Get()
 	if err != nil {
 		return errors.New("GetLicenseInfoFailed: " + err.Error())
@@ -52,9 +52,9 @@ func (repo LicenseCmdRepo) UpdateLicenseHash() error {
 		return err
 	}
 
-	err = repo.transientDbSvc.Set("licenseHash", licenseInfoHash.String())
+	err = repo.transientDbSvc.Set(LicenseInfoHashKey, licenseInfoHash.String())
 	if err != nil {
-		return errors.New("SetLicenseHashFailed: " + err.Error())
+		return errors.New("SetLicenseInfoHashFailed: " + err.Error())
 	}
 
 	return nil
@@ -64,7 +64,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
-	freshLicenseFingerprint, err := repo.licenseQueryRepo.GetLicenseFingerprint()
+	freshLicenseFingerprint, err := repo.licenseQueryRepo.GetFingerprint()
 	if err != nil {
 		return errors.New("GetLicenseFingerprintFailed")
 	}
@@ -149,7 +149,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 		return errors.New("SaveLicenseInfoFailed: " + err.Error())
 	}
 
-	return repo.UpdateLicenseHash()
+	return repo.UpdateIntegrityHash()
 }
 
 func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
@@ -163,7 +163,7 @@ func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error 
 		return err
 	}
 
-	return repo.UpdateLicenseHash()
+	return repo.UpdateIntegrityHash()
 }
 
 func (repo LicenseCmdRepo) IncrementErrorCount() error {
@@ -176,7 +176,7 @@ func (repo LicenseCmdRepo) IncrementErrorCount() error {
 		return err
 	}
 
-	return repo.UpdateLicenseHash()
+	return repo.UpdateIntegrityHash()
 }
 
 func (repo LicenseCmdRepo) ResetErrorCount() error {
@@ -189,5 +189,5 @@ func (repo LicenseCmdRepo) ResetErrorCount() error {
 		return err
 	}
 
-	return repo.UpdateLicenseHash()
+	return repo.UpdateIntegrityHash()
 }
