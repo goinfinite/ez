@@ -7,12 +7,22 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 )
 
-func DatabaseInit() *db.PersistentDatabaseService {
+func PersistentDatabaseInit() *db.PersistentDatabaseService {
 	persistentDbSvc, err := db.NewPersistentDatabaseService()
 	if err != nil {
-		fmt.Println("DatabaseConnectionError")
+		fmt.Println("PersistentDatabaseConnectionError")
 		os.Exit(1)
 	}
 
 	return persistentDbSvc
+}
+
+func TransientDatabaseInit() *db.TransientDatabaseService {
+	transientDbSvc, err := db.NewTransientDatabaseService()
+	if err != nil {
+		fmt.Println("TransientDatabaseConnectionError")
+		os.Exit(1)
+	}
+
+	return transientDbSvc
 }

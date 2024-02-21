@@ -23,7 +23,8 @@ import (
 // @Router       /license/ [get]
 func GetLicenseInfoController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
-	licenseQueryRepo := infra.NewLicenseQueryRepo(persistentDbSvc)
+	transientDbSvc := c.Get("transientDbSvc").(*db.TransientDatabaseService)
+	licenseQueryRepo := infra.NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
 	licenseStatus, err := useCase.GetLicenseInfo(licenseQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
@@ -32,15 +33,18 @@ func GetLicenseInfoController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, licenseStatus)
 }
 
-func AutoLicenseValidationController(persistentDbSvc *db.PersistentDatabaseService) {
+func AutoLicenseValidationController(
+	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
+) {
 	validationIntervalHours := 24 / useCase.LicenseValidationsPerDay
 
 	taskInterval := time.Duration(validationIntervalHours) * time.Hour
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
-	licenseQueryRepo := infra.NewLicenseQueryRepo(persistentDbSvc)
-	licenseCmdRepo := infra.NewLicenseCmdRepo(persistentDbSvc)
+	licenseQueryRepo := infra.NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
+	licenseCmdRepo := infra.NewLicenseCmdRepo(persistentDbSvc, transientDbSvc)
 
 	for range timer.C {
 		err := useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)

@@ -58,10 +58,14 @@ func containerRoutes(baseRoute *echo.Group) {
 	)
 }
 
-func licenseRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
+func licenseRoutes(
+	baseRoute *echo.Group,
+	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
+) {
 	licenseGroup := baseRoute.Group("/license")
 	licenseGroup.GET("/", apiController.GetLicenseInfoController)
-	go apiController.AutoLicenseValidationController(persistentDbSvc)
+	go apiController.AutoLicenseValidationController(persistentDbSvc, transientDbSvc)
 }
 
 func mappingRoutes(baseRoute *echo.Group) {
@@ -81,12 +85,16 @@ func o11yRoutes(baseRoute *echo.Group) {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
-func registerApiRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
+func registerApiRoutes(
+	baseRoute *echo.Group,
+	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
+) {
 	swaggerRoute(baseRoute)
 	authRoutes(baseRoute)
 	accountRoutes(baseRoute, persistentDbSvc)
 	containerRoutes(baseRoute)
-	licenseRoutes(baseRoute, persistentDbSvc)
+	licenseRoutes(baseRoute, persistentDbSvc, transientDbSvc)
 	mappingRoutes(baseRoute)
 	o11yRoutes(baseRoute)
 }

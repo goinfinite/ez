@@ -11,10 +11,17 @@ import (
 
 type Router struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	transientDbSvc  *db.TransientDatabaseService
 }
 
-func NewRouter(persistentDbSvc *db.PersistentDatabaseService) Router {
-	return Router{persistentDbSvc: persistentDbSvc}
+func NewRouter(
+	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
+) Router {
+	return Router{
+		persistentDbSvc: persistentDbSvc,
+		transientDbSvc:  transientDbSvc,
+	}
 }
 
 func (router Router) accountRoutes() {
@@ -74,7 +81,10 @@ func (router Router) licenseRoutes() {
 		Short: "LicenseManagement",
 	}
 
-	licenseController := cliController.NewLicenseController(router.persistentDbSvc)
+	licenseController := cliController.NewLicenseController(
+		router.persistentDbSvc,
+		router.transientDbSvc,
+	)
 	licenseCmd.AddCommand(licenseController.GetLicenseInfo())
 	rootCmd.AddCommand(licenseCmd)
 }
@@ -126,7 +136,7 @@ func (router Router) systemRoutes() {
 		Use:   "serve",
 		Short: "ServeApiDashboard",
 		Run: func(cmd *cobra.Command, args []string) {
-			api.ApiInit(router.persistentDbSvc)
+			api.ApiInit(router.persistentDbSvc, router.transientDbSvc)
 		},
 	}
 

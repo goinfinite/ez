@@ -27,7 +27,10 @@ import (
 
 // @host		localhost:3141
 // @BasePath	/v1
-func ApiInit(persistentDbSvc *db.PersistentDatabaseService) {
+func ApiInit(
+	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
+) {
 	sharedMiddleware.CheckEnvs()
 
 	e := echo.New()
@@ -38,15 +41,15 @@ func ApiInit(persistentDbSvc *db.PersistentDatabaseService) {
 	e.Pre(apiMiddleware.TrailingSlash(basePath))
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
-	e.Use(apiMiddleware.SetPersistentDatabaseService(persistentDbSvc))
+	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
 
-	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc)
+	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 
 	apiInit.BootContainers(persistentDbSvc)
 
 	e.Use(apiMiddleware.Auth(basePath))
 
-	registerApiRoutes(baseRoute, persistentDbSvc)
+	registerApiRoutes(baseRoute, persistentDbSvc, transientDbSvc)
 
 	e.Start(":3141")
 }
