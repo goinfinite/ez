@@ -55,12 +55,32 @@ func LicenseValidation(
 		return errors.New("GetLicenseInfoError: " + err.Error())
 	}
 
-	freshNonceHash, err := licenseQueryRepo.GetNonceHash()
+	freshNonceHash, err := licenseCmdRepo.GenerateNonceHash()
 	if err != nil {
-		return errors.New("GetLicenseNonceHashError: " + err.Error())
+		return errors.New("GenerateLicenseNonceHashError: " + err.Error())
 	}
 
 	if refreshOk && !isLicenseNonceValid(freshNonceHash, licenseInfo.Fingerprint) {
+		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
+		err = licenseCmdRepo.UpdateStatus(status)
+		if err != nil {
+			return errors.New("UpdateLicenseStatusError: " + err.Error())
+		}
+
+		return errors.New("LicenseIntegrityCheckFailed")
+	}
+
+	integrityHash, err := licenseCmdRepo.GenerateIntegrityHash(licenseInfo)
+	if err != nil {
+		return errors.New("GenerateLicenseIntegrityHashError: " + err.Error())
+	}
+
+	persistedIntegrityHash, err := licenseQueryRepo.GetIntegrityHash()
+	if err != nil {
+		return errors.New("GetPersistedLicenseIntegrityHashError: " + err.Error())
+	}
+
+	if integrityHash != persistedIntegrityHash {
 		status, _ := valueObject.NewLicenseStatus("SUSPENDED")
 		err = licenseCmdRepo.UpdateStatus(status)
 		if err != nil {
