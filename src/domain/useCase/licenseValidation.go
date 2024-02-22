@@ -90,7 +90,7 @@ func LicenseValidation(
 		return errors.New("LicenseIntegrityCheckFailed")
 	}
 
-	if licenseInfo.Status.String() == "ACTIVE" {
+	if refreshOk && licenseInfo.Status.String() == "ACTIVE" {
 		err = licenseCmdRepo.ResetErrorCount()
 		if err != nil {
 			return errors.New("ResetLicenseErrorCountError: " + err.Error())
