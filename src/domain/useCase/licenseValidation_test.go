@@ -5,6 +5,7 @@ import (
 
 	testHelpers "github.com/speedianet/control/src/devUtils"
 	"github.com/speedianet/control/src/infra"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
 func TestLicenseValidation(t *testing.T) {
@@ -14,8 +15,38 @@ func TestLicenseValidation(t *testing.T) {
 	licenseQueryRepo := infra.NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
 	licenseCmdRepo := infra.NewLicenseCmdRepo(persistentDbSvc, transientDbSvc)
 
-	t.Run("LicenseValidation", func(t *testing.T) {
+	t.Run("LicenseValidationWithPerfectConditions", func(t *testing.T) {
 		err := LicenseValidation(licenseQueryRepo, licenseCmdRepo)
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+	})
+
+	t.Run("LicenseValidationWithLicenseServerUnreachable", func(t *testing.T) {
+		_, err := infraHelper.RunCmdWithSubShell(
+			"echo \"127.0.0.1 app.speedia.net\" >> /etc/hosts",
+		)
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+
+		err = LicenseValidation(licenseQueryRepo, licenseCmdRepo)
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+
+		licenseInfo, err := licenseQueryRepo.Get()
+		if err != nil {
+			t.Errorf("UnexpectedError: %v", err)
+		}
+
+		if licenseInfo.ErrorCount < 1 {
+			t.Errorf("UnexpectedErrorCount: %v", licenseInfo.ErrorCount)
+		}
+
+		_, err = infraHelper.RunCmdWithSubShell(
+			"sed -i '$ d' /etc/hosts",
+		)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}
