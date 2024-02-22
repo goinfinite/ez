@@ -86,6 +86,7 @@ func (router Router) licenseRoutes() {
 		router.transientDbSvc,
 	)
 	licenseCmd.AddCommand(licenseController.GetLicenseInfo())
+	licenseCmd.AddCommand(licenseController.RefreshLicense())
 	rootCmd.AddCommand(licenseCmd)
 }
 

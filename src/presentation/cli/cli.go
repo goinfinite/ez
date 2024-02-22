@@ -49,7 +49,15 @@ func CliInit() {
 	persistentDbSvc := cliInit.PersistentDatabaseService()
 	transientDbSvc := cliInit.TransientDatabaseService()
 
-	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
+	isLicenseRefresh := false
+	if len(os.Args) > 2 {
+		isLicenseRefresh = os.Args[1] == "license" && os.Args[2] == "refresh"
+	}
+
+	if !isLicenseRefresh {
+		sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
+	}
+
 	cliMiddleware.SporadicLicenseValidation(persistentDbSvc, transientDbSvc)
 
 	router := NewRouter(persistentDbSvc, transientDbSvc)

@@ -43,3 +43,29 @@ func (controller LicenseController) GetLicenseInfo() *cobra.Command {
 
 	return cmd
 }
+
+func (controller LicenseController) RefreshLicense() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "refresh",
+		Short: "RefreshLicense",
+		Run: func(cmd *cobra.Command, args []string) {
+			licenseQueryRepo := infra.NewLicenseQueryRepo(
+				controller.persistentDbSvc,
+				controller.transientDbSvc,
+			)
+			licenseCmdRepo := infra.NewLicenseCmdRepo(
+				controller.persistentDbSvc,
+				controller.transientDbSvc,
+			)
+
+			err := useCase.LicenseValidation(licenseQueryRepo, licenseCmdRepo)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			cliHelper.ResponseWrapper(true, "LicenseRefreshed")
+		},
+	}
+
+	return cmd
+}
