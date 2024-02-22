@@ -161,14 +161,25 @@ func (repo LicenseCmdRepo) Refresh() error {
 		apiEndpoint += "&key=" + keyStr
 	}
 
-	httpResponse, err := http.Get(speediaApiUrl + apiEndpoint)
+	httpRequest, err := http.NewRequest(http.MethodGet, speediaApiUrl+apiEndpoint, nil)
 	if err != nil {
-		return errors.New("GetLicenseInfoFailed")
+		return errors.New("LicenseServerRequestError: " + err.Error())
+	}
+	httpRequest.Header.Set("User-Agent", "Speedia Control/1.0")
+
+	httpClient := &http.Client{
+		Timeout: time.Second *
+			15,
+	}
+
+	httpResponse, err := httpClient.Do(httpRequest)
+	if err != nil {
+		return errors.New("LicenseServerResponseError: " + err.Error())
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != 200 {
-		return errors.New("LicenseInfoBadStatusCode")
+		return errors.New("LicenseServerBadStatusCode")
 	}
 
 	responseBody, err := io.ReadAll(httpResponse.Body)
