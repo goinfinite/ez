@@ -118,6 +118,7 @@ func LicenseValidation(
 		if err != nil {
 			return errors.New("UpdateLicenseStatusError: " + err.Error())
 		}
+		return errors.New("InvalidLicenseStatusSystemShutdown")
 	}
 
 	log.Print("LicenseValidationFinished")
