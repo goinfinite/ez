@@ -8,9 +8,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func TrailingSlash(basePath string) echo.MiddlewareFunc {
+func TrailingSlash() echo.MiddlewareFunc {
 	trailingSlashSkipRegex := regexp.MustCompile(
-		"^(" + basePath + "/(swagger|auth|health)|/_)",
+		`^/(v\d{1,2}/(swagger|auth|health)|_)`,
 	)
 
 	return middleware.AddTrailingSlashWithConfig(middleware.TrailingSlashConfig{

@@ -35,10 +35,7 @@ func ApiInit(
 
 	e := echo.New()
 
-	basePath := "/v1"
-	baseRoute := e.Group(basePath)
-
-	e.Pre(apiMiddleware.TrailingSlash(basePath))
+	e.Pre(apiMiddleware.TrailingSlash())
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
 	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
@@ -47,11 +44,9 @@ func ApiInit(
 
 	apiInit.BootContainers(persistentDbSvc)
 
-	e.Use(apiMiddleware.Auth(basePath))
+	e.Use(apiMiddleware.Auth())
 
-	registerApiRoutes(baseRoute, persistentDbSvc, transientDbSvc)
-
-	e.Use(apiMiddleware.ServeUi())
+	registerApiRoutes(e, persistentDbSvc, transientDbSvc)
 
 	e.Start(":3141")
 }
