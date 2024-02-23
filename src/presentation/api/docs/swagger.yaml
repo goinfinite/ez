@@ -1,4 +1,4 @@
-basePath: /api
+basePath: /_/api
 definitions:
   dto.AddAccount:
     properties:

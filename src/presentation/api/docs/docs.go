@@ -1659,7 +1659,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.1",
 	Host:             "",
-	BasePath:         "/api",
+	BasePath:         "/_/api",
 	Schemes:          []string{},
 	Title:            "ControlApi",
 	Description:      "Speedia Control API",
