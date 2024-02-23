@@ -2,10 +2,12 @@ package api
 
 import (
 	_ "embed"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
 	apiController "github.com/speedianet/control/src/presentation/api/controller"
+	"github.com/speedianet/control/src/presentation/ui"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/speedianet/control/src/presentation/api/docs"
@@ -85,11 +87,23 @@ func o11yRoutes(baseRoute *echo.Group) {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
+func uiRoute(e *echo.Echo) {
+	uiPath := "/_/"
+
+	httpHandler := http.StripPrefix(uiPath, ui.UiFs())
+	e.GET(uiPath+"*", echo.WrapHandler(httpHandler))
+}
+
 func registerApiRoutes(
-	baseRoute *echo.Group,
+	e *echo.Echo,
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) {
+	uiRoute(e)
+
+	basePath := "/v1"
+	baseRoute := e.Group(basePath)
+
 	swaggerRoute(baseRoute)
 	authRoutes(baseRoute)
 	accountRoutes(baseRoute, persistentDbSvc)

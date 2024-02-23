@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
-//go:embed dist
+//go:embed dist/*
 var frontFiles embed.FS
 
-func UiFs() http.FileSystem {
-	frontFileSys, err := fs.Sub(frontFiles, "dist")
+func UiFs() http.Handler {
+	frontFileFs, err := fs.Sub(frontFiles, "dist")
 	if err != nil {
 		panic(err)
 	}
 
-	return http.FS(frontFileSys)
+	return http.FileServer(http.FS(frontFileFs))
 }
