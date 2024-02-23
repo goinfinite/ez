@@ -44,7 +44,7 @@ func getAccountIdFromAccessToken(
 
 func Auth(basePath string) echo.MiddlewareFunc {
 	urlSkipRegex := regexp.MustCompile(
-		"^" + basePath + "/" + "(swagger|auth|health)",
+		"^(" + basePath + "/(swagger|auth|health)|/_)",
 	)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

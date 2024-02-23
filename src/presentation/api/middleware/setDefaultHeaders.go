@@ -2,6 +2,7 @@ package apiMiddleware
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/labstack/echo/v4"
 )
@@ -10,13 +11,6 @@ func SetDefaultHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		req := c.Request()
 
-		if req.Header.Get("Content-Type") == "" {
-			req.Header.Set("Content-Type", "application/json")
-		}
-
-		c.Response().Header().Set(
-			"Content-Type", "application/json",
-		)
 		c.Response().Header().Set(
 			"Cache-Control", "no-store, no-cache, must-revalidate",
 		)
@@ -33,6 +27,21 @@ func SetDefaultHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 		if c.Request().Method == "OPTIONS" {
 			return c.NoContent(http.StatusOK)
 		}
+
+		urlSkipRegex := regexp.MustCompile(
+			"^/_",
+		)
+		if urlSkipRegex.MatchString(req.URL.Path) {
+			return next(c)
+		}
+
+		if req.Header.Get("Content-Type") == "" {
+			req.Header.Set("Content-Type", "application/json")
+		}
+
+		c.Response().Header().Set(
+			"Content-Type", "application/json",
+		)
 
 		return next(c)
 	}
