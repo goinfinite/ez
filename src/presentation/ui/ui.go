@@ -1,0 +1,19 @@
+package ui
+
+import (
+	"embed"
+	"io/fs"
+	"net/http"
+)
+
+//go:embed dist
+var frontFiles embed.FS
+
+func UiFs() http.FileSystem {
+	frontFileSys, err := fs.Sub(frontFiles, "dist")
+	if err != nil {
+		panic(err)
+	}
+
+	return http.FS(frontFileSys)
+}

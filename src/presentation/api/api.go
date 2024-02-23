@@ -51,5 +51,7 @@ func ApiInit(
 
 	registerApiRoutes(baseRoute, persistentDbSvc, transientDbSvc)
 
+	e.Use(apiMiddleware.ServeUi())
+
 	e.Start(":3141")
 }
