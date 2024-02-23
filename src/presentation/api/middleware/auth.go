@@ -44,12 +44,15 @@ func getAccountIdFromAccessToken(
 
 func Auth() echo.MiddlewareFunc {
 	urlSkipRegex := regexp.MustCompile(
-		`^(/api/v\d{1,2}/(swagger|auth|health)|/_)`,
+		`^/api/v\d{1,2}/(swagger|auth|health)`,
 	)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if urlSkipRegex.MatchString(c.Request().URL.Path) {
+			urlPath := c.Request().URL.Path
+			isNotApi := !strings.HasPrefix(urlPath, "/api/")
+
+			if isNotApi || urlSkipRegex.MatchString(urlPath) {
 				return next(c)
 			}
 

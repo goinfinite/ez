@@ -2,7 +2,7 @@ package apiMiddleware
 
 import (
 	"net/http"
-	"regexp"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,10 +28,10 @@ func SetDefaultHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusOK)
 		}
 
-		urlSkipRegex := regexp.MustCompile(
-			"^/_",
-		)
-		if urlSkipRegex.MatchString(req.URL.Path) {
+		urlPath := c.Request().URL.Path
+		isNotApi := !strings.HasPrefix(urlPath, "/api/")
+
+		if isNotApi {
 			return next(c)
 		}
 
