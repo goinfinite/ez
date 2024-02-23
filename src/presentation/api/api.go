@@ -25,8 +25,7 @@ import (
 // @name						Authorization
 // @description					Type "Bearer" + JWT token or API key.
 
-// @host		localhost:3141
-// @BasePath	/v1
+// @BasePath	/api
 func ApiInit(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,

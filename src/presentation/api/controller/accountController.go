@@ -22,7 +22,7 @@ import (
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} entity.Account
-// @Router       /account/ [get]
+// @Router       /v1/account/ [get]
 func GetAccountsController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	accsQueryRepo := infra.NewAccQueryRepo(persistentDbSvc)
@@ -85,7 +85,7 @@ func accQuotaFactory(
 // @Security     Bearer
 // @Param        addAccountDto 	  body    dto.AddAccount  true  "NewAccount"
 // @Success      201 {object} object{} "AccountCreated"
-// @Router       /account/ [post]
+// @Router       /v1/account/ [post]
 func AddAccountController(c echo.Context) error {
 	requiredParams := []string{"username", "password"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -132,7 +132,7 @@ func AddAccountController(c echo.Context) error {
 // @Security     Bearer
 // @Param        updateAccountDto 	  body dto.UpdateAccount  true  "UpdateAccount (Only accountId is required.)"
 // @Success      200 {object} object{} "AccountUpdated message or NewKeyString"
-// @Router       /account/ [put]
+// @Router       /v1/account/ [put]
 func UpdateAccountController(c echo.Context) error {
 	requiredParams := []string{"accountId"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -211,7 +211,7 @@ func UpdateAccountController(c echo.Context) error {
 // @Security     Bearer
 // @Param        accountId 	  path   string  true  "AccountId"
 // @Success      200 {object} object{} "AccountDeleted"
-// @Router       /account/{accountId}/ [delete]
+// @Router       /v1/account/{accountId}/ [delete]
 func DeleteAccountController(c echo.Context) error {
 	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 

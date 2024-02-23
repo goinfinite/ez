@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/account/": {
+        "/v1/account/": {
             "get": {
                 "security": [
                     {
@@ -129,7 +129,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/account/{accountId}/": {
+        "/v1/account/{accountId}/": {
             "delete": {
                 "security": [
                     {
@@ -166,7 +166,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/login/": {
+        "/v1/auth/login/": {
             "post": {
                 "description": "Generate JWT with credentials",
                 "consumes": [
@@ -206,7 +206,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/": {
+        "/v1/container/": {
             "get": {
                 "security": [
                     {
@@ -311,7 +311,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/metrics/": {
+        "/v1/container/metrics/": {
             "get": {
                 "security": [
                     {
@@ -342,7 +342,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/profile/": {
+        "/v1/container/profile/": {
             "get": {
                 "security": [
                     {
@@ -447,7 +447,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/profile/{profileId}/": {
+        "/v1/container/profile/{profileId}/": {
             "delete": {
                 "security": [
                     {
@@ -484,7 +484,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/registry/image/": {
+        "/v1/container/registry/image/": {
             "get": {
                 "security": [
                     {
@@ -523,7 +523,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/registry/image/tagged/": {
+        "/v1/container/registry/image/tagged/": {
             "get": {
                 "security": [
                     {
@@ -560,7 +560,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/container/{accountId}/{containerId}/": {
+        "/v1/container/{accountId}/{containerId}/": {
             "delete": {
                 "security": [
                     {
@@ -604,7 +604,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/license/": {
+        "/v1/license/": {
             "get": {
                 "security": [
                     {
@@ -632,7 +632,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/mapping/": {
+        "/v1/mapping/": {
             "get": {
                 "security": [
                     {
@@ -700,7 +700,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/mapping/target/": {
+        "/v1/mapping/target/": {
             "post": {
                 "security": [
                     {
@@ -739,7 +739,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/mapping/{mappingId}/": {
+        "/v1/mapping/{mappingId}/": {
             "delete": {
                 "security": [
                     {
@@ -776,7 +776,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/mapping/{mappingId}/target/{targetId}/": {
+        "/v1/mapping/{mappingId}/target/{targetId}/": {
             "delete": {
                 "security": [
                     {
@@ -820,7 +820,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/o11y/overview/": {
+        "/v1/o11y/overview/": {
             "get": {
                 "security": [
                     {
@@ -1238,6 +1238,9 @@ const docTemplate = `{
         "entity.LicenseInfo": {
             "type": "object",
             "properties": {
+                "errorCount": {
+                    "type": "integer"
+                },
                 "expiresAt": {
                     "type": "integer"
                 },
@@ -1252,6 +1255,9 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },
@@ -1652,8 +1658,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.1",
-	Host:             "localhost:3141",
-	BasePath:         "/v1",
+	Host:             "",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "ControlApi",
 	Description:      "Speedia Control API",

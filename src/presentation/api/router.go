@@ -13,18 +13,18 @@ import (
 	_ "github.com/speedianet/control/src/presentation/api/docs"
 )
 
-func swaggerRoute(baseRoute *echo.Group) {
-	swaggerGroup := baseRoute.Group("/swagger")
+func swaggerRoute(v1BaseRoute *echo.Group) {
+	swaggerGroup := v1BaseRoute.Group("/swagger")
 	swaggerGroup.GET("/*", echoSwagger.WrapHandler)
 }
 
-func authRoutes(baseRoute *echo.Group) {
-	authGroup := baseRoute.Group("/auth")
+func authRoutes(v1BaseRoute *echo.Group) {
+	authGroup := v1BaseRoute.Group("/auth")
 	authGroup.POST("/login/", apiController.AuthLoginController)
 }
 
-func accountRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
-	accountGroup := baseRoute.Group("/account")
+func accountRoutes(v1BaseRoute *echo.Group, persistentDbSvc *db.PersistentDatabaseService) {
+	accountGroup := v1BaseRoute.Group("/account")
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
@@ -32,8 +32,8 @@ func accountRoutes(baseRoute *echo.Group, persistentDbSvc *db.PersistentDatabase
 	go apiController.AutoUpdateAccountsQuotaUsageController(persistentDbSvc)
 }
 
-func containerRoutes(baseRoute *echo.Group) {
-	containerGroup := baseRoute.Group("/container")
+func containerRoutes(v1BaseRoute *echo.Group) {
+	containerGroup := v1BaseRoute.Group("/container")
 	containerGroup.GET("/", apiController.GetContainersController)
 	containerGroup.GET("/metrics/", apiController.GetContainersWithMetricsController)
 	containerGroup.POST("/", apiController.AddContainerController)
@@ -61,17 +61,17 @@ func containerRoutes(baseRoute *echo.Group) {
 }
 
 func licenseRoutes(
-	baseRoute *echo.Group,
+	v1BaseRoute *echo.Group,
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) {
-	licenseGroup := baseRoute.Group("/license")
+	licenseGroup := v1BaseRoute.Group("/license")
 	licenseGroup.GET("/", apiController.GetLicenseInfoController)
 	go apiController.AutoLicenseValidationController(persistentDbSvc, transientDbSvc)
 }
 
-func mappingRoutes(baseRoute *echo.Group) {
-	mappingGroup := baseRoute.Group("/mapping")
+func mappingRoutes(v1BaseRoute *echo.Group) {
+	mappingGroup := v1BaseRoute.Group("/mapping")
 	mappingGroup.GET("/", apiController.GetMappingsController)
 	mappingGroup.POST("/", apiController.AddMappingController)
 	mappingGroup.DELETE("/:mappingId/", apiController.DeleteMappingController)
@@ -82,8 +82,8 @@ func mappingRoutes(baseRoute *echo.Group) {
 	)
 }
 
-func o11yRoutes(baseRoute *echo.Group) {
-	o11yGroup := baseRoute.Group("/o11y")
+func o11yRoutes(v1BaseRoute *echo.Group) {
+	o11yGroup := v1BaseRoute.Group("/o11y")
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
@@ -100,15 +100,13 @@ func registerApiRoutes(
 	transientDbSvc *db.TransientDatabaseService,
 ) {
 	uiRoute(e)
+	v1BaseRoute := e.Group("/api/v1")
 
-	basePath := "/v1"
-	baseRoute := e.Group(basePath)
-
-	swaggerRoute(baseRoute)
-	authRoutes(baseRoute)
-	accountRoutes(baseRoute, persistentDbSvc)
-	containerRoutes(baseRoute)
-	licenseRoutes(baseRoute, persistentDbSvc, transientDbSvc)
-	mappingRoutes(baseRoute)
-	o11yRoutes(baseRoute)
+	swaggerRoute(v1BaseRoute)
+	authRoutes(v1BaseRoute)
+	accountRoutes(v1BaseRoute, persistentDbSvc)
+	containerRoutes(v1BaseRoute)
+	licenseRoutes(v1BaseRoute, persistentDbSvc, transientDbSvc)
+	mappingRoutes(v1BaseRoute)
+	o11yRoutes(v1BaseRoute)
 }

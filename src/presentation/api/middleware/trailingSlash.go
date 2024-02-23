@@ -10,7 +10,7 @@ import (
 
 func TrailingSlash() echo.MiddlewareFunc {
 	trailingSlashSkipRegex := regexp.MustCompile(
-		`^/(v\d{1,2}/(swagger|auth|health)|_)`,
+		`^(/api/v\d{1,2}/(swagger|auth|health)|/_)`,
 	)
 
 	return middleware.AddTrailingSlashWithConfig(middleware.TrailingSlashConfig{

@@ -20,7 +20,7 @@ import (
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {object} entity.LicenseInfo
-// @Router       /license/ [get]
+// @Router       /v1/license/ [get]
 func GetLicenseInfoController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	transientDbSvc := c.Get("transientDbSvc").(*db.TransientDatabaseService)

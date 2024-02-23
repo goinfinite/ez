@@ -20,7 +20,7 @@ import (
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} entity.Mapping
-// @Router       /mapping/ [get]
+// @Router       /v1/mapping/ [get]
 func GetMappingsController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	mappingQueryRepo := infra.NewMappingQueryRepo(persistentDbSvc)
@@ -41,7 +41,7 @@ func GetMappingsController(c echo.Context) error {
 // @Security     Bearer
 // @Param        addMappingDto 	  body    dto.AddMapping  true  "NewMapping"
 // @Success      201 {object} object{} "MappingCreated"
-// @Router       /mapping/ [post]
+// @Router       /v1/mapping/ [post]
 func AddMappingController(c echo.Context) error {
 	requiredParams := []string{"accountId", "publicPort", "targets"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -107,7 +107,7 @@ func AddMappingController(c echo.Context) error {
 // @Security     Bearer
 // @Param        mappingId 	  path   string  true  "MappingId"
 // @Success      200 {object} object{} "MappingDeleted"
-// @Router       /mapping/{mappingId}/ [delete]
+// @Router       /v1/mapping/{mappingId}/ [delete]
 func DeleteMappingController(c echo.Context) error {
 	mappingId := valueObject.NewMappingIdPanic(c.Param("mappingId"))
 
@@ -136,7 +136,7 @@ func DeleteMappingController(c echo.Context) error {
 // @Security     Bearer
 // @Param        addMappingTargetDto 	  body    dto.AddMappingTarget  true  "NewMappingTarget"
 // @Success      201 {object} object{} "MappingTargetAdded"
-// @Router       /mapping/target/ [post]
+// @Router       /v1/mapping/target/ [post]
 func AddMappingTargetController(c echo.Context) error {
 	requiredParams := []string{"mappingId", "target"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -179,7 +179,7 @@ func AddMappingTargetController(c echo.Context) error {
 // @Param        mappingId 	  path   string  true  "MappingId"
 // @Param        targetId 	  path   string  true  "TargetId"
 // @Success      200 {object} object{} "MappingTargetDeleted"
-// @Router       /mapping/{mappingId}/target/{targetId}/ [delete]
+// @Router       /v1/mapping/{mappingId}/target/{targetId}/ [delete]
 func DeleteMappingTargetController(c echo.Context) error {
 	targetId := valueObject.NewMappingTargetIdPanic(c.Param("targetId"))
 

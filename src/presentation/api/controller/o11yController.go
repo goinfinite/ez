@@ -17,7 +17,7 @@ import (
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {object} entity.O11yOverview
-// @Router       /o11y/overview/ [get]
+// @Router       /v1/o11y/overview/ [get]
 func O11yOverviewController(c echo.Context) error {
 	o11yQueryRepo := infra.O11yQueryRepo{}
 	o11yOverview, err := useCase.GetO11yOverview(o11yQueryRepo)

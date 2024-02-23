@@ -1,4 +1,4 @@
-basePath: /v1
+basePath: /api
 definitions:
   dto.AddAccount:
     properties:
@@ -254,6 +254,8 @@ definitions:
     type: object
   entity.LicenseInfo:
     properties:
+      errorCount:
+        type: integer
       expiresAt:
         type: integer
       fingerprint:
@@ -264,6 +266,8 @@ definitions:
         type: string
       status:
         type: string
+      updatedAt:
+        type: integer
     type: object
   entity.Mapping:
     properties:
@@ -520,7 +524,6 @@ definitions:
       writeOpsCount:
         type: integer
     type: object
-host: localhost:3141
 info:
   contact:
     email: eng+swagger@speedia.net
@@ -534,7 +537,7 @@ info:
   title: ControlApi
   version: 0.0.1
 paths:
-  /account/:
+  /v1/account/:
     get:
       consumes:
       - application/json
@@ -599,7 +602,7 @@ paths:
       summary: UpdateAccount
       tags:
       - account
-  /account/{accountId}/:
+  /v1/account/{accountId}/:
     delete:
       consumes:
       - application/json
@@ -622,7 +625,7 @@ paths:
       summary: DeleteAccount
       tags:
       - account
-  /auth/login/:
+  /v1/auth/login/:
     post:
       consumes:
       - application/json
@@ -648,7 +651,7 @@ paths:
       summary: GenerateJwtWithCredentials
       tags:
       - auth
-  /container/:
+  /v1/container/:
     get:
       consumes:
       - application/json
@@ -714,7 +717,7 @@ paths:
       summary: UpdateContainer
       tags:
       - container
-  /container/{accountId}/{containerId}/:
+  /v1/container/{accountId}/{containerId}/:
     delete:
       consumes:
       - application/json
@@ -742,7 +745,7 @@ paths:
       summary: DeleteContainer
       tags:
       - container
-  /container/metrics/:
+  /v1/container/metrics/:
     get:
       consumes:
       - application/json
@@ -761,7 +764,7 @@ paths:
       summary: GetContainersWithMetrics
       tags:
       - container
-  /container/profile/:
+  /v1/container/profile/:
     get:
       consumes:
       - application/json
@@ -826,7 +829,7 @@ paths:
       summary: UpdateContainerProfile
       tags:
       - container
-  /container/profile/{profileId}/:
+  /v1/container/profile/{profileId}/:
     delete:
       consumes:
       - application/json
@@ -849,7 +852,7 @@ paths:
       summary: DeleteContainerProfile
       tags:
       - container
-  /container/registry/image/:
+  /v1/container/registry/image/:
     get:
       consumes:
       - application/json
@@ -873,7 +876,7 @@ paths:
       summary: GetContainerRegistryImages
       tags:
       - container
-  /container/registry/image/tagged/:
+  /v1/container/registry/image/tagged/:
     get:
       consumes:
       - application/json
@@ -896,7 +899,7 @@ paths:
       summary: GetContainerRegistryTaggedImage
       tags:
       - container
-  /license/:
+  /v1/license/:
     get:
       consumes:
       - application/json
@@ -913,7 +916,7 @@ paths:
       summary: GetLicenseInfo
       tags:
       - license
-  /mapping/:
+  /v1/mapping/:
     get:
       consumes:
       - application/json
@@ -955,7 +958,7 @@ paths:
       summary: AddNewMapping
       tags:
       - mapping
-  /mapping/{mappingId}/:
+  /v1/mapping/{mappingId}/:
     delete:
       consumes:
       - application/json
@@ -978,7 +981,7 @@ paths:
       summary: DeleteMapping
       tags:
       - mapping
-  /mapping/{mappingId}/target/{targetId}/:
+  /v1/mapping/{mappingId}/target/{targetId}/:
     delete:
       consumes:
       - application/json
@@ -1006,7 +1009,7 @@ paths:
       summary: DeleteMappingTarget
       tags:
       - mapping
-  /mapping/target/:
+  /v1/mapping/target/:
     post:
       consumes:
       - application/json
@@ -1030,7 +1033,7 @@ paths:
       summary: AddMappingTarget
       tags:
       - mapping
-  /o11y/overview/:
+  /v1/o11y/overview/:
     get:
       consumes:
       - application/json

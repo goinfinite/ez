@@ -20,7 +20,7 @@ import (
 // @Security     Bearer
 // @Param        name    query     string  false  "ImageName"
 // @Success      200 {array} entity.RegistryImage
-// @Router       /container/registry/image/ [get]
+// @Router       /v1/container/registry/image/ [get]
 func GetContainerRegistryImagesController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 
@@ -52,7 +52,7 @@ func GetContainerRegistryImagesController(c echo.Context) error {
 // @Security     Bearer
 // @Param        address    query     string  true  "ImageAddress"
 // @Success      200 {object} entity.RegistryTaggedImage
-// @Router       /container/registry/image/tagged/ [get]
+// @Router       /v1/container/registry/image/tagged/ [get]
 func GetContainerRegistryTaggedImageController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 

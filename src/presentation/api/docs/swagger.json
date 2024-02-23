@@ -15,10 +15,9 @@
         },
         "version": "0.0.1"
     },
-    "host": "localhost:3141",
-    "basePath": "/v1",
+    "basePath": "/api",
     "paths": {
-        "/account/": {
+        "/v1/account/": {
             "get": {
                 "security": [
                     {
@@ -123,7 +122,7 @@
                 }
             }
         },
-        "/account/{accountId}/": {
+        "/v1/account/{accountId}/": {
             "delete": {
                 "security": [
                     {
@@ -160,7 +159,7 @@
                 }
             }
         },
-        "/auth/login/": {
+        "/v1/auth/login/": {
             "post": {
                 "description": "Generate JWT with credentials",
                 "consumes": [
@@ -200,7 +199,7 @@
                 }
             }
         },
-        "/container/": {
+        "/v1/container/": {
             "get": {
                 "security": [
                     {
@@ -305,7 +304,7 @@
                 }
             }
         },
-        "/container/metrics/": {
+        "/v1/container/metrics/": {
             "get": {
                 "security": [
                     {
@@ -336,7 +335,7 @@
                 }
             }
         },
-        "/container/profile/": {
+        "/v1/container/profile/": {
             "get": {
                 "security": [
                     {
@@ -441,7 +440,7 @@
                 }
             }
         },
-        "/container/profile/{profileId}/": {
+        "/v1/container/profile/{profileId}/": {
             "delete": {
                 "security": [
                     {
@@ -478,7 +477,7 @@
                 }
             }
         },
-        "/container/registry/image/": {
+        "/v1/container/registry/image/": {
             "get": {
                 "security": [
                     {
@@ -517,7 +516,7 @@
                 }
             }
         },
-        "/container/registry/image/tagged/": {
+        "/v1/container/registry/image/tagged/": {
             "get": {
                 "security": [
                     {
@@ -554,7 +553,7 @@
                 }
             }
         },
-        "/container/{accountId}/{containerId}/": {
+        "/v1/container/{accountId}/{containerId}/": {
             "delete": {
                 "security": [
                     {
@@ -598,7 +597,7 @@
                 }
             }
         },
-        "/license/": {
+        "/v1/license/": {
             "get": {
                 "security": [
                     {
@@ -626,7 +625,7 @@
                 }
             }
         },
-        "/mapping/": {
+        "/v1/mapping/": {
             "get": {
                 "security": [
                     {
@@ -694,7 +693,7 @@
                 }
             }
         },
-        "/mapping/target/": {
+        "/v1/mapping/target/": {
             "post": {
                 "security": [
                     {
@@ -733,7 +732,7 @@
                 }
             }
         },
-        "/mapping/{mappingId}/": {
+        "/v1/mapping/{mappingId}/": {
             "delete": {
                 "security": [
                     {
@@ -770,7 +769,7 @@
                 }
             }
         },
-        "/mapping/{mappingId}/target/{targetId}/": {
+        "/v1/mapping/{mappingId}/target/{targetId}/": {
             "delete": {
                 "security": [
                     {
@@ -814,7 +813,7 @@
                 }
             }
         },
-        "/o11y/overview/": {
+        "/v1/o11y/overview/": {
             "get": {
                 "security": [
                     {
@@ -1232,6 +1231,9 @@
         "entity.LicenseInfo": {
             "type": "object",
             "properties": {
+                "errorCount": {
+                    "type": "integer"
+                },
                 "expiresAt": {
                     "type": "integer"
                 },
@@ -1246,6 +1248,9 @@
                 },
                 "status": {
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },

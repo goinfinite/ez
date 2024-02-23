@@ -22,7 +22,7 @@ import (
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} entity.Container
-// @Router       /container/ [get]
+// @Router       /v1/container/ [get]
 func GetContainersController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
@@ -42,7 +42,7 @@ func GetContainersController(c echo.Context) error {
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} dto.ContainerWithMetrics
-// @Router       /container/metrics/ [get]
+// @Router       /v1/container/metrics/ [get]
 func GetContainersWithMetricsController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
@@ -146,7 +146,7 @@ func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
 // @Security     Bearer
 // @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required."
 // @Success      201 {object} object{} "ContainerCreated"
-// @Router       /container/ [post]
+// @Router       /v1/container/ [post]
 func AddContainerController(c echo.Context) error {
 	requiredParams := []string{"accountId", "hostname"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -270,7 +270,7 @@ func AddContainerController(c echo.Context) error {
 // @Security     Bearer
 // @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accountId and containerId are required.)"
 // @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
-// @Router       /container/ [put]
+// @Router       /v1/container/ [put]
 func UpdateContainerController(c echo.Context) error {
 	requiredParams := []string{"accountId", "containerId"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -346,7 +346,7 @@ func UpdateContainerController(c echo.Context) error {
 // @Param        accountId 	  path   string  true  "AccountId"
 // @Param        containerId 	  path   string  true  "ContainerId"
 // @Success      200 {object} object{} "ContainerDeleted"
-// @Router       /container/{accountId}/{containerId}/ [delete]
+// @Router       /v1/container/{accountId}/{containerId}/ [delete]
 func DeleteContainerController(c echo.Context) error {
 	accId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))

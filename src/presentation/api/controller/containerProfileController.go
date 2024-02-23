@@ -21,7 +21,7 @@ import (
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} entity.ContainerProfile
-// @Router       /container/profile/ [get]
+// @Router       /v1/container/profile/ [get]
 func GetContainerProfilesController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	queryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
@@ -49,7 +49,7 @@ func parseContainerSpecs(specs map[string]interface{}) valueObject.ContainerSpec
 // @Security     Bearer
 // @Param        addContainerProfileDto 	  body    dto.AddContainerProfile  true  "NewContainerProfile (Only name and baseSpecs are required.)"
 // @Success      201 {object} object{} "ContainerProfileCreated"
-// @Router       /container/profile/ [post]
+// @Router       /v1/container/profile/ [post]
 func AddContainerProfileController(c echo.Context) error {
 	requiredParams := []string{"name", "baseSpecs"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -167,7 +167,7 @@ func AddContainerProfileController(c echo.Context) error {
 // @Security     Bearer
 // @Param        updateContainerProfileDto 	  body dto.UpdateContainerProfile  true  "UpdateContainerProfile (Only id is required.)"
 // @Success      200 {object} object{} "ContainerProfileUpdated"
-// @Router       /container/profile/ [put]
+// @Router       /v1/container/profile/ [put]
 func UpdateContainerProfileController(c echo.Context) error {
 	requiredParams := []string{"id"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
@@ -302,7 +302,7 @@ func UpdateContainerProfileController(c echo.Context) error {
 // @Security     Bearer
 // @Param        profileId 	  path   string  true  "ProfileId"
 // @Success      200 {object} object{} "ContainerProfileDeleted"
-// @Router       /container/profile/{profileId}/ [delete]
+// @Router       /v1/container/profile/{profileId}/ [delete]
 func DeleteContainerProfileController(c echo.Context) error {
 	profileId := valueObject.NewContainerProfileIdPanic(c.Param("profileId"))
 
