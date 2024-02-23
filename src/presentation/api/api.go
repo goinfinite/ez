@@ -34,7 +34,7 @@ func ApiInit(
 
 	e := echo.New()
 
-	e.Pre(apiMiddleware.TrailingSlash())
+	e.Pre(apiMiddleware.AddTrailingSlash())
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders)
 	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
