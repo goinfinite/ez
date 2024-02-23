@@ -87,11 +87,10 @@ func o11yRoutes(v1BaseRoute *echo.Group) {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
-func uiRoute(e *echo.Echo) {
-	uiPath := "/_/"
-
-	httpHandler := http.StripPrefix(uiPath, ui.UiFs())
-	e.GET(uiPath+"*", echo.WrapHandler(httpHandler))
+func uiRoute(rootBase *echo.Group) {
+	rootBase.GET("/*", echo.WrapHandler(
+		http.StripPrefix("/_", ui.UiFs())),
+	)
 }
 
 func registerApiRoutes(
@@ -99,8 +98,9 @@ func registerApiRoutes(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) {
-	uiRoute(e)
-	v1BaseRoute := e.Group("/api/v1")
+	rootBase := e.Group("/_")
+	apiBaseRoute := rootBase.Group("/api")
+	v1BaseRoute := apiBaseRoute.Group("/v1")
 
 	swaggerRoute(v1BaseRoute)
 	authRoutes(v1BaseRoute)
@@ -109,4 +109,9 @@ func registerApiRoutes(
 	licenseRoutes(v1BaseRoute, persistentDbSvc, transientDbSvc)
 	mappingRoutes(v1BaseRoute)
 	o11yRoutes(v1BaseRoute)
+
+	uiRoute(rootBase)
+	e.RouteNotFound("/*", func(c echo.Context) error {
+		return c.Redirect(http.StatusMovedPermanently, "/_/")
+	})
 }
