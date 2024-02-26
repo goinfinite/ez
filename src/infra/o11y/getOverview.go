@@ -107,11 +107,11 @@ func (repo GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, er
 			valueObject.Byte(usageStat.Total),
 			valueObject.Byte(usageStat.Free),
 			valueObject.Byte(usageStat.Used),
-			usageStat.UsedPercent,
+			infraHelper.RoundFloat(usageStat.UsedPercent),
 			valueObject.InodesCount(usageStat.InodesTotal),
 			valueObject.InodesCount(usageStat.InodesFree),
 			valueObject.InodesCount(usageStat.InodesUsed),
-			usageStat.InodesUsedPercent,
+			infraHelper.RoundFloat(usageStat.InodesUsedPercent),
 			valueObject.Byte(readBytes),
 			readOpsCount,
 			valueObject.Byte(writeBytes),
@@ -151,7 +151,7 @@ func (repo GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 		return hardwareSpecs, errors.New("GetCpuModelNameFailed")
 	}
 
-	cpuFrequency := cpuInfo[0].Mhz
+	cpuFrequency := infraHelper.RoundFloat(cpuInfo[0].Mhz)
 
 	cpuCores, err := valueObject.NewCpuCoresCount(len(cpuInfo))
 	if err != nil {
@@ -177,7 +177,7 @@ func (repo GetOverview) getCpuUsagePercent() (float64, error) {
 		return 0, errors.New("GetCpuUsageFailed")
 	}
 
-	return cpuPercent[0], nil
+	return infraHelper.RoundFloat(cpuPercent[0]), nil
 }
 
 func (repo GetOverview) getMemUsagePercent() (float64, error) {
@@ -186,7 +186,7 @@ func (repo GetOverview) getMemUsagePercent() (float64, error) {
 		return 0, errors.New("GetMemInfoFailed")
 	}
 
-	return memInfo.UsedPercent, nil
+	return infraHelper.RoundFloat(memInfo.UsedPercent), nil
 }
 
 func (repo GetOverview) getNetInfos() ([]valueObject.NetInterfaceInfo, error) {

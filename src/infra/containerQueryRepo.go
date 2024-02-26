@@ -160,7 +160,7 @@ func (repo ContainerQueryRepo) containerMetricsFactory(
 			continue
 		}
 
-		cpuPerc, assertOk := containerMetricsInfo["CPU"].(float64)
+		cpuPercent, assertOk := containerMetricsInfo["CPU"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -170,7 +170,7 @@ func (repo ContainerQueryRepo) containerMetricsFactory(
 			continue
 		}
 
-		memPerc, assertOk := containerMetricsInfo["MemPerc"].(float64)
+		memPercent, assertOk := containerMetricsInfo["MemPerc"].(float64)
 		if !assertOk {
 			continue
 		}
@@ -247,10 +247,10 @@ func (repo ContainerQueryRepo) containerMetricsFactory(
 		}
 
 		containerMetrics := valueObject.NewContainerMetrics(
-			cpuPerc,
+			infraHelper.RoundFloat(cpuPercent),
 			avgCpu,
 			memBytes,
-			memPerc,
+			infraHelper.RoundFloat(memPercent),
 			blockInput,
 			blockOutput,
 			blockBytes,
