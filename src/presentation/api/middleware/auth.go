@@ -75,7 +75,7 @@ func Auth(apiBasePath string) echo.MiddlewareFunc {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
 					"status": http.StatusUnauthorized,
-					"body":   err.Error(),
+					"body":   "InvalidAuthToken",
 				})
 			}
 
