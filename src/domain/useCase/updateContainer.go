@@ -16,7 +16,7 @@ func UpdateContainer(
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	updateDto dto.UpdateContainer,
 ) error {
-	_, err := containerQueryRepo.GetById(updateDto.ContainerId)
+	containerEntity, err := containerQueryRepo.GetById(updateDto.ContainerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}
@@ -28,6 +28,7 @@ func UpdateContainer(
 			updateDto.AccountId,
 			containerProfileQueryRepo,
 			*updateDto.ProfileId,
+			&containerEntity.ProfileId,
 		)
 		if err != nil {
 			return err

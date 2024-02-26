@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
@@ -12,7 +13,8 @@ func CheckAccountQuota(
 	accQueryRepo repository.AccQueryRepo,
 	accId valueObject.AccountId,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
-	profileId valueObject.ContainerProfileId,
+	newProfileId valueObject.ContainerProfileId,
+	prevProfileId *valueObject.ContainerProfileId,
 ) error {
 	accEntity, err := accQueryRepo.GetById(accId)
 	if err != nil {
@@ -20,28 +22,40 @@ func CheckAccountQuota(
 		return errors.New("GetAccountInfoInfraError")
 	}
 
-	containerProfileEntity, err := containerProfileQueryRepo.GetById(profileId)
+	newProfile, err := containerProfileQueryRepo.GetById(newProfileId)
 	if err != nil {
-		log.Printf("GetContainerProfileError: %s", err)
-		return errors.New("GetContainerProfileInfraError")
+		log.Printf("GetNewContainerProfileError: %s", err)
+		return errors.New("GetNewContainerProfileInfraError")
 	}
 
-	quotaCpu := accEntity.Quota.CpuCores
-	quotaMemory := accEntity.Quota.MemoryBytes
+	var prevProfilePtr *entity.ContainerProfile
+	if prevProfileId != nil {
+		prevProfile, err := containerProfileQueryRepo.GetById(*prevProfileId)
+		if err != nil {
+			log.Printf("GetPrevContainerProfileError: %s", err)
+			return errors.New("GetPrevContainerProfileInfraError")
+		}
+		prevProfilePtr = &prevProfile
+	}
 
-	quotaUsageCpu := accEntity.QuotaUsage.CpuCores
-	quotaUsageMemory := accEntity.QuotaUsage.MemoryBytes
+	accCpuLimit := accEntity.Quota.CpuCores
+	accMemoryLimit := accEntity.Quota.MemoryBytes
 
-	containerCpuLimit := containerProfileEntity.BaseSpecs.CpuCores
-	containerMemoryLimit := containerProfileEntity.BaseSpecs.MemoryBytes
+	accCpuUsage := accEntity.QuotaUsage.CpuCores
+	accMemoryUsage := accEntity.QuotaUsage.MemoryBytes
+	if prevProfilePtr != nil {
+		accCpuUsage -= prevProfilePtr.BaseSpecs.CpuCores
+		accMemoryUsage -= prevProfilePtr.BaseSpecs.MemoryBytes
+	}
 
-	if quotaUsageCpu+containerCpuLimit > quotaCpu {
-		log.Printf("CpuQuotaUsageExceeded: %s", err)
+	newContainerCpuLimit := newProfile.BaseSpecs.CpuCores
+	newContainerMemoryLimit := newProfile.BaseSpecs.MemoryBytes
+
+	if accCpuUsage+newContainerCpuLimit > accCpuLimit {
 		return errors.New("CpuQuotaUsageExceeded")
 	}
 
-	if quotaUsageMemory+containerMemoryLimit > quotaMemory {
-		log.Printf("MemoryQuotaUsageExceeded: %s", err)
+	if accMemoryUsage+newContainerMemoryLimit > accMemoryLimit {
 		return errors.New("MemoryQuotaUsageExceeded")
 	}
 
