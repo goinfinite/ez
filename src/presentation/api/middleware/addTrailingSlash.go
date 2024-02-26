@@ -18,7 +18,7 @@ func AddTrailingSlash() echo.MiddlewareFunc {
 		RedirectCode: http.StatusTemporaryRedirect,
 		Skipper: func(c echo.Context) bool {
 			urlPath := c.Request().URL.Path
-			isNotApi := !strings.HasPrefix(urlPath, "/api/")
+			isNotApi := !strings.HasPrefix(urlPath, "/_/api/")
 
 			return isNotApi || urlSkipRegex.MatchString(urlPath)
 		},

@@ -29,7 +29,7 @@ func SetDefaultHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		urlPath := c.Request().URL.Path
-		isNotApi := !strings.HasPrefix(urlPath, "/api/")
+		isNotApi := !strings.HasPrefix(urlPath, "/_/api/")
 
 		if isNotApi {
 			return next(c)

@@ -50,7 +50,7 @@ func Auth() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			urlPath := c.Request().URL.Path
-			isNotApi := !strings.HasPrefix(urlPath, "/api/")
+			isNotApi := !strings.HasPrefix(urlPath, "/_/api/")
 
 			if isNotApi || urlSkipRegex.MatchString(urlPath) {
 				return next(c)
@@ -75,7 +75,7 @@ func Auth() echo.MiddlewareFunc {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
 					"status": http.StatusUnauthorized,
-					"body":   "InvalidAuthToken",
+					"body":   err.Error(),
 				})
 			}
 
