@@ -19,6 +19,10 @@ func GetAccessTokenDetails(
 
 	accessTokenDetails, err := authQueryRepo.GetAccessTokenDetails(accessToken)
 	if err != nil {
+		if err.Error() == "SessionTokenExpired" {
+			return tokenDetails, errors.New("SessionTokenExpired")
+		}
+
 		log.Printf("GetAccessTokenDetailsError: %s", err)
 		return tokenDetails, errors.New("GetAccessTokenDetailsInfraError")
 	}
