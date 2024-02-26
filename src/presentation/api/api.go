@@ -33,17 +33,18 @@ func ApiInit(
 	sharedMiddleware.CheckEnvs()
 
 	e := echo.New()
+	apiBasePath := "/_/api"
 
-	e.Pre(apiMiddleware.AddTrailingSlash())
+	e.Pre(apiMiddleware.AddTrailingSlash(apiBasePath))
 	e.Use(apiMiddleware.PanicHandler)
-	e.Use(apiMiddleware.SetDefaultHeaders)
+	e.Use(apiMiddleware.SetDefaultHeaders(apiBasePath))
 	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
 
 	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 
 	apiInit.BootContainers(persistentDbSvc)
 
-	e.Use(apiMiddleware.Auth())
+	e.Use(apiMiddleware.Auth(apiBasePath))
 
 	registerApiRoutes(e, persistentDbSvc, transientDbSvc)
 

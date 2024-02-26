@@ -42,15 +42,15 @@ func getAccountIdFromAccessToken(
 	return accessTokenDetails.AccountId, nil
 }
 
-func Auth() echo.MiddlewareFunc {
+func Auth(apiBasePath string) echo.MiddlewareFunc {
 	urlSkipRegex := regexp.MustCompile(
-		`^/api/v\d{1,2}/(swagger|auth|health)`,
+		`^` + apiBasePath + `/v\d{1,2}/(swagger|auth|health)`,
 	)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			urlPath := c.Request().URL.Path
-			isNotApi := !strings.HasPrefix(urlPath, "/_/api/")
+			isNotApi := !strings.HasPrefix(urlPath, apiBasePath)
 
 			if isNotApi || urlSkipRegex.MatchString(urlPath) {
 				return next(c)
