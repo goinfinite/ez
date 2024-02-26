@@ -2,6 +2,7 @@ package useCase
 
 import (
 	"errors"
+	"log"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -14,9 +15,12 @@ func GetAccessTokenDetails(
 	trustedIpAddress []valueObject.IpAddress,
 	ipAddress valueObject.IpAddress,
 ) (dto.AccessTokenDetails, error) {
+	var tokenDetails dto.AccessTokenDetails
+
 	accessTokenDetails, err := authQueryRepo.GetAccessTokenDetails(accessToken)
 	if err != nil {
-		return dto.AccessTokenDetails{}, err
+		log.Printf("GetAccessTokenDetailsError: %s", err)
+		return tokenDetails, errors.New("GetAccessTokenDetailsInfraError")
 	}
 
 	if accessTokenDetails.IpAddress == nil {
@@ -30,7 +34,7 @@ func GetAccessTokenDetails(
 	}
 
 	if accessTokenDetails.IpAddress.String() != ipAddress.String() {
-		return dto.AccessTokenDetails{}, errors.New("IpAddressChanged")
+		return tokenDetails, errors.New("AccessTokenIpMismatch")
 	}
 
 	return accessTokenDetails, nil
