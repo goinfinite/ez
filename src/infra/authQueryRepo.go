@@ -48,18 +48,24 @@ func (repo AuthQueryRepo) IsLoginValid(login dto.Login) bool {
 func (repo AuthQueryRepo) getSessionTokenClaims(
 	sessionToken valueObject.AccessTokenStr,
 ) (jwt.MapClaims, error) {
+	var claims jwt.MapClaims
+
 	parsedToken, err := jwt.Parse(
 		sessionToken.String(),
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 	if err != nil {
-		return jwt.MapClaims{}, err
+		if err.(*jwt.ValidationError).Errors == jwt.ValidationErrorExpired {
+			return claims, errors.New("SessionTokenExpired")
+		}
+
+		return claims, errors.New("SessionTokenParseError: " + err.Error())
 	}
 
 	claims, areClaimsReadable := parsedToken.Claims.(jwt.MapClaims)
 	if !areClaimsReadable {
-		return jwt.MapClaims{}, errors.New("SessionTokenClaimsUnReadable")
+		return claims, errors.New("SessionTokenClaimsUnreadable")
 	}
 
 	return claims, nil
@@ -147,8 +153,14 @@ func (repo AuthQueryRepo) getTokenDetailsFromApiKey(
 func (repo AuthQueryRepo) GetAccessTokenDetails(
 	token valueObject.AccessTokenStr,
 ) (dto.AccessTokenDetails, error) {
+	var tokenDetails dto.AccessTokenDetails
+
 	sessionTokenClaims, err := repo.getSessionTokenClaims(token)
 	if err != nil {
+		if err.Error() == "SessionTokenExpired" {
+			return tokenDetails, err
+		}
+
 		return repo.getTokenDetailsFromApiKey(token)
 	}
 
