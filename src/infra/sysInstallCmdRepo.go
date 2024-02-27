@@ -7,6 +7,10 @@ import (
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
+const (
+	ControlMainDir = "/var/speedia"
+)
+
 type SysInstallCmdRepo struct {
 }
 
@@ -127,11 +131,11 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
-	_ = os.MkdirAll("/var/speedia", 0755)
+	_ = os.MkdirAll(ControlMainDir, 0755)
 	_, err = infraHelper.RunCmd(
 		"bash",
 		"-c",
-		"echo \"alias control='/var/speedia/control'\" >> /root/.bashrc",
+		"echo \"alias control='"+ControlMainDir+"/control'\" >> /root/.bashrc",
 	)
 	if err != nil {
 		return errors.New("AddControlAliasFailed")
@@ -181,6 +185,12 @@ WantedBy=multi-user.target
 	}
 
 	err = repo.installNginx()
+	if err != nil {
+		return err
+	}
+
+	_ = os.MkdirAll(ControlMainDir+"/pki", 0755)
+	err = infraHelper.GenSelfSignedSslCert(ControlMainDir+"/pki", "control")
 	if err != nil {
 		return err
 	}
