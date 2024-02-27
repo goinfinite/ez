@@ -1,8 +1,12 @@
 package api
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
+	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	apiInit "github.com/speedianet/control/src/presentation/api/init"
 	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
@@ -48,5 +52,18 @@ func ApiInit(
 
 	registerApiRoutes(e, persistentDbSvc, transientDbSvc)
 
-	e.Start(":3141")
+	httpServer := http.Server{
+		Addr:     ":3141",
+		Handler:  e,
+		ErrorLog: apiHelper.NewCustomLogger(),
+	}
+
+	pkiDir := "/var/speedia/pki"
+	certFile := pkiDir + "/control.crt"
+	keyFile := pkiDir + "/control.key"
+
+	err := httpServer.ListenAndServeTLS(certFile, keyFile)
+	if err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
 }
