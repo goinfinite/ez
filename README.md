@@ -27,7 +27,7 @@ Note: make sure you downloaded the "Base System + Container Runtime" files and n
 
 3. Extract the `.vmdk` file if it came compressed.
 
-4. Add the VM to the VMWare Player interface and then:
+4. Add the VM to the VMWare Player interface using the "Open a Virtual Machine" option and then:
 
    1. Change the resources to 4GB RAM // 2vCPU;
    2. Remove the default disk;
@@ -83,7 +83,7 @@ chmod +x /var/speedia/control
 /var/speedia/control sys-install
 ```
 
-11. The system will reboot and once you get the final success message on the logs, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
+11. **The system will reboot** and once you get the final success message on the logs (`/var/log/control.log`), you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found on the VMWare interface which you used to SSH. If you don't see it, just use `exit` to return to the login screen and the IP will be displayed there.
 
@@ -110,6 +110,8 @@ timonwong.shellcheck
 systemctl disable control
 systemctl stop control
 ```
+
+13. If you get a license error, you can run `control license refresh` to force the license to be regenerated.
 
 ### Environment Variables
 
