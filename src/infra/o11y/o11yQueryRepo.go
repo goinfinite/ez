@@ -14,13 +14,23 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/speedianet/control/src/infra/db"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
-type GetOverview struct {
+type O11yQueryRepo struct {
+	transientDbSvc *db.TransientDatabaseService
 }
 
-func (repo *GetOverview) getUptime() (uint64, error) {
+func NewO11yQueryRepo(
+	transientDbSvc *db.TransientDatabaseService,
+) *O11yQueryRepo {
+	return &O11yQueryRepo{
+		transientDbSvc: transientDbSvc,
+	}
+}
+
+func (repo *O11yQueryRepo) getUptime() (uint64, error) {
 	sysinfo := &syscall.Sysinfo_t{}
 	if err := syscall.Sysinfo(sysinfo); err != nil {
 		return 0, err
@@ -29,7 +39,7 @@ func (repo *GetOverview) getUptime() (uint64, error) {
 	return uint64(sysinfo.Uptime), nil
 }
 
-func (repo *GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
+func (repo *O11yQueryRepo) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
 	var storageInfos []valueObject.StorageUnitInfo
 
 	initialStats, err := disk.IOCounters()
@@ -125,7 +135,7 @@ func (repo *GetOverview) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, e
 	return storageInfos, nil
 }
 
-func (repo *GetOverview) getMemLimit() (uint64, error) {
+func (repo *O11yQueryRepo) getMemLimit() (uint64, error) {
 	memInfo, err := mem.VirtualMemory()
 	if err != nil {
 		return 0, errors.New("GetMemInfoFailed")
@@ -134,7 +144,7 @@ func (repo *GetOverview) getMemLimit() (uint64, error) {
 	return memInfo.Total, nil
 }
 
-func (repo *GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
+func (repo *O11yQueryRepo) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 	var hardwareSpecs valueObject.HardwareSpecs
 
 	cpuInfo, err := cpu.Info()
@@ -171,7 +181,7 @@ func (repo *GetOverview) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
 	), nil
 }
 
-func (repo *GetOverview) getCpuUsagePercent() (float64, error) {
+func (repo *O11yQueryRepo) getCpuUsagePercent() (float64, error) {
 	cpuPercent, err := cpu.Percent(time.Second, false)
 	if err != nil {
 		return 0, errors.New("GetCpuUsageFailed")
@@ -180,7 +190,7 @@ func (repo *GetOverview) getCpuUsagePercent() (float64, error) {
 	return infraHelper.RoundFloat(cpuPercent[0]), nil
 }
 
-func (repo *GetOverview) getMemUsagePercent() (float64, error) {
+func (repo *O11yQueryRepo) getMemUsagePercent() (float64, error) {
 	memInfo, err := mem.VirtualMemory()
 	if err != nil {
 		return 0, errors.New("GetMemInfoFailed")
@@ -189,7 +199,7 @@ func (repo *GetOverview) getMemUsagePercent() (float64, error) {
 	return infraHelper.RoundFloat(memInfo.UsedPercent), nil
 }
 
-func (repo *GetOverview) getNetInfos() ([]valueObject.NetInterfaceInfo, error) {
+func (repo *O11yQueryRepo) getNetInfos() ([]valueObject.NetInterfaceInfo, error) {
 	var netInfos []valueObject.NetInterfaceInfo
 
 	initialStats, err := net.IOCounters(true)
@@ -256,7 +266,7 @@ type HostResourceUsageResult struct {
 	err             error
 }
 
-func (repo *GetOverview) getHostResourceUsage() (valueObject.HostResourceUsage, error) {
+func (repo *O11yQueryRepo) getHostResourceUsage() (valueObject.HostResourceUsage, error) {
 	cpuChan := make(chan HostResourceUsageResult)
 	memChan := make(chan HostResourceUsageResult)
 	storageChan := make(chan HostResourceUsageResult)
@@ -310,7 +320,7 @@ func (repo *GetOverview) getHostResourceUsage() (valueObject.HostResourceUsage, 
 	), nil
 }
 
-func (repo *GetOverview) Get() (entity.O11yOverview, error) {
+func (repo *O11yQueryRepo) GetOverview() (entity.O11yOverview, error) {
 	hostnameStr, err := os.Hostname()
 	if err != nil {
 		hostnameStr = "localhost"

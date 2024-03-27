@@ -8,12 +8,13 @@ import (
 
 func TestGetOverview(t *testing.T) {
 	testHelpers.LoadEnvVars()
+	transientDbSvc := testHelpers.GetTransientDbSvc()
+	o11yQueryRepo := NewO11yQueryRepo(transientDbSvc)
 
 	t.Run("GetOverview", func(t *testing.T) {
-		getOverviewRepo := GetOverview{}
-		_, err := getOverviewRepo.Get()
+		_, err := o11yQueryRepo.GetOverview()
 		if err != nil {
-			t.Errorf("Expected nil, got %v", err)
+			t.Errorf("UnexpectedError: %v", err)
 		}
 	})
 }
