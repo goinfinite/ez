@@ -26,7 +26,7 @@ func NewContainerRegistryQueryRepo(
 	return &ContainerRegistryQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
+func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 	imageMap map[string]interface{},
 ) (entity.RegistryImage, error) {
 	var registryImage entity.RegistryImage
@@ -207,7 +207,7 @@ func (repo ContainerRegistryQueryRepo) dockerHubImageFactory(
 	), nil
 }
 
-func (repo ContainerRegistryQueryRepo) queryJsonApi(
+func (repo *ContainerRegistryQueryRepo) queryJsonApi(
 	apiUrl string,
 ) ([]byte, error) {
 	var responseBody []byte
@@ -230,7 +230,7 @@ func (repo ContainerRegistryQueryRepo) queryJsonApi(
 	return io.ReadAll(httpResponse.Body)
 }
 
-func (repo ContainerRegistryQueryRepo) getDockerHubImages(
+func (repo *ContainerRegistryQueryRepo) getDockerHubImages(
 	imageName *valueObject.RegistryImageName,
 ) ([]entity.RegistryImage, error) {
 	registryImages := []entity.RegistryImage{}
@@ -295,7 +295,7 @@ func (repo ContainerRegistryQueryRepo) getDockerHubImages(
 	return registryImages, nil
 }
 
-func (repo ContainerRegistryQueryRepo) GetImages(
+func (repo *ContainerRegistryQueryRepo) GetImages(
 	imageName *valueObject.RegistryImageName,
 ) ([]entity.RegistryImage, error) {
 	registryImages := []entity.RegistryImage{}
@@ -310,7 +310,7 @@ func (repo ContainerRegistryQueryRepo) GetImages(
 	return registryImages, nil
 }
 
-func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
+func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	imageAddress valueObject.ContainerImageAddress,
 ) (entity.RegistryTaggedImage, error) {
 	var registryTaggedImage entity.RegistryTaggedImage
@@ -462,7 +462,7 @@ func (repo ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	), nil
 }
 
-func (repo ContainerRegistryQueryRepo) GetTaggedImage(
+func (repo *ContainerRegistryQueryRepo) GetTaggedImage(
 	imageAddress valueObject.ContainerImageAddress,
 ) (entity.RegistryTaggedImage, error) {
 	var registryTaggedImage entity.RegistryTaggedImage

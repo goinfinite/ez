@@ -20,7 +20,7 @@ func NewContainerProfileQueryRepo(
 	return &ContainerProfileQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
+func (repo *ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
 	var profileEntities []entity.ContainerProfile
 	var profileModels []dbModel.ContainerProfile
 
@@ -44,7 +44,7 @@ func (repo ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
 	return profileEntities, nil
 }
 
-func (repo ContainerProfileQueryRepo) GetById(
+func (repo *ContainerProfileQueryRepo) GetById(
 	id valueObject.ContainerProfileId,
 ) (entity.ContainerProfile, error) {
 	profileModel := dbModel.ContainerProfile{ID: uint(id.Get())}

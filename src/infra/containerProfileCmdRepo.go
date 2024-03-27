@@ -19,7 +19,7 @@ func NewContainerProfileCmdRepo(
 	return &ContainerProfileCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo ContainerProfileCmdRepo) Add(
+func (repo *ContainerProfileCmdRepo) Add(
 	addDto dto.AddContainerProfile,
 ) error {
 	containerProfileModel, err := dbModel.ContainerProfile{}.AddDtoToModel(addDto)
@@ -35,7 +35,7 @@ func (repo ContainerProfileCmdRepo) Add(
 	return nil
 }
 
-func (repo ContainerProfileCmdRepo) Update(
+func (repo *ContainerProfileCmdRepo) Update(
 	updateDto dto.UpdateContainerProfile,
 ) error {
 	updateMap := map[string]interface{}{}
@@ -86,7 +86,7 @@ func (repo ContainerProfileCmdRepo) Update(
 	return nil
 }
 
-func (repo ContainerProfileCmdRepo) Delete(
+func (repo *ContainerProfileCmdRepo) Delete(
 	profileId valueObject.ContainerProfileId,
 ) error {
 	err := repo.persistentDbSvc.Handler.Delete(

@@ -24,7 +24,7 @@ func NewAuthQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *AuthQueryR
 	return &AuthQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo AuthQueryRepo) IsLoginValid(login dto.Login) bool {
+func (repo *AuthQueryRepo) IsLoginValid(login dto.Login) bool {
 	storedPassHash, err := infraHelper.RunCmd(
 		"bash",
 		"-c",
@@ -45,7 +45,7 @@ func (repo AuthQueryRepo) IsLoginValid(login dto.Login) bool {
 	return err == nil
 }
 
-func (repo AuthQueryRepo) getSessionTokenClaims(
+func (repo *AuthQueryRepo) getSessionTokenClaims(
 	sessionToken valueObject.AccessTokenStr,
 ) (jwt.MapClaims, error) {
 	var claims jwt.MapClaims
@@ -71,7 +71,7 @@ func (repo AuthQueryRepo) getSessionTokenClaims(
 	return claims, nil
 }
 
-func (repo AuthQueryRepo) getTokenDetailsFromSession(
+func (repo *AuthQueryRepo) getTokenDetailsFromSession(
 	sessionTokenClaims jwt.MapClaims,
 ) (dto.AccessTokenDetails, error) {
 	issuedIp, err := valueObject.NewIpAddress(
@@ -93,7 +93,7 @@ func (repo AuthQueryRepo) getTokenDetailsFromSession(
 	), nil
 }
 
-func (repo AuthQueryRepo) getKeyHash(
+func (repo *AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
 	accModel := dbModel.Account{ID: uint(accountId.Get())}
@@ -109,7 +109,7 @@ func (repo AuthQueryRepo) getKeyHash(
 	return *accModel.KeyHash, nil
 }
 
-func (repo AuthQueryRepo) getTokenDetailsFromApiKey(
+func (repo *AuthQueryRepo) getTokenDetailsFromApiKey(
 	token valueObject.AccessTokenStr,
 ) (dto.AccessTokenDetails, error) {
 	secretKey := os.Getenv("ACC_API_KEY_SECRET")
@@ -150,7 +150,7 @@ func (repo AuthQueryRepo) getTokenDetailsFromApiKey(
 	), nil
 }
 
-func (repo AuthQueryRepo) GetAccessTokenDetails(
+func (repo *AuthQueryRepo) GetAccessTokenDetails(
 	token valueObject.AccessTokenStr,
 ) (dto.AccessTokenDetails, error) {
 	var tokenDetails dto.AccessTokenDetails

@@ -23,7 +23,7 @@ func NewContainerCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *Contain
 	return &ContainerCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo ContainerCmdRepo) getBaseSpecs(
+func (repo *ContainerCmdRepo) getBaseSpecs(
 	profileId valueObject.ContainerProfileId,
 ) (valueObject.ContainerSpecs, error) {
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
@@ -37,7 +37,7 @@ func (repo ContainerCmdRepo) getBaseSpecs(
 	return containerProfile.BaseSpecs, nil
 }
 
-func (repo ContainerCmdRepo) calibratePortBindings(
+func (repo *ContainerCmdRepo) calibratePortBindings(
 	originalPortBindings []valueObject.PortBinding,
 ) ([]valueObject.PortBinding, error) {
 	calibratedPortBindings := []valueObject.PortBinding{}
@@ -98,7 +98,7 @@ func (repo ContainerCmdRepo) calibratePortBindings(
 	return calibratedPortBindings, nil
 }
 
-func (repo ContainerCmdRepo) getPortBindingsParam(
+func (repo *ContainerCmdRepo) getPortBindingsParam(
 	portBindings []valueObject.PortBinding,
 ) []string {
 	portBindingsParams := []string{}
@@ -118,7 +118,7 @@ func (repo ContainerCmdRepo) getPortBindingsParam(
 	return portBindingsParams
 }
 
-func (repo ContainerCmdRepo) Add(
+func (repo *ContainerCmdRepo) Add(
 	addDto dto.AddContainer,
 ) (valueObject.ContainerId, error) {
 	var containerId valueObject.ContainerId
@@ -268,7 +268,7 @@ func (repo ContainerCmdRepo) Add(
 	return containerId, nil
 }
 
-func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
+func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
 	actionToPerform := "start"
 	if !*updateDto.Status {
 		actionToPerform = "stop"
@@ -301,7 +301,7 @@ func (repo ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer
 	return updateResult.Error
 }
 
-func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
+func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
 	currentContainer, err := containerQueryRepo.GetById(updateDto.ContainerId)
 	if err != nil {
@@ -367,7 +367,7 @@ func (repo ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	return updateResult.Error
 }
 
-func (repo ContainerCmdRepo) Delete(
+func (repo *ContainerCmdRepo) Delete(
 	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {

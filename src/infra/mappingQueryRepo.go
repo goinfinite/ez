@@ -20,7 +20,7 @@ func NewMappingQueryRepo(
 	return &MappingQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo MappingQueryRepo) Get() ([]entity.Mapping, error) {
+func (repo *MappingQueryRepo) Get() ([]entity.Mapping, error) {
 	mappingEntities := []entity.Mapping{}
 
 	var mappingModels []dbModel.Mapping
@@ -45,7 +45,7 @@ func (repo MappingQueryRepo) Get() ([]entity.Mapping, error) {
 	return mappingEntities, nil
 }
 
-func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, error) {
+func (repo *MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, error) {
 	var mapping entity.Mapping
 
 	mappingModel := dbModel.Mapping{ID: uint(id.Get())}
@@ -60,7 +60,7 @@ func (repo MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, 
 	return mappingModel.ToEntity()
 }
 
-func (repo MappingQueryRepo) GetByProtocol(
+func (repo *MappingQueryRepo) GetByProtocol(
 	protocol valueObject.NetworkProtocol,
 ) ([]entity.Mapping, error) {
 	mappingEntities := []entity.Mapping{}
@@ -87,7 +87,7 @@ func (repo MappingQueryRepo) GetByProtocol(
 	return mappingEntities, nil
 }
 
-func (repo MappingQueryRepo) GetTargetById(
+func (repo *MappingQueryRepo) GetTargetById(
 	id valueObject.MappingTargetId,
 ) (entity.MappingTarget, error) {
 	var mappingTarget entity.MappingTarget
@@ -103,7 +103,7 @@ func (repo MappingQueryRepo) GetTargetById(
 	return mappingTargetModel.ToEntity()
 }
 
-func (repo MappingQueryRepo) GetTargetsByContainerId(
+func (repo *MappingQueryRepo) GetTargetsByContainerId(
 	containerId valueObject.ContainerId,
 ) ([]entity.MappingTarget, error) {
 	mappingTargets := []entity.MappingTarget{}
@@ -131,7 +131,7 @@ func (repo MappingQueryRepo) GetTargetsByContainerId(
 	return mappingTargets, nil
 }
 
-func (repo MappingQueryRepo) FindOne(
+func (repo *MappingQueryRepo) FindOne(
 	hostname *valueObject.Fqdn,
 	publicPort valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,

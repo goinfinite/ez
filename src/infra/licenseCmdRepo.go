@@ -31,7 +31,7 @@ func NewLicenseCmdRepo(
 	}
 }
 
-func (repo LicenseCmdRepo) GenerateIntegrityHash(
+func (repo *LicenseCmdRepo) GenerateIntegrityHash(
 	licenseInfo entity.LicenseInfo,
 ) (valueObject.Hash, error) {
 	var integrityHash valueObject.Hash
@@ -45,7 +45,7 @@ func (repo LicenseCmdRepo) GenerateIntegrityHash(
 	return valueObject.NewHash(licenseInfoHashStr)
 }
 
-func (repo LicenseCmdRepo) GenerateNonceHash() (valueObject.Hash, error) {
+func (repo *LicenseCmdRepo) GenerateNonceHash() (valueObject.Hash, error) {
 	var nonceHash valueObject.Hash
 
 	currentHourInEpoch, err := infraHelper.RunCmdWithSubShell(
@@ -60,7 +60,7 @@ func (repo LicenseCmdRepo) GenerateNonceHash() (valueObject.Hash, error) {
 	return valueObject.NewHash(nonceHashStr)
 }
 
-func (repo LicenseCmdRepo) generateFingerprint() (
+func (repo *LicenseCmdRepo) generateFingerprint() (
 	valueObject.LicenseFingerprint,
 	error,
 ) {
@@ -121,7 +121,7 @@ func (repo LicenseCmdRepo) generateFingerprint() (
 	)
 }
 
-func (repo LicenseCmdRepo) updateIntegrityHash() error {
+func (repo *LicenseCmdRepo) updateIntegrityHash() error {
 	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc, repo.transientDbSvc)
 
 	licenseInfo, err := licenseQueryRepo.Get()
@@ -142,7 +142,7 @@ func (repo LicenseCmdRepo) updateIntegrityHash() error {
 	return nil
 }
 
-func (repo LicenseCmdRepo) Refresh() error {
+func (repo *LicenseCmdRepo) Refresh() error {
 	speediaApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
@@ -245,7 +245,7 @@ func (repo LicenseCmdRepo) Refresh() error {
 	return repo.updateIntegrityHash()
 }
 
-func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
+func (repo *LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error {
 	licenseInfoModel := dbModel.LicenseInfo{}
 
 	err := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
@@ -259,7 +259,7 @@ func (repo LicenseCmdRepo) UpdateStatus(status valueObject.LicenseStatus) error 
 	return repo.updateIntegrityHash()
 }
 
-func (repo LicenseCmdRepo) IncrementErrorCount() error {
+func (repo *LicenseCmdRepo) IncrementErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
 
 	err := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).
@@ -272,7 +272,7 @@ func (repo LicenseCmdRepo) IncrementErrorCount() error {
 	return repo.updateIntegrityHash()
 }
 
-func (repo LicenseCmdRepo) ResetErrorCount() error {
+func (repo *LicenseCmdRepo) ResetErrorCount() error {
 	licenseInfoModel := dbModel.LicenseInfo{}
 
 	err := repo.persistentDbSvc.Handler.Model(&licenseInfoModel).

@@ -18,7 +18,7 @@ func NewAccQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *AccQueryRep
 	return &AccQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo AccQueryRepo) Get() ([]entity.Account, error) {
+func (repo *AccQueryRepo) Get() ([]entity.Account, error) {
 	var accEntities []entity.Account
 
 	var accModels []dbModel.Account
@@ -43,7 +43,7 @@ func (repo AccQueryRepo) Get() ([]entity.Account, error) {
 	return accEntities, nil
 }
 
-func (repo AccQueryRepo) GetByUsername(
+func (repo *AccQueryRepo) GetByUsername(
 	username valueObject.Username,
 ) (entity.Account, error) {
 	accEntities, err := repo.Get()
@@ -60,7 +60,7 @@ func (repo AccQueryRepo) GetByUsername(
 	return entity.Account{}, errors.New("AccountNotFound")
 }
 
-func (repo AccQueryRepo) GetById(
+func (repo *AccQueryRepo) GetById(
 	accountId valueObject.AccountId,
 ) (entity.Account, error) {
 	accEntities, err := repo.Get()

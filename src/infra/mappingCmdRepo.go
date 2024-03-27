@@ -29,7 +29,7 @@ func NewMappingCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingCm
 	}
 }
 
-func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
+func (repo *MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
 	var mappingId valueObject.MappingId
 
 	mappingModel := dbModel.Mapping{}.AddDtoToModel(mappingDto)
@@ -42,7 +42,7 @@ func (repo MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId
 	return valueObject.NewMappingId(mappingModel.ID)
 }
 
-func (repo MappingCmdRepo) sslPreReadBlockFactory() (string, error) {
+func (repo *MappingCmdRepo) sslPreReadBlockFactory() (string, error) {
 	mappings, err := repo.queryRepo.Get()
 	if err != nil {
 		return "", err
@@ -113,7 +113,7 @@ server {
 	return preReadBlock, nil
 }
 
-func (repo MappingCmdRepo) nginxConfigFactory(
+func (repo *MappingCmdRepo) nginxConfigFactory(
 	mappingEntity entity.Mapping,
 ) (string, error) {
 	containerIdTargetEntityMap := map[valueObject.ContainerId]entity.MappingTarget{}
@@ -228,7 +228,7 @@ server {
 	return strings.TrimSpace(upstreamBlock+nginxConf) + "\n", nil
 }
 
-func (repo MappingCmdRepo) getNginxConfDirByProtocol(
+func (repo *MappingCmdRepo) getNginxConfDirByProtocol(
 	protocol valueObject.NetworkProtocol,
 ) string {
 	switch protocol.String() {
@@ -239,7 +239,7 @@ func (repo MappingCmdRepo) getNginxConfDirByProtocol(
 	return nginxStreamConfDir
 }
 
-func (repo MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) error {
+func (repo *MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) error {
 	mappingEntity, err := repo.queryRepo.GetById(mappingId)
 	if err != nil {
 		return err
@@ -272,7 +272,7 @@ func (repo MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) er
 	return nil
 }
 
-func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
+func (repo *MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 	targetModel := dbModel.MappingTarget{}.AddDtoToModel(addDto)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)
@@ -283,7 +283,7 @@ func (repo MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 	return repo.updateMappingFile(addDto.MappingId)
 }
 
-func (repo MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) error {
+func (repo *MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) error {
 	mappingEntity, err := repo.queryRepo.GetById(mappingId)
 	if err != nil {
 		return err
@@ -303,7 +303,7 @@ func (repo MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) er
 	return nil
 }
 
-func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
+func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 	ormSvc := repo.persistentDbSvc.Handler
 
 	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Get()).Error
@@ -319,7 +319,7 @@ func (repo MappingCmdRepo) Delete(id valueObject.MappingId) error {
 	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
 }
 
-func (repo MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
+func (repo *MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
 	targetEntity, err := repo.queryRepo.GetTargetById(id)
 	if err != nil {
 		return err
