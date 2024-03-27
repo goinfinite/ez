@@ -233,14 +233,14 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 		"-c",
 		"mount | awk '/on \\/ type/{print $1}'",
 	)
-	if err != nil {
+	if err != nil || primaryPart == "" {
 		return "", errors.New("GetPrimaryPartError")
 	}
 
 	primaryDiskId, err := infraHelper.RunCmd(
 		"lsblk", primaryPart, "-n", "--output", "PKNAME",
 	)
-	if err != nil {
+	if err != nil || primaryDiskId == "" {
 		return "", errors.New("GetPrimaryDiskIdError")
 	}
 
@@ -249,7 +249,7 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 		"-c",
 		"lsblk -ndp -e 7 --output KNAME | grep -v '/dev/"+primaryDiskId+"' | head -n1",
 	)
-	if err != nil {
+	if err != nil || additionalDisk == "" {
 		return "", errors.New("GetAddDiskError")
 	}
 
@@ -270,7 +270,7 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 	}
 
 	if addDiskFilesystem != "" {
-		return errors.New("AddDiskCannotHaveFilesystem")
+		return errors.New("AddDiskAlreadyHaveFilesystem")
 	}
 
 	_, err = infraHelper.RunCmd("mkfs.xfs", addDisk)
@@ -286,7 +286,7 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 	addDiskUuid, err := infraHelper.RunCmd(
 		"lsblk", addDisk, "-n", "--output", "UUID",
 	)
-	if err != nil {
+	if err != nil || addDiskUuid == "" {
 		return errors.New("GetAddDiskUuidError")
 	}
 
