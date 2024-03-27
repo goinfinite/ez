@@ -120,6 +120,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		"util-linux-tty-tools",
 		"dmidecode",
 		"whois",
+		"bind-utils",
 	}
 	err := infraHelper.InstallPkgs(necessaryPkgs)
 	if err != nil {
