@@ -6,7 +6,7 @@ import (
 	testHelpers "github.com/speedianet/control/src/devUtils"
 )
 
-func TestGetOverview(t *testing.T) {
+func TestO11yQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	transientDbSvc := testHelpers.GetTransientDbSvc()
 	o11yQueryRepo := NewO11yQueryRepo(transientDbSvc)
