@@ -10,7 +10,7 @@ import (
 type O11yController struct {
 }
 
-func (O11yController) GetO11yOverview() *cobra.Command {
+func (*O11yController) GetO11yOverview() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "overview",
 		Short: "GetOverview",

@@ -16,11 +16,13 @@ type ContainerController struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerController(persistentDbSvc *db.PersistentDatabaseService) ContainerController {
-	return ContainerController{persistentDbSvc: persistentDbSvc}
+func NewContainerController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerController {
+	return &ContainerController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller ContainerController) GetContainers() *cobra.Command {
+func (controller *ContainerController) GetContainers() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetContainers",
@@ -38,7 +40,7 @@ func (controller ContainerController) GetContainers() *cobra.Command {
 	return cmd
 }
 
-func (controller ContainerController) parsePortBindings(
+func (controller *ContainerController) parsePortBindings(
 	portBindingsSlice []string,
 ) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
@@ -54,7 +56,7 @@ func (controller ContainerController) parsePortBindings(
 	return portBindings
 }
 
-func (controller ContainerController) parseContainerEnvs(
+func (controller *ContainerController) parseContainerEnvs(
 	envsSlice []string,
 ) []valueObject.ContainerEnv {
 	envs := []valueObject.ContainerEnv{}
@@ -66,7 +68,7 @@ func (controller ContainerController) parseContainerEnvs(
 	return envs
 }
 
-func (controller ContainerController) AddContainer() *cobra.Command {
+func (controller *ContainerController) AddContainer() *cobra.Command {
 	var accId uint64
 	var hostnameStr string
 	var containerImageAddressStr string
@@ -184,7 +186,7 @@ func (controller ContainerController) AddContainer() *cobra.Command {
 	return cmd
 }
 
-func (controller ContainerController) UpdateContainer() *cobra.Command {
+func (controller *ContainerController) UpdateContainer() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 	var containerStatusStr string
@@ -252,7 +254,7 @@ func (controller ContainerController) UpdateContainer() *cobra.Command {
 	return cmd
 }
 
-func (controller ContainerController) DeleteContainer() *cobra.Command {
+func (controller *ContainerController) DeleteContainer() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 

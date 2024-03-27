@@ -14,11 +14,13 @@ type AccountController struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewAccountController(persistentDbSvc *db.PersistentDatabaseService) AccountController {
-	return AccountController{persistentDbSvc: persistentDbSvc}
+func NewAccountController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *AccountController {
+	return &AccountController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller AccountController) GetAccounts() *cobra.Command {
+func (controller *AccountController) GetAccounts() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetAccounts",
@@ -36,7 +38,7 @@ func (controller AccountController) GetAccounts() *cobra.Command {
 	return cmd
 }
 
-func (controller AccountController) AddAccount() *cobra.Command {
+func (controller *AccountController) AddAccount() *cobra.Command {
 	var usernameStr string
 	var passwordStr string
 	var quotaStr string
@@ -87,7 +89,7 @@ func (controller AccountController) AddAccount() *cobra.Command {
 	return cmd
 }
 
-func (controller AccountController) UpdateAccount() *cobra.Command {
+func (controller *AccountController) UpdateAccount() *cobra.Command {
 	var accountIdStr string
 	var passwordStr string
 	shouldUpdateApiKeyBool := false
@@ -167,7 +169,7 @@ func (controller AccountController) UpdateAccount() *cobra.Command {
 	return cmd
 }
 
-func (controller AccountController) DeleteAccount() *cobra.Command {
+func (controller *AccountController) DeleteAccount() *cobra.Command {
 	var accountIdStr string
 
 	cmd := &cobra.Command{

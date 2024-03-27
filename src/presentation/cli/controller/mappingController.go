@@ -14,11 +14,13 @@ type MappingController struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewMappingController(persistentDbSvc *db.PersistentDatabaseService) MappingController {
-	return MappingController{persistentDbSvc: persistentDbSvc}
+func NewMappingController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *MappingController {
+	return &MappingController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller MappingController) GetMappings() *cobra.Command {
+func (controller *MappingController) GetMappings() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetMappings",
@@ -36,7 +38,7 @@ func (controller MappingController) GetMappings() *cobra.Command {
 	return cmd
 }
 
-func (controller MappingController) AddMapping() *cobra.Command {
+func (controller *MappingController) AddMapping() *cobra.Command {
 	var accIdUint uint64
 	var hostnameStr string
 	var publicPortUint uint64
@@ -112,7 +114,7 @@ func (controller MappingController) AddMapping() *cobra.Command {
 	return cmd
 }
 
-func (controller MappingController) DeleteMapping() *cobra.Command {
+func (controller *MappingController) DeleteMapping() *cobra.Command {
 	var mappingIdUint uint64
 
 	cmd := &cobra.Command{
@@ -142,7 +144,7 @@ func (controller MappingController) DeleteMapping() *cobra.Command {
 	return cmd
 }
 
-func (controller MappingController) AddMappingTarget() *cobra.Command {
+func (controller *MappingController) AddMappingTarget() *cobra.Command {
 	var mappingIdUint uint64
 	var targetStr string
 
@@ -192,7 +194,7 @@ func (controller MappingController) AddMappingTarget() *cobra.Command {
 	return cmd
 }
 
-func (controller MappingController) DeleteMappingTarget() *cobra.Command {
+func (controller *MappingController) DeleteMappingTarget() *cobra.Command {
 	var targetIdUint uint64
 
 	cmd := &cobra.Command{

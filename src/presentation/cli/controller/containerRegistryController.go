@@ -13,11 +13,13 @@ type ContainerRegistryController struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerRegistryController(persistentDbSvc *db.PersistentDatabaseService) ContainerRegistryController {
-	return ContainerRegistryController{persistentDbSvc: persistentDbSvc}
+func NewContainerRegistryController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerRegistryController {
+	return &ContainerRegistryController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller ContainerRegistryController) GetRegistryImages() *cobra.Command {
+func (controller *ContainerRegistryController) GetRegistryImages() *cobra.Command {
 	var imageNameStr string
 
 	cmd := &cobra.Command{
@@ -48,7 +50,7 @@ func (controller ContainerRegistryController) GetRegistryImages() *cobra.Command
 	return cmd
 }
 
-func (controller ContainerRegistryController) GetRegistryTaggedImage() *cobra.Command {
+func (controller *ContainerRegistryController) GetRegistryTaggedImage() *cobra.Command {
 	var imageAddressStr string
 
 	cmd := &cobra.Command{

@@ -16,14 +16,14 @@ type LicenseController struct {
 func NewLicenseController(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
-) LicenseController {
-	return LicenseController{
+) *LicenseController {
+	return &LicenseController{
 		persistentDbSvc: persistentDbSvc,
 		transientDbSvc:  transientDbSvc,
 	}
 }
 
-func (controller LicenseController) GetLicenseInfo() *cobra.Command {
+func (controller *LicenseController) GetLicenseInfo() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetLicenseInfo",
@@ -44,7 +44,7 @@ func (controller LicenseController) GetLicenseInfo() *cobra.Command {
 	return cmd
 }
 
-func (controller LicenseController) RefreshLicense() *cobra.Command {
+func (controller *LicenseController) RefreshLicense() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "refresh",
 		Short: "RefreshLicense",

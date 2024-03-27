@@ -17,11 +17,13 @@ type ContainerProfileController struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewContainerProfileController(persistentDbSvc *db.PersistentDatabaseService) ContainerProfileController {
-	return ContainerProfileController{persistentDbSvc: persistentDbSvc}
+func NewContainerProfileController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerProfileController {
+	return &ContainerProfileController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller ContainerProfileController) GetContainerProfiles() *cobra.Command {
+func (controller *ContainerProfileController) GetContainerProfiles() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetContainerProfiles",
@@ -43,7 +45,7 @@ func (controller ContainerProfileController) GetContainerProfiles() *cobra.Comma
 	return cmd
 }
 
-func (controller ContainerProfileController) parseContainerSpecs(
+func (controller *ContainerProfileController) parseContainerSpecs(
 	specStr string,
 ) valueObject.ContainerSpecs {
 	specParts := strings.Split(specStr, ":")
@@ -67,7 +69,7 @@ func (controller ContainerProfileController) parseContainerSpecs(
 	)
 }
 
-func (controller ContainerProfileController) AddContainerProfile() *cobra.Command {
+func (controller *ContainerProfileController) AddContainerProfile() *cobra.Command {
 	var nameStr string
 	var baseSpecsStr string
 	var maxSpecsStr string
@@ -198,7 +200,7 @@ func (controller ContainerProfileController) AddContainerProfile() *cobra.Comman
 	return cmd
 }
 
-func (controller ContainerProfileController) UpdateContainerProfile() *cobra.Command {
+func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Command {
 	var profileIdUint uint64
 	var nameStr string
 	var baseSpecsStr string
@@ -347,7 +349,7 @@ func (controller ContainerProfileController) UpdateContainerProfile() *cobra.Com
 	return cmd
 }
 
-func (controller ContainerProfileController) DeleteContainerProfile() *cobra.Command {
+func (controller *ContainerProfileController) DeleteContainerProfile() *cobra.Command {
 	var profileIdUint uint64
 
 	cmd := &cobra.Command{
