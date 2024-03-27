@@ -93,7 +93,7 @@ func (repo *LicenseCmdRepo) generateFingerprint() (
 	fingerprintFirstPart := hwUuid + rootFsUuid + privateIp + installationUnixTime
 	firstPartShortHashStr := infraHelper.GenShortHash(fingerprintFirstPart)
 
-	publicIp, err := infraHelper.GetPublicIpAddress()
+	publicIp, err := infraHelper.GetPublicIpAddress(repo.transientDbSvc)
 	if err != nil {
 		return fingerprint, err
 	}

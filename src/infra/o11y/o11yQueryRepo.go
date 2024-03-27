@@ -336,7 +336,7 @@ func (repo *O11yQueryRepo) GetOverview() (entity.O11yOverview, error) {
 		uptime = 0
 	}
 
-	publicIpAddress, err := infraHelper.GetPublicIpAddress()
+	publicIpAddress, err := infraHelper.GetPublicIpAddress(repo.transientDbSvc)
 	if err != nil {
 		publicIpAddress, _ = valueObject.NewIpAddress("0.0.0.0")
 	}
