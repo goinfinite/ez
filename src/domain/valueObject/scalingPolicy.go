@@ -1,38 +1,36 @@
 package valueObject
 
-import "errors"
+import (
+	"errors"
+	"strings"
+
+	"golang.org/x/exp/slices"
+)
 
 type ScalingPolicy string
 
-const (
-	connection ScalingPolicy = "connection"
-	cpu        ScalingPolicy = "cpu"
-	memory     ScalingPolicy = "memory"
-)
+var ValidScalingPolicies = []string{
+	"connection",
+	"cpu",
+	"memory",
+}
 
 func NewScalingPolicy(value string) (ScalingPolicy, error) {
-	sp := ScalingPolicy(value)
-	if !sp.isValid() {
+	value = strings.TrimSpace(value)
+	value = strings.ToLower(value)
+
+	if !slices.Contains(ValidScalingPolicies, value) {
 		return "", errors.New("InvalidScalingPolicy")
 	}
-	return sp, nil
+	return ScalingPolicy(value), nil
 }
 
 func NewScalingPolicyPanic(value string) ScalingPolicy {
-	sp, err := NewScalingPolicy(value)
+	scalingPolicy, err := NewScalingPolicy(value)
 	if err != nil {
 		panic(err)
 	}
-	return sp
-}
-
-func (sp ScalingPolicy) isValid() bool {
-	switch sp {
-	case connection, cpu, memory:
-		return true
-	default:
-		return false
-	}
+	return scalingPolicy
 }
 
 func (sp ScalingPolicy) String() string {
