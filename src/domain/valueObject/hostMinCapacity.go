@@ -22,6 +22,10 @@ func NewHostMinCapacity(value interface{}) (HostMinCapacity, error) {
 	return HostMinCapacity(hmc), nil
 }
 
+func DefaultHostMinCapacity() HostMinCapacity {
+	return HostMinCapacity(20)
+}
+
 func NewHostMinCapacityPanic(value interface{}) HostMinCapacity {
 	hmc, err := NewHostMinCapacity(value)
 	if err != nil {
