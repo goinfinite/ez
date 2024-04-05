@@ -50,10 +50,10 @@ func AddMapping(
 		)
 	}
 
-	for _, target := range addDto.Targets {
+	for _, containerId := range addDto.ContainerIds {
 		addTargetDto := dto.NewAddMappingTarget(
 			mappingId,
-			target,
+			containerId,
 		)
 
 		err = AddMappingTarget(

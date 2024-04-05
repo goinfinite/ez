@@ -930,6 +930,12 @@
                 "accountId": {
                     "type": "integer"
                 },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "hostname": {
                     "type": "string"
                 },
@@ -938,12 +944,6 @@
                 },
                 "publicPort": {
                     "type": "integer"
-                },
-                "targets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },

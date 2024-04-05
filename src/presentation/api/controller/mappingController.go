@@ -43,7 +43,7 @@ func GetMappingsController(c echo.Context) error {
 // @Success      201 {object} object{} "MappingCreated"
 // @Router       /v1/mapping/ [post]
 func AddMappingController(c echo.Context) error {
-	requiredParams := []string{"accountId", "publicPort", "targets"}
+	requiredParams := []string{"accountId", "publicPort", "containerIds"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
@@ -63,13 +63,13 @@ func AddMappingController(c echo.Context) error {
 		protocol = valueObject.NewNetworkProtocolPanic(requestBody["protocol"].(string))
 	}
 
-	targets := []valueObject.ContainerId{}
-	for _, targetStr := range requestBody["targets"].([]interface{}) {
+	containerIds := []valueObject.ContainerId{}
+	for _, targetStr := range requestBody["containerIds"].([]interface{}) {
 		containerId, err := valueObject.NewContainerId(targetStr.(string))
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
-		targets = append(targets, containerId)
+		containerIds = append(containerIds, containerId)
 	}
 
 	addMappingDto := dto.NewAddMapping(
@@ -77,7 +77,7 @@ func AddMappingController(c echo.Context) error {
 		hostnamePtr,
 		publicPort,
 		protocol,
-		targets,
+		containerIds,
 	)
 
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
@@ -138,17 +138,17 @@ func DeleteMappingController(c echo.Context) error {
 // @Success      201 {object} object{} "MappingTargetAdded"
 // @Router       /v1/mapping/target/ [post]
 func AddMappingTargetController(c echo.Context) error {
-	requiredParams := []string{"mappingId", "target"}
+	requiredParams := []string{"mappingId", "containerId"}
 	requestBody, _ := apiHelper.GetRequestBody(c)
 
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	mappingId := valueObject.NewMappingIdPanic(requestBody["mappingId"])
-	target := valueObject.NewContainerIdPanic(requestBody["target"].(string))
+	containerId := valueObject.NewContainerIdPanic(requestBody["containerId"].(string))
 
 	addTargetDto := dto.NewAddMappingTarget(
 		mappingId,
-		target,
+		containerId,
 	)
 
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)

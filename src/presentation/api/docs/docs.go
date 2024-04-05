@@ -937,6 +937,12 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "hostname": {
                     "type": "string"
                 },
@@ -945,12 +951,6 @@ const docTemplate = `{
                 },
                 "publicPort": {
                     "type": "integer"
-                },
-                "targets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },

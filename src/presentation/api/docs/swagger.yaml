@@ -57,16 +57,16 @@ definitions:
     properties:
       accountId:
         type: integer
+      containerIds:
+        items:
+          type: string
+        type: array
       hostname:
         type: string
       protocol:
         type: string
       publicPort:
         type: integer
-      targets:
-        items:
-          type: string
-        type: array
     type: object
   dto.AddMappingTarget:
     properties:
