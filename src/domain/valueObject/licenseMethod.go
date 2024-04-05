@@ -17,25 +17,21 @@ var ValidLicenseMethods = []string{
 func NewLicenseMethod(value string) (LicenseMethod, error) {
 	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
-	LicenseMethod := LicenseMethod(value)
-	if !LicenseMethod.isValid() {
+
+	if !slices.Contains(ValidLicenseMethods, value) {
 		return "", errors.New("InvalidLicenseMethod")
 	}
-	return LicenseMethod, nil
+	return LicenseMethod(value), nil
 }
 
 func NewLicenseMethodPanic(value string) LicenseMethod {
-	LicenseMethod, err := NewLicenseMethod(value)
+	licenseMethod, err := NewLicenseMethod(value)
 	if err != nil {
 		panic(err)
 	}
-	return LicenseMethod
+	return licenseMethod
 }
 
-func (LicenseMethod LicenseMethod) isValid() bool {
-	return slices.Contains(ValidLicenseMethods, LicenseMethod.String())
-}
-
-func (LicenseMethod LicenseMethod) String() string {
-	return string(LicenseMethod)
+func (lm LicenseMethod) String() string {
+	return string(lm)
 }
