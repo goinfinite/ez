@@ -25,6 +25,11 @@ func NewScalingPolicy(value string) (ScalingPolicy, error) {
 	return ScalingPolicy(value), nil
 }
 
+func DefaultScalingPolicy() ScalingPolicy {
+	scalingPolicy, _ := NewScalingPolicy("cpu")
+	return scalingPolicy
+}
+
 func NewScalingPolicyPanic(value string) ScalingPolicy {
 	scalingPolicy, err := NewScalingPolicy(value)
 	if err != nil {
