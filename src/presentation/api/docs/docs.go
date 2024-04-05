@@ -924,7 +924,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "scalingPolicy": {
-                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                    "type": "string"
                 },
                 "scalingThreshold": {
                     "type": "integer"
@@ -1097,7 +1097,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "scalingPolicy": {
-                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                    "type": "string"
                 },
                 "scalingThreshold": {
                     "type": "integer"
@@ -1228,7 +1228,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "scalingPolicy": {
-                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                    "type": "string"
                 },
                 "scalingThreshold": {
                     "type": "integer"
@@ -1580,19 +1580,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "valueObject.ScalingPolicy": {
-            "type": "string",
-            "enum": [
-                "connection",
-                "cpu",
-                "memory"
-            ],
-            "x-enum-varnames": [
-                "connection",
-                "cpu",
-                "memory"
-            ]
         },
         "valueObject.StorageUnitInfo": {
             "type": "object",

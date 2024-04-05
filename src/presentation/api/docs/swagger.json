@@ -917,7 +917,7 @@
                     "type": "integer"
                 },
                 "scalingPolicy": {
-                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                    "type": "string"
                 },
                 "scalingThreshold": {
                     "type": "integer"
@@ -1090,7 +1090,7 @@
                     "type": "integer"
                 },
                 "scalingPolicy": {
-                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                    "type": "string"
                 },
                 "scalingThreshold": {
                     "type": "integer"
@@ -1221,7 +1221,7 @@
                     "type": "integer"
                 },
                 "scalingPolicy": {
-                    "$ref": "#/definitions/valueObject.ScalingPolicy"
+                    "type": "string"
                 },
                 "scalingThreshold": {
                     "type": "integer"
@@ -1573,19 +1573,6 @@
                     "type": "string"
                 }
             }
-        },
-        "valueObject.ScalingPolicy": {
-            "type": "string",
-            "enum": [
-                "connection",
-                "cpu",
-                "memory"
-            ],
-            "x-enum-varnames": [
-                "connection",
-                "cpu",
-                "memory"
-            ]
         },
         "valueObject.StorageUnitInfo": {
             "type": "object",

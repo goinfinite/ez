@@ -49,7 +49,7 @@ definitions:
       scalingMaxDurationSecs:
         type: integer
       scalingPolicy:
-        $ref: '#/definitions/valueObject.ScalingPolicy'
+        type: string
       scalingThreshold:
         type: integer
     type: object
@@ -162,7 +162,7 @@ definitions:
       scalingMaxDurationSecs:
         type: integer
       scalingPolicy:
-        $ref: '#/definitions/valueObject.ScalingPolicy'
+        type: string
       scalingThreshold:
         type: integer
     type: object
@@ -248,7 +248,7 @@ definitions:
       scalingMaxDurationSecs:
         type: integer
       scalingPolicy:
-        $ref: '#/definitions/valueObject.ScalingPolicy'
+        type: string
       scalingThreshold:
         type: integer
     type: object
@@ -481,16 +481,6 @@ definitions:
       serviceName:
         type: string
     type: object
-  valueObject.ScalingPolicy:
-    enum:
-    - connection
-    - cpu
-    - memory
-    type: string
-    x-enum-varnames:
-    - connection
-    - cpu
-    - memory
   valueObject.StorageUnitInfo:
     properties:
       deviceName:
