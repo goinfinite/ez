@@ -73,17 +73,17 @@ stream {
 		true,
 	)
 	if err != nil {
-		return errors.New("UpdateNginxConfFailed")
+		return errors.New("UpdateNginxConfFailed: " + err.Error())
 	}
 
 	err = infraHelper.MakeDir("/var/nginx/http.d")
 	if err != nil {
-		return errors.New("MakeNginxHttpDirFailed")
+		return errors.New("MakeNginxHttpDirFailed: " + err.Error())
 	}
 
 	err = infraHelper.MakeDir("/var/nginx/stream.d")
 	if err != nil {
-		return errors.New("MakeNginxStreamDirFailed")
+		return errors.New("MakeNginxStreamDirFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
@@ -93,7 +93,7 @@ stream {
 		"/var/nginx",
 	)
 	if err != nil {
-		return errors.New("ChownNginxDirFailed")
+		return errors.New("ChownNginxDirFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
@@ -103,7 +103,7 @@ stream {
 		"--now",
 	)
 	if err != nil {
-		return errors.New("EnableNginxSvcFailed")
+		return errors.New("EnableNginxSvcFailed: " + err.Error())
 	}
 
 	return nil
@@ -139,7 +139,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		"echo \"alias control='"+ControlMainDir+"/control'\" >> /root/.bashrc",
 	)
 	if err != nil {
-		return errors.New("AddControlAliasFailed")
+		return errors.New("AddControlAliasFailed: " + err.Error())
 	}
 
 	//cspell:disable
@@ -164,7 +164,7 @@ WantedBy=multi-user.target
 		true,
 	)
 	if err != nil {
-		return errors.New("UpdateHidepidSvcFailed")
+		return errors.New("UpdateHidepidSvcFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
@@ -172,7 +172,7 @@ WantedBy=multi-user.target
 		"daemon-reload",
 	)
 	if err != nil {
-		return errors.New("SystemctlDaemonReloadFailed")
+		return errors.New("SystemctlDaemonReloadFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
@@ -182,7 +182,7 @@ WantedBy=multi-user.target
 		"--now",
 	)
 	if err != nil {
-		return errors.New("EnableHidepidSvcFailed")
+		return errors.New("EnableHidepidSvcFailed: " + err.Error())
 	}
 
 	err = repo.installNginx()
@@ -207,7 +207,7 @@ func (repo SysInstallCmdRepo) DisableDefaultSoftwares() error {
 		"/etc/default/grub",
 	)
 	if err != nil {
-		return errors.New("DisableSelinuxFailed")
+		return errors.New("DisableSelinuxFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
@@ -217,12 +217,12 @@ func (repo SysInstallCmdRepo) DisableDefaultSoftwares() error {
 		"/etc/default/grub",
 	)
 	if err != nil {
-		return errors.New("ReduceGrubTimeoutFailed")
+		return errors.New("ReduceGrubTimeoutFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd("transactional-update", "grub.cfg")
 	if err != nil {
-		return errors.New("UpdateGrubFailed")
+		return errors.New("UpdateGrubFailed: " + err.Error())
 	}
 
 	return nil
@@ -235,14 +235,14 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 		"mount | awk '/on \\/ type/{print $1}'",
 	)
 	if err != nil || primaryPart == "" {
-		return "", errors.New("GetPrimaryPartError")
+		return "", errors.New("GetPrimaryPartError: " + err.Error())
 	}
 
 	primaryDiskId, err := infraHelper.RunCmd(
 		"lsblk", primaryPart, "-n", "--output", "PKNAME",
 	)
 	if err != nil || primaryDiskId == "" {
-		return "", errors.New("GetPrimaryDiskIdError")
+		return "", errors.New("GetPrimaryDiskIdError: " + err.Error())
 	}
 
 	additionalDisk, err := infraHelper.RunCmd(
@@ -251,7 +251,7 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 		"lsblk -ndp -e 7 --output KNAME | grep -v '/dev/"+primaryDiskId+"' | head -n1",
 	)
 	if err != nil || additionalDisk == "" {
-		return "", errors.New("GetAddDiskError")
+		return "", errors.New("GetAddDiskError: " + err.Error())
 	}
 
 	return additionalDisk, nil
@@ -267,7 +267,7 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 		"lsblk", addDisk, "-n", "--output", "FSTYPE",
 	)
 	if err != nil {
-		return errors.New("GetAddDiskFilesystemError")
+		return errors.New("GetAddDiskFilesystemError: " + err.Error())
 	}
 
 	if addDiskFilesystem != "" {
@@ -276,19 +276,19 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 
 	_, err = infraHelper.RunCmd("mkfs.xfs", addDisk)
 	if err != nil {
-		return errors.New("MkfsDataDiskFailed")
+		return errors.New("MkfsDataDiskFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd("mkdir", "/var/data")
 	if err != nil {
-		return errors.New("MkdirDataDirFailed")
+		return errors.New("MkdirDataDirFailed: " + err.Error())
 	}
 
 	addDiskUuid, err := infraHelper.RunCmd(
 		"lsblk", addDisk, "-n", "--output", "UUID",
 	)
 	if err != nil || addDiskUuid == "" {
-		return errors.New("GetAddDiskUuidError")
+		return errors.New("GetAddDiskUuidError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
@@ -297,12 +297,12 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 		"echo 'UUID="+addDiskUuid+" /var/data xfs defaults,uquota 0 0' >> /etc/fstab",
 	)
 	if err != nil {
-		return errors.New("AddDataDiskToFsTabFailed")
+		return errors.New("AddDataDiskToFsTabFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd("mount", "-a")
 	if err != nil {
-		return errors.New("MountDataDiskFailed")
+		return errors.New("MountDataDiskFailed: " + err.Error())
 	}
 
 	return nil
