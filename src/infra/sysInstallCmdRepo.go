@@ -291,10 +291,8 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 		return errors.New("GetAddDiskUuidError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd(
-		"bash",
-		"-c",
-		"echo 'UUID="+addDiskUuid+" /var/data xfs defaults,uquota 0 0' >> /etc/fstab",
+	_, err = infraHelper.RunCmdWithSubShell(
+		"echo 'UUID=" + addDiskUuid + " /var/data xfs defaults,uquota 0 0' >> /etc/fstab",
 	)
 	if err != nil {
 		return errors.New("AddDataDiskToFsTabFailed: " + err.Error())
