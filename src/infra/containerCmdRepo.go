@@ -181,12 +181,6 @@ func (repo *ContainerCmdRepo) Add(
 
 	runParams = append(runParams, addDto.ImageAddress.String())
 
-	err = infraHelper.EnableLingering(addDto.AccountId)
-	if err != nil {
-		return containerId, errors.New("FailedToEnableLingering: " + err.Error())
-	}
-	time.Sleep(1 * time.Second)
-
 	_, err = infraHelper.RunCmdAsUser(
 		addDto.AccountId,
 		"podman",

@@ -122,6 +122,11 @@ func (repo *AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
+	err = infraHelper.EnableLingering(accId)
+	if err != nil {
+		return errors.New("EnableLingeringFailed: " + err.Error())
+	}
+
 	return nil
 }
 
@@ -151,7 +156,7 @@ func (repo *AccCmdRepo) Delete(accId valueObject.AccountId) error {
 
 	err = infraHelper.DisableLingering(accId)
 	if err != nil {
-		return err
+		return errors.New("DisableLingeringFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd("pgrep", "-u", accId.String())
@@ -177,13 +182,13 @@ func (repo *AccCmdRepo) Delete(accId valueObject.AccountId) error {
 			"DELETE FROM "+tableName+" WHERE account_id = ?", modelId,
 		).Error
 		if err != nil {
-			return errors.New("DeleteAccRelatedTablesDbError")
+			return errors.New("DeleteAccRelatedTablesDbError: " + err.Error())
 		}
 	}
 
 	err = repo.persistentDbSvc.Handler.Delete(model, modelId).Error
 	if err != nil {
-		return errors.New("DeleteAccDbError")
+		return errors.New("DeleteAccDbError: " + err.Error())
 	}
 
 	return nil
