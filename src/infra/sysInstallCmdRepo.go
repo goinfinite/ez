@@ -303,5 +303,10 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 		return errors.New("MountDataDiskFailed: " + err.Error())
 	}
 
+	_, err = infraHelper.RunCmd("transactional-update", "apply")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
