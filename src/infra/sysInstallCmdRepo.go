@@ -3,6 +3,7 @@ package infra
 import (
 	"errors"
 	"os"
+	"time"
 
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
@@ -287,15 +288,23 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 		"-c",
 		"mount | awk '/on \\/ type/{print $1}'",
 	)
-	if err != nil || primaryPart == "" {
+	if err != nil {
 		return "", errors.New("GetPrimaryPartError: " + err.Error())
+	}
+
+	if primaryPart == "" {
+		return "", errors.New("PrimaryPartNotFound")
 	}
 
 	primaryDiskId, err := infraHelper.RunCmd(
 		"lsblk", primaryPart, "-n", "--output", "PKNAME",
 	)
-	if err != nil || primaryDiskId == "" {
+	if err != nil {
 		return "", errors.New("GetPrimaryDiskIdError: " + err.Error())
+	}
+
+	if primaryDiskId == "" {
+		return "", errors.New("PrimaryDiskIdNotFound")
 	}
 
 	additionalDisk, err := infraHelper.RunCmd(
@@ -303,8 +312,12 @@ func (repo SysInstallCmdRepo) getAdditionalDisk() (string, error) {
 		"-c",
 		"lsblk -ndp -e 7 --output KNAME | grep -v '/dev/"+primaryDiskId+"' | head -n1",
 	)
-	if err != nil || additionalDisk == "" {
+	if err != nil {
 		return "", errors.New("GetAddDiskError: " + err.Error())
+	}
+
+	if additionalDisk == "" {
+		return "", errors.New("AddDiskNotFound")
 	}
 
 	return additionalDisk, nil
@@ -332,16 +345,22 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 		return errors.New("MkfsDataDiskFailed: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd("mkdir", "/var/data")
-	if err != nil {
-		return errors.New("MkdirDataDirFailed: " + err.Error())
-	}
+	time.Sleep(5 * time.Second)
 
 	addDiskUuid, err := infraHelper.RunCmd(
 		"lsblk", addDisk, "-n", "--output", "UUID",
 	)
-	if err != nil || addDiskUuid == "" {
+	if err != nil {
 		return errors.New("GetAddDiskUuidError: " + err.Error())
+	}
+
+	if addDiskUuid == "" {
+		return errors.New("AddDiskUuidEmpty")
+	}
+
+	err = infraHelper.MakeDir("/var/data")
+	if err != nil {
+		return errors.New("MkdirDataDirFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdWithSubShell(
