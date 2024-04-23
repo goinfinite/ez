@@ -110,6 +110,7 @@ stream {
 }
 
 func (repo SysInstallCmdRepo) Install() error {
+	//cspell:disable
 	necessaryPkgs := []string{
 		"git",
 		"wget",
@@ -122,6 +123,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		"whois",
 		"bind-utils",
 	}
+	//cspell:enable
 	err := infraHelper.InstallPkgs(necessaryPkgs)
 	if err != nil {
 		return err
@@ -133,10 +135,8 @@ func (repo SysInstallCmdRepo) Install() error {
 	}
 
 	_ = os.MkdirAll(ControlMainDir, 0755)
-	_, err = infraHelper.RunCmd(
-		"bash",
-		"-c",
-		"echo \"alias control='"+ControlMainDir+"/control'\" >> /root/.bashrc",
+	_, err = infraHelper.RunCmdWithSubShell(
+		"echo \"alias control='" + ControlMainDir + "/control'\" >> /root/.bashrc",
 	)
 	if err != nil {
 		return errors.New("AddControlAliasFailed: " + err.Error())
@@ -167,6 +167,49 @@ WantedBy=multi-user.target
 		return errors.New("UpdateHidepidSvcFailed: " + err.Error())
 	}
 
+	//cspell:disable
+	cgroupControllersSvc := `[Unit]
+Description=CGroup Controllers
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'echo "+cpu +cpuset +io +memory +pids" > /sys/fs/cgroup/cgroup.subtree_control'
+
+[Install]
+WantedBy=multi-user.target
+`
+	//cspell:enable
+
+	err = infraHelper.UpdateFile(
+		"/etc/systemd/system/cgroup-controllers.service",
+		cgroupControllersSvc,
+		true,
+	)
+	if err != nil {
+		return errors.New("UpdateCgroupControllersSvcFailed: " + err.Error())
+	}
+
+	err = infraHelper.MakeDir("/etc/systemd/system/user@.service.d")
+	if err != nil {
+		return errors.New("MakeSystemdUserSliceDirFailed: " + err.Error())
+	}
+
+	//cspell:disable
+	cgroupDelegateConf := `[Service]
+Delegate=cpu cpuset io memory pids
+`
+	//cspell:enable
+
+	err = infraHelper.UpdateFile(
+		"/etc/systemd/system/user@.service.d/delegate.conf",
+		cgroupDelegateConf,
+		true,
+	)
+	if err != nil {
+		return errors.New("UpdateCgroupDelegateConfFailed: " + err.Error())
+	}
+
 	_, err = infraHelper.RunCmd(
 		"systemctl",
 		"daemon-reload",
@@ -183,6 +226,16 @@ WantedBy=multi-user.target
 	)
 	if err != nil {
 		return errors.New("EnableHidepidSvcFailed: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd(
+		"systemctl",
+		"enable",
+		"cgroup-controllers.service",
+		"--now",
+	)
+	if err != nil {
+		return errors.New("EnableCgroupControllersSvcFailed: " + err.Error())
 	}
 
 	err = repo.installNginx()
@@ -203,7 +256,7 @@ func (repo SysInstallCmdRepo) DisableDefaultSoftwares() error {
 	_, err := infraHelper.RunCmd(
 		"sed",
 		"-i",
-		"s/security=selinux selinux=1/selinux=0/g",
+		"s/security=selinux selinux=1/selinux=0 systemd.unified_cgroup_hierarchy=1/g",
 		"/etc/default/grub",
 	)
 	if err != nil {
