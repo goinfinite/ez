@@ -12,7 +12,20 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
+	"github.com/speedianet/control/src/presentation/service"
 )
+
+type ContainerController struct {
+	containerService *service.ContainerService
+}
+
+func NewContainerController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerController {
+	return &ContainerController{
+		containerService: service.NewContainerService(persistentDbSvc),
+	}
+}
 
 // GetContainers	 godoc
 // @Summary      GetContainers
@@ -23,7 +36,7 @@ import (
 // @Security     Bearer
 // @Success      200 {array} entity.Container
 // @Router       /v1/container/ [get]
-func GetContainersController(c echo.Context) error {
+func (controller *ContainerController) GetContainers(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 	containerList, err := useCase.GetContainers(containerQueryRepo)
@@ -43,7 +56,7 @@ func GetContainersController(c echo.Context) error {
 // @Security     Bearer
 // @Success      200 {array} dto.ContainerWithMetrics
 // @Router       /v1/container/metrics/ [get]
-func GetContainersWithMetricsController(c echo.Context) error {
+func (controller *ContainerController) GetContainersWithMetrics(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 	containerList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
@@ -54,7 +67,9 @@ func GetContainersWithMetricsController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
 }
 
-func parsePortBindings(rawPortBindings []interface{}) []valueObject.PortBinding {
+func (controller *ContainerController) parsePortBindings(
+	rawPortBindings []interface{},
+) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
 	for rawPortBindingIndex, rawPortBinding := range rawPortBindings {
 		errMsgSuffix := ": (item " + strconv.Itoa(rawPortBindingIndex) + ")"
@@ -124,7 +139,9 @@ func parsePortBindings(rawPortBindings []interface{}) []valueObject.PortBinding 
 	return portBindings
 }
 
-func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
+func (controller *ContainerController) parseContainerEnvs(
+	envs []interface{},
+) []valueObject.ContainerEnv {
 	containerEnvs := []valueObject.ContainerEnv{}
 	for _, env := range envs {
 		newEnv, err := valueObject.NewContainerEnv(env.(string))
@@ -147,28 +164,11 @@ func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
 // @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required."
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /v1/container/ [post]
-func AddContainerController(c echo.Context) error {
+func (controller *ContainerController) CreateContainer(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
 	}
-
-	requiredParams := []string{"accountId", "hostname"}
-	apiHelper.CheckMissingParams(requestBody, requiredParams)
-
-	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
-	hostname := valueObject.NewFqdnPanic(requestBody["hostname"].(string))
-
-	imgAddrStr, assertOk := requestBody["imageAddress"].(string)
-	if !assertOk {
-		imgAddrStr, assertOk = requestBody["imgAddr"].(string)
-		if !assertOk {
-			return apiHelper.ResponseWrapper(
-				c, http.StatusBadRequest, "MissingImageAddress",
-			)
-		}
-	}
-	imgAddr := valueObject.NewContainerImageAddressPanic(imgAddrStr)
 
 	portBindings := []valueObject.PortBinding{}
 	if requestBody["portBindings"] != nil {
@@ -177,91 +177,23 @@ func AddContainerController(c echo.Context) error {
 			requestBody["portBindings"] = []interface{}{requestBody["portBindings"]}
 		}
 
-		portBindings = parsePortBindings(requestBody["portBindings"].([]interface{}))
-	}
-
-	var restartPolicyPtr *valueObject.ContainerRestartPolicy
-	if requestBody["restartPolicy"] != nil {
-		restartPolicy := valueObject.NewContainerRestartPolicyPanic(
-			requestBody["restartPolicy"].(string),
+		portBindings = controller.parsePortBindings(
+			requestBody["portBindings"].([]interface{}),
 		)
-		restartPolicyPtr = &restartPolicy
-	}
-
-	var entrypointPtr *valueObject.ContainerEntrypoint
-	if requestBody["entrypoint"] != nil {
-		entrypoint := valueObject.NewContainerEntrypointPanic(
-			requestBody["entrypoint"].(string),
-		)
-		entrypointPtr = &entrypoint
-	}
-
-	var profileIdPtr *valueObject.ContainerProfileId
-	if requestBody["profileId"] != nil {
-		profileId := valueObject.NewContainerProfileIdPanic(
-			requestBody["profileId"],
-		)
-		profileIdPtr = &profileId
 	}
 
 	envs := []valueObject.ContainerEnv{}
 	if requestBody["envs"] != nil {
-		envs = parseContainerEnvs(requestBody["envs"].([]interface{}))
+		envs = controller.parseContainerEnvs(requestBody["envs"].([]interface{}))
 	}
 
-	autoCreateMappings := true
-	if requestBody["autoCreateMappings"] != nil {
-		var assertOk bool
-		autoCreateMappings, assertOk = requestBody["autoCreateMappings"].(bool)
-		if !assertOk {
-			var err error
-			autoCreateMappings, err = strconv.ParseBool(
-				requestBody["autoCreateMappings"].(string),
-			)
-			if err != nil {
-				return apiHelper.ResponseWrapper(
-					c, http.StatusBadRequest, "InvalidAutoCreateMappings",
-				)
-			}
-		}
-	}
+	requestBody["portBindings"] = portBindings
+	requestBody["envs"] = envs
 
-	addContainerDto := dto.NewAddContainer(
-		accId,
-		hostname,
-		imgAddr,
-		portBindings,
-		restartPolicyPtr,
-		entrypointPtr,
-		profileIdPtr,
-		envs,
-		autoCreateMappings,
+	return apiHelper.NewResponseWrapper(
+		c,
+		controller.containerService.Create(requestBody),
 	)
-
-	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
-	accQueryRepo := infra.NewAccQueryRepo(persistentDbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(persistentDbSvc)
-	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
-	mappingQueryRepo := infra.NewMappingQueryRepo(persistentDbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
-
-	err = useCase.AddContainer(
-		containerQueryRepo,
-		containerCmdRepo,
-		accQueryRepo,
-		accCmdRepo,
-		containerProfileQueryRepo,
-		mappingQueryRepo,
-		mappingCmdRepo,
-		addContainerDto,
-	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusCreated, "ContainerCreated")
 }
 
 // UpdateContainer godoc
@@ -274,7 +206,7 @@ func AddContainerController(c echo.Context) error {
 // @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accountId and containerId are required.)"
 // @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
 // @Router       /v1/container/ [put]
-func UpdateContainerController(c echo.Context) error {
+func (controller *ContainerController) UpdateContainer(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -353,7 +285,7 @@ func UpdateContainerController(c echo.Context) error {
 // @Param        containerId 	  path   string  true  "ContainerId"
 // @Success      200 {object} object{} "ContainerDeleted"
 // @Router       /v1/container/{accountId}/{containerId}/ [delete]
-func DeleteContainerController(c echo.Context) error {
+func (controller *ContainerController) DeleteContainer(c echo.Context) error {
 	accId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
 
