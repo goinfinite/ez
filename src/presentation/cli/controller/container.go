@@ -9,31 +9,44 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
+	"github.com/speedianet/control/src/presentation/service"
 	"github.com/spf13/cobra"
 )
 
 type ContainerController struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	persistentDbSvc  *db.PersistentDatabaseService
+	containerService *service.ContainerService
 }
 
 func NewContainerController(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *ContainerController {
-	return &ContainerController{persistentDbSvc: persistentDbSvc}
+	return &ContainerController{
+		persistentDbSvc:  persistentDbSvc,
+		containerService: service.NewContainerService(persistentDbSvc),
+	}
 }
 
-func (controller *ContainerController) Get() *cobra.Command {
+func (controller *ContainerController) Read() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "GetContainers",
+		Short: "ReadContainers",
 		Run: func(cmd *cobra.Command, args []string) {
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-			containersList, err := useCase.GetContainers(containerQueryRepo)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
+			cliHelper.NewResponseWrapper(controller.containerService.Read())
+		},
+	}
 
-			cliHelper.ResponseWrapper(true, containersList)
+	return cmd
+}
+
+func (controller *ContainerController) ReadWithMetrics() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-with-metrics",
+		Short: "ReadContainersWithMetrics",
+		Run: func(cmd *cobra.Command, args []string) {
+			cliHelper.NewResponseWrapper(
+				controller.containerService.ReadWithMetrics(),
+			)
 		},
 	}
 

@@ -27,8 +27,8 @@ func NewContainerController(
 	}
 }
 
-// GetContainers	 godoc
-// @Summary      GetContainers
+// ReadContainers	 godoc
+// @Summary      ReadContainers
 // @Description  List containers.
 // @Tags         container
 // @Accept       json
@@ -36,19 +36,12 @@ func NewContainerController(
 // @Security     Bearer
 // @Success      200 {array} entity.Container
 // @Router       /v1/container/ [get]
-func (controller *ContainerController) Get(c echo.Context) error {
-	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
-	containerList, err := useCase.GetContainers(containerQueryRepo)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
+func (controller *ContainerController) Read(c echo.Context) error {
+	return apiHelper.NewResponseWrapper(c, controller.containerService.Read())
 }
 
-// GetContainersWithMetrics	 godoc
-// @Summary      GetContainersWithMetrics
+// ReadContainersWithMetrics	 godoc
+// @Summary      ReadContainersWithMetrics
 // @Description  List containers with metrics.
 // @Tags         container
 // @Accept       json
@@ -56,15 +49,11 @@ func (controller *ContainerController) Get(c echo.Context) error {
 // @Security     Bearer
 // @Success      200 {array} dto.ContainerWithMetrics
 // @Router       /v1/container/metrics/ [get]
-func (controller *ContainerController) GetWithMetrics(c echo.Context) error {
-	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
-	containerList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, containerList)
+func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
+	return apiHelper.NewResponseWrapper(
+		c,
+		controller.containerService.ReadWithMetrics(),
+	)
 }
 
 func (controller *ContainerController) parsePortBindings(
