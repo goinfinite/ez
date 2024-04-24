@@ -2,14 +2,10 @@ package apiController
 
 import (
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -193,7 +189,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 // @Produce      json
 // @Security     Bearer
 // @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accountId and containerId are required.)"
-// @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
+// @Success      200 {object} object{} "ContainerUpdated"
 // @Router       /v1/container/ [put]
 func (controller *ContainerController) Update(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
@@ -201,66 +197,10 @@ func (controller *ContainerController) Update(c echo.Context) error {
 		return err
 	}
 
-	requiredParams := []string{"accountId", "containerId"}
-	apiHelper.CheckMissingParams(requestBody, requiredParams)
-
-	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
-	containerId := valueObject.NewContainerIdPanic(
-		requestBody["containerId"].(string),
+	return apiHelper.NewResponseWrapper(
+		c,
+		controller.containerService.Update(requestBody),
 	)
-
-	var containerStatusPtr *bool
-	if requestBody["status"] != nil {
-		containerStatus, assertOk := requestBody["status"].(bool)
-		if !assertOk {
-			var err error
-			containerStatus, err = strconv.ParseBool(requestBody["status"].(string))
-			if err != nil {
-				return apiHelper.ResponseWrapper(
-					c, http.StatusBadRequest, "InvalidContainerStatus",
-				)
-			}
-		}
-		containerStatusPtr = &containerStatus
-	}
-
-	var profileIdPtr *valueObject.ContainerProfileId
-	if requestBody["profileId"] != nil {
-		profileId := valueObject.NewContainerProfileIdPanic(
-			requestBody["profileId"],
-		)
-		profileIdPtr = &profileId
-	}
-
-	updateContainerDto := dto.NewUpdateContainer(
-		accId,
-		containerId,
-		containerStatusPtr,
-		profileIdPtr,
-	)
-
-	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
-	accQueryRepo := infra.NewAccQueryRepo(persistentDbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(persistentDbSvc)
-	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
-
-	err = useCase.UpdateContainer(
-		containerQueryRepo,
-		containerCmdRepo,
-		accQueryRepo,
-		accCmdRepo,
-		containerProfileQueryRepo,
-		updateContainerDto,
-	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(
-			c, http.StatusInternalServerError, err.Error(),
-		)
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, "ContainerUpdated")
 }
 
 // DeleteContainer godoc
@@ -275,28 +215,13 @@ func (controller *ContainerController) Update(c echo.Context) error {
 // @Success      200 {object} object{} "ContainerDeleted"
 // @Router       /v1/container/{accountId}/{containerId}/ [delete]
 func (controller *ContainerController) Delete(c echo.Context) error {
-	accId := valueObject.NewAccountIdPanic(c.Param("accountId"))
-	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
-
-	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
-	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
-	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(persistentDbSvc)
-	mappingQueryRepo := infra.NewMappingQueryRepo(persistentDbSvc)
-	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
-
-	err := useCase.DeleteContainer(
-		containerQueryRepo,
-		containerCmdRepo,
-		accCmdRepo,
-		mappingQueryRepo,
-		mappingCmdRepo,
-		accId,
-		containerId,
-	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	requestBody := map[string]interface{}{
+		"accountId":   c.Param("accountId"),
+		"containerId": c.Param("containerId"),
 	}
 
-	return apiHelper.ResponseWrapper(c, http.StatusOK, "ContainerDeleted")
+	return apiHelper.NewResponseWrapper(
+		c,
+		controller.containerService.Delete(requestBody),
+	)
 }
