@@ -54,7 +54,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 	},
 	{
 		ServiceNames: []string{
-			"http", "ws", "grpc", "php",
+			"http", "ws", "grpc", "php", "nginx", "apache", "caddy", "traefik",
 		},
 		PortBindings: []string{"80"},
 	},
