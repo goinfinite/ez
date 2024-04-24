@@ -3,6 +3,8 @@ module github.com/speedianet/control
 go 1.21
 
 require (
+	github.com/alecthomas/chroma v0.10.0
+	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/glebarez/sqlite v1.9.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.4.0
@@ -15,14 +17,15 @@ require (
 	github.com/swaggo/swag v1.16.2
 	golang.org/x/crypto v0.14.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
+	golang.org/x/term v0.13.0
 	gorm.io/gorm v1.25.5
 )
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/dgraph-io/badger/v4 v4.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
+	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
