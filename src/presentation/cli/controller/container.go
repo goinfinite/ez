@@ -82,7 +82,7 @@ func (controller *ContainerController) parseContainerEnvs(
 }
 
 func (controller *ContainerController) Create() *cobra.Command {
-	var accId uint64
+	var accountIdUint uint64
 	var hostnameStr string
 	var containerImageAddressStr string
 	var portBindingsSlice []string
@@ -93,40 +93,22 @@ func (controller *ContainerController) Create() *cobra.Command {
 	var autoCreateMappings bool
 
 	cmd := &cobra.Command{
-		Use:   "add",
-		Short: "AddNewContainer",
+		Use:   "create",
+		Short: "CreateNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accId)
-			hostname := valueObject.NewFqdnPanic(hostnameStr)
-			imgAddr := valueObject.NewContainerImageAddressPanic(
-				containerImageAddressStr,
-			)
+			requestBody := map[string]interface{}{
+				"accountId":          accountIdUint,
+				"hostname":           hostnameStr,
+				"imageAddress":       containerImageAddressStr,
+				"restartPolicy":      restartPolicyStr,
+				"entrypoint":         entrypointStr,
+				"profileId":          profileId,
+				"autoCreateMappings": autoCreateMappings,
+			}
 
 			portBindings := []valueObject.PortBinding{}
 			if len(portBindingsSlice) > 0 {
 				portBindings = controller.parsePortBindings(portBindingsSlice)
-			}
-
-			var restartPolicyPtr *valueObject.ContainerRestartPolicy
-			if restartPolicyStr != "" {
-				restartPolicy := valueObject.NewContainerRestartPolicyPanic(
-					restartPolicyStr,
-				)
-				restartPolicyPtr = &restartPolicy
-			}
-
-			var entrypointPtr *valueObject.ContainerEntrypoint
-			if entrypointStr != "" {
-				entrypoint := valueObject.NewContainerEntrypointPanic(entrypointStr)
-				entrypointPtr = &entrypoint
-			}
-
-			var profileIdPtr *valueObject.ContainerProfileId
-			if profileId != 0 {
-				profileId := valueObject.NewContainerProfileIdPanic(
-					profileId,
-				)
-				profileIdPtr = &profileId
 			}
 
 			envs := []valueObject.ContainerEnv{}
@@ -134,46 +116,17 @@ func (controller *ContainerController) Create() *cobra.Command {
 				envs = controller.parseContainerEnvs(envsSlice)
 			}
 
-			addContainerDto := dto.NewAddContainer(
-				accId,
-				hostname,
-				imgAddr,
-				portBindings,
-				restartPolicyPtr,
-				entrypointPtr,
-				profileIdPtr,
-				envs,
-				autoCreateMappings,
+			requestBody["portBindings"] = portBindings
+			requestBody["envs"] = envs
+
+			cliHelper.NewResponseWrapper(
+				controller.containerService.Create(requestBody),
 			)
-
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
-			accQueryRepo := infra.NewAccQueryRepo(controller.persistentDbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.persistentDbSvc)
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistentDbSvc)
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
-
-			err := useCase.AddContainer(
-				containerQueryRepo,
-				containerCmdRepo,
-				accQueryRepo,
-				accCmdRepo,
-				containerProfileQueryRepo,
-				mappingQueryRepo,
-				mappingCmdRepo,
-				addContainerDto,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
-
-			cliHelper.ResponseWrapper(true, "ContainerAdded")
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.MarkFlagRequired("hostname")
 	cmd.Flags().StringVarP(&containerImageAddressStr, "image", "i", "", "ImageAddress")
