@@ -45,8 +45,8 @@ func (router *Router) containerRoutes() {
 	}
 
 	containerController := cliController.NewContainerController(router.persistentDbSvc)
-	containerCmd.AddCommand(containerController.Get())
-	containerCmd.AddCommand(containerController.GetWithMetrics())
+	containerCmd.AddCommand(containerController.Read())
+	containerCmd.AddCommand(containerController.ReadWithMetrics())
 	containerCmd.AddCommand(containerController.Create())
 	containerCmd.AddCommand(containerController.Update())
 	containerCmd.AddCommand(containerController.Delete())
