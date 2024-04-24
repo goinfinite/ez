@@ -24,7 +24,7 @@ func NewRouter(
 	}
 }
 
-func (router Router) accountRoutes() {
+func (router *Router) accountRoutes() {
 	var accountCmd = &cobra.Command{
 		Use:   "account",
 		Short: "AccountManagement",
@@ -38,17 +38,18 @@ func (router Router) accountRoutes() {
 	rootCmd.AddCommand(accountCmd)
 }
 
-func (router Router) containerRoutes() {
+func (router *Router) containerRoutes() {
 	var containerCmd = &cobra.Command{
 		Use:   "container",
 		Short: "ContainerManagement",
 	}
 
 	containerController := cliController.NewContainerController(router.persistentDbSvc)
-	containerCmd.AddCommand(containerController.GetContainers())
-	containerCmd.AddCommand(containerController.AddContainer())
-	containerCmd.AddCommand(containerController.UpdateContainer())
-	containerCmd.AddCommand(containerController.DeleteContainer())
+	containerCmd.AddCommand(containerController.Get())
+	containerCmd.AddCommand(containerController.GetWithMetrics())
+	containerCmd.AddCommand(containerController.Create())
+	containerCmd.AddCommand(containerController.Update())
+	containerCmd.AddCommand(containerController.Delete())
 
 	var containerProfileCmd = &cobra.Command{
 		Use:   "profile",
@@ -75,7 +76,7 @@ func (router Router) containerRoutes() {
 	rootCmd.AddCommand(containerCmd)
 }
 
-func (router Router) licenseRoutes() {
+func (router *Router) licenseRoutes() {
 	var licenseCmd = &cobra.Command{
 		Use:   "license",
 		Short: "LicenseManagement",
@@ -90,7 +91,7 @@ func (router Router) licenseRoutes() {
 	rootCmd.AddCommand(licenseCmd)
 }
 
-func (router Router) mappingRoutes() {
+func (router *Router) mappingRoutes() {
 	var mappingCmd = &cobra.Command{
 		Use:   "mapping",
 		Short: "MappingManagement",
@@ -113,7 +114,7 @@ func (router Router) mappingRoutes() {
 	rootCmd.AddCommand(mappingCmd)
 }
 
-func (router Router) o11yRoutes() {
+func (router *Router) o11yRoutes() {
 	var o11yCmd = &cobra.Command{
 		Use:   "o11y",
 		Short: "O11yManagement",
@@ -124,7 +125,7 @@ func (router Router) o11yRoutes() {
 	rootCmd.AddCommand(o11yCmd)
 }
 
-func (router Router) systemRoutes() {
+func (router *Router) systemRoutes() {
 	var versionCmd = &cobra.Command{
 		Use:   "version",
 		Short: "PrintVersion",

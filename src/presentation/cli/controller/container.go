@@ -22,7 +22,7 @@ func NewContainerController(
 	return &ContainerController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller *ContainerController) GetContainers() *cobra.Command {
+func (controller *ContainerController) Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "GetContainers",
@@ -68,7 +68,7 @@ func (controller *ContainerController) parseContainerEnvs(
 	return envs
 }
 
-func (controller *ContainerController) AddContainer() *cobra.Command {
+func (controller *ContainerController) Create() *cobra.Command {
 	var accId uint64
 	var hostnameStr string
 	var containerImageAddressStr string
@@ -186,7 +186,7 @@ func (controller *ContainerController) AddContainer() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerController) UpdateContainer() *cobra.Command {
+func (controller *ContainerController) Update() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 	var containerStatusStr string
@@ -254,7 +254,7 @@ func (controller *ContainerController) UpdateContainer() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerController) DeleteContainer() *cobra.Command {
+func (controller *ContainerController) Delete() *cobra.Command {
 	var accId uint64
 	var containerIdStr string
 
