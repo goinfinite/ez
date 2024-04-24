@@ -1,12 +1,7 @@
 package cliController
 
 import (
-	"strconv"
-
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -153,7 +148,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 }
 
 func (controller *ContainerController) Update() *cobra.Command {
-	var accId uint64
+	var accountIdUint uint64
 	var containerIdStr string
 	var containerStatusStr string
 	var profileId uint64
@@ -162,57 +157,21 @@ func (controller *ContainerController) Update() *cobra.Command {
 		Use:   "update",
 		Short: "UpdateContainer",
 		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accId)
-			containerId := valueObject.NewContainerIdPanic(containerIdStr)
-
-			var containerStatusPtr *bool
-			if containerStatusStr != "" {
-				containerStatus, err := strconv.ParseBool(containerStatusStr)
-				if err != nil {
-					panic("InvalidContainerStatus")
-				}
-				containerStatusPtr = &containerStatus
+			requestBody := map[string]interface{}{
+				"accountId":   accountIdUint,
+				"containerId": containerIdStr,
+				"status":      containerStatusStr,
+				"profileId":   profileId,
 			}
 
-			var profileIdPtr *valueObject.ContainerProfileId
-			if profileId != 0 {
-				profileId := valueObject.NewContainerProfileIdPanic(
-					profileId,
-				)
-				profileIdPtr = &profileId
-			}
-
-			updateContainerDto := dto.NewUpdateContainer(
-				accId,
-				containerId,
-				containerStatusPtr,
-				profileIdPtr,
+			cliHelper.NewResponseWrapper(
+				controller.containerService.Update(requestBody),
 			)
-
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
-			accQueryRepo := infra.NewAccQueryRepo(controller.persistentDbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.persistentDbSvc)
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistentDbSvc)
-
-			err := useCase.UpdateContainer(
-				containerQueryRepo,
-				containerCmdRepo,
-				accQueryRepo,
-				accCmdRepo,
-				containerProfileQueryRepo,
-				updateContainerDto,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
-
-			cliHelper.ResponseWrapper(true, "ContainerUpdated")
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
 	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "Status (true/false)")
@@ -221,41 +180,26 @@ func (controller *ContainerController) Update() *cobra.Command {
 }
 
 func (controller *ContainerController) Delete() *cobra.Command {
-	var accId uint64
+	var accountIdUint uint64
 	var containerIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainer",
 		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accId)
-			containerId := valueObject.NewContainerIdPanic(containerIdStr)
-
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
-			accCmdRepo := infra.NewAccCmdRepo(controller.persistentDbSvc)
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
-
-			err := useCase.DeleteContainer(
-				containerQueryRepo,
-				containerCmdRepo,
-				accCmdRepo,
-				mappingQueryRepo,
-				mappingCmdRepo,
-				accId,
-				containerId,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
+			requestBody := map[string]interface{}{
+				"accountId":   accountIdUint,
+				"containerId": containerIdStr,
 			}
 
-			cliHelper.ResponseWrapper(true, "ContainerDeleted")
+			cliHelper.NewResponseWrapper(
+				controller.containerService.Delete(requestBody),
+			)
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&accId, "acc-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
 	return cmd
