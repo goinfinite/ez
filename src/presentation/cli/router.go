@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/speedianet/control/src/infra/db"
-	api "github.com/speedianet/control/src/presentation/api"
+	"github.com/speedianet/control/src/presentation"
 	cliController "github.com/speedianet/control/src/presentation/cli/controller"
 	"github.com/spf13/cobra"
 )
@@ -137,7 +137,7 @@ func (router Router) systemRoutes() {
 		Use:   "serve",
 		Short: "ServeApiDashboard",
 		Run: func(cmd *cobra.Command, args []string) {
-			api.ApiInit(router.persistentDbSvc, router.transientDbSvc)
+			presentation.HttpServerInit(router.persistentDbSvc, router.transientDbSvc)
 		},
 	}
 

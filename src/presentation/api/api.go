@@ -1,13 +1,8 @@
 package api
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
-	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	apiInit "github.com/speedianet/control/src/presentation/api/init"
 	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
@@ -32,55 +27,26 @@ import (
 
 // @BasePath	/_/api
 func ApiInit(
+	e *echo.Echo,
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) {
 	sharedMiddleware.CheckEnvs()
 
-	e := echo.New()
-	apiBasePath := "/_/api"
+	basePath := "/_/api"
+	baseRoute := e.Group(basePath)
 
-	e.Pre(apiMiddleware.AddTrailingSlash(apiBasePath))
+	e.Pre(apiMiddleware.AddTrailingSlash(basePath))
 	e.Use(apiMiddleware.PanicHandler)
-	e.Use(apiMiddleware.SetDefaultHeaders(apiBasePath))
+	e.Use(apiMiddleware.SetDefaultHeaders(basePath))
 	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
 
 	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 
 	apiInit.BootContainers(persistentDbSvc)
 
-	e.Use(apiMiddleware.Auth(apiBasePath))
+	e.Use(apiMiddleware.Auth(basePath))
 
-	registerApiRoutes(e, persistentDbSvc, transientDbSvc)
-
-	httpServer := http.Server{
-		Addr:     ":3141",
-		Handler:  e,
-		ErrorLog: apiHelper.NewCustomLogger(),
-	}
-
-	pkiDir := "/var/speedia/pki"
-	certFile := pkiDir + "/control.crt"
-	keyFile := pkiDir + "/control.key"
-
-	controlBanner := `
-                                             ▒▓▓▓▒                        ▓▓▓▓▒
-                                             ████▒                        ████▓
-   ▓▒   ▒████▓▓▓█▒▓████▓▓████▒▓████▓▓█████ ▓█████▓▓ █████▓▓▓▓▒████▓▓█████ ████ 
- ▒█▓    ████▓    ▒████  ▒████ ▓████  ▓████  ████▒   ████▓    ▓████  ████▓▓████ 
-▓▓█▒▒▒ ▒████     ▓███▓  ████▓ ████▒  ████▒ ▒████   ▒████     ████▒ ▒████ ████▓ 
-  ▓█▓  ████▓     ████▒ ▒████ ▒████  ▓████  ████▓   ████▓    ▓████  ▓███▓▒████  
- ▒█    ████▒    ▓████  ████▓ ████▓  ████▒ ▒████▒   ████     ████▓ ▒████ ▓████  
- ▒     ▒▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▒  ▓▓▓▓   ▓▓▓▓   ▓▓▓▓▓▓ ▒▓▓▓▓     ▒▓▓▓▓▓▓▓▓▓  ▓▓▓▓▓▒ 
-______________________________________________________________________________
-
-⇨ HTTPS server started on [::]:3141 and is ready to serve! 🎉
-`
-
-	fmt.Println(controlBanner)
-
-	err := httpServer.ListenAndServeTLS(certFile, keyFile)
-	if err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
+	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc)
+	router.RegisterRoutes()
 }

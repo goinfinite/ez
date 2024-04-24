@@ -1,19 +1,18 @@
 package ui
 
 import (
-	"embed"
-	"io/fs"
-	"net/http"
+	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/infra/db"
 )
 
-//go:embed dist/*
-var frontFiles embed.FS
+func UiInit(
+	e *echo.Echo,
+	persistentDbSvc *db.PersistentDatabaseService,
+	transientDbSvc *db.TransientDatabaseService,
+) {
+	basePath := "/_"
+	baseRoute := e.Group(basePath)
 
-func UiFs() http.Handler {
-	frontFileFs, err := fs.Sub(frontFiles, "dist")
-	if err != nil {
-		panic(err)
-	}
-
-	return http.FileServer(http.FS(frontFileFs))
+	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc)
+	router.RegisterRoutes()
 }
