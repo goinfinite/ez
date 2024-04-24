@@ -171,3 +171,71 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 
 	return NewServiceOutput(Created, "ContainerCreated")
 }
+
+func (service *ContainerService) Update(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"accountId", "containerId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	containerId, err := valueObject.NewContainerId(input["containerId"].(string))
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	var containerStatusPtr *bool
+	if input["status"] != nil {
+		containerStatus, assertOk := input["status"].(bool)
+		if !assertOk {
+			var err error
+			containerStatus, err = strconv.ParseBool(input["status"].(string))
+			if err != nil {
+				return NewServiceOutput(UserError, err.Error())
+			}
+		}
+		containerStatusPtr = &containerStatus
+	}
+
+	var profileIdPtr *valueObject.ContainerProfileId
+	if input["profileId"] != nil {
+		profileId, err := valueObject.NewContainerProfileId(input["profileId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		profileIdPtr = &profileId
+	}
+
+	updateContainerDto := dto.NewUpdateContainer(
+		accId,
+		containerId,
+		containerStatusPtr,
+		profileIdPtr,
+	)
+
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
+	accQueryRepo := infra.NewAccQueryRepo(service.persistentDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(service.persistentDbSvc)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(service.persistentDbSvc)
+
+	err = useCase.UpdateContainer(
+		containerQueryRepo,
+		containerCmdRepo,
+		accQueryRepo,
+		accCmdRepo,
+		containerProfileQueryRepo,
+		updateContainerDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Created, "ContainerUpdated")
+}
