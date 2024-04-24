@@ -153,14 +153,10 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PortBindings: []string{"2525"},
 	},
 	{
-		ServiceNames:       []string{"node", "nodejs", "ruby-on-rails", "rails", "ruby"},
-		PortBindings:       []string{"3000"},
+		ServiceNames: []string{"custom", "node", "nodejs", "ruby-on-rails", "rails", "ruby", "aerospike"},
+		PortBindings: []string{
+			"3000", "3001", "3002", "3003", "3004", "3005", "3006", "3007", "3008", "3009"},
 		PublicPortInterval: httpPublicPortInterval,
-	},
-	{
-		ServiceNames:       []string{"aerospike"},
-		PortBindings:       []string{"3000", "3001", "3002"},
-		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
 		ServiceNames:       []string{"mysql", "mariadb", "percona"},
@@ -524,7 +520,7 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 
 	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
-	portBindingRegex := `^(?:(?P<serviceName>[a-z][\w\.\_\-]{0,128}))?(?::?(?P<publicPort>\d{1,5}))?(?::(?P<containerPort>\d{1,5}))?(?:\/(?P<protocol>\w{1,5}))?(?::(?P<privatePort>\d{1,5}))?$`
+	portBindingRegex := `^(?:(?P<serviceName>[a-z][\w\.\_\ \-]{0,128}[a-z0-9]))?(?::?(?P<publicPort>\d{1,5}))?(?::(?P<containerPort>\d{1,5}))?(?:\/(?P<protocol>\w{1,5}))?(?::(?P<privatePort>\d{1,5}))?$`
 	portBindingParts := voHelper.FindNamedGroupsMatches(portBindingRegex, string(value))
 
 	serviceNameSent := portBindingParts["serviceName"] != ""
@@ -538,9 +534,11 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 	serviceName, _ := NewServiceName("unmapped")
 	if serviceNameSent {
 		var err error
-		serviceName, err = NewServiceName(portBindingParts["serviceName"])
+		specialCharReplacer := strings.NewReplacer(" ", "-", "_", "-", ".", "-")
+		rawServiceName := specialCharReplacer.Replace(portBindingParts["serviceName"])
+		serviceName, err = NewServiceName(rawServiceName)
 		if err != nil {
-			return portBindings, err
+			serviceName, _ = NewServiceName("unknown")
 		}
 	}
 

@@ -21,6 +21,7 @@ func TestNewPortBinding(t *testing.T) {
 			"unknown:12345:12345/tcp",
 			"unknown:12345:12345/tcp:40000",
 			"dns-alt-name:53/udp",
+			"dns alt name:53/udp",
 		}
 
 		for _, path := range validPortBindings {
