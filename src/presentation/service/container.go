@@ -23,6 +23,26 @@ func NewContainerService(
 	}
 }
 
+func (service *ContainerService) Read() ServiceOutput {
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
+	containersList, err := useCase.GetContainers(containerQueryRepo)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, containersList)
+}
+
+func (service *ContainerService) ReadWithMetrics() ServiceOutput {
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
+	containersList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, containersList)
+}
+
 func (service *ContainerService) Create(input map[string]interface{}) ServiceOutput {
 	requiredParams := []string{"accountId", "hostname"}
 
