@@ -107,17 +107,10 @@ func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 			return registryImage, errors.New("ParseIsaNameError")
 		}
 
+		// TODO: support arm, armv7 and arm64 in the future.
 		switch rawIsaName {
-		case "386":
-			rawIsaName = "i386"
 		case "amd64", "x86-64":
 			rawIsaName = "amd64"
-		case "arm", "armv7":
-			rawIsaName = "arm"
-		case "arm64", "aarch64":
-			rawIsaName = "arm64"
-		case "riscv64":
-			rawIsaName = "riscv64"
 		default:
 			continue
 		}
@@ -402,7 +395,8 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 
 	rawUpdatedAt, assertOk := desiredImageMap["last_pushed"].(string)
 	if !assertOk {
-		return registryTaggedImage, errors.New("ParseUpdatedAtError")
+		fakeUpdatedAt := time.Now().UTC().Add(-time.Hour * 24 * 365 * 5)
+		rawUpdatedAt = fakeUpdatedAt.Format(time.RFC3339)
 	}
 	updatedAtUnix, err := time.Parse(time.RFC3339, rawUpdatedAt)
 	if err != nil {
