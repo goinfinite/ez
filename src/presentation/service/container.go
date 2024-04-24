@@ -237,5 +237,38 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "ContainerUpdated")
+	return NewServiceOutput(Success, "ContainerUpdated")
+}
+
+func (service *ContainerService) Delete(input map[string]interface{}) ServiceOutput {
+	accId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	containerId, err := valueObject.NewContainerId(input["containerId"].(string))
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
+	accCmdRepo := infra.NewAccCmdRepo(service.persistentDbSvc)
+	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
+
+	err = useCase.DeleteContainer(
+		containerQueryRepo,
+		containerCmdRepo,
+		accCmdRepo,
+		mappingQueryRepo,
+		mappingCmdRepo,
+		accId,
+		containerId,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "ContainerDeleted")
 }
