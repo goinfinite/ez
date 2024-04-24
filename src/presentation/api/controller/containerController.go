@@ -36,7 +36,7 @@ func NewContainerController(
 // @Security     Bearer
 // @Success      200 {array} entity.Container
 // @Router       /v1/container/ [get]
-func (controller *ContainerController) GetContainers(c echo.Context) error {
+func (controller *ContainerController) Get(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 	containerList, err := useCase.GetContainers(containerQueryRepo)
@@ -56,7 +56,7 @@ func (controller *ContainerController) GetContainers(c echo.Context) error {
 // @Security     Bearer
 // @Success      200 {array} dto.ContainerWithMetrics
 // @Router       /v1/container/metrics/ [get]
-func (controller *ContainerController) GetContainersWithMetrics(c echo.Context) error {
+func (controller *ContainerController) GetWithMetrics(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 	containerList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
@@ -164,7 +164,7 @@ func (controller *ContainerController) parseContainerEnvs(
 // @Param        addContainerDto 	  body    dto.AddContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required."
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /v1/container/ [post]
-func (controller *ContainerController) CreateContainer(c echo.Context) error {
+func (controller *ContainerController) Create(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -206,7 +206,7 @@ func (controller *ContainerController) CreateContainer(c echo.Context) error {
 // @Param        updateContainerDto 	  body dto.UpdateContainer  true  "UpdateContainer (Only accountId and containerId are required.)"
 // @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
 // @Router       /v1/container/ [put]
-func (controller *ContainerController) UpdateContainer(c echo.Context) error {
+func (controller *ContainerController) Update(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -285,7 +285,7 @@ func (controller *ContainerController) UpdateContainer(c echo.Context) error {
 // @Param        containerId 	  path   string  true  "ContainerId"
 // @Success      200 {object} object{} "ContainerDeleted"
 // @Router       /v1/container/{accountId}/{containerId}/ [delete]
-func (controller *ContainerController) DeleteContainer(c echo.Context) error {
+func (controller *ContainerController) Delete(c echo.Context) error {
 	accId := valueObject.NewAccountIdPanic(c.Param("accountId"))
 	containerId := valueObject.NewContainerIdPanic(c.Param("containerId"))
 

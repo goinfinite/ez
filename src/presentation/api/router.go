@@ -53,13 +53,13 @@ func (router *Router) accountRoutes() {
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/v1/container")
 	containerController := apiController.NewContainerController(router.persistentDbSvc)
-	containerGroup.GET("/", containerController.GetContainers)
-	containerGroup.GET("/metrics/", containerController.GetContainersWithMetrics)
-	containerGroup.POST("/", containerController.CreateContainer)
-	containerGroup.PUT("/", containerController.UpdateContainer)
+	containerGroup.GET("/", containerController.Get)
+	containerGroup.GET("/metrics/", containerController.GetWithMetrics)
+	containerGroup.POST("/", containerController.Create)
+	containerGroup.PUT("/", containerController.Update)
 	containerGroup.DELETE(
 		"/:accountId/:containerId/",
-		containerController.DeleteContainer,
+		containerController.Delete,
 	)
 
 	containerProfileGroup := containerGroup.Group("/profile")
