@@ -49,6 +49,6 @@ func (router *Router) RegisterRoutes() {
 	router.rootRoute()
 
 	router.baseRoute.RouteNotFound("/*", func(c echo.Context) error {
-		return c.Redirect(http.StatusMovedPermanently, "/_/")
+		return c.Redirect(http.StatusTemporaryRedirect, "/_/")
 	})
 }
