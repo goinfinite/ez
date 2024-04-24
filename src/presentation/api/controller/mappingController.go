@@ -43,9 +43,12 @@ func GetMappingsController(c echo.Context) error {
 // @Success      201 {object} object{} "MappingCreated"
 // @Router       /v1/mapping/ [post]
 func AddMappingController(c echo.Context) error {
-	requiredParams := []string{"accountId", "publicPort", "containerIds"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"accountId", "publicPort", "containerIds"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
@@ -85,7 +88,7 @@ func AddMappingController(c echo.Context) error {
 	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 
-	err := useCase.AddMapping(
+	err = useCase.AddMapping(
 		mappingQueryRepo,
 		mappingCmdRepo,
 		containerQueryRepo,
@@ -138,9 +141,12 @@ func DeleteMappingController(c echo.Context) error {
 // @Success      201 {object} object{} "MappingTargetAdded"
 // @Router       /v1/mapping/target/ [post]
 func AddMappingTargetController(c echo.Context) error {
-	requiredParams := []string{"mappingId", "containerId"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"mappingId", "containerId"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	mappingId := valueObject.NewMappingIdPanic(requestBody["mappingId"])
@@ -156,7 +162,7 @@ func AddMappingTargetController(c echo.Context) error {
 	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 
-	err := useCase.AddMappingTarget(
+	err = useCase.AddMappingTarget(
 		mappingQueryRepo,
 		mappingCmdRepo,
 		containerQueryRepo,

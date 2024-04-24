@@ -148,9 +148,12 @@ func parseContainerEnvs(envs []interface{}) []valueObject.ContainerEnv {
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /v1/container/ [post]
 func AddContainerController(c echo.Context) error {
-	requiredParams := []string{"accountId", "hostname"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"accountId", "hostname"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
@@ -244,7 +247,7 @@ func AddContainerController(c echo.Context) error {
 	mappingQueryRepo := infra.NewMappingQueryRepo(persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
 
-	err := useCase.AddContainer(
+	err = useCase.AddContainer(
 		containerQueryRepo,
 		containerCmdRepo,
 		accQueryRepo,
@@ -272,9 +275,12 @@ func AddContainerController(c echo.Context) error {
 // @Success      200 {object} object{} "ContainerUpdated message or NewKeyString"
 // @Router       /v1/container/ [put]
 func UpdateContainerController(c echo.Context) error {
-	requiredParams := []string{"accountId", "containerId"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"accountId", "containerId"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	accId := valueObject.NewAccountIdPanic(requestBody["accountId"])
@@ -319,7 +325,7 @@ func UpdateContainerController(c echo.Context) error {
 	accCmdRepo := infra.NewAccCmdRepo(persistentDbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
 
-	err := useCase.UpdateContainer(
+	err = useCase.UpdateContainer(
 		containerQueryRepo,
 		containerCmdRepo,
 		accQueryRepo,

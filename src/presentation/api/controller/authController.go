@@ -23,9 +23,12 @@ import (
 // @Failure      401 {object} string
 // @Router       /v1/auth/login/ [post]
 func AuthLoginController(c echo.Context) error {
-	requiredParams := []string{"username", "password"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"username", "password"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	loginDto := dto.NewLogin(

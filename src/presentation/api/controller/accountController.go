@@ -87,9 +87,12 @@ func accQuotaFactory(
 // @Success      201 {object} object{} "AccountCreated"
 // @Router       /v1/account/ [post]
 func AddAccountController(c echo.Context) error {
-	requiredParams := []string{"username", "password"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"username", "password"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	var quotaPtr *valueObject.AccountQuota
@@ -111,7 +114,7 @@ func AddAccountController(c echo.Context) error {
 	accQueryRepo := infra.NewAccQueryRepo(persistentDbSvc)
 	accCmdRepo := infra.NewAccCmdRepo(persistentDbSvc)
 
-	err := useCase.AddAccount(
+	err = useCase.AddAccount(
 		accQueryRepo,
 		accCmdRepo,
 		addAccountDto,
@@ -134,9 +137,12 @@ func AddAccountController(c echo.Context) error {
 // @Success      200 {object} object{} "AccountUpdated message or NewKeyString"
 // @Router       /v1/account/ [put]
 func UpdateAccountController(c echo.Context) error {
-	requiredParams := []string{"accountId"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"accountId"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	accountId := valueObject.NewAccountIdPanic(requestBody["accountId"])
@@ -188,7 +194,7 @@ func UpdateAccountController(c echo.Context) error {
 		return apiHelper.ResponseWrapper(c, http.StatusOK, newKey)
 	}
 
-	err := useCase.UpdateAccount(
+	err = useCase.UpdateAccount(
 		accQueryRepo,
 		accCmdRepo,
 		updateAccountDto,

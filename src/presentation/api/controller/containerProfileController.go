@@ -51,9 +51,12 @@ func parseContainerSpecs(specs map[string]interface{}) valueObject.ContainerSpec
 // @Success      201 {object} object{} "ContainerProfileCreated"
 // @Router       /v1/container/profile/ [post]
 func AddContainerProfileController(c echo.Context) error {
-	requiredParams := []string{"name", "baseSpecs"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"name", "baseSpecs"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	name := valueObject.NewContainerProfileNamePanic(requestBody["name"].(string))
@@ -147,7 +150,7 @@ func AddContainerProfileController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistentDbSvc)
 
-	err := useCase.AddContainerProfile(
+	err = useCase.AddContainerProfile(
 		containerProfileCmdRepo,
 		dto,
 	)
@@ -169,9 +172,12 @@ func AddContainerProfileController(c echo.Context) error {
 // @Success      200 {object} object{} "ContainerProfileUpdated"
 // @Router       /v1/container/profile/ [put]
 func UpdateContainerProfileController(c echo.Context) error {
-	requiredParams := []string{"id"}
-	requestBody, _ := apiHelper.GetRequestBody(c)
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
 
+	requiredParams := []string{"id"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
 	id := valueObject.NewContainerProfileIdPanic(requestBody["id"])
@@ -279,7 +285,7 @@ func UpdateContainerProfileController(c echo.Context) error {
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
 
-	err := useCase.UpdateContainerProfile(
+	err = useCase.UpdateContainerProfile(
 		containerProfileQueryRepo,
 		containerProfileCmdRepo,
 		containerQueryRepo,
