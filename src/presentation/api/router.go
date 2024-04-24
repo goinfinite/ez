@@ -35,12 +35,12 @@ func (router *Router) swaggerRoute() {
 }
 
 func (router *Router) authRoutes() {
-	authGroup := router.baseRoute.Group("/auth")
+	authGroup := router.baseRoute.Group("/v1/auth")
 	authGroup.POST("/login/", apiController.AuthLoginController)
 }
 
 func (router *Router) accountRoutes() {
-	accountGroup := router.baseRoute.Group("/account")
+	accountGroup := router.baseRoute.Group("/v1/account")
 	accountGroup.GET("/", apiController.GetAccountsController)
 	accountGroup.POST("/", apiController.AddAccountController)
 	accountGroup.PUT("/", apiController.UpdateAccountController)
@@ -51,7 +51,7 @@ func (router *Router) accountRoutes() {
 }
 
 func (router *Router) containerRoutes() {
-	containerGroup := router.baseRoute.Group("/container")
+	containerGroup := router.baseRoute.Group("/v1/container")
 	containerController := apiController.NewContainerController(router.persistentDbSvc)
 	containerGroup.GET("/", containerController.GetContainers)
 	containerGroup.GET("/metrics/", containerController.GetContainersWithMetrics)
@@ -80,7 +80,7 @@ func (router *Router) containerRoutes() {
 }
 
 func (router *Router) licenseRoutes() {
-	licenseGroup := router.baseRoute.Group("/license")
+	licenseGroup := router.baseRoute.Group("/v1/license")
 	licenseGroup.GET("/", apiController.GetLicenseInfoController)
 	go apiController.AutoLicenseValidationController(
 		router.persistentDbSvc,
@@ -89,7 +89,7 @@ func (router *Router) licenseRoutes() {
 }
 
 func (router *Router) mappingRoutes() {
-	mappingGroup := router.baseRoute.Group("/mapping")
+	mappingGroup := router.baseRoute.Group("/v1/mapping")
 	mappingGroup.GET("/", apiController.GetMappingsController)
 	mappingGroup.POST("/", apiController.AddMappingController)
 	mappingGroup.DELETE("/:mappingId/", apiController.DeleteMappingController)
@@ -101,7 +101,7 @@ func (router *Router) mappingRoutes() {
 }
 
 func (router *Router) o11yRoutes() {
-	o11yGroup := router.baseRoute.Group("/o11y")
+	o11yGroup := router.baseRoute.Group("/v1/o11y")
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
