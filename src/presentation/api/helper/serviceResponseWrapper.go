@@ -12,8 +12,7 @@ type newFormattedResponse struct {
 	Body   interface{} `json:"body"`
 }
 
-// TODO: Remove previous wrapper once this one is used everywhere.
-func NewResponseWrapper(
+func ServiceResponseWrapper(
 	c echo.Context,
 	serviceOutput service.ServiceOutput,
 ) error {

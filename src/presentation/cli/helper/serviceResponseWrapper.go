@@ -12,8 +12,7 @@ import (
 	"golang.org/x/term"
 )
 
-// TODO: Remove previous wrapper once this one is used everywhere.
-func NewResponseWrapper(serviceOutput service.ServiceOutput) {
+func ServiceResponseWrapper(serviceOutput service.ServiceOutput) {
 	exitCode := 0
 	switch serviceOutput.Status {
 	case service.MultiStatus:
