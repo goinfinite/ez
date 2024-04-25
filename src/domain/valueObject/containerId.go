@@ -3,31 +3,37 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
 const containerIdRegex string = `^\w{12,64}$`
 
 type ContainerId string
 
-func NewContainerId(value string) (ContainerId, error) {
-	containerId := ContainerId(value)
-	if !containerId.isValid() {
+func NewContainerId(value interface{}) (ContainerId, error) {
+	stringValue, assertOk := value.(string)
+	if !assertOk {
+		return "", errors.New("ContainerIdMustBeString")
+	}
+
+	stringValue = strings.TrimSpace(stringValue)
+	stringValue = strings.ToLower(stringValue)
+
+	re := regexp.MustCompile(containerIdRegex)
+	isValid := re.MatchString(stringValue)
+	if !isValid {
 		return "", errors.New("InvalidContainerId")
 	}
-	return containerId, nil
+
+	return ContainerId(stringValue), nil
 }
 
 func NewContainerIdPanic(value string) ContainerId {
-	containerId := ContainerId(value)
-	if !containerId.isValid() {
-		panic("InvalidContainerId")
+	containerId, err := NewContainerId(value)
+	if err != nil {
+		panic(err)
 	}
 	return containerId
-}
-
-func (containerId ContainerId) isValid() bool {
-	re := regexp.MustCompile(containerIdRegex)
-	return re.MatchString(string(containerId))
 }
 
 func (containerId ContainerId) String() string {
