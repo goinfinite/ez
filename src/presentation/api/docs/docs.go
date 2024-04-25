@@ -223,7 +223,7 @@ const docTemplate = `{
                 "tags": [
                     "container"
                 ],
-                "summary": "GetContainers",
+                "summary": "ReadContainers",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -266,7 +266,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ContainerUpdated message or NewKeyString",
+                        "description": "ContainerUpdated",
                         "schema": {
                             "type": "object"
                         }
@@ -279,7 +279,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Add a new container.",
+                "description": "Create a new container.",
                 "consumes": [
                     "application/json"
                 ],
@@ -289,7 +289,7 @@ const docTemplate = `{
                 "tags": [
                     "container"
                 ],
-                "summary": "AddNewContainer",
+                "summary": "CreateNewContainer",
                 "parameters": [
                     {
                         "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
@@ -328,7 +328,7 @@ const docTemplate = `{
                 "tags": [
                     "container"
                 ],
-                "summary": "GetContainersWithMetrics",
+                "summary": "ReadContainersWithMetrics",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -898,7 +898,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "restartPolicy": {
-                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                    "type": "string"
                 }
             }
         },
@@ -1011,7 +1011,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "restartPolicy": {
-                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                    "type": "string"
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1187,7 +1187,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "restartPolicy": {
-                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                    "type": "string"
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1462,21 +1462,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "valueObject.ContainerRestartPolicy": {
-            "type": "string",
-            "enum": [
-                "no",
-                "on-failure",
-                "always",
-                "unless-stopped"
-            ],
-            "x-enum-varnames": [
-                "no",
-                "onFailure",
-                "always",
-                "unlessStopped"
-            ]
         },
         "valueObject.ContainerSpecs": {
             "type": "object",

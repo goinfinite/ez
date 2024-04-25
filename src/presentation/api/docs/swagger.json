@@ -216,7 +216,7 @@
                 "tags": [
                     "container"
                 ],
-                "summary": "GetContainers",
+                "summary": "ReadContainers",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -259,7 +259,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "ContainerUpdated message or NewKeyString",
+                        "description": "ContainerUpdated",
                         "schema": {
                             "type": "object"
                         }
@@ -272,7 +272,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "Add a new container.",
+                "description": "Create a new container.",
                 "consumes": [
                     "application/json"
                 ],
@@ -282,7 +282,7 @@
                 "tags": [
                     "container"
                 ],
-                "summary": "AddNewContainer",
+                "summary": "CreateNewContainer",
                 "parameters": [
                     {
                         "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
@@ -321,7 +321,7 @@
                 "tags": [
                     "container"
                 ],
-                "summary": "GetContainersWithMetrics",
+                "summary": "ReadContainersWithMetrics",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -891,7 +891,7 @@
                     "type": "integer"
                 },
                 "restartPolicy": {
-                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                    "type": "string"
                 }
             }
         },
@@ -1004,7 +1004,7 @@
                     "type": "integer"
                 },
                 "restartPolicy": {
-                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                    "type": "string"
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1180,7 +1180,7 @@
                     "type": "integer"
                 },
                 "restartPolicy": {
-                    "$ref": "#/definitions/valueObject.ContainerRestartPolicy"
+                    "type": "string"
                 },
                 "startedAt": {
                     "type": "integer"
@@ -1455,21 +1455,6 @@
                     "type": "integer"
                 }
             }
-        },
-        "valueObject.ContainerRestartPolicy": {
-            "type": "string",
-            "enum": [
-                "no",
-                "on-failure",
-                "always",
-                "unless-stopped"
-            ],
-            "x-enum-varnames": [
-                "no",
-                "onFailure",
-                "always",
-                "unlessStopped"
-            ]
         },
         "valueObject.ContainerSpecs": {
             "type": "object",

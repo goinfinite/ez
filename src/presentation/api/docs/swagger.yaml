@@ -32,7 +32,7 @@ definitions:
       profileId:
         type: integer
       restartPolicy:
-        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+        type: string
     type: object
   dto.AddContainerProfile:
     properties:
@@ -106,7 +106,7 @@ definitions:
       restartCount:
         type: integer
       restartPolicy:
-        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+        type: string
       startedAt:
         type: integer
       status:
@@ -221,7 +221,7 @@ definitions:
       restartCount:
         type: integer
       restartPolicy:
-        $ref: '#/definitions/valueObject.ContainerRestartPolicy'
+        type: string
       startedAt:
         type: integer
       status:
@@ -402,18 +402,6 @@ definitions:
       storageSpaceBytes:
         type: integer
     type: object
-  valueObject.ContainerRestartPolicy:
-    enum:
-    - "no"
-    - on-failure
-    - always
-    - unless-stopped
-    type: string
-    x-enum-varnames:
-    - "no"
-    - onFailure
-    - always
-    - unlessStopped
   valueObject.ContainerSpecs:
     properties:
       cpuCores:
@@ -657,13 +645,13 @@ paths:
             type: array
       security:
       - Bearer: []
-      summary: GetContainers
+      summary: ReadContainers
       tags:
       - container
     post:
       consumes:
       - application/json
-      description: Add a new container.
+      description: Create a new container.
       parameters:
       - description: NewContainer (Only accountId, hostname and imageAddress are required.)<br
           />When specifying portBindings, only publicPort is required.
@@ -681,7 +669,7 @@ paths:
             type: object
       security:
       - Bearer: []
-      summary: AddNewContainer
+      summary: CreateNewContainer
       tags:
       - container
     put:
@@ -699,7 +687,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ContainerUpdated message or NewKeyString
+          description: ContainerUpdated
           schema:
             type: object
       security:
@@ -751,7 +739,7 @@ paths:
             type: array
       security:
       - Bearer: []
-      summary: GetContainersWithMetrics
+      summary: ReadContainersWithMetrics
       tags:
       - container
   /v1/container/profile/:
