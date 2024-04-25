@@ -1,39 +1,43 @@
 package valueObject
 
-import "errors"
+import (
+	"errors"
+	"strings"
+
+	"golang.org/x/exp/slices"
+)
 
 type ContainerRestartPolicy string
 
-const (
-	no            ContainerRestartPolicy = "no"
-	onFailure     ContainerRestartPolicy = "on-failure"
-	always        ContainerRestartPolicy = "always"
-	unlessStopped ContainerRestartPolicy = "unless-stopped"
-)
+var ValidContainerRestartPolicies = []string{
+	"no",
+	"on-failure",
+	"always",
+	"unless-stopped",
+}
 
-func NewContainerRestartPolicy(value string) (ContainerRestartPolicy, error) {
-	crp := ContainerRestartPolicy(value)
-	if !crp.isValid() {
-		return "", errors.New("InvalidContainerRestartPolicy")
+func NewContainerRestartPolicy(value interface{}) (ContainerRestartPolicy, error) {
+	stringValue, assertOk := value.(string)
+	if !assertOk {
+		return "", errors.New("ContainerRestartPolicyMustBeString")
 	}
-	return crp, nil
+
+	stringValue = strings.TrimSpace(stringValue)
+	stringValue = strings.ToLower(stringValue)
+
+	if !slices.Contains(ValidContainerRestartPolicies, stringValue) {
+		return "", errors.New("UnknownContainerRestartPolicy")
+	}
+
+	return ContainerRestartPolicy(stringValue), nil
 }
 
 func NewContainerRestartPolicyPanic(value string) ContainerRestartPolicy {
-	crp := ContainerRestartPolicy(value)
-	if !crp.isValid() {
-		panic("InvalidContainerRestartPolicy")
+	crp, err := NewContainerRestartPolicy(value)
+	if err != nil {
+		panic(err)
 	}
 	return crp
-}
-
-func (crp ContainerRestartPolicy) isValid() bool {
-	switch crp {
-	case no, onFailure, always, unlessStopped:
-		return true
-	default:
-		return false
-	}
 }
 
 func (crp ContainerRestartPolicy) String() string {
