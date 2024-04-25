@@ -2,7 +2,7 @@ package apiController
 
 import (
 	"log"
-	"strconv"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -33,7 +33,7 @@ func NewContainerController(
 // @Success      200 {array} entity.Container
 // @Router       /v1/container/ [get]
 func (controller *ContainerController) Read(c echo.Context) error {
-	return apiHelper.NewResponseWrapper(c, controller.containerService.Read())
+	return apiHelper.ServiceResponseWrapper(c, controller.containerService.Read())
 }
 
 // ReadContainersWithMetrics	 godoc
@@ -46,9 +46,8 @@ func (controller *ContainerController) Read(c echo.Context) error {
 // @Success      200 {array} dto.ContainerWithMetrics
 // @Router       /v1/container/metrics/ [get]
 func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
-	return apiHelper.NewResponseWrapper(
-		c,
-		controller.containerService.ReadWithMetrics(),
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerService.ReadWithMetrics(),
 	)
 }
 
@@ -56,12 +55,10 @@ func (controller *ContainerController) parsePortBindings(
 	rawPortBindings []interface{},
 ) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
-	for rawPortBindingIndex, rawPortBinding := range rawPortBindings {
-		errMsgSuffix := ": (item " + strconv.Itoa(rawPortBindingIndex) + ")"
-
+	for bindingIndex, rawPortBinding := range rawPortBindings {
 		rawPortBindingMap, assertOk := rawPortBinding.(map[string]interface{})
 		if !assertOk {
-			log.Print("InvalidPortBindingStructure" + errMsgSuffix)
+			log.Printf("[%d] InvalidPortBindingStructure", bindingIndex)
 			continue
 		}
 
@@ -76,7 +73,7 @@ func (controller *ContainerController) parsePortBindings(
 		if exists {
 			publicPort, err := valueObject.NewNetworkPort(rawPublicPort)
 			if err != nil {
-				log.Print(err.Error() + errMsgSuffix)
+				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
 			portBindingStr += ":" + publicPort.String()
@@ -86,7 +83,7 @@ func (controller *ContainerController) parsePortBindings(
 		if rawContainerPortExists {
 			containerPort, err := valueObject.NewNetworkPort(rawContainerPort)
 			if err != nil {
-				log.Print(err.Error() + errMsgSuffix)
+				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
 			portBindingStr += ":" + containerPort.String()
@@ -96,7 +93,7 @@ func (controller *ContainerController) parsePortBindings(
 		if assertOk && rawContainerPortExists {
 			protocol, err := valueObject.NewNetworkProtocol(rawProtocol)
 			if err != nil {
-				log.Print(err.Error() + errMsgSuffix)
+				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
 			portBindingStr += "/" + protocol.String()
@@ -106,7 +103,7 @@ func (controller *ContainerController) parsePortBindings(
 		if exists {
 			privatePort, err := valueObject.NewNetworkPort(rawPrivatePort)
 			if err != nil {
-				log.Print(err.Error() + errMsgSuffix)
+				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
 			portBindingStr += ":" + privatePort.String()
@@ -114,7 +111,7 @@ func (controller *ContainerController) parsePortBindings(
 
 		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
 		if err != nil {
-			log.Print(err.Error() + errMsgSuffix)
+			log.Printf("[%d] %s", bindingIndex, err.Error())
 			continue
 		}
 
@@ -139,9 +136,9 @@ func (controller *ContainerController) parseContainerEnvs(
 	return containerEnvs
 }
 
-// AddContainer	 godoc
-// @Summary      AddNewContainer
-// @Description  Add a new container.
+// CreateContainer	 godoc
+// @Summary      CreateNewContainer
+// @Description  Create a new container.
 // @Tags         container
 // @Accept       json
 // @Produce      json
@@ -155,27 +152,35 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		return err
 	}
 
-	portBindings := []valueObject.PortBinding{}
+	if _, exists := requestBody["imageAddress"]; !exists {
+		if _, exists = requestBody["imgAddr"]; exists {
+			requestBody["imageAddress"] = requestBody["imgAddr"]
+		}
+	}
+
 	if requestBody["portBindings"] != nil {
 		_, isMapStringInterface := requestBody["portBindings"].(map[string]interface{})
 		if isMapStringInterface {
 			requestBody["portBindings"] = []interface{}{requestBody["portBindings"]}
 		}
 
-		portBindings = controller.parsePortBindings(
-			requestBody["portBindings"].([]interface{}),
-		)
+		portBindingsSlice, assertOk := requestBody["portBindings"].([]interface{})
+		if !assertOk {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, "PortBindingsMustBeArray",
+			)
+		}
+
+		portBindings := controller.parsePortBindings(portBindingsSlice)
+		requestBody["portBindings"] = portBindings
 	}
 
-	envs := []valueObject.ContainerEnv{}
 	if requestBody["envs"] != nil {
-		envs = controller.parseContainerEnvs(requestBody["envs"].([]interface{}))
+		envs := controller.parseContainerEnvs(requestBody["envs"].([]interface{}))
+		requestBody["envs"] = envs
 	}
 
-	requestBody["portBindings"] = portBindings
-	requestBody["envs"] = envs
-
-	return apiHelper.NewResponseWrapper(
+	return apiHelper.ServiceResponseWrapper(
 		c,
 		controller.containerService.Create(requestBody),
 	)
@@ -197,9 +202,8 @@ func (controller *ContainerController) Update(c echo.Context) error {
 		return err
 	}
 
-	return apiHelper.NewResponseWrapper(
-		c,
-		controller.containerService.Update(requestBody),
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerService.Update(requestBody),
 	)
 }
 
@@ -220,8 +224,7 @@ func (controller *ContainerController) Delete(c echo.Context) error {
 		"containerId": c.Param("containerId"),
 	}
 
-	return apiHelper.NewResponseWrapper(
-		c,
-		controller.containerService.Delete(requestBody),
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerService.Delete(requestBody),
 	)
 }
