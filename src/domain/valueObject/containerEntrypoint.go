@@ -1,29 +1,38 @@
 package valueObject
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type ContainerEntrypoint string
 
-func NewContainerEntrypoint(value string) (ContainerEntrypoint, error) {
-	ce := ContainerEntrypoint(value)
-	if !ce.isValid() {
-		return "", errors.New("InvalidContainerEntrypoint")
+func NewContainerEntrypoint(value interface{}) (ContainerEntrypoint, error) {
+	stringValue, assertOk := value.(string)
+	if !assertOk {
+		return "", errors.New("ContainerEntrypointMustBeString")
 	}
-	return ce, nil
+
+	stringValue = strings.TrimSpace(stringValue)
+	stringValue = strings.ToLower(stringValue)
+
+	if len(stringValue) < 6 {
+		return "", errors.New("ContainerEntrypointIsTooShort")
+	}
+
+	if len(stringValue) > 1000 {
+		return "", errors.New("ContainerEntrypointIsTooLong")
+	}
+
+	return ContainerEntrypoint(stringValue), nil
 }
 
 func NewContainerEntrypointPanic(value string) ContainerEntrypoint {
-	ce := ContainerEntrypoint(value)
-	if !ce.isValid() {
-		panic("InvalidContainerEntrypoint")
+	ce, err := NewContainerEntrypoint(value)
+	if err != nil {
+		panic(err)
 	}
 	return ce
-}
-
-func (ce ContainerEntrypoint) isValid() bool {
-	isTooShort := len(string(ce)) < 6
-	isTooLong := len(string(ce)) > 1000
-	return !isTooShort && !isTooLong
 }
 
 func (ce ContainerEntrypoint) String() string {
