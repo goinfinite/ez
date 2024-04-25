@@ -27,7 +27,7 @@ func (controller *ContainerController) Read() *cobra.Command {
 		Use:   "get",
 		Short: "ReadContainers",
 		Run: func(cmd *cobra.Command, args []string) {
-			cliHelper.NewResponseWrapper(controller.containerService.Read())
+			cliHelper.ServiceResponseWrapper(controller.containerService.Read())
 		},
 	}
 
@@ -39,7 +39,7 @@ func (controller *ContainerController) ReadWithMetrics() *cobra.Command {
 		Use:   "get-with-metrics",
 		Short: "ReadContainersWithMetrics",
 		Run: func(cmd *cobra.Command, args []string) {
-			cliHelper.NewResponseWrapper(
+			cliHelper.ServiceResponseWrapper(
 				controller.containerService.ReadWithMetrics(),
 			)
 		},
@@ -92,29 +92,38 @@ func (controller *ContainerController) Create() *cobra.Command {
 		Short: "CreateNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId":          accountIdUint,
-				"hostname":           hostnameStr,
-				"imageAddress":       containerImageAddressStr,
-				"restartPolicy":      restartPolicyStr,
-				"entrypoint":         entrypointStr,
-				"profileId":          profileId,
-				"autoCreateMappings": autoCreateMappings,
+				"accountId":    accountIdUint,
+				"hostname":     hostnameStr,
+				"imageAddress": containerImageAddressStr,
 			}
 
-			portBindings := []valueObject.PortBinding{}
 			if len(portBindingsSlice) > 0 {
-				portBindings = controller.parsePortBindings(portBindingsSlice)
+				portBindings := controller.parsePortBindings(portBindingsSlice)
+				requestBody["portBindings"] = portBindings
 			}
 
-			envs := []valueObject.ContainerEnv{}
+			if restartPolicyStr != "" {
+				requestBody["restartPolicy"] = restartPolicyStr
+			}
+
+			if entrypointStr != "" {
+				requestBody["entrypoint"] = entrypointStr
+			}
+
+			if profileId != 0 {
+				requestBody["profileId"] = profileId
+			}
+
 			if len(envsSlice) > 0 {
-				envs = controller.parseContainerEnvs(envsSlice)
+				envs := controller.parseContainerEnvs(envsSlice)
+				requestBody["envs"] = envs
 			}
 
-			requestBody["portBindings"] = portBindings
-			requestBody["envs"] = envs
+			if !autoCreateMappings {
+				requestBody["autoCreateMappings"] = autoCreateMappings
+			}
 
-			cliHelper.NewResponseWrapper(
+			cliHelper.ServiceResponseWrapper(
 				controller.containerService.Create(requestBody),
 			)
 		},
@@ -160,11 +169,17 @@ func (controller *ContainerController) Update() *cobra.Command {
 			requestBody := map[string]interface{}{
 				"accountId":   accountIdUint,
 				"containerId": containerIdStr,
-				"status":      containerStatusStr,
-				"profileId":   profileId,
 			}
 
-			cliHelper.NewResponseWrapper(
+			if containerStatusStr != "" {
+				requestBody["status"] = containerStatusStr
+			}
+
+			if profileId != 0 {
+				requestBody["profileId"] = profileId
+			}
+
+			cliHelper.ServiceResponseWrapper(
 				controller.containerService.Update(requestBody),
 			)
 		},
@@ -192,7 +207,7 @@ func (controller *ContainerController) Delete() *cobra.Command {
 				"containerId": containerIdStr,
 			}
 
-			cliHelper.NewResponseWrapper(
+			cliHelper.ServiceResponseWrapper(
 				controller.containerService.Delete(requestBody),
 			)
 		},
