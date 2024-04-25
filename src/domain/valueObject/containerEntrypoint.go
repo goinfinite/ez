@@ -3,13 +3,15 @@ package valueObject
 import (
 	"errors"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type ContainerEntrypoint string
 
 func NewContainerEntrypoint(value interface{}) (ContainerEntrypoint, error) {
-	stringValue, assertOk := value.(string)
-	if !assertOk {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
 		return "", errors.New("ContainerEntrypointMustBeString")
 	}
 

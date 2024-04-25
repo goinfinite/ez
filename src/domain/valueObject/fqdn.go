@@ -5,6 +5,8 @@ import (
 	"net"
 	"regexp"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 const fqdnRegex string = `^((\*\.)?([a-zA-Z0-9_]+[\w-]*\.)*)?([a-zA-Z0-9_][\w-]*[a-zA-Z0-9])\.([a-zA-Z]{2,})$`
@@ -12,8 +14,8 @@ const fqdnRegex string = `^((\*\.)?([a-zA-Z0-9_]+[\w-]*\.)*)?([a-zA-Z0-9_][\w-]*
 type Fqdn string
 
 func NewFqdn(value interface{}) (Fqdn, error) {
-	stringValue, assertOk := value.(string)
-	if !assertOk {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
 		return "", errors.New("FqdnMustBeString")
 	}
 

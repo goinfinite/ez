@@ -4,6 +4,8 @@ import (
 	"errors"
 	"regexp"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 const containerIdRegex string = `^\w{12,64}$`
@@ -11,8 +13,8 @@ const containerIdRegex string = `^\w{12,64}$`
 type ContainerId string
 
 func NewContainerId(value interface{}) (ContainerId, error) {
-	stringValue, assertOk := value.(string)
-	if !assertOk {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
 		return "", errors.New("ContainerIdMustBeString")
 	}
 

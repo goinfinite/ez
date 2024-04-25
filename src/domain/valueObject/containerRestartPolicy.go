@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"golang.org/x/exp/slices"
 )
 
@@ -17,8 +18,8 @@ var ValidContainerRestartPolicies = []string{
 }
 
 func NewContainerRestartPolicy(value interface{}) (ContainerRestartPolicy, error) {
-	stringValue, assertOk := value.(string)
-	if !assertOk {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
 		return "", errors.New("ContainerRestartPolicyMustBeString")
 	}
 

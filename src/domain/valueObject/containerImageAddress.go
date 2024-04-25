@@ -13,8 +13,8 @@ const containerImgAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9
 type ContainerImageAddress string
 
 func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) {
-	stringValue, assertOk := value.(string)
-	if !assertOk {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
 		return "", errors.New("ContainerImageAddressMustBeString")
 	}
 
