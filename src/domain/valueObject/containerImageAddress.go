@@ -12,25 +12,33 @@ const containerImgAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9
 
 type ContainerImageAddress string
 
-func NewContainerImageAddress(value string) (ContainerImageAddress, error) {
-	valueParts := voHelper.FindNamedGroupsMatches(containerImgAddressRegex, value)
+func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) {
+	stringValue, assertOk := value.(string)
+	if !assertOk {
+		return "", errors.New("ContainerImageAddressMustBeString")
+	}
+
+	stringValue = strings.TrimSpace(stringValue)
+	stringValue = strings.ToLower(stringValue)
+
+	valueParts := voHelper.FindNamedGroupsMatches(containerImgAddressRegex, stringValue)
 	if len(valueParts) == 0 {
 		return "", errors.New("UnknownImageAddressFormat")
 	}
 
 	if valueParts["schema"] != "" {
-		value = strings.TrimPrefix(value, valueParts["schema"])
+		value = strings.TrimPrefix(stringValue, valueParts["schema"])
 	}
 
 	if valueParts["fqdn"] == "" {
-		value = "docker.io/" + value
+		value = "docker.io/" + stringValue
 	}
 
-	if !strings.Contains(value, "/") {
+	if !strings.Contains(stringValue, "/") {
 		return "", errors.New("ImageAddressMustContainOrgAndImageName")
 	}
 
-	imageAddress := ContainerImageAddress(value)
+	imageAddress := ContainerImageAddress(stringValue)
 	if !imageAddress.isValid() {
 		return "", errors.New("InvalidContainerImageAddress")
 	}
