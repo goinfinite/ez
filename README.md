@@ -46,7 +46,7 @@ Note: If you use Pastebin, make sure you're downloading the raw file and not the
 
 ```
 transactional-update pkg install git
-curl -L https://go.dev/dl/go1.21.3.linux-amd64.tar.gz -o go.tar.gz
+curl -L https://go.dev/dl/go1.22.2.linux-amd64.tar.gz -o go.tar.gz
 tar -C /usr/local -xzf go.tar.gz
 rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
@@ -170,7 +170,6 @@ swag init -g src/presentation/api/api.go -o src/presentation/api/docs
 ```
 
 The annotations are in the controller files. The reference file can be found [here](https://github.com/swaggo/swag#attribute).
-
 
 ### Authentication
 
