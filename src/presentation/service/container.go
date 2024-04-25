@@ -1,8 +1,6 @@
 package service
 
 import (
-	"strconv"
-
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -56,25 +54,19 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	hostname, err := valueObject.NewFqdn(input["hostname"].(string))
+	hostname, err := valueObject.NewFqdn(input["hostname"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	imgAddrStr, assertOk := input["imageAddress"].(string)
-	if !assertOk {
-		imgAddrStr, assertOk = input["imgAddr"].(string)
-		if !assertOk {
-			return NewServiceOutput(UserError, "InvalidImageAddress")
-		}
-	}
-	imgAddr, err := valueObject.NewContainerImageAddress(imgAddrStr)
+	imgAddr, err := valueObject.NewContainerImageAddress(input["imageAddress"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
 	portBindings := []valueObject.PortBinding{}
-	if input["portBindings"] != nil {
+	if _, exists := input["portBindings"]; exists {
+		var assertOk bool
 		portBindings, assertOk = input["portBindings"].([]valueObject.PortBinding)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidPortBindings")
@@ -82,10 +74,8 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	}
 
 	var restartPolicyPtr *valueObject.ContainerRestartPolicy
-	if input["restartPolicy"] != nil {
-		restartPolicy, err := valueObject.NewContainerRestartPolicy(
-			input["restartPolicy"].(string),
-		)
+	if _, exists := input["restartPolicy"]; exists {
+		restartPolicy, err := valueObject.NewContainerRestartPolicy(input["restartPolicy"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
@@ -93,10 +83,8 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	}
 
 	var entrypointPtr *valueObject.ContainerEntrypoint
-	if input["entrypoint"] != nil {
-		entrypoint, err := valueObject.NewContainerEntrypoint(
-			input["entrypoint"].(string),
-		)
+	if _, exists := input["entrypoint"]; exists {
+		entrypoint, err := valueObject.NewContainerEntrypoint(input["entrypoint"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
@@ -104,7 +92,7 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	}
 
 	var profileIdPtr *valueObject.ContainerProfileId
-	if input["profileId"] != nil {
+	if _, exists := input["profileId"]; exists {
 		profileId, err := valueObject.NewContainerProfileId(input["profileId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -113,7 +101,8 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	}
 
 	envs := []valueObject.ContainerEnv{}
-	if input["envs"] != nil {
+	if _, exists := input["envs"]; exists {
+		var assertOk bool
 		envs, assertOk = input["envs"].([]valueObject.ContainerEnv)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidEnvs")
@@ -121,17 +110,10 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	}
 
 	autoCreateMappings := true
-	if input["autoCreateMappings"] != nil {
-		var assertOk bool
-		autoCreateMappings, assertOk = input["autoCreateMappings"].(bool)
-		if !assertOk {
-			var err error
-			autoCreateMappings, err = strconv.ParseBool(
-				input["autoCreateMappings"].(string),
-			)
-			if err != nil {
-				return NewServiceOutput(UserError, err.Error())
-			}
+	if _, exists := input["autoCreateMappings"]; exists {
+		autoCreateMappings, err = serviceHelper.ParseBoolParam(input["autoCreateMappings"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
@@ -185,26 +167,22 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	containerId, err := valueObject.NewContainerId(input["containerId"].(string))
+	containerId, err := valueObject.NewContainerId(input["containerId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
 	var containerStatusPtr *bool
-	if input["status"] != nil {
-		containerStatus, assertOk := input["status"].(bool)
-		if !assertOk {
-			var err error
-			containerStatus, err = strconv.ParseBool(input["status"].(string))
-			if err != nil {
-				return NewServiceOutput(UserError, err.Error())
-			}
+	if _, exists := input["status"]; exists {
+		containerStatus, err := serviceHelper.ParseBoolParam(input["status"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
 		}
 		containerStatusPtr = &containerStatus
 	}
 
 	var profileIdPtr *valueObject.ContainerProfileId
-	if input["profileId"] != nil {
+	if _, exists := input["profileId"]; exists {
 		profileId, err := valueObject.NewContainerProfileId(input["profileId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -246,7 +224,7 @@ func (service *ContainerService) Delete(input map[string]interface{}) ServiceOut
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	containerId, err := valueObject.NewContainerId(input["containerId"].(string))
+	containerId, err := valueObject.NewContainerId(input["containerId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
