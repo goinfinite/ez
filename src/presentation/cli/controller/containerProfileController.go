@@ -69,7 +69,7 @@ func (controller *ContainerProfileController) parseContainerSpecs(
 	)
 }
 
-func (controller *ContainerProfileController) AddContainerProfile() *cobra.Command {
+func (controller *ContainerProfileController) CreateContainerProfile() *cobra.Command {
 	var nameStr string
 	var baseSpecsStr string
 	var maxSpecsStr string
@@ -120,7 +120,7 @@ func (controller *ContainerProfileController) AddContainerProfile() *cobra.Comma
 				hostMinCapacityPercentPtr = &hostMinCapacityPercent
 			}
 
-			dto := dto.NewAddContainerProfile(
+			dto := dto.NewCreateContainerProfile(
 				name,
 				baseSpecs,
 				maxSpecsPtr,
@@ -133,7 +133,7 @@ func (controller *ContainerProfileController) AddContainerProfile() *cobra.Comma
 
 			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
 
-			err := useCase.AddContainerProfile(
+			err := useCase.CreateContainerProfile(
 				containerProfileCmdRepo,
 				dto,
 			)

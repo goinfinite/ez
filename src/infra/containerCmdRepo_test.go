@@ -15,7 +15,7 @@ func TestContainerCmdRepo(t *testing.T) {
 	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
 	containerCmdRepo := NewContainerCmdRepo(persistentDbSvc)
 
-	t.Run("AddContainer", func(t *testing.T) {
+	t.Run("CreateContainer", func(t *testing.T) {
 		portBindings, _ := valueObject.NewPortBindingFromString("http")
 
 		restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
@@ -29,7 +29,7 @@ func TestContainerCmdRepo(t *testing.T) {
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-		addContainer := dto.NewAddContainer(
+		createContainer := dto.NewCreateContainer(
 			accountId,
 			valueObject.NewFqdnPanic("speedia.net"),
 			valueObject.NewContainerImageAddressPanic("https://docker.io/nginx:latest"),
@@ -41,7 +41,7 @@ func TestContainerCmdRepo(t *testing.T) {
 			false,
 		)
 
-		_, err := containerCmdRepo.Add(addContainer)
+		_, err := containerCmdRepo.Create(createContainer)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}

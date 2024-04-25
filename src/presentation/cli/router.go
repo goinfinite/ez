@@ -58,7 +58,7 @@ func (router *Router) containerRoutes() {
 
 	containerProfileController := cliController.NewContainerProfileController(router.persistentDbSvc)
 	containerProfileCmd.AddCommand(containerProfileController.GetContainerProfiles())
-	containerProfileCmd.AddCommand(containerProfileController.AddContainerProfile())
+	containerProfileCmd.AddCommand(containerProfileController.CreateContainerProfile())
 	containerProfileCmd.AddCommand(containerProfileController.UpdateContainerProfile())
 	containerProfileCmd.AddCommand(containerProfileController.DeleteContainerProfile())
 

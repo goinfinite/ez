@@ -293,11 +293,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
-                        "name": "addContainerDto",
+                        "name": "createContainerDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddContainer"
+                            "$ref": "#/definitions/dto.CreateContainer"
                         }
                     }
                 ],
@@ -429,11 +429,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "NewContainerProfile (Only name and baseSpecs are required.)",
-                        "name": "addContainerProfileDto",
+                        "name": "createContainerProfileDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddContainerProfile"
+                            "$ref": "#/definitions/dto.CreateContainerProfile"
                         }
                     }
                 ],
@@ -864,7 +864,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AddContainer": {
+        "dto.CreateContainer": {
             "type": "object",
             "properties": {
                 "accountId": {
@@ -902,7 +902,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AddContainerProfile": {
+        "dto.CreateContainerProfile": {
             "type": "object",
             "properties": {
                 "baseSpecs": {

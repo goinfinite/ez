@@ -19,10 +19,10 @@ func NewContainerProfileCmdRepo(
 	return &ContainerProfileCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *ContainerProfileCmdRepo) Add(
-	addDto dto.AddContainerProfile,
+func (repo *ContainerProfileCmdRepo) Create(
+	createDto dto.CreateContainerProfile,
 ) error {
-	containerProfileModel, err := dbModel.ContainerProfile{}.AddDtoToModel(addDto)
+	containerProfileModel, err := dbModel.ContainerProfile{}.AddDtoToModel(createDto)
 	if err != nil {
 		return err
 	}

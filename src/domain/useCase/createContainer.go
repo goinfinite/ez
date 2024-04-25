@@ -8,7 +8,7 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func AddContainer(
+func CreateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 	accQueryRepo repository.AccQueryRepo,
@@ -16,13 +16,13 @@ func AddContainer(
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
-	addContainerDto dto.AddContainer,
+	createDto dto.CreateContainer,
 ) error {
 	err := CheckAccountQuota(
 		accQueryRepo,
-		addContainerDto.AccountId,
+		createDto.AccountId,
 		containerProfileQueryRepo,
-		*addContainerDto.ProfileId,
+		*createDto.ProfileId,
 		nil,
 	)
 	if err != nil {
@@ -30,19 +30,19 @@ func AddContainer(
 		return err
 	}
 
-	_, err = containerQueryRepo.GetByHostname(addContainerDto.Hostname)
+	_, err = containerQueryRepo.GetByHostname(createDto.Hostname)
 	if err == nil {
-		log.Printf("ContainerHostnameAlreadyExists: %s", addContainerDto.Hostname)
+		log.Printf("ContainerHostnameAlreadyExists: %s", createDto.Hostname)
 		return errors.New("ContainerHostnameAlreadyExists")
 	}
 
-	containerId, err := containerCmdRepo.Add(addContainerDto)
+	containerId, err := containerCmdRepo.Create(createDto)
 	if err != nil {
-		log.Printf("AddContainerError: %s", err)
-		return errors.New("AddContainerInfraError")
+		log.Printf("CreateContainerError: %s", err)
+		return errors.New("CreateContainerInfraError")
 	}
 
-	err = accCmdRepo.UpdateQuotaUsage(addContainerDto.AccountId)
+	err = accCmdRepo.UpdateQuotaUsage(createDto.AccountId)
 	if err != nil {
 		log.Printf("UpdateAccountQuotaError: %s", err)
 		return errors.New("UpdateAccountQuotaError")
@@ -51,11 +51,11 @@ func AddContainer(
 	log.Printf(
 		"ContainerId '%s' (%s) created for AccountId '%s'.",
 		containerId.String(),
-		addContainerDto.ImageAddress.String(),
-		addContainerDto.AccountId.String(),
+		createDto.ImageAddress.String(),
+		createDto.AccountId.String(),
 	)
 
-	if !addContainerDto.AutoCreateMappings {
+	if !createDto.AutoCreateMappings {
 		return nil
 	}
 

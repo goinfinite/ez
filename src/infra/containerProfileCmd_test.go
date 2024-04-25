@@ -13,7 +13,7 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	containerProfileCmdRepo := NewContainerProfileCmdRepo(persistentDbSvc)
 
-	t.Run("AddContainerProfile", func(t *testing.T) {
+	t.Run("CreateContainerProfile", func(t *testing.T) {
 		name := valueObject.NewContainerProfileNamePanic("testContainerProfile")
 
 		baseSpecs := valueObject.NewContainerSpecs(
@@ -32,7 +32,7 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 		interval := uint64(86400)
 		hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(10)
 
-		addDto := dto.NewAddContainerProfile(
+		createDto := dto.NewCreateContainerProfile(
 			name,
 			baseSpecs,
 			&maxSpecs,
@@ -43,9 +43,9 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 			&hostMinCapacityPercent,
 		)
 
-		err := containerProfileCmdRepo.Add(addDto)
+		err := containerProfileCmdRepo.Create(createDto)
 		if err != nil {
-			t.Errorf("AddContainerProfileFailed: %v", err)
+			t.Errorf("CreateContainerProfileFailed: %v", err)
 		}
 	})
 

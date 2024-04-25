@@ -2,7 +2,7 @@ package dto
 
 import "github.com/speedianet/control/src/domain/valueObject"
 
-type AddContainerProfile struct {
+type CreateContainerProfile struct {
 	Name                   valueObject.ContainerProfileName `json:"name"`
 	BaseSpecs              valueObject.ContainerSpecs       `json:"baseSpecs"`
 	MaxSpecs               *valueObject.ContainerSpecs      `json:"maxSpecs"`
@@ -13,7 +13,7 @@ type AddContainerProfile struct {
 	HostMinCapacityPercent *valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
 }
 
-func NewAddContainerProfile(
+func NewCreateContainerProfile(
 	name valueObject.ContainerProfileName,
 	baseSpecs valueObject.ContainerSpecs,
 	maxSpecs *valueObject.ContainerSpecs,
@@ -22,8 +22,8 @@ func NewAddContainerProfile(
 	scalingMaxDurationSecs *uint64,
 	scalingIntervalSecs *uint64,
 	hostMinCapacityPercent *valueObject.HostMinCapacity,
-) AddContainerProfile {
-	return AddContainerProfile{
+) CreateContainerProfile {
+	return CreateContainerProfile{
 		Name:                   name,
 		BaseSpecs:              baseSpecs,
 		MaxSpecs:               maxSpecs,

@@ -9,9 +9,9 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func AddContainerProfile(
+func CreateContainerProfile(
 	containerProfileCmdRepo repository.ContainerProfileCmdRepo,
-	dto dto.AddContainerProfile,
+	dto dto.CreateContainerProfile,
 ) error {
 	if dto.MaxSpecs != nil {
 		if dto.ScalingPolicy == nil {
@@ -40,10 +40,10 @@ func AddContainerProfile(
 		}
 	}
 
-	err := containerProfileCmdRepo.Add(dto)
+	err := containerProfileCmdRepo.Create(dto)
 	if err != nil {
-		log.Printf("AddContainerProfileError: %v", err)
-		return errors.New("AddContainerProfileInfraError")
+		log.Printf("CreateContainerProfileError: %v", err)
+		return errors.New("CreateContainerProfileInfraError")
 	}
 
 	log.Printf("ContainerProfile '%s' added.", dto.Name.String())

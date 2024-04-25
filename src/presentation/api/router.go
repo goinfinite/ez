@@ -64,7 +64,7 @@ func (router *Router) containerRoutes() {
 
 	containerProfileGroup := containerGroup.Group("/profile")
 	containerProfileGroup.GET("/", apiController.GetContainerProfilesController)
-	containerProfileGroup.POST("/", apiController.AddContainerProfileController)
+	containerProfileGroup.POST("/", apiController.CreateContainerProfileController)
 	containerProfileGroup.PUT("/", apiController.UpdateContainerProfileController)
 	containerProfileGroup.DELETE(
 		"/:profileId/",

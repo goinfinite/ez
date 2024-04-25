@@ -117,7 +117,7 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 		}
 	}
 
-	addContainerDto := dto.NewAddContainer(
+	createContainerDto := dto.NewCreateContainer(
 		accId,
 		hostname,
 		imgAddr,
@@ -137,7 +137,7 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 
-	err = useCase.AddContainer(
+	err = useCase.CreateContainer(
 		containerQueryRepo,
 		containerCmdRepo,
 		accQueryRepo,
@@ -145,7 +145,7 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 		containerProfileQueryRepo,
 		mappingQueryRepo,
 		mappingCmdRepo,
-		addContainerDto,
+		createContainerDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

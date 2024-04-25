@@ -163,7 +163,7 @@ func (model ContainerProfile) ToEntity() (entity.ContainerProfile, error) {
 }
 
 func (ContainerProfile) AddDtoToModel(
-	dto dto.AddContainerProfile,
+	dto dto.CreateContainerProfile,
 ) (ContainerProfile, error) {
 	var maxSpecsPtr *string
 	if dto.MaxSpecs != nil {

@@ -118,13 +118,13 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 	return portBindingsParams
 }
 
-func (repo *ContainerCmdRepo) Add(
-	addDto dto.AddContainer,
+func (repo *ContainerCmdRepo) Create(
+	createDto dto.CreateContainer,
 ) (valueObject.ContainerId, error) {
 	var containerId valueObject.ContainerId
 
-	containerName := addDto.ProfileId.String() +
-		"-" + addDto.Hostname.String()
+	containerName := createDto.ProfileId.String() +
+		"-" + createDto.Hostname.String()
 
 	runParams := []string{
 		"run",
@@ -132,14 +132,14 @@ func (repo *ContainerCmdRepo) Add(
 		"--name",
 		containerName,
 		"--hostname",
-		addDto.Hostname.String(),
+		createDto.Hostname.String(),
 		"--env",
-		"VIRTUAL_HOST=" + addDto.Hostname.String(),
+		"VIRTUAL_HOST=" + createDto.Hostname.String(),
 	}
 
-	if len(addDto.Envs) > 0 {
+	if len(createDto.Envs) > 0 {
 		envFlags := []string{}
-		for _, env := range addDto.Envs {
+		for _, env := range createDto.Envs {
 			envFlags = append(envFlags, "--env")
 			envFlags = append(envFlags, env.String())
 		}
@@ -147,7 +147,7 @@ func (repo *ContainerCmdRepo) Add(
 		runParams = append(runParams, envFlags...)
 	}
 
-	baseSpecs, err := repo.getBaseSpecs(*addDto.ProfileId)
+	baseSpecs, err := repo.getBaseSpecs(*createDto.ProfileId)
 	if err != nil {
 		return containerId, err
 	}
@@ -160,29 +160,29 @@ func (repo *ContainerCmdRepo) Add(
 	}
 	runParams = append(runParams, baseSpecsParams...)
 
-	if addDto.RestartPolicy != nil {
-		runParams = append(runParams, "--restart", addDto.RestartPolicy.String())
+	if createDto.RestartPolicy != nil {
+		runParams = append(runParams, "--restart", createDto.RestartPolicy.String())
 	}
 
-	if addDto.Entrypoint != nil {
-		runParams = append(runParams, "--entrypoint", addDto.Entrypoint.String())
+	if createDto.Entrypoint != nil {
+		runParams = append(runParams, "--entrypoint", createDto.Entrypoint.String())
 	}
 
-	if len(addDto.PortBindings) > 0 {
-		addDto.PortBindings, err = repo.calibratePortBindings(addDto.PortBindings)
+	if len(createDto.PortBindings) > 0 {
+		createDto.PortBindings, err = repo.calibratePortBindings(createDto.PortBindings)
 		if err != nil {
 			return containerId, err
 		}
 
-		portBindingsParams := repo.getPortBindingsParam(addDto.PortBindings)
+		portBindingsParams := repo.getPortBindingsParam(createDto.PortBindings)
 
 		runParams = append(runParams, portBindingsParams...)
 	}
 
-	runParams = append(runParams, addDto.ImageAddress.String())
+	runParams = append(runParams, createDto.ImageAddress.String())
 
 	_, err = infraHelper.RunCmdAsUser(
-		addDto.AccountId,
+		createDto.AccountId,
 		"podman",
 		runParams...,
 	)
@@ -191,7 +191,7 @@ func (repo *ContainerCmdRepo) Add(
 	}
 
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
-		addDto.AccountId,
+		createDto.AccountId,
 		"podman",
 		"container",
 		"inspect",
@@ -235,17 +235,17 @@ func (repo *ContainerCmdRepo) Add(
 
 	containerEntity := entity.NewContainer(
 		containerId,
-		addDto.AccountId,
-		addDto.Hostname,
+		createDto.AccountId,
+		createDto.Hostname,
 		true,
-		addDto.ImageAddress,
+		createDto.ImageAddress,
 		imageHash,
-		addDto.PortBindings,
-		*addDto.RestartPolicy,
+		createDto.PortBindings,
+		*createDto.RestartPolicy,
 		0,
-		addDto.Entrypoint,
-		*addDto.ProfileId,
-		addDto.Envs,
+		createDto.Entrypoint,
+		*createDto.ProfileId,
+		createDto.Envs,
 		nowUnixTime,
 		nowUnixTime,
 		&nowUnixTime,

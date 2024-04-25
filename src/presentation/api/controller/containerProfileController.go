@@ -40,17 +40,17 @@ func parseContainerSpecs(specs map[string]interface{}) valueObject.ContainerSpec
 	return valueObject.NewContainerSpecs(cpuCores, memoryBytes)
 }
 
-// AddContainerProfile	 godoc
+// CreateContainerProfile	 godoc
 // @Summary      AddNewContainerProfile
 // @Description  Add a new container profile.
 // @Tags         container
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addContainerProfileDto 	  body    dto.AddContainerProfile  true  "NewContainerProfile (Only name and baseSpecs are required.)"
+// @Param        createContainerProfileDto 	  body    dto.CreateContainerProfile  true  "NewContainerProfile (Only name and baseSpecs are required.)"
 // @Success      201 {object} object{} "ContainerProfileCreated"
 // @Router       /v1/container/profile/ [post]
-func AddContainerProfileController(c echo.Context) error {
+func CreateContainerProfileController(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func AddContainerProfileController(c echo.Context) error {
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
-	dto := dto.NewAddContainerProfile(
+	dto := dto.NewCreateContainerProfile(
 		name,
 		baseSpecs,
 		maxSpecsPtr,
@@ -150,7 +150,7 @@ func AddContainerProfileController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistentDbSvc)
 
-	err = useCase.AddContainerProfile(
+	err = useCase.CreateContainerProfile(
 		containerProfileCmdRepo,
 		dto,
 	)
