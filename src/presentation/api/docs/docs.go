@@ -864,73 +864,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateContainer": {
-            "type": "object",
-            "properties": {
-                "accountId": {
-                    "type": "integer"
-                },
-                "autoCreateMappings": {
-                    "type": "boolean"
-                },
-                "entrypoint": {
-                    "type": "string"
-                },
-                "envs": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "hostname": {
-                    "type": "string"
-                },
-                "imageAddress": {
-                    "type": "string"
-                },
-                "portBindings": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/valueObject.PortBinding"
-                    }
-                },
-                "profileId": {
-                    "type": "integer"
-                },
-                "restartPolicy": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.CreateContainerProfile": {
-            "type": "object",
-            "properties": {
-                "baseSpecs": {
-                    "$ref": "#/definitions/valueObject.ContainerSpecs"
-                },
-                "hostMinCapacityPercent": {
-                    "type": "number"
-                },
-                "maxSpecs": {
-                    "$ref": "#/definitions/valueObject.ContainerSpecs"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "scalingIntervalSecs": {
-                    "type": "integer"
-                },
-                "scalingMaxDurationSecs": {
-                    "type": "integer"
-                },
-                "scalingPolicy": {
-                    "type": "string"
-                },
-                "scalingThreshold": {
-                    "type": "integer"
-                }
-            }
-        },
         "dto.AddMapping": {
             "type": "object",
             "properties": {
@@ -1023,6 +956,76 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateContainer": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "autoCreateMappings": {
+                    "type": "boolean"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "launchScript": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "restartPolicy": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "type": "string"
+                },
+                "scalingThreshold": {
                     "type": "integer"
                 }
             }

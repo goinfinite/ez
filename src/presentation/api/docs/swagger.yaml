@@ -5,53 +5,9 @@ definitions:
       password:
         type: string
       quota:
-        $ref: "#/definitions/valueObject.AccountQuota"
+        $ref: '#/definitions/valueObject.AccountQuota'
       username:
         type: string
-    type: object
-  dto.CreateContainer:
-    properties:
-      accountId:
-        type: integer
-      autoCreateMappings:
-        type: boolean
-      entrypoint:
-        type: string
-      envs:
-        items:
-          type: string
-        type: array
-      hostname:
-        type: string
-      imageAddress:
-        type: string
-      portBindings:
-        items:
-          $ref: "#/definitions/valueObject.PortBinding"
-        type: array
-      profileId:
-        type: integer
-      restartPolicy:
-        type: string
-    type: object
-  dto.CreateContainerProfile:
-    properties:
-      baseSpecs:
-        $ref: "#/definitions/valueObject.ContainerSpecs"
-      hostMinCapacityPercent:
-        type: number
-      maxSpecs:
-        $ref: "#/definitions/valueObject.ContainerSpecs"
-      name:
-        type: string
-      scalingIntervalSecs:
-        type: integer
-      scalingMaxDurationSecs:
-        type: integer
-      scalingPolicy:
-        type: string
-      scalingThreshold:
-        type: integer
     type: object
   dto.AddMapping:
     properties:
@@ -96,10 +52,10 @@ definitions:
       imageHash:
         type: string
       metrics:
-        $ref: "#/definitions/valueObject.ContainerMetrics"
+        $ref: '#/definitions/valueObject.ContainerMetrics'
       portBindings:
         items:
-          $ref: "#/definitions/valueObject.PortBinding"
+          $ref: '#/definitions/valueObject.PortBinding'
         type: array
       profileId:
         type: integer
@@ -116,6 +72,52 @@ definitions:
       updatedAt:
         type: integer
     type: object
+  dto.CreateContainer:
+    properties:
+      accountId:
+        type: integer
+      autoCreateMappings:
+        type: boolean
+      entrypoint:
+        type: string
+      envs:
+        items:
+          type: string
+        type: array
+      hostname:
+        type: string
+      imageAddress:
+        type: string
+      launchScript:
+        type: string
+      portBindings:
+        items:
+          $ref: '#/definitions/valueObject.PortBinding'
+        type: array
+      profileId:
+        type: integer
+      restartPolicy:
+        type: string
+    type: object
+  dto.CreateContainerProfile:
+    properties:
+      baseSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      hostMinCapacityPercent:
+        type: number
+      maxSpecs:
+        $ref: '#/definitions/valueObject.ContainerSpecs'
+      name:
+        type: string
+      scalingIntervalSecs:
+        type: integer
+      scalingMaxDurationSecs:
+        type: integer
+      scalingPolicy:
+        type: string
+      scalingThreshold:
+        type: integer
+    type: object
   dto.Login:
     properties:
       password:
@@ -130,7 +132,7 @@ definitions:
       password:
         type: string
       quota:
-        $ref: "#/definitions/valueObject.AccountQuota"
+        $ref: '#/definitions/valueObject.AccountQuota'
       shouldUpdateApiKey:
         type: boolean
     type: object
@@ -148,13 +150,13 @@ definitions:
   dto.UpdateContainerProfile:
     properties:
       baseSpecs:
-        $ref: "#/definitions/valueObject.ContainerSpecs"
+        $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
         type: number
       id:
         type: integer
       maxSpecs:
-        $ref: "#/definitions/valueObject.ContainerSpecs"
+        $ref: '#/definitions/valueObject.ContainerSpecs'
       name:
         type: string
       scalingIntervalSecs:
@@ -173,7 +175,7 @@ definitions:
       tokenStr:
         type: string
       type:
-        $ref: "#/definitions/valueObject.AccessTokenType"
+        $ref: '#/definitions/valueObject.AccessTokenType'
     type: object
   entity.Account:
     properties:
@@ -184,9 +186,9 @@ definitions:
       id:
         type: integer
       quota:
-        $ref: "#/definitions/valueObject.AccountQuota"
+        $ref: '#/definitions/valueObject.AccountQuota'
       quotaUsage:
-        $ref: "#/definitions/valueObject.AccountQuota"
+        $ref: '#/definitions/valueObject.AccountQuota'
       updatedAt:
         type: integer
       username:
@@ -214,7 +216,7 @@ definitions:
         type: string
       portBindings:
         items:
-          $ref: "#/definitions/valueObject.PortBinding"
+          $ref: '#/definitions/valueObject.PortBinding'
         type: array
       profileId:
         type: integer
@@ -234,13 +236,13 @@ definitions:
   entity.ContainerProfile:
     properties:
       baseSpecs:
-        $ref: "#/definitions/valueObject.ContainerSpecs"
+        $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
         type: number
       id:
         type: integer
       maxSpecs:
-        $ref: "#/definitions/valueObject.ContainerSpecs"
+        $ref: '#/definitions/valueObject.ContainerSpecs'
       name:
         type: string
       scalingIntervalSecs:
@@ -283,7 +285,7 @@ definitions:
         type: integer
       targets:
         items:
-          $ref: "#/definitions/entity.MappingTarget"
+          $ref: '#/definitions/entity.MappingTarget'
         type: array
     type: object
   entity.MappingTarget:
@@ -302,9 +304,9 @@ definitions:
       publicIp:
         type: string
       resourceUsage:
-        $ref: "#/definitions/valueObject.HostResourceUsage"
+        $ref: '#/definitions/valueObject.HostResourceUsage'
       specs:
-        $ref: "#/definitions/valueObject.HardwareSpecs"
+        $ref: '#/definitions/valueObject.HardwareSpecs'
       uptimeSecs:
         type: integer
     type: object
@@ -347,7 +349,7 @@ definitions:
         type: string
       portBindings:
         items:
-          $ref: "#/definitions/valueObject.PortBinding"
+          $ref: '#/definitions/valueObject.PortBinding'
         type: array
       publisherName:
         type: string
@@ -362,12 +364,12 @@ definitions:
     type: object
   valueObject.AccessTokenType:
     enum:
-      - sessionToken
-      - accountApiKey
+    - sessionToken
+    - accountApiKey
     type: string
     x-enum-varnames:
-      - sessionToken
-      - accountApiKey
+    - sessionToken
+    - accountApiKey
   valueObject.AccountQuota:
     properties:
       cpuCores:
@@ -428,11 +430,11 @@ definitions:
         type: number
       netInfo:
         items:
-          $ref: "#/definitions/valueObject.NetInterfaceInfo"
+          $ref: '#/definitions/valueObject.NetInterfaceInfo'
         type: array
       storageInfo:
         items:
-          $ref: "#/definitions/valueObject.StorageUnitInfo"
+          $ref: '#/definitions/valueObject.StorageUnitInfo'
         type: array
     type: object
   valueObject.NetInterfaceInfo:
@@ -518,517 +520,516 @@ paths:
   /v1/account/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: List accs.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/entity.Account"
+              $ref: '#/definitions/entity.Account'
             type: array
       security:
-        - Bearer: []
+      - Bearer: []
       summary: GetAccounts
       tags:
-        - account
+      - account
     post:
       consumes:
-        - application/json
+      - application/json
       description: Add a new account.
       parameters:
-        - description: NewAccount
-          in: body
-          name: addAccountDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.AddAccount"
+      - description: NewAccount
+        in: body
+        name: addAccountDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddAccount'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: AccountCreated
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: AddNewAccount
       tags:
-        - account
+      - account
     put:
       consumes:
-        - application/json
+      - application/json
       description: Update an account.
       parameters:
-        - description: UpdateAccount (Only accountId is required.)
-          in: body
-          name: updateAccountDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.UpdateAccount"
+      - description: UpdateAccount (Only accountId is required.)
+        in: body
+        name: updateAccountDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAccount'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: AccountUpdated message or NewKeyString
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: UpdateAccount
       tags:
-        - account
+      - account
   /v1/account/{accountId}/:
     delete:
       consumes:
-        - application/json
+      - application/json
       description: Delete an account.
       parameters:
-        - description: AccountId
-          in: path
-          name: accountId
-          required: true
-          type: string
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: AccountDeleted
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: DeleteAccount
       tags:
-        - account
+      - account
   /v1/auth/login/:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Generate JWT with credentials
       parameters:
-        - description: Login
-          in: body
-          name: loginDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.Login"
+      - description: Login
+        in: body
+        name: loginDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Login'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/entity.AccessToken"
+            $ref: '#/definitions/entity.AccessToken'
         "401":
           description: Unauthorized
           schema:
             type: string
       summary: GenerateJwtWithCredentials
       tags:
-        - auth
+      - auth
   /v1/container/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: List containers.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/entity.Container"
+              $ref: '#/definitions/entity.Container'
             type: array
       security:
-        - Bearer: []
+      - Bearer: []
       summary: ReadContainers
       tags:
-        - container
+      - container
     post:
       consumes:
-        - application/json
+      - application/json
       description: Create a new container.
       parameters:
-        - description:
-            NewContainer (Only accountId, hostname and imageAddress are required.)<br
-            />When specifying portBindings, only publicPort is required.
-          in: body
-          name: createContainerDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.CreateContainer"
+      - description: NewContainer (Only accountId, hostname and imageAddress are required.)<br
+          />When specifying portBindings, only publicPort is required.
+        in: body
+        name: createContainerDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContainer'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: ContainerCreated
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: CreateNewContainer
       tags:
-        - container
+      - container
     put:
       consumes:
-        - application/json
+      - application/json
       description: Update a container.
       parameters:
-        - description: UpdateContainer (Only accountId and containerId are required.)
-          in: body
-          name: updateContainerDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.UpdateContainer"
+      - description: UpdateContainer (Only accountId and containerId are required.)
+        in: body
+        name: updateContainerDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContainer'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: ContainerUpdated
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: UpdateContainer
       tags:
-        - container
+      - container
   /v1/container/{accountId}/{containerId}/:
     delete:
       consumes:
-        - application/json
+      - application/json
       description: Delete a container.
       parameters:
-        - description: AccountId
-          in: path
-          name: accountId
-          required: true
-          type: string
-        - description: ContainerId
-          in: path
-          name: containerId
-          required: true
-          type: string
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: ContainerId
+        in: path
+        name: containerId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: ContainerDeleted
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: DeleteContainer
       tags:
-        - container
+      - container
   /v1/container/metrics/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: List containers with metrics.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/dto.ContainerWithMetrics"
+              $ref: '#/definitions/dto.ContainerWithMetrics'
             type: array
       security:
-        - Bearer: []
+      - Bearer: []
       summary: ReadContainersWithMetrics
       tags:
-        - container
+      - container
   /v1/container/profile/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: List container profiles.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/entity.ContainerProfile"
+              $ref: '#/definitions/entity.ContainerProfile'
             type: array
       security:
-        - Bearer: []
+      - Bearer: []
       summary: GetContainerProfiles
       tags:
-        - container
+      - container
     post:
       consumes:
-        - application/json
+      - application/json
       description: Add a new container profile.
       parameters:
-        - description: NewContainerProfile (Only name and baseSpecs are required.)
-          in: body
-          name: createContainerProfileDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.CreateContainerProfile"
+      - description: NewContainerProfile (Only name and baseSpecs are required.)
+        in: body
+        name: createContainerProfileDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContainerProfile'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: ContainerProfileCreated
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: AddNewContainerProfile
       tags:
-        - container
+      - container
     put:
       consumes:
-        - application/json
+      - application/json
       description: Update a container profile.
       parameters:
-        - description: UpdateContainerProfile (Only id is required.)
-          in: body
-          name: updateContainerProfileDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.UpdateContainerProfile"
+      - description: UpdateContainerProfile (Only id is required.)
+        in: body
+        name: updateContainerProfileDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContainerProfile'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: ContainerProfileUpdated
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: UpdateContainerProfile
       tags:
-        - container
+      - container
   /v1/container/profile/{profileId}/:
     delete:
       consumes:
-        - application/json
+      - application/json
       description: Delete a container profile.
       parameters:
-        - description: ProfileId
-          in: path
-          name: profileId
-          required: true
-          type: string
+      - description: ProfileId
+        in: path
+        name: profileId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: ContainerProfileDeleted
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: DeleteContainerProfile
       tags:
-        - container
+      - container
   /v1/container/registry/image/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: Get container registry images.
       parameters:
-        - description: ImageName
-          in: query
-          name: name
-          type: string
+      - description: ImageName
+        in: query
+        name: name
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/entity.RegistryImage"
+              $ref: '#/definitions/entity.RegistryImage'
             type: array
       security:
-        - Bearer: []
+      - Bearer: []
       summary: GetContainerRegistryImages
       tags:
-        - container
+      - container
   /v1/container/registry/image/tagged/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: Get container registry tagged image.
       parameters:
-        - description: ImageAddress
-          in: query
-          name: address
-          required: true
-          type: string
+      - description: ImageAddress
+        in: query
+        name: address
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/entity.RegistryTaggedImage"
+            $ref: '#/definitions/entity.RegistryTaggedImage'
       security:
-        - Bearer: []
+      - Bearer: []
       summary: GetContainerRegistryTaggedImage
       tags:
-        - container
+      - container
   /v1/license/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: Get license info.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/entity.LicenseInfo"
+            $ref: '#/definitions/entity.LicenseInfo'
       security:
-        - Bearer: []
+      - Bearer: []
       summary: GetLicenseInfo
       tags:
-        - license
+      - license
   /v1/mapping/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: List mapping.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/entity.Mapping"
+              $ref: '#/definitions/entity.Mapping'
             type: array
       security:
-        - Bearer: []
+      - Bearer: []
       summary: GetMappings
       tags:
-        - mapping
+      - mapping
     post:
       consumes:
-        - application/json
+      - application/json
       description: Add a new mapping.
       parameters:
-        - description: NewMapping
-          in: body
-          name: addMappingDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.AddMapping"
+      - description: NewMapping
+        in: body
+        name: addMappingDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddMapping'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: MappingCreated
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: AddNewMapping
       tags:
-        - mapping
+      - mapping
   /v1/mapping/{mappingId}/:
     delete:
       consumes:
-        - application/json
+      - application/json
       description: Delete a mapping.
       parameters:
-        - description: MappingId
-          in: path
-          name: mappingId
-          required: true
-          type: string
+      - description: MappingId
+        in: path
+        name: mappingId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: MappingDeleted
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: DeleteMapping
       tags:
-        - mapping
+      - mapping
   /v1/mapping/{mappingId}/target/{targetId}/:
     delete:
       consumes:
-        - application/json
+      - application/json
       description: Delete a mapping target.
       parameters:
-        - description: MappingId
-          in: path
-          name: mappingId
-          required: true
-          type: string
-        - description: TargetId
-          in: path
-          name: targetId
-          required: true
-          type: string
+      - description: MappingId
+        in: path
+        name: mappingId
+        required: true
+        type: string
+      - description: TargetId
+        in: path
+        name: targetId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: MappingTargetDeleted
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: DeleteMappingTarget
       tags:
-        - mapping
+      - mapping
   /v1/mapping/target/:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Add a new mapping target.
       parameters:
-        - description: NewMappingTarget
-          in: body
-          name: addMappingTargetDto
-          required: true
-          schema:
-            $ref: "#/definitions/dto.AddMappingTarget"
+      - description: NewMappingTarget
+        in: body
+        name: addMappingTargetDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddMappingTarget'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: MappingTargetAdded
           schema:
             type: object
       security:
-        - Bearer: []
+      - Bearer: []
       summary: AddMappingTarget
       tags:
-        - mapping
+      - mapping
   /v1/o11y/overview/:
     get:
       consumes:
-        - application/json
+      - application/json
       description: Show system information and resource usage.
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/entity.O11yOverview"
+            $ref: '#/definitions/entity.O11yOverview'
       security:
-        - Bearer: []
+      - Bearer: []
       summary: O11yOverview
       tags:
-        - o11y
+      - o11y
 securityDefinitions:
   Bearer:
     description: Type "Bearer" + JWT token or API key.
