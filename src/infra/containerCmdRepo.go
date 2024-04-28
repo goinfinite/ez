@@ -118,6 +118,84 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 	return portBindingsParams
 }
 
+func (repo *ContainerCmdRepo) persistContainer(
+	createDto dto.CreateContainer,
+	containerName string,
+) (valueObject.ContainerId, error) {
+	var containerId valueObject.ContainerId
+
+	containerInfoJson, err := infraHelper.RunCmdAsUser(
+		createDto.AccountId,
+		"podman",
+		"container",
+		"inspect",
+		containerName,
+		"--format",
+		"{{json .}}",
+	)
+	if err != nil {
+		return containerId, errors.New("GetContainerInfoError")
+	}
+
+	containerInfo := map[string]interface{}{}
+	err = json.Unmarshal([]byte(containerInfoJson), &containerInfo)
+	if err != nil {
+		return containerId, errors.New("ContainerInfoParseError")
+	}
+
+	rawContainerId, assertOk := containerInfo["Id"].(string)
+	if !assertOk || len(rawContainerId) < 12 {
+		return containerId, errors.New("ContainerIdParseError")
+	}
+
+	rawContainerId = rawContainerId[:12]
+	containerId, err = valueObject.NewContainerId(rawContainerId)
+	if err != nil {
+		return containerId, err
+	}
+
+	rawImageHash, assertOk := containerInfo["ImageDigest"].(string)
+	if !assertOk {
+		return containerId, errors.New("ImageHashParseError")
+	}
+	rawImageHash = strings.TrimPrefix(rawImageHash, "sha256:")
+
+	imageHash, err := valueObject.NewHash(rawImageHash)
+	if err != nil {
+		return containerId, err
+	}
+
+	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+
+	containerEntity := entity.NewContainer(
+		containerId,
+		createDto.AccountId,
+		createDto.Hostname,
+		true,
+		createDto.ImageAddress,
+		imageHash,
+		createDto.PortBindings,
+		*createDto.RestartPolicy,
+		0,
+		createDto.Entrypoint,
+		*createDto.ProfileId,
+		createDto.Envs,
+		nowUnixTime,
+		nowUnixTime,
+		&nowUnixTime,
+		nil,
+	)
+
+	containerModel := dbModel.Container{}.ToModel(containerEntity)
+
+	createResult := repo.persistentDbSvc.Handler.Create(&containerModel)
+	if createResult.Error != nil {
+		return containerId, createResult.Error
+	}
+
+	return containerId, nil
+}
+
 func (repo *ContainerCmdRepo) Create(
 	createDto dto.CreateContainer,
 ) (valueObject.ContainerId, error) {
@@ -190,76 +268,7 @@ func (repo *ContainerCmdRepo) Create(
 		return containerId, errors.New("ContainerRunError: " + err.Error())
 	}
 
-	containerInfoJson, err := infraHelper.RunCmdAsUser(
-		createDto.AccountId,
-		"podman",
-		"container",
-		"inspect",
-		containerName,
-		"--format",
-		"{{json .}}",
-	)
-	if err != nil {
-		return containerId, errors.New("GetContainerInfoError")
-	}
-
-	containerInfo := map[string]interface{}{}
-	err = json.Unmarshal([]byte(containerInfoJson), &containerInfo)
-	if err != nil {
-		return containerId, errors.New("ContainerInfoParseError")
-	}
-
-	rawContainerId, assertOk := containerInfo["Id"].(string)
-	if !assertOk || len(rawContainerId) < 12 {
-		return containerId, errors.New("ContainerIdParseError")
-	}
-
-	rawContainerId = rawContainerId[:12]
-	containerId, err = valueObject.NewContainerId(rawContainerId)
-	if err != nil {
-		return containerId, err
-	}
-
-	rawImageHash, assertOk := containerInfo["ImageDigest"].(string)
-	if !assertOk {
-		return containerId, errors.New("ImageHashParseError")
-	}
-	rawImageHash = strings.TrimPrefix(rawImageHash, "sha256:")
-
-	imageHash, err := valueObject.NewHash(rawImageHash)
-	if err != nil {
-		return containerId, err
-	}
-
-	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
-
-	containerEntity := entity.NewContainer(
-		containerId,
-		createDto.AccountId,
-		createDto.Hostname,
-		true,
-		createDto.ImageAddress,
-		imageHash,
-		createDto.PortBindings,
-		*createDto.RestartPolicy,
-		0,
-		createDto.Entrypoint,
-		*createDto.ProfileId,
-		createDto.Envs,
-		nowUnixTime,
-		nowUnixTime,
-		&nowUnixTime,
-		nil,
-	)
-
-	containerModel := dbModel.Container{}.ToModel(containerEntity)
-
-	createResult := repo.persistentDbSvc.Handler.Create(&containerModel)
-	if createResult.Error != nil {
-		return containerId, createResult.Error
-	}
-
-	return containerId, nil
+	return repo.persistContainer(createDto, containerName)
 }
 
 func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
