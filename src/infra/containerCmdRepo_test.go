@@ -29,6 +29,11 @@ func TestContainerCmdRepo(t *testing.T) {
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
+		launchScript, err := valueObject.NewLaunchScript("echo 'Hello, World!'")
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+
 		createContainer := dto.NewCreateContainer(
 			accountId,
 			valueObject.NewFqdnPanic("speedia.net"),
@@ -38,12 +43,13 @@ func TestContainerCmdRepo(t *testing.T) {
 			nil,
 			&profileId,
 			envs,
+			&launchScript,
 			false,
 		)
 
-		_, err := containerCmdRepo.Create(createContainer)
+		_, err = containerCmdRepo.Create(createContainer)
 		if err != nil {
-			t.Errorf("Expected no error, got %v", err)
+			t.Errorf("CreateContainerFailed: %v", err)
 		}
 	})
 
