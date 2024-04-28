@@ -27,11 +27,11 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 	}
 
 	if valueParts["schema"] != "" {
-		value = strings.TrimPrefix(stringValue, valueParts["schema"])
+		stringValue = strings.TrimPrefix(stringValue, valueParts["schema"])
 	}
 
 	if valueParts["fqdn"] == "" {
-		value = "docker.io/" + stringValue
+		stringValue = "docker.io/" + stringValue
 	}
 
 	if !strings.Contains(stringValue, "/") {
