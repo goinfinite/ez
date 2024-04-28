@@ -109,6 +109,15 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 		}
 	}
 
+	var launchScriptPtr *valueObject.LaunchScript
+	if _, exists := input["launchScript"]; exists {
+		launchScript, err := valueObject.NewLaunchScript(input["launchScript"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		launchScriptPtr = &launchScript
+	}
+
 	autoCreateMappings := true
 	if _, exists := input["autoCreateMappings"]; exists {
 		autoCreateMappings, err = serviceHelper.ParseBoolParam(input["autoCreateMappings"])
@@ -126,6 +135,7 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 		entrypointPtr,
 		profileIdPtr,
 		envs,
+		launchScriptPtr,
 		autoCreateMappings,
 	)
 

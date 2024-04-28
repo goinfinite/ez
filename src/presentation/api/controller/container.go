@@ -180,6 +180,27 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		requestBody["envs"] = envs
 	}
 
+	if requestBody["launchScript"] != nil {
+		scriptEncodedContent, err := valueObject.NewEncodedContent(
+			requestBody["launchScript"].(string),
+		)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		scriptDecodedContent, err := scriptEncodedContent.GetDecoded()
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		launchScript, err := valueObject.NewLaunchScript(scriptDecodedContent)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		requestBody["launchScript"] = launchScript
+	}
+
 	return apiHelper.ServiceResponseWrapper(
 		c,
 		controller.containerService.Create(requestBody),

@@ -3,6 +3,7 @@ package cliController
 import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
 	"github.com/speedianet/control/src/presentation/service"
 	"github.com/spf13/cobra"
@@ -85,6 +86,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 	var entrypointStr string
 	var profileId uint64
 	var envsSlice []string
+	var launchScriptFilePathStr string
 	var autoCreateMappings bool
 
 	cmd := &cobra.Command{
@@ -119,6 +121,25 @@ func (controller *ContainerController) Create() *cobra.Command {
 				requestBody["envs"] = envs
 			}
 
+			if launchScriptFilePathStr != "" {
+				scriptFilePath, err := valueObject.NewUnixFilePath(launchScriptFilePathStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+
+				scriptFileContent, err := infraHelper.GetFileContent(scriptFilePath.String())
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+
+				launchScript, err := valueObject.NewLaunchScript(scriptFileContent)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+
+				requestBody["launchScript"] = launchScript
+			}
+
 			if !autoCreateMappings {
 				requestBody["autoCreateMappings"] = autoCreateMappings
 			}
@@ -146,12 +167,11 @@ func (controller *ContainerController) Create() *cobra.Command {
 	cmd.Flags().StringVarP(&entrypointStr, "entrypoint", "e", "", "Entrypoint")
 	cmd.Flags().Uint64VarP(&profileId, "profile-id", "p", 0, "ContainerProfileId")
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "Envs (key=value)")
+	cmd.Flags().StringVarP(
+		&launchScriptFilePathStr, "launch-script-path", "l", "", "Launch script file path",
+	)
 	cmd.Flags().BoolVarP(
-		&autoCreateMappings,
-		"auto-create-mappings",
-		"m",
-		true,
-		"AutoCreateMappings",
+		&autoCreateMappings, "auto-create-mappings", "m", true, "AutoCreateMappings",
 	)
 	return cmd
 }
