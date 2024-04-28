@@ -14,6 +14,7 @@ type CreateContainer struct {
 	Entrypoint         *valueObject.ContainerEntrypoint    `json:"entrypoint"`
 	ProfileId          *valueObject.ContainerProfileId     `json:"profileId"`
 	Envs               []valueObject.ContainerEnv          `json:"envs"`
+	LaunchScript       *valueObject.LaunchScript           `json:"launchScript"`
 	AutoCreateMappings bool                                `json:"autoCreateMappings"`
 }
 
@@ -26,6 +27,7 @@ func NewCreateContainer(
 	entrypoint *valueObject.ContainerEntrypoint,
 	profileId *valueObject.ContainerProfileId,
 	envs []valueObject.ContainerEnv,
+	launchScript *valueObject.LaunchScript,
 	autoCreateMappings bool,
 ) CreateContainer {
 	if restartPolicyPtr == nil {
@@ -47,6 +49,7 @@ func NewCreateContainer(
 		Entrypoint:         entrypoint,
 		ProfileId:          profileId,
 		Envs:               envs,
+		LaunchScript:       launchScript,
 		AutoCreateMappings: autoCreateMappings,
 	}
 }
