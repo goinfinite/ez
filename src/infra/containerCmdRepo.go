@@ -118,11 +118,11 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 	return portBindingsParams
 }
 
-func (repo *ContainerCmdRepo) persistContainer(
+func (repo *ContainerCmdRepo) containerEntityFactory(
 	createDto dto.CreateContainer,
 	containerName string,
-) (valueObject.ContainerId, error) {
-	var containerId valueObject.ContainerId
+) (entity.Container, error) {
+	var containerEntity entity.Container
 
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
 		createDto.AccountId,
@@ -134,40 +134,40 @@ func (repo *ContainerCmdRepo) persistContainer(
 		"{{json .}}",
 	)
 	if err != nil {
-		return containerId, errors.New("GetContainerInfoError")
+		return containerEntity, errors.New("GetContainerInfoError")
 	}
 
 	containerInfo := map[string]interface{}{}
 	err = json.Unmarshal([]byte(containerInfoJson), &containerInfo)
 	if err != nil {
-		return containerId, errors.New("ContainerInfoParseError")
+		return containerEntity, errors.New("ContainerInfoParseError")
 	}
 
 	rawContainerId, assertOk := containerInfo["Id"].(string)
 	if !assertOk || len(rawContainerId) < 12 {
-		return containerId, errors.New("ContainerIdParseError")
+		return containerEntity, errors.New("ContainerIdParseError")
 	}
 
 	rawContainerId = rawContainerId[:12]
-	containerId, err = valueObject.NewContainerId(rawContainerId)
+	containerId, err := valueObject.NewContainerId(rawContainerId)
 	if err != nil {
-		return containerId, err
+		return containerEntity, err
 	}
 
 	rawImageHash, assertOk := containerInfo["ImageDigest"].(string)
 	if !assertOk {
-		return containerId, errors.New("ImageHashParseError")
+		return containerEntity, errors.New("ImageHashParseError")
 	}
 	rawImageHash = strings.TrimPrefix(rawImageHash, "sha256:")
 
 	imageHash, err := valueObject.NewHash(rawImageHash)
 	if err != nil {
-		return containerId, err
+		return containerEntity, err
 	}
 
 	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
 
-	containerEntity := entity.NewContainer(
+	return entity.NewContainer(
 		containerId,
 		createDto.AccountId,
 		createDto.Hostname,
@@ -184,16 +184,7 @@ func (repo *ContainerCmdRepo) persistContainer(
 		nowUnixTime,
 		&nowUnixTime,
 		nil,
-	)
-
-	containerModel := dbModel.Container{}.ToModel(containerEntity)
-
-	createResult := repo.persistentDbSvc.Handler.Create(&containerModel)
-	if createResult.Error != nil {
-		return containerId, createResult.Error
-	}
-
-	return containerId, nil
+	), nil
 }
 
 func (repo *ContainerCmdRepo) Create(
@@ -268,7 +259,18 @@ func (repo *ContainerCmdRepo) Create(
 		return containerId, errors.New("ContainerRunError: " + err.Error())
 	}
 
-	return repo.persistContainer(createDto, containerName)
+	containerEntity, err := repo.containerEntityFactory(createDto, containerName)
+	if err != nil {
+		return containerId, err
+	}
+
+	containerModel := dbModel.Container{}.ToModel(containerEntity)
+	createResult := repo.persistentDbSvc.Handler.Create(&containerModel)
+	if createResult.Error != nil {
+		return containerId, createResult.Error
+	}
+
+	return containerEntity.Id, nil
 }
 
 func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
