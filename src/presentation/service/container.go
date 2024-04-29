@@ -111,9 +111,9 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 
 	var launchScriptPtr *valueObject.LaunchScript
 	if _, exists := input["launchScript"]; exists {
-		launchScript, err := valueObject.NewLaunchScript(input["launchScript"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+		launchScript, assertOk := input["launchScript"].(valueObject.LaunchScript)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidLaunchScript")
 		}
 		launchScriptPtr = &launchScript
 	}
