@@ -29,7 +29,9 @@ func TestContainerCmdRepo(t *testing.T) {
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-		launchScript, err := valueObject.NewLaunchScript("echo 'Hello, World!'")
+		launchScript, err := valueObject.NewLaunchScript(
+			"printenv > /tmp/hello.txt",
+		)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
