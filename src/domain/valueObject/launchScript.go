@@ -25,6 +25,11 @@ func NewLaunchScript(value interface{}) (LaunchScript, error) {
 		return "", errors.New("LaunchScriptIsTooLong")
 	}
 
+	hasSheBang := strings.HasPrefix(stringValue, "#!")
+	if !hasSheBang {
+		stringValue = "#!/bin/sh\n" + stringValue
+	}
+
 	return LaunchScript(stringValue), nil
 }
 
