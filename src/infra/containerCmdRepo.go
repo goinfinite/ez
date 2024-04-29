@@ -192,8 +192,9 @@ func runLaunchScript(
 	containerId valueObject.ContainerId,
 	launchScript *valueObject.LaunchScript,
 ) error {
+	accountIdStr := accountId.String()
 	accountHomeDir, err := infraHelper.RunCmdWithSubShell(
-		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
+		"awk -F: '$3 == " + accountIdStr + " {print $6}' /etc/passwd",
 	)
 	if err != nil {
 		return errors.New("GetAccountHomeDirError: " + err.Error())
@@ -210,6 +211,13 @@ func runLaunchScript(
 	err = infraHelper.UpdateFile(launchScriptFilePath, launchScript.String(), true)
 	if err != nil {
 		return errors.New("WriteLaunchScriptError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd(
+		"chown", "-R", accountIdStr+":"+accountIdStr, accountTmpDir,
+	)
+	if err != nil {
+		return errors.New("ChownTmpDirError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
@@ -236,7 +244,7 @@ func runLaunchScript(
 
 	_, err = infraHelper.RunCmdAsUser(
 		accountId,
-		"podman", "exec", containerIdStr, "/bin/sh", "-c", "/tmp/launch-script",
+		"podman", "exec", containerIdStr, "/tmp/launch-script",
 	)
 	if err != nil {
 		return errors.New("RunLaunchScriptError: " + err.Error())
