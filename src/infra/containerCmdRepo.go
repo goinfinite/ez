@@ -187,6 +187,64 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	), nil
 }
 
+func runLaunchScript(
+	accountId valueObject.AccountId,
+	containerId valueObject.ContainerId,
+	launchScript *valueObject.LaunchScript,
+) error {
+	accountHomeDir, err := infraHelper.RunCmdWithSubShell(
+		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
+	)
+	if err != nil {
+		return errors.New("GetAccountHomeDirError: " + err.Error())
+	}
+
+	accountTmpDir := accountHomeDir + "/tmp"
+	err = infraHelper.MakeDir(accountTmpDir)
+	if err != nil {
+		return errors.New("MakeTmpDirError: " + err.Error())
+	}
+
+	containerIdStr := containerId.String()
+	launchScriptFilePath := accountTmpDir + "/launch-script-" + containerIdStr + ".sh"
+	err = infraHelper.UpdateFile(launchScriptFilePath, launchScript.String(), true)
+	if err != nil {
+		return errors.New("WriteLaunchScriptError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "cp", launchScriptFilePath, containerIdStr+":/tmp/launch-script",
+	)
+	if err != nil {
+		return errors.New("CopyLaunchScriptError: " + err.Error())
+	}
+
+	err = infraHelper.RemoveFile(launchScriptFilePath)
+	if err != nil {
+		return errors.New("RemoveLaunchScriptError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "exec", containerIdStr, "/bin/sh", "-c",
+		"chmod +x /tmp/launch-script",
+	)
+	if err != nil {
+		return errors.New("ChmodLaunchScriptError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "exec", containerIdStr, "/bin/sh", "-c", "/tmp/launch-script",
+	)
+	if err != nil {
+		return errors.New("RunLaunchScriptError: " + err.Error())
+	}
+
+	return nil
+}
+
 func (repo *ContainerCmdRepo) Create(
 	createDto dto.CreateContainer,
 ) (valueObject.ContainerId, error) {
@@ -196,14 +254,10 @@ func (repo *ContainerCmdRepo) Create(
 		"-" + createDto.Hostname.String()
 
 	runParams := []string{
-		"run",
-		"--detach",
-		"--name",
-		containerName,
-		"--hostname",
-		createDto.Hostname.String(),
-		"--env",
-		"VIRTUAL_HOST=" + createDto.Hostname.String(),
+		"run", "--detach",
+		"--name", containerName,
+		"--hostname", createDto.Hostname.String(),
+		"--env", "VIRTUAL_HOST=" + createDto.Hostname.String(),
 	}
 
 	if len(createDto.Envs) > 0 {
@@ -222,10 +276,8 @@ func (repo *ContainerCmdRepo) Create(
 	}
 
 	baseSpecsParams := []string{
-		"--cpus",
-		baseSpecs.CpuCores.String(),
-		"--memory",
-		baseSpecs.MemoryBytes.String(),
+		"--cpus", baseSpecs.CpuCores.String(),
+		"--memory", baseSpecs.MemoryBytes.String(),
 	}
 	runParams = append(runParams, baseSpecsParams...)
 
@@ -264,13 +316,22 @@ func (repo *ContainerCmdRepo) Create(
 		return containerId, err
 	}
 
+	containerId = containerEntity.Id
+
 	containerModel := dbModel.Container{}.ToModel(containerEntity)
 	createResult := repo.persistentDbSvc.Handler.Create(&containerModel)
 	if createResult.Error != nil {
 		return containerId, createResult.Error
 	}
 
-	return containerEntity.Id, nil
+	if createDto.LaunchScript != nil {
+		err = runLaunchScript(createDto.AccountId, containerId, createDto.LaunchScript)
+		if err != nil {
+			return containerId, errors.New("LaunchScriptError: " + err.Error())
+		}
+	}
+
+	return containerId, err
 }
 
 func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
