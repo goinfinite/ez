@@ -282,10 +282,10 @@
                 "tags": [
                     "container"
                 ],
-                "summary": "CreateNewContainer",
+                "summary": "CreateContainer",
                 "parameters": [
                     {
-                        "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.\u003cbr /\u003eLaunchScript must be base64 encoded.",
+                        "description": "Only accountId, hostname and imageAddress are required.\u003cbr /\u003eWhen specifying portBindings, only 'publicPort' OR 'serviceName' is required.\u003cbr /\u003e'launchScript' must be base64 encoded (if any).",
                         "name": "createContainerDto",
                         "in": "body",
                         "required": true,

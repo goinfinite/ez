@@ -137,13 +137,13 @@ func (controller *ContainerController) parseContainerEnvs(
 }
 
 // CreateContainer	 godoc
-// @Summary      CreateNewContainer
+// @Summary      CreateContainer
 // @Description  Create a new container.
 // @Tags         container
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createContainerDto 	  body    dto.CreateContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required.<br />LaunchScript must be base64 encoded."
+// @Param        createContainerDto 	  body    dto.CreateContainer  true  "Only accountId, hostname and imageAddress are required.<br />When specifying portBindings, only 'publicPort' OR 'serviceName' is required.<br />'launchScript' must be base64 encoded (if any)."
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /v1/container/ [post]
 func (controller *ContainerController) Create(c echo.Context) error {
@@ -188,12 +188,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
 
-		scriptDecodedContent, err := scriptEncodedContent.GetDecoded()
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-		}
-
-		launchScript, err := valueObject.NewLaunchScript(scriptDecodedContent)
+		launchScript, err := valueObject.NewLaunchScriptFromEncodedContent(scriptEncodedContent)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
