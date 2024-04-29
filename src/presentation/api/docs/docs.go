@@ -292,7 +292,7 @@ const docTemplate = `{
                 "summary": "CreateNewContainer",
                 "parameters": [
                     {
-                        "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.",
+                        "description": "NewContainer (Only accountId, hostname and imageAddress are required.)\u003cbr /\u003eWhen specifying portBindings, only publicPort is required.\u003cbr /\u003eLaunchScript must be base64 encoded.",
                         "name": "createContainerDto",
                         "in": "body",
                         "required": true,

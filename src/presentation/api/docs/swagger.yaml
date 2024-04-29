@@ -656,7 +656,8 @@ paths:
       description: Create a new container.
       parameters:
       - description: NewContainer (Only accountId, hostname and imageAddress are required.)<br
-          />When specifying portBindings, only publicPort is required.
+          />When specifying portBindings, only publicPort is required.<br />LaunchScript
+          must be base64 encoded.
         in: body
         name: createContainerDto
         required: true

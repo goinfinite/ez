@@ -143,7 +143,7 @@ func (controller *ContainerController) parseContainerEnvs(
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createContainerDto 	  body    dto.CreateContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required."
+// @Param        createContainerDto 	  body    dto.CreateContainer  true  "NewContainer (Only accountId, hostname and imageAddress are required.)<br />When specifying portBindings, only publicPort is required.<br />LaunchScript must be base64 encoded."
 // @Success      201 {object} object{} "ContainerCreated"
 // @Router       /v1/container/ [post]
 func (controller *ContainerController) Create(c echo.Context) error {
