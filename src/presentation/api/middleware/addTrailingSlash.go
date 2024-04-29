@@ -11,7 +11,7 @@ import (
 
 func AddTrailingSlash(apiBasePath string) echo.MiddlewareFunc {
 	urlSkipRegex := regexp.MustCompile(
-		`^` + apiBasePath + `/v\d{1,2}/(swagger|auth|health)`,
+		`^` + apiBasePath + `(/v\d{1,2}/(auth|health)|/swagger)`,
 	)
 
 	return middleware.AddTrailingSlashWithConfig(middleware.TrailingSlashConfig{
