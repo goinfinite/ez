@@ -9,6 +9,8 @@ type Mapping struct {
 	PublicPort valueObject.NetworkPort     `json:"publicPort"`
 	Protocol   valueObject.NetworkProtocol `json:"protocol"`
 	Targets    []MappingTarget             `json:"targets"`
+	CreatedAt  valueObject.UnixTime        `json:"createdAt"`
+	UpdatedAt  valueObject.UnixTime        `json:"updatedAt"`
 }
 
 func NewMapping(
@@ -18,6 +20,8 @@ func NewMapping(
 	publicPort valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
 	targets []MappingTarget,
+	createdAt valueObject.UnixTime,
+	updatedAt valueObject.UnixTime,
 ) Mapping {
 	return Mapping{
 		Id:         id,
@@ -26,5 +30,7 @@ func NewMapping(
 		PublicPort: publicPort,
 		Protocol:   protocol,
 		Targets:    targets,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	}
 }

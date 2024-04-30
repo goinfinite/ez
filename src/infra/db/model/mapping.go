@@ -30,6 +30,8 @@ func NewMapping(
 	publicPort uint,
 	protocol string,
 	targets []MappingTarget,
+	createdAt time.Time,
+	updatedAt time.Time,
 ) Mapping {
 	mappingModel := Mapping{
 		AccountID:  accountId,
@@ -37,6 +39,8 @@ func NewMapping(
 		PublicPort: publicPort,
 		Protocol:   protocol,
 		Targets:    targets,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	}
 
 	if id != 0 {
@@ -87,6 +91,9 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		targets = append(targets, targetEntity)
 	}
 
+	createdAt := valueObject.UnixTime(model.CreatedAt.Unix())
+	updatedAt := valueObject.UnixTime(model.UpdatedAt.Unix())
+
 	return entity.NewMapping(
 		mappingId,
 		accountId,
@@ -94,6 +101,8 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		port,
 		protocol,
 		targets,
+		createdAt,
+		updatedAt,
 	), nil
 }
 
@@ -111,5 +120,7 @@ func (Mapping) AddDtoToModel(addDto dto.AddMapping) Mapping {
 		uint(addDto.PublicPort.Get()),
 		addDto.Protocol.String(),
 		[]MappingTarget{},
+		time.Now(),
+		time.Now(),
 	)
 }
