@@ -46,7 +46,7 @@ func GuessNetworkProtocolByPort(port NetworkPort) NetworkProtocol {
 	switch port.Get() {
 	case 53, 123, 514:
 		protocolStr = "udp"
-	case 80, 2368, 3000, 5000, 5601, 8000, 8001, 8002, 8065:
+	case 80, 2368, 3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009, 5000, 5601, 8000, 8001, 8002, 8065, 8080, 8081:
 		protocolStr = "http"
 	case 443, 1618, 8443, 8444, 8445:
 		protocolStr = "https"
