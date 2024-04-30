@@ -3,17 +3,17 @@ package dbModel
 import (
 	"time"
 
-	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type MappingTarget struct {
-	ID          uint `gorm:"primarykey"`
-	MappingID   uint
-	ContainerId string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                uint `gorm:"primarykey"`
+	MappingID         uint
+	ContainerId       string
+	ContainerHostname string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 func (MappingTarget) TableName() string {
@@ -24,12 +24,12 @@ func NewMappingTarget(
 	id uint,
 	mappingId uint,
 	containerId string,
-	containerPort *uint,
-	protocol *string,
+	containerHostname string,
 ) MappingTarget {
 	targetModel := MappingTarget{
-		MappingID:   mappingId,
-		ContainerId: containerId,
+		MappingID:         mappingId,
+		ContainerId:       containerId,
+		ContainerHostname: containerHostname,
 	}
 
 	if id != 0 {
@@ -57,21 +57,15 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 		return mappingTarget, err
 	}
 
+	containerHostname, err := valueObject.NewFqdn(model.ContainerHostname)
+	if err != nil {
+		return mappingTarget, err
+	}
+
 	return entity.NewMappingTarget(
 		id,
 		mappingId,
 		containerId,
+		containerHostname,
 	), nil
-}
-
-func (MappingTarget) AddDtoToModel(addDto dto.AddMappingTarget) MappingTarget {
-	model := NewMappingTarget(
-		0,
-		uint(addDto.MappingId),
-		addDto.ContainerId.String(),
-		nil,
-		nil,
-	)
-
-	return model
 }
