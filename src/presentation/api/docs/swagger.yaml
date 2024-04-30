@@ -294,6 +294,8 @@ definitions:
     type: object
   entity.MappingTarget:
     properties:
+      containerHostname:
+        type: string
       containerId:
         type: string
       id:

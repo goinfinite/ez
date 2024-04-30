@@ -1299,6 +1299,9 @@ const docTemplate = `{
         "entity.MappingTarget": {
             "type": "object",
             "properties": {
+                "containerHostname": {
+                    "type": "string"
+                },
                 "containerId": {
                     "type": "string"
                 },
