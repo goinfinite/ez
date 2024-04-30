@@ -3,8 +3,8 @@ package useCase
 import (
 	"errors"
 	"log"
+	"time"
 
-	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
@@ -12,11 +12,11 @@ import (
 func mappingsJanitor(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
-	containerEntity entity.Container,
+	containerId valueObject.ContainerId,
 ) error {
-	targets, err := mappingQueryRepo.GetTargetsByContainerId(containerEntity.Id)
+	targets, err := mappingQueryRepo.GetTargetsByContainerId(containerId)
 	if err != nil {
-		log.Printf("[%v] GetTargetsByContainerIdError: %s", containerEntity.Id, err)
+		log.Printf("[%v] GetTargetsByContainerIdError: %s", containerId, err)
 		return nil
 	}
 
@@ -30,7 +30,7 @@ func mappingsJanitor(
 		log.Printf("TargetId '%v' deleted.", target.Id)
 	}
 
-	mappings, err := mappingQueryRepo.GetByHostname(containerEntity.Hostname)
+	mappings, err := mappingQueryRepo.Get()
 	if err != nil {
 		return nil
 	}
@@ -39,8 +39,14 @@ func mappingsJanitor(
 		return nil
 	}
 
+	nowEpoch := time.Now().Unix()
 	for _, mapping := range mappings {
 		if len(mapping.Targets) != 0 {
+			continue
+		}
+
+		isMappingTooRecent := nowEpoch-mapping.CreatedAt.Get() < 60
+		if isMappingTooRecent {
 			continue
 		}
 
@@ -65,13 +71,13 @@ func DeleteContainer(
 	accId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
-	containerEntity, err := containerQueryRepo.GetById(containerId)
+	_, err := containerQueryRepo.GetById(containerId)
 	if err != nil {
 		log.Printf("ContainerNotFound: %s", err)
 		return errors.New("ContainerNotFound")
 	}
 
-	err = mappingsJanitor(mappingQueryRepo, mappingCmdRepo, containerEntity)
+	err = mappingsJanitor(mappingQueryRepo, mappingCmdRepo, containerId)
 	if err != nil {
 		return err
 	}
