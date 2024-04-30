@@ -60,6 +60,33 @@ func (repo *MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping,
 	return mappingModel.ToEntity()
 }
 
+func (repo *MappingQueryRepo) GetByHostname(
+	hostname valueObject.Fqdn,
+) ([]entity.Mapping, error) {
+	mappingEntities := []entity.Mapping{}
+
+	var mappingModels []dbModel.Mapping
+	err := repo.persistentDbSvc.Handler.Model(dbModel.Mapping{}).
+		Preload("Targets").
+		Where("hostname = ?", hostname.String()).
+		Find(&mappingModels).Error
+	if err != nil {
+		return mappingEntities, errors.New("GetMappingsFromDatabaseError")
+	}
+
+	for _, mappingModel := range mappingModels {
+		mappingEntity, err := mappingModel.ToEntity()
+		if err != nil {
+			log.Printf("MappingModelToEntityError: %v", err.Error())
+			continue
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
+}
+
 func (repo *MappingQueryRepo) GetByProtocol(
 	protocol valueObject.NetworkProtocol,
 ) ([]entity.Mapping, error) {
