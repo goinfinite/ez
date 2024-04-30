@@ -1263,6 +1263,9 @@
                 "accountId": {
                     "type": "integer"
                 },
+                "createdAt": {
+                    "type": "integer"
+                },
                 "hostname": {
                     "type": "string"
                 },
@@ -1280,6 +1283,9 @@
                     "items": {
                         "$ref": "#/definitions/entity.MappingTarget"
                     }
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },

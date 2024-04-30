@@ -275,6 +275,8 @@ definitions:
     properties:
       accountId:
         type: integer
+      createdAt:
+        type: integer
       hostname:
         type: string
       id:
@@ -287,6 +289,8 @@ definitions:
         items:
           $ref: '#/definitions/entity.MappingTarget'
         type: array
+      updatedAt:
+        type: integer
     type: object
   entity.MappingTarget:
     properties:

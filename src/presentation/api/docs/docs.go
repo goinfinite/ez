@@ -1270,6 +1270,9 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "createdAt": {
+                    "type": "integer"
+                },
                 "hostname": {
                     "type": "string"
                 },
@@ -1287,6 +1290,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.MappingTarget"
                     }
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },
