@@ -18,14 +18,16 @@ var nginxStreamConfDir = "/var/nginx/stream.d"
 var nginxHttpConfDir = "/var/nginx/http.d"
 
 type MappingCmdRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
-	queryRepo       *MappingQueryRepo
+	persistentDbSvc    *db.PersistentDatabaseService
+	mappingQueryRepo   *MappingQueryRepo
+	containerQueryRepo *ContainerQueryRepo
 }
 
 func NewMappingCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingCmdRepo {
 	return &MappingCmdRepo{
-		persistentDbSvc: persistentDbSvc,
-		queryRepo:       NewMappingQueryRepo(persistentDbSvc),
+		persistentDbSvc:    persistentDbSvc,
+		mappingQueryRepo:   NewMappingQueryRepo(persistentDbSvc),
+		containerQueryRepo: NewContainerQueryRepo(persistentDbSvc),
 	}
 }
 
@@ -43,7 +45,7 @@ func (repo *MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingI
 }
 
 func (repo *MappingCmdRepo) sslPreReadBlockFactory() (string, error) {
-	mappings, err := repo.queryRepo.Get()
+	mappings, err := repo.mappingQueryRepo.Get()
 	if err != nil {
 		return "", err
 	}
@@ -121,8 +123,7 @@ func (repo *MappingCmdRepo) nginxConfigFactory(
 		containerIdTargetEntityMap[mappingTarget.ContainerId] = mappingTarget
 	}
 
-	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
-	containerEntities, err := containerQueryRepo.Get()
+	containerEntities, err := repo.containerQueryRepo.Get()
 	if err != nil {
 		return "", err
 	}
@@ -240,7 +241,7 @@ func (repo *MappingCmdRepo) getNginxConfDirByProtocol(
 }
 
 func (repo *MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) error {
-	mappingEntity, err := repo.queryRepo.GetById(mappingId)
+	mappingEntity, err := repo.mappingQueryRepo.GetById(mappingId)
 	if err != nil {
 		return err
 	}
@@ -273,7 +274,17 @@ func (repo *MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) e
 }
 
 func (repo *MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
-	targetModel := dbModel.MappingTarget{}.AddDtoToModel(addDto)
+	containerEntity, err := repo.containerQueryRepo.GetById(addDto.ContainerId)
+	if err != nil {
+		return err
+	}
+
+	targetModel := dbModel.NewMappingTarget(
+		0,
+		uint(addDto.MappingId.Get()),
+		containerEntity.Id.String(),
+		containerEntity.Hostname.String(),
+	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)
 	if createResult.Error != nil {
@@ -284,7 +295,7 @@ func (repo *MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 }
 
 func (repo *MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) error {
-	mappingEntity, err := repo.queryRepo.GetById(mappingId)
+	mappingEntity, err := repo.mappingQueryRepo.GetById(mappingId)
 	if err != nil {
 		return err
 	}
@@ -320,7 +331,7 @@ func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 }
 
 func (repo *MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
-	targetEntity, err := repo.queryRepo.GetTargetById(id)
+	targetEntity, err := repo.mappingQueryRepo.GetTargetById(id)
 	if err != nil {
 		return err
 	}
@@ -330,7 +341,7 @@ func (repo *MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
 		return err
 	}
 
-	mappingEntity, err := repo.queryRepo.GetById(targetEntity.MappingId)
+	mappingEntity, err := repo.mappingQueryRepo.GetById(targetEntity.MappingId)
 	if err != nil {
 		return err
 	}
