@@ -73,21 +73,25 @@ func TestNewPortBinding(t *testing.T) {
 	})
 
 	t.Run("CheckIfPublicPortTakesPrecedenceOverServiceName", func(t *testing.T) {
-		portBindings, _ := NewPortBindingFromString("http:22")
-		publicPort := portBindings[0].GetPublicPort()
-		if publicPort.String() != "22" {
+		portBindings, _ := NewPortBindingFromString("mongodb:1000:1000/tcp")
+		publicPortStr := portBindings[0].GetPublicPort().String()
+		expectedPublicPortStr := "1000"
+		if publicPortStr != expectedPublicPortStr {
 			t.Errorf(
-				"GotWrongPublicPort: %s, Expected: %s", publicPort.String(), "22",
+				"GotWrongPublicPort: %s, Expected: %s",
+				publicPortStr, expectedPublicPortStr,
 			)
 		}
 	})
 
 	t.Run("CheckIfPublicPortTakesPrecedenceOverUnknownServiceName", func(t *testing.T) {
 		portBindings, _ := NewPortBindingFromString("unknown-service:22")
-		publicPort := portBindings[0].GetPublicPort()
-		if publicPort.String() != "22" {
+		publicPortStr := portBindings[0].GetPublicPort().String()
+		expectedPublicPortStr := "22"
+		if publicPortStr != expectedPublicPortStr {
 			t.Errorf(
-				"GotWrongPublicPort: %s, Expected: %s", publicPort.String(), "22",
+				"GotWrongPublicPort: %s, Expected: %s",
+				publicPortStr, expectedPublicPortStr,
 			)
 		}
 	})
