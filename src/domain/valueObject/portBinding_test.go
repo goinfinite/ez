@@ -50,4 +50,45 @@ func TestNewPortBinding(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("GetPortBindingWithServiceName", func(t *testing.T) {
+		portBindings, _ := NewPortBindingFromString("ssh")
+		publicPort := portBindings[0].GetPublicPort()
+		if publicPort.String() != "22" {
+			t.Errorf(
+				"GotWrongPublicPort: %s, Expected: %s", publicPort.String(), "22",
+			)
+		}
+	})
+
+	t.Run("GetPortBindingWithPublicPort", func(t *testing.T) {
+		portBindings, _ := NewPortBindingFromString("22")
+		serviceNameStr := portBindings[0].ServiceName.String()
+
+		if serviceNameStr != "ssh" {
+			t.Errorf(
+				"GotWrongServiceName: %s, Expected: %s", serviceNameStr, "ssh",
+			)
+		}
+	})
+
+	t.Run("CheckIfPublicPortTakesPrecedenceOverServiceName", func(t *testing.T) {
+		portBindings, _ := NewPortBindingFromString("http:22")
+		publicPort := portBindings[0].GetPublicPort()
+		if publicPort.String() != "22" {
+			t.Errorf(
+				"GotWrongPublicPort: %s, Expected: %s", publicPort.String(), "22",
+			)
+		}
+	})
+
+	t.Run("CheckIfPublicPortTakesPrecedenceOverUnknownServiceName", func(t *testing.T) {
+		portBindings, _ := NewPortBindingFromString("unknown-service:22")
+		publicPort := portBindings[0].GetPublicPort()
+		if publicPort.String() != "22" {
+			t.Errorf(
+				"GotWrongPublicPort: %s, Expected: %s", publicPort.String(), "22",
+			)
+		}
+	})
 }
