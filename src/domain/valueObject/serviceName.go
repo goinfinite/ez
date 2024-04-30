@@ -6,19 +6,23 @@ import (
 	"strings"
 )
 
-const serviceNameRegex string = `^[a-z][\w\.\_\-]{0,128}$`
+const serviceNameRegex string = `^[a-z][\w\-]{0,128}$`
 
 type ServiceName string
 
 func NewServiceName(value string) (ServiceName, error) {
 	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
+	specialCharReplacer := strings.NewReplacer(" ", "-", "_", "-", ".", "-")
+	value = specialCharReplacer.Replace(value)
 
-	name := ServiceName(value)
-	if !name.isValid() {
+	re := regexp.MustCompile(serviceNameRegex)
+	isValid := re.MatchString(value)
+	if !isValid {
 		return "", errors.New("InvalidServiceName")
 	}
-	return name, nil
+
+	return ServiceName(value), nil
 }
 
 func NewServiceNamePanic(value string) ServiceName {
@@ -27,11 +31,6 @@ func NewServiceNamePanic(value string) ServiceName {
 		panic(err)
 	}
 	return name
-}
-
-func (name ServiceName) isValid() bool {
-	re := regexp.MustCompile(serviceNameRegex)
-	return re.MatchString(string(name))
 }
 
 func (name ServiceName) String() string {

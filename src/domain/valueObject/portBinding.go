@@ -531,12 +531,10 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		return portBindings, errors.New("ServiceNameOrPortRequired")
 	}
 
+	var err error
 	serviceName, _ := NewServiceName("unmapped")
 	if serviceNameSent {
-		var err error
-		specialCharReplacer := strings.NewReplacer(" ", "-", "_", "-", ".", "-")
-		rawServiceName := specialCharReplacer.Replace(portBindingParts["serviceName"])
-		serviceName, err = NewServiceName(rawServiceName)
+		serviceName, err = NewServiceName(portBindingParts["serviceName"])
 		if err != nil {
 			serviceName, _ = NewServiceName("unknown")
 		}
@@ -562,11 +560,10 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		isKnownPublicPort = false
 	}
 
-	if !serviceNameSent && !protocolSent && isKnownPublicPort {
-		return []PortBinding{likelyPortBinding}, nil
-	}
-
-	if isKnownPublicPort {
+	if isKnownPublicPort && !serviceNameSent {
+		if !protocolSent {
+			return []PortBinding{likelyPortBinding}, nil
+		}
 		serviceName = likelyPortBinding.ServiceName
 	}
 
