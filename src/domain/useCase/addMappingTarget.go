@@ -37,10 +37,21 @@ func AddMappingTarget(
 	if !publicPortMatches {
 		log.Printf(
 			"ContainerId '%s' does not bind to public port '%d'.",
-			addDto.ContainerId,
-			mappingEntity.PublicPort,
+			addDto.ContainerId, mappingEntity.PublicPort,
 		)
 		return errors.New("ContainerDoesNotBindToMappingPublicPort")
+	}
+
+	for _, target := range mappingEntity.Targets {
+		if target.ContainerId != addDto.ContainerId {
+			continue
+		}
+
+		log.Printf(
+			"Skipping AddMappingTarget: ContainerId '%s' is already a target for MappingId '%s'.",
+			addDto.ContainerId, addDto.MappingId,
+		)
+		return nil
 	}
 
 	err = mappingCmdRepo.AddTarget(addDto)
@@ -51,8 +62,7 @@ func AddMappingTarget(
 
 	log.Printf(
 		"ContainerId '%s' added as target for MappingId '%s'.",
-		addDto.ContainerId,
-		addDto.MappingId,
+		addDto.ContainerId, addDto.MappingId,
 	)
 
 	return nil
