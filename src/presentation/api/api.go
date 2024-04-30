@@ -40,6 +40,7 @@ func ApiInit(
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders(basePath))
 	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
+	e.Use(apiMiddleware.ReadOnlyMode(basePath))
 
 	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 
