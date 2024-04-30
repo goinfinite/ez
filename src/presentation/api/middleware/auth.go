@@ -3,7 +3,6 @@ package apiMiddleware
 import (
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -43,16 +42,10 @@ func getAccountIdFromAccessToken(
 }
 
 func Auth(apiBasePath string) echo.MiddlewareFunc {
-	urlSkipRegex := regexp.MustCompile(
-		`^` + apiBasePath + `(/v\d{1,2}/(auth|health)|/swagger)`,
-	)
-
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			urlPath := c.Request().URL.Path
-			isNotApi := !strings.HasPrefix(urlPath, apiBasePath)
-
-			if isNotApi || urlSkipRegex.MatchString(urlPath) {
+			shouldSkip := IsSkippableApiCall(c.Request(), apiBasePath)
+			if shouldSkip {
 				return next(c)
 			}
 
