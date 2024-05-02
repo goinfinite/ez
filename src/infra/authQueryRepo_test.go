@@ -56,7 +56,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	})
 
 	t.Run("InvalidSessionAccessToken", func(t *testing.T) {
-		invalidToken := valueObject.NewAccessTokenStrPanic(
+		invalidToken, _ := valueObject.NewAccessTokenStr(
 			"invalidTokenInvalidTokenInvalidTokenInvalidTokenInvalidToken",
 		)
 		_, err := authQueryRepo.GetAccessTokenDetails(invalidToken)
