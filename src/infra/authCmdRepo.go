@@ -18,6 +18,8 @@ func (repo AuthCmdRepo) GenerateSessionToken(
 	expiresIn valueObject.UnixTime,
 	ipAddress valueObject.IpAddress,
 ) (entity.AccessToken, error) {
+	var accessToken entity.AccessToken
+
 	jwtSecret := os.Getenv("JWT_SECRET")
 	apiUrl, err := os.Hostname()
 	if err != nil {
@@ -39,11 +41,14 @@ func (repo AuthCmdRepo) GenerateSessionToken(
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStrUnparsed, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
-		return entity.AccessToken{}, errors.New("SessionTokenGenerationError")
+		return accessToken, errors.New("SessionTokenGenerationError")
 	}
 
-	tokenType := valueObject.NewAccessTokenTypePanic("sessionToken")
-	tokenStr := valueObject.NewAccessTokenStrPanic(tokenStrUnparsed)
+	tokenType, _ := valueObject.NewAccessTokenType("sessionToken")
+	tokenStr, err := valueObject.NewAccessTokenStr(tokenStrUnparsed)
+	if err != nil {
+		return accessToken, errors.New("SessionTokenGenerationError")
+	}
 
 	return entity.NewAccessToken(
 		tokenType,
