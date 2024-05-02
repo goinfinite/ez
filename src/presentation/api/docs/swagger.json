@@ -304,6 +304,61 @@
                 }
             }
         },
+        "/v1/container/auto-login/{containerId}/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Generates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "ContainerAutoLogin",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ShouldRedirect (default/empty is true)",
+                        "name": "shouldRedirect",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "If shouldRedirect is set to false, the updated session token is returned.",
+                        "schema": {
+                            "$ref": "#/definitions/entity.AccessToken"
+                        }
+                    },
+                    "302": {
+                        "description": "The redirect to Speedia OS dashboard (/_/container/{containerId}/).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Container is not found, not running or isn't Speedia OS.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/metrics/": {
             "get": {
                 "security": [

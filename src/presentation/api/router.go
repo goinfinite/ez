@@ -55,6 +55,7 @@ func (router *Router) containerRoutes() {
 	containerController := apiController.NewContainerController(router.persistentDbSvc)
 	containerGroup.GET("/", containerController.Read)
 	containerGroup.GET("/metrics/", containerController.ReadWithMetrics)
+	containerGroup.GET("/auto-login/:containerId/", containerController.AutoLogin)
 	containerGroup.POST("/", containerController.Create)
 	containerGroup.PUT("/", containerController.Update)
 	containerGroup.DELETE(
