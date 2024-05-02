@@ -15,7 +15,7 @@ import (
 
 func getAccountIdFromAccessToken(
 	authQueryRepo repository.AuthQueryRepo,
-	accessToken valueObject.AccessTokenStr,
+	accessTokenStr valueObject.AccessTokenStr,
 	ipAddress valueObject.IpAddress,
 ) (valueObject.AccountId, error) {
 	trustedIpsRaw := strings.Split(os.Getenv("TRUSTED_IPS"), ",")
@@ -30,7 +30,7 @@ func getAccountIdFromAccessToken(
 
 	accessTokenDetails, err := useCase.GetAccessTokenDetails(
 		authQueryRepo,
-		accessToken,
+		accessTokenStr,
 		trustedIps,
 		ipAddress,
 	)
@@ -41,6 +41,13 @@ func getAccountIdFromAccessToken(
 	return accessTokenDetails.AccountId, nil
 }
 
+func authError(message string) *echo.HTTPError {
+	return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
+		"status": http.StatusUnauthorized,
+		"body":   message,
+	})
+}
+
 func Auth(apiBasePath string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -49,27 +56,39 @@ func Auth(apiBasePath string) echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			token := c.Request().Header.Get("Authorization")
-			if token == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-					"status": http.StatusUnauthorized,
-					"body":   "MissingAuthToken",
-				})
+			rawAccessToken := ""
+			accessTokenCookie, err := c.Cookie("control-auth-token")
+			if err == nil {
+				rawAccessToken = accessTokenCookie.Value
+			}
+
+			if rawAccessToken == "" {
+				rawAccessToken = c.Request().Header.Get("Authorization")
+				if rawAccessToken == "" {
+					return authError("MissingAccessToken")
+				}
+				tokenWithoutPrefix := rawAccessToken[7:]
+				rawAccessToken = tokenWithoutPrefix
+			}
+
+			accessTokenStr, err := valueObject.NewAccessTokenStr(rawAccessToken)
+			if err != nil {
+				return authError("InvalidAccessToken")
+			}
+
+			userIpAddress, err := valueObject.NewIpAddress(c.RealIP())
+			if err != nil {
+				return authError("InvalidIpAddress")
 			}
 
 			persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 			authQueryRepo := infra.NewAuthQueryRepo(persistentDbSvc)
-			tokenWithoutPrefix := token[7:]
+
 			accountId, err := getAccountIdFromAccessToken(
-				authQueryRepo,
-				valueObject.AccessTokenStr(tokenWithoutPrefix),
-				valueObject.NewIpAddressPanic(c.RealIP()),
+				authQueryRepo, accessTokenStr, userIpAddress,
 			)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-					"status": http.StatusUnauthorized,
-					"body":   "InvalidAuthToken",
-				})
+				return authError("InvalidAccessToken")
 			}
 
 			c.Set("accountId", accountId.String())
