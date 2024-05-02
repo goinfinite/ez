@@ -51,6 +51,33 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 	)
 }
 
+// ContainerAutoLogin	 godoc
+// @Summary      ContainerAutoLogin
+// @Description  Generates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        containerId	path	string	true	"ContainerId"
+// @Param        shouldRedirect	query	bool	false	"ShouldRedirect (default/empty is true)"
+// @Success      200 {object} entity.AccessToken "If shouldRedirect is set to false, the updated session token is returned."
+// @Success      302 {string} string "The redirect to Speedia OS dashboard (/_/container/{containerId}/)."
+// @Failure      500 {string} string "Container is not found, not running or isn't Speedia OS."
+// @Router       /v1/container/auto-login/{containerId}/ [get]
+func (controller *ContainerController) AutoLogin(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"containerId": c.Param("containerId"),
+	}
+
+	if shouldRedirect := c.QueryParam("shouldRedirect"); shouldRedirect != "" {
+		requestBody["shouldRedirect"] = shouldRedirect
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerService.AutoLogin(requestBody),
+	)
+}
+
 func (controller *ContainerController) parsePortBindings(
 	rawPortBindings []interface{},
 ) []valueObject.PortBinding {
