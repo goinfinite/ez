@@ -21,7 +21,7 @@ func mappingsJanitor(
 	}
 
 	for _, target := range targets {
-		err = mappingCmdRepo.DeleteTarget(target.Id)
+		err = mappingCmdRepo.DeleteTarget(target.MappingId, target.Id)
 		if err != nil {
 			log.Printf("[%v] DeleteTargetError: %s", target.Id, err)
 			continue
