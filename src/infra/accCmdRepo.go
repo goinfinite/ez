@@ -231,7 +231,7 @@ func (repo *AccCmdRepo) UpdatePassword(
 
 func (repo *AccCmdRepo) UpdateApiKey(
 	accId valueObject.AccountId,
-) (valueObject.AccessTokenStr, error) {
+) (valueObject.AccessTokenValue, error) {
 	uuid := uuid.New()
 	secretKey := os.Getenv("ACC_API_KEY_SECRET")
 	apiKeyPlainText := accId.String() + ":" + uuid.String()
@@ -241,7 +241,7 @@ func (repo *AccCmdRepo) UpdateApiKey(
 		return "", err
 	}
 
-	apiKey, err := valueObject.NewAccessTokenStr(encryptedApiKey)
+	apiKey, err := valueObject.NewAccessTokenValue(encryptedApiKey)
 	if err != nil {
 		return "", err
 	}

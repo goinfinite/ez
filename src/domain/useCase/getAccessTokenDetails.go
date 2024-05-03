@@ -11,7 +11,7 @@ import (
 
 func GetAccessTokenDetails(
 	authQueryRepo repository.AuthQueryRepo,
-	accessToken valueObject.AccessTokenStr,
+	accessToken valueObject.AccessTokenValue,
 	trustedIpAddress []valueObject.IpAddress,
 	ipAddress valueObject.IpAddress,
 ) (dto.AccessTokenDetails, error) {

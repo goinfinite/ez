@@ -13,7 +13,7 @@ func UpdateAccountApiKey(
 	accQueryRepo repository.AccQueryRepo,
 	accCmdRepo repository.AccCmdRepo,
 	updateAccountDto dto.UpdateAccount,
-) (valueObject.AccessTokenStr, error) {
+) (valueObject.AccessTokenValue, error) {
 	_, err := accQueryRepo.GetById(updateAccountDto.AccountId)
 	if err != nil {
 		return "", errors.New("AccountNotFound")

@@ -46,7 +46,7 @@ func (repo *AuthQueryRepo) IsLoginValid(login dto.Login) bool {
 }
 
 func (repo *AuthQueryRepo) getSessionTokenClaims(
-	sessionToken valueObject.AccessTokenStr,
+	sessionToken valueObject.AccessTokenValue,
 ) (jwt.MapClaims, error) {
 	var claims jwt.MapClaims
 
@@ -110,7 +110,7 @@ func (repo *AuthQueryRepo) getKeyHash(
 }
 
 func (repo *AuthQueryRepo) getTokenDetailsFromApiKey(
-	token valueObject.AccessTokenStr,
+	token valueObject.AccessTokenValue,
 ) (dto.AccessTokenDetails, error) {
 	secretKey := os.Getenv("ACC_API_KEY_SECRET")
 	decryptedApiKey, err := infraHelper.DecryptStr(secretKey, token.String())
@@ -151,7 +151,7 @@ func (repo *AuthQueryRepo) getTokenDetailsFromApiKey(
 }
 
 func (repo *AuthQueryRepo) GetAccessTokenDetails(
-	token valueObject.AccessTokenStr,
+	token valueObject.AccessTokenValue,
 ) (dto.AccessTokenDetails, error) {
 	var tokenDetails dto.AccessTokenDetails
 

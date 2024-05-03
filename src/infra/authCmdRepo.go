@@ -45,7 +45,7 @@ func (repo AuthCmdRepo) GenerateSessionToken(
 	}
 
 	tokenType, _ := valueObject.NewAccessTokenType("sessionToken")
-	tokenStr, err := valueObject.NewAccessTokenStr(tokenStrUnparsed)
+	tokenStr, err := valueObject.NewAccessTokenValue(tokenStrUnparsed)
 	if err != nil {
 		return accessToken, errors.New("SessionTokenGenerationError")
 	}
