@@ -88,7 +88,7 @@ func (controller *MappingController) Create() *cobra.Command {
 	cmd.MarkFlagRequired("port")
 	cmd.Flags().StringVarP(&networkProtocolStr, "protocol", "l", "", "NetworkProtocol")
 	cmd.Flags().StringVarP(&pathStr, "path", "t", "", "Path")
-	cmd.Flags().StringVarP(&matchPattern, "match-pattern", "m", "", "MatchPattern")
+	cmd.Flags().StringVarP(&matchPattern, "match-pattern", "m", "", "MatchPattern (begins-with|contains|ends-with)")
 	cmd.Flags().StringSliceVarP(
 		&containerIdStrSlice, "container-ids", "c", []string{}, "ContainerIds",
 	)
