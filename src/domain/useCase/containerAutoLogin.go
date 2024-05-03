@@ -21,12 +21,12 @@ func ContainerAutoLogin(
 		return accessToken, errors.New("ContainerNotFound")
 	}
 
-	if containerEntity.ImageAddress != "speedia/os" {
+	if containerEntity.IsSpeediaOs() {
 		log.Printf("ContainerIsNotSpeediaOs: %s", containerEntity.ImageAddress)
 		return accessToken, errors.New("ContainerIsNotSpeediaOs")
 	}
 
-	if !containerEntity.Status {
+	if !containerEntity.IsRunning() {
 		return accessToken, errors.New("ContainerIsNotRunning")
 	}
 
