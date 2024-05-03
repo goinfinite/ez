@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 
-	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
@@ -13,8 +12,8 @@ func ContainerAutoLogin(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 	containerId valueObject.ContainerId,
-) (entity.AccessToken, error) {
-	var accessToken entity.AccessToken
+) (valueObject.AccessTokenValue, error) {
+	var accessToken valueObject.AccessTokenValue
 
 	containerEntity, err := containerQueryRepo.GetById(containerId)
 	if err != nil {

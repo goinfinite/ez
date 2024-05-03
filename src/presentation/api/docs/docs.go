@@ -348,7 +348,7 @@ const docTemplate = `{
                     "200": {
                         "description": "If shouldRedirect is set to false, the updated session token is returned.",
                         "schema": {
-                            "$ref": "#/definitions/entity.AccessToken"
+                            "type": "string"
                         }
                     },
                     "302": {

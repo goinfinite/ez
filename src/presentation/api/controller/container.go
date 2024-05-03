@@ -60,7 +60,7 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 // @Security     Bearer
 // @Param        containerId	path	string	true	"ContainerId"
 // @Param        shouldRedirect	query	bool	false	"ShouldRedirect (default/empty is true)"
-// @Success      200 {object} entity.AccessToken "If shouldRedirect is set to false, the updated session token is returned."
+// @Success      200 {object} valueObject.AccessTokenValue "If shouldRedirect is set to false, the updated session token is returned."
 // @Success      302 {string} string "The redirect to Speedia OS dashboard (/_/container/{containerId}/)."
 // @Failure      500 {string} string "Container is not found, not running or isn't Speedia OS."
 // @Router       /v1/container/auto-login/{containerId}/ [get]
