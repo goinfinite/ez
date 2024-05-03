@@ -37,6 +37,8 @@ func (controller *MappingController) Create() *cobra.Command {
 	var hostnameStr string
 	var publicPortUint uint64
 	var networkProtocolStr string
+	var pathStr string
+	var matchPattern string
 	var containerIdStrSlice []string
 
 	cmd := &cobra.Command{
@@ -54,6 +56,14 @@ func (controller *MappingController) Create() *cobra.Command {
 
 			if networkProtocolStr != "" {
 				requestBody["protocol"] = networkProtocolStr
+			}
+
+			if pathStr != "" {
+				requestBody["path"] = pathStr
+			}
+
+			if matchPattern != "" {
+				requestBody["matchPattern"] = matchPattern
 			}
 
 			containerIds := []valueObject.ContainerId{}
@@ -74,9 +84,11 @@ func (controller *MappingController) Create() *cobra.Command {
 	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
 	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
-	cmd.Flags().Uint64VarP(&publicPortUint, "port", "p", 0, "Public Port")
+	cmd.Flags().Uint64VarP(&publicPortUint, "port", "p", 0, "PublicPort")
 	cmd.MarkFlagRequired("port")
-	cmd.Flags().StringVarP(&networkProtocolStr, "protocol", "l", "", "Host Protocol")
+	cmd.Flags().StringVarP(&networkProtocolStr, "protocol", "l", "", "NetworkProtocol")
+	cmd.Flags().StringVarP(&pathStr, "path", "t", "", "Path")
+	cmd.Flags().StringVarP(&matchPattern, "match-pattern", "m", "", "MatchPattern")
 	cmd.Flags().StringSliceVarP(
 		&containerIdStrSlice, "container-ids", "c", []string{}, "ContainerIds",
 	)

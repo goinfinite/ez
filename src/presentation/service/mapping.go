@@ -66,6 +66,24 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
+	var pathPtr *valueObject.MappingPath
+	if _, exists := input["path"]; exists {
+		path, err := valueObject.NewMappingPath(input["path"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		pathPtr = &path
+	}
+
+	var matchPatternPtr *valueObject.MappingMatchPattern
+	if _, exists := input["matchPattern"]; exists {
+		matchPattern, err := valueObject.NewMappingMatchPattern(input["matchPattern"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		matchPatternPtr = &matchPattern
+	}
+
 	containerIds, assertOk := input["containerIds"].([]valueObject.ContainerId)
 	if !assertOk {
 		return NewServiceOutput(UserError, "InvalidContainerIds")
@@ -76,6 +94,8 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 		hostnamePtr,
 		publicPort,
 		protocol,
+		pathPtr,
+		matchPatternPtr,
 		containerIds,
 	)
 

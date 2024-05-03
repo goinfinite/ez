@@ -1066,6 +1066,12 @@ const docTemplate = `{
                 "hostname": {
                     "type": "string"
                 },
+                "matchPattern": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
                 "protocol": {
                     "type": "string"
                 },
@@ -1333,6 +1339,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "matchPattern": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
                 },
                 "protocol": {
                     "type": "string"

@@ -24,6 +24,8 @@ func TestMappingCmdRepo(t *testing.T) {
 			&hostname,
 			valueObject.NewNetworkPortPanic(80),
 			valueObject.NewNetworkProtocolPanic("http"),
+			nil,
+			nil,
 			[]valueObject.ContainerId{},
 		)
 

@@ -1059,6 +1059,12 @@
                 "hostname": {
                     "type": "string"
                 },
+                "matchPattern": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
                 "protocol": {
                     "type": "string"
                 },
@@ -1326,6 +1332,12 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "matchPattern": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
                 },
                 "protocol": {
                     "type": "string"

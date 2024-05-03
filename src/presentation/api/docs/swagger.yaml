@@ -106,6 +106,10 @@ definitions:
         type: array
       hostname:
         type: string
+      matchPattern:
+        type: string
+      path:
+        type: string
       protocol:
         type: string
       publicPort:
@@ -281,6 +285,10 @@ definitions:
         type: string
       id:
         type: integer
+      matchPattern:
+        type: string
+      path:
+        type: string
       protocol:
         type: string
       publicPort:
