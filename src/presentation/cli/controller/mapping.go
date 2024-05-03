@@ -1,10 +1,7 @@
 package cliController
 
 import (
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -28,13 +25,7 @@ func (controller *MappingController) Read() *cobra.Command {
 		Use:   "get",
 		Short: "ReadMappings",
 		Run: func(cmd *cobra.Command, args []string) {
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingsList, err := useCase.GetMappings(mappingQueryRepo)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
-
-			cliHelper.ResponseWrapper(true, mappingsList)
+			cliHelper.ServiceResponseWrapper(controller.mappingService.Read())
 		},
 	}
 
@@ -42,78 +33,54 @@ func (controller *MappingController) Read() *cobra.Command {
 }
 
 func (controller *MappingController) Create() *cobra.Command {
-	var accIdUint uint64
+	var accountIdUint uint64
 	var hostnameStr string
 	var publicPortUint uint64
-	var hostProtocolStr string
-	var targetsSlice []string
+	var networkProtocolStr string
+	var containerIdStrSlice []string
 
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "CreateMapping",
 		Run: func(cmd *cobra.Command, args []string) {
-			accId := valueObject.NewAccountIdPanic(accIdUint)
-			var hostnamePtr *valueObject.Fqdn
+			requestBody := map[string]interface{}{
+				"accountId":  accountIdUint,
+				"publicPort": publicPortUint,
+			}
+
 			if hostnameStr != "" {
-				hostname := valueObject.NewFqdnPanic(hostnameStr)
-				hostnamePtr = &hostname
+				requestBody["hostname"] = hostnameStr
 			}
 
-			publicPort := valueObject.NewNetworkPortPanic(publicPortUint)
-
-			protocolStr := valueObject.GuessNetworkProtocolByPort(publicPort).String()
-			if hostProtocolStr != "" {
-				protocolStr = hostProtocolStr
+			if networkProtocolStr != "" {
+				requestBody["protocol"] = networkProtocolStr
 			}
-			hostProtocol := valueObject.NewNetworkProtocolPanic(protocolStr)
 
-			targets := []valueObject.ContainerId{}
-			for _, targetStr := range targetsSlice {
-				containerId, err := valueObject.NewContainerId(targetStr)
+			containerIds := []valueObject.ContainerId{}
+			for _, containerIdStr := range containerIdStrSlice {
+				containerId, err := valueObject.NewContainerId(containerIdStr)
 				if err != nil {
 					cliHelper.ResponseWrapper(false, err.Error())
 				}
-				targets = append(targets, containerId)
+				containerIds = append(containerIds, containerId)
 			}
-			createMappingDto := dto.NewCreateMapping(
-				accId,
-				hostnamePtr,
-				publicPort,
-				hostProtocol,
-				targets,
+			requestBody["containerIds"] = containerIds
+
+			cliHelper.ServiceResponseWrapper(
+				controller.mappingService.Create(requestBody),
 			)
-
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-
-			err := useCase.CreateMapping(
-				mappingQueryRepo,
-				mappingCmdRepo,
-				containerQueryRepo,
-				createMappingDto,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
-
-			cliHelper.ResponseWrapper(true, "MappingCreated")
 		},
 	}
-	cmd.Flags().Uint64VarP(&accIdUint, "acc-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("acc-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.Flags().Uint64VarP(&publicPortUint, "port", "p", 0, "Public Port")
 	cmd.MarkFlagRequired("port")
-	cmd.Flags().StringVarP(&hostProtocolStr, "protocol", "l", "", "Host Protocol")
+	cmd.Flags().StringVarP(&networkProtocolStr, "protocol", "l", "", "Host Protocol")
 	cmd.Flags().StringSliceVarP(
-		&targetsSlice,
-		"target",
-		"t",
-		[]string{},
-		"ContainerIds",
+		&containerIdStrSlice, "container-ids", "c", []string{}, "ContainerIds",
 	)
-	cmd.MarkFlagRequired("target")
+	cmd.MarkFlagRequired("container-ids")
 	return cmd
 }
 
@@ -124,21 +91,13 @@ func (controller *MappingController) Delete() *cobra.Command {
 		Use:   "delete",
 		Short: "DeleteMapping",
 		Run: func(cmd *cobra.Command, args []string) {
-			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
-
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
-
-			err := useCase.DeleteMapping(
-				mappingQueryRepo,
-				mappingCmdRepo,
-				mappingId,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
+			requestBody := map[string]interface{}{
+				"mappingId": mappingIdUint,
 			}
 
-			cliHelper.ResponseWrapper(true, "MappingDeleted")
+			cliHelper.ServiceResponseWrapper(
+				controller.mappingService.Delete(requestBody),
+			)
 		},
 	}
 
@@ -149,80 +108,52 @@ func (controller *MappingController) Delete() *cobra.Command {
 
 func (controller *MappingController) CreateTarget() *cobra.Command {
 	var mappingIdUint uint64
-	var targetStr string
+	var containerIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "CreateMappingTarget",
 		Run: func(cmd *cobra.Command, args []string) {
-			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
-			target, err := valueObject.NewContainerId(targetStr)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
+			requestBody := map[string]interface{}{
+				"mappingId":   mappingIdUint,
+				"containerId": containerIdStr,
 			}
 
-			createTargetDto := dto.NewCreateMappingTarget(
-				mappingId,
-				target,
+			cliHelper.ServiceResponseWrapper(
+				controller.mappingService.CreateTarget(requestBody),
 			)
-
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
-			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-
-			err = useCase.CreateMappingTarget(
-				mappingQueryRepo,
-				mappingCmdRepo,
-				containerQueryRepo,
-				createTargetDto,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
-			}
-
-			cliHelper.ResponseWrapper(true, "MappingTargetAdded")
 		},
 	}
 
 	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
 	cmd.MarkFlagRequired("mapping-id")
-	cmd.Flags().StringVarP(
-		&targetStr,
-		"target",
-		"t",
-		"",
-		"ContainerId",
-	)
-	cmd.MarkFlagRequired("target")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.MarkFlagRequired("container-id")
 	return cmd
 }
 
 func (controller *MappingController) DeleteTarget() *cobra.Command {
+	var mappingIdUint uint64
 	var targetIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteMappingTarget",
 		Run: func(cmd *cobra.Command, args []string) {
-			targetId := valueObject.NewMappingTargetIdPanic(targetIdUint)
-
-			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
-			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
-
-			err := useCase.DeleteMappingTarget(
-				mappingQueryRepo,
-				mappingCmdRepo,
-				targetId,
-			)
-			if err != nil {
-				cliHelper.ResponseWrapper(false, err.Error())
+			requestBody := map[string]interface{}{
+				"mappingId": mappingIdUint,
+				"targetId":  targetIdUint,
 			}
 
-			cliHelper.ResponseWrapper(true, "MappingTargetDeleted")
+			cliHelper.ServiceResponseWrapper(
+				controller.mappingService.DeleteTarget(requestBody),
+			)
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&targetIdUint, "id", "i", 0, "MappingTargetId")
-	cmd.MarkFlagRequired("id")
+	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
+	cmd.MarkFlagRequired("mapping-id")
+	cmd.Flags().Uint64VarP(&targetIdUint, "target-id", "t", 0, "MappingTargetId")
+	cmd.MarkFlagRequired("target-id")
 	return cmd
 }
