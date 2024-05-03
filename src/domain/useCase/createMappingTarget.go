@@ -61,7 +61,7 @@ func CreateMappingTarget(
 	}
 
 	log.Printf(
-		"ContainerId '%s' created as target for MappingId '%s'.",
+		"ContainerId '%s' added as target for MappingId '%s'.",
 		createDto.ContainerId, createDto.MappingId,
 	)
 
