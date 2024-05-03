@@ -10,18 +10,31 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
+	"github.com/speedianet/control/src/presentation/service"
 )
 
+type MappingController struct {
+	mappingService *service.MappingService
+}
+
+func NewMappingController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *MappingController {
+	return &MappingController{
+		mappingService: service.NewMappingService(persistentDbSvc),
+	}
+}
+
 // GetMappings	 godoc
-// @Summary      GetMappings
-// @Description  List mapping.
+// @Summary      ReadMappings
+// @Description  List mappings.
 // @Tags         mapping
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} entity.Mapping
 // @Router       /v1/mapping/ [get]
-func GetMappingsController(c echo.Context) error {
+func (controller *MappingController) Read(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	mappingQueryRepo := infra.NewMappingQueryRepo(persistentDbSvc)
 	mappingList, err := useCase.GetMappings(mappingQueryRepo)
@@ -42,7 +55,7 @@ func GetMappingsController(c echo.Context) error {
 // @Param        createMappingDto 	  body    dto.CreateMapping  true  "NewMapping"
 // @Success      201 {object} object{} "MappingCreated"
 // @Router       /v1/mapping/ [post]
-func CreateMappingController(c echo.Context) error {
+func (controller *MappingController) Create(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -111,7 +124,7 @@ func CreateMappingController(c echo.Context) error {
 // @Param        mappingId 	  path   string  true  "MappingId"
 // @Success      200 {object} object{} "MappingDeleted"
 // @Router       /v1/mapping/{mappingId}/ [delete]
-func DeleteMappingController(c echo.Context) error {
+func (controller *MappingController) Delete(c echo.Context) error {
 	mappingId := valueObject.NewMappingIdPanic(c.Param("mappingId"))
 
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
@@ -140,7 +153,7 @@ func DeleteMappingController(c echo.Context) error {
 // @Param        createMappingTargetDto 	  body    dto.CreateMappingTarget  true  "NewMappingTarget"
 // @Success      201 {object} object{} "MappingTargetCreated"
 // @Router       /v1/mapping/target/ [post]
-func CreateMappingTargetController(c echo.Context) error {
+func (controller *MappingController) CreateTarget(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -186,7 +199,7 @@ func CreateMappingTargetController(c echo.Context) error {
 // @Param        targetId 	  path   string  true  "TargetId"
 // @Success      200 {object} object{} "MappingTargetDeleted"
 // @Router       /v1/mapping/{mappingId}/target/{targetId}/ [delete]
-func DeleteMappingTargetController(c echo.Context) error {
+func (controller *MappingController) DeleteTarget(c echo.Context) error {
 	targetId := valueObject.NewMappingTargetIdPanic(c.Param("targetId"))
 
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)

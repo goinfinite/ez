@@ -52,6 +52,7 @@ func (router *Router) accountRoutes() {
 
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/v1/container")
+
 	containerController := apiController.NewContainerController(router.persistentDbSvc)
 	containerGroup.GET("/", containerController.Read)
 	containerGroup.GET("/metrics/", containerController.ReadWithMetrics)
@@ -91,13 +92,15 @@ func (router *Router) licenseRoutes() {
 
 func (router *Router) mappingRoutes() {
 	mappingGroup := router.baseRoute.Group("/v1/mapping")
-	mappingGroup.GET("/", apiController.GetMappingsController)
-	mappingGroup.POST("/", apiController.CreateMappingController)
-	mappingGroup.DELETE("/:mappingId/", apiController.DeleteMappingController)
-	mappingGroup.POST("/target/", apiController.CreateMappingTargetController)
+
+	mappingController := apiController.NewMappingController(router.persistentDbSvc)
+	mappingGroup.GET("/", mappingController.Read)
+	mappingGroup.POST("/", mappingController.Create)
+	mappingGroup.DELETE("/:mappingId/", mappingController.Delete)
+	mappingGroup.POST("/target/", mappingController.CreateTarget)
 	mappingGroup.DELETE(
 		"/:mappingId/target/:targetId/",
-		apiController.DeleteMappingTargetController,
+		mappingController.DeleteTarget,
 	)
 }
 
