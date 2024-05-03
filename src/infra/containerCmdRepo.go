@@ -16,11 +16,16 @@ import (
 )
 
 type ContainerCmdRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	persistentDbSvc    *db.PersistentDatabaseService
+	containerQueryRepo *ContainerQueryRepo
 }
 
 func NewContainerCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *ContainerCmdRepo {
-	return &ContainerCmdRepo{persistentDbSvc: persistentDbSvc}
+	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
+	return &ContainerCmdRepo{
+		persistentDbSvc:    persistentDbSvc,
+		containerQueryRepo: containerQueryRepo,
+	}
 }
 
 func (repo *ContainerCmdRepo) getBaseSpecs(
@@ -126,12 +131,7 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
 		createDto.AccountId,
-		"podman",
-		"container",
-		"inspect",
-		containerName,
-		"--format",
-		"{{json .}}",
+		"podman", "container", "inspect", containerName, "--format", "{{json .}}",
 	)
 	if err != nil {
 		return containerEntity, errors.New("GetContainerInfoError")
@@ -187,7 +187,18 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	), nil
 }
 
-func runLaunchScript(
+func (repo *ContainerCmdRepo) runContainerCmd(
+	accountId valueObject.AccountId,
+	containerId valueObject.ContainerId,
+	command string,
+) (string, error) {
+	return infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "exec", containerId.String(), "/bin/sh", "-c", command,
+	)
+}
+
+func (repo *ContainerCmdRepo) runLaunchScript(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 	launchScript *valueObject.LaunchScript,
@@ -233,21 +244,28 @@ func runLaunchScript(
 		return errors.New("RemoveLaunchScriptError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"podman", "exec", containerIdStr, "/bin/sh", "-c",
+	_, err = repo.runContainerCmd(
+		accountId, containerId,
 		"chmod +x /tmp/launch-script",
 	)
 	if err != nil {
 		return errors.New("ChmodLaunchScriptError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"podman", "exec", containerIdStr, "/tmp/launch-script",
+	_, err = repo.runContainerCmd(
+		accountId, containerId,
+		"/tmp/launch-script",
 	)
 	if err != nil {
 		return errors.New("RunLaunchScriptError: " + err.Error())
+	}
+
+	_, err = repo.runContainerCmd(
+		accountId, containerId,
+		"rm -f /tmp/launch-script",
+	)
+	if err != nil {
+		return errors.New("RemoveLaunchScriptError: " + err.Error())
 	}
 
 	return nil
@@ -312,8 +330,7 @@ func (repo *ContainerCmdRepo) Create(
 
 	_, err = infraHelper.RunCmdAsUser(
 		createDto.AccountId,
-		"podman",
-		runParams...,
+		"podman", runParams...,
 	)
 	if err != nil {
 		return containerId, errors.New("ContainerRunError: " + err.Error())
@@ -333,7 +350,9 @@ func (repo *ContainerCmdRepo) Create(
 	}
 
 	if createDto.LaunchScript != nil {
-		err = runLaunchScript(createDto.AccountId, containerId, createDto.LaunchScript)
+		err = repo.runLaunchScript(
+			createDto.AccountId, containerId, createDto.LaunchScript,
+		)
 		if err != nil {
 			return containerId, errors.New("LaunchScriptError: " + err.Error())
 		}
@@ -350,9 +369,7 @@ func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContaine
 
 	_, err := infraHelper.RunCmdAsUser(
 		updateDto.AccountId,
-		"podman",
-		actionToPerform,
-		updateDto.ContainerId.String(),
+		"podman", actionToPerform, updateDto.ContainerId.String(),
 	)
 	if err != nil {
 		return err
@@ -376,8 +393,7 @@ func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContaine
 }
 
 func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
-	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
-	currentContainer, err := containerQueryRepo.GetById(updateDto.ContainerId)
+	currentContainer, err := repo.containerQueryRepo.GetById(updateDto.ContainerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}
@@ -406,12 +422,9 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 
 	_, err = infraHelper.RunCmdAsUser(
 		updateDto.AccountId,
-		"podman",
-		"update",
-		"--cpus",
-		newSpecs.CpuCores.String(),
-		"--memory",
-		newSpecs.MemoryBytes.String(),
+		"podman", "update",
+		"--cpus", newSpecs.CpuCores.String(),
+		"--memory", newSpecs.MemoryBytes.String(),
 		updateDto.ContainerId.String(),
 	)
 	if err != nil {
@@ -426,10 +439,7 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 
 	_, err = infraHelper.RunCmdAsUser(
 		updateDto.AccountId,
-		"podman",
-		"rename",
-		updateDto.ContainerId.String(),
-		newContainerName,
+		"podman", "rename", updateDto.ContainerId.String(), newContainerName,
 	)
 	if err != nil {
 		return errors.New("FailedToRenameContainer: " + err.Error())
@@ -447,10 +457,7 @@ func (repo *ContainerCmdRepo) Delete(
 ) error {
 	_, err := infraHelper.RunCmdAsUser(
 		accId,
-		"podman",
-		"rm",
-		"--force",
-		containerId.String(),
+		"podman", "rm", "--force", containerId.String(),
 	)
 	if err != nil {
 		return err
@@ -469,4 +476,50 @@ func (repo *ContainerCmdRepo) Delete(
 	containerModel := dbModel.Container{ID: containerId.String()}
 	deleteResult = repo.persistentDbSvc.Handler.Delete(&containerModel)
 	return deleteResult.Error
+}
+
+func (repo *ContainerCmdRepo) GenerateContainerSessionToken(
+	containerId valueObject.ContainerId,
+) (valueObject.AccessTokenValue, error) {
+	var tokenValue valueObject.AccessTokenValue
+
+	containerEntity, err := repo.containerQueryRepo.GetById(containerId)
+	if err != nil {
+		return tokenValue, errors.New("ContainerNotFound")
+	}
+
+	randomPassword := infraHelper.GenPass(16)
+	_, _ = repo.runContainerCmd(
+		containerEntity.AccountId, containerId,
+		"os account create -u control -p "+randomPassword,
+	)
+
+	_, err = repo.runContainerCmd(
+		containerEntity.AccountId, containerId,
+		"os account update -u control -p "+randomPassword,
+	)
+	if err != nil {
+		return tokenValue, errors.New("UpdateControlUserPasswordFailed")
+	}
+
+	loginResponseJson, err := repo.runContainerCmd(
+		containerEntity.AccountId, containerId,
+		"os account login -u control -p "+randomPassword,
+	)
+	if err != nil {
+		return tokenValue, errors.New("LoginWithControlUserFailed")
+	}
+
+	loginResponseMap := map[string]interface{}{}
+	err = json.Unmarshal([]byte(loginResponseJson), &loginResponseMap)
+	if err != nil {
+		return tokenValue, errors.New("LoginResponseParseError")
+	}
+
+	rawResponseBody, assertOk := loginResponseMap["body"].(string)
+	if !assertOk || len(rawResponseBody) == 0 {
+		return tokenValue, errors.New("LoginResponseBodyParseError")
+	}
+
+	return valueObject.NewAccessTokenValue(rawResponseBody)
 }
