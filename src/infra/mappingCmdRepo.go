@@ -330,27 +330,27 @@ func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
 }
 
-func (repo *MappingCmdRepo) DeleteTarget(id valueObject.MappingTargetId) error {
-	targetEntity, err := repo.mappingQueryRepo.GetTargetById(id)
+func (repo *MappingCmdRepo) DeleteTarget(
+	mappingId valueObject.MappingId,
+	targetId valueObject.MappingTargetId,
+) error {
+	err := repo.persistentDbSvc.Handler.Delete(
+		dbModel.MappingTarget{}, "id = ?", targetId.Get(),
+	).Error
 	if err != nil {
 		return err
 	}
 
-	err = repo.persistentDbSvc.Handler.Delete(dbModel.MappingTarget{}, id.Get()).Error
-	if err != nil {
-		return err
-	}
-
-	mappingEntity, err := repo.mappingQueryRepo.GetById(targetEntity.MappingId)
+	mappingEntity, err := repo.mappingQueryRepo.GetById(mappingId)
 	if err != nil {
 		return err
 	}
 
 	if len(mappingEntity.Targets) < 1 {
-		return repo.deleteMappingFile(targetEntity.MappingId)
+		return repo.deleteMappingFile(mappingId)
 	}
 
-	return repo.updateMappingFile(targetEntity.MappingId)
+	return repo.updateMappingFile(mappingId)
 }
 
 func (repo *MappingCmdRepo) CreateContainerProxy(

@@ -9,7 +9,10 @@ type MappingCmdRepo interface {
 	Create(createDto dto.CreateMapping) (valueObject.MappingId, error)
 	CreateTarget(createDto dto.CreateMappingTarget) error
 	Delete(mappingId valueObject.MappingId) error
-	DeleteTarget(targetId valueObject.MappingTargetId) error
+	DeleteTarget(
+		mappingId valueObject.MappingId,
+		targetId valueObject.MappingTargetId,
+	) error
 
 	CreateContainerProxy(containerId valueObject.ContainerId) error
 }

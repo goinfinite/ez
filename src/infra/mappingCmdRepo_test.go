@@ -78,9 +78,10 @@ func TestMappingCmdRepo(t *testing.T) {
 			return
 		}
 
+		mappingId := mappings[0].Id
 		targetId := mappings[0].Targets[0].Id
 
-		err = mappingCmdRepo.DeleteTarget(targetId)
+		err = mappingCmdRepo.DeleteTarget(mappingId, targetId)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

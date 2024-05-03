@@ -11,6 +11,7 @@ import (
 func DeleteMappingTarget(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
+	mappingId valueObject.MappingId,
 	targetId valueObject.MappingTargetId,
 ) error {
 	_, err := mappingQueryRepo.GetTargetById(targetId)
@@ -18,9 +19,10 @@ func DeleteMappingTarget(
 		return errors.New("MappingTargetNotFound")
 	}
 
-	err = mappingCmdRepo.DeleteTarget(targetId)
+	err = mappingCmdRepo.DeleteTarget(mappingId, targetId)
 	if err != nil {
-		return errors.New("DeleteMappingTargetError")
+		log.Printf("DeleteMappingTargetError: %v", err)
+		return errors.New("DeleteMappingTargetInfraError")
 	}
 
 	log.Printf("TargetId '%v' deleted.", targetId)
