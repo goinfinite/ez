@@ -1,0 +1,41 @@
+package useCase
+
+import (
+	"errors"
+	"log"
+
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
+)
+
+func ContainerAutoLogin(
+	containerQueryRepo repository.ContainerQueryRepo,
+	containerCmdRepo repository.ContainerCmdRepo,
+	containerId valueObject.ContainerId,
+) (entity.AccessToken, error) {
+	var accessToken entity.AccessToken
+
+	containerEntity, err := containerQueryRepo.GetById(containerId)
+	if err != nil {
+		log.Printf("ContainerNotFound: %s", err)
+		return accessToken, errors.New("ContainerNotFound")
+	}
+
+	if containerEntity.ImageAddress != "speedia/os" {
+		log.Printf("ContainerIsNotSpeediaOs: %s", containerEntity.ImageAddress)
+		return accessToken, errors.New("ContainerIsNotSpeediaOs")
+	}
+
+	if !containerEntity.Status {
+		return accessToken, errors.New("ContainerIsNotRunning")
+	}
+
+	accessToken, err = containerCmdRepo.GenerateContainerSessionToken(containerId)
+	if err != nil {
+		log.Printf("GenerateContainerSessionTokenError: %s", err)
+		return accessToken, errors.New("GenerateContainerSessionTokenError")
+	}
+
+	return accessToken, nil
+}

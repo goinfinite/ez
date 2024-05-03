@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -12,4 +13,7 @@ type ContainerCmdRepo interface {
 		accId valueObject.AccountId,
 		containerId valueObject.ContainerId,
 	) error
+	GenerateContainerSessionToken(
+		containerId valueObject.ContainerId,
+	) (entity.AccessToken, error)
 }
