@@ -3,6 +3,7 @@ package apiController
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -69,13 +70,45 @@ func (controller *ContainerController) AutoLogin(c echo.Context) error {
 		"containerId": c.Param("containerId"),
 	}
 
-	if shouldRedirect := c.QueryParam("shouldRedirect"); shouldRedirect != "" {
-		requestBody["shouldRedirect"] = shouldRedirect
+	serviceOutput := controller.containerService.AutoLogin(requestBody)
+	if serviceOutput.Status != service.Success {
+		return apiHelper.ResponseWrapper(
+			c, http.StatusInternalServerError, serviceOutput.Body,
+		)
 	}
 
-	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerService.AutoLogin(requestBody),
-	)
+	var err error
+	shouldRedirect := true
+	if rawShouldRedirect := c.QueryParam("shouldRedirect"); rawShouldRedirect != "" {
+		shouldRedirect, err = apiHelper.ParseBoolParam(shouldRedirect)
+		if err != nil {
+			shouldRedirect = false
+		}
+	}
+
+	accessToken, assertOk := serviceOutput.Body.(valueObject.AccessTokenValue)
+	if !assertOk {
+		return apiHelper.ResponseWrapper(
+			c, http.StatusInternalServerError, "InvalidAccessTokenValue",
+		)
+	}
+
+	if !shouldRedirect {
+		return apiHelper.ResponseWrapper(c, http.StatusOK, accessToken)
+	}
+
+	redirectUrl := "/_/container/" + c.Param("containerId") + "/"
+	accessTokenCookie := new(http.Cookie)
+	accessTokenCookie.Name = "os-access-token"
+	accessTokenCookie.Value = accessToken.String()
+	accessTokenCookie.Expires = time.Now().Add(3 * time.Hour)
+	accessTokenCookie.Path = redirectUrl
+	accessTokenCookie.HttpOnly = true
+	accessTokenCookie.Secure = true
+	accessTokenCookie.SameSite = http.SameSiteStrictMode
+	c.SetCookie(accessTokenCookie)
+
+	return c.Redirect(http.StatusFound, redirectUrl)
 }
 
 func (controller *ContainerController) parsePortBindings(
