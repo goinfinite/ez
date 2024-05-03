@@ -41,6 +41,32 @@ func (service *ContainerService) ReadWithMetrics() ServiceOutput {
 	return NewServiceOutput(Success, containersList)
 }
 
+func (service *ContainerService) AutoLogin(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"containerId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	containerId, err := valueObject.NewContainerId(input["containerId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
+	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
+	accessToken, err := useCase.ContainerAutoLogin(
+		containerQueryRepo, containerCmdRepo, containerId,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, accessToken)
+
+}
+
 func (service *ContainerService) Create(input map[string]interface{}) ServiceOutput {
 	requiredParams := []string{"accountId", "hostname"}
 
