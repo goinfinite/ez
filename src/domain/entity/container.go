@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/speedianet/control/src/domain/valueObject"
+import (
+	"strings"
+
+	"github.com/speedianet/control/src/domain/valueObject"
+)
 
 type Container struct {
 	Id            valueObject.ContainerId            `json:"id"`
@@ -57,4 +61,12 @@ func NewContainer(
 		StartedAt:     startedAt,
 		StoppedAt:     stoppedAt,
 	}
+}
+
+func (container *Container) IsRunning() bool {
+	return container.Status
+}
+
+func (container *Container) IsSpeediaOs() bool {
+	return strings.Contains(container.ImageAddress.String(), "speedia/os")
 }
