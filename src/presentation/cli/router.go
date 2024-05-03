@@ -98,17 +98,17 @@ func (router *Router) mappingRoutes() {
 	}
 
 	mappingController := cliController.NewMappingController(router.persistentDbSvc)
-	mappingCmd.AddCommand(mappingController.GetMappings())
-	mappingCmd.AddCommand(mappingController.CreateMapping())
-	mappingCmd.AddCommand(mappingController.DeleteMapping())
+	mappingCmd.AddCommand(mappingController.Read())
+	mappingCmd.AddCommand(mappingController.Create())
+	mappingCmd.AddCommand(mappingController.Delete())
 
 	var mappingTargetCmd = &cobra.Command{
 		Use:   "target",
 		Short: "MappingTargetManagement",
 	}
 
-	mappingTargetCmd.AddCommand(mappingController.CreateMappingTarget())
-	mappingTargetCmd.AddCommand(mappingController.DeleteMappingTarget())
+	mappingTargetCmd.AddCommand(mappingController.CreateTarget())
+	mappingTargetCmd.AddCommand(mappingController.DeleteTarget())
 
 	mappingCmd.AddCommand(mappingTargetCmd)
 	rootCmd.AddCommand(mappingCmd)
