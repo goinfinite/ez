@@ -2,9 +2,10 @@ package valueObject
 
 import (
 	"errors"
+	"slices"
 	"strings"
 
-	"golang.org/x/exp/slices"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type NetworkProtocol string
@@ -20,13 +21,19 @@ var ValidNetworkProtocols = []string{
 	"udp",
 }
 
-func NewNetworkProtocol(value string) (NetworkProtocol, error) {
-	value = strings.TrimSpace(value)
-	value = strings.ToLower(value)
-	if !slices.Contains(ValidNetworkProtocols, value) {
+func NewNetworkProtocol(value interface{}) (NetworkProtocol, error) {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
+		return "", errors.New("NetworkProtocolMustBeString")
+	}
+
+	stringValue = strings.TrimSpace(stringValue)
+	stringValue = strings.ToLower(stringValue)
+
+	if !slices.Contains(ValidNetworkProtocols, stringValue) {
 		return "", errors.New("InvalidNetworkProtocol")
 	}
-	return NetworkProtocol(value), nil
+	return NetworkProtocol(stringValue), nil
 }
 
 func NewNetworkProtocolPanic(value string) NetworkProtocol {
