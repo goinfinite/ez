@@ -92,9 +92,9 @@ func (router *Router) licenseRoutes() {
 func (router *Router) mappingRoutes() {
 	mappingGroup := router.baseRoute.Group("/v1/mapping")
 	mappingGroup.GET("/", apiController.GetMappingsController)
-	mappingGroup.POST("/", apiController.AddMappingController)
+	mappingGroup.POST("/", apiController.CreateMappingController)
 	mappingGroup.DELETE("/:mappingId/", apiController.DeleteMappingController)
-	mappingGroup.POST("/target/", apiController.AddMappingTargetController)
+	mappingGroup.POST("/target/", apiController.CreateMappingTargetController)
 	mappingGroup.DELETE(
 		"/:mappingId/target/:targetId/",
 		apiController.DeleteMappingTargetController,

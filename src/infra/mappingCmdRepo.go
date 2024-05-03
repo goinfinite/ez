@@ -31,10 +31,10 @@ func NewMappingCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingCm
 	}
 }
 
-func (repo *MappingCmdRepo) Add(mappingDto dto.AddMapping) (valueObject.MappingId, error) {
+func (repo *MappingCmdRepo) Create(createDto dto.CreateMapping) (valueObject.MappingId, error) {
 	var mappingId valueObject.MappingId
 
-	mappingModel := dbModel.Mapping{}.AddDtoToModel(mappingDto)
+	mappingModel := dbModel.Mapping{}.CreateDtoToModel(createDto)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&mappingModel)
 	if createResult.Error != nil {
@@ -273,15 +273,15 @@ func (repo *MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) e
 	return nil
 }
 
-func (repo *MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
-	containerEntity, err := repo.containerQueryRepo.GetById(addDto.ContainerId)
+func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) error {
+	containerEntity, err := repo.containerQueryRepo.GetById(createDto.ContainerId)
 	if err != nil {
 		return err
 	}
 
 	targetModel := dbModel.NewMappingTarget(
 		0,
-		uint(addDto.MappingId.Get()),
+		uint(createDto.MappingId.Get()),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
 	)
@@ -291,7 +291,7 @@ func (repo *MappingCmdRepo) AddTarget(addDto dto.AddMappingTarget) error {
 		return createResult.Error
 	}
 
-	return repo.updateMappingFile(addDto.MappingId)
+	return repo.updateMappingFile(createDto.MappingId)
 }
 
 func (repo *MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) error {

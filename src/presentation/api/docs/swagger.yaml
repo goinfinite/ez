@@ -9,28 +9,6 @@ definitions:
       username:
         type: string
     type: object
-  dto.AddMapping:
-    properties:
-      accountId:
-        type: integer
-      containerIds:
-        items:
-          type: string
-        type: array
-      hostname:
-        type: string
-      protocol:
-        type: string
-      publicPort:
-        type: integer
-    type: object
-  dto.AddMappingTarget:
-    properties:
-      containerId:
-        type: string
-      mappingId:
-        type: integer
-    type: object
   dto.ContainerWithMetrics:
     properties:
       accountId:
@@ -116,6 +94,28 @@ definitions:
       scalingPolicy:
         type: string
       scalingThreshold:
+        type: integer
+    type: object
+  dto.CreateMapping:
+    properties:
+      accountId:
+        type: integer
+      containerIds:
+        items:
+          type: string
+        type: array
+      hostname:
+        type: string
+      protocol:
+        type: string
+      publicPort:
+        type: integer
+    type: object
+  dto.CreateMappingTarget:
+    properties:
+      containerId:
+        type: string
+      mappingId:
         type: integer
     type: object
   dto.Login:
@@ -962,14 +962,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add a new mapping.
+      description: Create a new mapping.
       parameters:
       - description: NewMapping
         in: body
-        name: addMappingDto
+        name: createMappingDto
         required: true
         schema:
-          $ref: '#/definitions/dto.AddMapping'
+          $ref: '#/definitions/dto.CreateMapping'
       produces:
       - application/json
       responses:
@@ -979,7 +979,7 @@ paths:
             type: object
       security:
       - Bearer: []
-      summary: AddNewMapping
+      summary: CreateNewMapping
       tags:
       - mapping
   /v1/mapping/{mappingId}/:
@@ -1037,24 +1037,24 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add a new mapping target.
+      description: Create a new mapping target.
       parameters:
       - description: NewMappingTarget
         in: body
-        name: addMappingTargetDto
+        name: createMappingTargetDto
         required: true
         schema:
-          $ref: '#/definitions/dto.AddMappingTarget'
+          $ref: '#/definitions/dto.CreateMappingTarget'
       produces:
       - application/json
       responses:
         "201":
-          description: MappingTargetAdded
+          description: MappingTargetCreated
           schema:
             type: object
       security:
       - Bearer: []
-      summary: AddMappingTarget
+      summary: CreateMappingTarget
       tags:
       - mapping
   /v1/o11y/overview/:

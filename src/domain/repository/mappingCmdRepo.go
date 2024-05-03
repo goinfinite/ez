@@ -6,8 +6,8 @@ import (
 )
 
 type MappingCmdRepo interface {
-	Add(addDto dto.AddMapping) (valueObject.MappingId, error)
-	AddTarget(addDto dto.AddMappingTarget) error
+	Create(createDto dto.CreateMapping) (valueObject.MappingId, error)
+	CreateTarget(createDto dto.CreateMappingTarget) error
 	Delete(mappingId valueObject.MappingId) error
 	DeleteTarget(targetId valueObject.MappingTargetId) error
 

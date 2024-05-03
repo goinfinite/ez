@@ -2,16 +2,16 @@ package dto
 
 import "github.com/speedianet/control/src/domain/valueObject"
 
-type AddMappingTarget struct {
+type CreateMappingTarget struct {
 	MappingId   valueObject.MappingId   `json:"mappingId"`
 	ContainerId valueObject.ContainerId `json:"containerId"`
 }
 
-func NewAddMappingTarget(
+func NewCreateMappingTarget(
 	mappingId valueObject.MappingId,
 	containerId valueObject.ContainerId,
-) AddMappingTarget {
-	return AddMappingTarget{
+) CreateMappingTarget {
+	return CreateMappingTarget{
 		MappingId:   mappingId,
 		ContainerId: containerId,
 	}

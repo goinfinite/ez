@@ -15,11 +15,11 @@ func TestMappingCmdRepo(t *testing.T) {
 	mappingCmdRepo := NewMappingCmdRepo(persistentDbSvc)
 	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
 
-	t.Run("AddMapping", func(t *testing.T) {
+	t.Run("CreateMapping", func(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		hostname := valueObject.NewFqdnPanic("speedia.net")
 
-		addMapping := dto.NewAddMapping(
+		createMapping := dto.NewCreateMapping(
 			accountId,
 			&hostname,
 			valueObject.NewNetworkPortPanic(80),
@@ -27,13 +27,13 @@ func TestMappingCmdRepo(t *testing.T) {
 			[]valueObject.ContainerId{},
 		)
 
-		_, err := mappingCmdRepo.Add(addMapping)
+		_, err := mappingCmdRepo.Create(createMapping)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 	})
 
-	t.Run("AddTargets", func(t *testing.T) {
+	t.Run("CreateTargets", func(t *testing.T) {
 		mappingId := valueObject.NewMappingIdPanic(1)
 		containers, err := containerQueryRepo.Get()
 		if err != nil {
@@ -48,12 +48,12 @@ func TestMappingCmdRepo(t *testing.T) {
 
 		containerId := containers[0].Id
 
-		addMappingTarget := dto.NewAddMappingTarget(
+		createMappingTarget := dto.NewCreateMappingTarget(
 			mappingId,
 			containerId,
 		)
 
-		err = mappingCmdRepo.AddTarget(addMappingTarget)
+		err = mappingCmdRepo.CreateTarget(createMappingTarget)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

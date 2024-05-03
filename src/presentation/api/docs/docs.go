@@ -723,7 +723,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Add a new mapping.",
+                "description": "Create a new mapping.",
                 "consumes": [
                     "application/json"
                 ],
@@ -733,15 +733,15 @@ const docTemplate = `{
                 "tags": [
                     "mapping"
                 ],
-                "summary": "AddNewMapping",
+                "summary": "CreateNewMapping",
                 "parameters": [
                     {
                         "description": "NewMapping",
-                        "name": "addMappingDto",
+                        "name": "createMappingDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddMapping"
+                            "$ref": "#/definitions/dto.CreateMapping"
                         }
                     }
                 ],
@@ -762,7 +762,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Add a new mapping target.",
+                "description": "Create a new mapping target.",
                 "consumes": [
                     "application/json"
                 ],
@@ -772,21 +772,21 @@ const docTemplate = `{
                 "tags": [
                     "mapping"
                 ],
-                "summary": "AddMappingTarget",
+                "summary": "CreateMappingTarget",
                 "parameters": [
                     {
                         "description": "NewMappingTarget",
-                        "name": "addMappingTargetDto",
+                        "name": "createMappingTargetDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddMappingTarget"
+                            "$ref": "#/definitions/dto.CreateMappingTarget"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "MappingTargetAdded",
+                        "description": "MappingTargetCreated",
                         "schema": {
                             "type": "object"
                         }
@@ -919,40 +919,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AddMapping": {
-            "type": "object",
-            "properties": {
-                "accountId": {
-                    "type": "integer"
-                },
-                "containerIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "hostname": {
-                    "type": "string"
-                },
-                "protocol": {
-                    "type": "string"
-                },
-                "publicPort": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.AddMappingTarget": {
-            "type": "object",
-            "properties": {
-                "containerId": {
-                    "type": "string"
-                },
-                "mappingId": {
-                    "type": "integer"
-                }
-            }
-        },
         "dto.ContainerWithMetrics": {
             "type": "object",
             "properties": {
@@ -1081,6 +1047,40 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "scalingThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateMapping": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "publicPort": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateMappingTarget": {
+            "type": "object",
+            "properties": {
+                "containerId": {
+                    "type": "string"
+                },
+                "mappingId": {
                     "type": "integer"
                 }
             }

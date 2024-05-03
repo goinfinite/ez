@@ -8,26 +8,26 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func AddMapping(
+func CreateMapping(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
-	addDto dto.AddMapping,
+	createDto dto.CreateMapping,
 ) error {
-	wasHostnameSent := addDto.Hostname != nil
+	wasHostnameSent := createDto.Hostname != nil
 
-	isTcp := addDto.Protocol.String() == "tcp"
-	isUdp := addDto.Protocol.String() == "udp"
+	isTcp := createDto.Protocol.String() == "tcp"
+	isUdp := createDto.Protocol.String() == "udp"
 	isTransportLayer := isTcp || isUdp
 
 	if wasHostnameSent && isTransportLayer {
-		addDto.Hostname = nil
+		createDto.Hostname = nil
 	}
 
 	existingMapping, err := mappingQueryRepo.FindOne(
-		addDto.Hostname,
-		addDto.PublicPort,
-		addDto.Protocol,
+		createDto.Hostname,
+		createDto.PublicPort,
+		createDto.Protocol,
 	)
 	if err != nil && err.Error() != "MappingNotFound" {
 		log.Printf("FindExistingMappingError: %s", err)
@@ -37,26 +37,26 @@ func AddMapping(
 	mappingId := existingMapping.Id
 	mappingAlreadyExists := mappingId != 0
 	if !mappingAlreadyExists {
-		mappingId, err = mappingCmdRepo.Add(addDto)
+		mappingId, err = mappingCmdRepo.Create(createDto)
 		if err != nil {
-			log.Printf("AddMappingError: %s", err)
-			return errors.New("AddMappingInfraError")
+			log.Printf("CreateMappingError: %s", err)
+			return errors.New("CreateMappingInfraError")
 		}
 
 		log.Printf(
 			"Mapping for port '%v/%v' added.",
-			addDto.PublicPort,
-			addDto.Protocol.String(),
+			createDto.PublicPort,
+			createDto.Protocol.String(),
 		)
 	}
 
-	for _, containerId := range addDto.ContainerIds {
-		addTargetDto := dto.NewAddMappingTarget(
+	for _, containerId := range createDto.ContainerIds {
+		addTargetDto := dto.NewCreateMappingTarget(
 			mappingId,
 			containerId,
 		)
 
-		err = AddMappingTarget(
+		err = CreateMappingTarget(
 			mappingQueryRepo,
 			mappingCmdRepo,
 			containerQueryRepo,

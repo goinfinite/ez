@@ -10,7 +10,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func AddMappingsWithContainerId(
+func CreateMappingsWithContainerId(
 	containerQueryRepo repository.ContainerQueryRepo,
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
@@ -35,28 +35,28 @@ func AddMappingsWithContainerId(
 
 		err = mappingCmdRepo.CreateContainerProxy(containerId)
 		if err != nil {
-			log.Printf("AddContainerProxyMappingError: %s", err)
-			return errors.New("AddContainerProxyMappingInfraError")
+			log.Printf("CreateContainerProxyMappingError: %s", err)
+			return errors.New("CreateContainerProxyMappingInfraError")
 		}
 	}
 
 	for _, portBinding := range containerEntity.PortBindings {
-		addMappingDto := dto.NewAddMapping(
+		createMappingDto := dto.NewCreateMapping(
 			containerEntity.AccountId,
 			&containerEntity.Hostname,
 			portBinding.PublicPort,
 			portBinding.Protocol,
 			[]valueObject.ContainerId{containerId},
 		)
-		err = AddMapping(
+		err = CreateMapping(
 			mappingQueryRepo,
 			mappingCmdRepo,
 			containerQueryRepo,
-			addMappingDto,
+			createMappingDto,
 		)
 		if err != nil {
-			log.Printf("AddMappingError: %s", err)
-			return errors.New("AddMappingInfraError")
+			log.Printf("CreateMappingError: %s", err)
+			return errors.New("CreateMappingInfraError")
 		}
 	}
 

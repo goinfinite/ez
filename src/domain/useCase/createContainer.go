@@ -59,7 +59,7 @@ func CreateContainer(
 		return nil
 	}
 
-	return AddMappingsWithContainerId(
+	return CreateMappingsWithContainerId(
 		containerQueryRepo,
 		mappingQueryRepo,
 		mappingCmdRepo,

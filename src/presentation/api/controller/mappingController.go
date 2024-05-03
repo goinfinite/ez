@@ -32,17 +32,17 @@ func GetMappingsController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, mappingList)
 }
 
-// AddMapping	 godoc
-// @Summary      AddNewMapping
-// @Description  Add a new mapping.
+// CreateMapping	 godoc
+// @Summary      CreateNewMapping
+// @Description  Create a new mapping.
 // @Tags         mapping
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addMappingDto 	  body    dto.AddMapping  true  "NewMapping"
+// @Param        createMappingDto 	  body    dto.CreateMapping  true  "NewMapping"
 // @Success      201 {object} object{} "MappingCreated"
 // @Router       /v1/mapping/ [post]
-func AddMappingController(c echo.Context) error {
+func CreateMappingController(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func AddMappingController(c echo.Context) error {
 		containerIds = append(containerIds, containerId)
 	}
 
-	addMappingDto := dto.NewAddMapping(
+	createMappingDto := dto.NewCreateMapping(
 		accId,
 		hostnamePtr,
 		publicPort,
@@ -88,11 +88,11 @@ func AddMappingController(c echo.Context) error {
 	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 
-	err = useCase.AddMapping(
+	err = useCase.CreateMapping(
 		mappingQueryRepo,
 		mappingCmdRepo,
 		containerQueryRepo,
-		addMappingDto,
+		createMappingDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
@@ -130,17 +130,17 @@ func DeleteMappingController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, "MappingDeleted")
 }
 
-// AddMappingTarget godoc
-// @Summary      AddMappingTarget
-// @Description  Add a new mapping target.
+// CreateMappingTarget godoc
+// @Summary      CreateMappingTarget
+// @Description  Create a new mapping target.
 // @Tags         mapping
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addMappingTargetDto 	  body    dto.AddMappingTarget  true  "NewMappingTarget"
-// @Success      201 {object} object{} "MappingTargetAdded"
+// @Param        createMappingTargetDto 	  body    dto.CreateMappingTarget  true  "NewMappingTarget"
+// @Success      201 {object} object{} "MappingTargetCreated"
 // @Router       /v1/mapping/target/ [post]
-func AddMappingTargetController(c echo.Context) error {
+func CreateMappingTargetController(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func AddMappingTargetController(c echo.Context) error {
 	mappingId := valueObject.NewMappingIdPanic(requestBody["mappingId"])
 	containerId := valueObject.NewContainerIdPanic(requestBody["containerId"].(string))
 
-	addTargetDto := dto.NewAddMappingTarget(
+	createTargetDto := dto.NewCreateMappingTarget(
 		mappingId,
 		containerId,
 	)
@@ -162,17 +162,17 @@ func AddMappingTargetController(c echo.Context) error {
 	mappingCmdRepo := infra.NewMappingCmdRepo(persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 
-	err = useCase.AddMappingTarget(
+	err = useCase.CreateMappingTarget(
 		mappingQueryRepo,
 		mappingCmdRepo,
 		containerQueryRepo,
-		addTargetDto,
+		createTargetDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	return apiHelper.ResponseWrapper(c, http.StatusCreated, "MappingTargetAdded")
+	return apiHelper.ResponseWrapper(c, http.StatusCreated, "MappingTargetCreated")
 }
 
 // DeleteMappingTarget godoc

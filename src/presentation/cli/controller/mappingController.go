@@ -38,7 +38,7 @@ func (controller *MappingController) GetMappings() *cobra.Command {
 	return cmd
 }
 
-func (controller *MappingController) AddMapping() *cobra.Command {
+func (controller *MappingController) CreateMapping() *cobra.Command {
 	var accIdUint uint64
 	var hostnameStr string
 	var publicPortUint uint64
@@ -46,8 +46,8 @@ func (controller *MappingController) AddMapping() *cobra.Command {
 	var targetsSlice []string
 
 	cmd := &cobra.Command{
-		Use:   "add",
-		Short: "AddMapping",
+		Use:   "create",
+		Short: "CreateMapping",
 		Run: func(cmd *cobra.Command, args []string) {
 			accId := valueObject.NewAccountIdPanic(accIdUint)
 			var hostnamePtr *valueObject.Fqdn
@@ -72,7 +72,7 @@ func (controller *MappingController) AddMapping() *cobra.Command {
 				}
 				targets = append(targets, containerId)
 			}
-			addMappingDto := dto.NewAddMapping(
+			createMappingDto := dto.NewCreateMapping(
 				accId,
 				hostnamePtr,
 				publicPort,
@@ -84,17 +84,17 @@ func (controller *MappingController) AddMapping() *cobra.Command {
 			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
 
-			err := useCase.AddMapping(
+			err := useCase.CreateMapping(
 				mappingQueryRepo,
 				mappingCmdRepo,
 				containerQueryRepo,
-				addMappingDto,
+				createMappingDto,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			cliHelper.ResponseWrapper(true, "MappingAdded")
+			cliHelper.ResponseWrapper(true, "MappingCreated")
 		},
 	}
 	cmd.Flags().Uint64VarP(&accIdUint, "acc-id", "a", 0, "AccountId")
@@ -144,13 +144,13 @@ func (controller *MappingController) DeleteMapping() *cobra.Command {
 	return cmd
 }
 
-func (controller *MappingController) AddMappingTarget() *cobra.Command {
+func (controller *MappingController) CreateMappingTarget() *cobra.Command {
 	var mappingIdUint uint64
 	var targetStr string
 
 	cmd := &cobra.Command{
-		Use:   "add",
-		Short: "AddMappingTarget",
+		Use:   "create",
+		Short: "CreateMappingTarget",
 		Run: func(cmd *cobra.Command, args []string) {
 			mappingId := valueObject.NewMappingIdPanic(mappingIdUint)
 			target, err := valueObject.NewContainerId(targetStr)
@@ -158,7 +158,7 @@ func (controller *MappingController) AddMappingTarget() *cobra.Command {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
 
-			addTargetDto := dto.NewAddMappingTarget(
+			createTargetDto := dto.NewCreateMappingTarget(
 				mappingId,
 				target,
 			)
@@ -167,11 +167,11 @@ func (controller *MappingController) AddMappingTarget() *cobra.Command {
 			mappingCmdRepo := infra.NewMappingCmdRepo(controller.persistentDbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
 
-			err = useCase.AddMappingTarget(
+			err = useCase.CreateMappingTarget(
 				mappingQueryRepo,
 				mappingCmdRepo,
 				containerQueryRepo,
-				addTargetDto,
+				createTargetDto,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())

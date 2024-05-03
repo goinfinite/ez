@@ -106,19 +106,19 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 	), nil
 }
 
-func (Mapping) AddDtoToModel(addDto dto.AddMapping) Mapping {
+func (Mapping) CreateDtoToModel(createDto dto.CreateMapping) Mapping {
 	var hostnamePtr *string
-	if addDto.Hostname != nil {
-		hostnameStr := addDto.Hostname.String()
+	if createDto.Hostname != nil {
+		hostnameStr := createDto.Hostname.String()
 		hostnamePtr = &hostnameStr
 	}
 
 	return NewMapping(
 		0,
-		uint(addDto.AccountId.Get()),
+		uint(createDto.AccountId.Get()),
 		hostnamePtr,
-		uint(addDto.PublicPort.Get()),
-		addDto.Protocol.String(),
+		uint(createDto.PublicPort.Get()),
+		createDto.Protocol.String(),
 		[]MappingTarget{},
 		time.Now(),
 		time.Now(),
