@@ -4,8 +4,9 @@ import (
 	"errors"
 	"strings"
 
+	"slices"
+
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
-	"golang.org/x/exp/slices"
 )
 
 type ContainerRestartPolicy string

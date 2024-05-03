@@ -16,7 +16,6 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.2
 	golang.org/x/crypto v0.14.0
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/term v0.13.0
 	gorm.io/gorm v1.25.5
 )
