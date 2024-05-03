@@ -51,11 +51,11 @@ func (controller *MappingController) Create(c echo.Context) error {
 		return err
 	}
 
-	containerIds := []valueObject.ContainerId{}
 	if requestBody["containerId"] != nil {
 		requestBody["containerIds"] = requestBody["containerId"]
 	}
 
+	containerIds := []valueObject.ContainerId{}
 	if requestBody["containerIds"] != nil {
 		_, isContainerIdsString := requestBody["containerIds"].(string)
 		if isContainerIdsString {
@@ -77,6 +77,7 @@ func (controller *MappingController) Create(c echo.Context) error {
 			containerIds = append(containerIds, containerId)
 		}
 	}
+	requestBody["containerIds"] = containerIds
 
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.mappingService.Create(requestBody),
