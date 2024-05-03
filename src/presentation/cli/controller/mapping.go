@@ -7,23 +7,26 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
+	"github.com/speedianet/control/src/presentation/service"
 	"github.com/spf13/cobra"
 )
 
 type MappingController struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	mappingService *service.MappingService
 }
 
 func NewMappingController(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *MappingController {
-	return &MappingController{persistentDbSvc: persistentDbSvc}
+	return &MappingController{
+		mappingService: service.NewMappingService(persistentDbSvc),
+	}
 }
 
-func (controller *MappingController) GetMappings() *cobra.Command {
+func (controller *MappingController) Read() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "GetMappings",
+		Short: "ReadMappings",
 		Run: func(cmd *cobra.Command, args []string) {
 			mappingQueryRepo := infra.NewMappingQueryRepo(controller.persistentDbSvc)
 			mappingsList, err := useCase.GetMappings(mappingQueryRepo)
@@ -38,7 +41,7 @@ func (controller *MappingController) GetMappings() *cobra.Command {
 	return cmd
 }
 
-func (controller *MappingController) CreateMapping() *cobra.Command {
+func (controller *MappingController) Create() *cobra.Command {
 	var accIdUint uint64
 	var hostnameStr string
 	var publicPortUint uint64
@@ -114,7 +117,7 @@ func (controller *MappingController) CreateMapping() *cobra.Command {
 	return cmd
 }
 
-func (controller *MappingController) DeleteMapping() *cobra.Command {
+func (controller *MappingController) Delete() *cobra.Command {
 	var mappingIdUint uint64
 
 	cmd := &cobra.Command{
@@ -144,7 +147,7 @@ func (controller *MappingController) DeleteMapping() *cobra.Command {
 	return cmd
 }
 
-func (controller *MappingController) CreateMappingTarget() *cobra.Command {
+func (controller *MappingController) CreateTarget() *cobra.Command {
 	var mappingIdUint uint64
 	var targetStr string
 
@@ -194,7 +197,7 @@ func (controller *MappingController) CreateMappingTarget() *cobra.Command {
 	return cmd
 }
 
-func (controller *MappingController) DeleteMappingTarget() *cobra.Command {
+func (controller *MappingController) DeleteTarget() *cobra.Command {
 	var targetIdUint uint64
 
 	cmd := &cobra.Command{

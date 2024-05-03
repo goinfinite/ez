@@ -694,7 +694,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "List mapping.",
+                "description": "List mappings.",
                 "consumes": [
                     "application/json"
                 ],
@@ -704,7 +704,7 @@ const docTemplate = `{
                 "tags": [
                     "mapping"
                 ],
-                "summary": "GetMappings",
+                "summary": "ReadMappings",
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -944,7 +944,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: List mapping.
+      description: List mappings.
       produces:
       - application/json
       responses:
@@ -956,7 +956,7 @@ paths:
             type: array
       security:
       - Bearer: []
-      summary: GetMappings
+      summary: ReadMappings
       tags:
       - mapping
     post:
