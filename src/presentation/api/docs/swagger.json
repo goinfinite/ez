@@ -1062,14 +1062,17 @@
                 "matchPattern": {
                     "type": "string"
                 },
-                "path": {
-                    "type": "string"
-                },
                 "protocol": {
                     "type": "string"
                 },
                 "publicPort": {
                     "type": "integer"
+                },
+                "sourcePath": {
+                    "type": "string"
+                },
+                "targetPath": {
+                    "type": "string"
                 }
             }
         },
@@ -1081,6 +1084,9 @@
                 },
                 "mappingId": {
                     "type": "integer"
+                },
+                "path": {
+                    "type": "string"
                 }
             }
         },
@@ -1370,6 +1376,9 @@
                 },
                 "mappingId": {
                     "type": "integer"
+                },
+                "path": {
+                    "type": "string"
                 }
             }
         },

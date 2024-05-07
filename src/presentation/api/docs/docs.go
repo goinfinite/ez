@@ -1069,14 +1069,17 @@ const docTemplate = `{
                 "matchPattern": {
                     "type": "string"
                 },
-                "path": {
-                    "type": "string"
-                },
                 "protocol": {
                     "type": "string"
                 },
                 "publicPort": {
                     "type": "integer"
+                },
+                "sourcePath": {
+                    "type": "string"
+                },
+                "targetPath": {
+                    "type": "string"
                 }
             }
         },
@@ -1088,6 +1091,9 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
+                },
+                "path": {
+                    "type": "string"
                 }
             }
         },
@@ -1377,6 +1383,9 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
+                },
+                "path": {
+                    "type": "string"
                 }
             }
         },
