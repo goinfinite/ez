@@ -3,7 +3,6 @@ package dbModel
 import (
 	"time"
 
-	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
@@ -130,37 +129,4 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		createdAt,
 		updatedAt,
 	), nil
-}
-
-func (Mapping) CreateDtoToModel(createDto dto.CreateMapping) Mapping {
-	var hostnamePtr *string
-	if createDto.Hostname != nil {
-		hostnameStr := createDto.Hostname.String()
-		hostnamePtr = &hostnameStr
-	}
-
-	var sourcePathPtr *string
-	if createDto.SourcePath != nil {
-		sourcePathStr := createDto.SourcePath.String()
-		sourcePathPtr = &sourcePathStr
-	}
-
-	var matchPatternPtr *string
-	if createDto.MatchPattern != nil {
-		matchPatternStr := createDto.MatchPattern.String()
-		matchPatternPtr = &matchPatternStr
-	}
-
-	return NewMapping(
-		0,
-		uint(createDto.AccountId.Get()),
-		hostnamePtr,
-		uint(createDto.PublicPort.Get()),
-		createDto.Protocol.String(),
-		sourcePathPtr,
-		matchPatternPtr,
-		[]MappingTarget{},
-		time.Now(),
-		time.Now(),
-	)
 }

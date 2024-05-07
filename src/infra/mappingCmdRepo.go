@@ -5,6 +5,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -34,12 +35,44 @@ func NewMappingCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingCm
 func (repo *MappingCmdRepo) Create(createDto dto.CreateMapping) (valueObject.MappingId, error) {
 	var mappingId valueObject.MappingId
 
-	mappingModel := dbModel.Mapping{}.CreateDtoToModel(createDto)
+	var hostnamePtr *string
+	if createDto.Hostname != nil {
+		hostnameStr := createDto.Hostname.String()
+		hostnamePtr = &hostnameStr
+	}
+
+	var sourcePathPtr *string
+	if createDto.SourcePath != nil {
+		sourcePathStr := createDto.SourcePath.String()
+		sourcePathPtr = &sourcePathStr
+	}
+
+	var matchPatternPtr *string
+	if createDto.MatchPattern != nil {
+		matchPatternStr := createDto.MatchPattern.String()
+		matchPatternPtr = &matchPatternStr
+	}
+
+	mappingModel := dbModel.NewMapping(
+		0,
+		uint(createDto.AccountId.Get()),
+		hostnamePtr,
+		uint(createDto.PublicPort.Get()),
+		createDto.Protocol.String(),
+		sourcePathPtr,
+		matchPatternPtr,
+		[]dbModel.MappingTarget{},
+		time.Now(),
+		time.Now(),
+	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&mappingModel)
 	if createResult.Error != nil {
 		return mappingId, createResult.Error
 	}
+
+	// FYI: adding target requires business logic that is laid out in the use case.
+	// Although the target information is on the createDto, it is not used here.
 
 	return valueObject.NewMappingId(mappingModel.ID)
 }
