@@ -68,7 +68,8 @@ func DeleteContainer(
 	accCmdRepo repository.AccCmdRepo,
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
-	accId valueObject.AccountId,
+	containerProxyCmdRepo repository.ContainerProxyCmdRepo,
+	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
 	_, err := containerQueryRepo.GetById(containerId)
@@ -82,7 +83,13 @@ func DeleteContainer(
 		return err
 	}
 
-	err = containerCmdRepo.Delete(accId, containerId)
+	err = containerProxyCmdRepo.Delete(containerId)
+	if err != nil {
+		log.Printf("DeleteContainerProxyError: %s", err)
+		return errors.New("DeleteContainerProxyInfraError")
+	}
+
+	err = containerCmdRepo.Delete(accountId, containerId)
 	if err != nil {
 		log.Printf("DeleteContainerError: %s", err)
 		return errors.New("DeleteContainerInfraError")
@@ -90,7 +97,7 @@ func DeleteContainer(
 
 	log.Printf("ContainerId '%v' deleted.", containerId)
 
-	err = accCmdRepo.UpdateQuotaUsage(accId)
+	err = accCmdRepo.UpdateQuotaUsage(accountId)
 	if err != nil {
 		log.Printf("UpdateAccountQuotaError: %s", err)
 		return errors.New("UpdateAccountQuotaError")
