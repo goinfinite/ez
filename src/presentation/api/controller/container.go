@@ -62,7 +62,7 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 // @Param        containerId	path	string	true	"ContainerId"
 // @Param        shouldRedirect	query	bool	false	"ShouldRedirect (default/empty is true)"
 // @Success      200 {object} valueObject.AccessTokenValue "If shouldRedirect is set to false, the updated session token is returned."
-// @Success      302 {string} string "The redirect to Speedia OS dashboard (/_/container/{containerId}/)."
+// @Success      302 {string} string "A redirect to Speedia OS dashboard (:1618/{containerId}/)."
 // @Failure      500 {string} string "Container is not found, not running or isn't Speedia OS."
 // @Router       /v1/container/auto-login/{containerId}/ [get]
 func (controller *ContainerController) AutoLogin(c echo.Context) error {
@@ -97,7 +97,9 @@ func (controller *ContainerController) AutoLogin(c echo.Context) error {
 		return apiHelper.ResponseWrapper(c, http.StatusOK, accessToken)
 	}
 
-	redirectUrl := "/_/container/" + c.Param("containerId") + "/"
+	currentHost := c.Request().Host
+	redirectUrl := "https://" + currentHost + ":1618/" + c.Param("containerId") + "/"
+
 	accessTokenCookie := new(http.Cookie)
 	accessTokenCookie.Name = "os-access-token"
 	accessTokenCookie.Value = accessToken.String()

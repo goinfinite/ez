@@ -352,7 +352,7 @@ const docTemplate = `{
                         }
                     },
                     "302": {
-                        "description": "The redirect to Speedia OS dashboard (/_/container/{containerId}/).",
+                        "description": "A redirect to Speedia OS dashboard (:1618/{containerId}/).",
                         "schema": {
                             "type": "string"
                         }
