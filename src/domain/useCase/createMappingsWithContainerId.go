@@ -46,9 +46,6 @@ func CreateMappingsWithContainerId(
 			&containerEntity.Hostname,
 			portBinding.PublicPort,
 			portBinding.Protocol,
-			nil,
-			nil,
-			nil,
 			[]valueObject.ContainerId{containerId},
 		)
 		err = CreateMapping(

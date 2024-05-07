@@ -1066,20 +1066,11 @@ const docTemplate = `{
                 "hostname": {
                     "type": "string"
                 },
-                "matchPattern": {
-                    "type": "string"
-                },
                 "protocol": {
                     "type": "string"
                 },
                 "publicPort": {
                     "type": "integer"
-                },
-                "sourcePath": {
-                    "type": "string"
-                },
-                "targetPath": {
-                    "type": "string"
                 }
             }
         },
@@ -1091,9 +1082,6 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
-                },
-                "path": {
-                    "type": "string"
                 }
             }
         },
@@ -1346,12 +1334,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "matchPattern": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
                 "protocol": {
                     "type": "string"
                 },
@@ -1383,9 +1365,6 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
-                },
-                "path": {
-                    "type": "string"
                 }
             }
         },

@@ -106,16 +106,10 @@ definitions:
         type: array
       hostname:
         type: string
-      matchPattern:
-        type: string
       protocol:
         type: string
       publicPort:
         type: integer
-      sourcePath:
-        type: string
-      targetPath:
-        type: string
     type: object
   dto.CreateMappingTarget:
     properties:
@@ -123,8 +117,6 @@ definitions:
         type: string
       mappingId:
         type: integer
-      path:
-        type: string
     type: object
   dto.Login:
     properties:
@@ -289,10 +281,6 @@ definitions:
         type: string
       id:
         type: integer
-      matchPattern:
-        type: string
-      path:
-        type: string
       protocol:
         type: string
       publicPort:
@@ -314,8 +302,6 @@ definitions:
         type: integer
       mappingId:
         type: integer
-      path:
-        type: string
     type: object
   entity.O11yOverview:
     properties:

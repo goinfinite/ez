@@ -1059,20 +1059,11 @@
                 "hostname": {
                     "type": "string"
                 },
-                "matchPattern": {
-                    "type": "string"
-                },
                 "protocol": {
                     "type": "string"
                 },
                 "publicPort": {
                     "type": "integer"
-                },
-                "sourcePath": {
-                    "type": "string"
-                },
-                "targetPath": {
-                    "type": "string"
                 }
             }
         },
@@ -1084,9 +1075,6 @@
                 },
                 "mappingId": {
                     "type": "integer"
-                },
-                "path": {
-                    "type": "string"
                 }
             }
         },
@@ -1339,12 +1327,6 @@
                 "id": {
                     "type": "integer"
                 },
-                "matchPattern": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
                 "protocol": {
                     "type": "string"
                 },
@@ -1376,9 +1358,6 @@
                 },
                 "mappingId": {
                     "type": "integer"
-                },
-                "path": {
-                    "type": "string"
                 }
             }
         },

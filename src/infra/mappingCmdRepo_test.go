@@ -24,9 +24,6 @@ func TestMappingCmdRepo(t *testing.T) {
 			&hostname,
 			valueObject.NewNetworkPortPanic(80),
 			valueObject.NewNetworkProtocolPanic("http"),
-			nil,
-			nil,
-			nil,
 			[]valueObject.ContainerId{},
 		)
 
@@ -54,7 +51,6 @@ func TestMappingCmdRepo(t *testing.T) {
 		createMappingTarget := dto.NewCreateMappingTarget(
 			mappingId,
 			containerId,
-			nil,
 		)
 
 		err = mappingCmdRepo.CreateTarget(createMappingTarget)

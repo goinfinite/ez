@@ -41,26 +41,12 @@ func (repo *MappingCmdRepo) Create(createDto dto.CreateMapping) (valueObject.Map
 		hostnamePtr = &hostnameStr
 	}
 
-	var sourcePathPtr *string
-	if createDto.SourcePath != nil {
-		sourcePathStr := createDto.SourcePath.String()
-		sourcePathPtr = &sourcePathStr
-	}
-
-	var matchPatternPtr *string
-	if createDto.MatchPattern != nil {
-		matchPatternStr := createDto.MatchPattern.String()
-		matchPatternPtr = &matchPatternStr
-	}
-
 	mappingModel := dbModel.NewMapping(
 		0,
 		uint(createDto.AccountId.Get()),
 		hostnamePtr,
 		uint(createDto.PublicPort.Get()),
 		createDto.Protocol.String(),
-		sourcePathPtr,
-		matchPatternPtr,
 		[]dbModel.MappingTarget{},
 		time.Now(),
 		time.Now(),
@@ -312,18 +298,11 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		return err
 	}
 
-	var pathPtr *string
-	if createDto.Path != nil {
-		path := createDto.Path.String()
-		pathPtr = &path
-	}
-
 	targetModel := dbModel.NewMappingTarget(
 		0,
 		uint(createDto.MappingId.Get()),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
-		pathPtr,
 	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)

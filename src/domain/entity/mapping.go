@@ -3,16 +3,14 @@ package entity
 import "github.com/speedianet/control/src/domain/valueObject"
 
 type Mapping struct {
-	Id           valueObject.MappingId            `json:"id"`
-	AccountId    valueObject.AccountId            `json:"accountId"`
-	Hostname     *valueObject.Fqdn                `json:"hostname"`
-	PublicPort   valueObject.NetworkPort          `json:"publicPort"`
-	Protocol     valueObject.NetworkProtocol      `json:"protocol"`
-	Path         *valueObject.MappingPath         `json:"path"`
-	MatchPattern *valueObject.MappingMatchPattern `json:"matchPattern"`
-	Targets      []MappingTarget                  `json:"targets"`
-	CreatedAt    valueObject.UnixTime             `json:"createdAt"`
-	UpdatedAt    valueObject.UnixTime             `json:"updatedAt"`
+	Id         valueObject.MappingId       `json:"id"`
+	AccountId  valueObject.AccountId       `json:"accountId"`
+	Hostname   *valueObject.Fqdn           `json:"hostname"`
+	PublicPort valueObject.NetworkPort     `json:"publicPort"`
+	Protocol   valueObject.NetworkProtocol `json:"protocol"`
+	Targets    []MappingTarget             `json:"targets"`
+	CreatedAt  valueObject.UnixTime        `json:"createdAt"`
+	UpdatedAt  valueObject.UnixTime        `json:"updatedAt"`
 }
 
 func NewMapping(
@@ -21,22 +19,18 @@ func NewMapping(
 	hostname *valueObject.Fqdn,
 	publicPort valueObject.NetworkPort,
 	protocol valueObject.NetworkProtocol,
-	path *valueObject.MappingPath,
-	matchPattern *valueObject.MappingMatchPattern,
 	targets []MappingTarget,
 	createdAt valueObject.UnixTime,
 	updatedAt valueObject.UnixTime,
 ) Mapping {
 	return Mapping{
-		Id:           id,
-		AccountId:    accountId,
-		Hostname:     hostname,
-		PublicPort:   publicPort,
-		Protocol:     protocol,
-		Path:         path,
-		MatchPattern: matchPattern,
-		Targets:      targets,
-		CreatedAt:    createdAt,
-		UpdatedAt:    updatedAt,
+		Id:         id,
+		AccountId:  accountId,
+		Hostname:   hostname,
+		PublicPort: publicPort,
+		Protocol:   protocol,
+		Targets:    targets,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	}
 }

@@ -12,7 +12,6 @@ type MappingTarget struct {
 	MappingID         uint
 	ContainerId       string
 	ContainerHostname string
-	Path              *string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
@@ -26,13 +25,11 @@ func NewMappingTarget(
 	mappingId uint,
 	containerId string,
 	containerHostname string,
-	path *string,
 ) MappingTarget {
 	targetModel := MappingTarget{
 		MappingID:         mappingId,
 		ContainerId:       containerId,
 		ContainerHostname: containerHostname,
-		Path:              path,
 	}
 
 	if id != 0 {
@@ -65,20 +62,10 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 		return mappingTarget, err
 	}
 
-	var pathPtr *valueObject.MappingPath
-	if model.Path != nil {
-		path, err := valueObject.NewMappingPath(*model.Path)
-		if err != nil {
-			return mappingTarget, err
-		}
-		pathPtr = &path
-	}
-
 	return entity.NewMappingTarget(
 		id,
 		mappingId,
 		containerId,
 		containerHostname,
-		pathPtr,
 	), nil
 }

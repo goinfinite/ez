@@ -8,16 +8,14 @@ import (
 )
 
 type Mapping struct {
-	ID           uint `gorm:"primarykey"`
-	AccountID    uint
-	Hostname     *string
-	PublicPort   uint
-	Protocol     string
-	Path         *string
-	MatchPattern *string
-	Targets      []MappingTarget
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID         uint `gorm:"primarykey"`
+	AccountID  uint
+	Hostname   *string
+	PublicPort uint
+	Protocol   string
+	Targets    []MappingTarget
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (Mapping) TableName() string {
@@ -30,22 +28,18 @@ func NewMapping(
 	hostname *string,
 	publicPort uint,
 	protocol string,
-	path *string,
-	matchPattern *string,
 	targets []MappingTarget,
 	createdAt time.Time,
 	updatedAt time.Time,
 ) Mapping {
 	mappingModel := Mapping{
-		AccountID:    accountId,
-		Hostname:     hostname,
-		PublicPort:   publicPort,
-		Protocol:     protocol,
-		Path:         path,
-		MatchPattern: matchPattern,
-		Targets:      targets,
-		CreatedAt:    createdAt,
-		UpdatedAt:    updatedAt,
+		AccountID:  accountId,
+		Hostname:   hostname,
+		PublicPort: publicPort,
+		Protocol:   protocol,
+		Targets:    targets,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	}
 
 	if id != 0 {
@@ -87,24 +81,6 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		return mapping, err
 	}
 
-	var pathPtr *valueObject.MappingPath
-	if model.Path != nil {
-		path, err := valueObject.NewMappingPath(*model.Path)
-		if err != nil {
-			return mapping, err
-		}
-		pathPtr = &path
-	}
-
-	var matchPatternPtr *valueObject.MappingMatchPattern
-	if model.MatchPattern != nil {
-		matchPattern, err := valueObject.NewMappingMatchPattern(*model.MatchPattern)
-		if err != nil {
-			return mapping, err
-		}
-		matchPatternPtr = &matchPattern
-	}
-
 	var targets []entity.MappingTarget
 	for _, target := range model.Targets {
 		targetEntity, err := target.ToEntity()
@@ -123,8 +99,6 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		hostnamePtr,
 		port,
 		protocol,
-		pathPtr,
-		matchPatternPtr,
 		targets,
 		createdAt,
 		updatedAt,
