@@ -90,5 +90,5 @@ func (vo ContainerImageAddress) GetImageTag() (RegistryImageTag, error) {
 }
 
 func (vo ContainerImageAddress) IsSpeediaOs() bool {
-	return strings.Contains(vo.String(), "speedia/os")
+	return strings.Contains(vo.String(), "speedianet/os")
 }
