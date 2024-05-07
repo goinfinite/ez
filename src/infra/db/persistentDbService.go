@@ -92,6 +92,7 @@ func (dbSvc PersistentDatabaseService) dbMigrate() error {
 		&dbModel.Container{},
 		&dbModel.ContainerPortBinding{},
 		&dbModel.ContainerProfile{},
+		&dbModel.ContainerProxy{},
 		&dbModel.Mapping{},
 		&dbModel.MappingTarget{},
 		&dbModel.LicenseInfo{},
