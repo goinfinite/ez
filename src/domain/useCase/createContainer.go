@@ -16,6 +16,7 @@ func CreateContainer(
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
+	containerProxyCmdRepo repository.ContainerProxyCmdRepo,
 	createDto dto.CreateContainer,
 ) error {
 	err := CheckAccountQuota(
@@ -55,6 +56,14 @@ func CreateContainer(
 		createDto.AccountId.String(),
 	)
 
+	if createDto.ImageAddress.IsSpeediaOs() {
+		err = containerProxyCmdRepo.Create(containerId)
+		if err != nil {
+			log.Printf("CreateContainerProxyError: %s", err)
+			return errors.New("CreateContainerProxyInfraError")
+		}
+	}
+
 	if !createDto.AutoCreateMappings {
 		return nil
 	}
@@ -63,6 +72,7 @@ func CreateContainer(
 		containerQueryRepo,
 		mappingQueryRepo,
 		mappingCmdRepo,
+		containerProxyCmdRepo,
 		containerId,
 	)
 }

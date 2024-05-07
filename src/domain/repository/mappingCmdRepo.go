@@ -13,6 +13,4 @@ type MappingCmdRepo interface {
 		mappingId valueObject.MappingId,
 		targetId valueObject.MappingTargetId,
 	) error
-
-	CreateContainerProxy(containerId valueObject.ContainerId) error
 }

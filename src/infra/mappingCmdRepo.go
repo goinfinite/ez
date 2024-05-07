@@ -371,9 +371,3 @@ func (repo *MappingCmdRepo) DeleteTarget(
 
 	return repo.updateMappingFile(mappingId)
 }
-
-func (repo *MappingCmdRepo) CreateContainerProxy(
-	containerId valueObject.ContainerId,
-) error {
-	return nil
-}
