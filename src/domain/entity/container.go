@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"strings"
-
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -65,8 +63,4 @@ func NewContainer(
 
 func (container *Container) IsRunning() bool {
 	return container.Status
-}
-
-func (container *Container) IsSpeediaOs() bool {
-	return strings.Contains(container.ImageAddress.String(), "speedia/os")
 }

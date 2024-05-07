@@ -8,7 +8,7 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-const containerImgAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)?(?::(?P<port>\d{1,6}))?/?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
+const containerImageAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)?(?::(?P<port>\d{1,6}))?/?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
 
 type ContainerImageAddress string
 
@@ -21,7 +21,7 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 	stringValue = strings.TrimSpace(stringValue)
 	stringValue = strings.ToLower(stringValue)
 
-	valueParts := voHelper.FindNamedGroupsMatches(containerImgAddressRegex, stringValue)
+	valueParts := voHelper.FindNamedGroupsMatches(containerImageAddressRegex, stringValue)
 	if len(valueParts) == 0 {
 		return "", errors.New("UnknownImageAddressFormat")
 	}
@@ -38,12 +38,13 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 		return "", errors.New("ImageAddressMustContainOrgAndImageName")
 	}
 
-	imageAddress := ContainerImageAddress(stringValue)
-	if !imageAddress.isValid() {
+	re := regexp.MustCompile(containerImageAddressRegex)
+	isValid := re.MatchString(stringValue)
+	if !isValid {
 		return "", errors.New("InvalidContainerImageAddress")
 	}
 
-	return imageAddress, nil
+	return ContainerImageAddress(stringValue), nil
 }
 
 func NewContainerImageAddressPanic(value string) ContainerImageAddress {
@@ -54,25 +55,20 @@ func NewContainerImageAddressPanic(value string) ContainerImageAddress {
 	return imageAddress
 }
 
-func (imageAddress ContainerImageAddress) isValid() bool {
-	re := regexp.MustCompile(containerImgAddressRegex)
-	return re.MatchString(string(imageAddress))
+func (vo ContainerImageAddress) String() string {
+	return string(vo)
 }
 
-func (imageAddress ContainerImageAddress) String() string {
-	return string(imageAddress)
+func (vo ContainerImageAddress) getParts() map[string]string {
+	return voHelper.FindNamedGroupsMatches(containerImageAddressRegex, string(vo))
 }
 
-func (imageAddress ContainerImageAddress) getParts() map[string]string {
-	return voHelper.FindNamedGroupsMatches(containerImgAddressRegex, string(imageAddress))
+func (vo ContainerImageAddress) GetFqdn() (Fqdn, error) {
+	return NewFqdn(vo.getParts()["fqdn"])
 }
 
-func (imageAddress ContainerImageAddress) GetFqdn() (Fqdn, error) {
-	return NewFqdn(imageAddress.getParts()["fqdn"])
-}
-
-func (imageAddress ContainerImageAddress) GetOrgName() (RegistryPublisherName, error) {
-	orgNameStr, exists := imageAddress.getParts()["orgName"]
+func (vo ContainerImageAddress) GetOrgName() (RegistryPublisherName, error) {
+	orgNameStr, exists := vo.getParts()["orgName"]
 	if !exists || orgNameStr == "" || orgNameStr == "_" {
 		orgNameStr = "library"
 	}
@@ -80,15 +76,19 @@ func (imageAddress ContainerImageAddress) GetOrgName() (RegistryPublisherName, e
 	return NewRegistryPublisherName(orgNameStr)
 }
 
-func (imageAddress ContainerImageAddress) GetImageName() (RegistryImageName, error) {
-	return NewRegistryImageName(imageAddress.getParts()["imageName"])
+func (vo ContainerImageAddress) GetImageName() (RegistryImageName, error) {
+	return NewRegistryImageName(vo.getParts()["imageName"])
 }
 
-func (imageAddress ContainerImageAddress) GetImageTag() (RegistryImageTag, error) {
-	imageTagStr, exists := imageAddress.getParts()["imageTag"]
+func (vo ContainerImageAddress) GetImageTag() (RegistryImageTag, error) {
+	imageTagStr, exists := vo.getParts()["imageTag"]
 	if !exists || imageTagStr == "" {
 		imageTagStr = "latest"
 	}
 
 	return NewRegistryImageTag(imageTagStr)
+}
+
+func (vo ContainerImageAddress) IsSpeediaOs() bool {
+	return strings.Contains(vo.String(), "speedia/os")
 }
