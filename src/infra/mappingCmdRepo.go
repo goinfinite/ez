@@ -279,11 +279,18 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		return err
 	}
 
+	var pathPtr *string
+	if createDto.Path != nil {
+		path := createDto.Path.String()
+		pathPtr = &path
+	}
+
 	targetModel := dbModel.NewMappingTarget(
 		0,
 		uint(createDto.MappingId.Get()),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
+		pathPtr,
 	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)

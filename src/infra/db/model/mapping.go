@@ -139,10 +139,10 @@ func (Mapping) CreateDtoToModel(createDto dto.CreateMapping) Mapping {
 		hostnamePtr = &hostnameStr
 	}
 
-	var pathPtr *string
-	if createDto.Path != nil {
-		pathStr := createDto.Path.String()
-		pathPtr = &pathStr
+	var sourcePathPtr *string
+	if createDto.SourcePath != nil {
+		sourcePathStr := createDto.SourcePath.String()
+		sourcePathPtr = &sourcePathStr
 	}
 
 	var matchPatternPtr *string
@@ -157,7 +157,7 @@ func (Mapping) CreateDtoToModel(createDto dto.CreateMapping) Mapping {
 		hostnamePtr,
 		uint(createDto.PublicPort.Get()),
 		createDto.Protocol.String(),
-		pathPtr,
+		sourcePathPtr,
 		matchPatternPtr,
 		[]MappingTarget{},
 		time.Now(),

@@ -66,13 +66,13 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
-	var pathPtr *valueObject.MappingPath
-	if _, exists := input["path"]; exists {
-		path, err := valueObject.NewMappingPath(input["path"])
+	var sourcePathPtr *valueObject.MappingPath
+	if _, exists := input["sourcePath"]; exists {
+		sourcePath, err := valueObject.NewMappingPath(input["sourcePath"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
-		pathPtr = &path
+		sourcePathPtr = &sourcePath
 	}
 
 	var matchPatternPtr *valueObject.MappingMatchPattern
@@ -82,6 +82,15 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 			return NewServiceOutput(UserError, err.Error())
 		}
 		matchPatternPtr = &matchPattern
+	}
+
+	var targetPathPtr *valueObject.MappingPath
+	if _, exists := input["targetPath"]; exists {
+		targetPath, err := valueObject.NewMappingPath(input["targetPath"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		targetPathPtr = &targetPath
 	}
 
 	containerIds, assertOk := input["containerIds"].([]valueObject.ContainerId)
@@ -94,8 +103,9 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 		hostnamePtr,
 		publicPort,
 		protocol,
-		pathPtr,
+		sourcePathPtr,
 		matchPatternPtr,
+		targetPathPtr,
 		containerIds,
 	)
 
@@ -162,9 +172,19 @@ func (service *MappingService) CreateTarget(input map[string]interface{}) Servic
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	var pathPtr *valueObject.MappingPath
+	if _, exists := input["path"]; exists {
+		path, err := valueObject.NewMappingPath(input["path"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		pathPtr = &path
+	}
+
 	createTargetDto := dto.NewCreateMappingTarget(
 		mappingId,
 		containerId,
+		pathPtr,
 	)
 
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)

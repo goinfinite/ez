@@ -37,8 +37,9 @@ func (controller *MappingController) Create() *cobra.Command {
 	var hostnameStr string
 	var publicPortUint uint64
 	var networkProtocolStr string
-	var pathStr string
+	var sourcePathStr string
 	var matchPattern string
+	var targetPathStr string
 	var containerIdStrSlice []string
 
 	cmd := &cobra.Command{
@@ -58,12 +59,16 @@ func (controller *MappingController) Create() *cobra.Command {
 				requestBody["protocol"] = networkProtocolStr
 			}
 
-			if pathStr != "" {
-				requestBody["path"] = pathStr
+			if sourcePathStr != "" {
+				requestBody["sourcePath"] = sourcePathStr
 			}
 
 			if matchPattern != "" {
 				requestBody["matchPattern"] = matchPattern
+			}
+
+			if targetPathStr != "" {
+				requestBody["targetPath"] = targetPathStr
 			}
 
 			containerIds := []valueObject.ContainerId{}
@@ -87,8 +92,9 @@ func (controller *MappingController) Create() *cobra.Command {
 	cmd.Flags().Uint64VarP(&publicPortUint, "port", "p", 0, "PublicPort")
 	cmd.MarkFlagRequired("port")
 	cmd.Flags().StringVarP(&networkProtocolStr, "protocol", "l", "", "NetworkProtocol")
-	cmd.Flags().StringVarP(&pathStr, "path", "t", "", "Path")
+	cmd.Flags().StringVarP(&sourcePathStr, "source-path", "s", "", "SourcePath")
 	cmd.Flags().StringVarP(&matchPattern, "match-pattern", "m", "", "MatchPattern (begins-with|contains|ends-with)")
+	cmd.Flags().StringVarP(&targetPathStr, "target-path", "t", "", "TargetPath")
 	cmd.Flags().StringSliceVarP(
 		&containerIdStrSlice, "container-ids", "c", []string{}, "ContainerIds",
 	)
@@ -121,6 +127,7 @@ func (controller *MappingController) Delete() *cobra.Command {
 func (controller *MappingController) CreateTarget() *cobra.Command {
 	var mappingIdUint uint64
 	var containerIdStr string
+	var pathStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -129,6 +136,10 @@ func (controller *MappingController) CreateTarget() *cobra.Command {
 			requestBody := map[string]interface{}{
 				"mappingId":   mappingIdUint,
 				"containerId": containerIdStr,
+			}
+
+			if pathStr != "" {
+				requestBody["path"] = pathStr
 			}
 
 			cliHelper.ServiceResponseWrapper(
@@ -141,6 +152,7 @@ func (controller *MappingController) CreateTarget() *cobra.Command {
 	cmd.MarkFlagRequired("mapping-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
+	cmd.Flags().StringVarP(&pathStr, "path", "p", "", "Path")
 	return cmd
 }
 

@@ -54,6 +54,7 @@ func CreateMapping(
 		addTargetDto := dto.NewCreateMappingTarget(
 			mappingId,
 			containerId,
+			nil,
 		)
 
 		err = CreateMappingTarget(
