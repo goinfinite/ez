@@ -545,6 +545,21 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 			return portBindings, err
 		}
 
+		if !protocolSent {
+			return servicePortBindings, nil
+		}
+
+		protocol, err := NewNetworkProtocol(portBindingParts["protocol"])
+		if err != nil {
+			return servicePortBindings, err
+		}
+
+		for _, servicePortBinding := range servicePortBindings {
+			if servicePortBinding.Protocol.String() == "tcp" {
+				servicePortBinding.Protocol = protocol
+			}
+		}
+
 		return servicePortBindings, nil
 	}
 
@@ -566,10 +581,8 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		serviceName = likelyPortBinding.ServiceName
 	}
 
-	likelyProtocol := GuessNetworkProtocolByPort(publicPort)
-	isLikelyProtocolGeneric := likelyProtocol.String() == "tcp"
-	protocol := likelyProtocol
-	if protocolSent && isLikelyProtocolGeneric {
+	protocol := GuessNetworkProtocolByPort(publicPort)
+	if protocolSent {
 		protocol, err = NewNetworkProtocol(portBindingParts["protocol"])
 		if err != nil {
 			return portBindings, err
