@@ -88,7 +88,18 @@ server {
 	server_name {{ .Hostname }} www.{{ .Hostname }};
 
 	location / {
+		{{- if eq .Protocol "http" "ws" }}
 		proxy_pass http://mapping_{{ .Id }}_backend;
+		proxy_set_header Host $host;
+		{{- end }}
+		{{- if eq .Protocol "ws" }}
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+		{{- end }}
+		{{- if eq .Protocol "grpc" }}
+		grpc_pass grpc://mapping_{{ .Id }}_backend;
+		{{- end }}
 	}
 	{{- else }}
 	proxy_pass mapping_{{ .Id }}_backend;
