@@ -2,8 +2,8 @@ package infra
 
 import (
 	"errors"
-	"html/template"
 	"strings"
+	"text/template"
 
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
@@ -54,7 +54,7 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 	location /{{ .ContainerId }}/ {
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
 	}
-	{{ end }}
+	{{- end }}
 }
 {{ range . }}
 server {
