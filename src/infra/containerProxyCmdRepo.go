@@ -50,7 +50,6 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 
 	ssl_certificate /var/speedia/pki/control.crt;
 	ssl_certificate_key /var/speedia/pki/control.key;
-
 	{{ range . }}
 	location /{{ .ContainerId }}/ {
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
