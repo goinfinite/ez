@@ -112,8 +112,7 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 		portBindingsString := portBindingVo.PrivatePort.String() +
 			":" + portBindingVo.ContainerPort.String()
 
-		protocolStr := portBindingVo.Protocol.String()
-		if protocolStr != "" && protocolStr != "tcp" {
+		if portBindingVo.Protocol.String() == "udp" {
 			portBindingsString += "/udp"
 		}
 
