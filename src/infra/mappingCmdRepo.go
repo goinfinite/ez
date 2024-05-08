@@ -2,9 +2,10 @@ package infra
 
 import (
 	"errors"
-	"os"
+	"log"
 	"slices"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -63,15 +64,74 @@ func (repo *MappingCmdRepo) Create(createDto dto.CreateMapping) (valueObject.Map
 	return valueObject.NewMappingId(mappingModel.ID)
 }
 
-func (repo *MappingCmdRepo) sslPreReadBlockFactory() (string, error) {
+func (repo *MappingCmdRepo) updateWebServerFile() error {
 	mappings, err := repo.mappingQueryRepo.Get()
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	validSslProtocolos := []string{"https", "grpcs", "wss"}
+	if len(mappings) == 0 {
+		return nil
+	}
+
+	for _, mappingEntity := range mappings {
+		fileTemplate := `upstream mapping_{{ .Id }}_backend {
+{{- range .Targets }}
+	server localhost:{{ .ContainerPrivatePort }};
+{{- end }}
+}
+
+{{- if eq .Protocol "http" "grpc" "ws" "tcp" "udp" }}
+server {
+	listen {{ .PublicPort }}{{ if eq .Protocol "udp" }}udp{{end}};
+	{{- if eq .Protocol "http" "grpc" "ws" }}
+	server_name {{ .Hostname }} www.{{ .Hostname }};
+
+	location / {
+		proxy_pass http://mapping_{{ .Id }}_backend;
+	}
+	{{- else }}
+	proxy_pass mapping_{{ .Id }}_backend;
+	{{- end }}
+}
+{{- end }}
+`
+
+		if len(mappingEntity.Targets) == 0 {
+			fileTemplate = ``
+		}
+
+		mappingIdStr := mappingEntity.Id.String()
+		templatePtr, err := template.New("mappingFile").Parse(fileTemplate)
+		if err != nil {
+			log.Printf("[%s] MappingTemplateParsingError: %s", mappingIdStr, err.Error())
+			continue
+		}
+
+		var mappingFileContent strings.Builder
+		err = templatePtr.Execute(&mappingFileContent, mappingEntity)
+		if err != nil {
+			log.Printf("[%s] MappingTemplateExecutionError: %s", mappingIdStr, err.Error())
+			continue
+		}
+
+		mappingDir := nginxStreamConfDir
+		switch mappingEntity.Protocol.String() {
+		case "http", "grpc", "ws":
+			mappingDir = nginxHttpConfDir
+		}
+
+		mappingFile := mappingDir + "/mapping-" + mappingIdStr + ".conf"
+		mappingContentStr := strings.TrimSpace(mappingFileContent.String()) + "\n"
+
+		err = infraHelper.UpdateFile(mappingFile, mappingContentStr, true)
+		if err != nil {
+			log.Printf("[%s] UpdateMappingFileError: %s", mappingIdStr, err.Error())
+		}
+	}
 
 	sslMappings := []entity.Mapping{}
+	validSslProtocolos := []string{"https", "grpcs", "wss"}
 	for _, mapping := range mappings {
 		if !slices.Contains(validSslProtocolos, mapping.Protocol.String()) {
 			continue
@@ -79,212 +139,43 @@ func (repo *MappingCmdRepo) sslPreReadBlockFactory() (string, error) {
 
 		sslMappings = append(sslMappings, mapping)
 	}
-	if len(sslMappings) == 0 {
-		return "", nil
-	}
 
-	type hostUpstream struct {
-		hostname string
-		upstream string
-	}
+	fileTemplate := `{{ range . }}
+map $ssl_preread_server_name $ssl_{{.PublicPort}}_vhost_upstream_map {
+	{{ .Hostname }} mapping_{{ .Id }}_backend;
+	www.{{ .Hostname }} mapping_{{ .Id }}_backend;
+}
 
-	publicPortUpstreamMap := map[string][]hostUpstream{}
-	for _, mapping := range sslMappings {
-		hostname := "default"
-		if mapping.Hostname != nil {
-			hostname = mapping.Hostname.String()
-		}
-
-		upstreamName := "mapping_" + mapping.Id.String() + "_backend"
-
-		publicPort := mapping.PublicPort.String()
-		publicPortUpstreamMap[publicPort] = append(
-			publicPortUpstreamMap[publicPort],
-			hostUpstream{
-				hostname: hostname,
-				upstream: upstreamName,
-			},
-		)
-	}
-
-	preReadBlock := ""
-	for hostPort, hostUpstreams := range publicPortUpstreamMap {
-		if len(hostUpstreams) == 0 {
-			continue
-		}
-
-		varName := "ssl_" + hostPort + "_vhost_upstream_map"
-		preReadBlock += "map $ssl_preread_server_name $" + varName + " {\n"
-
-		for _, hostUpstream := range hostUpstreams {
-			preReadBlock += "\t" + hostUpstream.hostname + " " + hostUpstream.upstream + ";\n"
-		}
-
-		preReadBlock += "}\n"
-
-		preReadBlock += `
 server {
-	listen      ` + hostPort + `;
-	proxy_pass  $ssl_` + hostPort + `_vhost_upstream_map;
+	listen {{ .PublicPort }};
+	proxy_pass $ssl_{{ .PublicPort }}_vhost_upstream_map;
 	ssl_preread on;
 }
-`
+{{ end }}`
+
+	if len(sslMappings) == 0 {
+		fileTemplate = ``
 	}
 
-	return preReadBlock, nil
-}
-
-func (repo *MappingCmdRepo) nginxConfigFactory(
-	mappingEntity entity.Mapping,
-) (string, error) {
-	containerIdTargetEntityMap := map[valueObject.ContainerId]entity.MappingTarget{}
-	for _, mappingTarget := range mappingEntity.Targets {
-		containerIdTargetEntityMap[mappingTarget.ContainerId] = mappingTarget
-	}
-
-	containerEntities, err := repo.containerQueryRepo.Get()
+	templatePtr, err := template.New("sslFile").Parse(fileTemplate)
 	if err != nil {
-		return "", err
+		return errors.New("SslTemplateParsingError: " + err.Error())
 	}
 
-	if len(containerEntities) == 0 {
-		return "", errors.New("NoContainersFound")
-	}
-
-	containerIdContainerEntityMap := map[valueObject.ContainerId]entity.Container{}
-	for _, containerEntity := range containerEntities {
-		containerIdContainerEntityMap[containerEntity.Id] = containerEntity
-	}
-
-	serversList := ""
-	for containerId, containerEntity := range containerIdContainerEntityMap {
-		_, isContainerTarget := containerIdTargetEntityMap[containerId]
-		if !isContainerTarget {
-			continue
-		}
-
-		for _, containerPortBinding := range containerEntity.PortBindings {
-			privatePort := containerPortBinding.PrivatePort
-			if privatePort == nil {
-				continue
-			}
-
-			if containerPortBinding.PublicPort != mappingEntity.PublicPort {
-				continue
-			}
-
-			serversList += "server localhost:" + privatePort.String() + ";\n"
-		}
-	}
-	serversList = strings.TrimSpace(serversList)
-
-	if serversList == "" {
-		return "", errors.New("UpstreamServersListEmpty")
-	}
-
-	upstreamName := "mapping_" + mappingEntity.Id.String() + "_backend"
-	upstreamBlock := `
-upstream ` + upstreamName + ` {
-	` + serversList + `
-}
-`
-
-	hostPort := mappingEntity.PublicPort.String()
-
-	serverNameLine := ``
-	if mappingEntity.Hostname != nil {
-		serverNameLine = "server_name " + mappingEntity.Hostname.String() + ";"
-	}
-
-	httpNginxConf := `
-server {
-	listen      ` + hostPort + `;
-	` + serverNameLine + `
-
-	location / {
-		proxy_pass http://` + upstreamName + `;
-	}
-}
-`
-
-	tcpNginxConf := `
-server {
-	listen      ` + hostPort + `;
-	proxy_pass ` + upstreamName + `;
-}
-`
-
-	udpNginxConf := `
-server {
-	listen      ` + hostPort + ` udp;
-	proxy_pass ` + upstreamName + `;
-}
-`
-
-	nginxConf := ""
-	switch mappingEntity.Protocol.String() {
-	case "http", "grpc", "ws":
-		nginxConf = httpNginxConf
-	case "https", "grpcs", "wss":
-		sslPreReadBlock, err := repo.sslPreReadBlockFactory()
-		if err != nil {
-			return "", err
-		}
-
-		err = infraHelper.UpdateFile(
-			nginxStreamConfDir+"/ssl_pre_read.conf",
-			sslPreReadBlock,
-			true,
-		)
-		if err != nil {
-			return "", errors.New("UpdateNginxPreReadBlockFailed: " + err.Error())
-		}
-	case "udp":
-		nginxConf = udpNginxConf
-	default:
-		nginxConf = tcpNginxConf
-	}
-
-	return strings.TrimSpace(upstreamBlock+nginxConf) + "\n", nil
-}
-
-func (repo *MappingCmdRepo) getNginxConfDirByProtocol(
-	protocol valueObject.NetworkProtocol,
-) string {
-	switch protocol.String() {
-	case "http", "grpc", "ws":
-		return nginxHttpConfDir
-	}
-
-	return nginxStreamConfDir
-}
-
-func (repo *MappingCmdRepo) updateMappingFile(mappingId valueObject.MappingId) error {
-	mappingEntity, err := repo.mappingQueryRepo.GetById(mappingId)
+	var sslFileContent strings.Builder
+	err = templatePtr.Execute(&sslFileContent, sslMappings)
 	if err != nil {
-		return err
+		return errors.New("SslTemplateExecutionError: " + err.Error())
 	}
 
-	if len(mappingEntity.Targets) == 0 {
-		return errors.New("MappingHasNoTarget")
-	}
+	fileContentStr := strings.TrimSpace(sslFileContent.String()) + "\n"
 
-	nginxConf, err := repo.nginxConfigFactory(mappingEntity)
+	err = infraHelper.UpdateFile(nginxStreamConfDir+"/ssl.conf", fileContentStr, true)
 	if err != nil {
-		return err
+		return errors.New("UpdateSslFileError: " + err.Error())
 	}
 
-	nginxConfDir := repo.getNginxConfDirByProtocol(mappingEntity.Protocol)
-	err = infraHelper.UpdateFile(
-		nginxConfDir+"/mapping_"+mappingId.String()+".conf",
-		nginxConf,
-		true,
-	)
-	if err != nil {
-		return errors.New("UpdateNginxConfFailed: " + err.Error())
-	}
-
-	_, err = infraHelper.RunCmd("nginx", "-s", "reload")
+	_, err = infraHelper.RunCmdWithSubShell("nginx -t && nginx -s reload")
 	if err != nil {
 		return errors.New("ReloadNginxFailed: " + err.Error())
 	}
@@ -298,11 +189,30 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		return err
 	}
 
+	mappingEntity, err := repo.mappingQueryRepo.GetById(createDto.MappingId)
+	if err != nil {
+		return err
+	}
+
+	containerPrivatePort := uint64(0)
+	mappingPublicPortStr := mappingEntity.PublicPort.String()
+	for _, portBinding := range containerEntity.PortBindings {
+		if portBinding.ContainerPort.String() != mappingPublicPortStr {
+			continue
+		}
+
+		containerPrivatePort = portBinding.PrivatePort.Get()
+	}
+	if containerPrivatePort == 0 {
+		return errors.New("ContainerPrivatePortNotFound")
+	}
+
 	targetModel := dbModel.NewMappingTarget(
 		0,
 		uint(createDto.MappingId.Get()),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
+		uint(containerPrivatePort),
 	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)
@@ -310,27 +220,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		return createResult.Error
 	}
 
-	return repo.updateMappingFile(createDto.MappingId)
-}
-
-func (repo *MappingCmdRepo) deleteMappingFile(mappingId valueObject.MappingId) error {
-	mappingEntity, err := repo.mappingQueryRepo.GetById(mappingId)
-	if err != nil {
-		return err
-	}
-
-	nginxConfDir := repo.getNginxConfDirByProtocol(mappingEntity.Protocol)
-	err = os.Remove(nginxConfDir + "/mapping_" + mappingId.String() + ".conf")
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
-
-	_, err = infraHelper.RunCmd("nginx", "-s", "reload")
-	if err != nil {
-		return errors.New("ReloadNginxFailed: " + err.Error())
-	}
-
-	return nil
+	return repo.updateWebServerFile()
 }
 
 func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
@@ -341,12 +231,12 @@ func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 		return err
 	}
 
-	err = repo.deleteMappingFile(id)
+	err = ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
 	if err != nil {
 		return err
 	}
 
-	return ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
+	return repo.updateWebServerFile()
 }
 
 func (repo *MappingCmdRepo) DeleteTarget(
@@ -360,14 +250,5 @@ func (repo *MappingCmdRepo) DeleteTarget(
 		return err
 	}
 
-	mappingEntity, err := repo.mappingQueryRepo.GetById(mappingId)
-	if err != nil {
-		return err
-	}
-
-	if len(mappingEntity.Targets) < 1 {
-		return repo.deleteMappingFile(mappingId)
-	}
-
-	return repo.updateMappingFile(mappingId)
+	return repo.updateWebServerFile()
 }
