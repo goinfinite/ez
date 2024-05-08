@@ -24,6 +24,11 @@ func CreateMapping(
 		createDto.Hostname = nil
 	}
 
+	publicPortStr := createDto.PublicPort.String()
+	if publicPortStr == "1618" || publicPortStr == "3141" {
+		return nil
+	}
+
 	existingMapping, err := mappingQueryRepo.FindOne(
 		createDto.Hostname,
 		createDto.PublicPort,

@@ -22,11 +22,6 @@ func CreateMappingsWithContainerId(
 	}
 
 	for _, portBinding := range containerEntity.PortBindings {
-		publicPortStr := portBinding.PublicPort.String()
-		if publicPortStr == "1618" || publicPortStr == "3141" {
-			continue
-		}
-
 		createMappingDto := dto.NewCreateMapping(
 			containerEntity.AccountId,
 			&containerEntity.Hostname,
