@@ -315,6 +315,20 @@ func (repo *ContainerCmdRepo) Create(
 		runParams = append(runParams, "--entrypoint", createDto.Entrypoint.String())
 	}
 
+	isSpeediaOs := createDto.ImageAddress.IsSpeediaOs()
+	hasSpeediaOsPortBinding := false
+	for _, portBinding := range createDto.PortBindings {
+		if portBinding.ContainerPort.String() == "1618" {
+			hasSpeediaOsPortBinding = true
+			break
+		}
+	}
+
+	if isSpeediaOs && !hasSpeediaOsPortBinding {
+		portBinding, _ := valueObject.NewPortBindingFromString("sos")
+		createDto.PortBindings = append(createDto.PortBindings, portBinding[0])
+	}
+
 	if len(createDto.PortBindings) > 0 {
 		createDto.PortBindings, err = repo.calibratePortBindings(createDto.PortBindings)
 		if err != nil {
