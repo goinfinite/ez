@@ -126,8 +126,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 		ServiceNames: []string{
 			"sos", "speediaos", "speedia-os", "speedia",
 		},
-		PortBindings:       []string{"1618"},
-		PublicPortInterval: httpsPublicPortInterval,
+		PortBindings: []string{"1618"},
 	},
 	{
 		ServiceNames:       []string{"mqtt"},
