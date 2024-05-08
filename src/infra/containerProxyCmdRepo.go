@@ -34,21 +34,29 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 		return err
 	}
 
-	controlHostname := "replace-me"
+	rawControlHostname, err := infraHelper.RunCmd("hostname")
+	if err != nil {
+		return errors.New("GetHostnameFailed: " + err.Error())
+	}
+
+	controlHostname, err := valueObject.NewFqdn(rawControlHostname)
+	if err != nil {
+		return errors.New("InvalidControlHostname: " + err.Error())
+	}
+
 	fileTemplate := `server {
 	listen 1618 ssl;
-	server_name ` + controlHostname + `;
+	server_name ` + controlHostname.String() + `;
 
 	ssl_certificate /var/speedia/pki/control.crt;
 	ssl_certificate_key /var/speedia/pki/control.key;
 
 	{{ range . }}
-		location /{{ .ContainerId }}/ {
-			proxy_pass https://localhost:{{ .ContainerPrivatePort }};
-		}
+	location /{{ .ContainerId }}/ {
+		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
+	}
 	{{ end }}
 }
-
 {{ range . }}
 server {
 	listen 1618 ssl;
@@ -57,7 +65,7 @@ server {
 	ssl_certificate /var/speedia/pki/control.crt;
 	ssl_certificate_key /var/speedia/pki/control.key;
 
-	location /{
+	location / {
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
 	}
 }
