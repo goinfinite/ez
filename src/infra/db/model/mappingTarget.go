@@ -8,12 +8,13 @@ import (
 )
 
 type MappingTarget struct {
-	ID                uint `gorm:"primarykey"`
-	MappingID         uint
-	ContainerId       string
-	ContainerHostname string
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ID                   uint `gorm:"primarykey"`
+	MappingID            uint
+	ContainerId          string
+	ContainerHostname    string
+	ContainerPrivatePort uint
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 func (MappingTarget) TableName() string {
@@ -25,11 +26,13 @@ func NewMappingTarget(
 	mappingId uint,
 	containerId string,
 	containerHostname string,
+	containerPrivatePort uint,
 ) MappingTarget {
 	targetModel := MappingTarget{
-		MappingID:         mappingId,
-		ContainerId:       containerId,
-		ContainerHostname: containerHostname,
+		MappingID:            mappingId,
+		ContainerId:          containerId,
+		ContainerHostname:    containerHostname,
+		ContainerPrivatePort: containerPrivatePort,
 	}
 
 	if id != 0 {
@@ -62,10 +65,16 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 		return mappingTarget, err
 	}
 
+	containerPrivatePort, err := valueObject.NewNetworkPort(model.ContainerPrivatePort)
+	if err != nil {
+		return mappingTarget, err
+	}
+
 	return entity.NewMappingTarget(
 		id,
 		mappingId,
 		containerId,
 		containerHostname,
+		containerPrivatePort,
 	), nil
 }
