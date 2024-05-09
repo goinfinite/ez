@@ -16,9 +16,8 @@ func CreateMapping(
 ) error {
 	wasHostnameSent := createDto.Hostname != nil
 
-	isTcp := createDto.Protocol.String() == "tcp"
-	isUdp := createDto.Protocol.String() == "udp"
-	isTransportLayer := isTcp || isUdp
+	protocolStr := createDto.Protocol.String()
+	isTransportLayer := protocolStr == "tcp" || protocolStr == "udp"
 
 	if wasHostnameSent && isTransportLayer {
 		createDto.Hostname = nil
@@ -48,18 +47,11 @@ func CreateMapping(
 			return errors.New("CreateMappingInfraError")
 		}
 
-		log.Printf(
-			"Mapping for port '%v/%v' added.",
-			createDto.PublicPort,
-			createDto.Protocol.String(),
-		)
+		log.Printf("Mapping for port '%s/%s' added.", publicPortStr, protocolStr)
 	}
 
 	for _, containerId := range createDto.ContainerIds {
-		addTargetDto := dto.NewCreateMappingTarget(
-			mappingId,
-			containerId,
-		)
+		addTargetDto := dto.NewCreateMappingTarget(mappingId, containerId)
 
 		err = CreateMappingTarget(
 			mappingQueryRepo,
@@ -68,7 +60,8 @@ func CreateMapping(
 			addTargetDto,
 		)
 		if err != nil {
-			return err
+			log.Printf("[%s] CreateMappingTargetError: %s", containerId.String(), err)
+			return errors.New("CreateMappingTargetInfraError")
 		}
 	}
 
