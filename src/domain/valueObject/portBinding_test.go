@@ -22,12 +22,13 @@ func TestNewPortBinding(t *testing.T) {
 			"unknown:12345:12345/tcp:40000",
 			"dns-alt-name:53/udp",
 			"dns alt name:53/udp",
+			"8081/ws",
 		}
 
-		for _, path := range validPortBindings {
-			_, err := NewPortBindingFromString(path)
+		for _, portBinding := range validPortBindings {
+			_, err := NewPortBindingFromString(portBinding)
 			if err != nil {
-				t.Errorf("ExpectingNoErrorButGot: %s [%s]", err.Error(), path)
+				t.Errorf("ExpectingNoErrorButGot: %s [%s]", err.Error(), portBinding)
 			}
 		}
 	})
@@ -36,17 +37,17 @@ func TestNewPortBinding(t *testing.T) {
 		invalidPortBindings := []string{
 			"",
 			"UNION SELECT * FROM USERS",
-			"/path\n/path",
+			"/portBinding\n/portBinding",
 			"?param=value",
 			"https://www.google.com",
-			"/path/'; DROP TABLE users; --",
-			"uknown",
+			"/portBinding/'; DROP TABLE users; --",
+			"unknown",
 		}
 
-		for _, path := range invalidPortBindings {
-			_, err := NewPortBindingFromString(path)
+		for _, portBinding := range invalidPortBindings {
+			_, err := NewPortBindingFromString(portBinding)
 			if err == nil {
-				t.Errorf("ExpectingErrorButDidNotGetFor: %v", path)
+				t.Errorf("ExpectingErrorButDidNotGetFor: %v", portBinding)
 			}
 		}
 	})
