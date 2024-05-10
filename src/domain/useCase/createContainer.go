@@ -68,11 +68,16 @@ func CreateContainer(
 		return nil
 	}
 
-	return CreateMappingsWithContainerId(
+	err = CreateMappingsWithContainerId(
 		containerQueryRepo,
 		mappingQueryRepo,
 		mappingCmdRepo,
 		containerProxyCmdRepo,
 		containerId,
 	)
+	if err != nil {
+		log.Printf("CreateAutoMappingsError: %s", err)
+	}
+
+	return nil
 }
