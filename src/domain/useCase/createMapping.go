@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
 )
 
@@ -26,30 +27,50 @@ func CreateMapping(
 		return nil
 	}
 
-	existingMapping, err := mappingQueryRepo.FindOne(
-		createDto.Hostname,
-		createDto.PublicPort,
-		createDto.Protocol,
-	)
-	if err != nil && err.Error() != "MappingNotFound" {
-		log.Printf("FindExistingMappingError: %s", err)
-		return errors.New("FindExistingMappingInfraError")
+	currentMappings, err := mappingQueryRepo.Get()
+	if err != nil {
+		log.Printf("GetMappingError: %s", err)
+		return errors.New("GetMappingInfraError")
 	}
 
-	mappingId := existingMapping.Id
-	mappingAlreadyExists := mappingId != 0
-	if !mappingAlreadyExists {
-		mappingId, err = mappingCmdRepo.Create(createDto)
+	var existingMapping *entity.Mapping
+	for _, mapping := range currentMappings {
+		if mapping.PublicPort != createDto.PublicPort {
+			continue
+		}
+
+		if isTransportLayer {
+			return errors.New("PublicPortAlreadyInUse")
+		}
+
+		hostnameMatches := mapping.Hostname == createDto.Hostname
+		if hostnameMatches && mapping.Protocol != createDto.Protocol {
+			return errors.New("PublicPortAlreadyInUseWithDifferentProtocol")
+		}
+
+		existingMapping = &mapping
+		break
+	}
+
+	if existingMapping == nil {
+		mappingId, err := mappingCmdRepo.Create(createDto)
 		if err != nil {
 			log.Printf("CreateMappingError: %s", err)
 			return errors.New("CreateMappingInfraError")
 		}
 
 		log.Printf("Mapping for port '%s/%s' added.", publicPortStr, protocolStr)
+
+		newMapping, err := mappingQueryRepo.GetById(mappingId)
+		if err != nil {
+			log.Printf("GetMappingByIdError: %s", err)
+			return errors.New("GetMappingByIdInfraError")
+		}
+		existingMapping = &newMapping
 	}
 
 	for _, containerId := range createDto.ContainerIds {
-		createTargetDto := dto.NewCreateMappingTarget(mappingId, containerId)
+		createTargetDto := dto.NewCreateMappingTarget(existingMapping.Id, containerId)
 		err = CreateMappingTarget(
 			mappingQueryRepo,
 			mappingCmdRepo,
