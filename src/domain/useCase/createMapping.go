@@ -15,10 +15,8 @@ func CreateMapping(
 	createDto dto.CreateMapping,
 ) error {
 	wasHostnameSent := createDto.Hostname != nil
-
 	protocolStr := createDto.Protocol.String()
 	isTransportLayer := protocolStr == "tcp" || protocolStr == "udp"
-
 	if wasHostnameSent && isTransportLayer {
 		createDto.Hostname = nil
 	}
@@ -51,13 +49,12 @@ func CreateMapping(
 	}
 
 	for _, containerId := range createDto.ContainerIds {
-		addTargetDto := dto.NewCreateMappingTarget(mappingId, containerId)
-
+		createTargetDto := dto.NewCreateMappingTarget(mappingId, containerId)
 		err = CreateMappingTarget(
 			mappingQueryRepo,
 			mappingCmdRepo,
 			containerQueryRepo,
-			addTargetDto,
+			createTargetDto,
 		)
 		if err != nil {
 			log.Printf("[%s] CreateMappingTargetError: %s", containerId.String(), err)
