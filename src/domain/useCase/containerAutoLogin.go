@@ -15,13 +15,11 @@ func ContainerAutoLogin(
 ) (accessToken valueObject.AccessTokenValue, err error) {
 	containerEntity, err := containerQueryRepo.GetById(containerId)
 	if err != nil {
-		log.Printf("ContainerNotFound: %s", err)
 		return accessToken, errors.New("ContainerNotFound")
 	}
 
 	if !containerEntity.ImageAddress.IsSpeediaOs() {
-		log.Printf("ContainerIsNotSpeediaOs: %s", containerEntity.ImageAddress)
-		return accessToken, errors.New("ContainerIsNotSpeediaOs")
+		return accessToken, errors.New("NotSpeediaOs")
 	}
 
 	if !containerEntity.IsRunning() {
@@ -31,7 +29,7 @@ func ContainerAutoLogin(
 	accessToken, err = containerCmdRepo.GenerateContainerSessionToken(containerId)
 	if err != nil {
 		log.Printf("GenerateContainerSessionTokenError: %s", err)
-		return accessToken, errors.New("GenerateContainerSessionTokenError")
+		return accessToken, errors.New("GenerateContainerSessionTokenInfraError")
 	}
 
 	return accessToken, nil
