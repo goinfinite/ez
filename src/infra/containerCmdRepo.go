@@ -30,13 +30,13 @@ func NewContainerCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *Contain
 
 func (repo *ContainerCmdRepo) getBaseSpecs(
 	profileId valueObject.ContainerProfileId,
-) (valueObject.ContainerSpecs, error) {
+) (specs valueObject.ContainerSpecs, err error) {
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
 	containerProfile, err := profileQueryRepo.GetById(
 		profileId,
 	)
 	if err != nil {
-		return valueObject.ContainerSpecs{}, err
+		return specs, err
 	}
 
 	return containerProfile.BaseSpecs, nil
@@ -44,8 +44,7 @@ func (repo *ContainerCmdRepo) getBaseSpecs(
 
 func (repo *ContainerCmdRepo) calibratePortBindings(
 	originalPortBindings []valueObject.PortBinding,
-) ([]valueObject.PortBinding, error) {
-	calibratedPortBindings := []valueObject.PortBinding{}
+) (calibratedPortBindings []valueObject.PortBinding, err error) {
 	usedPrivatePorts := []valueObject.NetworkPort{}
 	usedPublicPorts := []valueObject.NetworkPort{}
 	portBindingModel := dbModel.ContainerPortBinding{}
@@ -125,9 +124,7 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 func (repo *ContainerCmdRepo) containerEntityFactory(
 	createDto dto.CreateContainer,
 	containerName string,
-) (entity.Container, error) {
-	var containerEntity entity.Container
-
+) (containerEntity entity.Container, err error) {
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
 		createDto.AccountId,
 		"podman", "container", "inspect", containerName, "--format", "{{json .}}",
@@ -272,9 +269,7 @@ func (repo *ContainerCmdRepo) runLaunchScript(
 
 func (repo *ContainerCmdRepo) Create(
 	createDto dto.CreateContainer,
-) (valueObject.ContainerId, error) {
-	var containerId valueObject.ContainerId
-
+) (containerId valueObject.ContainerId, err error) {
 	containerName := createDto.ProfileId.String() +
 		"-" + createDto.Hostname.String()
 
@@ -493,9 +488,7 @@ func (repo *ContainerCmdRepo) Delete(
 
 func (repo *ContainerCmdRepo) GenerateContainerSessionToken(
 	containerId valueObject.ContainerId,
-) (valueObject.AccessTokenValue, error) {
-	var tokenValue valueObject.AccessTokenValue
-
+) (tokenValue valueObject.AccessTokenValue, err error) {
 	containerEntity, err := repo.containerQueryRepo.GetById(containerId)
 	if err != nil {
 		return tokenValue, errors.New("ContainerNotFound")
