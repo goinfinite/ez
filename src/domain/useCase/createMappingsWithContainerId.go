@@ -36,8 +36,9 @@ func CreateMappingsWithContainerId(
 			createMappingDto,
 		)
 		if err != nil {
-			log.Printf("CreateMappingError: %s", err)
-			return errors.New("CreateMappingInfraError")
+			publicPortStr := portBinding.PublicPort.String()
+			log.Printf("[%s] CreateMappingError: %s", publicPortStr, err)
+			continue
 		}
 	}
 
