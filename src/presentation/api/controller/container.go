@@ -115,8 +115,7 @@ func (controller *ContainerController) AutoLogin(c echo.Context) error {
 
 func (controller *ContainerController) parsePortBindings(
 	rawPortBindings []interface{},
-) []valueObject.PortBinding {
-	portBindings := []valueObject.PortBinding{}
+) (portBindings []valueObject.PortBinding) {
 	for bindingIndex, rawPortBinding := range rawPortBindings {
 		rawPortBindingMap, assertOk := rawPortBinding.(map[string]interface{})
 		if !assertOk {
@@ -131,14 +130,17 @@ func (controller *ContainerController) parsePortBindings(
 			portBindingStr += rawServiceName
 		}
 
-		rawPublicPort, exists := rawPortBindingMap["publicPort"]
-		if exists {
+		rawPublicPort, rawPublicPortExists := rawPortBindingMap["publicPort"]
+		if rawPublicPortExists {
 			publicPort, err := valueObject.NewNetworkPort(rawPublicPort)
 			if err != nil {
 				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
-			portBindingStr += ":" + publicPort.String()
+			if len(portBindingStr) > 0 {
+				portBindingStr += ":"
+			}
+			portBindingStr += publicPort.String()
 		}
 
 		rawContainerPort, rawContainerPortExists := rawPortBindingMap["containerPort"]
@@ -148,11 +150,14 @@ func (controller *ContainerController) parsePortBindings(
 				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
-			portBindingStr += ":" + containerPort.String()
+			if len(portBindingStr) > 0 {
+				portBindingStr += ":"
+			}
+			portBindingStr += containerPort.String()
 		}
 
 		rawProtocol, assertOk := rawPortBindingMap["protocol"].(string)
-		if assertOk && rawContainerPortExists {
+		if assertOk && (rawPublicPortExists || rawContainerPortExists) {
 			protocol, err := valueObject.NewNetworkProtocol(rawProtocol)
 			if err != nil {
 				log.Printf("[%d] %s", bindingIndex, err.Error())
@@ -168,7 +173,10 @@ func (controller *ContainerController) parsePortBindings(
 				log.Printf("[%d] %s", bindingIndex, err.Error())
 				continue
 			}
-			portBindingStr += ":" + privatePort.String()
+			if len(portBindingStr) > 0 {
+				portBindingStr += ":"
+			}
+			portBindingStr += privatePort.String()
 		}
 
 		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
@@ -185,8 +193,7 @@ func (controller *ContainerController) parsePortBindings(
 
 func (controller *ContainerController) parseContainerEnvs(
 	envs []interface{},
-) []valueObject.ContainerEnv {
-	containerEnvs := []valueObject.ContainerEnv{}
+) (containerEnvs []valueObject.ContainerEnv) {
 	for _, env := range envs {
 		newEnv, err := valueObject.NewContainerEnv(env.(string))
 		if err != nil {
