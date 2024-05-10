@@ -54,42 +54,4 @@ func TestMappingQueryRepo(t *testing.T) {
 			return
 		}
 	})
-
-	t.Run("FindOneMappingWithoutHostname", func(t *testing.T) {
-		_, err := mappingQueryRepo.FindOne(
-			nil,
-			valueObject.NewNetworkPortPanic(80),
-			valueObject.NewNetworkProtocolPanic("http"),
-		)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-	})
-
-	t.Run("FindOneMappingWithHostname", func(t *testing.T) {
-		hostname := valueObject.NewFqdnPanic("speedia.net")
-
-		_, err := mappingQueryRepo.FindOne(
-			&hostname,
-			valueObject.NewNetworkPortPanic(80),
-			valueObject.NewNetworkProtocolPanic("http"),
-		)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-	})
-
-	t.Run("FindOneMappingWithUnpublishedPort", func(t *testing.T) {
-		_, err := mappingQueryRepo.FindOne(
-			nil,
-			valueObject.NewNetworkPortPanic(8080),
-			valueObject.NewNetworkProtocolPanic("http"),
-		)
-		if err == nil {
-			t.Error("ShouldNotFindAnyMapping")
-			return
-		}
-	})
 }
