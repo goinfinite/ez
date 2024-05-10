@@ -33,9 +33,9 @@ func NewMappingCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *MappingCm
 	}
 }
 
-func (repo *MappingCmdRepo) Create(createDto dto.CreateMapping) (valueObject.MappingId, error) {
-	var mappingId valueObject.MappingId
-
+func (repo *MappingCmdRepo) Create(
+	createDto dto.CreateMapping,
+) (mappingId valueObject.MappingId, err error) {
 	var hostnamePtr *string
 	if createDto.Hostname != nil {
 		hostnameStr := createDto.Hostname.String()
