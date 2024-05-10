@@ -212,6 +212,15 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 			continue
 		}
 
+		bindingProtocolStr := portBinding.Protocol.String()
+		mappingProtocolStr := mappingEntity.Protocol.String()
+		if bindingProtocolStr != mappingProtocolStr {
+			return errors.New(
+				"MappingVsBindingProtocolMismatch: " +
+					mappingProtocolStr + " != " + bindingProtocolStr,
+			)
+		}
+
 		containerPrivatePort = portBinding.PrivatePort.Get()
 	}
 	if containerPrivatePort == 0 {
