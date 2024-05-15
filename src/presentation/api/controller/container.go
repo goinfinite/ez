@@ -2,6 +2,7 @@ package apiController
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"time"
 
@@ -68,6 +69,7 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 func (controller *ContainerController) AutoLogin(c echo.Context) error {
 	requestBody := map[string]interface{}{
 		"containerId": c.Param("containerId"),
+		"ipAddress":   c.RealIP(),
 	}
 
 	serviceOutput := controller.containerService.AutoLogin(requestBody)
@@ -98,6 +100,11 @@ func (controller *ContainerController) AutoLogin(c echo.Context) error {
 	}
 
 	currentHost := c.Request().Host
+	currentHost, _, err = net.SplitHostPort(currentHost)
+	if err != nil {
+		currentHost = c.Request().Host
+	}
+
 	redirectUrl := "https://" + currentHost + ":1618/" + c.Param("containerId") + "/"
 
 	accessTokenCookie := new(http.Cookie)
