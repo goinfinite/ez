@@ -277,7 +277,7 @@ func (repo *ContainerCmdRepo) Create(
 		"run", "--detach",
 		"--name", containerName,
 		"--hostname", createDto.Hostname.String(),
-		"--env", "VIRTUAL_HOST=" + createDto.Hostname.String(),
+		"--env", "PRIMARY_VHOST=" + createDto.Hostname.String(),
 	}
 
 	if len(createDto.Envs) > 0 {
@@ -487,45 +487,51 @@ func (repo *ContainerCmdRepo) Delete(
 }
 
 func (repo *ContainerCmdRepo) GenerateContainerSessionToken(
-	containerId valueObject.ContainerId,
+	autoLoginDto dto.ContainerAutoLogin,
 ) (tokenValue valueObject.AccessTokenValue, err error) {
-	containerEntity, err := repo.containerQueryRepo.GetById(containerId)
+	containerEntity, err := repo.containerQueryRepo.GetById(autoLoginDto.ContainerId)
 	if err != nil {
 		return tokenValue, errors.New("ContainerNotFound")
 	}
 
 	randomPassword := infraHelper.GenPass(16)
 	_, _ = repo.runContainerCmd(
-		containerEntity.AccountId, containerId,
+		containerEntity.AccountId, containerEntity.Id,
 		"os account create -u control -p "+randomPassword,
 	)
 
 	_, err = repo.runContainerCmd(
-		containerEntity.AccountId, containerId,
+		containerEntity.AccountId, containerEntity.Id,
 		"os account update -u control -p "+randomPassword,
 	)
 	if err != nil {
-		return tokenValue, errors.New("UpdateControlUserPasswordFailed")
+		return tokenValue, errors.New("UpdateControlUserPasswordFailed: " + err.Error())
 	}
 
+	ipAddressStr := autoLoginDto.IpAddress.String()
 	loginResponseJson, err := repo.runContainerCmd(
-		containerEntity.AccountId, containerId,
-		"os account login -u control -p "+randomPassword,
+		containerEntity.AccountId, containerEntity.Id,
+		"os auth login -u control -p "+randomPassword+" -i "+ipAddressStr,
 	)
 	if err != nil {
-		return tokenValue, errors.New("LoginWithControlUserFailed")
+		return tokenValue, errors.New("LoginWithControlUserFailed: " + err.Error())
 	}
 
-	loginResponseMap := map[string]interface{}{}
+	var loginResponseMap map[string]interface{}
 	err = json.Unmarshal([]byte(loginResponseJson), &loginResponseMap)
 	if err != nil {
-		return tokenValue, errors.New("LoginResponseParseError")
+		return tokenValue, errors.New("LoginResponseParseError: " + err.Error())
 	}
 
-	rawResponseBody, assertOk := loginResponseMap["body"].(string)
+	rawResponseBody, assertOk := loginResponseMap["body"].(map[string]interface{})
 	if !assertOk || len(rawResponseBody) == 0 {
 		return tokenValue, errors.New("LoginResponseBodyParseError")
 	}
 
-	return valueObject.NewAccessTokenValue(rawResponseBody)
+	rawTokenValue, assertOk := rawResponseBody["tokenStr"].(string)
+	if !assertOk || len(rawTokenValue) == 0 {
+		return tokenValue, errors.New("TokenValueParseError")
+	}
+
+	return valueObject.NewAccessTokenValue(rawTokenValue)
 }
