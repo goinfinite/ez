@@ -13,6 +13,6 @@ type ContainerCmdRepo interface {
 		containerId valueObject.ContainerId,
 	) error
 	GenerateContainerSessionToken(
-		containerId valueObject.ContainerId,
+		autoLoginDto dto.ContainerAutoLogin,
 	) (valueObject.AccessTokenValue, error)
 }

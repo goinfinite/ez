@@ -42,7 +42,7 @@ func (service *ContainerService) ReadWithMetrics() ServiceOutput {
 }
 
 func (service *ContainerService) AutoLogin(input map[string]interface{}) ServiceOutput {
-	requiredParams := []string{"containerId"}
+	requiredParams := []string{"containerId", "ipAddress"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
@@ -54,10 +54,17 @@ func (service *ContainerService) AutoLogin(input map[string]interface{}) Service
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	ipAddress, err := valueObject.NewIpAddress(input["ipAddress"].(string))
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	autoLoginDto := dto.NewContainerAutoLogin(containerId, ipAddress)
+
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
 	accessToken, err := useCase.ContainerAutoLogin(
-		containerQueryRepo, containerCmdRepo, containerId,
+		containerQueryRepo, containerCmdRepo, autoLoginDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
