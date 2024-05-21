@@ -2,6 +2,7 @@ package dbModel
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/speedianet/control/src/domain/valueObject"
 	"gorm.io/gorm"
@@ -122,7 +123,6 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 	portsToIgnore []valueObject.NetworkPort,
 ) (valueObject.NetworkPort, error) {
 	usedPublicPorts := []uint{}
-
 	err := ormSvc.Model(model).
 		Select("public_port").
 		Order("public_port asc").
@@ -137,24 +137,27 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 			portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
 		}
 		usedPublicPorts = append(usedPublicPorts, portsToIgnoreUint...)
+		usedPublicPorts = slices.Compact(usedPublicPorts)
+		slices.Sort(usedPublicPorts)
 	}
 
 	publicPortInterval, err := portBinding.GetPublicPortInterval()
 	if err != nil {
 		return portBinding.ContainerPort, nil
 	}
-	if publicPortInterval.Max == nil {
-		return publicPortInterval.Min, nil
-	}
 
 	initialPort := uint(publicPortInterval.Min.Get())
-
-	nextPort := uint(initialPort)
+	nextPort := initialPort
 	for _, port := range usedPublicPorts {
+		if port < initialPort {
+			continue
+		}
+
 		if port == nextPort {
 			nextPort++
 			continue
 		}
+
 		break
 	}
 
@@ -162,8 +165,7 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 		return 0, errors.New("PublicPortTooLow")
 	}
 
-	maxPort := uint(publicPortInterval.Max.Get())
-	if nextPort > maxPort {
+	if nextPort > uint(publicPortInterval.Max.Get()) {
 		return 0, errors.New("NoAvailablePublicPort")
 	}
 
