@@ -514,13 +514,18 @@ func NewPortBindingByPort(port NetworkPort) (PortBinding, error) {
 }
 
 // format: [serviceName][:publicPort][:containerPort][/protocol][:privatePort]
-func NewPortBindingFromString(value string) ([]PortBinding, error) {
-	portBindings := []PortBinding{}
-
+func NewPortBindingFromString(value string) (portBindings []PortBinding, err error) {
 	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
 	portBindingRegex := `^(?:(?P<serviceName>[a-z][\w\.\_\ \-]{0,128}[a-z0-9]))?(?::?(?P<publicPort>\d{1,5}))?(?::(?P<containerPort>\d{1,5}))?(?:\/(?P<protocol>\w{1,5}))?(?::(?P<privatePort>\d{1,5}))?$`
 	portBindingParts := voHelper.FindNamedGroupsMatches(portBindingRegex, string(value))
+	if len(portBindingParts) == 0 {
+		return portBindings, errors.New("InvalidPortBindingStructure")
+	}
+
+	if portBindingParts["publicPort"] == "" && portBindingParts["containerPort"] != "" {
+		portBindingParts["publicPort"] = portBindingParts["containerPort"]
+	}
 
 	serviceNameSent := portBindingParts["serviceName"] != ""
 	publicPortSent := portBindingParts["publicPort"] != ""
@@ -530,13 +535,10 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		return portBindings, errors.New("ServiceNameOrPortRequired")
 	}
 
-	var err error
-	serviceName, _ := NewServiceName("unmapped")
+	unknownServiceName, _ := NewServiceName("unknown")
+	serviceName := unknownServiceName
 	if serviceNameSent {
-		serviceName, err = NewServiceName(portBindingParts["serviceName"])
-		if err != nil {
-			serviceName, _ = NewServiceName("unknown")
-		}
+		serviceName, _ = NewServiceName(portBindingParts["serviceName"])
 	}
 
 	if serviceNameSent && !publicPortSent {
@@ -586,6 +588,10 @@ func NewPortBindingFromString(value string) ([]PortBinding, error) {
 		protocol, err = NewNetworkProtocol(portBindingParts["protocol"])
 		if err != nil {
 			return portBindings, err
+		}
+
+		if protocol.String() != likelyPortBinding.Protocol.String() {
+			serviceName = unknownServiceName
 		}
 	}
 
