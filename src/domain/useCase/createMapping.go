@@ -22,6 +22,10 @@ func CreateMapping(
 		createDto.Hostname = nil
 	}
 
+	if !wasHostnameSent && !isTransportLayer {
+		return errors.New("HostnameRequiredForApplicationLayer")
+	}
+
 	publicPortStr := createDto.PublicPort.String()
 	if publicPortStr == "1618" || publicPortStr == "3141" {
 		return nil
@@ -43,9 +47,18 @@ func CreateMapping(
 			return errors.New("PublicPortAlreadyInUse")
 		}
 
-		hostnameMatches := mapping.Hostname == createDto.Hostname
-		if hostnameMatches && mapping.Protocol != createDto.Protocol {
+		if mapping.Hostname == nil {
+			existingMapping = &mapping
+			break
+		}
+
+		if mapping.Protocol != createDto.Protocol {
 			return errors.New("PublicPortAlreadyInUseWithDifferentProtocol")
+		}
+
+		hostnameMatches := mapping.Hostname == createDto.Hostname
+		if !hostnameMatches {
+			continue
 		}
 
 		existingMapping = &mapping
