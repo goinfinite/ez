@@ -208,17 +208,18 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 	containerPrivatePort := uint64(0)
 	mappingPublicPortStr := mappingEntity.PublicPort.String()
 	for _, portBinding := range containerEntity.PortBindings {
-		if portBinding.ContainerPort.String() != mappingPublicPortStr {
+		if portBinding.PublicPort.String() != mappingPublicPortStr {
 			continue
 		}
 
 		bindingProtocolStr := portBinding.Protocol.String()
 		mappingProtocolStr := mappingEntity.Protocol.String()
 		if bindingProtocolStr != mappingProtocolStr {
-			return errors.New(
-				"MappingVsBindingProtocolMismatch: " +
-					mappingProtocolStr + " != " + bindingProtocolStr,
+			log.Printf(
+				"[%s] MappingVsBindingProtocolMismatch: %s != %s",
+				mappingPublicPortStr, mappingProtocolStr, bindingProtocolStr,
 			)
+			continue
 		}
 
 		containerPrivatePort = portBinding.PrivatePort.Get()
