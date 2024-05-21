@@ -25,6 +25,7 @@ var httpPublicPortInterval = "80"
 var httpsPublicPortInterval = "443"
 var databasePublicPortInterval = "30000-39999"
 
+//cspell:disable
 var KnownServiceBindings = []serviceBindingInfo{
 	{
 		ServiceNames:       []string{"ftp"},
@@ -152,7 +153,9 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PortBindings: []string{"2525"},
 	},
 	{
-		ServiceNames: []string{"custom", "node", "nodejs", "ruby-on-rails", "rails", "ruby", "aerospike"},
+		ServiceNames: []string{
+			"custom", "node", "nodejs", "ruby-on-rails", "rails", "ruby", "aerospike",
+		},
 		PortBindings: []string{
 			"3000", "3001", "3002", "3003", "3004", "3005", "3006", "3007", "3008", "3009"},
 		PublicPortInterval: httpPublicPortInterval,
@@ -262,23 +265,8 @@ var KnownServiceBindings = []serviceBindingInfo{
 	{
 		ServiceNames: []string{"couchbase"},
 		PortBindings: []string{
-			"8091",
-			"8092",
-			"8093",
-			"8094",
-			"8095",
-			"8096",
-			"8097",
-			"9123",
-			"11207",
-			"11210",
-			"11280",
-			"18091",
-			"18092",
-			"18093",
-			"18094",
-			"18095",
-			"18096",
+			"8091", "8092", "8093", "8094", "8095", "8096", "8097", "9123", "11207",
+			"11210", "11280", "18091", "18092", "18093", "18094", "18095", "18096",
 			"18097",
 		},
 		PublicPortInterval: databasePublicPortInterval,
@@ -290,10 +278,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 	},
 	{
 		ServiceNames: []string{
-			"https",
-			"wss",
-			"grpcs",
-			"php",
+			"https", "wss", "grpcs", "php",
 		},
 		PortBindings: []string{"8443"},
 	},
@@ -371,6 +356,8 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PortBindings: []string{"51820"},
 	},
 }
+
+//cspell:enable
 
 func NewPortBinding(
 	serviceName ServiceName,
@@ -662,9 +649,9 @@ func (portBinding PortBinding) GetProtocol() NetworkProtocol {
 	return portBinding.Protocol
 }
 
-func (portBinding PortBinding) GetPublicPortInterval() (NetworkPortInterval, error) {
-	var portInterval NetworkPortInterval
-
+func (portBinding PortBinding) GetPublicPortInterval() (
+	portInterval NetworkPortInterval, err error,
+) {
 	serviceInfo, err := findKnownServiceBindingByName(portBinding.ServiceName)
 	if err != nil {
 		return portInterval, err
@@ -675,19 +662,19 @@ func (portBinding PortBinding) GetPublicPortInterval() (NetworkPortInterval, err
 	}
 
 	intervalParts := strings.Split(serviceInfo.PublicPortInterval, "-")
-	if len(intervalParts) <= 1 {
-		preDefinedPublicPort, err := NewNetworkPort(serviceInfo.PublicPortInterval)
-		if err != nil {
-			return portInterval, err
-		}
-
-		return NewNetworkPortInterval(preDefinedPublicPort, nil)
+	intervalPartsLength := len(intervalParts)
+	if intervalPartsLength == 0 || intervalPartsLength > 2 {
+		return portInterval, errors.New("InvalidPublicPortInterval")
 	}
 
 	minPublicPortStr := intervalParts[0]
 	minPublicPort, err := NewNetworkPort(minPublicPortStr)
 	if err != nil {
 		return portInterval, err
+	}
+
+	if intervalPartsLength == 1 {
+		return NewNetworkPortInterval(minPublicPort, nil)
 	}
 
 	maxPublicPortStr := intervalParts[1]
