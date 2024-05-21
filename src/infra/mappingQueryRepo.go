@@ -25,7 +25,7 @@ func (repo *MappingQueryRepo) Get() ([]entity.Mapping, error) {
 
 	var mappingModels []dbModel.Mapping
 
-	err := repo.persistentDbSvc.Handler.Model(&dbModel.Mapping{}).
+	err := repo.persistentDbSvc.Handler.
 		Preload("Targets").
 		Find(&mappingModels).Error
 	if err != nil {
@@ -45,16 +45,16 @@ func (repo *MappingQueryRepo) Get() ([]entity.Mapping, error) {
 	return mappingEntities, nil
 }
 
-func (repo *MappingQueryRepo) GetById(id valueObject.MappingId) (entity.Mapping, error) {
-	var mapping entity.Mapping
-
-	mappingModel := dbModel.Mapping{ID: uint(id.Get())}
-
-	err := repo.persistentDbSvc.Handler.Model(&mappingModel).
+func (repo *MappingQueryRepo) GetById(
+	id valueObject.MappingId,
+) (mappingEntity entity.Mapping, err error) {
+	var mappingModel dbModel.Mapping
+	err = repo.persistentDbSvc.Handler.
 		Preload("Targets").
+		Where("id = ?", id.Get()).
 		First(&mappingModel).Error
 	if err != nil {
-		return mapping, errors.New("MappingNotFound")
+		return mappingEntity, errors.New("MappingNotFound")
 	}
 
 	return mappingModel.ToEntity()
@@ -66,7 +66,7 @@ func (repo *MappingQueryRepo) GetByProtocol(
 	mappingEntities := []entity.Mapping{}
 
 	var mappingModels []dbModel.Mapping
-	err := repo.persistentDbSvc.Handler.Model(dbModel.Mapping{}).
+	err := repo.persistentDbSvc.Handler.
 		Preload("Targets").
 		Where("protocol = ?", protocol.String()).
 		Find(&mappingModels).Error
@@ -89,15 +89,14 @@ func (repo *MappingQueryRepo) GetByProtocol(
 
 func (repo *MappingQueryRepo) GetTargetById(
 	id valueObject.MappingTargetId,
-) (entity.MappingTarget, error) {
-	var mappingTarget entity.MappingTarget
+) (mappingTargetEntity entity.MappingTarget, err error) {
+	var mappingTargetModel dbModel.MappingTarget
 
-	mappingTargetModel := dbModel.MappingTarget{ID: uint(id.Get())}
-
-	err := repo.persistentDbSvc.Handler.Model(&mappingTargetModel).
+	err = repo.persistentDbSvc.Handler.
+		Where("id = ?", id.Get()).
 		First(&mappingTargetModel).Error
 	if err != nil {
-		return mappingTarget, errors.New("MappingTargetNotFound")
+		return mappingTargetEntity, errors.New("MappingTargetNotFound")
 	}
 
 	return mappingTargetModel.ToEntity()
@@ -111,7 +110,6 @@ func (repo *MappingQueryRepo) GetTargetsByContainerId(
 	var mappingTargetModels []dbModel.MappingTarget
 
 	err := repo.persistentDbSvc.Handler.
-		Model(&dbModel.MappingTarget{}).
 		Where("container_id = ?", containerId.String()).
 		Find(&mappingTargetModels).Error
 	if err != nil {
