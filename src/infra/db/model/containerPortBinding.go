@@ -73,82 +73,39 @@ func (model ContainerPortBinding) ToValueObject() (valueObject.PortBinding, erro
 	), nil
 }
 
-func (model ContainerPortBinding) GetNextAvailablePrivatePort(
+func (model ContainerPortBinding) getUnusablePorts(
 	ormSvc *gorm.DB,
+	portType string,
 	portsToIgnore []valueObject.NetworkPort,
-) (valueObject.NetworkPort, error) {
-	usedPrivatePorts := []uint{}
-
-	err := ormSvc.Model(model).
-		Select("private_port").
-		Order("private_port asc").
-		Find(&usedPrivatePorts).Error
+) (unusablePorts []uint, err error) {
+	err = ormSvc.Model(model).Select(portType).
+		Order(portType + " asc").Find(&unusablePorts).Error
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	if len(portsToIgnore) > 0 {
-		portsToIgnoreUint := []uint{}
-		for _, port := range portsToIgnore {
-			portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
-		}
-		usedPrivatePorts = append(usedPrivatePorts, portsToIgnoreUint...)
+	if len(portsToIgnore) == 0 {
+		return unusablePorts, nil
 	}
 
-	initialPort := uint(40000)
-
-	nextPort := initialPort
-	for _, port := range usedPrivatePorts {
-		if port == nextPort {
-			nextPort++
-			continue
-		}
-		break
+	portsToIgnoreUint := []uint{}
+	for _, port := range portsToIgnore {
+		portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
 	}
+	unusablePorts = append(unusablePorts, portsToIgnoreUint...)
+	unusablePorts = slices.Compact(unusablePorts)
+	slices.Sort(unusablePorts)
 
-	if nextPort < initialPort {
-		return 0, errors.New("PrivatePortTooLow")
-	}
-
-	if nextPort > 60000 {
-		return 0, errors.New("NoAvailablePrivatePort")
-	}
-
-	return valueObject.NewNetworkPort(nextPort)
+	return unusablePorts, nil
 }
 
-func (model ContainerPortBinding) GetNextAvailablePublicPort(
-	ormSvc *gorm.DB,
-	portBinding valueObject.PortBinding,
-	portsToIgnore []valueObject.NetworkPort,
-) (valueObject.NetworkPort, error) {
-	usedPublicPorts := []uint{}
-	err := ormSvc.Model(model).
-		Select("public_port").
-		Order("public_port asc").
-		Find(&usedPublicPorts).Error
-	if err != nil {
-		return 0, err
-	}
-
-	if len(portsToIgnore) > 0 {
-		portsToIgnoreUint := []uint{}
-		for _, port := range portsToIgnore {
-			portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
-		}
-		usedPublicPorts = append(usedPublicPorts, portsToIgnoreUint...)
-		usedPublicPorts = slices.Compact(usedPublicPorts)
-		slices.Sort(usedPublicPorts)
-	}
-
-	publicPortInterval, err := portBinding.GetPublicPortInterval()
-	if err != nil {
-		return portBinding.ContainerPort, nil
-	}
-
-	initialPort := uint(publicPortInterval.Min.Get())
+func (model ContainerPortBinding) getNextAvailablePort(
+	notUsablePorts []uint,
+	initialPort uint,
+	maxPort uint,
+) (nextAvailablePort valueObject.NetworkPort, err error) {
 	nextPort := initialPort
-	for _, port := range usedPublicPorts {
+	for _, port := range notUsablePorts {
 		if port < initialPort {
 			continue
 		}
@@ -162,12 +119,49 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 	}
 
 	if nextPort < initialPort {
-		return 0, errors.New("PublicPortTooLow")
+		return nextAvailablePort, errors.New("PortTooLow")
 	}
 
-	if nextPort > uint(publicPortInterval.Max.Get()) {
-		return 0, errors.New("NoAvailablePublicPort")
+	if nextPort > maxPort {
+		return nextAvailablePort, errors.New("NoAvailablePort")
 	}
 
 	return valueObject.NewNetworkPort(nextPort)
+}
+
+func (model ContainerPortBinding) GetNextAvailablePrivatePort(
+	ormSvc *gorm.DB,
+	portsToIgnore []valueObject.NetworkPort,
+) (nextAvailablePort valueObject.NetworkPort, err error) {
+	unusablePorts, err := model.getUnusablePorts(ormSvc, "private_port", portsToIgnore)
+	if err != nil {
+		return nextAvailablePort, err
+	}
+
+	maxPort := uint(60000)
+	return model.getNextAvailablePort(unusablePorts, 40000, maxPort)
+}
+
+func (model ContainerPortBinding) GetNextAvailablePublicPort(
+	ormSvc *gorm.DB,
+	portBinding valueObject.PortBinding,
+	portsToIgnore []valueObject.NetworkPort,
+) (nextAvailablePort valueObject.NetworkPort, err error) {
+	publicPortInterval, err := portBinding.GetPublicPortInterval()
+	if err != nil {
+		return portBinding.ContainerPort, nil
+	}
+
+	if publicPortInterval.Min == publicPortInterval.Max {
+		return publicPortInterval.Min, nil
+	}
+
+	unusablePorts, err := model.getUnusablePorts(ormSvc, "public_port", portsToIgnore)
+	if err != nil {
+		return nextAvailablePort, err
+	}
+
+	minPortUint := uint(publicPortInterval.Min.Get())
+	maxPortUint := uint(publicPortInterval.Max.Get())
+	return model.getNextAvailablePort(unusablePorts, minPortUint, maxPortUint)
 }
