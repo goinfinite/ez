@@ -6,10 +6,9 @@ import (
 	"strconv"
 )
 
-func InterfaceToFloat(input interface{}) (float64, error) {
-	var output float64
-	var err error
-	var defaultErr error = errors.New("InvalidInput")
+func InterfaceToFloat(input interface{}) (output float64, err error) {
+	defaultErr := errors.New("InvalidInput")
+
 	switch v := input.(type) {
 	case string:
 		output, err = strconv.ParseFloat(v, 64)
@@ -24,7 +23,7 @@ func InterfaceToFloat(input interface{}) (float64, error) {
 	}
 
 	if err != nil {
-		return float64(0), defaultErr
+		return output, defaultErr
 	}
 
 	return output, nil
