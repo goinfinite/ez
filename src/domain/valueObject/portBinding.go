@@ -674,7 +674,7 @@ func (portBinding PortBinding) GetPublicPortInterval() (
 	}
 
 	if intervalPartsLength == 1 {
-		return NewNetworkPortInterval(minPublicPort, nil)
+		return NewNetworkPortInterval(minPublicPort, minPublicPort)
 	}
 
 	maxPublicPortStr := intervalParts[1]
@@ -683,5 +683,5 @@ func (portBinding PortBinding) GetPublicPortInterval() (
 		return portInterval, err
 	}
 
-	return NewNetworkPortInterval(minPublicPort, &maxPublicPort)
+	return NewNetworkPortInterval(minPublicPort, maxPublicPort)
 }
