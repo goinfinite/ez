@@ -33,9 +33,16 @@ func GetContainerProfilesController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, profilesList)
 }
 
-func parseContainerSpecs(specs map[string]interface{}) valueObject.ContainerSpecs {
-	cpuCores := valueObject.NewCpuCoresCountPanic(specs["cpuCores"])
-	memoryBytes := valueObject.NewBytePanic(specs["memoryBytes"])
+func parseContainerSpecs(rawSpecs map[string]interface{}) valueObject.ContainerSpecs {
+	cpuCores, _ := valueObject.NewCpuCoresCount(0)
+	if rawSpecs["cpuCores"] != nil {
+		cpuCores = valueObject.NewCpuCoresCountPanic(rawSpecs["cpuCores"])
+	}
+
+	memoryBytes, _ := valueObject.NewByte(0)
+	if rawSpecs["memoryBytes"] != nil {
+		memoryBytes = valueObject.NewBytePanic(rawSpecs["memoryBytes"])
+	}
 
 	return valueObject.NewContainerSpecs(cpuCores, memoryBytes)
 }
