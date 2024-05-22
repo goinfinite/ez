@@ -9,20 +9,20 @@ import (
 
 type LaunchScript string
 
-func NewLaunchScript(value interface{}) (LaunchScript, error) {
+func NewLaunchScript(value interface{}) (launchScript LaunchScript, err error) {
 	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
-		return "", errors.New("LaunchScriptMustBeString")
+		return launchScript, errors.New("LaunchScriptMustBeString")
 	}
 
 	stringValue = strings.TrimSpace(stringValue)
 
 	if len(stringValue) < 3 {
-		return "", errors.New("LaunchScriptIsTooShort")
+		return launchScript, errors.New("LaunchScriptIsTooShort")
 	}
 
 	if len(stringValue) > 16384 {
-		return "", errors.New("LaunchScriptIsTooLong")
+		return launchScript, errors.New("LaunchScriptIsTooLong")
 	}
 
 	hasSheBang := strings.HasPrefix(stringValue, "#!")
@@ -35,9 +35,7 @@ func NewLaunchScript(value interface{}) (LaunchScript, error) {
 
 func NewLaunchScriptFromEncodedContent(
 	encodedContent EncodedContent,
-) (LaunchScript, error) {
-	var launchScript LaunchScript
-
+) (launchScript LaunchScript, err error) {
 	decodedContent, err := encodedContent.GetDecoded()
 	if err != nil {
 		return launchScript, err
@@ -46,6 +44,6 @@ func NewLaunchScriptFromEncodedContent(
 	return NewLaunchScript(decodedContent)
 }
 
-func (ls LaunchScript) String() string {
-	return string(ls)
+func (vo LaunchScript) String() string {
+	return string(vo)
 }
