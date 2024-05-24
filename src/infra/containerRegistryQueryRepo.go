@@ -430,6 +430,7 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 
 		rawPortBindings := bindingsRegex.FindAllString(rawInstruction, -1)
 		for _, rawPortBinding := range rawPortBindings {
+			rawPortBinding = strings.ReplaceAll(rawPortBinding, "/tcp", "")
 			portBinding, err := valueObject.NewPortBindingFromString(rawPortBinding)
 			if err != nil {
 				continue
