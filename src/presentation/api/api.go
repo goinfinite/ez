@@ -9,7 +9,7 @@ import (
 )
 
 // @title			ControlApi
-// @version			0.0.1
+// @version			0.0.2
 // @description		Speedia Control API
 // @termsOfService	https://speedia.net/tos/
 
