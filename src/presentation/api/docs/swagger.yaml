@@ -298,6 +298,8 @@ definitions:
         type: string
       containerId:
         type: string
+      containerPrivatePort:
+        type: integer
       id:
         type: integer
       mappingId:
@@ -521,7 +523,7 @@ info:
     url: https://speedia.net/tos/
   termsOfService: https://speedia.net/tos/
   title: ControlApi
-  version: 0.0.1
+  version: 0.0.2
 paths:
   /v1/account/:
     get:

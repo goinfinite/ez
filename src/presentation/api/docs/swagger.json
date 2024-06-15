@@ -13,7 +13,7 @@
             "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
             "url": "https://speedia.net/tos/"
         },
-        "version": "0.0.1"
+        "version": "0.0.2"
     },
     "basePath": "/_/api",
     "paths": {
@@ -1352,6 +1352,9 @@
                 },
                 "containerId": {
                     "type": "string"
+                },
+                "containerPrivatePort": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
