@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -284,6 +285,10 @@ func (repo *ContainerRegistryQueryRepo) getDockerHubImages(
 
 		registryImages = append(registryImages, registryImage)
 	}
+
+	sort.SliceStable(registryImages, func(i, j int) bool {
+		return registryImages[i].PullCount > registryImages[j].PullCount
+	})
 
 	return registryImages, nil
 }
