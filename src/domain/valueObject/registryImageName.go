@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-const registryImageNameRegex string = `^[\w\_\-]{1,128}/?[\w\_\-]{0,128}$`
+const registryImageNameRegex string = `^[\w\_\-]{1,128}/?[\w\.\_\-]{0,128}$`
 
 type RegistryImageName string
 
