@@ -19,6 +19,11 @@ func TestNewContainerImageAddress(t *testing.T) {
 			"https://docker.io/speedianet/os",
 			"speedianet/os:latest",
 			"speedianet/os:0.0.1-alpha",
+			"rocket.chat",
+			"docker.io/rocket.chat",
+			"docker.io/rocket.chat:latest",
+			"docker.io/rocket.chat:3.18.0",
+			"https://docker.io/rocket.chat:3.18.0-rc1",
 		}
 
 		for _, path := range validContainerImageAddresses {
@@ -35,7 +40,6 @@ func TestNewContainerImageAddress(t *testing.T) {
 			"UNION SELECT * FROM USERS",
 			"/path\n/path",
 			"?param=value",
-			"https://www.google.com",
 			"/path/'; DROP TABLE users; --",
 		}
 

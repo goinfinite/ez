@@ -8,7 +8,7 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-const containerImageAddressRegex string = `^(?P<schema>https?://)?(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)?(?::(?P<port>\d{1,6}))?/?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
+const containerImageAddressRegex string = `^(?P<schema>https?://)?(?:(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)?:?(?:(?P<port>\d{1,6}))?/)?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\.\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
 
 type ContainerImageAddress string
 
