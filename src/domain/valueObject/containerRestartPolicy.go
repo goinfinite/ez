@@ -13,6 +13,7 @@ type ContainerRestartPolicy string
 
 var ValidContainerRestartPolicies = []string{
 	"no",
+	"never",
 	"on-failure",
 	"always",
 	"unless-stopped",
@@ -29,6 +30,13 @@ func NewContainerRestartPolicy(value interface{}) (ContainerRestartPolicy, error
 
 	if !slices.Contains(ValidContainerRestartPolicies, stringValue) {
 		return "", errors.New("UnknownContainerRestartPolicy")
+	}
+
+	switch stringValue {
+	case "never":
+		stringValue = "no"
+	case "unless-stopped":
+		stringValue = "always"
 	}
 
 	return ContainerRestartPolicy(stringValue), nil
