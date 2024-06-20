@@ -1,6 +1,9 @@
 package valueObject
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type UnixTime int64
 
@@ -21,5 +24,5 @@ func (vo UnixTime) GetTimeOnly() string {
 }
 
 func (vo UnixTime) String() string {
-	return time.Unix(int64(vo), 0).UTC().String()
+	return strconv.FormatInt(int64(vo), 10)
 }
