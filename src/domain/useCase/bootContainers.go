@@ -19,7 +19,7 @@ func BootContainers(
 
 	for _, currentContainer := range containers {
 		restartPolicyStr := currentContainer.RestartPolicy.String()
-		shouldBoot := restartPolicyStr == "always" || restartPolicyStr == "unless-stopped"
+		shouldBoot := restartPolicyStr == "always" || restartPolicyStr == "on-failure"
 		if !shouldBoot {
 			continue
 		}
@@ -35,9 +35,7 @@ func BootContainers(
 		err = containerCmdRepo.Update(updateDto)
 		if err != nil {
 			log.Printf(
-				"[ContainerId: %s] UpdateContainerError: %s",
-				currentContainer.Id,
-				err,
+				"[ContainerId: %s] UpdateContainerError: %s", currentContainer.Id, err,
 			)
 			continue
 		}
