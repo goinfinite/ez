@@ -2,7 +2,9 @@ package infra
 
 import (
 	"errors"
+	"math/rand"
 	"os"
+	"strconv"
 	"time"
 
 	infraHelper "github.com/speedianet/control/src/infra/helper"
@@ -16,9 +18,7 @@ type SysInstallCmdRepo struct {
 }
 
 func (repo SysInstallCmdRepo) installNginx() error {
-	necessaryPkgs := []string{
-		"nginx",
-	}
+	necessaryPkgs := []string{"nginx"}
 	err := infraHelper.InstallPkgs(necessaryPkgs)
 	if err != nil {
 		return err
@@ -68,11 +68,7 @@ stream {
 }
 `
 
-	err = infraHelper.UpdateFile(
-		"/etc/nginx/nginx.conf",
-		nginxConf,
-		true,
-	)
+	err = infraHelper.UpdateFile("/etc/nginx/nginx.conf", nginxConf, true)
 	if err != nil {
 		return errors.New("UpdateNginxConfFailed: " + err.Error())
 	}
@@ -87,22 +83,12 @@ stream {
 		return errors.New("MakeNginxStreamDirFailed: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd(
-		"chown",
-		"-R",
-		"nginx:nginx",
-		"/var/nginx",
-	)
+	_, err = infraHelper.RunCmd("chown", "-R", "nginx:nginx", "/var/nginx")
 	if err != nil {
 		return errors.New("ChownNginxDirFailed: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd(
-		"systemctl",
-		"enable",
-		"nginx.service",
-		"--now",
-	)
+	_, err = infraHelper.RunCmd("systemctl", "enable", "nginx.service", "--now")
 	if err != nil {
 		return errors.New("EnableNginxSvcFailed: " + err.Error())
 	}
@@ -113,16 +99,8 @@ stream {
 func (repo SysInstallCmdRepo) Install() error {
 	//cspell:disable
 	necessaryPkgs := []string{
-		"git",
-		"wget",
-		"curl",
-		"cyrus-sasl",
-		"procps",
-		"xfsprogs",
-		"util-linux-tty-tools",
-		"dmidecode",
-		"whois",
-		"bind-utils",
+		"git", "wget", "curl", "cyrus-sasl", "procps", "xfsprogs",
+		"util-linux-tty-tools", "dmidecode", "whois", "bind-utils",
 	}
 	//cspell:enable
 	err := infraHelper.InstallPkgs(necessaryPkgs)
@@ -159,11 +137,7 @@ WantedBy=multi-user.target
 `
 	//cspell:enable
 
-	err = infraHelper.UpdateFile(
-		"/etc/systemd/system/hidepid.service",
-		hidepidSvc,
-		true,
-	)
+	err = infraHelper.UpdateFile("/etc/systemd/system/hidepid.service", hidepidSvc, true)
 	if err != nil {
 		return errors.New("UpdateHidepidSvcFailed: " + err.Error())
 	}
@@ -211,29 +185,40 @@ Delegate=cpu cpuset io memory pids
 		return errors.New("UpdateCgroupDelegateConfFailed: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd(
-		"systemctl",
-		"daemon-reload",
+	err = infraHelper.MakeDir("/etc/systemd/system/transactional-update.timer.d")
+	if err != nil {
+		return errors.New("MakeSystemdTransUpdateTimerDirFailed: " + err.Error())
+	}
+
+	randomMorningHour := strconv.Itoa(rand.Intn(7))
+	//cspell:disable
+	updateTimerOverride := `[Timer]
+OnCalendar=
+OnCalendar=Sat *-*-* 0` + randomMorningHour + `:00:00
+`
+	//cspell:enable
+
+	err = infraHelper.UpdateFile(
+		"/etc/systemd/system/transactional-update.timer.d/timer.conf",
+		updateTimerOverride,
+		true,
 	)
+	if err != nil {
+		return errors.New("UpdateTransUpdateTimerOverrideFailed: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd("systemctl", "daemon-reload")
 	if err != nil {
 		return errors.New("SystemctlDaemonReloadFailed: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd(
-		"systemctl",
-		"enable",
-		"hidepid.service",
-		"--now",
-	)
+	_, err = infraHelper.RunCmd("systemctl", "enable", "hidepid.service", "--now")
 	if err != nil {
 		return errors.New("EnableHidepidSvcFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
-		"systemctl",
-		"enable",
-		"cgroup-controllers.service",
-		"--now",
+		"systemctl", "enable", "cgroup-controllers.service", "--now",
 	)
 	if err != nil {
 		return errors.New("EnableCgroupControllersSvcFailed: " + err.Error())
