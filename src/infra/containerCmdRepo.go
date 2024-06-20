@@ -124,6 +124,7 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 func (repo *ContainerCmdRepo) containerEntityFactory(
 	createDto dto.CreateContainer,
 	containerName string,
+	nowUnixTime valueObject.UnixTime,
 ) (containerEntity entity.Container, err error) {
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
 		createDto.AccountId,
@@ -160,8 +161,6 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	if err != nil {
 		return containerEntity, err
 	}
-
-	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
 
 	return entity.NewContainer(
 		containerId,
@@ -270,14 +269,15 @@ func (repo *ContainerCmdRepo) runLaunchScript(
 func (repo *ContainerCmdRepo) Create(
 	createDto dto.CreateContainer,
 ) (containerId valueObject.ContainerId, err error) {
-	containerName := createDto.ProfileId.String() +
-		"-" + createDto.Hostname.String()
+	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+	hostnameStr := createDto.Hostname.String()
+	containerName := nowUnixTime.String() + "-" + hostnameStr
 
 	runParams := []string{
 		"run", "--detach",
 		"--name", containerName,
-		"--hostname", createDto.Hostname.String(),
-		"--env", "PRIMARY_VHOST=" + createDto.Hostname.String(),
+		"--hostname", hostnameStr,
+		"--env", "PRIMARY_VHOST=" + hostnameStr,
 	}
 
 	if len(createDto.Envs) > 0 {
@@ -344,7 +344,9 @@ func (repo *ContainerCmdRepo) Create(
 		return containerId, errors.New("ContainerRunError: " + err.Error())
 	}
 
-	containerEntity, err := repo.containerEntityFactory(createDto, containerName)
+	containerEntity, err := repo.containerEntityFactory(
+		createDto, containerName, nowUnixTime,
+	)
 	if err != nil {
 		return containerId, err
 	}
@@ -440,17 +442,6 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		if !strings.Contains(err.Error(), ignorableError) {
 			return errors.New("FailedToUpdateContainerSpecs: " + err.Error())
 		}
-	}
-
-	newContainerName := updateDto.ProfileId.String() +
-		"-" + currentContainer.Hostname.String()
-
-	_, err = infraHelper.RunCmdAsUser(
-		updateDto.AccountId,
-		"podman", "rename", updateDto.ContainerId.String(), newContainerName,
-	)
-	if err != nil {
-		return errors.New("FailedToRenameContainer: " + err.Error())
 	}
 
 	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
