@@ -2,8 +2,11 @@
 
 ```log
 0.0.2 - 2024/X/X
+refactor: use systemd to manage containers statuses
 feat: sort registry result by pull count
+feat: add transactional update timer overwrite
 fix: DockerHubImageFactoryError when search for "rocket.chat"
+fix: stop using profile id as prefix for container name
 chore: update front
 chore: update dependencies
 
