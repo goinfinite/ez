@@ -3,7 +3,9 @@ package infra
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -12,34 +14,22 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
-	"gorm.io/gorm"
 )
 
 type ContainerCmdRepo struct {
-	persistentDbSvc    *db.PersistentDatabaseService
-	containerQueryRepo *ContainerQueryRepo
+	persistentDbSvc           *db.PersistentDatabaseService
+	containerQueryRepo        *ContainerQueryRepo
+	containerProfileQueryRepo *ContainerProfileQueryRepo
 }
 
 func NewContainerCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *ContainerCmdRepo {
 	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
+	ContainerProfileQueryRepo := NewContainerProfileQueryRepo(persistentDbSvc)
 	return &ContainerCmdRepo{
-		persistentDbSvc:    persistentDbSvc,
-		containerQueryRepo: containerQueryRepo,
+		persistentDbSvc:           persistentDbSvc,
+		containerQueryRepo:        containerQueryRepo,
+		containerProfileQueryRepo: ContainerProfileQueryRepo,
 	}
-}
-
-func (repo *ContainerCmdRepo) getBaseSpecs(
-	profileId valueObject.ContainerProfileId,
-) (specs valueObject.ContainerSpecs, err error) {
-	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
-	containerProfile, err := profileQueryRepo.GetById(
-		profileId,
-	)
-	if err != nil {
-		return specs, err
-	}
-
-	return containerProfile.BaseSpecs, nil
 }
 
 func (repo *ContainerCmdRepo) calibratePortBindings(
@@ -124,7 +114,6 @@ func (repo *ContainerCmdRepo) getPortBindingsParam(
 func (repo *ContainerCmdRepo) containerEntityFactory(
 	createDto dto.CreateContainer,
 	containerName string,
-	nowUnixTime valueObject.UnixTime,
 ) (containerEntity entity.Container, err error) {
 	containerInfoJson, err := infraHelper.RunCmdAsUser(
 		createDto.AccountId,
@@ -162,6 +151,8 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 		return containerEntity, err
 	}
 
+	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+
 	return entity.NewContainer(
 		containerId,
 		createDto.AccountId,
@@ -193,15 +184,21 @@ func (repo *ContainerCmdRepo) runContainerCmd(
 	)
 }
 
+func (repo *ContainerCmdRepo) getAccountHomeDir(
+	accountId valueObject.AccountId,
+) (string, error) {
+	return infraHelper.RunCmdWithSubShell(
+		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
+	)
+}
+
 func (repo *ContainerCmdRepo) runLaunchScript(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 	launchScript *valueObject.LaunchScript,
 ) error {
 	accountIdStr := accountId.String()
-	accountHomeDir, err := infraHelper.RunCmdWithSubShell(
-		"awk -F: '$3 == " + accountIdStr + " {print $6}' /etc/passwd",
-	)
+	accountHomeDir, err := repo.getAccountHomeDir(accountId)
 	if err != nil {
 		return errors.New("GetAccountHomeDirError: " + err.Error())
 	}
@@ -269,12 +266,13 @@ func (repo *ContainerCmdRepo) runLaunchScript(
 func (repo *ContainerCmdRepo) Create(
 	createDto dto.CreateContainer,
 ) (containerId valueObject.ContainerId, err error) {
-	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
 	hostnameStr := createDto.Hostname.String()
-	containerName := nowUnixTime.String() + "-" + hostnameStr
+	containerName := hostnameStr
 
-	runParams := []string{
-		"run", "--detach",
+	createParams := []string{
+		"create",
+		"--cgroups=split",
+		"--sdnotify=conmon",
 		"--name", containerName,
 		"--hostname", hostnameStr,
 		"--env", "PRIMARY_VHOST=" + hostnameStr,
@@ -287,26 +285,11 @@ func (repo *ContainerCmdRepo) Create(
 			envFlags = append(envFlags, env.String())
 		}
 
-		runParams = append(runParams, envFlags...)
-	}
-
-	baseSpecs, err := repo.getBaseSpecs(*createDto.ProfileId)
-	if err != nil {
-		return containerId, err
-	}
-
-	baseSpecsParams := []string{
-		"--cpus", baseSpecs.CpuCores.String(),
-		"--memory", baseSpecs.MemoryBytes.String(),
-	}
-	runParams = append(runParams, baseSpecsParams...)
-
-	if createDto.RestartPolicy != nil {
-		runParams = append(runParams, "--restart", createDto.RestartPolicy.String())
+		createParams = append(createParams, envFlags...)
 	}
 
 	if createDto.Entrypoint != nil {
-		runParams = append(runParams, "--entrypoint", createDto.Entrypoint.String())
+		createParams = append(createParams, "--entrypoint", createDto.Entrypoint.String())
 	}
 
 	isSpeediaOs := createDto.ImageAddress.IsSpeediaOs()
@@ -331,27 +314,109 @@ func (repo *ContainerCmdRepo) Create(
 
 		portBindingsParams := repo.getPortBindingsParam(createDto.PortBindings)
 
-		runParams = append(runParams, portBindingsParams...)
+		createParams = append(createParams, portBindingsParams...)
 	}
 
-	runParams = append(runParams, createDto.ImageAddress.String())
+	createParams = append(createParams, createDto.ImageAddress.String())
 
 	_, err = infraHelper.RunCmdAsUser(
 		createDto.AccountId,
-		"podman", runParams...,
+		"podman", createParams...,
 	)
 	if err != nil {
-		return containerId, errors.New("ContainerRunError: " + err.Error())
+		return containerId, errors.New("CreateContainerError: " + err.Error())
 	}
 
-	containerEntity, err := repo.containerEntityFactory(
-		createDto, containerName, nowUnixTime,
-	)
+	containerProfile, err := repo.containerProfileQueryRepo.GetById(*createDto.ProfileId)
+	if err != nil {
+		return containerId, err
+	}
+
+	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Get() * 100
+	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
+
+	containerEntity, err := repo.containerEntityFactory(createDto, containerName)
 	if err != nil {
 		return containerId, err
 	}
 
 	containerId = containerEntity.Id
+
+	systemdUnitTemplate := `[Unit]
+Description=` + containerName + ` Container
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Type=forking
+Delegate=true
+{{if .RestartPolicy}}Restart={{ .RestartPolicy.String }}{{end}}
+Environment=PODMAN_SYSTEMD_UNIT=%n
+CPUQuota=` + cpuQuotaPercentileStr + `
+MemoryMax=` + containerProfile.BaseSpecs.MemoryBytes.String() + `
+MemorySwapMax=0
+ExecStart=/usr/bin/podman start ` + containerId.String() + `
+ExecStop=/usr/bin/podman stop -t 10 ` + containerId.String() + `
+TimeoutStartSec=900
+TimeoutStopSec=60
+OOMScoreAdjust=500
+KillMode=mixed
+
+[Install]
+WantedBy=default.target
+`
+
+	systemdUnitTemplatePtr, err := template.New("systemdUnitFile").Parse(systemdUnitTemplate)
+	if err != nil {
+		return containerId, errors.New("SystemdUnitTemplateParsingError: " + err.Error())
+	}
+
+	var systemdUnitFileContent strings.Builder
+	err = systemdUnitTemplatePtr.Execute(&systemdUnitFileContent, createDto)
+	if err != nil {
+		return containerId, errors.New("SystemdUnitTemplateExecutionError: " + err.Error())
+	}
+
+	accountHomeDir, err := repo.getAccountHomeDir(createDto.AccountId)
+	if err != nil {
+		return containerId, errors.New("GetAccountHomeDirError: " + err.Error())
+	}
+
+	systemdUnitDir := accountHomeDir + "/.config/systemd/user/"
+	_, err = infraHelper.RunCmdAsUser(createDto.AccountId, "mkdir", "-p", systemdUnitDir)
+	if err != nil {
+		return containerId, errors.New("MakeSystemdUnitDirError: " + err.Error())
+	}
+
+	unitName := containerName + ".service"
+	systemdUnitFilePath := systemdUnitDir + unitName
+	err = infraHelper.UpdateFile(systemdUnitFilePath, systemdUnitFileContent.String(), true)
+	if err != nil {
+		return containerId, errors.New("WriteSystemdUnitFileError: " + err.Error())
+	}
+
+	accountIdStr := createDto.AccountId.String()
+	_, err = infraHelper.RunCmd("chown", accountIdStr+":"+accountIdStr, systemdUnitFilePath)
+	if err != nil {
+		return containerId, errors.New("ChownSystemdUnitFileError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		createDto.AccountId,
+		"systemctl", "--user", "daemon-reload",
+	)
+	if err != nil {
+		return containerId, errors.New("SystemdDaemonReloadError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		createDto.AccountId,
+		"systemctl", "--user", "enable", "--now", unitName,
+	)
+	if err != nil {
+		return containerId, errors.New("SystemdEnableUnitError: " + err.Error())
+	}
 
 	containerModel := dbModel.Container{}.ToModel(containerEntity)
 	createResult := repo.persistentDbSvc.Handler.Create(&containerModel)
@@ -371,108 +436,169 @@ func (repo *ContainerCmdRepo) Create(
 	return containerId, err
 }
 
-func (repo *ContainerCmdRepo) updateContainerStatus(updateDto dto.UpdateContainer) error {
-	actionToPerform := "start"
-	if !*updateDto.Status {
-		actionToPerform = "stop"
-	}
-
-	_, err := infraHelper.RunCmdAsUser(
-		updateDto.AccountId,
-		"podman", actionToPerform, updateDto.ContainerId.String(),
-	)
+func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
+	containerEntity, err := repo.containerQueryRepo.GetById(updateDto.ContainerId)
 	if err != nil {
 		return err
 	}
 
-	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
-	updateMap := map[string]interface{}{
-		"status":     *updateDto.Status,
-		"started_at": time.Now(),
-		"stopped_at": gorm.Expr("NULL"),
-		"updated_at": time.Now(),
-	}
+	containerHostnameStr := containerEntity.Hostname.String()
+	unitName := containerHostnameStr + ".service"
+	containerIdStr := updateDto.ContainerId.String()
+	containerModel := dbModel.Container{ID: containerIdStr}
 
-	if !*updateDto.Status {
-		updateMap["started_at"] = gorm.Expr("NULL")
-		updateMap["stopped_at"] = time.Now()
-	}
-
-	updateResult := repo.persistentDbSvc.Handler.Model(&containerModel).Updates(updateMap)
-	return updateResult.Error
-}
-
-func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
-	currentContainer, err := repo.containerQueryRepo.GetById(updateDto.ContainerId)
-	if err != nil {
-		return errors.New("ContainerNotFound")
-	}
-
-	if updateDto.Status != nil && *updateDto.Status != currentContainer.Status {
-		err := repo.updateContainerStatus(updateDto)
-		if err != nil {
-			return errors.New("FailedToUpdateContainerStatus: " + err.Error())
+	if updateDto.Status != nil && *updateDto.Status != containerEntity.Status {
+		systemdCmd := "stop"
+		if *updateDto.Status {
+			systemdCmd = "start"
 		}
 
-		// Current OCI implementations does not support permanent container resources
-		// update. Therefore, when updating container status (on/off), it is also
-		// necessary to update the container profile to guarantee that the container
-		// resources are in accordance with the profile.
-		updateDto.ProfileId = &currentContainer.ProfileId
+		_, err = infraHelper.RunCmdAsUser(
+			updateDto.AccountId,
+			"systemctl", "--user", systemdCmd, unitName,
+		)
+		if err != nil {
+			return errors.New("SystemdCmdError: " + err.Error())
+		}
+
+		err = repo.persistentDbSvc.Handler.
+			Model(&containerModel).
+			Update("status", *updateDto.Status).Error
+		if err != nil {
+			return err
+		}
 	}
 
 	if updateDto.ProfileId == nil {
 		return nil
 	}
 
-	newSpecs, err := repo.getBaseSpecs(*updateDto.ProfileId)
+	containerProfile, err := repo.containerProfileQueryRepo.GetById(*updateDto.ProfileId)
 	if err != nil {
 		return err
 	}
 
+	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Get() * 100
+	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
+
+	unitFilePath, err := infraHelper.RunCmdAsUser(
+		updateDto.AccountId,
+		"systemctl", "--user", "show", "-P", "FragmentPath", unitName,
+	)
+	if err != nil {
+		return errors.New("GetSystemdUnitFilePathError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		updateDto.AccountId,
+		"sed", "-i", "s/CPUQuota=.*/CPUQuota="+cpuQuotaPercentileStr+"/",
+		unitFilePath,
+	)
+	if err != nil {
+		return errors.New("UpdateCpuQuotaError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		updateDto.AccountId,
+		"sed", "-i", "s/MemoryMax=.*/MemoryMax="+containerProfile.BaseSpecs.MemoryBytes.String()+"/",
+		unitFilePath,
+	)
+	if err != nil {
+		return errors.New("UpdateMemoryQuotaError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		updateDto.AccountId,
+		"systemctl", "--user", "daemon-reload",
+	)
+	if err != nil {
+		return errors.New("SystemdDaemonReloadError: " + err.Error())
+	}
+
+	// Podman doesn't read the systemd unit file on reload, so it's necessary to
+	// update the container specs directly as well.
 	_, err = infraHelper.RunCmdAsUser(
 		updateDto.AccountId,
 		"podman", "update",
-		"--cpus", newSpecs.CpuCores.String(),
-		"--memory", newSpecs.MemoryBytes.String(),
+		"--cpus", containerProfile.BaseSpecs.CpuCores.String(),
+		"--memory", containerProfile.BaseSpecs.MemoryBytes.String(),
 		updateDto.ContainerId.String(),
 	)
 	if err != nil {
 		ignorableError := "error opening file"
 		if !strings.Contains(err.Error(), ignorableError) {
-			return errors.New("FailedToUpdateContainerSpecs: " + err.Error())
+			return errors.New("UpdateContainerSpecsError: " + err.Error())
 		}
 	}
 
-	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
-	updateResult := repo.persistentDbSvc.Handler.Model(&containerModel).
-		Update("profile_id", updateDto.ProfileId.String())
-	return updateResult.Error
+	return repo.persistentDbSvc.Handler.
+		Model(&containerModel).
+		Update("profile_id", updateDto.ProfileId.String()).Error
 }
 
 func (repo *ContainerCmdRepo) Delete(
-	accId valueObject.AccountId,
+	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
-	_, err := infraHelper.RunCmdAsUser(
-		accId,
-		"podman", "rm", "--force", containerId.String(),
-	)
+	containerEntity, err := repo.containerQueryRepo.GetById(containerId)
 	if err != nil {
 		return err
+	}
+
+	containerHostnameStr := containerEntity.Hostname.String()
+	unitName := containerHostnameStr + ".service"
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"systemctl", "--user", "disable", "--now", unitName,
+	)
+	if err != nil {
+		return errors.New("SystemdDisableUnitError: " + err.Error())
+	}
+
+	unitFilePath, err := infraHelper.RunCmdAsUser(
+		accountId,
+		"systemctl", "--user", "show", "-P", "FragmentPath", unitName,
+	)
+	if err != nil {
+		return errors.New("GetSystemdUnitFilePathError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"rm", "-f", unitFilePath,
+	)
+	if err != nil {
+		return errors.New("RemoveSystemdUnitFileError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"systemctl", "--user", "daemon-reload",
+	)
+	if err != nil {
+		return errors.New("SystemdDaemonReloadError: " + err.Error())
+	}
+
+	containerIdStr := containerId.String()
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "rm", "--force", containerIdStr,
+	)
+	if err != nil {
+		return errors.New("RemoveContainerError: " + err.Error())
 	}
 
 	portBindingModel := dbModel.ContainerPortBinding{}
 	deleteResult := repo.persistentDbSvc.Handler.Delete(
 		portBindingModel,
-		"container_id = ?",
-		containerId.String(),
+		"container_id = ?", containerIdStr,
 	)
 	if deleteResult.Error != nil {
 		return err
 	}
 
-	containerModel := dbModel.Container{ID: containerId.String()}
+	containerModel := dbModel.Container{ID: containerIdStr}
 	deleteResult = repo.persistentDbSvc.Handler.Delete(&containerModel)
 	return deleteResult.Error
 }
