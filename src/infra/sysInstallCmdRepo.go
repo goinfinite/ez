@@ -349,7 +349,7 @@ func (repo SysInstallCmdRepo) AddDataDisk() error {
 	}
 
 	_, err = infraHelper.RunCmdWithSubShell(
-		"echo 'UUID=" + addDiskUuid + " /var/data xfs defaults,uquota 0 0' >> /etc/fstab",
+		"echo 'UUID=" + addDiskUuid + " /var/data xfs defaults,uquota,prjquota 0 0' >> /etc/fstab",
 	)
 	if err != nil {
 		return errors.New("AddDataDiskToFsTabFailed: " + err.Error())
