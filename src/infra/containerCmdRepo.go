@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -173,6 +172,121 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	), nil
 }
 
+func (repo *ContainerCmdRepo) containerNameFactory(
+	containerHostname valueObject.Fqdn,
+) string {
+	return containerHostname.String()
+}
+
+func (repo *ContainerCmdRepo) containerSystemdUnitNameFactory(
+	containerName string,
+) string {
+	return containerName + ".service"
+}
+
+func (repo *ContainerCmdRepo) getAccountHomeDir(
+	accountId valueObject.AccountId,
+) (string, error) {
+	return infraHelper.RunCmdWithSubShell(
+		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
+	)
+}
+
+func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
+	accountId valueObject.AccountId,
+	containerId valueObject.ContainerId,
+	containerHostname valueObject.Fqdn,
+	restartPolicy valueObject.ContainerRestartPolicy,
+	profileId valueObject.ContainerProfileId,
+) error {
+	containerName := repo.containerNameFactory(containerHostname)
+
+	containerProfile, err := repo.containerProfileQueryRepo.GetById(profileId)
+	if err != nil {
+		return err
+	}
+	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Get() * 100
+	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
+	memoryBytesStr := containerProfile.BaseSpecs.MemoryBytes.String()
+
+	containerIdStr := containerId.String()
+
+	systemdUnitTemplate := `[Unit]
+Description=` + containerName + ` Container
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Type=forking
+Delegate=true
+Restart=` + restartPolicy.String() + `
+Environment=PODMAN_SYSTEMD_UNIT=%n
+CPUQuota=` + cpuQuotaPercentileStr + `
+MemoryMax=` + memoryBytesStr + `
+MemorySwapMax=0
+ExecStartPre=/usr/bin/podman update --cpus ` + containerProfile.BaseSpecs.CpuCores.String() + ` --memory ` + containerProfile.BaseSpecs.MemoryBytes.String() + ` ` + containerIdStr + `
+ExecStart=/usr/bin/podman start ` + containerIdStr + `
+ExecStop=/usr/bin/podman stop -t 30 ` + containerIdStr + `
+TimeoutStartSec=30
+TimeoutStopSec=30
+OOMScoreAdjust=500
+KillMode=mixed
+
+[Install]
+WantedBy=default.target
+`
+
+	accountHomeDir, err := repo.getAccountHomeDir(accountId)
+	if err != nil {
+		return errors.New("GetAccountHomeDirError: " + err.Error())
+	}
+
+	systemdUnitDir := accountHomeDir + "/.config/systemd/user/"
+	_, err = infraHelper.RunCmdAsUser(accountId, "mkdir", "-p", systemdUnitDir)
+	if err != nil {
+		return errors.New("MakeSystemdUnitDirError: " + err.Error())
+	}
+
+	systemdUnitFilePath := systemdUnitDir + repo.containerSystemdUnitNameFactory(containerName)
+	err = infraHelper.UpdateFile(systemdUnitFilePath, systemdUnitTemplate, true)
+	if err != nil {
+		return errors.New("WriteSystemdUnitFileError: " + err.Error())
+	}
+
+	accountIdStr := accountId.String()
+	_, err = infraHelper.RunCmd("chown", accountIdStr+":"+accountIdStr, systemdUnitFilePath)
+	if err != nil {
+		return errors.New("ChownSystemdUnitFileError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"systemctl", "--user", "daemon-reload",
+	)
+	if err != nil {
+		return errors.New("SystemdDaemonReloadError: " + err.Error())
+	}
+
+	// Podman doesn't read the systemd unit file on reload, so it's necessary to
+	// update the container specs directly as well.
+	_, err = infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "update",
+		"--cpus", containerProfile.BaseSpecs.CpuCores.String(),
+		"--memory", containerProfile.BaseSpecs.MemoryBytes.String(),
+		containerIdStr,
+	)
+	if err != nil {
+		ignorableError := "error opening file"
+		if !strings.Contains(err.Error(), ignorableError) {
+			return errors.New("UpdateContainerSpecsError: " + err.Error())
+		}
+	}
+
+	return nil
+}
+
 func (repo *ContainerCmdRepo) runContainerCmd(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
@@ -181,14 +295,6 @@ func (repo *ContainerCmdRepo) runContainerCmd(
 	return infraHelper.RunCmdAsUser(
 		accountId,
 		"podman", "exec", containerId.String(), "/bin/sh", "-c", command,
-	)
-}
-
-func (repo *ContainerCmdRepo) getAccountHomeDir(
-	accountId valueObject.AccountId,
-) (string, error) {
-	return infraHelper.RunCmdWithSubShell(
-		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
 	)
 }
 
@@ -266,13 +372,13 @@ func (repo *ContainerCmdRepo) runLaunchScript(
 func (repo *ContainerCmdRepo) Create(
 	createDto dto.CreateContainer,
 ) (containerId valueObject.ContainerId, err error) {
+	containerName := repo.containerNameFactory(createDto.Hostname)
 	hostnameStr := createDto.Hostname.String()
-	containerName := hostnameStr
 
 	createParams := []string{
 		"create",
 		"--cgroups=split",
-		"--sdnotify=conmon",
+		"--sdnotify=ignore",
 		"--name", containerName,
 		"--hostname", hostnameStr,
 		"--env", "PRIMARY_VHOST=" + hostnameStr,
@@ -327,92 +433,27 @@ func (repo *ContainerCmdRepo) Create(
 		return containerId, errors.New("CreateContainerError: " + err.Error())
 	}
 
-	containerProfile, err := repo.containerProfileQueryRepo.GetById(*createDto.ProfileId)
-	if err != nil {
-		return containerId, err
-	}
-
-	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Get() * 100
-	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
-
 	containerEntity, err := repo.containerEntityFactory(createDto, containerName)
 	if err != nil {
 		return containerId, err
 	}
-
 	containerId = containerEntity.Id
 
-	systemdUnitTemplate := `[Unit]
-Description=` + containerName + ` Container
-Wants=network-online.target
-After=network-online.target
-RequiresMountsFor=%t/containers
-
-[Service]
-Type=forking
-Delegate=true
-{{if .RestartPolicy}}Restart={{ .RestartPolicy.String }}{{end}}
-Environment=PODMAN_SYSTEMD_UNIT=%n
-CPUQuota=` + cpuQuotaPercentileStr + `
-MemoryMax=` + containerProfile.BaseSpecs.MemoryBytes.String() + `
-MemorySwapMax=0
-ExecStart=/usr/bin/podman start ` + containerId.String() + `
-ExecStop=/usr/bin/podman stop -t 10 ` + containerId.String() + `
-TimeoutStartSec=900
-TimeoutStopSec=60
-OOMScoreAdjust=500
-KillMode=mixed
-
-[Install]
-WantedBy=default.target
-`
-
-	systemdUnitTemplatePtr, err := template.New("systemdUnitFile").Parse(systemdUnitTemplate)
-	if err != nil {
-		return containerId, errors.New("SystemdUnitTemplateParsingError: " + err.Error())
-	}
-
-	var systemdUnitFileContent strings.Builder
-	err = systemdUnitTemplatePtr.Execute(&systemdUnitFileContent, createDto)
-	if err != nil {
-		return containerId, errors.New("SystemdUnitTemplateExecutionError: " + err.Error())
-	}
-
-	accountHomeDir, err := repo.getAccountHomeDir(createDto.AccountId)
-	if err != nil {
-		return containerId, errors.New("GetAccountHomeDirError: " + err.Error())
-	}
-
-	systemdUnitDir := accountHomeDir + "/.config/systemd/user/"
-	_, err = infraHelper.RunCmdAsUser(createDto.AccountId, "mkdir", "-p", systemdUnitDir)
-	if err != nil {
-		return containerId, errors.New("MakeSystemdUnitDirError: " + err.Error())
-	}
-
-	unitName := containerName + ".service"
-	systemdUnitFilePath := systemdUnitDir + unitName
-	err = infraHelper.UpdateFile(systemdUnitFilePath, systemdUnitFileContent.String(), true)
-	if err != nil {
-		return containerId, errors.New("WriteSystemdUnitFileError: " + err.Error())
-	}
-
-	accountIdStr := createDto.AccountId.String()
-	_, err = infraHelper.RunCmd("chown", accountIdStr+":"+accountIdStr, systemdUnitFilePath)
-	if err != nil {
-		return containerId, errors.New("ChownSystemdUnitFileError: " + err.Error())
-	}
-
-	_, err = infraHelper.RunCmdAsUser(
+	err = repo.updateContainerSystemdUnit(
 		createDto.AccountId,
-		"systemctl", "--user", "daemon-reload",
+		containerId,
+		createDto.Hostname,
+		*createDto.RestartPolicy,
+		*createDto.ProfileId,
 	)
 	if err != nil {
-		return containerId, errors.New("SystemdDaemonReloadError: " + err.Error())
+		return containerId, errors.New("UpdateSystemdUnitError: " + err.Error())
 	}
 
+	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
 	_, err = infraHelper.RunCmdAsUser(
 		createDto.AccountId,
-		"systemctl", "--user", "enable", "--now", unitName,
+		"systemctl", "--user", "enable", "--now", systemdUnitName,
 	)
 	if err != nil {
 		return containerId, errors.New("SystemdEnableUnitError: " + err.Error())
@@ -442,10 +483,9 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		return err
 	}
 
-	containerHostnameStr := containerEntity.Hostname.String()
-	unitName := containerHostnameStr + ".service"
-	containerIdStr := updateDto.ContainerId.String()
-	containerModel := dbModel.Container{ID: containerIdStr}
+	containerName := repo.containerNameFactory(containerEntity.Hostname)
+	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
+	containerModel := dbModel.Container{ID: updateDto.ContainerId.String()}
 
 	if updateDto.Status != nil && *updateDto.Status != containerEntity.Status {
 		systemdCmd := "stop"
@@ -455,7 +495,7 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 
 		_, err = infraHelper.RunCmdAsUser(
 			updateDto.AccountId,
-			"systemctl", "--user", systemdCmd, unitName,
+			"systemctl", "--user", systemdCmd, systemdUnitName,
 		)
 		if err != nil {
 			return errors.New("SystemdCmdError: " + err.Error())
@@ -473,62 +513,15 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		return nil
 	}
 
-	containerProfile, err := repo.containerProfileQueryRepo.GetById(*updateDto.ProfileId)
-	if err != nil {
-		return err
-	}
-
-	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Get() * 100
-	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
-
-	unitFilePath, err := infraHelper.RunCmdAsUser(
+	err = repo.updateContainerSystemdUnit(
 		updateDto.AccountId,
-		"systemctl", "--user", "show", "-P", "FragmentPath", unitName,
+		updateDto.ContainerId,
+		containerEntity.Hostname,
+		containerEntity.RestartPolicy,
+		*updateDto.ProfileId,
 	)
 	if err != nil {
-		return errors.New("GetSystemdUnitFilePathError: " + err.Error())
-	}
-
-	_, err = infraHelper.RunCmdAsUser(
-		updateDto.AccountId,
-		"sed", "-i", "s/CPUQuota=.*/CPUQuota="+cpuQuotaPercentileStr+"/",
-		unitFilePath,
-	)
-	if err != nil {
-		return errors.New("UpdateCpuQuotaError: " + err.Error())
-	}
-
-	_, err = infraHelper.RunCmdAsUser(
-		updateDto.AccountId,
-		"sed", "-i", "s/MemoryMax=.*/MemoryMax="+containerProfile.BaseSpecs.MemoryBytes.String()+"/",
-		unitFilePath,
-	)
-	if err != nil {
-		return errors.New("UpdateMemoryQuotaError: " + err.Error())
-	}
-
-	_, err = infraHelper.RunCmdAsUser(
-		updateDto.AccountId,
-		"systemctl", "--user", "daemon-reload",
-	)
-	if err != nil {
-		return errors.New("SystemdDaemonReloadError: " + err.Error())
-	}
-
-	// Podman doesn't read the systemd unit file on reload, so it's necessary to
-	// update the container specs directly as well.
-	_, err = infraHelper.RunCmdAsUser(
-		updateDto.AccountId,
-		"podman", "update",
-		"--cpus", containerProfile.BaseSpecs.CpuCores.String(),
-		"--memory", containerProfile.BaseSpecs.MemoryBytes.String(),
-		updateDto.ContainerId.String(),
-	)
-	if err != nil {
-		ignorableError := "error opening file"
-		if !strings.Contains(err.Error(), ignorableError) {
-			return errors.New("UpdateContainerSpecsError: " + err.Error())
-		}
+		return errors.New("UpdateSystemdUnitError: " + err.Error())
 	}
 
 	return repo.persistentDbSvc.Handler.
@@ -545,12 +538,12 @@ func (repo *ContainerCmdRepo) Delete(
 		return err
 	}
 
-	containerHostnameStr := containerEntity.Hostname.String()
-	unitName := containerHostnameStr + ".service"
+	containerName := repo.containerNameFactory(containerEntity.Hostname)
+	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
 
 	_, err = infraHelper.RunCmdAsUser(
 		accountId,
-		"systemctl", "--user", "disable", "--now", unitName,
+		"systemctl", "--user", "disable", "--now", systemdUnitName,
 	)
 	if err != nil {
 		return errors.New("SystemdDisableUnitError: " + err.Error())
@@ -558,33 +551,24 @@ func (repo *ContainerCmdRepo) Delete(
 
 	unitFilePath, err := infraHelper.RunCmdAsUser(
 		accountId,
-		"systemctl", "--user", "show", "-P", "FragmentPath", unitName,
+		"systemctl", "--user", "show", "-P", "FragmentPath", systemdUnitName,
 	)
 	if err != nil {
 		return errors.New("GetSystemdUnitFilePathError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"rm", "-f", unitFilePath,
-	)
+	_, err = infraHelper.RunCmdAsUser(accountId, "rm", "-f", unitFilePath)
 	if err != nil {
 		return errors.New("RemoveSystemdUnitFileError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"systemctl", "--user", "daemon-reload",
-	)
+	_, err = infraHelper.RunCmdAsUser(accountId, "systemctl", "--user", "daemon-reload")
 	if err != nil {
 		return errors.New("SystemdDaemonReloadError: " + err.Error())
 	}
 
 	containerIdStr := containerId.String()
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"podman", "rm", "--force", containerIdStr,
-	)
+	_, err = infraHelper.RunCmdAsUser(accountId, "podman", "rm", "--force", containerIdStr)
 	if err != nil {
 		return errors.New("RemoveContainerError: " + err.Error())
 	}
