@@ -100,7 +100,7 @@ func (repo SysInstallCmdRepo) Install() error {
 	//cspell:disable
 	necessaryPkgs := []string{
 		"git", "wget", "curl", "cyrus-sasl", "procps", "xfsprogs",
-		"util-linux-tty-tools", "dmidecode", "whois", "bind-utils",
+		"util-linux-tty-tools", "dmidecode", "whois", "bind-utils", "jq",
 	}
 	//cspell:enable
 	err := infraHelper.InstallPkgs(necessaryPkgs)
