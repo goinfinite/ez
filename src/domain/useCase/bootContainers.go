@@ -29,7 +29,7 @@ func BootContainers(
 			currentContainer.AccountId,
 			currentContainer.Id,
 			&newContainerStatus,
-			&currentContainer.ProfileId,
+			nil,
 		)
 
 		err = containerCmdRepo.Update(updateDto)
