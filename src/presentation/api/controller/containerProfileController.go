@@ -94,7 +94,7 @@ func CreateContainerProfileController(c echo.Context) error {
 
 	var scalingThresholdPtr *uint64
 	if requestBody["scalingThreshold"] != nil {
-		scalingThreshold, err := voHelper.InterfaceToUint(requestBody["scalingThreshold"])
+		scalingThreshold, err := voHelper.InterfaceToUint64(requestBody["scalingThreshold"])
 		if err != nil {
 			return apiHelper.ResponseWrapper(
 				c,
@@ -107,7 +107,7 @@ func CreateContainerProfileController(c echo.Context) error {
 
 	var scalingMaxDurationSecsPtr *uint64
 	if requestBody["scalingMaxDurationSecs"] != nil {
-		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
+		scalingMaxDurationSecs, err := voHelper.InterfaceToUint64(
 			requestBody["scalingMaxDurationSecs"],
 		)
 		if err != nil {
@@ -122,7 +122,7 @@ func CreateContainerProfileController(c echo.Context) error {
 
 	var scalingIntervalSecsPtr *uint64
 	if requestBody["scalingIntervalSecs"] != nil {
-		scalingIntervalSecs, err := voHelper.InterfaceToUint(
+		scalingIntervalSecs, err := voHelper.InterfaceToUint64(
 			requestBody["scalingIntervalSecs"],
 		)
 		if err != nil {
@@ -225,7 +225,7 @@ func UpdateContainerProfileController(c echo.Context) error {
 
 	var scalingThresholdPtr *uint64
 	if requestBody["scalingThreshold"] != nil {
-		scalingThreshold, err := voHelper.InterfaceToUint(requestBody["scalingThreshold"])
+		scalingThreshold, err := voHelper.InterfaceToUint64(requestBody["scalingThreshold"])
 		if err != nil {
 			return apiHelper.ResponseWrapper(
 				c,
@@ -238,7 +238,7 @@ func UpdateContainerProfileController(c echo.Context) error {
 
 	var scalingMaxDurationSecsPtr *uint64
 	if requestBody["scalingMaxDurationSecs"] != nil {
-		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
+		scalingMaxDurationSecs, err := voHelper.InterfaceToUint64(
 			requestBody["scalingMaxDurationSecs"],
 		)
 		if err != nil {
@@ -253,7 +253,7 @@ func UpdateContainerProfileController(c echo.Context) error {
 
 	var scalingIntervalSecsPtr *uint64
 	if requestBody["scalingIntervalSecs"] != nil {
-		scalingIntervalSecs, err := voHelper.InterfaceToUint(
+		scalingIntervalSecs, err := voHelper.InterfaceToUint64(
 			requestBody["scalingIntervalSecs"],
 		)
 		if err != nil {

@@ -138,7 +138,7 @@ func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 		pullCount = uint64(pullCountInt)
 	}
 
-	starCount, err := voHelper.InterfaceToUint(imageMap["star_count"])
+	starCount, err := voHelper.InterfaceToUint64(imageMap["star_count"])
 	if err != nil {
 		return registryImage, err
 	}
