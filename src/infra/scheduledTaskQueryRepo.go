@@ -31,7 +31,7 @@ func (repo *ScheduledTaskQueryRepo) Get() ([]entity.ScheduledTask, error) {
 	for _, scheduledTaskModel := range scheduledTaskModels {
 		scheduledTaskEntity, err := scheduledTaskModel.ToEntity()
 		if err != nil {
-			log.Printf("[%s] %s", scheduledTaskModel.ID, err.Error())
+			log.Printf("[%d] %s", scheduledTaskModel.ID, err.Error())
 			continue
 		}
 		scheduledTasks = append(scheduledTasks, scheduledTaskEntity)
