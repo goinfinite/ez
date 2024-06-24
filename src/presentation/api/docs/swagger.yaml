@@ -370,6 +370,33 @@ definitions:
       updatedAt:
         type: integer
     type: object
+  entity.ScheduledTask:
+    properties:
+      command:
+        type: string
+      createdAt:
+        type: integer
+      err:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      output:
+        type: string
+      runAt:
+        type: integer
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      timeoutSecs:
+        type: integer
+      updatedAt:
+        type: integer
+    type: object
   valueObject.AccessTokenType:
     enum:
     - sessionToken
@@ -1076,6 +1103,25 @@ paths:
       summary: O11yOverview
       tags:
       - o11y
+  /v1/task/:
+    get:
+      consumes:
+      - application/json
+      description: List scheduledTasks.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.ScheduledTask'
+            type: array
+      security:
+      - Bearer: []
+      summary: ReadScheduledTasks
+      tags:
+      - task
 securityDefinitions:
   Bearer:
     description: Type "Bearer" + JWT token or API key.

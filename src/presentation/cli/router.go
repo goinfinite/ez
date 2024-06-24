@@ -125,6 +125,17 @@ func (router *Router) o11yRoutes() {
 	rootCmd.AddCommand(o11yCmd)
 }
 
+func (router *Router) scheduledTaskRoutes() {
+	var scheduledTaskCmd = &cobra.Command{
+		Use:   "task",
+		Short: "ScheduledTaskManagement",
+	}
+
+	scheduledTaskController := cliController.NewScheduledTaskController(router.persistentDbSvc)
+	scheduledTaskCmd.AddCommand(scheduledTaskController.Read())
+	rootCmd.AddCommand(scheduledTaskCmd)
+}
+
 func (router *Router) systemRoutes() {
 	var versionCmd = &cobra.Command{
 		Use:   "version",
@@ -152,5 +163,6 @@ func (router Router) RegisterRoutes() {
 	router.licenseRoutes()
 	router.mappingRoutes()
 	router.o11yRoutes()
+	router.scheduledTaskRoutes()
 	router.systemRoutes()
 }

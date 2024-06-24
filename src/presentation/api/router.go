@@ -109,6 +109,13 @@ func (router *Router) o11yRoutes() {
 	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
 }
 
+func (router *Router) scheduledTaskRoutes() {
+	scheduledTaskGroup := router.baseRoute.Group("/v1/scheduled-task")
+
+	scheduledTaskController := apiController.NewScheduledTaskController(router.persistentDbSvc)
+	scheduledTaskGroup.GET("/", scheduledTaskController.Read)
+}
+
 func (router *Router) RegisterRoutes() {
 	router.swaggerRoute()
 	router.authRoutes()
@@ -117,4 +124,5 @@ func (router *Router) RegisterRoutes() {
 	router.licenseRoutes()
 	router.mappingRoutes()
 	router.o11yRoutes()
+	router.scheduledTaskRoutes()
 }
