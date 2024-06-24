@@ -9,7 +9,7 @@ import (
 )
 
 type ScheduledTask struct {
-	ID          string `gorm:"primarykey"`
+	ID          uint   `gorm:"primarykey"`
 	Name        string `gorm:"not null"`
 	Status      string `gorm:"not null"`
 	Command     string `gorm:"not null"`
@@ -24,6 +24,39 @@ type ScheduledTask struct {
 
 func (ScheduledTask) TableName() string {
 	return "scheduled_tasks"
+}
+
+func NewScheduledTask(
+	id uint,
+	name string,
+	status string,
+	command string,
+	tags []string,
+	timeoutSecs *uint,
+	runAt *time.Time,
+	output *string,
+	err *string,
+) ScheduledTask {
+	model := ScheduledTask{
+		Name:        name,
+		Status:      status,
+		Command:     command,
+		TimeoutSecs: timeoutSecs,
+		RunAt:       runAt,
+		Output:      output,
+		Error:       err,
+	}
+
+	if id != 0 {
+		model.ID = id
+	}
+
+	if len(tags) > 0 {
+		modelTags := strings.Join(tags, ";")
+		model.Tags = &modelTags
+	}
+
+	return model
 }
 
 func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err error) {
