@@ -10,7 +10,7 @@ import (
 type InodesCount uint64
 
 func NewInodesCount(value interface{}) (InodesCount, error) {
-	ic, err := voHelper.InterfaceToUint(value)
+	ic, err := voHelper.InterfaceToUint64(value)
 	if err != nil {
 		return 0, errors.New("InvalidInodesCount")
 	}

@@ -10,7 +10,7 @@ import (
 type ContainerProfileId uint64
 
 func NewContainerProfileId(value interface{}) (ContainerProfileId, error) {
-	rpId, err := voHelper.InterfaceToUint(value)
+	rpId, err := voHelper.InterfaceToUint64(value)
 	if err != nil {
 		return 0, errors.New("InvalidContainerProfileId")
 	}

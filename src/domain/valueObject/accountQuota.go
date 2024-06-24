@@ -47,12 +47,12 @@ func NewAccountQuotaFromString(value string) (AccountQuota, error) {
 		return AccountQuota{}, err
 	}
 
-	memory, err := voHelper.InterfaceToUint(specParts[1])
+	memory, err := voHelper.InterfaceToUint64(specParts[1])
 	if err != nil {
 		return AccountQuota{}, errors.New("InvalidMemoryLimit")
 	}
 
-	disk, err := voHelper.InterfaceToUint(specParts[2])
+	disk, err := voHelper.InterfaceToUint64(specParts[2])
 	if err != nil {
 		return AccountQuota{}, errors.New("InvalidDiskLimit")
 	}

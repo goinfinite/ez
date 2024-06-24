@@ -10,7 +10,7 @@ import (
 type MappingTargetId uint64
 
 func NewMappingTargetId(value interface{}) (MappingTargetId, error) {
-	targetId, err := voHelper.InterfaceToUint(value)
+	targetId, err := voHelper.InterfaceToUint64(value)
 	if err != nil {
 		return 0, errors.New("InvalidMappingTargetId")
 	}
