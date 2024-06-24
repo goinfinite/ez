@@ -10,8 +10,8 @@ type ScheduledTask struct {
 	Tags        []valueObject.ScheduledTaskTag   `json:"tags"`
 	TimeoutSecs *uint                            `json:"timeoutSecs"`
 	RunAt       *valueObject.UnixTime            `json:"runAt"`
-	Stdout      *valueObject.ScheduledTaskOutput `json:"stdout"`
-	Stderr      *valueObject.ScheduledTaskOutput `json:"stderr"`
+	Output      *valueObject.ScheduledTaskOutput `json:"output"`
+	Error       *valueObject.ScheduledTaskOutput `json:"err"`
 	CreatedAt   valueObject.UnixTime             `json:"createdAt"`
 	UpdatedAt   valueObject.UnixTime             `json:"updatedAt"`
 }
@@ -24,8 +24,8 @@ func NewScheduledTask(
 	tags []valueObject.ScheduledTaskTag,
 	timeoutSecs *uint,
 	runAt *valueObject.UnixTime,
-	stdout *valueObject.ScheduledTaskOutput,
-	stderr *valueObject.ScheduledTaskOutput,
+	output *valueObject.ScheduledTaskOutput,
+	err *valueObject.ScheduledTaskOutput,
 	createdAt valueObject.UnixTime,
 	updatedAt valueObject.UnixTime,
 ) ScheduledTask {
@@ -37,8 +37,8 @@ func NewScheduledTask(
 		Tags:        tags,
 		TimeoutSecs: timeoutSecs,
 		RunAt:       runAt,
-		Stdout:      stdout,
-		Stderr:      stderr,
+		Output:      output,
+		Error:       err,
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
 	}
