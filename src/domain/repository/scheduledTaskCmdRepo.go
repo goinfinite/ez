@@ -6,4 +6,5 @@ import (
 
 type ScheduledTaskCmdRepo interface {
 	Create(createDto dto.CreateScheduledTask) error
+	Update(updateDto dto.UpdateScheduledTask) error
 }
