@@ -32,3 +32,37 @@ func (controller *ScheduledTaskController) Read() *cobra.Command {
 
 	return cmd
 }
+
+func (controller *ScheduledTaskController) Update() *cobra.Command {
+	var taskIdUint uint
+	var statusStr string
+	var runAtInt64 int64
+
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "UpdateScheduledTask",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"id": taskIdUint,
+			}
+
+			if statusStr != "" {
+				requestBody["status"] = statusStr
+			}
+
+			if runAtInt64 != 0 {
+				requestBody["runAt"] = runAtInt64
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.scheduledTaskService.Update(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().UintVarP(&taskIdUint, "task-id", "t", 0, "TaskId")
+	cmd.MarkFlagRequired("task-id")
+	cmd.Flags().StringVarP(&statusStr, "status", "s", "", "Status (pending/cancelled)")
+	cmd.Flags().Int64VarP(&runAtInt64, "run-at", "r", 0, "RunAt (in unix epoch)")
+	return cmd
+}

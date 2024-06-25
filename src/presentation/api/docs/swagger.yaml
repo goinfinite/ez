@@ -168,6 +168,15 @@ definitions:
       scalingThreshold:
         type: integer
     type: object
+  dto.UpdateScheduledTask:
+    properties:
+      id:
+        type: integer
+      runAt:
+        type: integer
+      status:
+        type: string
+    type: object
   entity.AccessToken:
     properties:
       expiresIn:
@@ -1107,7 +1116,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: List scheduledTasks.
+      description: List scheduled tasks.
       produces:
       - application/json
       responses:
@@ -1120,6 +1129,29 @@ paths:
       security:
       - Bearer: []
       summary: ReadScheduledTasks
+      tags:
+      - task
+    put:
+      consumes:
+      - application/json
+      description: Reschedule a task or change its status.
+      parameters:
+      - description: UpdateScheduledTask (Only id is required.)
+        in: body
+        name: updateScheduledTaskDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateScheduledTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ScheduledTaskUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateScheduledTask
       tags:
       - task
 securityDefinitions:

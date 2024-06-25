@@ -910,7 +910,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "List scheduledTasks.",
+                "description": "List scheduled tasks.",
                 "consumes": [
                     "application/json"
                 ],
@@ -929,6 +929,43 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/entity.ScheduledTask"
                             }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Reschedule a task or change its status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "UpdateScheduledTask",
+                "parameters": [
+                    {
+                        "description": "UpdateScheduledTask (Only id is required.)",
+                        "name": "updateScheduledTaskDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateScheduledTask"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ScheduledTaskUpdated",
+                        "schema": {
+                            "type": "object"
                         }
                     }
                 }
@@ -1190,6 +1227,20 @@ const docTemplate = `{
                 },
                 "scalingThreshold": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateScheduledTask": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "runAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
