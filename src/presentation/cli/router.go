@@ -133,6 +133,7 @@ func (router *Router) scheduledTaskRoutes() {
 
 	scheduledTaskController := cliController.NewScheduledTaskController(router.persistentDbSvc)
 	scheduledTaskCmd.AddCommand(scheduledTaskController.Read())
+	scheduledTaskCmd.AddCommand(scheduledTaskController.Update())
 	rootCmd.AddCommand(scheduledTaskCmd)
 }
 
