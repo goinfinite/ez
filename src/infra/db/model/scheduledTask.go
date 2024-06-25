@@ -99,7 +99,7 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 
 	var runAtPtr *valueObject.UnixTime
 	if model.RunAt != nil {
-		runAt := valueObject.UnixTime(model.RunAt.Unix())
+		runAt := valueObject.NewUnixTimeWithGoTime(*model.RunAt)
 		runAtPtr = &runAt
 	}
 
@@ -121,8 +121,8 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 		taskErrorPtr = &taskError
 	}
 
-	createdAt := valueObject.UnixTime(model.CreatedAt.Unix())
-	updatedAt := valueObject.UnixTime(model.UpdatedAt.Unix())
+	createdAt := valueObject.NewUnixTimeWithGoTime(model.CreatedAt)
+	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewScheduledTask(
 		id,

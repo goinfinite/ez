@@ -1,11 +1,39 @@
 package valueObject
 
 import (
+	"errors"
 	"strconv"
 	"time"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type UnixTime int64
+
+func NewUnixTime(value interface{}) (UnixTime, error) {
+	unixTime, err := voHelper.InterfaceToInt64(value)
+	if err != nil {
+		return 0, errors.New("InvalidScheduledTaskId")
+	}
+
+	return UnixTime(unixTime), nil
+}
+
+func NewUnixTimeNow() UnixTime {
+	return UnixTime(time.Now().Unix())
+}
+
+func NewUnixTimeBeforeNow(duration time.Duration) UnixTime {
+	return UnixTime(time.Now().Add(-duration).Unix())
+}
+
+func NewUnixTimeAfterNow(duration time.Duration) UnixTime {
+	return UnixTime(time.Now().Add(duration).Unix())
+}
+
+func NewUnixTimeWithGoTime(goTime time.Time) UnixTime {
+	return UnixTime(goTime.Unix())
+}
 
 func (vo UnixTime) Get() int64 {
 	return time.Unix(int64(vo), 0).UTC().Unix()
@@ -21,6 +49,10 @@ func (vo UnixTime) GetDateOnly() string {
 
 func (vo UnixTime) GetTimeOnly() string {
 	return time.Unix(int64(vo), 0).UTC().Format("15:04:05")
+}
+
+func (vo UnixTime) GetAsGoTime() time.Time {
+	return time.Unix(int64(vo), 0).UTC()
 }
 
 func (vo UnixTime) String() string {

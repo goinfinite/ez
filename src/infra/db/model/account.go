@@ -76,7 +76,7 @@ func (model Account) ToEntity() (entity.Account, error) {
 		username,
 		quota,
 		quotaUsage,
-		valueObject.UnixTime(model.CreatedAt.Unix()),
-		valueObject.UnixTime(model.UpdatedAt.Unix()),
+		valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
+		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
 	), nil
 }

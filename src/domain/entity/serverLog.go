@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"time"
-
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -19,7 +17,7 @@ func NewServerLog(
 	payload valueObject.ServerLogPayload,
 ) ServerLog {
 	return ServerLog{
-		Timestamp: valueObject.UnixTime(time.Now().Unix()),
+		Timestamp: valueObject.NewUnixTimeNow(),
 		Level:     level,
 		Operation: operation,
 		Payload:   payload,

@@ -96,7 +96,7 @@ func (repo *AccCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+	nowUnixTime := valueObject.NewUnixTimeNow()
 	accEntity := entity.NewAccount(
 		accId,
 		gid,

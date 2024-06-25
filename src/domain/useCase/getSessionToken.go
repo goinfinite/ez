@@ -17,7 +17,7 @@ func GetSessionToken(
 	accQueryRepo repository.AccQueryRepo,
 	login dto.Login,
 	ipAddress valueObject.IpAddress,
-) (entity.AccessToken, error) {
+) (accessToken entity.AccessToken, err error) {
 	isLoginValid := authQueryRepo.IsLoginValid(login)
 
 	if !isLoginValid {
@@ -26,18 +26,16 @@ func GetSessionToken(
 			login.Username.String(),
 			ipAddress.String(),
 		)
-		return entity.AccessToken{}, errors.New("InvalidCredentials")
+		return accessToken, errors.New("InvalidCredentials")
 	}
 
 	accountDetails, err := accQueryRepo.GetByUsername(login.Username)
 	if err != nil {
-		return entity.AccessToken{}, errors.New("AccountNotFound")
+		return accessToken, errors.New("AccountNotFound")
 	}
 
 	accountId := accountDetails.Id
-	expiresIn := valueObject.UnixTime(
-		time.Now().Add(3 * time.Hour).Unix(),
-	)
+	expiresIn := valueObject.NewUnixTimeAfterNow(3 * time.Hour)
 
 	return authCmdRepo.GenerateSessionToken(accountId, expiresIn, ipAddress)
 }

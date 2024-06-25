@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -150,7 +149,7 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 		return containerEntity, err
 	}
 
-	nowUnixTime := valueObject.UnixTime(time.Now().Unix())
+	nowUnixTime := valueObject.NewUnixTimeNow()
 
 	return entity.NewContainer(
 		containerId,

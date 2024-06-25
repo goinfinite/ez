@@ -168,7 +168,7 @@ func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 		if err != nil {
 			return registryImage, err
 		}
-		createdAt := valueObject.UnixTime(createdAtUnix.Unix())
+		createdAt := valueObject.NewUnixTimeWithGoTime(createdAtUnix)
 		createdAtPtr = &createdAt
 	}
 
@@ -182,7 +182,7 @@ func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 		if err != nil {
 			return registryImage, err
 		}
-		updatedAt := valueObject.UnixTime(updatedAtUnix.Unix())
+		updatedAt := valueObject.NewUnixTimeWithGoTime(updatedAtUnix)
 		updatedAtPtr = &updatedAt
 	}
 
@@ -407,7 +407,7 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	if err != nil {
 		return registryTaggedImage, err
 	}
-	updatedAt := valueObject.UnixTime(updatedAtUnix.Unix())
+	updatedAt := valueObject.NewUnixTimeWithGoTime(updatedAtUnix)
 
 	portBindings := []valueObject.PortBinding{}
 	portBindingsRegex := `\d{1,5}(\/\w{1,4})?`

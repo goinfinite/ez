@@ -216,14 +216,12 @@ func (repo *LicenseCmdRepo) Refresh() error {
 		return err
 	}
 
-	rawExpiresAt, assertOk := parsedBody["expiresAt"].(float64)
-	if !assertOk {
+	expiresAt, err := valueObject.NewUnixTime(parsedBody["expiresAt"])
+	if err != nil {
 		return errors.New("ParseLicenseExpiresAtFailed")
 	}
-	expiresAt := valueObject.UnixTime(int64(rawExpiresAt))
 
-	todayDate := time.Now()
-	lastCheckAt := valueObject.UnixTime(todayDate.Unix())
+	lastCheckAt := valueObject.NewUnixTimeNow()
 	updatedAt := lastCheckAt
 
 	licenseInfoEntity := entity.NewLicenseInfo(

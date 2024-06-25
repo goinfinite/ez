@@ -90,8 +90,8 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		targets = append(targets, targetEntity)
 	}
 
-	createdAt := valueObject.UnixTime(model.CreatedAt.Unix())
-	updatedAt := valueObject.UnixTime(model.UpdatedAt.Unix())
+	createdAt := valueObject.NewUnixTimeWithGoTime(model.CreatedAt)
+	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewMapping(
 		mappingId,

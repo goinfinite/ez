@@ -92,9 +92,9 @@ func (model LicenseInfo) ToEntity() (entity.LicenseInfo, error) {
 		return licenseInfo, err
 	}
 
-	expiresAt := valueObject.UnixTime(model.ExpiresAt.Unix())
-	lastCheckAt := valueObject.UnixTime(model.LastCheckAt.Unix())
-	updatedAt := valueObject.UnixTime(model.UpdatedAt.Unix())
+	expiresAt := valueObject.NewUnixTimeWithGoTime(model.ExpiresAt)
+	lastCheckAt := valueObject.NewUnixTimeWithGoTime(model.LastCheckAt)
+	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	licenseInfo = entity.NewLicenseInfo(
 		licenseMethod,

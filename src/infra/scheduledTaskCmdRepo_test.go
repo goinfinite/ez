@@ -2,7 +2,6 @@ package infra
 
 import (
 	"testing"
-	"time"
 
 	testHelpers "github.com/speedianet/control/src/devUtils"
 	"github.com/speedianet/control/src/domain/dto"
@@ -20,8 +19,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 		containerTag, _ := valueObject.NewScheduledTaskTag("container")
 		tags := []valueObject.ScheduledTaskTag{containerTag}
 		timeoutSecs := uint(60)
-		nowUnixTime := time.Unix(time.Now().Unix(), 0)
-		runAt := valueObject.UnixTime(nowUnixTime.Unix())
+		runAt := valueObject.NewUnixTimeNow()
 
 		createScheduledTask := dto.NewCreateScheduledTask(
 			name, command, tags, &timeoutSecs, &runAt,

@@ -85,18 +85,18 @@ func (model Container) ToEntity() (entity.Container, error) {
 		entryPointPtr = &entryPoint
 	}
 
-	createdAt := valueObject.UnixTime(model.CreatedAt.Unix())
-	updatedAt := valueObject.UnixTime(model.UpdatedAt.Unix())
+	createdAt := valueObject.NewUnixTimeWithGoTime(model.CreatedAt)
+	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	var startedAtPtr *valueObject.UnixTime
 	if model.StartedAt != nil {
-		startedAt := valueObject.UnixTime(model.StartedAt.Unix())
+		startedAt := valueObject.NewUnixTimeWithGoTime(*model.StartedAt)
 		startedAtPtr = &startedAt
 	}
 
 	var stoppedAtPtr *valueObject.UnixTime
 	if model.StoppedAt != nil {
-		stoppedAt := valueObject.UnixTime(model.StoppedAt.Unix())
+		stoppedAt := valueObject.NewUnixTimeWithGoTime(*model.StoppedAt)
 		stoppedAtPtr = &stoppedAt
 	}
 
