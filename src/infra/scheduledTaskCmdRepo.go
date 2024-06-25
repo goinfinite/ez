@@ -51,3 +51,26 @@ func (repo *ScheduledTaskCmdRepo) Create(
 
 	return repo.persistentDbSvc.Handler.Create(&scheduledTaskModel).Error
 }
+
+func (repo *ScheduledTaskCmdRepo) Update(
+	updateDto dto.UpdateScheduledTask,
+) error {
+	updateMap := map[string]interface{}{}
+
+	if updateDto.Status != nil {
+		updateMap["status"] = updateDto.Status.String()
+	}
+
+	if updateDto.RunAt != nil {
+		updateMap["run_at"] = updateDto.RunAt.GetAsGoTime()
+	}
+
+	if len(updateMap) == 0 {
+		return nil
+	}
+
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.ScheduledTask{}).
+		Where("id = ?", updateDto.Id).
+		Updates(updateMap).Error
+}

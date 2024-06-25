@@ -12,6 +12,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	scheduledTaskCmdRepo := NewScheduledTaskCmdRepo(persistentDbSvc)
+	scheduledTaskQueryRepo := NewScheduledTaskQueryRepo(persistentDbSvc)
 
 	t.Run("CreateScheduledTask", func(t *testing.T) {
 		name, _ := valueObject.NewScheduledTaskName("test")
@@ -21,11 +22,34 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 		timeoutSecs := uint(60)
 		runAt := valueObject.NewUnixTimeNow()
 
-		createScheduledTask := dto.NewCreateScheduledTask(
+		createDto := dto.NewCreateScheduledTask(
 			name, command, tags, &timeoutSecs, &runAt,
 		)
 
-		err := scheduledTaskCmdRepo.Create(createScheduledTask)
+		err := scheduledTaskCmdRepo.Create(createDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
+	t.Run("UpdateScheduledTask", func(t *testing.T) {
+		taskEntities, err := scheduledTaskQueryRepo.Get()
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+			return
+		}
+
+		if len(taskEntities) == 0 {
+			t.Error("NoScheduledTasksFound")
+			return
+		}
+
+		newStatus, _ := valueObject.NewScheduledTaskStatus("pending")
+		updateDto := dto.NewUpdateScheduledTask(
+			taskEntities[0].Id, &newStatus, nil,
+		)
+
+		err = scheduledTaskCmdRepo.Update(updateDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

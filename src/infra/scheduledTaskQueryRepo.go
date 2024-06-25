@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 )
@@ -38,4 +39,18 @@ func (repo *ScheduledTaskQueryRepo) Get() ([]entity.ScheduledTask, error) {
 	}
 
 	return scheduledTasks, nil
+}
+
+func (repo *ScheduledTaskQueryRepo) GetById(
+	id valueObject.ScheduledTaskId,
+) (taskEntity entity.ScheduledTask, err error) {
+	var scheduledTaskModel dbModel.ScheduledTask
+	err = repo.persistentDbSvc.Handler.
+		Where("id = ?", id).
+		First(&scheduledTaskModel).Error
+	if err != nil {
+		return taskEntity, err
+	}
+
+	return scheduledTaskModel.ToEntity()
 }
