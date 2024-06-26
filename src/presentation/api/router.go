@@ -115,6 +115,7 @@ func (router *Router) scheduledTaskRoutes() {
 	scheduledTaskController := apiController.NewScheduledTaskController(router.persistentDbSvc)
 	scheduledTaskGroup.GET("/", scheduledTaskController.Read)
 	scheduledTaskGroup.PUT("/", scheduledTaskController.Update)
+	go scheduledTaskController.Run()
 }
 
 func (router *Router) RegisterRoutes() {

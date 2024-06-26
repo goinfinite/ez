@@ -1,7 +1,11 @@
 package apiController
 
 import (
+	"time"
+
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/domain/useCase"
+	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -9,6 +13,7 @@ import (
 
 type ScheduledTaskController struct {
 	scheduledTaskService *service.ScheduledTaskService
+	persistentDbSvc      *db.PersistentDatabaseService
 }
 
 func NewScheduledTaskController(
@@ -16,6 +21,7 @@ func NewScheduledTaskController(
 ) *ScheduledTaskController {
 	return &ScheduledTaskController{
 		scheduledTaskService: service.NewScheduledTaskService(persistentDbSvc),
+		persistentDbSvc:      persistentDbSvc,
 	}
 }
 
@@ -51,4 +57,17 @@ func (controller *ScheduledTaskController) Update(c echo.Context) error {
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.scheduledTaskService.Update(requestBody),
 	)
+}
+
+func (controller *ScheduledTaskController) Run() {
+	timer := time.NewTicker(
+		time.Duration(int64(useCase.ScheduledTasksRunIntervalSecs)) * time.Second,
+	)
+	defer timer.Stop()
+
+	scheduledTaskQueryRepo := infra.NewScheduledTaskQueryRepo(controller.persistentDbSvc)
+	scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(controller.persistentDbSvc)
+	for range timer.C {
+		go useCase.RunScheduledTasks(scheduledTaskQueryRepo, scheduledTaskCmdRepo)
+	}
 }
