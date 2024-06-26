@@ -220,7 +220,7 @@ func (controller *ContainerController) parseContainerEnvs(
 // @Produce      json
 // @Security     Bearer
 // @Param        createContainerDto 	  body    dto.CreateContainer  true  "Only accountId, hostname and imageAddress are required.<br />When specifying portBindings, only 'publicPort' OR 'serviceName' is required.<br />'launchScript' must be base64 encoded (if any)."
-// @Success      201 {object} object{} "ContainerCreated"
+// @Success      201 {object} object{} "ContainerCreationScheduled"
 // @Router       /v1/container/ [post]
 func (controller *ContainerController) Create(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
@@ -274,7 +274,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 
 	return apiHelper.ServiceResponseWrapper(
 		c,
-		controller.containerService.Create(requestBody),
+		controller.containerService.Create(requestBody, true),
 	)
 }
 
