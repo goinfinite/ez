@@ -1,11 +1,15 @@
 package service
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
 
@@ -74,8 +78,11 @@ func (service *ContainerService) AutoLogin(input map[string]interface{}) Service
 
 }
 
-func (service *ContainerService) Create(input map[string]interface{}) ServiceOutput {
-	requiredParams := []string{"accountId", "hostname"}
+func (service *ContainerService) Create(
+	input map[string]interface{},
+	shouldSchedule bool,
+) ServiceOutput {
+	requiredParams := []string{"accountId", "hostname", "imageAddress"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
@@ -159,17 +166,81 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 		}
 	}
 
+	if shouldSchedule {
+		cliCmd := "/var/speedia/control container create"
+		createParams := []string{
+			"--account-id", accId.String(),
+			"--hostname", hostname.String(),
+			"--image", imgAddr.String(),
+		}
+		if len(portBindings) > 0 {
+			for _, portBinding := range portBindings {
+				createParams = append(createParams, "--port-bindings")
+				createParams = append(createParams, portBinding.String())
+			}
+		}
+		if restartPolicyPtr != nil {
+			createParams = append(createParams, "--restart-policy")
+			createParams = append(createParams, restartPolicyPtr.String())
+		}
+		if entrypointPtr != nil {
+			createParams = append(createParams, "--entrypoint")
+			createParams = append(createParams, entrypointPtr.String())
+		}
+		if profileIdPtr != nil {
+			createParams = append(createParams, "--profile-id")
+			createParams = append(createParams, profileIdPtr.String())
+		}
+		if len(envs) > 0 {
+			for _, env := range envs {
+				createParams = append(createParams, "--envs")
+				createParams = append(createParams, env.String())
+			}
+		}
+
+		if launchScriptPtr != nil {
+			launchScriptTempFilePath := "/tmp/ls-" + hostname.String() + ".sh"
+			err = infraHelper.UpdateFile(
+				launchScriptTempFilePath, launchScriptPtr.String(), true,
+			)
+			if err != nil {
+				return NewServiceOutput(
+					InfraError, errors.New("FailedToSaveLaunchScript").Error(),
+				)
+			}
+			createParams = append(createParams, "--launch-script-path")
+			createParams = append(createParams, launchScriptTempFilePath)
+		}
+
+		if !autoCreateMappings {
+			createParams = append(createParams, "--auto-create-mappings")
+			createParams = append(createParams, "false")
+		}
+
+		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
+
+		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
+		taskName, _ := valueObject.NewScheduledTaskName("CreateContainer")
+		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
+		taskTag, _ := valueObject.NewScheduledTaskTag("container")
+		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		timeoutSeconds := uint(900)
+
+		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
+			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+		)
+
+		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+
+		return NewServiceOutput(Created, "ContainerCreationScheduled")
+	}
+
 	createContainerDto := dto.NewCreateContainer(
-		accId,
-		hostname,
-		imgAddr,
-		portBindings,
-		restartPolicyPtr,
-		entrypointPtr,
-		profileIdPtr,
-		envs,
-		launchScriptPtr,
-		autoCreateMappings,
+		accId, hostname, imgAddr, portBindings, restartPolicyPtr, entrypointPtr,
+		profileIdPtr, envs, launchScriptPtr, autoCreateMappings,
 	)
 
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
@@ -182,15 +253,9 @@ func (service *ContainerService) Create(input map[string]interface{}) ServiceOut
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainer(
-		containerQueryRepo,
-		containerCmdRepo,
-		accQueryRepo,
-		accCmdRepo,
-		containerProfileQueryRepo,
-		mappingQueryRepo,
-		mappingCmdRepo,
-		containerProxyCmdRepo,
-		createContainerDto,
+		containerQueryRepo, containerCmdRepo, accQueryRepo, accCmdRepo,
+		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
+		containerProxyCmdRepo, createContainerDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
