@@ -205,7 +205,7 @@ func (service *ContainerService) Create(
 			)
 			if err != nil {
 				return NewServiceOutput(
-					InfraError, errors.New("FailedToSaveLaunchScript").Error(),
+					InfraError, errors.New("SaveLaunchScriptError").Error(),
 				)
 			}
 			createParams = append(createParams, "--launch-script-path")
