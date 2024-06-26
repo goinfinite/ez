@@ -54,3 +54,28 @@ func (repo *ScheduledTaskQueryRepo) GetById(
 
 	return scheduledTaskModel.ToEntity()
 }
+
+func (repo *ScheduledTaskQueryRepo) GetByStatus(
+	status valueObject.ScheduledTaskStatus,
+) ([]entity.ScheduledTask, error) {
+	scheduledTasks := []entity.ScheduledTask{}
+
+	scheduledTaskModels := []dbModel.ScheduledTask{}
+	err := repo.persistentDbSvc.Handler.
+		Where("status = ?", status.String()).
+		Find(&scheduledTaskModels).Error
+	if err != nil {
+		return scheduledTasks, err
+	}
+
+	for _, scheduledTaskModel := range scheduledTaskModels {
+		scheduledTaskEntity, err := scheduledTaskModel.ToEntity()
+		if err != nil {
+			log.Printf("[%d] ModelToEntityError: %s", scheduledTaskModel.ID, err.Error())
+			continue
+		}
+		scheduledTasks = append(scheduledTasks, scheduledTaskEntity)
+	}
+
+	return scheduledTasks, nil
+}
