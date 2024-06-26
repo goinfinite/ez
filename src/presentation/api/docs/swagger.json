@@ -1,1652 +1,1814 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "description": "Speedia Control API",
-    "title": "ControlApi",
-    "termsOfService": "https://speedia.net/tos/",
-    "contact": {
-      "name": "Speedia Engineering",
-      "url": "https://speedia.net/",
-      "email": "eng+swagger@speedia.net"
+    "swagger": "2.0",
+    "info": {
+        "description": "Speedia Control API",
+        "title": "ControlApi",
+        "termsOfService": "https://speedia.net/tos/",
+        "contact": {
+            "name": "Speedia Engineering",
+            "url": "https://speedia.net/",
+            "email": "eng+swagger@speedia.net"
+        },
+        "license": {
+            "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
+            "url": "https://speedia.net/tos/"
+        },
+        "version": "0.0.3"
     },
-    "license": {
-      "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
-      "url": "https://speedia.net/tos/"
+    "basePath": "/_/api",
+    "paths": {
+        "/v1/account/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List accs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "GetAccounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Account"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update an account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "UpdateAccount",
+                "parameters": [
+                    {
+                        "description": "UpdateAccount (Only accountId is required.)",
+                        "name": "updateAccountDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AccountUpdated message or NewKeyString",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Add a new account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "AddNewAccount",
+                "parameters": [
+                    {
+                        "description": "NewAccount",
+                        "name": "addAccountDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "AccountCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/account/{accountId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete an account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "DeleteAccount",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AccountDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login/": {
+            "post": {
+                "description": "Generate JWT with credentials",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "GenerateJwtWithCredentials",
+                "parameters": [
+                    {
+                        "description": "Login",
+                        "name": "loginDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.AccessToken"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List containers.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "ReadContainers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Container"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a container.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "UpdateContainer",
+                "parameters": [
+                    {
+                        "description": "UpdateContainer (Only accountId and containerId are required.)",
+                        "name": "updateContainerDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateContainer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new container.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "CreateContainer",
+                "parameters": [
+                    {
+                        "description": "Only accountId, hostname and imageAddress are required.\u003cbr /\u003eWhen specifying portBindings, only 'publicPort' OR 'serviceName' is required.\u003cbr /\u003e'launchScript' must be base64 encoded (if any).",
+                        "name": "createContainerDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateContainer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerCreationScheduled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/auto-login/{containerId}/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Generates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "ContainerAutoLogin",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ShouldRedirect (default/empty is true)",
+                        "name": "shouldRedirect",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "If shouldRedirect is set to false, the updated session token is returned.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "302": {
+                        "description": "A redirect to Speedia OS dashboard (:1618/{containerId}/).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Container is not found, not running or isn't Speedia OS.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/metrics/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List containers with metrics.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "ReadContainersWithMetrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ContainerWithMetrics"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/profile/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List container profiles.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainerProfiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.ContainerProfile"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a container profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "UpdateContainerProfile",
+                "parameters": [
+                    {
+                        "description": "UpdateContainerProfile (Only id is required.)",
+                        "name": "updateContainerProfileDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateContainerProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerProfileUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Add a new container profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "AddNewContainerProfile",
+                "parameters": [
+                    {
+                        "description": "NewContainerProfile (Only name and baseSpecs are required.)",
+                        "name": "createContainerProfileDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateContainerProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerProfileCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/profile/{profileId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a container profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "DeleteContainerProfile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ProfileId",
+                        "name": "profileId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerProfileDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/registry/image/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get container registry images.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainerRegistryImages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ImageName",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.RegistryImage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/registry/image/tagged/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get container registry tagged image.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "GetContainerRegistryTaggedImage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ImageAddress",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.RegistryTaggedImage"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/{accountId}/{containerId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a container.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "DeleteContainer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/license/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get license info.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "license"
+                ],
+                "summary": "GetLicenseInfo",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.LicenseInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/mapping/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List mappings.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "ReadMappings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Mapping"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new mapping.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "CreateNewMapping",
+                "parameters": [
+                    {
+                        "description": "NewMapping",
+                        "name": "createMappingDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateMapping"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "MappingCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/mapping/target/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new mapping target.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "CreateMappingTarget",
+                "parameters": [
+                    {
+                        "description": "NewMappingTarget",
+                        "name": "createMappingTargetDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateMappingTarget"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "MappingTargetCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/mapping/{mappingId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a mapping.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "DeleteMapping",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MappingId",
+                        "name": "mappingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MappingDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/mapping/{mappingId}/target/{targetId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a mapping target.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "DeleteMappingTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MappingId",
+                        "name": "mappingId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "TargetId",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MappingTargetDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/o11y/overview/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Show system information and resource usage.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "o11y"
+                ],
+                "summary": "O11yOverview",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.O11yOverview"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/task/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List scheduled tasks.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "ReadScheduledTasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.ScheduledTask"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Reschedule a task or change its status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "UpdateScheduledTask",
+                "parameters": [
+                    {
+                        "description": "UpdateScheduledTask (Only id is required.)",
+                        "name": "updateScheduledTaskDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateScheduledTask"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ScheduledTaskUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        }
     },
-    "version": "0.0.3"
-  },
-  "basePath": "/_/api",
-  "paths": {
-    "/v1/account/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "List accs.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["account"],
-        "summary": "GetAccounts",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/entity.Account"
-              }
+    "definitions": {
+        "dto.AddAccount": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "username": {
+                    "type": "string"
+                }
             }
-          }
-        }
-      },
-      "put": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Update an account.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["account"],
-        "summary": "UpdateAccount",
-        "parameters": [
-          {
-            "description": "UpdateAccount (Only accountId is required.)",
-            "name": "updateAccountDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.UpdateAccount"
+        },
+        "dto.ContainerWithMetrics": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "metrics": {
+                    "$ref": "#/definitions/valueObject.ContainerMetrics"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "restartCount": {
+                    "type": "integer"
+                },
+                "restartPolicy": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "stoppedAt": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "AccountUpdated message or NewKeyString",
-            "schema": {
-              "type": "object"
+        },
+        "dto.CreateContainer": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "autoCreateMappings": {
+                    "type": "boolean"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "launchScript": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "restartPolicy": {
+                    "type": "string"
+                }
             }
-          }
-        }
-      },
-      "post": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Add a new account.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["account"],
-        "summary": "AddNewAccount",
-        "parameters": [
-          {
-            "description": "NewAccount",
-            "name": "addAccountDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.AddAccount"
+        },
+        "dto.CreateContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "type": "string"
+                },
+                "scalingThreshold": {
+                    "type": "integer"
+                }
             }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "AccountCreated",
-            "schema": {
-              "type": "object"
+        },
+        "dto.CreateMapping": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "publicPort": {
+                    "type": "integer"
+                }
             }
-          }
-        }
-      }
-    },
-    "/v1/account/{accountId}/": {
-      "delete": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Delete an account.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["account"],
-        "summary": "DeleteAccount",
-        "parameters": [
-          {
+        },
+        "dto.CreateMappingTarget": {
+            "type": "object",
+            "properties": {
+                "containerId": {
+                    "type": "string"
+                },
+                "mappingId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.Login": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateAccount": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "shouldUpdateApiKey": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.UpdateContainer": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.UpdateContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "type": "string"
+                },
+                "scalingThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateScheduledTask": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "runAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.AccessToken": {
+            "type": "object",
+            "properties": {
+                "expiresIn": {
+                    "type": "integer"
+                },
+                "tokenStr": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/valueObject.AccessTokenType"
+                }
+            }
+        },
+        "entity.Account": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "integer"
+                },
+                "groupId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "quotaUsage": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Container": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "profileId": {
+                    "type": "integer"
+                },
+                "restartCount": {
+                    "type": "integer"
+                },
+                "restartPolicy": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "stoppedAt": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.ContainerProfile": {
+            "type": "object",
+            "properties": {
+                "baseSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "hostMinCapacityPercent": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "maxSpecs": {
+                    "$ref": "#/definitions/valueObject.ContainerSpecs"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationSecs": {
+                    "type": "integer"
+                },
+                "scalingPolicy": {
+                    "type": "string"
+                },
+                "scalingThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.LicenseInfo": {
+            "type": "object",
+            "properties": {
+                "errorCount": {
+                    "type": "integer"
+                },
+                "expiresAt": {
+                    "type": "integer"
+                },
+                "fingerprint": {
+                    "type": "string"
+                },
+                "lastCheckAt": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.Mapping": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "publicPort": {
+                    "type": "integer"
+                },
+                "targets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.MappingTarget"
+                    }
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.MappingTarget": {
+            "type": "object",
+            "properties": {
+                "containerHostname": {
+                    "type": "string"
+                },
+                "containerId": {
+                    "type": "string"
+                },
+                "containerPrivatePort": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mappingId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.O11yOverview": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "publicIp": {
+                    "type": "string"
+                },
+                "resourceUsage": {
+                    "$ref": "#/definitions/valueObject.HostResourceUsage"
+                },
+                "specs": {
+                    "$ref": "#/definitions/valueObject.HardwareSpecs"
+                },
+                "uptimeSecs": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.RegistryImage": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "isas": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "logoUrl": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "publisherName": {
+                    "type": "string"
+                },
+                "pullCount": {
+                    "type": "integer"
+                },
+                "registryName": {
+                    "type": "string"
+                },
+                "starCount": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.RegistryTaggedImage": {
+            "type": "object",
+            "properties": {
+                "imageAddress": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "imageName": {
+                    "type": "string"
+                },
+                "isa": {
+                    "type": "string"
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "publisherName": {
+                    "type": "string"
+                },
+                "registryName": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "tagName": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.ScheduledTask": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "err": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "output": {
+                    "type": "string"
+                },
+                "runAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.AccessTokenType": {
             "type": "string",
-            "description": "AccountId",
-            "name": "accountId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "AccountDeleted",
-            "schema": {
-              "type": "object"
+            "enum": [
+                "sessionToken",
+                "accountApiKey"
+            ],
+            "x-enum-varnames": [
+                "sessionToken",
+                "accountApiKey"
+            ]
+        },
+        "valueObject.AccountQuota": {
+            "type": "object",
+            "properties": {
+                "cpuCores": {
+                    "type": "number"
+                },
+                "diskBytes": {
+                    "type": "integer"
+                },
+                "inodes": {
+                    "type": "integer"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                }
             }
-          }
+        },
+        "valueObject.ContainerMetrics": {
+            "type": "object",
+            "properties": {
+                "avgCpuPercent": {
+                    "type": "number"
+                },
+                "currentCpuPercent": {
+                    "type": "number"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                },
+                "memoryPercent": {
+                    "type": "number"
+                },
+                "netInputBytes": {
+                    "type": "integer"
+                },
+                "netOutputBytes": {
+                    "type": "integer"
+                },
+                "storageInodesCount": {
+                    "type": "integer"
+                },
+                "storageInputBytes": {
+                    "type": "integer"
+                },
+                "storageOutputBytes": {
+                    "type": "integer"
+                },
+                "storageSpaceBytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.ContainerSpecs": {
+            "type": "object",
+            "properties": {
+                "cpuCores": {
+                    "type": "number"
+                },
+                "memoryBytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.HardwareSpecs": {
+            "type": "object",
+            "properties": {
+                "cpuCoresCount": {
+                    "type": "number"
+                },
+                "cpuFrequency": {
+                    "type": "number"
+                },
+                "cpuModelName": {
+                    "type": "string"
+                },
+                "memoryTotalBytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.HostResourceUsage": {
+            "type": "object",
+            "properties": {
+                "cpuPercent": {
+                    "type": "number"
+                },
+                "memoryPercent": {
+                    "type": "number"
+                },
+                "netInfo": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.NetInterfaceInfo"
+                    }
+                },
+                "storageInfo": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.StorageUnitInfo"
+                    }
+                }
+            }
+        },
+        "valueObject.NetInterfaceInfo": {
+            "type": "object",
+            "properties": {
+                "deviceName": {
+                    "type": "string"
+                },
+                "recvBytes": {
+                    "type": "integer"
+                },
+                "recvDropPackets": {
+                    "type": "integer"
+                },
+                "recvErrs": {
+                    "type": "integer"
+                },
+                "recvPackets": {
+                    "type": "integer"
+                },
+                "sentBytes": {
+                    "type": "integer"
+                },
+                "sentDropPackets": {
+                    "type": "integer"
+                },
+                "sentErrs": {
+                    "type": "integer"
+                },
+                "sentPackets": {
+                    "type": "integer"
+                }
+            }
+        },
+        "valueObject.PortBinding": {
+            "type": "object",
+            "properties": {
+                "containerPort": {
+                    "type": "integer"
+                },
+                "privatePort": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "publicPort": {
+                    "type": "integer"
+                },
+                "serviceName": {
+                    "type": "string"
+                }
+            }
+        },
+        "valueObject.StorageUnitInfo": {
+            "type": "object",
+            "properties": {
+                "deviceName": {
+                    "type": "string"
+                },
+                "fileSystem": {
+                    "type": "string"
+                },
+                "freeBytes": {
+                    "type": "integer"
+                },
+                "freeInodes": {
+                    "type": "integer"
+                },
+                "mountPoint": {
+                    "type": "string"
+                },
+                "readBytes": {
+                    "type": "integer"
+                },
+                "readOpsCount": {
+                    "type": "integer"
+                },
+                "totalBytes": {
+                    "type": "integer"
+                },
+                "totalInodes": {
+                    "type": "integer"
+                },
+                "usedBytes": {
+                    "type": "integer"
+                },
+                "usedInodes": {
+                    "type": "integer"
+                },
+                "usedInodesPercent": {
+                    "type": "number"
+                },
+                "usedPercent": {
+                    "type": "number"
+                },
+                "writeBytes": {
+                    "type": "integer"
+                },
+                "writeOpsCount": {
+                    "type": "integer"
+                }
+            }
         }
-      }
     },
-    "/v1/auth/login/": {
-      "post": {
-        "description": "Generate JWT with credentials",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "GenerateJwtWithCredentials",
-        "parameters": [
-          {
-            "description": "Login",
-            "name": "loginDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.Login"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/entity.AccessToken"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "string"
-            }
-          }
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" + JWT token or API key.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
-      }
-    },
-    "/v1/container/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "List containers.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "ReadContainers",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/entity.Container"
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Update a container.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "UpdateContainer",
-        "parameters": [
-          {
-            "description": "UpdateContainer (Only accountId and containerId are required.)",
-            "name": "updateContainerDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.UpdateContainer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ContainerUpdated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "post": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Create a new container.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "CreateContainer",
-        "parameters": [
-          {
-            "description": "Only accountId, hostname and imageAddress are required.\u003cbr /\u003eWhen specifying portBindings, only 'publicPort' OR 'serviceName' is required.\u003cbr /\u003e'launchScript' must be base64 encoded (if any).",
-            "name": "createContainerDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.CreateContainer"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "ContainerCreated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/auto-login/{containerId}/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Generates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "ContainerAutoLogin",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "ContainerId",
-            "name": "containerId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "boolean",
-            "description": "ShouldRedirect (default/empty is true)",
-            "name": "shouldRedirect",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "If shouldRedirect is set to false, the updated session token is returned.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "302": {
-            "description": "A redirect to Speedia OS dashboard (:1618/{containerId}/).",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "500": {
-            "description": "Container is not found, not running or isn't Speedia OS.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/metrics/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "List containers with metrics.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "ReadContainersWithMetrics",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/dto.ContainerWithMetrics"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/profile/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "List container profiles.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "GetContainerProfiles",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/entity.ContainerProfile"
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Update a container profile.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "UpdateContainerProfile",
-        "parameters": [
-          {
-            "description": "UpdateContainerProfile (Only id is required.)",
-            "name": "updateContainerProfileDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.UpdateContainerProfile"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ContainerProfileUpdated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "post": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Add a new container profile.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "AddNewContainerProfile",
-        "parameters": [
-          {
-            "description": "NewContainerProfile (Only name and baseSpecs are required.)",
-            "name": "createContainerProfileDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.CreateContainerProfile"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "ContainerProfileCreated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/profile/{profileId}/": {
-      "delete": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Delete a container profile.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "DeleteContainerProfile",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "ProfileId",
-            "name": "profileId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ContainerProfileDeleted",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/registry/image/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Get container registry images.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "GetContainerRegistryImages",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "ImageName",
-            "name": "name",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/entity.RegistryImage"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/registry/image/tagged/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Get container registry tagged image.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "GetContainerRegistryTaggedImage",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "ImageAddress",
-            "name": "address",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/entity.RegistryTaggedImage"
-            }
-          }
-        }
-      }
-    },
-    "/v1/container/{accountId}/{containerId}/": {
-      "delete": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Delete a container.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["container"],
-        "summary": "DeleteContainer",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "AccountId",
-            "name": "accountId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "ContainerId",
-            "name": "containerId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ContainerDeleted",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/license/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Get license info.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["license"],
-        "summary": "GetLicenseInfo",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/entity.LicenseInfo"
-            }
-          }
-        }
-      }
-    },
-    "/v1/mapping/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "List mappings.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["mapping"],
-        "summary": "ReadMappings",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/entity.Mapping"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Create a new mapping.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["mapping"],
-        "summary": "CreateNewMapping",
-        "parameters": [
-          {
-            "description": "NewMapping",
-            "name": "createMappingDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.CreateMapping"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "MappingCreated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/mapping/target/": {
-      "post": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Create a new mapping target.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["mapping"],
-        "summary": "CreateMappingTarget",
-        "parameters": [
-          {
-            "description": "NewMappingTarget",
-            "name": "createMappingTargetDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.CreateMappingTarget"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "MappingTargetCreated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/mapping/{mappingId}/": {
-      "delete": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Delete a mapping.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["mapping"],
-        "summary": "DeleteMapping",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "MappingId",
-            "name": "mappingId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "MappingDeleted",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/mapping/{mappingId}/target/{targetId}/": {
-      "delete": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Delete a mapping target.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["mapping"],
-        "summary": "DeleteMappingTarget",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "MappingId",
-            "name": "mappingId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "TargetId",
-            "name": "targetId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "MappingTargetDeleted",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/v1/o11y/overview/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Show system information and resource usage.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["o11y"],
-        "summary": "O11yOverview",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/entity.O11yOverview"
-            }
-          }
-        }
-      }
-    },
-    "/v1/task/": {
-      "get": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "List scheduled tasks.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["task"],
-        "summary": "ReadScheduledTasks",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/entity.ScheduledTask"
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Reschedule a task or change its status.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["task"],
-        "summary": "UpdateScheduledTask",
-        "parameters": [
-          {
-            "description": "UpdateScheduledTask (Only id is required.)",
-            "name": "updateScheduledTaskDto",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dto.UpdateScheduledTask"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ScheduledTaskUpdated",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
     }
-  },
-  "definitions": {
-    "dto.AddAccount": {
-      "type": "object",
-      "properties": {
-        "password": {
-          "type": "string"
-        },
-        "quota": {
-          "$ref": "#/definitions/valueObject.AccountQuota"
-        },
-        "username": {
-          "type": "string"
-        }
-      }
-    },
-    "dto.ContainerWithMetrics": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "createdAt": {
-          "type": "integer"
-        },
-        "entrypoint": {
-          "type": "string"
-        },
-        "envs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "hostname": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "imageAddress": {
-          "type": "string"
-        },
-        "imageHash": {
-          "type": "string"
-        },
-        "metrics": {
-          "$ref": "#/definitions/valueObject.ContainerMetrics"
-        },
-        "portBindings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/valueObject.PortBinding"
-          }
-        },
-        "profileId": {
-          "type": "integer"
-        },
-        "restartCount": {
-          "type": "integer"
-        },
-        "restartPolicy": {
-          "type": "string"
-        },
-        "startedAt": {
-          "type": "integer"
-        },
-        "status": {
-          "type": "boolean"
-        },
-        "stoppedAt": {
-          "type": "integer"
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "dto.CreateContainer": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "autoCreateMappings": {
-          "type": "boolean"
-        },
-        "entrypoint": {
-          "type": "string"
-        },
-        "envs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "hostname": {
-          "type": "string"
-        },
-        "imageAddress": {
-          "type": "string"
-        },
-        "launchScript": {
-          "type": "string"
-        },
-        "portBindings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/valueObject.PortBinding"
-          }
-        },
-        "profileId": {
-          "type": "integer"
-        },
-        "restartPolicy": {
-          "type": "string"
-        }
-      }
-    },
-    "dto.CreateContainerProfile": {
-      "type": "object",
-      "properties": {
-        "baseSpecs": {
-          "$ref": "#/definitions/valueObject.ContainerSpecs"
-        },
-        "hostMinCapacityPercent": {
-          "type": "number"
-        },
-        "maxSpecs": {
-          "$ref": "#/definitions/valueObject.ContainerSpecs"
-        },
-        "name": {
-          "type": "string"
-        },
-        "scalingIntervalSecs": {
-          "type": "integer"
-        },
-        "scalingMaxDurationSecs": {
-          "type": "integer"
-        },
-        "scalingPolicy": {
-          "type": "string"
-        },
-        "scalingThreshold": {
-          "type": "integer"
-        }
-      }
-    },
-    "dto.CreateMapping": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "containerIds": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "hostname": {
-          "type": "string"
-        },
-        "protocol": {
-          "type": "string"
-        },
-        "publicPort": {
-          "type": "integer"
-        }
-      }
-    },
-    "dto.CreateMappingTarget": {
-      "type": "object",
-      "properties": {
-        "containerId": {
-          "type": "string"
-        },
-        "mappingId": {
-          "type": "integer"
-        }
-      }
-    },
-    "dto.Login": {
-      "type": "object",
-      "properties": {
-        "password": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        }
-      }
-    },
-    "dto.UpdateAccount": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "password": {
-          "type": "string"
-        },
-        "quota": {
-          "$ref": "#/definitions/valueObject.AccountQuota"
-        },
-        "shouldUpdateApiKey": {
-          "type": "boolean"
-        }
-      }
-    },
-    "dto.UpdateContainer": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "id": {
-          "type": "string"
-        },
-        "profileId": {
-          "type": "integer"
-        },
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "dto.UpdateContainerProfile": {
-      "type": "object",
-      "properties": {
-        "baseSpecs": {
-          "$ref": "#/definitions/valueObject.ContainerSpecs"
-        },
-        "hostMinCapacityPercent": {
-          "type": "number"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "maxSpecs": {
-          "$ref": "#/definitions/valueObject.ContainerSpecs"
-        },
-        "name": {
-          "type": "string"
-        },
-        "scalingIntervalSecs": {
-          "type": "integer"
-        },
-        "scalingMaxDurationSecs": {
-          "type": "integer"
-        },
-        "scalingPolicy": {
-          "type": "string"
-        },
-        "scalingThreshold": {
-          "type": "integer"
-        }
-      }
-    },
-    "dto.UpdateScheduledTask": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer"
-        },
-        "runAt": {
-          "type": "integer"
-        },
-        "status": {
-          "type": "string"
-        }
-      }
-    },
-    "entity.AccessToken": {
-      "type": "object",
-      "properties": {
-        "expiresIn": {
-          "type": "integer"
-        },
-        "tokenStr": {
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/definitions/valueObject.AccessTokenType"
-        }
-      }
-    },
-    "entity.Account": {
-      "type": "object",
-      "properties": {
-        "createdAt": {
-          "type": "integer"
-        },
-        "groupId": {
-          "type": "integer"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "quota": {
-          "$ref": "#/definitions/valueObject.AccountQuota"
-        },
-        "quotaUsage": {
-          "$ref": "#/definitions/valueObject.AccountQuota"
-        },
-        "updatedAt": {
-          "type": "integer"
-        },
-        "username": {
-          "type": "string"
-        }
-      }
-    },
-    "entity.Container": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "createdAt": {
-          "type": "integer"
-        },
-        "entrypoint": {
-          "type": "string"
-        },
-        "envs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "hostname": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "imageAddress": {
-          "type": "string"
-        },
-        "imageHash": {
-          "type": "string"
-        },
-        "portBindings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/valueObject.PortBinding"
-          }
-        },
-        "profileId": {
-          "type": "integer"
-        },
-        "restartCount": {
-          "type": "integer"
-        },
-        "restartPolicy": {
-          "type": "string"
-        },
-        "startedAt": {
-          "type": "integer"
-        },
-        "status": {
-          "type": "boolean"
-        },
-        "stoppedAt": {
-          "type": "integer"
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.ContainerProfile": {
-      "type": "object",
-      "properties": {
-        "baseSpecs": {
-          "$ref": "#/definitions/valueObject.ContainerSpecs"
-        },
-        "hostMinCapacityPercent": {
-          "type": "number"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "maxSpecs": {
-          "$ref": "#/definitions/valueObject.ContainerSpecs"
-        },
-        "name": {
-          "type": "string"
-        },
-        "scalingIntervalSecs": {
-          "type": "integer"
-        },
-        "scalingMaxDurationSecs": {
-          "type": "integer"
-        },
-        "scalingPolicy": {
-          "type": "string"
-        },
-        "scalingThreshold": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.LicenseInfo": {
-      "type": "object",
-      "properties": {
-        "errorCount": {
-          "type": "integer"
-        },
-        "expiresAt": {
-          "type": "integer"
-        },
-        "fingerprint": {
-          "type": "string"
-        },
-        "lastCheckAt": {
-          "type": "integer"
-        },
-        "method": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.Mapping": {
-      "type": "object",
-      "properties": {
-        "accountId": {
-          "type": "integer"
-        },
-        "createdAt": {
-          "type": "integer"
-        },
-        "hostname": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "protocol": {
-          "type": "string"
-        },
-        "publicPort": {
-          "type": "integer"
-        },
-        "targets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/entity.MappingTarget"
-          }
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.MappingTarget": {
-      "type": "object",
-      "properties": {
-        "containerHostname": {
-          "type": "string"
-        },
-        "containerId": {
-          "type": "string"
-        },
-        "containerPrivatePort": {
-          "type": "integer"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "mappingId": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.O11yOverview": {
-      "type": "object",
-      "properties": {
-        "hostname": {
-          "type": "string"
-        },
-        "publicIp": {
-          "type": "string"
-        },
-        "resourceUsage": {
-          "$ref": "#/definitions/valueObject.HostResourceUsage"
-        },
-        "specs": {
-          "$ref": "#/definitions/valueObject.HardwareSpecs"
-        },
-        "uptimeSecs": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.RegistryImage": {
-      "type": "object",
-      "properties": {
-        "createdAt": {
-          "type": "integer"
-        },
-        "description": {
-          "type": "string"
-        },
-        "imageAddress": {
-          "type": "string"
-        },
-        "isas": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "logoUrl": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "publisherName": {
-          "type": "string"
-        },
-        "pullCount": {
-          "type": "integer"
-        },
-        "registryName": {
-          "type": "string"
-        },
-        "starCount": {
-          "type": "integer"
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.RegistryTaggedImage": {
-      "type": "object",
-      "properties": {
-        "imageAddress": {
-          "type": "string"
-        },
-        "imageHash": {
-          "type": "string"
-        },
-        "imageName": {
-          "type": "string"
-        },
-        "isa": {
-          "type": "string"
-        },
-        "portBindings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/valueObject.PortBinding"
-          }
-        },
-        "publisherName": {
-          "type": "string"
-        },
-        "registryName": {
-          "type": "string"
-        },
-        "sizeBytes": {
-          "type": "integer"
-        },
-        "tagName": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "entity.ScheduledTask": {
-      "type": "object",
-      "properties": {
-        "command": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "integer"
-        },
-        "err": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "name": {
-          "type": "string"
-        },
-        "output": {
-          "type": "string"
-        },
-        "runAt": {
-          "type": "integer"
-        },
-        "status": {
-          "type": "string"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "timeoutSecs": {
-          "type": "integer"
-        },
-        "updatedAt": {
-          "type": "integer"
-        }
-      }
-    },
-    "valueObject.AccessTokenType": {
-      "type": "string",
-      "enum": ["sessionToken", "accountApiKey"],
-      "x-enum-varnames": ["sessionToken", "accountApiKey"]
-    },
-    "valueObject.AccountQuota": {
-      "type": "object",
-      "properties": {
-        "cpuCores": {
-          "type": "number"
-        },
-        "diskBytes": {
-          "type": "integer"
-        },
-        "inodes": {
-          "type": "integer"
-        },
-        "memoryBytes": {
-          "type": "integer"
-        }
-      }
-    },
-    "valueObject.ContainerMetrics": {
-      "type": "object",
-      "properties": {
-        "avgCpuPercent": {
-          "type": "number"
-        },
-        "currentCpuPercent": {
-          "type": "number"
-        },
-        "memoryBytes": {
-          "type": "integer"
-        },
-        "memoryPercent": {
-          "type": "number"
-        },
-        "netInputBytes": {
-          "type": "integer"
-        },
-        "netOutputBytes": {
-          "type": "integer"
-        },
-        "storageInodesCount": {
-          "type": "integer"
-        },
-        "storageInputBytes": {
-          "type": "integer"
-        },
-        "storageOutputBytes": {
-          "type": "integer"
-        },
-        "storageSpaceBytes": {
-          "type": "integer"
-        }
-      }
-    },
-    "valueObject.ContainerSpecs": {
-      "type": "object",
-      "properties": {
-        "cpuCores": {
-          "type": "number"
-        },
-        "memoryBytes": {
-          "type": "integer"
-        }
-      }
-    },
-    "valueObject.HardwareSpecs": {
-      "type": "object",
-      "properties": {
-        "cpuCoresCount": {
-          "type": "number"
-        },
-        "cpuFrequency": {
-          "type": "number"
-        },
-        "cpuModelName": {
-          "type": "string"
-        },
-        "memoryTotalBytes": {
-          "type": "integer"
-        }
-      }
-    },
-    "valueObject.HostResourceUsage": {
-      "type": "object",
-      "properties": {
-        "cpuPercent": {
-          "type": "number"
-        },
-        "memoryPercent": {
-          "type": "number"
-        },
-        "netInfo": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/valueObject.NetInterfaceInfo"
-          }
-        },
-        "storageInfo": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/valueObject.StorageUnitInfo"
-          }
-        }
-      }
-    },
-    "valueObject.NetInterfaceInfo": {
-      "type": "object",
-      "properties": {
-        "deviceName": {
-          "type": "string"
-        },
-        "recvBytes": {
-          "type": "integer"
-        },
-        "recvDropPackets": {
-          "type": "integer"
-        },
-        "recvErrs": {
-          "type": "integer"
-        },
-        "recvPackets": {
-          "type": "integer"
-        },
-        "sentBytes": {
-          "type": "integer"
-        },
-        "sentDropPackets": {
-          "type": "integer"
-        },
-        "sentErrs": {
-          "type": "integer"
-        },
-        "sentPackets": {
-          "type": "integer"
-        }
-      }
-    },
-    "valueObject.PortBinding": {
-      "type": "object",
-      "properties": {
-        "containerPort": {
-          "type": "integer"
-        },
-        "privatePort": {
-          "type": "integer"
-        },
-        "protocol": {
-          "type": "string"
-        },
-        "publicPort": {
-          "type": "integer"
-        },
-        "serviceName": {
-          "type": "string"
-        }
-      }
-    },
-    "valueObject.StorageUnitInfo": {
-      "type": "object",
-      "properties": {
-        "deviceName": {
-          "type": "string"
-        },
-        "fileSystem": {
-          "type": "string"
-        },
-        "freeBytes": {
-          "type": "integer"
-        },
-        "freeInodes": {
-          "type": "integer"
-        },
-        "mountPoint": {
-          "type": "string"
-        },
-        "readBytes": {
-          "type": "integer"
-        },
-        "readOpsCount": {
-          "type": "integer"
-        },
-        "totalBytes": {
-          "type": "integer"
-        },
-        "totalInodes": {
-          "type": "integer"
-        },
-        "usedBytes": {
-          "type": "integer"
-        },
-        "usedInodes": {
-          "type": "integer"
-        },
-        "usedInodesPercent": {
-          "type": "number"
-        },
-        "usedPercent": {
-          "type": "number"
-        },
-        "writeBytes": {
-          "type": "integer"
-        },
-        "writeOpsCount": {
-          "type": "integer"
-        }
-      }
-    }
-  },
-  "securityDefinitions": {
-    "Bearer": {
-      "description": "Type \"Bearer\" + JWT token or API key.",
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
-    }
-  }
 }

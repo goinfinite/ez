@@ -303,7 +303,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "ContainerCreated",
+                        "description": "ContainerCreationScheduled",
                         "schema": {
                             "type": "object"
                         }
