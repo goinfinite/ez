@@ -13,7 +13,7 @@ type UnixTime int64
 func NewUnixTime(value interface{}) (UnixTime, error) {
 	unixTime, err := voHelper.InterfaceToInt64(value)
 	if err != nil {
-		return 0, errors.New("InvalidScheduledTaskId")
+		return 0, errors.New("InvalidUnixTime")
 	}
 
 	return UnixTime(unixTime), nil
