@@ -137,6 +137,11 @@ func (controller *ContainerController) Create() *cobra.Command {
 					cliHelper.ResponseWrapper(false, err.Error())
 				}
 
+				err = infraHelper.RemoveFile(scriptFilePath.String())
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
+
 				requestBody["launchScript"] = launchScript
 			}
 
@@ -145,7 +150,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 			}
 
 			cliHelper.ServiceResponseWrapper(
-				controller.containerService.Create(requestBody),
+				controller.containerService.Create(requestBody, false),
 			)
 		},
 	}
