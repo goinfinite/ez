@@ -8,4 +8,5 @@ import (
 type ScheduledTaskQueryRepo interface {
 	Get() ([]entity.ScheduledTask, error)
 	GetById(id valueObject.ScheduledTaskId) (entity.ScheduledTask, error)
+	GetByStatus(status valueObject.ScheduledTaskStatus) ([]entity.ScheduledTask, error)
 }

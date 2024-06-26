@@ -2,9 +2,11 @@ package repository
 
 import (
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
 )
 
 type ScheduledTaskCmdRepo interface {
 	Create(createDto dto.CreateScheduledTask) error
 	Update(updateDto dto.UpdateScheduledTask) error
+	Run(pendingTask entity.ScheduledTask) error
 }
