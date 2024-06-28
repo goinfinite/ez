@@ -9,8 +9,6 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-const MaxFailedLoginAttemptsPerIpAddress uint = 5
-
 func GetSecurityEvents(
 	securityQueryRepo repository.SecurityQueryRepo,
 	getDto dto.GetSecurityEvents,
