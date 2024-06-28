@@ -51,9 +51,12 @@ func (controller *AuthController) Login(c echo.Context) error {
 	authQueryRepo := infra.NewAuthQueryRepo(controller.persistentDbSvc)
 	authCmdRepo := infra.AuthCmdRepo{}
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
+	securityQueryRepo := infra.NewSecurityQueryRepo(controller.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
 
 	accessToken, err := useCase.GenerateSessionToken(
-		authQueryRepo, authCmdRepo, accountQueryRepo, loginDto,
+		authQueryRepo, authCmdRepo, accountQueryRepo,
+		securityQueryRepo, securityCmdRepo, loginDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusUnauthorized, err.Error())
