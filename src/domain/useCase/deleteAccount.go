@@ -9,12 +9,12 @@ import (
 )
 
 func DeleteAccount(
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	accountId valueObject.AccountId,
 	containerQueryRepo repository.ContainerQueryRepo,
 ) error {
-	_, err := accQueryRepo.GetById(accountId)
+	_, err := accountQueryRepo.GetById(accountId)
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}
@@ -29,7 +29,7 @@ func DeleteAccount(
 		return errors.New("AccountHasContainers")
 	}
 
-	err = accCmdRepo.Delete(accountId)
+	err = accountCmdRepo.Delete(accountId)
 	if err != nil {
 		log.Printf("DeleteAccountError: %s", err)
 		return errors.New("DeleteAccountInfraError")

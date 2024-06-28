@@ -10,11 +10,11 @@ import (
 )
 
 func AddAccount(
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	addAccount dto.AddAccount,
 ) error {
-	_, err := accQueryRepo.GetByUsername(addAccount.Username)
+	_, err := accountQueryRepo.GetByUsername(addAccount.Username)
 	if err == nil {
 		return errors.New("AccountAlreadyExists")
 	}
@@ -24,7 +24,7 @@ func AddAccount(
 		addAccount.Quota = &defaultQuota
 	}
 
-	err = accCmdRepo.Add(addAccount)
+	err = accountCmdRepo.Add(addAccount)
 	if err != nil {
 		log.Printf("AddAccountError: %s", err)
 		return errors.New("AddAccountInfraError")

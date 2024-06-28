@@ -319,7 +319,7 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 func (repo *ContainerQueryRepo) GetWithMetrics() ([]dto.ContainerWithMetrics, error) {
 	containersWithMetrics := []dto.ContainerWithMetrics{}
 
-	accsList, err := NewAccQueryRepo(repo.persistentDbSvc).Get()
+	accsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Get()
 	if err != nil {
 		return containersWithMetrics, err
 	}

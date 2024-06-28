@@ -50,7 +50,7 @@ func (controller *AuthController) Login(c echo.Context) error {
 
 	authQueryRepo := infra.NewAuthQueryRepo(controller.persistentDbSvc)
 	authCmdRepo := infra.AuthCmdRepo{}
-	accQueryRepo := infra.NewAccQueryRepo(controller.persistentDbSvc)
+	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 
 	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
 	if err != nil {
@@ -58,7 +58,7 @@ func (controller *AuthController) Login(c echo.Context) error {
 	}
 
 	accessToken, err := useCase.GetSessionToken(
-		authQueryRepo, authCmdRepo, accQueryRepo, loginDto, ipAddress,
+		authQueryRepo, authCmdRepo, accountQueryRepo, loginDto, ipAddress,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusUnauthorized, err.Error())

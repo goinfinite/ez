@@ -10,16 +10,16 @@ import (
 )
 
 func UpdateAccountApiKey(
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	updateAccountDto dto.UpdateAccount,
 ) (valueObject.AccessTokenValue, error) {
-	_, err := accQueryRepo.GetById(updateAccountDto.AccountId)
+	_, err := accountQueryRepo.GetById(updateAccountDto.AccountId)
 	if err != nil {
 		return "", errors.New("AccountNotFound")
 	}
 
-	newKey, err := accCmdRepo.UpdateApiKey(updateAccountDto.AccountId)
+	newKey, err := accountCmdRepo.UpdateApiKey(updateAccountDto.AccountId)
 	if err != nil {
 		log.Printf("UpdateAccountApiKeyError: %s", err)
 		return "", errors.New("UpdateAccountApiKeyInfraError")

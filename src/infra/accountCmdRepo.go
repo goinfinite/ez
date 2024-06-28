@@ -20,15 +20,15 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-type AccCmdRepo struct {
+type AccountCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewAccCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *AccCmdRepo {
-	return &AccCmdRepo{persistentDbSvc: persistentDbSvc}
+func NewAccountCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *AccountCmdRepo {
+	return &AccountCmdRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *AccCmdRepo) updateFilesystemQuota(
+func (repo *AccountCmdRepo) updateFilesystemQuota(
 	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
@@ -60,7 +60,7 @@ func (repo *AccCmdRepo) updateFilesystemQuota(
 	return nil
 }
 
-func (repo *AccCmdRepo) Add(addAccount dto.AddAccount) error {
+func (repo *AccountCmdRepo) Add(addAccount dto.AddAccount) error {
 	passHash, err := bcrypt.GenerateFromPassword(
 		[]byte(addAccount.Password.String()),
 		bcrypt.DefaultCost,
@@ -130,10 +130,10 @@ func (repo *AccCmdRepo) Add(addAccount dto.AddAccount) error {
 	return nil
 }
 
-func (repo *AccCmdRepo) getUsernameById(
+func (repo *AccountCmdRepo) getUsernameById(
 	accId valueObject.AccountId,
 ) (valueObject.Username, error) {
-	accQuery := NewAccQueryRepo(repo.persistentDbSvc)
+	accQuery := NewAccountQueryRepo(repo.persistentDbSvc)
 	accDetails, err := accQuery.GetById(accId)
 	if err != nil {
 		return "", err
@@ -142,7 +142,7 @@ func (repo *AccCmdRepo) getUsernameById(
 	return accDetails.Username, nil
 }
 
-func (repo *AccCmdRepo) Delete(accId valueObject.AccountId) error {
+func (repo *AccountCmdRepo) Delete(accId valueObject.AccountId) error {
 	quota := valueObject.NewAccountQuotaWithBlankValues()
 	err := repo.updateFilesystemQuota(accId, quota)
 	if err != nil {
@@ -194,7 +194,7 @@ func (repo *AccCmdRepo) Delete(accId valueObject.AccountId) error {
 	return nil
 }
 
-func (repo *AccCmdRepo) UpdatePassword(
+func (repo *AccountCmdRepo) UpdatePassword(
 	accId valueObject.AccountId,
 	password valueObject.Password,
 ) error {
@@ -229,7 +229,7 @@ func (repo *AccCmdRepo) UpdatePassword(
 	return updateResult.Error
 }
 
-func (repo *AccCmdRepo) UpdateApiKey(
+func (repo *AccountCmdRepo) UpdateApiKey(
 	accId valueObject.AccountId,
 ) (valueObject.AccessTokenValue, error) {
 	uuid := uuid.New()
@@ -260,7 +260,7 @@ func (repo *AccCmdRepo) UpdateApiKey(
 	return apiKey, nil
 }
 
-func (repo *AccCmdRepo) updateQuotaTable(
+func (repo *AccountCmdRepo) updateQuotaTable(
 	tableName string,
 	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
@@ -291,7 +291,7 @@ func (repo *AccCmdRepo) updateQuotaTable(
 	return nil
 }
 
-func (repo *AccCmdRepo) UpdateQuota(
+func (repo *AccountCmdRepo) UpdateQuota(
 	accId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
@@ -307,7 +307,7 @@ func (repo *AccCmdRepo) UpdateQuota(
 	)
 }
 
-func (repo *AccCmdRepo) getStorageUsage(
+func (repo *AccountCmdRepo) getStorageUsage(
 	accId valueObject.AccountId,
 ) (valueObject.AccountQuota, error) {
 	var quotaUsage valueObject.AccountQuota
@@ -364,7 +364,7 @@ func (repo *AccCmdRepo) getStorageUsage(
 	), nil
 }
 
-func (repo *AccCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
+func (repo *AccountCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error {
 	storageUsage, err := repo.getStorageUsage(accId)
 	if err != nil {
 		return err

@@ -14,7 +14,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	authQueryRepo := NewAuthQueryRepo(persistentDbSvc)
-	accCmdRepo := NewAccCmdRepo(persistentDbSvc)
+	accountCmdRepo := NewAccountCmdRepo(persistentDbSvc)
 
 	t.Run("ValidLoginCredentials", func(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
@@ -64,7 +64,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	})
 
 	t.Run("ValidAccountApiKey", func(t *testing.T) {
-		apiKey, err := accCmdRepo.UpdateApiKey(
+		apiKey, err := accountCmdRepo.UpdateApiKey(
 			valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID")),
 		)
 		if err != nil {

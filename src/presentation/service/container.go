@@ -245,15 +245,15 @@ func (service *ContainerService) Create(
 
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
-	accQueryRepo := infra.NewAccQueryRepo(service.persistentDbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(service.persistentDbSvc)
+	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
+	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(service.persistentDbSvc)
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainer(
-		containerQueryRepo, containerCmdRepo, accQueryRepo, accCmdRepo,
+		containerQueryRepo, containerCmdRepo, accountQueryRepo, accountCmdRepo,
 		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
 		containerProxyCmdRepo, createContainerDto,
 	)
@@ -309,15 +309,15 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
-	accQueryRepo := infra.NewAccQueryRepo(service.persistentDbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(service.persistentDbSvc)
+	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
+	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(service.persistentDbSvc)
 
 	err = useCase.UpdateContainer(
 		containerQueryRepo,
 		containerCmdRepo,
-		accQueryRepo,
-		accCmdRepo,
+		accountQueryRepo,
+		accountCmdRepo,
 		containerProfileQueryRepo,
 		updateContainerDto,
 	)
@@ -341,7 +341,7 @@ func (service *ContainerService) Delete(input map[string]interface{}) ServiceOut
 
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
-	accCmdRepo := infra.NewAccCmdRepo(service.persistentDbSvc)
+	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
@@ -349,7 +349,7 @@ func (service *ContainerService) Delete(input map[string]interface{}) ServiceOut
 	err = useCase.DeleteContainer(
 		containerQueryRepo,
 		containerCmdRepo,
-		accCmdRepo,
+		accountCmdRepo,
 		mappingQueryRepo,
 		mappingCmdRepo,
 		containerProxyCmdRepo,

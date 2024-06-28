@@ -5,7 +5,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-type AccCmdRepo interface {
+type AccountCmdRepo interface {
 	Add(addAccount dto.AddAccount) error
 	Delete(accId valueObject.AccountId) error
 	UpdatePassword(accId valueObject.AccountId, password valueObject.Password) error

@@ -9,17 +9,17 @@ import (
 )
 
 func UpdateAccount(
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	updateAccountDto dto.UpdateAccount,
 ) error {
-	_, err := accQueryRepo.GetById(updateAccountDto.AccountId)
+	_, err := accountQueryRepo.GetById(updateAccountDto.AccountId)
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}
 
 	if updateAccountDto.Password != nil {
-		err = accCmdRepo.UpdatePassword(
+		err = accountCmdRepo.UpdatePassword(
 			updateAccountDto.AccountId,
 			*updateAccountDto.Password,
 		)
@@ -32,7 +32,7 @@ func UpdateAccount(
 	}
 
 	if updateAccountDto.Quota != nil {
-		err = accCmdRepo.UpdateQuota(
+		err = accountCmdRepo.UpdateQuota(
 			updateAccountDto.AccountId,
 			*updateAccountDto.Quota,
 		)

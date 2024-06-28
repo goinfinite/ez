@@ -9,9 +9,9 @@ import (
 )
 
 func GetAccounts(
-	accQueryRepo repository.AccQueryRepo,
+	accountQueryRepo repository.AccountQueryRepo,
 ) ([]entity.Account, error) {
-	accs, err := accQueryRepo.Get()
+	accs, err := accountQueryRepo.Get()
 	if err != nil {
 		log.Printf("GetAccountsError: %s", err)
 		return nil, errors.New("GetAccountsInfraError")

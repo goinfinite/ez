@@ -10,13 +10,13 @@ import (
 )
 
 func CheckAccountQuota(
-	accQueryRepo repository.AccQueryRepo,
+	accountQueryRepo repository.AccountQueryRepo,
 	accId valueObject.AccountId,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	newProfileId valueObject.ContainerProfileId,
 	prevProfileId *valueObject.ContainerProfileId,
 ) error {
-	accEntity, err := accQueryRepo.GetById(accId)
+	accEntity, err := accountQueryRepo.GetById(accId)
 	if err != nil {
 		log.Printf("GetAccountInfoError: %s", err)
 		return errors.New("GetAccountInfoInfraError")

@@ -7,17 +7,17 @@ import (
 )
 
 func AutoUpdateAccountsQuotaUsage(
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 ) {
-	accs, err := accQueryRepo.Get()
+	accs, err := accountQueryRepo.Get()
 	if err != nil {
 		log.Printf("GetAccountsError: %v", err)
 		return
 	}
 
 	for _, acc := range accs {
-		err := accCmdRepo.UpdateQuotaUsage(acc.Id)
+		err := accountCmdRepo.UpdateQuotaUsage(acc.Id)
 		if err != nil {
 			log.Printf("UpdateQuotaUsageError: %v [accId: %s]", acc.Id, err)
 			continue

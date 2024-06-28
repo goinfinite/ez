@@ -11,8 +11,8 @@ import (
 func CreateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
@@ -20,7 +20,7 @@ func CreateContainer(
 	createDto dto.CreateContainer,
 ) error {
 	err := CheckAccountQuota(
-		accQueryRepo,
+		accountQueryRepo,
 		createDto.AccountId,
 		containerProfileQueryRepo,
 		*createDto.ProfileId,
@@ -43,7 +43,7 @@ func CreateContainer(
 		return errors.New("CreateContainerInfraError")
 	}
 
-	err = accCmdRepo.UpdateQuotaUsage(createDto.AccountId)
+	err = accountCmdRepo.UpdateQuotaUsage(createDto.AccountId)
 	if err != nil {
 		log.Printf("UpdateAccountQuotaError: %s", err)
 		return errors.New("UpdateAccountQuotaError")

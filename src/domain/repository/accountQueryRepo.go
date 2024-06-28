@@ -5,7 +5,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-type AccQueryRepo interface {
+type AccountQueryRepo interface {
 	Get() ([]entity.Account, error)
 	GetByUsername(
 		username valueObject.Username,

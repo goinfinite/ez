@@ -10,15 +10,15 @@ import (
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 )
 
-type AccQueryRepo struct {
+type AccountQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
-func NewAccQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *AccQueryRepo {
-	return &AccQueryRepo{persistentDbSvc: persistentDbSvc}
+func NewAccountQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *AccountQueryRepo {
+	return &AccountQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *AccQueryRepo) Get() ([]entity.Account, error) {
+func (repo *AccountQueryRepo) Get() ([]entity.Account, error) {
 	var accEntities []entity.Account
 
 	var accModels []dbModel.Account
@@ -43,7 +43,7 @@ func (repo *AccQueryRepo) Get() ([]entity.Account, error) {
 	return accEntities, nil
 }
 
-func (repo *AccQueryRepo) GetByUsername(
+func (repo *AccountQueryRepo) GetByUsername(
 	username valueObject.Username,
 ) (entity.Account, error) {
 	accEntities, err := repo.Get()
@@ -60,7 +60,7 @@ func (repo *AccQueryRepo) GetByUsername(
 	return entity.Account{}, errors.New("AccountNotFound")
 }
 
-func (repo *AccQueryRepo) GetById(
+func (repo *AccountQueryRepo) GetById(
 	accountId valueObject.AccountId,
 ) (entity.Account, error) {
 	accEntities, err := repo.Get()

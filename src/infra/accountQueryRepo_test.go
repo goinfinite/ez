@@ -8,13 +8,13 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func TestAccQueryRepo(t *testing.T) {
+func TestAccountQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
-	accQueryRepo := NewAccQueryRepo(persistentDbSvc)
+	accountQueryRepo := NewAccountQueryRepo(persistentDbSvc)
 
 	t.Run("GetValidAccounts", func(t *testing.T) {
-		_, err := accQueryRepo.Get()
+		_, err := accountQueryRepo.Get()
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -23,7 +23,7 @@ func TestAccQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountByUsername", func(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 
-		_, err := accQueryRepo.GetByUsername(username)
+		_, err := accountQueryRepo.GetByUsername(username)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -32,7 +32,7 @@ func TestAccQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountById", func(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-		_, err := accQueryRepo.GetById(accountId)
+		_, err := accountQueryRepo.GetById(accountId)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -41,7 +41,7 @@ func TestAccQueryRepo(t *testing.T) {
 	t.Run("GetInvalidAccount", func(t *testing.T) {
 		username, _ := valueObject.NewUsername("invalid")
 
-		_, err := accQueryRepo.GetByUsername(username)
+		_, err := accountQueryRepo.GetByUsername(username)
 		if err == nil {
 			t.Error("ExpectingError")
 		}

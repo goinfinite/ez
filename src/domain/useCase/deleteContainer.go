@@ -65,7 +65,7 @@ func mappingsJanitor(
 func DeleteContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
 	containerProxyCmdRepo repository.ContainerProxyCmdRepo,
@@ -97,7 +97,7 @@ func DeleteContainer(
 
 	log.Printf("ContainerId '%v' deleted.", containerId)
 
-	err = accCmdRepo.UpdateQuotaUsage(accountId)
+	err = accountCmdRepo.UpdateQuotaUsage(accountId)
 	if err != nil {
 		log.Printf("UpdateAccountQuotaError: %s", err)
 		return errors.New("UpdateAccountQuotaError")

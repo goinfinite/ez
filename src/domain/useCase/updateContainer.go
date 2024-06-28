@@ -11,8 +11,8 @@ import (
 func UpdateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	accQueryRepo repository.AccQueryRepo,
-	accCmdRepo repository.AccCmdRepo,
+	accountQueryRepo repository.AccountQueryRepo,
+	accountCmdRepo repository.AccountCmdRepo,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 	updateDto dto.UpdateContainer,
 ) error {
@@ -24,7 +24,7 @@ func UpdateContainer(
 	shouldUpdateQuota := updateDto.ProfileId != nil
 	if shouldUpdateQuota {
 		err = CheckAccountQuota(
-			accQueryRepo,
+			accountQueryRepo,
 			updateDto.AccountId,
 			containerProfileQueryRepo,
 			*updateDto.ProfileId,
@@ -42,7 +42,7 @@ func UpdateContainer(
 	}
 
 	if shouldUpdateQuota {
-		err = accCmdRepo.UpdateQuotaUsage(updateDto.AccountId)
+		err = accountCmdRepo.UpdateQuotaUsage(updateDto.AccountId)
 		if err != nil {
 			log.Printf("UpdateAccountQuotaError: %s", err)
 			return errors.New("UpdateAccountQuotaError")
