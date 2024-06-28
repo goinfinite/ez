@@ -9,14 +9,14 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetSecurityEvents(
+func ReadSecurityEvents(
 	securityQueryRepo repository.SecurityQueryRepo,
-	getDto dto.GetSecurityEvents,
+	readDto dto.ReadSecurityEvents,
 ) ([]entity.SecurityEvent, error) {
-	securityEvents, err := securityQueryRepo.GetEvents(getDto)
+	securityEvents, err := securityQueryRepo.ReadEvents(readDto)
 	if err != nil {
-		log.Printf("GetSecurityEventsError: %s", err)
-		return nil, errors.New("GetSecurityEventsInfraError")
+		log.Printf("ReadSecurityEventsError: %s", err)
+		return nil, errors.New("ReadSecurityEventsInfraError")
 	}
 
 	return securityEvents, nil

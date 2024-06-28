@@ -6,5 +6,5 @@ import (
 )
 
 type SecurityQueryRepo interface {
-	GetEvents(getDto dto.GetSecurityEvents) ([]entity.SecurityEvent, error)
+	ReadEvents(readDto dto.ReadSecurityEvents) ([]entity.SecurityEvent, error)
 }

@@ -26,11 +26,11 @@ func GenerateSessionToken(
 	failedAttemptsIntervalStartsAt := valueObject.NewUnixTimeBeforeNow(
 		FailedLoginAttemptsInterval,
 	)
-	getSecurityEventsDto := dto.NewGetSecurityEvents(
+	readSecurityEventsDto := dto.NewReadSecurityEvents(
 		&eventType, loginDto.IpAddress, nil, &failedAttemptsIntervalStartsAt,
 	)
 
-	failedLoginAttempts, err := GetSecurityEvents(securityQueryRepo, getSecurityEventsDto)
+	failedLoginAttempts, err := ReadSecurityEvents(securityQueryRepo, readSecurityEventsDto)
 	if err != nil {
 		return accessToken, err
 	}

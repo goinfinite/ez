@@ -12,9 +12,9 @@ func TestSecurityQueryRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	securityQueryRepo := NewSecurityQueryRepo(persistentDbSvc)
 
-	t.Run("GetSecurityEvents", func(t *testing.T) {
-		getDto := dto.NewGetSecurityEvents(nil, nil, nil, nil)
-		_, err := securityQueryRepo.GetEvents(getDto)
+	t.Run("ReadSecurityEvents", func(t *testing.T) {
+		readDto := dto.NewReadSecurityEvents(nil, nil, nil, nil)
+		_, err := securityQueryRepo.ReadEvents(readDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

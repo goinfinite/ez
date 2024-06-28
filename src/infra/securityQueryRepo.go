@@ -19,23 +19,23 @@ func NewSecurityQueryRepo(
 	return &SecurityQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *SecurityQueryRepo) GetEvents(
-	getDto dto.GetSecurityEvents,
+func (repo *SecurityQueryRepo) ReadEvents(
+	readDto dto.ReadSecurityEvents,
 ) ([]entity.SecurityEvent, error) {
 	securityEvents := []entity.SecurityEvent{}
 
 	getConditionsMap := map[string]interface{}{}
 
-	if getDto.Type != nil {
-		getConditionsMap["type"] = getDto.Type.String()
+	if readDto.Type != nil {
+		getConditionsMap["type"] = readDto.Type.String()
 	}
 
-	if getDto.IpAddress != nil {
-		getConditionsMap["ip_address"] = getDto.IpAddress.String()
+	if readDto.IpAddress != nil {
+		getConditionsMap["ip_address"] = readDto.IpAddress.String()
 	}
 
-	if getDto.AccountId != nil {
-		getConditionsMap["account_id"] = getDto.AccountId.Get()
+	if readDto.AccountId != nil {
+		getConditionsMap["account_id"] = readDto.AccountId.Get()
 	}
 
 	securityEventModels := []dbModel.SecurityEvent{}
