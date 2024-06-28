@@ -12,7 +12,7 @@ type ScheduledTaskOutput string
 func NewScheduledTaskOutput(value interface{}) (ScheduledTaskOutput, error) {
 	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
-		return "", errors.New("ScheduledTaskNameMustBeString")
+		return "", errors.New("ScheduledTaskOutputMustBeString")
 	}
 
 	stringValue = strings.TrimSpace(stringValue)
