@@ -37,10 +37,7 @@ func (router *Router) swaggerRoute() {
 func (router *Router) authRoutes() {
 	authGroup := router.baseRoute.Group("/v1/auth")
 
-	authController := apiController.NewAuthController(
-		router.persistentDbSvc,
-		router.transientDbSvc,
-	)
+	authController := apiController.NewAuthController(router.persistentDbSvc)
 	authGroup.POST("/login/", authController.Login)
 }
 

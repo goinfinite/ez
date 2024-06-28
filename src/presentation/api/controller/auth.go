@@ -14,17 +14,12 @@ import (
 
 type AuthController struct {
 	persistentDbSvc *db.PersistentDatabaseService
-	transientDbSbc  *db.TransientDatabaseService
 }
 
 func NewAuthController(
 	persistentDbSvc *db.PersistentDatabaseService,
-	transientDbSvc *db.TransientDatabaseService,
 ) *AuthController {
-	return &AuthController{
-		persistentDbSvc: persistentDbSvc,
-		transientDbSbc:  transientDbSvc,
-	}
+	return &AuthController{persistentDbSvc: persistentDbSvc}
 }
 
 func (controller *AuthController) Login(c echo.Context) error {
