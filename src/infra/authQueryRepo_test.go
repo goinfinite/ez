@@ -20,7 +20,7 @@ func TestAuthQueryRepo(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 
-		login := dto.NewLogin(username, password)
+		login := dto.NewLogin(username, password, nil)
 		isValid := authQueryRepo.IsLoginValid(login)
 		if !isValid {
 			t.Error("Expected valid login credentials, but got invalid")
@@ -31,7 +31,7 @@ func TestAuthQueryRepo(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword("wrongPassword")
 
-		login := dto.NewLogin(username, password)
+		login := dto.NewLogin(username, password, nil)
 		isValid := authQueryRepo.IsLoginValid(login)
 		if isValid {
 			t.Error("Expected invalid login credentials, but got valid")
