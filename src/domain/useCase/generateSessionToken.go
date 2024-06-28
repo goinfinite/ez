@@ -2,7 +2,6 @@ package useCase
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -11,25 +10,19 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func GetSessionToken(
+const MaxFailedLoginAttemptsPerIpAddress uint = 5
+
+func GenerateSessionToken(
 	authQueryRepo repository.AuthQueryRepo,
 	authCmdRepo repository.AuthCmdRepo,
 	accountQueryRepo repository.AccountQueryRepo,
-	login dto.Login,
-	ipAddress valueObject.IpAddress,
+	loginDto dto.Login,
 ) (accessToken entity.AccessToken, err error) {
-	isLoginValid := authQueryRepo.IsLoginValid(login)
-
-	if !isLoginValid {
-		log.Printf(
-			"Login failed for '%v' from '%v'.",
-			login.Username.String(),
-			ipAddress.String(),
-		)
+	if !authQueryRepo.IsLoginValid(loginDto) {
 		return accessToken, errors.New("InvalidCredentials")
 	}
 
-	accountDetails, err := accountQueryRepo.GetByUsername(login.Username)
+	accountDetails, err := accountQueryRepo.GetByUsername(loginDto.Username)
 	if err != nil {
 		return accessToken, errors.New("AccountNotFound")
 	}
@@ -37,5 +30,5 @@ func GetSessionToken(
 	accountId := accountDetails.Id
 	expiresIn := valueObject.NewUnixTimeAfterNow(3 * time.Hour)
 
-	return authCmdRepo.GenerateSessionToken(accountId, expiresIn, ipAddress)
+	return authCmdRepo.GenerateSessionToken(accountId, expiresIn, *loginDto.IpAddress)
 }
