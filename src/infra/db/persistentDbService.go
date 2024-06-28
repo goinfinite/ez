@@ -97,6 +97,7 @@ func (dbSvc PersistentDatabaseService) dbMigrate() error {
 		&dbModel.MappingTarget{},
 		&dbModel.LicenseInfo{},
 		&dbModel.ScheduledTask{},
+		&dbModel.SecurityEvent{},
 	)
 	if err != nil {
 		return errors.New("DatabaseMigrationError")
