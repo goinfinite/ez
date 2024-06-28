@@ -47,8 +47,15 @@ func (controller *AccountController) AddAccount() *cobra.Command {
 		Use:   "add",
 		Short: "AddNewAccount",
 		Run: func(cmd *cobra.Command, args []string) {
-			username := valueObject.NewUsernamePanic(usernameStr)
-			password := valueObject.NewPasswordPanic(passwordStr)
+			username, err := valueObject.NewUsername(usernameStr)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
+
+			password, err := valueObject.NewPassword(passwordStr)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
 
 			var quotaPtr *valueObject.AccountQuota
 			if quotaStr != "" {
@@ -68,7 +75,7 @@ func (controller *AccountController) AddAccount() *cobra.Command {
 			accQueryRepo := infra.NewAccQueryRepo(controller.persistentDbSvc)
 			accCmdRepo := infra.NewAccCmdRepo(controller.persistentDbSvc)
 
-			err := useCase.AddAccount(
+			err = useCase.AddAccount(
 				accQueryRepo,
 				accCmdRepo,
 				addAccountDto,
@@ -103,7 +110,10 @@ func (controller *AccountController) UpdateAccount() *cobra.Command {
 
 			var passPtr *valueObject.Password
 			if passwordStr != "" {
-				password := valueObject.NewPasswordPanic(passwordStr)
+				password, err := valueObject.NewPassword(passwordStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				passPtr = &password
 			}
 

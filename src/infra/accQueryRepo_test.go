@@ -21,7 +21,7 @@ func TestAccQueryRepo(t *testing.T) {
 	})
 
 	t.Run("GetValidAccountByUsername", func(t *testing.T) {
-		username := valueObject.NewUsernamePanic(os.Getenv("DUMMY_USER_NAME"))
+		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 
 		_, err := accQueryRepo.GetByUsername(username)
 		if err != nil {
@@ -39,7 +39,7 @@ func TestAccQueryRepo(t *testing.T) {
 	})
 
 	t.Run("GetInvalidAccount", func(t *testing.T) {
-		username := valueObject.NewUsernamePanic("invalid")
+		username, _ := valueObject.NewUsername("invalid")
 
 		_, err := accQueryRepo.GetByUsername(username)
 		if err == nil {

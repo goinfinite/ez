@@ -104,11 +104,17 @@ func AddAccountController(c echo.Context) error {
 		quotaPtr = &quota
 	}
 
-	addAccountDto := dto.NewAddAccount(
-		valueObject.NewUsernamePanic(requestBody["username"].(string)),
-		valueObject.NewPasswordPanic(requestBody["password"].(string)),
-		quotaPtr,
-	)
+	username, err := valueObject.NewUsername(requestBody["username"])
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	password, err := valueObject.NewPassword(requestBody["password"])
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	addAccountDto := dto.NewAddAccount(username, password, quotaPtr)
 
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	accQueryRepo := infra.NewAccQueryRepo(persistentDbSvc)
@@ -149,7 +155,10 @@ func UpdateAccountController(c echo.Context) error {
 
 	var passPtr *valueObject.Password
 	if requestBody["password"] != nil {
-		password := valueObject.NewPasswordPanic(requestBody["password"].(string))
+		password, err := valueObject.NewPassword(requestBody["password"])
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
 		passPtr = &password
 	}
 

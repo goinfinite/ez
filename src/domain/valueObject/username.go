@@ -3,33 +3,33 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 const usernameRegex string = `^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$`
 
 type Username string
 
-func NewUsername(value string) (Username, error) {
-	user := Username(value)
-	if !user.isValid() {
+func NewUsername(value interface{}) (Username, error) {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
+		return "", errors.New("UsernameMustBeString")
+	}
+
+	stringValue = strings.TrimSpace(stringValue)
+	stringValue = strings.ToLower(stringValue)
+
+	re := regexp.MustCompile(usernameRegex)
+	isValid := re.MatchString(stringValue)
+	if !isValid {
 		return "", errors.New("InvalidUsername")
 	}
-	return user, nil
+
+	return Username(stringValue), nil
 }
 
-func NewUsernamePanic(value string) Username {
-	user := Username(value)
-	if !user.isValid() {
-		panic("InvalidUsername")
-	}
-	return user
-}
-
-func (user Username) isValid() bool {
-	re := regexp.MustCompile(usernameRegex)
-	return re.MatchString(string(user))
-}
-
-func (user Username) String() string {
-	return string(user)
+func (vo Username) String() string {
+	return string(vo)
 }
