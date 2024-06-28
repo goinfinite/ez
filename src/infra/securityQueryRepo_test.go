@@ -14,11 +14,9 @@ func TestSecurityQueryRepo(t *testing.T) {
 
 	t.Run("GetSecurityEvents", func(t *testing.T) {
 		getDto := dto.NewGetSecurityEvents(nil, nil, nil, nil)
-
 		_, err := securityQueryRepo.GetEvents(getDto)
 		if err != nil {
-			t.Error(err)
-			return
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 	})
 }
