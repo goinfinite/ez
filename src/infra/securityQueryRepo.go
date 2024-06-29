@@ -24,25 +24,25 @@ func (repo *SecurityQueryRepo) ReadEvents(
 ) ([]entity.SecurityEvent, error) {
 	securityEvents := []entity.SecurityEvent{}
 
-	getConditionsMap := map[string]interface{}{}
-
+	dbQuery := repo.persistentDbSvc.Handler.Model(&dbModel.SecurityEvent{})
 	if readDto.Type != nil {
-		getConditionsMap["type"] = readDto.Type.String()
+		dbQuery = dbQuery.Where("type = ?", readDto.Type.String())
 	}
 
 	if readDto.IpAddress != nil {
-		getConditionsMap["ip_address"] = readDto.IpAddress.String()
+		dbQuery = dbQuery.Where("ip_address = ?", readDto.IpAddress.String())
 	}
 
 	if readDto.AccountId != nil {
-		getConditionsMap["account_id"] = readDto.AccountId.Get()
+		dbQuery = dbQuery.Where("account_id = ?", readDto.AccountId.Get())
+	}
+
+	if readDto.CreatedAt != nil {
+		dbQuery = dbQuery.Where("created_at >= ?", readDto.CreatedAt.GetAsGoTime())
 	}
 
 	securityEventModels := []dbModel.SecurityEvent{}
-	err := repo.persistentDbSvc.Handler.
-		Where(getConditionsMap).
-		Find(&securityEventModels).
-		Error
+	err := dbQuery.Find(&securityEventModels).Error
 	if err != nil {
 		return securityEvents, err
 	}
