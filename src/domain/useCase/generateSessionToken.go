@@ -58,6 +58,16 @@ func GenerateSessionToken(
 	if err != nil {
 		return accessToken, errors.New("AccountNotFound")
 	}
+
+	eventType, _ = valueObject.NewSecurityEventType("successful-login")
+	createSecurityEventDto := dto.NewCreateSecurityEvent(
+		eventType, nil, loginDto.IpAddress, &accountDetails.Id,
+	)
+	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	if err != nil {
+		return accessToken, err
+	}
+
 	expiresIn := valueObject.NewUnixTimeAfterNow(SessionTokenExpiresIn)
 
 	return authCmdRepo.GenerateSessionToken(

@@ -12,6 +12,7 @@ type SecurityEventType string
 
 var ValidSecurityEventTypes = []string{
 	"failed-login",
+	"successful-login",
 	"unauthorized-access",
 }
 
