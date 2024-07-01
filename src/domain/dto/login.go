@@ -5,7 +5,7 @@ import "github.com/speedianet/control/src/domain/valueObject"
 type Login struct {
 	Username  valueObject.Username   `json:"username"`
 	Password  valueObject.Password   `json:"password"`
-	IpAddress *valueObject.IpAddress `json:"ipAddress"`
+	IpAddress *valueObject.IpAddress `json:"-"`
 }
 
 func NewLogin(
