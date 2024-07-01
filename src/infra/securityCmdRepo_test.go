@@ -15,7 +15,7 @@ func TestSecurityCmdRepo(t *testing.T) {
 
 	t.Run("CreateSecurityEvent", func(t *testing.T) {
 		eventType, _ := valueObject.NewSecurityEventType("failed-login")
-		ipAddress, _ := valueObject.NewIpAddress("127.0.0.1")
+		ipAddress := valueObject.NewLocalhostIpAddress()
 		createDto := dto.NewCreateSecurityEvent(eventType, nil, &ipAddress, nil)
 
 		err := securityCmdRepo.CreateEvent(createDto)
@@ -25,7 +25,7 @@ func TestSecurityCmdRepo(t *testing.T) {
 	})
 
 	t.Run("DeleteSecurityEvents", func(t *testing.T) {
-		ipAddress, _ := valueObject.NewIpAddress("127.0.0.1")
+		ipAddress := valueObject.NewLocalhostIpAddress()
 		deleteDto := dto.NewDeleteSecurityEvents(nil, &ipAddress, nil, nil)
 
 		err := securityCmdRepo.DeleteEvents(deleteDto)

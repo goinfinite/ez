@@ -3,31 +3,32 @@ package valueObject
 import (
 	"errors"
 	"net"
+	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type IpAddress string
 
-func NewIpAddress(value string) (IpAddress, error) {
-	addr := IpAddress(value)
-	if !addr.isValid(value) {
+func NewIpAddress(value interface{}) (IpAddress, error) {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
+		return "", errors.New("IpAddressMustBeString")
+	}
+
+	stringValue = strings.TrimSpace(stringValue)
+	isValid := net.ParseIP(stringValue) != nil
+	if !isValid {
 		return "", errors.New("InvalidIpAddress")
 	}
-	return addr, nil
+
+	return IpAddress(stringValue), nil
 }
 
-func NewIpAddressPanic(value string) IpAddress {
-	addr := IpAddress(value)
-	if !addr.isValid(value) {
-		panic("InvalidIpAddress")
-	}
-	return addr
+func NewLocalhostIpAddress() IpAddress {
+	return IpAddress("127.0.0.1")
 }
 
-func (addr IpAddress) isValid(value string) bool {
-	ip := net.ParseIP(value)
-	return ip != nil
-}
-
-func (addr IpAddress) String() string {
-	return string(addr)
+func (vo IpAddress) String() string {
+	return string(vo)
 }

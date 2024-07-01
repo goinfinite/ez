@@ -44,7 +44,7 @@ func TestAuthQueryRepo(t *testing.T) {
 		token, _ := authCmdRepo.GenerateSessionToken(
 			valueObject.AccountId(1000),
 			valueObject.NewUnixTimeAfterNow(3*time.Hour),
-			valueObject.NewIpAddressPanic("127.0.0.1"),
+			valueObject.NewLocalhostIpAddress(),
 		)
 
 		_, err := authQueryRepo.GetAccessTokenDetails(token.TokenStr)
