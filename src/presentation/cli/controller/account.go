@@ -42,8 +42,9 @@ func (controller *AccountController) Create() *cobra.Command {
 		Short: "CreateAccount",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"username": usernameStr,
-				"password": passwordStr,
+				"username":  usernameStr,
+				"password":  passwordStr,
+				"ipAddress": valueObject.NewLocalhostIpAddress().String(),
 			}
 
 			if quotaStr != "" {
@@ -80,6 +81,7 @@ func (controller *AccountController) Update() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
 				"accountId": accountIdStr,
+				"ipAddress": valueObject.NewLocalhostIpAddress().String(),
 			}
 
 			if passwordStr != "" {
@@ -123,6 +125,7 @@ func (controller *AccountController) Delete() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
 				"accountId": accountIdStr,
+				"ipAddress": valueObject.NewLocalhostIpAddress().String(),
 			}
 
 			cliHelper.ServiceResponseWrapper(
