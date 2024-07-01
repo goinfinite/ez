@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
@@ -11,8 +12,10 @@ import (
 func DeleteAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
-	accountId valueObject.AccountId,
 	containerQueryRepo repository.ContainerQueryRepo,
+	securityCmdRepo repository.SecurityCmdRepo,
+	accountId valueObject.AccountId,
+	ipAddress *valueObject.IpAddress,
 ) error {
 	_, err := accountQueryRepo.GetById(accountId)
 	if err != nil {
@@ -35,7 +38,14 @@ func DeleteAccount(
 		return errors.New("DeleteAccountInfraError")
 	}
 
-	log.Printf("AccountId '%v' deleted.", accountId)
+	eventType, _ := valueObject.NewSecurityEventType("account-deleted")
+	createSecurityEventDto := dto.NewCreateSecurityEvent(
+		eventType, nil, ipAddress, &accountId,
+	)
+	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

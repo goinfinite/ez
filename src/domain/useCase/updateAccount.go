@@ -6,42 +6,51 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func UpdateAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
-	updateAccountDto dto.UpdateAccount,
+	securityCmdRepo repository.SecurityCmdRepo,
+	updateDto dto.UpdateAccount,
 ) error {
-	_, err := accountQueryRepo.GetById(updateAccountDto.AccountId)
+	_, err := accountQueryRepo.GetById(updateDto.AccountId)
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}
 
-	if updateAccountDto.Password != nil {
+	if updateDto.Password != nil {
 		err = accountCmdRepo.UpdatePassword(
-			updateAccountDto.AccountId,
-			*updateAccountDto.Password,
+			updateDto.AccountId,
+			*updateDto.Password,
 		)
 		if err != nil {
 			log.Printf("UpdateAccountPasswordError: %s", err)
 			return errors.New("UpdateAccountPasswordInfraError")
 		}
 
-		log.Printf("AccountId '%v' password updated.", updateAccountDto.AccountId)
+		eventType, _ := valueObject.NewSecurityEventType("account-password-updated")
+		createSecurityEventDto := dto.NewCreateSecurityEvent(
+			eventType, nil, updateDto.IpAddress, &updateDto.AccountId,
+		)
+		err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+		if err != nil {
+			return err
+		}
 	}
 
-	if updateAccountDto.Quota != nil {
+	if updateDto.Quota != nil {
 		err = accountCmdRepo.UpdateQuota(
-			updateAccountDto.AccountId,
-			*updateAccountDto.Quota,
+			updateDto.AccountId,
+			*updateDto.Quota,
 		)
 		if err != nil {
 			log.Printf("UpdateAccountQuotaError: %s", err)
 			return errors.New("UpdateAccountQuotaInfraError")
 		}
 
-		log.Printf("AccountId '%v' quota updated.", updateAccountDto.AccountId)
+		log.Printf("AccountId '%v' quota updated.", updateDto.AccountId)
 	}
 
 	return nil
