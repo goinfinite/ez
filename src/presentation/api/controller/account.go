@@ -77,22 +77,17 @@ func (controller *AccountController) accQuotaFactory(
 		inodes = valueObject.NewInodesCountPanic(quotaMap["inodes"])
 	}
 
-	return valueObject.NewAccountQuota(
-		cpuCores,
-		memoryBytes,
-		diskBytes,
-		inodes,
-	), nil
+	return valueObject.NewAccountQuota(cpuCores, memoryBytes, diskBytes, inodes), nil
 }
 
-// AddAccount	 godoc
-// @Summary      AddNewAccount
-// @Description  Add a new account.
+// CreateAccount	 godoc
+// @Summary      CreateAccount
+// @Description  Create a new account.
 // @Tags         account
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        addAccountDto 	  body    dto.AddAccount  true  "NewAccount"
+// @Param        createDto 	  body    dto.CreateAccount  true  "NewAccount"
 // @Success      201 {object} object{} "AccountCreated"
 // @Router       /v1/account/ [post]
 func (controller *AccountController) Create(c echo.Context) error {
@@ -106,7 +101,7 @@ func (controller *AccountController) Create(c echo.Context) error {
 
 	var quotaPtr *valueObject.AccountQuota
 	if requestBody["quota"] != nil {
-		quota, err := accQuotaFactory(requestBody["quota"], true)
+		quota, err := controller.accQuotaFactory(requestBody["quota"], true)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
@@ -123,15 +118,19 @@ func (controller *AccountController) Create(c echo.Context) error {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	addAccountDto := dto.NewAddAccount(username, password, quotaPtr)
+	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	createDto := dto.NewCreateAccount(username, password, quotaPtr, &ipAddress)
 
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
 
-	err = useCase.AddAccount(
-		accountQueryRepo,
-		accountCmdRepo,
-		addAccountDto,
+	err = useCase.CreateAccount(
+		accountQueryRepo, accountCmdRepo, securityCmdRepo, createDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
@@ -147,7 +146,7 @@ func (controller *AccountController) Create(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        updateAccountDto 	  body dto.UpdateAccount  true  "UpdateAccount (Only accountId is required.)"
+// @Param        updateDto 	  body dto.UpdateAccount  true  "UpdateAccount (Only accountId is required.)"
 // @Success      200 {object} object{} "AccountUpdated message or NewKeyString"
 // @Router       /v1/account/ [put]
 func (controller *AccountController) Update(c echo.Context) error {
@@ -178,28 +177,29 @@ func (controller *AccountController) Update(c echo.Context) error {
 
 	var quotaPtr *valueObject.AccountQuota
 	if requestBody["quota"] != nil {
-		quota, err := accQuotaFactory(requestBody["quota"], false)
+		quota, err := controller.accQuotaFactory(requestBody["quota"], false)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
 		quotaPtr = &quota
 	}
 
-	updateAccountDto := dto.NewUpdateAccount(
-		accountId,
-		passPtr,
-		shouldUpdateApiKeyPtr,
-		quotaPtr,
+	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	updateDto := dto.NewUpdateAccount(
+		accountId, passPtr, shouldUpdateApiKeyPtr, quotaPtr, &ipAddress,
 	)
 
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
 
-	if updateAccountDto.ShouldUpdateApiKey != nil && *updateAccountDto.ShouldUpdateApiKey {
+	if updateDto.ShouldUpdateApiKey != nil && *updateDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
-			accountQueryRepo,
-			accountCmdRepo,
-			updateAccountDto,
+			accountQueryRepo, accountCmdRepo, securityCmdRepo, updateDto,
 		)
 		if err != nil {
 			return apiHelper.ResponseWrapper(
@@ -211,9 +211,7 @@ func (controller *AccountController) Update(c echo.Context) error {
 	}
 
 	err = useCase.UpdateAccount(
-		accountQueryRepo,
-		accountCmdRepo,
-		updateAccountDto,
+		accountQueryRepo, accountCmdRepo, securityCmdRepo, updateDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(
@@ -240,12 +238,16 @@ func (controller *AccountController) Delete(c echo.Context) error {
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
 
-	err := useCase.DeleteAccount(
-		accountQueryRepo,
-		accountCmdRepo,
-		accountId,
-		containerQueryRepo,
+	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	err = useCase.DeleteAccount(
+		accountQueryRepo, accountCmdRepo, containerQueryRepo,
+		securityCmdRepo, accountId, &ipAddress,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
