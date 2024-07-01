@@ -1,14 +1,5 @@
 basePath: /_/api
 definitions:
-  dto.AddAccount:
-    properties:
-      password:
-        type: string
-      quota:
-        $ref: '#/definitions/valueObject.AccountQuota'
-      username:
-        type: string
-    type: object
   dto.ContainerWithMetrics:
     properties:
       accountId:
@@ -49,6 +40,15 @@ definitions:
         type: integer
       updatedAt:
         type: integer
+    type: object
+  dto.CreateAccount:
+    properties:
+      password:
+        type: string
+      quota:
+        $ref: '#/definitions/valueObject.AccountQuota'
+      username:
+        type: string
     type: object
   dto.CreateContainer:
     properties:
@@ -565,7 +565,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: List accs.
+      description: List accounts.
       produces:
       - application/json
       responses:
@@ -577,20 +577,20 @@ paths:
             type: array
       security:
       - Bearer: []
-      summary: GetAccounts
+      summary: ReadAccounts
       tags:
       - account
     post:
       consumes:
       - application/json
-      description: Add a new account.
+      description: Create a new account.
       parameters:
       - description: NewAccount
         in: body
-        name: addAccountDto
+        name: createDto
         required: true
         schema:
-          $ref: '#/definitions/dto.AddAccount'
+          $ref: '#/definitions/dto.CreateAccount'
       produces:
       - application/json
       responses:
@@ -600,7 +600,7 @@ paths:
             type: object
       security:
       - Bearer: []
-      summary: AddNewAccount
+      summary: CreateAccount
       tags:
       - account
     put:
@@ -610,7 +610,7 @@ paths:
       parameters:
       - description: UpdateAccount (Only accountId is required.)
         in: body
-        name: updateAccountDto
+        name: updateDto
         required: true
         schema:
           $ref: '#/definitions/dto.UpdateAccount'

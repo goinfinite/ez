@@ -38,7 +38,7 @@ func (controller *AccountController) GetAccounts() *cobra.Command {
 	return cmd
 }
 
-func (controller *AccountController) AddAccount() *cobra.Command {
+func (controller *AccountController) CreateAccount() *cobra.Command {
 	var usernameStr string
 	var passwordStr string
 	var quotaStr string
@@ -66,7 +66,7 @@ func (controller *AccountController) AddAccount() *cobra.Command {
 				quotaPtr = &quota
 			}
 
-			addAccountDto := dto.NewAddAccount(
+			createAccountDto := dto.NewCreateAccount(
 				username,
 				password,
 				quotaPtr,
@@ -75,10 +75,10 @@ func (controller *AccountController) AddAccount() *cobra.Command {
 			accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 			accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
 
-			err = useCase.AddAccount(
+			err = useCase.CreateAccount(
 				accountQueryRepo,
 				accountCmdRepo,
-				addAccountDto,
+				createAccountDto,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())

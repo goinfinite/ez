@@ -22,6 +22,16 @@ func NewAuthController(
 	return &AuthController{persistentDbSvc: persistentDbSvc}
 }
 
+// AuthLogin godoc
+// @Summary      GenerateJwtWithCredentials
+// @Description  Generate JWT with credentials
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        loginDto 	  body    dto.Login  true  "Login"
+// @Success      200 {object} entity.AccessToken
+// @Failure      401 {object} string
+// @Router       /v1/auth/login/ [post]
 func (controller *AuthController) Login(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {

@@ -32,7 +32,7 @@ func (router *Router) accountRoutes() {
 
 	accountController := cliController.NewAccountController(router.persistentDbSvc)
 	accountCmd.AddCommand(accountController.GetAccounts())
-	accountCmd.AddCommand(accountController.AddAccount())
+	accountCmd.AddCommand(accountController.CreateAccount())
 	accountCmd.AddCommand(accountController.UpdateAccount())
 	accountCmd.AddCommand(accountController.DeleteAccount())
 	rootCmd.AddCommand(accountCmd)

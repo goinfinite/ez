@@ -60,30 +60,30 @@ func (repo *AccountCmdRepo) updateFilesystemQuota(
 	return nil
 }
 
-func (repo *AccountCmdRepo) Add(addAccount dto.AddAccount) error {
+func (repo *AccountCmdRepo) Create(createDto dto.CreateAccount) error {
 	passHash, err := bcrypt.GenerateFromPassword(
-		[]byte(addAccount.Password.String()),
+		[]byte(createDto.Password.String()),
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
 		return err
 	}
 
-	addAccountCmd := exec.Command(
+	createAccountCmd := exec.Command(
 		"useradd",
 		"-m",
-		"-d", "/var/data/"+addAccount.Username.String(),
+		"-d", "/var/data/"+createDto.Username.String(),
 		"-s", "/usr/sbin/nologin",
 		"-p", string(passHash),
-		addAccount.Username.String(),
+		createDto.Username.String(),
 	)
 
-	err = addAccountCmd.Run()
+	err = createAccountCmd.Run()
 	if err != nil {
 		return err
 	}
 
-	userInfo, err := user.Lookup(addAccount.Username.String())
+	userInfo, err := user.Lookup(createDto.Username.String())
 	if err != nil {
 		return err
 	}
@@ -100,8 +100,8 @@ func (repo *AccountCmdRepo) Add(addAccount dto.AddAccount) error {
 	accEntity := entity.NewAccount(
 		accId,
 		gid,
-		addAccount.Username,
-		*addAccount.Quota,
+		createDto.Username,
+		*createDto.Quota,
 		valueObject.NewAccountQuotaWithBlankValues(),
 		nowUnixTime,
 		nowUnixTime,
@@ -117,7 +117,7 @@ func (repo *AccountCmdRepo) Add(addAccount dto.AddAccount) error {
 		return err
 	}
 
-	err = repo.updateFilesystemQuota(accId, *addAccount.Quota)
+	err = repo.updateFilesystemQuota(accId, *createDto.Quota)
 	if err != nil {
 		return err
 	}

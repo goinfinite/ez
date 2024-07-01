@@ -31,7 +31,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "List accs.",
+                "description": "List accounts.",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,7 +41,7 @@ const docTemplate = `{
                 "tags": [
                     "account"
                 ],
-                "summary": "GetAccounts",
+                "summary": "ReadAccounts",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -74,7 +74,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "UpdateAccount (Only accountId is required.)",
-                        "name": "updateAccountDto",
+                        "name": "updateDto",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -97,7 +97,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Add a new account.",
+                "description": "Create a new account.",
                 "consumes": [
                     "application/json"
                 ],
@@ -107,15 +107,15 @@ const docTemplate = `{
                 "tags": [
                     "account"
                 ],
-                "summary": "AddNewAccount",
+                "summary": "CreateAccount",
                 "parameters": [
                     {
                         "description": "NewAccount",
-                        "name": "addAccountDto",
+                        "name": "createDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddAccount"
+                            "$ref": "#/definitions/dto.CreateAccount"
                         }
                     }
                 ],
@@ -973,20 +973,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.AddAccount": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "quota": {
-                    "$ref": "#/definitions/valueObject.AccountQuota"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.ContainerWithMetrics": {
             "type": "object",
             "properties": {
@@ -1046,6 +1032,20 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.CreateAccount": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "quota": {
+                    "$ref": "#/definitions/valueObject.AccountQuota"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
