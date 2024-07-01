@@ -21,10 +21,7 @@ func UpdateAccount(
 	}
 
 	if updateDto.Password != nil {
-		err = accountCmdRepo.UpdatePassword(
-			updateDto.AccountId,
-			*updateDto.Password,
-		)
+		err = accountCmdRepo.UpdatePassword(updateDto.AccountId, *updateDto.Password)
 		if err != nil {
 			log.Printf("UpdateAccountPasswordError: %s", err)
 			return errors.New("UpdateAccountPasswordInfraError")
@@ -40,17 +37,23 @@ func UpdateAccount(
 		}
 	}
 
-	if updateDto.Quota != nil {
-		err = accountCmdRepo.UpdateQuota(
-			updateDto.AccountId,
-			*updateDto.Quota,
-		)
-		if err != nil {
-			log.Printf("UpdateAccountQuotaError: %s", err)
-			return errors.New("UpdateAccountQuotaInfraError")
-		}
+	if updateDto.Quota == nil {
+		return nil
+	}
 
-		log.Printf("AccountId '%v' quota updated.", updateDto.AccountId)
+	err = accountCmdRepo.UpdateQuota(updateDto.AccountId, *updateDto.Quota)
+	if err != nil {
+		log.Printf("UpdateAccountQuotaError: %s", err)
+		return errors.New("UpdateAccountQuotaInfraError")
+	}
+
+	eventType, _ := valueObject.NewSecurityEventType("account-quota-updated")
+	createSecurityEventDto := dto.NewCreateSecurityEvent(
+		eventType, nil, updateDto.IpAddress, &updateDto.AccountId,
+	)
+	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	if err != nil {
+		return err
 	}
 
 	return nil

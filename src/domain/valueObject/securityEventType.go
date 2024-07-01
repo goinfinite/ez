@@ -17,6 +17,7 @@ var ValidSecurityEventTypes = []string{
 	"account-deleted",
 	"account-password-updated",
 	"account-api-key-updated",
+	"account-quota-updated",
 	"unauthorized-access",
 }
 
