@@ -43,13 +43,13 @@ func (router *Router) authRoutes() {
 
 func (router *Router) accountRoutes() {
 	accountGroup := router.baseRoute.Group("/v1/account")
-	accountGroup.GET("/", apiController.GetAccountsController)
-	accountGroup.POST("/", apiController.AddAccountController)
-	accountGroup.PUT("/", apiController.UpdateAccountController)
-	accountGroup.DELETE("/:accountId/", apiController.DeleteAccountController)
-	go apiController.AutoUpdateAccountsQuotaUsageController(
-		router.persistentDbSvc,
-	)
+
+	accountController := apiController.NewAccountController(router.persistentDbSvc)
+	accountGroup.GET("/", accountController.Read)
+	accountGroup.POST("/", accountController.Create)
+	accountGroup.PUT("/", accountController.Update)
+	accountGroup.DELETE("/:accountId/", accountController.Delete)
+	go accountController.AutoUpdateAccountsQuotaUsage()
 }
 
 func (router *Router) containerRoutes() {
