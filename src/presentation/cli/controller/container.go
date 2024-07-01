@@ -10,7 +10,6 @@ import (
 )
 
 type ContainerController struct {
-	persistentDbSvc  *db.PersistentDatabaseService
 	containerService *service.ContainerService
 }
 
@@ -18,7 +17,6 @@ func NewContainerController(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *ContainerController {
 	return &ContainerController{
-		persistentDbSvc:  persistentDbSvc,
 		containerService: service.NewContainerService(persistentDbSvc),
 	}
 }

@@ -6,22 +6,26 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
+	"github.com/speedianet/control/src/presentation/service"
 )
 
 type AccountController struct {
+	accountService  *service.AccountService
 	persistentDbSvc *db.PersistentDatabaseService
 }
 
 func NewAccountController(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *AccountController {
-	return &AccountController{persistentDbSvc: persistentDbSvc}
+	return &AccountController{
+		accountService:  service.NewAccountService(persistentDbSvc),
+		persistentDbSvc: persistentDbSvc,
+	}
 }
 
 // GetAccounts	 godoc
@@ -34,47 +38,52 @@ func NewAccountController(
 // @Success      200 {array} entity.Account
 // @Router       /v1/account/ [get]
 func (controller *AccountController) Read(c echo.Context) error {
-	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
-	accsList, err := useCase.GetAccounts(accountQueryRepo)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, accsList)
+	return apiHelper.ServiceResponseWrapper(c, controller.accountService.Read())
 }
 
-func (controller *AccountController) accQuotaFactory(
-	quota interface{},
-	withDefaults bool,
-) (valueObject.AccountQuota, error) {
+func (controller *AccountController) accountQuotaFactory(
+	quota interface{}, withDefaults bool,
+) (accountQuota valueObject.AccountQuota, err error) {
 	quotaMap, quotaMapOk := quota.(map[string]interface{})
 	if !quotaMapOk {
 		return valueObject.AccountQuota{}, errors.New("InvalidQuotaStructure")
 	}
 
-	accQuota := valueObject.NewAccountQuotaWithDefaultValues()
+	accountQuota = valueObject.NewAccountQuotaWithDefaultValues()
 	if !withDefaults {
-		accQuota = valueObject.NewAccountQuotaWithBlankValues()
+		accountQuota = valueObject.NewAccountQuotaWithBlankValues()
 	}
 
-	cpuCores := accQuota.CpuCores
+	cpuCores := accountQuota.CpuCores
 	if quotaMap["cpuCores"] != nil {
-		cpuCores = valueObject.NewCpuCoresCountPanic(quotaMap["cpuCores"])
+		cpuCores, err = valueObject.NewCpuCoresCount(quotaMap["cpuCores"])
+		if err != nil {
+			return accountQuota, err
+		}
 	}
 
-	memoryBytes := accQuota.MemoryBytes
+	memoryBytes := accountQuota.MemoryBytes
 	if quotaMap["memoryBytes"] != nil {
-		memoryBytes = valueObject.NewBytePanic(quotaMap["memoryBytes"])
+		memoryBytes, err = valueObject.NewByte(quotaMap["memoryBytes"])
+		if err != nil {
+			return accountQuota, err
+		}
 	}
 
-	diskBytes := accQuota.DiskBytes
+	diskBytes := accountQuota.DiskBytes
 	if quotaMap["diskBytes"] != nil {
-		diskBytes = valueObject.NewBytePanic(quotaMap["diskBytes"])
+		diskBytes, err = valueObject.NewByte(quotaMap["diskBytes"])
+		if err != nil {
+			return accountQuota, err
+		}
 	}
 
-	inodes := accQuota.Inodes
+	inodes := accountQuota.Inodes
 	if quotaMap["inodes"] != nil {
-		inodes = valueObject.NewInodesCountPanic(quotaMap["inodes"])
+		inodes, err = valueObject.NewInodesCount(quotaMap["inodes"])
+		if err != nil {
+			return accountQuota, err
+		}
 	}
 
 	return valueObject.NewAccountQuota(cpuCores, memoryBytes, diskBytes, inodes), nil
@@ -96,47 +105,19 @@ func (controller *AccountController) Create(c echo.Context) error {
 		return err
 	}
 
-	requiredParams := []string{"username", "password"}
-	apiHelper.CheckMissingParams(requestBody, requiredParams)
-
-	var quotaPtr *valueObject.AccountQuota
 	if requestBody["quota"] != nil {
-		quota, err := controller.accQuotaFactory(requestBody["quota"], true)
+		quota, err := controller.accountQuotaFactory(requestBody["quota"], true)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
-		quotaPtr = &quota
+		requestBody["quota"] = quota
 	}
 
-	username, err := valueObject.NewUsername(requestBody["username"])
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
+	requestBody["ipAddress"] = c.RealIP()
 
-	password, err := valueObject.NewPassword(requestBody["password"])
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
-
-	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
-
-	createDto := dto.NewCreateAccount(username, password, quotaPtr, &ipAddress)
-
-	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
-	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
-
-	err = useCase.CreateAccount(
-		accountQueryRepo, accountCmdRepo, securityCmdRepo, createDto,
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.accountService.Create(requestBody),
 	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusCreated, "AccountCreated")
 }
 
 // UpdateAccount godoc
@@ -155,71 +136,19 @@ func (controller *AccountController) Update(c echo.Context) error {
 		return err
 	}
 
-	requiredParams := []string{"accountId"}
-	apiHelper.CheckMissingParams(requestBody, requiredParams)
-
-	accountId := valueObject.NewAccountIdPanic(requestBody["accountId"])
-
-	var passPtr *valueObject.Password
-	if requestBody["password"] != nil {
-		password, err := valueObject.NewPassword(requestBody["password"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-		}
-		passPtr = &password
-	}
-
-	var shouldUpdateApiKeyPtr *bool
-	if requestBody["shouldUpdateApiKey"] != nil {
-		shouldUpdateApiKey := requestBody["shouldUpdateApiKey"].(bool)
-		shouldUpdateApiKeyPtr = &shouldUpdateApiKey
-	}
-
-	var quotaPtr *valueObject.AccountQuota
 	if requestBody["quota"] != nil {
-		quota, err := controller.accQuotaFactory(requestBody["quota"], false)
+		quota, err := controller.accountQuotaFactory(requestBody["quota"], true)
 		if err != nil {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 		}
-		quotaPtr = &quota
+		requestBody["quota"] = quota
 	}
 
-	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
+	requestBody["ipAddress"] = c.RealIP()
 
-	updateDto := dto.NewUpdateAccount(
-		accountId, passPtr, shouldUpdateApiKeyPtr, quotaPtr, &ipAddress,
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.accountService.Update(requestBody),
 	)
-
-	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
-	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
-
-	if updateDto.ShouldUpdateApiKey != nil && *updateDto.ShouldUpdateApiKey {
-		newKey, err := useCase.UpdateAccountApiKey(
-			accountQueryRepo, accountCmdRepo, securityCmdRepo, updateDto,
-		)
-		if err != nil {
-			return apiHelper.ResponseWrapper(
-				c, http.StatusInternalServerError, err.Error(),
-			)
-		}
-
-		return apiHelper.ResponseWrapper(c, http.StatusOK, newKey)
-	}
-
-	err = useCase.UpdateAccount(
-		accountQueryRepo, accountCmdRepo, securityCmdRepo, updateDto,
-	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(
-			c, http.StatusInternalServerError, err.Error(),
-		)
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountUpdated")
 }
 
 // DeleteAccount godoc
@@ -233,27 +162,14 @@ func (controller *AccountController) Update(c echo.Context) error {
 // @Success      200 {object} object{} "AccountDeleted"
 // @Router       /v1/account/{accountId}/ [delete]
 func (controller *AccountController) Delete(c echo.Context) error {
-	accountId := valueObject.NewAccountIdPanic(c.Param("accountId"))
-
-	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
-	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
-	containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
-
-	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	requestBody := map[string]interface{}{
+		"accountId": c.Param("accountId"),
+		"ipAddress": c.RealIP(),
 	}
 
-	err = useCase.DeleteAccount(
-		accountQueryRepo, accountCmdRepo, containerQueryRepo,
-		securityCmdRepo, accountId, &ipAddress,
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.accountService.Delete(requestBody),
 	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, "AccountDeleted")
 }
 
 func (controller *AccountController) AutoUpdateAccountsQuotaUsage() {
