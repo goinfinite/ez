@@ -97,7 +97,6 @@ func (service *PersistentDatabaseService) RunMigrations() error {
 		&dbModel.MappingTarget{},
 		&dbModel.LicenseInfo{},
 		&dbModel.ScheduledTask{},
-		&dbModel.SecurityEvent{},
 	)
 	if err != nil {
 		return errors.New("PersistentDatabaseMigrationError")
