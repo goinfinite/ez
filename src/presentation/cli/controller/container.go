@@ -92,9 +92,12 @@ func (controller *ContainerController) Create() *cobra.Command {
 		Short: "CreateNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId":    accountIdUint,
-				"hostname":     hostnameStr,
-				"imageAddress": containerImageAddressStr,
+				"accountId": accountIdUint,
+				"hostname":  hostnameStr,
+			}
+
+			if containerImageAddressStr != "" {
+				requestBody["imageAddress"] = containerImageAddressStr
 			}
 
 			if len(portBindingsSlice) > 0 {
@@ -157,13 +160,9 @@ func (controller *ContainerController) Create() *cobra.Command {
 	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.MarkFlagRequired("hostname")
-	cmd.Flags().StringVarP(&containerImageAddressStr, "image", "i", "", "ImageAddress")
-	cmd.MarkFlagRequired("image")
+	cmd.Flags().StringVarP(&containerImageAddressStr, "image-address", "i", "", "ImageAddress")
 	cmd.Flags().StringSliceVarP(
-		&portBindingsSlice,
-		"port-bindings",
-		"b",
-		[]string{},
+		&portBindingsSlice, "port-bindings", "b", []string{},
 		"PortBindings (serviceName[:publicPort][:containerPort][/protocol][:privatePort])",
 	)
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "RestartPolicy")

@@ -82,7 +82,7 @@ func (service *ContainerService) Create(
 	input map[string]interface{},
 	shouldSchedule bool,
 ) ServiceOutput {
-	requiredParams := []string{"accountId", "hostname", "imageAddress"}
+	requiredParams := []string{"accountId", "hostname"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
@@ -99,6 +99,9 @@ func (service *ContainerService) Create(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	if _, exists := input["imageAddress"]; !exists {
+		input["imageAddress"] = "speedianet/os"
+	}
 	imgAddr, err := valueObject.NewContainerImageAddress(input["imageAddress"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
