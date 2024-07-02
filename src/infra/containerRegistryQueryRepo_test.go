@@ -15,7 +15,7 @@ func TestContainerRegistryQueryRepo(t *testing.T) {
 	t.Run("ReadRegistryImages", func(t *testing.T) {
 		imageName, _ := valueObject.NewRegistryImageName("speedianet/os")
 
-		registryImages, err := containerQueryRepo.GetImages(&imageName)
+		registryImages, err := containerQueryRepo.ReadImages(&imageName)
 		if err != nil {
 			t.Error(err)
 		}
@@ -28,7 +28,7 @@ func TestContainerRegistryQueryRepo(t *testing.T) {
 	t.Run("ReadRegistryTaggedImage", func(t *testing.T) {
 		imageAddress, _ := valueObject.NewContainerImageAddress("speedianet/os")
 
-		_, err := containerQueryRepo.GetTaggedImage(imageAddress)
+		_, err := containerQueryRepo.ReadTaggedImage(imageAddress)
 		if err != nil {
 			t.Error(err)
 		}

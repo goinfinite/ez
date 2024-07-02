@@ -293,7 +293,7 @@ func (repo *ContainerRegistryQueryRepo) getDockerHubImages(
 	return registryImages, nil
 }
 
-func (repo *ContainerRegistryQueryRepo) GetImages(
+func (repo *ContainerRegistryQueryRepo) ReadImages(
 	imageName *valueObject.RegistryImageName,
 ) ([]entity.RegistryImage, error) {
 	registryImages := []entity.RegistryImage{}
@@ -462,20 +462,18 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	), nil
 }
 
-func (repo *ContainerRegistryQueryRepo) GetTaggedImage(
+func (repo *ContainerRegistryQueryRepo) ReadTaggedImage(
 	imageAddress valueObject.ContainerImageAddress,
-) (entity.RegistryTaggedImage, error) {
-	var registryTaggedImage entity.RegistryTaggedImage
-
+) (taggedImage entity.RegistryTaggedImage, err error) {
 	registryName, err := imageAddress.GetFqdn()
 	if err != nil {
-		return registryTaggedImage, err
+		return taggedImage, err
 	}
 
 	switch registryName.String() {
 	case "docker.io", "registry-1.docker.io":
 		return repo.getTaggedImageFromDockerHub(imageAddress)
 	default:
-		return registryTaggedImage, errors.New("UnknownRegistry")
+		return taggedImage, errors.New("UnknownRegistry")
 	}
 }

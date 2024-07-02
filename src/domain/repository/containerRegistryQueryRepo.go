@@ -6,10 +6,10 @@ import (
 )
 
 type ContainerRegistryQueryRepo interface {
-	GetImages(
+	ReadImages(
 		imageName *valueObject.RegistryImageName,
 	) ([]entity.RegistryImage, error)
-	GetTaggedImage(
+	ReadTaggedImage(
 		imageAddress valueObject.ContainerImageAddress,
 	) (entity.RegistryTaggedImage, error)
 }
