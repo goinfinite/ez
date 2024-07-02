@@ -35,9 +35,10 @@ func CreateAccount(
 	eventDetails, _ := valueObject.NewSecurityEventDetails(
 		"Username: " + createDto.Username.String(),
 	)
-
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, &eventDetails, &createDto.IpAddress, nil,
 	)
-	return CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+
+	return nil
 }

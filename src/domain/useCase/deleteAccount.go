@@ -41,5 +41,7 @@ func DeleteAccount(
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, nil, &deleteDto.IpAddress, &deleteDto.AccountId,
 	)
-	return CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+
+	return nil
 }

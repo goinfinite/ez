@@ -30,10 +30,7 @@ func UpdateAccountApiKey(
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
 	)
-	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-	if err != nil {
-		return newKey, err
-	}
+	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	return newKey, nil
 }

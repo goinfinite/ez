@@ -30,10 +30,7 @@ func GenerateSessionToken(
 		&eventType, loginDto.IpAddress, nil, &failedAttemptsIntervalStartsAt,
 	)
 
-	failedLoginAttempts, err := ReadSecurityEvents(securityQueryRepo, readSecurityEventsDto)
-	if err != nil {
-		return accessToken, err
-	}
+	failedLoginAttempts := ReadSecurityEvents(securityQueryRepo, readSecurityEventsDto)
 	failedAttemptsCount := uint(len(failedLoginAttempts))
 	if failedAttemptsCount >= MaxFailedLoginAttemptsPerIpAddress {
 		return accessToken, errors.New("MaxFailedLoginAttemptsReached")
@@ -46,10 +43,7 @@ func GenerateSessionToken(
 		createSecurityEventDto := dto.NewCreateSecurityEvent(
 			eventType, &eventDetails, loginDto.IpAddress, nil,
 		)
-		err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-		if err != nil {
-			return accessToken, err
-		}
+		CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 		return accessToken, errors.New("InvalidCredentials")
 	}
@@ -63,10 +57,7 @@ func GenerateSessionToken(
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, nil, loginDto.IpAddress, &accountDetails.Id,
 	)
-	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-	if err != nil {
-		return accessToken, err
-	}
+	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	expiresIn := valueObject.NewUnixTimeAfterNow(SessionTokenExpiresIn)
 

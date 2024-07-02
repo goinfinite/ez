@@ -31,10 +31,7 @@ func UpdateAccount(
 		createSecurityEventDto := dto.NewCreateSecurityEvent(
 			eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
 		)
-		err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-		if err != nil {
-			return err
-		}
+		CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 	}
 
 	if updateDto.Quota == nil {
@@ -51,5 +48,7 @@ func UpdateAccount(
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
 	)
-	return CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+
+	return nil
 }
