@@ -43,7 +43,7 @@ func GenerateSessionToken(
 		createSecurityEventDto := dto.NewCreateSecurityEvent(
 			eventType, &eventDetails, loginDto.IpAddress, nil,
 		)
-		CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+		AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 		return accessToken, errors.New("InvalidCredentials")
 	}
@@ -57,7 +57,7 @@ func GenerateSessionToken(
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, nil, loginDto.IpAddress, &accountDetails.Id,
 	)
-	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	expiresIn := valueObject.NewUnixTimeAfterNow(SessionTokenExpiresIn)
 

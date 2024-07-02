@@ -38,7 +38,7 @@ func CreateAccount(
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
 		eventType, &eventDetails, &createDto.IpAddress, nil,
 	)
-	CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
+	AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	return nil
 }
