@@ -28,7 +28,7 @@ func NewAccountController(
 	}
 }
 
-// GetAccounts	 godoc
+// ReadAccounts  godoc
 // @Summary      ReadAccounts
 // @Description  List accounts.
 // @Tags         account
@@ -89,7 +89,7 @@ func (controller *AccountController) accountQuotaFactory(
 	return valueObject.NewAccountQuota(cpuCores, memoryBytes, diskBytes, inodes), nil
 }
 
-// CreateAccount	 godoc
+// CreateAccount godoc
 // @Summary      CreateAccount
 // @Description  Create a new account.
 // @Tags         account
