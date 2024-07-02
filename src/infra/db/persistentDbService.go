@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DatabaseFilePath = "/var/speedia/control.db"
+	PersistentDatabaseFilePath = "/var/speedia/control.db"
 )
 
 type PersistentDatabaseService struct {
@@ -19,25 +19,25 @@ type PersistentDatabaseService struct {
 
 func NewPersistentDatabaseService() (*PersistentDatabaseService, error) {
 	ormSvc, err := gorm.Open(
-		sqlite.Open(DatabaseFilePath),
+		sqlite.Open(PersistentDatabaseFilePath),
 		&gorm.Config{},
 	)
 	if err != nil {
-		return nil, errors.New("DatabaseConnectionError")
+		return nil, errors.New("PersistentDatabaseConnectionError")
 	}
 
-	dbSvc := &PersistentDatabaseService{Handler: ormSvc}
-	err = dbSvc.dbMigrate()
+	service := &PersistentDatabaseService{Handler: ormSvc}
+	err = service.RunMigrations()
 	if err != nil {
 		return nil, err
 	}
 
-	return dbSvc, nil
+	return service, nil
 }
 
-func (dbSvc PersistentDatabaseService) isTableEmpty(model interface{}) (bool, error) {
+func (service *PersistentDatabaseService) isTableEmpty(model interface{}) (bool, error) {
 	var count int64
-	err := dbSvc.Handler.Model(&model).Count(&count).Error
+	err := service.Handler.Model(&model).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
@@ -45,9 +45,9 @@ func (dbSvc PersistentDatabaseService) isTableEmpty(model interface{}) (bool, er
 	return count == 0, nil
 }
 
-func (dbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) error {
+func (service *PersistentDatabaseService) seedDatabase(seedModels ...interface{}) error {
 	for _, seedModel := range seedModels {
-		isTableEmpty, err := dbSvc.isTableEmpty(seedModel)
+		isTableEmpty, err := service.isTableEmpty(seedModel)
 		if err != nil {
 			return err
 		}
@@ -59,13 +59,13 @@ func (dbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) e
 		seedModelType := reflect.TypeOf(seedModel).Elem()
 		seedModelFieldsAndMethods := reflect.ValueOf(seedModel)
 
-		seedModelInitialEntriesMethod := seedModelFieldsAndMethods.MethodByName(
+		initialEntriesMethod := seedModelFieldsAndMethods.MethodByName(
 			"InitialEntries",
 		)
-		seedModelInitialEntriesMethodResults := seedModelInitialEntriesMethod.Call(
+		initialEntriesMethodResults := initialEntriesMethod.Call(
 			[]reflect.Value{},
 		)
-		initialEntries := seedModelInitialEntriesMethodResults[0].Interface()
+		initialEntries := initialEntriesMethodResults[0].Interface()
 
 		for _, entry := range initialEntries.([]interface{}) {
 			entryInnerStructure := reflect.ValueOf(entry)
@@ -74,7 +74,7 @@ func (dbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) e
 			entryFormatHandlerWillAccept.Elem().Set(entryInnerStructure)
 			adjustedEntry := entryFormatHandlerWillAccept.Interface()
 
-			err = dbSvc.Handler.Create(adjustedEntry).Error
+			err = service.Handler.Create(adjustedEntry).Error
 			if err != nil {
 				return err
 			}
@@ -84,8 +84,8 @@ func (dbSvc PersistentDatabaseService) seedDatabase(seedModels ...interface{}) e
 	return nil
 }
 
-func (dbSvc PersistentDatabaseService) dbMigrate() error {
-	err := dbSvc.Handler.AutoMigrate(
+func (service *PersistentDatabaseService) RunMigrations() error {
+	err := service.Handler.AutoMigrate(
 		&dbModel.Account{},
 		&dbModel.AccountQuota{},
 		&dbModel.AccountQuotaUsage{},
@@ -100,16 +100,16 @@ func (dbSvc PersistentDatabaseService) dbMigrate() error {
 		&dbModel.SecurityEvent{},
 	)
 	if err != nil {
-		return errors.New("DatabaseMigrationError")
+		return errors.New("PersistentDatabaseMigrationError")
 	}
 
 	modelsWithInitialEntries := []interface{}{
 		&dbModel.ContainerProfile{},
 	}
 
-	err = dbSvc.seedDatabase(modelsWithInitialEntries...)
+	err = service.seedDatabase(modelsWithInitialEntries...)
 	if err != nil {
-		return errors.New("AddDefaultDatabaseEntriesError")
+		return errors.New("AddDefaultPersistentDatabaseEntriesError")
 	}
 
 	return nil

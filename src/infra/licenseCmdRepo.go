@@ -84,7 +84,7 @@ func (repo *LicenseCmdRepo) generateFingerprint() (
 	}
 
 	installationUnixTime, err := infraHelper.RunCmdWithSubShell(
-		"stat -c %W " + db.DatabaseFilePath,
+		"stat -c %W " + db.PersistentDatabaseFilePath,
 	)
 	if err != nil {
 		return fingerprint, err
