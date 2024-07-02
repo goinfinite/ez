@@ -174,7 +174,7 @@ func (service *ContainerService) Create(
 		createParams := []string{
 			"--account-id", accId.String(),
 			"--hostname", hostname.String(),
-			"--image", imgAddr.String(),
+			"--image-address", imgAddr.String(),
 		}
 		if len(portBindings) > 0 {
 			for _, portBinding := range portBindings {
