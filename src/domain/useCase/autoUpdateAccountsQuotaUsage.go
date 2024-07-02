@@ -10,7 +10,7 @@ func AutoUpdateAccountsQuotaUsage(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 ) {
-	accs, err := accountQueryRepo.Get()
+	accs, err := accountQueryRepo.Read()
 	if err != nil {
 		log.Printf("GetAccountsError: %v", err)
 		return

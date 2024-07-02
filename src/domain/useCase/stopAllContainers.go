@@ -12,9 +12,9 @@ func StopAllContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) error {
-	containers, err := containerQueryRepo.Get()
+	containers, err := containerQueryRepo.Read()
 	if err != nil {
-		return errors.New("GetContainersError: " + err.Error())
+		return errors.New("ReadContainersError: " + err.Error())
 	}
 
 	for _, currentContainer := range containers {

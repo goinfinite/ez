@@ -36,7 +36,7 @@ func (repo *ScheduledTaskCmdRepo) Create(
 
 	var runAtPtr *time.Time
 	if createDto.RunAt != nil {
-		runAt := time.Unix(createDto.RunAt.Get(), 0)
+		runAt := time.Unix(createDto.RunAt.Read(), 0)
 		runAtPtr = &runAt
 	}
 

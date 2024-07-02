@@ -58,7 +58,7 @@ func (repo *ContainerCmdRepo) calibratePortBindings(
 			&nextPrivatePort,
 		)
 
-		if originalPortBinding.PublicPort.Get() == 0 {
+		if originalPortBinding.PublicPort.Read() == 0 {
 			calibratedPortBindings = append(
 				calibratedPortBindings,
 				calibratedPortBinding,
@@ -200,11 +200,11 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 ) error {
 	containerName := repo.containerNameFactory(containerHostname)
 
-	containerProfile, err := repo.containerProfileQueryRepo.GetById(profileId)
+	containerProfile, err := repo.containerProfileQueryRepo.ReadById(profileId)
 	if err != nil {
 		return err
 	}
-	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Get() * 100
+	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Read() * 100
 	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
 	memoryBytesStr := containerProfile.BaseSpecs.MemoryBytes.String()
 
@@ -477,7 +477,7 @@ func (repo *ContainerCmdRepo) Create(
 }
 
 func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
-	containerEntity, err := repo.containerQueryRepo.GetById(updateDto.ContainerId)
+	containerEntity, err := repo.containerQueryRepo.ReadById(updateDto.ContainerId)
 	if err != nil {
 		return err
 	}
@@ -532,7 +532,7 @@ func (repo *ContainerCmdRepo) Delete(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
-	containerEntity, err := repo.containerQueryRepo.GetById(containerId)
+	containerEntity, err := repo.containerQueryRepo.ReadById(containerId)
 	if err != nil {
 		return err
 	}
@@ -589,7 +589,7 @@ func (repo *ContainerCmdRepo) Delete(
 func (repo *ContainerCmdRepo) GenerateContainerSessionToken(
 	autoLoginDto dto.ContainerAutoLogin,
 ) (tokenValue valueObject.AccessTokenValue, err error) {
-	containerEntity, err := repo.containerQueryRepo.GetById(autoLoginDto.ContainerId)
+	containerEntity, err := repo.containerQueryRepo.ReadById(autoLoginDto.ContainerId)
 	if err != nil {
 		return tokenValue, errors.New("ContainerNotFound")
 	}

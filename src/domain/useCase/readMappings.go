@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetMappings(
+func ReadMappings(
 	mappingQueryRepo repository.MappingQueryRepo,
 ) ([]entity.Mapping, error) {
-	return mappingQueryRepo.Get()
+	return mappingQueryRepo.Read()
 }

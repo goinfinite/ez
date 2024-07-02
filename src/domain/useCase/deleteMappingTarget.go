@@ -14,7 +14,7 @@ func DeleteMappingTarget(
 	mappingId valueObject.MappingId,
 	targetId valueObject.MappingTargetId,
 ) error {
-	_, err := mappingQueryRepo.GetTargetById(targetId)
+	_, err := mappingQueryRepo.ReadTargetById(targetId)
 	if err != nil {
 		return errors.New("MappingTargetNotFound")
 	}

@@ -50,7 +50,7 @@ func (np NetworkProtocol) String() string {
 
 func GuessNetworkProtocolByPort(port NetworkPort) NetworkProtocol {
 	protocolStr := "tcp"
-	switch port.Get() {
+	switch port.Read() {
 	case 53, 123, 514:
 		protocolStr = "udp"
 	case 80, 2368, 3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009, 5000, 5601, 8000, 8001, 8002, 8065, 8080, 8081:

@@ -11,7 +11,7 @@ func InvalidLicenseBlocker(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) error {
-	licenseInfo, err := licenseQueryRepo.Get()
+	licenseInfo, err := licenseQueryRepo.Read()
 	if err != nil {
 		return errors.New("GetLicenseStatusError: " + err.Error())
 	}

@@ -26,7 +26,7 @@ func NewGroupIdPanic(value interface{}) GroupId {
 	return gid
 }
 
-func (id GroupId) Get() uint64 {
+func (id GroupId) Read() uint64 {
 	return uint64(id)
 }
 

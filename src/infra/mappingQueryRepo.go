@@ -20,7 +20,7 @@ func NewMappingQueryRepo(
 	return &MappingQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *MappingQueryRepo) Get() ([]entity.Mapping, error) {
+func (repo *MappingQueryRepo) Read() ([]entity.Mapping, error) {
 	mappingEntities := []entity.Mapping{}
 
 	var mappingModels []dbModel.Mapping
@@ -45,13 +45,13 @@ func (repo *MappingQueryRepo) Get() ([]entity.Mapping, error) {
 	return mappingEntities, nil
 }
 
-func (repo *MappingQueryRepo) GetById(
+func (repo *MappingQueryRepo) ReadById(
 	id valueObject.MappingId,
 ) (mappingEntity entity.Mapping, err error) {
 	var mappingModel dbModel.Mapping
 	err = repo.persistentDbSvc.Handler.
 		Preload("Targets").
-		Where("id = ?", id.Get()).
+		Where("id = ?", id.Read()).
 		First(&mappingModel).Error
 	if err != nil {
 		return mappingEntity, errors.New("MappingNotFound")
@@ -71,7 +71,7 @@ func (repo *MappingQueryRepo) GetByProtocol(
 		Where("protocol = ?", protocol.String()).
 		Find(&mappingModels).Error
 	if err != nil {
-		return mappingEntities, errors.New("GetMappingsFromDatabaseError")
+		return mappingEntities, errors.New("ReadMappingsFromDatabaseError")
 	}
 
 	for _, mappingModel := range mappingModels {
@@ -87,13 +87,13 @@ func (repo *MappingQueryRepo) GetByProtocol(
 	return mappingEntities, nil
 }
 
-func (repo *MappingQueryRepo) GetTargetById(
+func (repo *MappingQueryRepo) ReadTargetById(
 	id valueObject.MappingTargetId,
 ) (mappingTargetEntity entity.MappingTarget, err error) {
 	var mappingTargetModel dbModel.MappingTarget
 
 	err = repo.persistentDbSvc.Handler.
-		Where("id = ?", id.Get()).
+		Where("id = ?", id.Read()).
 		First(&mappingTargetModel).Error
 	if err != nil {
 		return mappingTargetEntity, errors.New("MappingTargetNotFound")
@@ -102,7 +102,7 @@ func (repo *MappingQueryRepo) GetTargetById(
 	return mappingTargetModel.ToEntity()
 }
 
-func (repo *MappingQueryRepo) GetTargetsByContainerId(
+func (repo *MappingQueryRepo) ReadTargetsByContainerId(
 	containerId valueObject.ContainerId,
 ) ([]entity.MappingTarget, error) {
 	mappingTargets := []entity.MappingTarget{}

@@ -124,9 +124,9 @@ func (repo *LicenseCmdRepo) generateFingerprint() (
 func (repo *LicenseCmdRepo) updateIntegrityHash() error {
 	licenseQueryRepo := NewLicenseQueryRepo(repo.persistentDbSvc, repo.transientDbSvc)
 
-	licenseInfo, err := licenseQueryRepo.Get()
+	licenseInfo, err := licenseQueryRepo.Read()
 	if err != nil {
-		return errors.New("GetLicenseInfoFailed: " + err.Error())
+		return errors.New("ReadLicenseInfoFailed: " + err.Error())
 	}
 
 	licenseInfoHash, err := repo.GenerateIntegrityHash(licenseInfo)

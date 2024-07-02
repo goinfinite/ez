@@ -23,16 +23,16 @@ func NewLicenseController(
 	}
 }
 
-func (controller *LicenseController) GetLicenseInfo() *cobra.Command {
+func (controller *LicenseController) ReadLicenseInfo() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "GetLicenseInfo",
+		Short: "ReadLicenseInfo",
 		Run: func(cmd *cobra.Command, args []string) {
 			licenseQueryRepo := infra.NewLicenseQueryRepo(
 				controller.persistentDbSvc,
 				controller.transientDbSvc,
 			)
-			licenseStatus, err := useCase.GetLicenseInfo(licenseQueryRepo)
+			licenseStatus, err := useCase.ReadLicenseInfo(licenseQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}

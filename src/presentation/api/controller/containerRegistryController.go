@@ -32,7 +32,7 @@ func GetContainerRegistryImagesController(c echo.Context) error {
 	}
 
 	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistentDbSvc)
-	imagesList, err := useCase.GetRegistryImages(
+	imagesList, err := useCase.ReadRegistryImages(
 		containerRegistryQueryRepo,
 		imageNamePtr,
 	)
@@ -60,7 +60,7 @@ func GetContainerRegistryTaggedImageController(c echo.Context) error {
 	imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
 
 	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistentDbSvc)
-	taggedImage, err := useCase.GetRegistryTaggedImage(
+	taggedImage, err := useCase.ReadRegistryTaggedImage(
 		containerRegistryQueryRepo,
 		imageAddress,
 	)

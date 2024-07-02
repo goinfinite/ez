@@ -6,6 +6,6 @@ import (
 )
 
 type LicenseQueryRepo interface {
-	Get() (entity.LicenseInfo, error)
-	GetIntegrityHash() (valueObject.Hash, error)
+	Read() (entity.LicenseInfo, error)
+	ReadIntegrityHash() (valueObject.Hash, error)
 }

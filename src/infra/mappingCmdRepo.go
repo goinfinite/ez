@@ -44,9 +44,9 @@ func (repo *MappingCmdRepo) Create(
 
 	mappingModel := dbModel.NewMapping(
 		0,
-		uint(createDto.AccountId.Get()),
+		uint(createDto.AccountId.Read()),
 		hostnamePtr,
-		uint(createDto.PublicPort.Get()),
+		uint(createDto.PublicPort.Read()),
 		createDto.Protocol.String(),
 		[]dbModel.MappingTarget{},
 		time.Now(),
@@ -65,7 +65,7 @@ func (repo *MappingCmdRepo) Create(
 }
 
 func (repo *MappingCmdRepo) updateWebServerFile() error {
-	mappings, err := repo.mappingQueryRepo.Get()
+	mappings, err := repo.mappingQueryRepo.Read()
 	if err != nil {
 		return err
 	}
@@ -195,12 +195,12 @@ server {
 }
 
 func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) error {
-	containerEntity, err := repo.containerQueryRepo.GetById(createDto.ContainerId)
+	containerEntity, err := repo.containerQueryRepo.ReadById(createDto.ContainerId)
 	if err != nil {
 		return err
 	}
 
-	mappingEntity, err := repo.mappingQueryRepo.GetById(createDto.MappingId)
+	mappingEntity, err := repo.mappingQueryRepo.ReadById(createDto.MappingId)
 	if err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 			continue
 		}
 
-		containerPrivatePort = portBinding.PrivatePort.Get()
+		containerPrivatePort = portBinding.PrivatePort.Read()
 	}
 	if containerPrivatePort == 0 {
 		return errors.New("ContainerPrivatePortNotFound")
@@ -230,7 +230,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 
 	targetModel := dbModel.NewMappingTarget(
 		0,
-		uint(createDto.MappingId.Get()),
+		uint(createDto.MappingId.Read()),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
 		uint(containerPrivatePort),
@@ -247,12 +247,12 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 	ormSvc := repo.persistentDbSvc.Handler
 
-	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Get()).Error
+	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Read()).Error
 	if err != nil {
 		return err
 	}
 
-	err = ormSvc.Delete(dbModel.Mapping{}, id.Get()).Error
+	err = ormSvc.Delete(dbModel.Mapping{}, id.Read()).Error
 	if err != nil {
 		return err
 	}
@@ -265,7 +265,7 @@ func (repo *MappingCmdRepo) DeleteTarget(
 	targetId valueObject.MappingTargetId,
 ) error {
 	err := repo.persistentDbSvc.Handler.Delete(
-		dbModel.MappingTarget{}, "id = ?", targetId.Get(),
+		dbModel.MappingTarget{}, "id = ?", targetId.Read(),
 	).Error
 	if err != nil {
 		return err

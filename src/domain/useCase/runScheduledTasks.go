@@ -16,7 +16,7 @@ func RunScheduledTasks(
 	scheduledTaskCmdRepo repository.ScheduledTaskCmdRepo,
 ) {
 	pendingStatus, _ := valueObject.NewScheduledTaskStatus("pending")
-	pendingTasks, err := scheduledTaskQueryRepo.GetByStatus(pendingStatus)
+	pendingTasks, err := scheduledTaskQueryRepo.ReadByStatus(pendingStatus)
 	if err != nil {
 		log.Printf("GetPendingScheduledTasksError: %s", err)
 		return
@@ -29,7 +29,7 @@ func RunScheduledTasks(
 	for _, pendingTask := range pendingTasks {
 		if pendingTask.RunAt != nil {
 			nowUnixTime := valueObject.NewUnixTimeNow()
-			if nowUnixTime.Get() < pendingTask.RunAt.Get() {
+			if nowUnixTime.Read() < pendingTask.RunAt.Read() {
 				continue
 			}
 		}
@@ -40,7 +40,7 @@ func RunScheduledTasks(
 
 		err = scheduledTaskCmdRepo.Run(pendingTask)
 		if err != nil {
-			log.Printf("(%d) RunScheduledTaskError: %s", pendingTask.Id.Get(), err)
+			log.Printf("(%d) RunScheduledTaskError: %s", pendingTask.Id.Read(), err)
 			continue
 		}
 	}

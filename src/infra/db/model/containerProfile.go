@@ -74,7 +74,7 @@ func (ContainerProfile) ToModel(
 	}
 
 	return ContainerProfile{
-		ID:                     uint(entity.Id.Get()),
+		ID:                     uint(entity.Id.Read()),
 		Name:                   entity.Name.String(),
 		BaseSpecs:              entity.BaseSpecs.String(),
 		MaxSpecs:               maxSpecsPtr,

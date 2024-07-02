@@ -12,8 +12,8 @@ import (
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 )
 
-// GetLicenseInfo	 godoc
-// @Summary      GetLicenseInfo
+// ReadLicenseInfo	 godoc
+// @Summary      ReadLicenseInfo
 // @Description  Get license info.
 // @Tags         license
 // @Accept       json
@@ -21,11 +21,11 @@ import (
 // @Security     Bearer
 // @Success      200 {object} entity.LicenseInfo
 // @Router       /v1/license/ [get]
-func GetLicenseInfoController(c echo.Context) error {
+func ReadLicenseInfoController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	transientDbSvc := c.Get("transientDbSvc").(*db.TransientDatabaseService)
 	licenseQueryRepo := infra.NewLicenseQueryRepo(persistentDbSvc, transientDbSvc)
-	licenseStatus, err := useCase.GetLicenseInfo(licenseQueryRepo)
+	licenseStatus, err := useCase.ReadLicenseInfo(licenseQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
 	}

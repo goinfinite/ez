@@ -22,7 +22,7 @@ func NewMappingController(
 	}
 }
 
-// GetMappings	 godoc
+// ReadMappings	 godoc
 // @Summary      ReadMappings
 // @Description  List mappings.
 // @Tags         mapping

@@ -23,15 +23,15 @@ func NewContainerProfileController(
 	return &ContainerProfileController{persistentDbSvc: persistentDbSvc}
 }
 
-func (controller *ContainerProfileController) GetContainerProfiles() *cobra.Command {
+func (controller *ContainerProfileController) ReadContainerProfiles() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "GetContainerProfiles",
+		Short: "ReadContainerProfiles",
 		Run: func(cmd *cobra.Command, args []string) {
 			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(
 				controller.persistentDbSvc,
 			)
-			containerProfilesList, err := useCase.GetContainerProfiles(
+			containerProfilesList, err := useCase.ReadContainerProfiles(
 				containerProfileQueryRepo,
 			)
 			if err != nil {

@@ -14,7 +14,7 @@ func TestAccountQueryRepo(t *testing.T) {
 	accountQueryRepo := NewAccountQueryRepo(persistentDbSvc)
 
 	t.Run("GetValidAccounts", func(t *testing.T) {
-		_, err := accountQueryRepo.Get()
+		_, err := accountQueryRepo.Read()
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -23,7 +23,7 @@ func TestAccountQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountByUsername", func(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 
-		_, err := accountQueryRepo.GetByUsername(username)
+		_, err := accountQueryRepo.ReadByUsername(username)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -32,7 +32,7 @@ func TestAccountQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountById", func(t *testing.T) {
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 
-		_, err := accountQueryRepo.GetById(accountId)
+		_, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -41,7 +41,7 @@ func TestAccountQueryRepo(t *testing.T) {
 	t.Run("GetInvalidAccount", func(t *testing.T) {
 		username, _ := valueObject.NewUsername("invalid")
 
-		_, err := accountQueryRepo.GetByUsername(username)
+		_, err := accountQueryRepo.ReadByUsername(username)
 		if err == nil {
 			t.Error("ExpectingError")
 		}

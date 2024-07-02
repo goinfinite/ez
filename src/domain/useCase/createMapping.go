@@ -31,7 +31,7 @@ func CreateMapping(
 		return nil
 	}
 
-	currentMappings, err := mappingQueryRepo.Get()
+	currentMappings, err := mappingQueryRepo.Read()
 	if err != nil {
 		log.Printf("GetMappingError: %s", err)
 		return errors.New("GetMappingInfraError")
@@ -74,7 +74,7 @@ func CreateMapping(
 
 		log.Printf("Mapping for port '%s/%s' added.", publicPortStr, protocolStr)
 
-		newMapping, err := mappingQueryRepo.GetById(mappingId)
+		newMapping, err := mappingQueryRepo.ReadById(mappingId)
 		if err != nil {
 			log.Printf("GetMappingByIdError: %s", err)
 			return errors.New("GetMappingByIdInfraError")

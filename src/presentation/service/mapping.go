@@ -23,7 +23,7 @@ func NewMappingService(
 
 func (service *MappingService) Read() ServiceOutput {
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
-	mappingsList, err := useCase.GetMappings(mappingQueryRepo)
+	mappingsList, err := useCase.ReadMappings(mappingQueryRepo)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}

@@ -20,7 +20,7 @@ func NewContainerProfileQueryRepo(
 	return &ContainerProfileQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) {
+func (repo *ContainerProfileQueryRepo) Read() ([]entity.ContainerProfile, error) {
 	var profileEntities []entity.ContainerProfile
 	var profileModels []dbModel.ContainerProfile
 
@@ -44,10 +44,10 @@ func (repo *ContainerProfileQueryRepo) Get() ([]entity.ContainerProfile, error) 
 	return profileEntities, nil
 }
 
-func (repo *ContainerProfileQueryRepo) GetById(
+func (repo *ContainerProfileQueryRepo) ReadById(
 	id valueObject.ContainerProfileId,
 ) (entity.ContainerProfile, error) {
-	profileModel := dbModel.ContainerProfile{ID: uint(id.Get())}
+	profileModel := dbModel.ContainerProfile{ID: uint(id.Read())}
 	err := repo.persistentDbSvc.Handler.
 		Model(&profileModel).
 		First(&profileModel).Error

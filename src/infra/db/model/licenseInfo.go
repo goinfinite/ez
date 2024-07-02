@@ -61,8 +61,8 @@ func NewLicenseInfo(
 }
 
 func (LicenseInfo) ToModel(entity entity.LicenseInfo) LicenseInfo {
-	expiresAt := time.Unix(entity.ExpiresAt.Get(), 0)
-	lastCheckAt := time.Unix(entity.LastCheckAt.Get(), 0)
+	expiresAt := time.Unix(entity.ExpiresAt.Read(), 0)
+	lastCheckAt := time.Unix(entity.LastCheckAt.Read(), 0)
 
 	return NewLicenseInfo(
 		entity.Method.String(),

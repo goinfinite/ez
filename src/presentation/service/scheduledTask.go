@@ -23,7 +23,7 @@ func NewScheduledTaskService(
 
 func (service *ScheduledTaskService) Read() ServiceOutput {
 	scheduledTaskQueryRepo := infra.NewScheduledTaskQueryRepo(service.persistentDbSvc)
-	scheduledTasksList, err := useCase.GetScheduledTasks(scheduledTaskQueryRepo)
+	scheduledTasksList, err := useCase.ReadScheduledTasks(scheduledTaskQueryRepo)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}

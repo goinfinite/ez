@@ -18,7 +18,7 @@ func NewAccountQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *Account
 	return &AccountQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *AccountQueryRepo) Get() ([]entity.Account, error) {
+func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
 	var accEntities []entity.Account
 
 	var accModels []dbModel.Account
@@ -43,10 +43,10 @@ func (repo *AccountQueryRepo) Get() ([]entity.Account, error) {
 	return accEntities, nil
 }
 
-func (repo *AccountQueryRepo) GetByUsername(
+func (repo *AccountQueryRepo) ReadByUsername(
 	username valueObject.Username,
 ) (entity.Account, error) {
-	accEntities, err := repo.Get()
+	accEntities, err := repo.Read()
 	if err != nil {
 		return entity.Account{}, errors.New("AccountQueryError")
 	}
@@ -60,10 +60,10 @@ func (repo *AccountQueryRepo) GetByUsername(
 	return entity.Account{}, errors.New("AccountNotFound")
 }
 
-func (repo *AccountQueryRepo) GetById(
+func (repo *AccountQueryRepo) ReadById(
 	accountId valueObject.AccountId,
 ) (entity.Account, error) {
-	accEntities, err := repo.Get()
+	accEntities, err := repo.Read()
 	if err != nil {
 		return entity.Account{}, errors.New("AccountQueryError")
 	}

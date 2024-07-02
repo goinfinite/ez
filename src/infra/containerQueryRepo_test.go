@@ -11,8 +11,8 @@ func TestContainerQueryRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
 
-	t.Run("GetContainers", func(t *testing.T) {
-		containerList, err := containerQueryRepo.Get()
+	t.Run("ReadContainers", func(t *testing.T) {
+		containerList, err := containerQueryRepo.Read()
 		if err != nil {
 			t.Error(err)
 		}
@@ -22,8 +22,8 @@ func TestContainerQueryRepo(t *testing.T) {
 		}
 	})
 
-	t.Run("GetContainersWithMetrics", func(t *testing.T) {
-		containerList, err := containerQueryRepo.GetWithMetrics()
+	t.Run("ReadContainersWithMetrics", func(t *testing.T) {
+		containerList, err := containerQueryRepo.ReadWithMetrics()
 		if err != nil {
 			t.Error(err)
 		}

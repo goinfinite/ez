@@ -18,7 +18,7 @@ func NewScheduledTaskId(value interface{}) (ScheduledTaskId, error) {
 	return ScheduledTaskId(id), nil
 }
 
-func (vo ScheduledTaskId) Get() uint64 {
+func (vo ScheduledTaskId) Read() uint64 {
 	return uint64(vo)
 }
 

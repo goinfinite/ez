@@ -67,7 +67,7 @@ func (router *Router) containerRoutes() {
 	)
 
 	containerProfileGroup := containerGroup.Group("/profile")
-	containerProfileGroup.GET("/", apiController.GetContainerProfilesController)
+	containerProfileGroup.GET("/", apiController.ReadContainerProfilesController)
 	containerProfileGroup.POST("/", apiController.CreateContainerProfileController)
 	containerProfileGroup.PUT("/", apiController.UpdateContainerProfileController)
 	containerProfileGroup.DELETE(
@@ -85,7 +85,7 @@ func (router *Router) containerRoutes() {
 
 func (router *Router) licenseRoutes() {
 	licenseGroup := router.baseRoute.Group("/v1/license")
-	licenseGroup.GET("/", apiController.GetLicenseInfoController)
+	licenseGroup.GET("/", apiController.ReadLicenseInfoController)
 	go apiController.AutoLicenseValidationController(
 		router.persistentDbSvc,
 		router.transientDbSvc,

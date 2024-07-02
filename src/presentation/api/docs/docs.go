@@ -414,7 +414,7 @@ const docTemplate = `{
                 "tags": [
                     "container"
                 ],
-                "summary": "GetContainerProfiles",
+                "summary": "ReadContainerProfiles",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -676,7 +676,7 @@ const docTemplate = `{
                 "tags": [
                     "license"
                 ],
-                "summary": "GetLicenseInfo",
+                "summary": "ReadLicenseInfo",
                 "responses": {
                     "200": {
                         "description": "OK",

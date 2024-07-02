@@ -11,7 +11,7 @@ import (
 func getLastContainer(
 	containerQueryRepo *ContainerQueryRepo,
 ) (containerEntity entity.Container, err error) {
-	containers, err := containerQueryRepo.Get()
+	containers, err := containerQueryRepo.Read()
 	if err != nil {
 		return containerEntity, err
 	}
@@ -38,7 +38,7 @@ func TestContainerProxyCmdRepo(t *testing.T) {
 
 	lastContainer, err := getLastContainer(containerQueryRepo)
 	if err != nil {
-		t.Errorf("GetContainersFailed: %v", err)
+		t.Errorf("ReadContainersFailed: %v", err)
 		return
 	}
 

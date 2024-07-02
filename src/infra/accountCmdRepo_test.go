@@ -15,7 +15,7 @@ func addDummyUser() error {
 	password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	ipAddress := valueObject.NewLocalhostIpAddress()
-	createDto := dto.NewCreateAccount(username, password, &quota, &ipAddress)
+	createDto := dto.NewCreateAccount(username, password, &quota, ipAddress)
 
 	accountCmdRepo := NewAccountCmdRepo(testHelpers.GetPersistentDbSvc())
 	err := accountCmdRepo.Create(createDto)
@@ -62,7 +62,7 @@ func TestAccountCmdRepo(t *testing.T) {
 		password, _ := valueObject.NewPassword("invalid")
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
 		ipAddress := valueObject.NewLocalhostIpAddress()
-		createDto := dto.NewCreateAccount(username, password, &quota, &ipAddress)
+		createDto := dto.NewCreateAccount(username, password, &quota, ipAddress)
 
 		err := accountCmdRepo.Create(createDto)
 		if err == nil {
@@ -125,18 +125,18 @@ func TestAccountCmdRepo(t *testing.T) {
 		}
 
 		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		os.Chown(testFilePath, int(accId.Get()), int(accId.Get()))
+		os.Chown(testFilePath, int(accId.Read()), int(accId.Read()))
 
 		err = accountCmdRepo.UpdateQuotaUsage(accId)
 		if err != nil {
 			t.Error(err)
 		}
 
-		accEntity, err := accountQueryRepo.GetById(accId)
+		accEntity, err := accountQueryRepo.ReadById(accId)
 		if err != nil {
 			t.Error(err)
 		}
-		if accEntity.QuotaUsage.DiskBytes.Get() < 100000000 {
+		if accEntity.QuotaUsage.DiskBytes.Read() < 100000000 {
 			t.Error("QuotaUsageNotUpdated")
 		}
 

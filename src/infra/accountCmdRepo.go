@@ -36,8 +36,8 @@ func (repo *AccountCmdRepo) updateFilesystemQuota(
 	inodesStr := quota.Inodes.String()
 	accIdStr := accId.String()
 
-	shouldUpdateDiskQuota := quota.DiskBytes.Get() > 0
-	shouldUpdateInodeQuota := quota.Inodes.Get() > 0
+	shouldUpdateDiskQuota := quota.DiskBytes.Read() > 0
+	shouldUpdateInodeQuota := quota.Inodes.Read() > 0
 	shouldRemoveQuota := !shouldUpdateDiskQuota && !shouldUpdateInodeQuota
 
 	xfsFlags := "-x -c 'limit -u"
@@ -134,7 +134,7 @@ func (repo *AccountCmdRepo) getUsernameById(
 	accId valueObject.AccountId,
 ) (valueObject.Username, error) {
 	accQuery := NewAccountQueryRepo(repo.persistentDbSvc)
-	accDetails, err := accQuery.GetById(accId)
+	accDetails, err := accQuery.ReadById(accId)
 	if err != nil {
 		return "", err
 	}
@@ -170,7 +170,7 @@ func (repo *AccountCmdRepo) Delete(accId valueObject.AccountId) error {
 	}
 
 	model := dbModel.Account{}
-	modelId := accId.Get()
+	modelId := accId.Read()
 
 	relatedTables := []string{
 		dbModel.AccountQuota{}.TableName(),
@@ -222,7 +222,7 @@ func (repo *AccountCmdRepo) UpdatePassword(
 		return err
 	}
 
-	accModel := dbModel.Account{ID: uint(accId.Get())}
+	accModel := dbModel.Account{ID: uint(accId.Read())}
 	updateResult := repo.persistentDbSvc.Handler.Model(&accModel).
 		Update("updated_at", time.Now())
 
@@ -250,7 +250,7 @@ func (repo *AccountCmdRepo) UpdateApiKey(
 	hash.Write([]byte(uuid.String()))
 	uuidHash := hex.EncodeToString(hash.Sum(nil))
 
-	accModel := dbModel.Account{ID: uint(accId.Get())}
+	accModel := dbModel.Account{ID: uint(accId.Read())}
 	updateResult := repo.persistentDbSvc.Handler.Model(&accModel).
 		Update("key_hash", uuidHash)
 	if updateResult.Error != nil {
@@ -267,22 +267,22 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 ) error {
 	updateMap := map[string]interface{}{}
 
-	if quota.CpuCores.Get() >= 0 {
-		updateMap["cpu_cores"] = quota.CpuCores.Get()
+	if quota.CpuCores.Read() >= 0 {
+		updateMap["cpu_cores"] = quota.CpuCores.Read()
 	}
 
-	if quota.MemoryBytes.Get() >= 0 {
-		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Get())
+	if quota.MemoryBytes.Read() >= 0 {
+		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Read())
 	}
 
-	if quota.DiskBytes.Get() >= 0 {
-		updateMap["disk_bytes"] = uint64(quota.DiskBytes.Get())
+	if quota.DiskBytes.Read() >= 0 {
+		updateMap["disk_bytes"] = uint64(quota.DiskBytes.Read())
 	}
 
-	updateMap["inodes"] = quota.Inodes.Get()
+	updateMap["inodes"] = quota.Inodes.Read()
 
 	err := repo.persistentDbSvc.Handler.Table(tableName).
-		Where("account_id = ?", uint(accId.Get())).
+		Where("account_id = ?", uint(accId.Read())).
 		Updates(updateMap).Error
 	if err != nil {
 		return err
@@ -371,7 +371,7 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error 
 	}
 
 	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
-	containers, err := containerQueryRepo.GetByAccId(accId)
+	containers, err := containerQueryRepo.ReadByAccountId(accId)
 	if err != nil {
 		return err
 	}
@@ -381,15 +381,15 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accId valueObject.AccountId) error 
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
 
 	for _, container := range containers {
-		containerProfile, err := profileQueryRepo.GetById(
+		containerProfile, err := profileQueryRepo.ReadById(
 			container.ProfileId,
 		)
 		if err != nil {
 			continue
 		}
 
-		containerCpuCores := containerProfile.BaseSpecs.CpuCores.Get()
-		containerMemoryBytes := containerProfile.BaseSpecs.MemoryBytes.Get()
+		containerCpuCores := containerProfile.BaseSpecs.CpuCores.Read()
+		containerMemoryBytes := containerProfile.BaseSpecs.MemoryBytes.Read()
 
 		cpuCoresUsage += containerCpuCores
 		memoryBytesUsage += containerMemoryBytes

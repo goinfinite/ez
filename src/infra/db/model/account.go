@@ -23,7 +23,7 @@ func (Account) TableName() string {
 }
 
 func (Account) ToModel(entity entity.Account) (Account, error) {
-	accId := uint(entity.Id.Get())
+	accId := uint(entity.Id.Read())
 	quota, err := AccountQuota{}.ToModel(entity.Quota, accId)
 	if err != nil {
 		return Account{}, err
@@ -36,7 +36,7 @@ func (Account) ToModel(entity entity.Account) (Account, error) {
 
 	return Account{
 		ID:         accId,
-		GroupID:    uint(entity.GroupId.Get()),
+		GroupID:    uint(entity.GroupId.Read()),
 		Username:   entity.Username.String(),
 		KeyHash:    nil,
 		Quota:      quota,

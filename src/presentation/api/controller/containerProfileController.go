@@ -13,8 +13,8 @@ import (
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 )
 
-// GetContainerProfiles	 godoc
-// @Summary      GetContainerProfiles
+// ReadContainerProfiles	 godoc
+// @Summary      ReadContainerProfiles
 // @Description  List container profiles.
 // @Tags         container
 // @Accept       json
@@ -22,10 +22,10 @@ import (
 // @Security     Bearer
 // @Success      200 {array} entity.ContainerProfile
 // @Router       /v1/container/profile/ [get]
-func GetContainerProfilesController(c echo.Context) error {
+func ReadContainerProfilesController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	queryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
-	profilesList, err := useCase.GetContainerProfiles(queryRepo)
+	profilesList, err := useCase.ReadContainerProfiles(queryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
 	}

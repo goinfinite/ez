@@ -6,6 +6,6 @@ import (
 )
 
 type ContainerProfileQueryRepo interface {
-	Get() ([]entity.ContainerProfile, error)
-	GetById(id valueObject.ContainerProfileId) (entity.ContainerProfile, error)
+	Read() ([]entity.ContainerProfile, error)
+	ReadById(id valueObject.ContainerProfileId) (entity.ContainerProfile, error)
 }

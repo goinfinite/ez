@@ -50,7 +50,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 
 	t.Run("RunScheduledTasks", func(t *testing.T) {
 		pendingStatus, _ := valueObject.NewScheduledTaskStatus("pending")
-		pendingTasks, err := scheduledTaskQueryRepo.GetByStatus(pendingStatus)
+		pendingTasks, err := scheduledTaskQueryRepo.ReadByStatus(pendingStatus)
 		if err != nil {
 			t.Error(err)
 			return
@@ -61,7 +61,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 
-		completedTask, err := scheduledTaskQueryRepo.GetById(pendingTasks[0].Id)
+		completedTask, err := scheduledTaskQueryRepo.ReadById(pendingTasks[0].Id)
 		if err != nil {
 			t.Error(err)
 			return

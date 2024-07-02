@@ -16,7 +16,7 @@ func DeleteContainerProfile(
 	containerCmdRepo repository.ContainerCmdRepo,
 	profileId valueObject.ContainerProfileId,
 ) error {
-	_, err := containerProfileQueryRepo.GetById(profileId)
+	_, err := containerProfileQueryRepo.ReadById(profileId)
 	if err != nil {
 		return errors.New("ContainerProfileNotFound")
 	}

@@ -26,7 +26,7 @@ func NewInodesCountPanic(value interface{}) InodesCount {
 	return ic
 }
 
-func (ic InodesCount) Get() uint64 {
+func (ic InodesCount) Read() uint64 {
 	return uint64(ic)
 }
 

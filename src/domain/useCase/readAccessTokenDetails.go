@@ -9,7 +9,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func GetAccessTokenDetails(
+func ReadAccessTokenDetails(
 	authQueryRepo repository.AuthQueryRepo,
 	accessToken valueObject.AccessTokenValue,
 	trustedIpAddress []valueObject.IpAddress,
@@ -17,14 +17,14 @@ func GetAccessTokenDetails(
 ) (dto.AccessTokenDetails, error) {
 	var tokenDetails dto.AccessTokenDetails
 
-	accessTokenDetails, err := authQueryRepo.GetAccessTokenDetails(accessToken)
+	accessTokenDetails, err := authQueryRepo.ReadAccessTokenDetails(accessToken)
 	if err != nil {
 		if err.Error() == "SessionTokenExpired" {
 			return tokenDetails, errors.New("SessionTokenExpired")
 		}
 
-		log.Printf("GetAccessTokenDetailsError: %s", err)
-		return tokenDetails, errors.New("GetAccessTokenDetailsInfraError")
+		log.Printf("ReadAccessTokenDetailsError: %s", err)
+		return tokenDetails, errors.New("ReadAccessTokenDetailsInfraError")
 	}
 
 	if accessTokenDetails.IpAddress == nil {

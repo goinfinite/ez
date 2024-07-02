@@ -34,7 +34,7 @@ func (repo *SecurityQueryRepo) ReadEvents(
 	}
 
 	if readDto.AccountId != nil {
-		dbQuery = dbQuery.Where("account_id = ?", readDto.AccountId.Get())
+		dbQuery = dbQuery.Where("account_id = ?", readDto.AccountId.Read())
 	}
 
 	if readDto.CreatedAt != nil {

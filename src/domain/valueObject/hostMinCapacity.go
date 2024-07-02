@@ -34,7 +34,7 @@ func NewHostMinCapacityPanic(value interface{}) HostMinCapacity {
 	return hmc
 }
 
-func (hmc HostMinCapacity) Get() float64 {
+func (hmc HostMinCapacity) Read() float64 {
 	return float64(hmc)
 }
 

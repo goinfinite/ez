@@ -21,12 +21,12 @@ func NewAccountService(
 
 func (service *AccountService) Read() ServiceOutput {
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
-	accsList, err := useCase.GetAccounts(accountQueryRepo)
+	accountsList, err := useCase.ReadAccounts(accountQueryRepo)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, accsList)
+	return NewServiceOutput(Success, accountsList)
 }
 
 func (service *AccountService) Create(input map[string]interface{}) ServiceOutput {
@@ -55,16 +55,15 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 		quotaPtr = &accountQuota
 	}
 
-	var ipAddressPtr *valueObject.IpAddress
+	var ipAddress valueObject.IpAddress
 	if _, exists := input["ipAddress"]; exists {
-		ipAddress, err := valueObject.NewIpAddress(input["ipAddress"])
+		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
-		ipAddressPtr = &ipAddress
 	}
 
-	createDto := dto.NewCreateAccount(username, password, quotaPtr, ipAddressPtr)
+	createDto := dto.NewCreateAccount(username, password, quotaPtr, ipAddress)
 
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
@@ -119,17 +118,16 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 		quotaPtr = &accountQuota
 	}
 
-	var ipAddressPtr *valueObject.IpAddress
+	var ipAddress valueObject.IpAddress
 	if _, exists := input["ipAddress"]; exists {
-		ipAddress, err := valueObject.NewIpAddress(input["ipAddress"])
+		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
-		ipAddressPtr = &ipAddress
 	}
 
 	updateDto := dto.NewUpdateAccount(
-		accountId, passwordPtr, shouldUpdateApiKeyPtr, quotaPtr, ipAddressPtr,
+		accountId, passwordPtr, shouldUpdateApiKeyPtr, quotaPtr, ipAddress,
 	)
 
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
@@ -173,18 +171,18 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	securityCmdRepo := infra.NewSecurityCmdRepo(service.persistentDbSvc)
 
-	var ipAddressPtr *valueObject.IpAddress
+	var ipAddress valueObject.IpAddress
 	if _, exists := input["ipAddress"]; exists {
-		ipAddress, err := valueObject.NewIpAddress(input["ipAddress"])
+		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
-		ipAddressPtr = &ipAddress
 	}
 
+	deleteDto := dto.NewDeleteAccount(accountId, ipAddress)
+
 	err = useCase.DeleteAccount(
-		accountQueryRepo, accountCmdRepo, containerQueryRepo,
-		securityCmdRepo, accountId, ipAddressPtr,
+		accountQueryRepo, accountCmdRepo, containerQueryRepo, securityCmdRepo, deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

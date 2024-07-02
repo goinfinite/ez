@@ -16,7 +16,7 @@ func CreateMappingsWithContainerId(
 	containerProxyCmdRepo repository.ContainerProxyCmdRepo,
 	containerId valueObject.ContainerId,
 ) error {
-	containerEntity, err := containerQueryRepo.GetById(containerId)
+	containerEntity, err := containerQueryRepo.ReadById(containerId)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}

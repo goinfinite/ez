@@ -31,7 +31,7 @@ func CreateContainer(
 		return err
 	}
 
-	_, err = containerQueryRepo.GetByHostname(createDto.Hostname)
+	_, err = containerQueryRepo.ReadByHostname(createDto.Hostname)
 	if err == nil {
 		log.Printf("ContainerHostnameAlreadyExists: %s", createDto.Hostname)
 		return errors.New("ContainerHostnameAlreadyExists")

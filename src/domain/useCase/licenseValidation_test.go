@@ -35,7 +35,7 @@ func TestLicenseValidation(t *testing.T) {
 			t.Errorf("UnexpectedError: %v", err)
 		}
 
-		licenseInfo, err := licenseQueryRepo.Get()
+		licenseInfo, err := licenseQueryRepo.Read()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}

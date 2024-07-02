@@ -18,7 +18,7 @@ func NewSecurityEventId(value interface{}) (SecurityEventId, error) {
 	return SecurityEventId(id), nil
 }
 
-func (vo SecurityEventId) Get() uint64 {
+func (vo SecurityEventId) Read() uint64 {
 	return uint64(vo)
 }
 

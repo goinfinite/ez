@@ -50,9 +50,9 @@ func LicenseValidation(
 		}
 	}
 
-	licenseInfo, err := licenseQueryRepo.Get()
+	licenseInfo, err := licenseQueryRepo.Read()
 	if err != nil {
-		return errors.New("GetLicenseInfoError: " + err.Error())
+		return errors.New("ReadLicenseInfoError: " + err.Error())
 	}
 
 	freshNonceHash, err := licenseCmdRepo.GenerateNonceHash()
@@ -76,7 +76,7 @@ func LicenseValidation(
 		return errors.New("GenerateLicenseIntegrityHashError: " + err.Error())
 	}
 
-	persistedIntegrityHash, err := licenseQueryRepo.GetIntegrityHash()
+	persistedIntegrityHash, err := licenseQueryRepo.ReadIntegrityHash()
 	if err != nil {
 		return errors.New("GetPersistedLicenseIntegrityHashError: " + err.Error())
 	}

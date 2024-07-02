@@ -11,9 +11,9 @@ func BootContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) {
-	containers, err := containerQueryRepo.Get()
+	containers, err := containerQueryRepo.Read()
 	if err != nil {
-		log.Printf("GetContainersError: %v", err)
+		log.Printf("ReadContainersError: %v", err)
 		return
 	}
 

@@ -6,10 +6,10 @@ import (
 )
 
 type MappingQueryRepo interface {
-	Get() ([]entity.Mapping, error)
-	GetById(id valueObject.MappingId) (entity.Mapping, error)
-	GetTargetById(id valueObject.MappingTargetId) (entity.MappingTarget, error)
-	GetTargetsByContainerId(
+	Read() ([]entity.Mapping, error)
+	ReadById(id valueObject.MappingId) (entity.Mapping, error)
+	ReadTargetById(id valueObject.MappingTargetId) (entity.MappingTarget, error)
+	ReadTargetsByContainerId(
 		containerId valueObject.ContainerId,
 	) ([]entity.MappingTarget, error)
 }

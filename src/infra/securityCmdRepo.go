@@ -31,7 +31,7 @@ func (repo *SecurityCmdRepo) CreateEvent(createDto dto.CreateSecurityEvent) erro
 
 	var accountIdUintPtr *uint
 	if createDto.AccountId != nil {
-		accountIdUint := uint(createDto.AccountId.Get())
+		accountIdUint := uint(createDto.AccountId.Read())
 		accountIdUintPtr = &accountIdUint
 	}
 
@@ -58,7 +58,7 @@ func (repo *SecurityCmdRepo) DeleteEvents(deleteDto dto.DeleteSecurityEvents) er
 	}
 
 	if deleteDto.AccountId != nil {
-		deleteConditionsMap["account_id"] = deleteDto.AccountId.Get()
+		deleteConditionsMap["account_id"] = deleteDto.AccountId.Read()
 	}
 
 	return repo.persistentDbSvc.Handler.

@@ -6,7 +6,7 @@ import (
 )
 
 type ScheduledTaskQueryRepo interface {
-	Get() ([]entity.ScheduledTask, error)
-	GetById(id valueObject.ScheduledTaskId) (entity.ScheduledTask, error)
-	GetByStatus(status valueObject.ScheduledTaskStatus) ([]entity.ScheduledTask, error)
+	Read() ([]entity.ScheduledTask, error)
+	ReadById(id valueObject.ScheduledTaskId) (entity.ScheduledTask, error)
+	ReadByStatus(status valueObject.ScheduledTaskStatus) ([]entity.ScheduledTask, error)
 }

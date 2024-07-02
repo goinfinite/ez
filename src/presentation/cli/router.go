@@ -57,7 +57,7 @@ func (router *Router) containerRoutes() {
 	}
 
 	containerProfileController := cliController.NewContainerProfileController(router.persistentDbSvc)
-	containerProfileCmd.AddCommand(containerProfileController.GetContainerProfiles())
+	containerProfileCmd.AddCommand(containerProfileController.ReadContainerProfiles())
 	containerProfileCmd.AddCommand(containerProfileController.CreateContainerProfile())
 	containerProfileCmd.AddCommand(containerProfileController.UpdateContainerProfile())
 	containerProfileCmd.AddCommand(containerProfileController.DeleteContainerProfile())
@@ -68,8 +68,8 @@ func (router *Router) containerRoutes() {
 	}
 
 	containerRegistryController := cliController.NewContainerRegistryController(router.persistentDbSvc)
-	containerRegistryCmd.AddCommand(containerRegistryController.GetRegistryImages())
-	containerRegistryCmd.AddCommand(containerRegistryController.GetRegistryTaggedImage())
+	containerRegistryCmd.AddCommand(containerRegistryController.ReadRegistryImages())
+	containerRegistryCmd.AddCommand(containerRegistryController.ReadRegistryTaggedImage())
 
 	containerCmd.AddCommand(containerProfileCmd)
 	containerCmd.AddCommand(containerRegistryCmd)
@@ -86,7 +86,7 @@ func (router *Router) licenseRoutes() {
 		router.persistentDbSvc,
 		router.transientDbSvc,
 	)
-	licenseCmd.AddCommand(licenseController.GetLicenseInfo())
+	licenseCmd.AddCommand(licenseController.ReadLicenseInfo())
 	licenseCmd.AddCommand(licenseController.RefreshLicense())
 	rootCmd.AddCommand(licenseCmd)
 }
@@ -121,7 +121,7 @@ func (router *Router) o11yRoutes() {
 	}
 
 	o11yController := cliController.O11yController{}
-	o11yCmd.AddCommand(o11yController.GetO11yOverview())
+	o11yCmd.AddCommand(o11yController.ReadO11yOverview())
 	rootCmd.AddCommand(o11yCmd)
 }
 

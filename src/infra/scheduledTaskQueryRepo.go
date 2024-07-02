@@ -19,7 +19,7 @@ func NewScheduledTaskQueryRepo(
 	return &ScheduledTaskQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *ScheduledTaskQueryRepo) Get() ([]entity.ScheduledTask, error) {
+func (repo *ScheduledTaskQueryRepo) Read() ([]entity.ScheduledTask, error) {
 	scheduledTasks := []entity.ScheduledTask{}
 
 	scheduledTaskModels := []dbModel.ScheduledTask{}
@@ -41,7 +41,7 @@ func (repo *ScheduledTaskQueryRepo) Get() ([]entity.ScheduledTask, error) {
 	return scheduledTasks, nil
 }
 
-func (repo *ScheduledTaskQueryRepo) GetById(
+func (repo *ScheduledTaskQueryRepo) ReadById(
 	id valueObject.ScheduledTaskId,
 ) (taskEntity entity.ScheduledTask, err error) {
 	var scheduledTaskModel dbModel.ScheduledTask
@@ -55,7 +55,7 @@ func (repo *ScheduledTaskQueryRepo) GetById(
 	return scheduledTaskModel.ToEntity()
 }
 
-func (repo *ScheduledTaskQueryRepo) GetByStatus(
+func (repo *ScheduledTaskQueryRepo) ReadByStatus(
 	status valueObject.ScheduledTaskStatus,
 ) ([]entity.ScheduledTask, error) {
 	scheduledTasks := []entity.ScheduledTask{}

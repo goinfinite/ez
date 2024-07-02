@@ -26,7 +26,7 @@ func NewMappingTargetIdPanic(value interface{}) MappingTargetId {
 	return targetId
 }
 
-func (id MappingTargetId) Get() uint64 {
+func (id MappingTargetId) Read() uint64 {
 	return uint64(id)
 }
 

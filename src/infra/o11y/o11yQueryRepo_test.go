@@ -11,8 +11,8 @@ func TestO11yQueryRepo(t *testing.T) {
 	transientDbSvc := testHelpers.GetTransientDbSvc()
 	o11yQueryRepo := NewO11yQueryRepo(transientDbSvc)
 
-	t.Run("GetOverview", func(t *testing.T) {
-		_, err := o11yQueryRepo.GetOverview()
+	t.Run("ReadOverview", func(t *testing.T) {
+		_, err := o11yQueryRepo.ReadOverview()
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
 		}

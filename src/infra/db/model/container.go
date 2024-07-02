@@ -159,7 +159,7 @@ func (Container) ToModel(entity entity.Container) Container {
 
 	var startedAtPtr *time.Time
 	if entity.StartedAt != nil {
-		startedAt := time.Unix(entity.StartedAt.Get(), 0)
+		startedAt := time.Unix(entity.StartedAt.Read(), 0)
 		startedAtPtr = &startedAt
 	}
 
@@ -175,7 +175,7 @@ func (Container) ToModel(entity entity.Container) Container {
 
 	return Container{
 		ID:            entity.Id.String(),
-		AccountID:     uint(entity.AccountId.Get()),
+		AccountID:     uint(entity.AccountId.Read()),
 		Hostname:      entity.Hostname.String(),
 		Status:        entity.Status,
 		ImageAddress:  entity.ImageAddress.String(),
@@ -184,9 +184,9 @@ func (Container) ToModel(entity entity.Container) Container {
 		RestartPolicy: entity.RestartPolicy.String(),
 		RestartCount:  uint(entity.RestartCount),
 		Entrypoint:    entrypointStrPtr,
-		CreatedAt:     time.Unix(entity.CreatedAt.Get(), 0),
+		CreatedAt:     time.Unix(entity.CreatedAt.Read(), 0),
 		StartedAt:     startedAtPtr,
-		ProfileID:     uint(entity.ProfileId.Get()),
+		ProfileID:     uint(entity.ProfileId.Read()),
 		Envs:          envsPtr,
 	}
 }

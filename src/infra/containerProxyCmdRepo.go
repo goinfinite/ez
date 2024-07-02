@@ -99,7 +99,7 @@ server {
 }
 
 func (repo *ContainerProxyCmdRepo) Create(containerId valueObject.ContainerId) error {
-	containerEntity, err := repo.containerQueryRepo.GetById(containerId)
+	containerEntity, err := repo.containerQueryRepo.ReadById(containerId)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (repo *ContainerProxyCmdRepo) Create(containerId valueObject.ContainerId) e
 			continue
 		}
 
-		containerPrivatePort = portBinding.PrivatePort.Get()
+		containerPrivatePort = portBinding.PrivatePort.Read()
 	}
 	if containerPrivatePort == 0 {
 		return errors.New("SpeediaOsPrivatePortNotFound")

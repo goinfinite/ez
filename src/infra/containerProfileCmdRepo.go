@@ -73,7 +73,7 @@ func (repo *ContainerProfileCmdRepo) Update(
 	}
 
 	if updateDto.HostMinCapacityPercent != nil {
-		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Get()
+		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Read()
 	}
 
 	err := repo.persistentDbSvc.Handler.Table(dbModel.ContainerProfile{}.TableName()).
@@ -91,7 +91,7 @@ func (repo *ContainerProfileCmdRepo) Delete(
 ) error {
 	err := repo.persistentDbSvc.Handler.Delete(
 		dbModel.ContainerProfile{},
-		profileId.Get(),
+		profileId.Read(),
 	).Error
 	if err != nil {
 		return errors.New("DeleteContainerProfileDbError")

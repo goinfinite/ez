@@ -24,7 +24,7 @@ func NewContainerQueryRepo(
 	return &ContainerQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *ContainerQueryRepo) Get() ([]entity.Container, error) {
+func (repo *ContainerQueryRepo) Read() ([]entity.Container, error) {
 	containers := []entity.Container{}
 
 	containerModels := []dbModel.Container{}
@@ -47,7 +47,7 @@ func (repo *ContainerQueryRepo) Get() ([]entity.Container, error) {
 	return containers, nil
 }
 
-func (repo *ContainerQueryRepo) GetById(
+func (repo *ContainerQueryRepo) ReadById(
 	containerId valueObject.ContainerId,
 ) (entity.Container, error) {
 	var containerEntity entity.Container
@@ -74,7 +74,7 @@ func (repo *ContainerQueryRepo) GetById(
 	return containerEntity, nil
 }
 
-func (repo *ContainerQueryRepo) GetByHostname(
+func (repo *ContainerQueryRepo) ReadByHostname(
 	hostname valueObject.Fqdn,
 ) (entity.Container, error) {
 	var containerEntity entity.Container
@@ -101,7 +101,7 @@ func (repo *ContainerQueryRepo) GetByHostname(
 	return containerEntity, nil
 }
 
-func (repo *ContainerQueryRepo) GetByAccId(
+func (repo *ContainerQueryRepo) ReadByAccountId(
 	accId valueObject.AccountId,
 ) ([]entity.Container, error) {
 	containers := []entity.Container{}
@@ -109,7 +109,7 @@ func (repo *ContainerQueryRepo) GetByAccId(
 	containerModels := []dbModel.Container{}
 	err := repo.persistentDbSvc.Handler.
 		Preload("PortBindings").
-		Where("account_id = ?", accId.Get()).
+		Where("account_id = ?", accId.Read()).
 		Find(&containerModels).Error
 	if err != nil {
 		return containers, err
@@ -291,7 +291,7 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 		return containersWithMetrics, err
 	}
 
-	containerEntities, err := repo.GetByAccId(accId)
+	containerEntities, err := repo.ReadByAccountId(accId)
 	if err != nil {
 		return containersWithMetrics, err
 	}
@@ -316,10 +316,10 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 	return containersWithMetrics, nil
 }
 
-func (repo *ContainerQueryRepo) GetWithMetrics() ([]dto.ContainerWithMetrics, error) {
+func (repo *ContainerQueryRepo) ReadWithMetrics() ([]dto.ContainerWithMetrics, error) {
 	containersWithMetrics := []dto.ContainerWithMetrics{}
 
-	accsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Get()
+	accsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Read()
 	if err != nil {
 		return containersWithMetrics, err
 	}

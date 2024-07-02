@@ -26,10 +26,10 @@ func (AccountQuota) ToModel(
 	accId uint,
 ) (AccountQuota, error) {
 	return AccountQuota{
-		CpuCores:    vo.CpuCores.Get(),
-		MemoryBytes: uint64(vo.MemoryBytes.Get()),
-		DiskBytes:   uint64(vo.DiskBytes.Get()),
-		Inodes:      vo.Inodes.Get(),
+		CpuCores:    vo.CpuCores.Read(),
+		MemoryBytes: uint64(vo.MemoryBytes.Read()),
+		DiskBytes:   uint64(vo.DiskBytes.Read()),
+		Inodes:      vo.Inodes.Read(),
 		AccountID:   accId,
 	}, nil
 }

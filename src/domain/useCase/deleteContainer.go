@@ -14,9 +14,9 @@ func mappingsJanitor(
 	mappingCmdRepo repository.MappingCmdRepo,
 	containerId valueObject.ContainerId,
 ) error {
-	targets, err := mappingQueryRepo.GetTargetsByContainerId(containerId)
+	targets, err := mappingQueryRepo.ReadTargetsByContainerId(containerId)
 	if err != nil {
-		log.Printf("[%v] GetTargetsByContainerIdError: %s", containerId, err)
+		log.Printf("[%v] ReadTargetsByContainerIdError: %s", containerId, err)
 		return nil
 	}
 
@@ -30,7 +30,7 @@ func mappingsJanitor(
 		log.Printf("TargetId '%v' deleted.", target.Id)
 	}
 
-	mappings, err := mappingQueryRepo.Get()
+	mappings, err := mappingQueryRepo.Read()
 	if err != nil {
 		return nil
 	}
@@ -45,7 +45,7 @@ func mappingsJanitor(
 			continue
 		}
 
-		isMappingTooRecent := nowEpoch-mapping.CreatedAt.Get() < 60
+		isMappingTooRecent := nowEpoch-mapping.CreatedAt.Read() < 60
 		if isMappingTooRecent {
 			continue
 		}
@@ -72,7 +72,7 @@ func DeleteContainer(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) error {
-	_, err := containerQueryRepo.GetById(containerId)
+	_, err := containerQueryRepo.ReadById(containerId)
 	if err != nil {
 		log.Printf("ContainerNotFound: %s", err)
 		return errors.New("ContainerNotFound")

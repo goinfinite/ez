@@ -96,7 +96,7 @@ func (repo *AuthQueryRepo) getTokenDetailsFromSession(
 func (repo *AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
-	accModel := dbModel.Account{ID: uint(accountId.Get())}
+	accModel := dbModel.Account{ID: uint(accountId.Read())}
 	err := repo.persistentDbSvc.Handler.Model(&accModel).First(&accModel).Error
 	if err != nil {
 		return "", errors.New("AccountNotFound")
@@ -150,7 +150,7 @@ func (repo *AuthQueryRepo) getTokenDetailsFromApiKey(
 	), nil
 }
 
-func (repo *AuthQueryRepo) GetAccessTokenDetails(
+func (repo *AuthQueryRepo) ReadAccessTokenDetails(
 	token valueObject.AccessTokenValue,
 ) (dto.AccessTokenDetails, error) {
 	var tokenDetails dto.AccessTokenDetails

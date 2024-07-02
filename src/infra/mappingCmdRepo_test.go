@@ -35,9 +35,9 @@ func TestMappingCmdRepo(t *testing.T) {
 
 	t.Run("CreateTargets", func(t *testing.T) {
 		mappingId := valueObject.NewMappingIdPanic(1)
-		containers, err := containerQueryRepo.Get()
+		containers, err := containerQueryRepo.Read()
 		if err != nil {
-			t.Errorf("GetContainersFailed: %v", err)
+			t.Errorf("ReadContainersFailed: %v", err)
 			return
 		}
 
@@ -62,9 +62,9 @@ func TestMappingCmdRepo(t *testing.T) {
 	t.Run("DeleteTargets", func(t *testing.T) {
 		queryRepo := NewMappingQueryRepo(persistentDbSvc)
 
-		mappings, err := queryRepo.Get()
+		mappings, err := queryRepo.Read()
 		if err != nil {
-			t.Errorf("GetMappingsFailed: %v", err)
+			t.Errorf("ReadMappingsFailed: %v", err)
 			return
 		}
 
@@ -90,9 +90,9 @@ func TestMappingCmdRepo(t *testing.T) {
 	t.Run("DeleteMapping", func(t *testing.T) {
 		queryRepo := NewMappingQueryRepo(persistentDbSvc)
 
-		mappings, err := queryRepo.Get()
+		mappings, err := queryRepo.Read()
 		if err != nil {
-			t.Errorf("GetMappingsFailed: %v", err)
+			t.Errorf("ReadMappingsFailed: %v", err)
 			return
 		}
 

@@ -320,7 +320,7 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (valueObject.HostResourceUsage
 	), nil
 }
 
-func (repo *O11yQueryRepo) GetOverview() (entity.O11yOverview, error) {
+func (repo *O11yQueryRepo) ReadOverview() (entity.O11yOverview, error) {
 	hostnameStr, err := os.Hostname()
 	if err != nil {
 		hostnameStr = "localhost"

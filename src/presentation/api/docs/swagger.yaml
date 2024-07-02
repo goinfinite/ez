@@ -842,7 +842,7 @@ paths:
             type: array
       security:
       - Bearer: []
-      summary: GetContainerProfiles
+      summary: ReadContainerProfiles
       tags:
       - container
     post:
@@ -975,7 +975,7 @@ paths:
             $ref: '#/definitions/entity.LicenseInfo'
       security:
       - Bearer: []
-      summary: GetLicenseInfo
+      summary: ReadLicenseInfo
       tags:
       - license
   /v1/mapping/:

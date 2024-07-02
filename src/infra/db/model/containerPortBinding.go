@@ -29,10 +29,10 @@ func (ContainerPortBinding) ToModel(
 	return ContainerPortBinding{
 		ContainerID:   containerId.String(),
 		ServiceName:   vo.ServiceName.String(),
-		PublicPort:    uint(vo.PublicPort.Get()),
-		ContainerPort: uint(vo.ContainerPort.Get()),
+		PublicPort:    uint(vo.PublicPort.Read()),
+		ContainerPort: uint(vo.ContainerPort.Read()),
 		Protocol:      vo.Protocol.String(),
-		PrivatePort:   uint(vo.PrivatePort.Get()),
+		PrivatePort:   uint(vo.PrivatePort.Read()),
 	}
 }
 
@@ -90,7 +90,7 @@ func (model ContainerPortBinding) getUnusablePorts(
 
 	portsToIgnoreUint := []uint{}
 	for _, port := range portsToIgnore {
-		portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Get()))
+		portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Read()))
 	}
 	unusablePorts = append(unusablePorts, portsToIgnoreUint...)
 	unusablePorts = slices.Compact(unusablePorts)
@@ -161,7 +161,7 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 		return nextAvailablePort, err
 	}
 
-	minPortUint := uint(publicPortInterval.Min.Get())
-	maxPortUint := uint(publicPortInterval.Max.Get())
+	minPortUint := uint(publicPortInterval.Min.Read())
+	maxPortUint := uint(publicPortInterval.Max.Read())
 	return model.getNextAvailablePort(unusablePorts, minPortUint, maxPortUint)
 }

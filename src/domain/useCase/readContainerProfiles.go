@@ -5,8 +5,8 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetContainerProfiles(
+func ReadContainerProfiles(
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
 ) ([]entity.ContainerProfile, error) {
-	return containerProfileQueryRepo.Get()
+	return containerProfileQueryRepo.Read()
 }

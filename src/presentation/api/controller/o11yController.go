@@ -22,7 +22,7 @@ import (
 func O11yOverviewController(c echo.Context) error {
 	transientDbSvc := c.Get("transientDbSvc").(*db.TransientDatabaseService)
 	o11yQueryRepo := o11yInfra.NewO11yQueryRepo(transientDbSvc)
-	o11yOverview, err := useCase.GetO11yOverview(o11yQueryRepo)
+	o11yOverview, err := useCase.ReadO11yOverview(o11yQueryRepo)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
 	}

@@ -7,7 +7,7 @@ import (
 
 type AuthQueryRepo interface {
 	IsLoginValid(login dto.Login) bool
-	GetAccessTokenDetails(
+	ReadAccessTokenDetails(
 		token valueObject.AccessTokenValue,
 	) (dto.AccessTokenDetails, error)
 }

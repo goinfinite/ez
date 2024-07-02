@@ -16,13 +16,13 @@ func CheckAccountQuota(
 	newProfileId valueObject.ContainerProfileId,
 	prevProfileId *valueObject.ContainerProfileId,
 ) error {
-	accEntity, err := accountQueryRepo.GetById(accId)
+	accEntity, err := accountQueryRepo.ReadById(accId)
 	if err != nil {
 		log.Printf("GetAccountInfoError: %s", err)
 		return errors.New("GetAccountInfoInfraError")
 	}
 
-	newProfile, err := containerProfileQueryRepo.GetById(newProfileId)
+	newProfile, err := containerProfileQueryRepo.ReadById(newProfileId)
 	if err != nil {
 		log.Printf("GetNewContainerProfileError: %s", err)
 		return errors.New("GetNewContainerProfileInfraError")
@@ -30,7 +30,7 @@ func CheckAccountQuota(
 
 	var prevProfilePtr *entity.ContainerProfile
 	if prevProfileId != nil {
-		prevProfile, err := containerProfileQueryRepo.GetById(*prevProfileId)
+		prevProfile, err := containerProfileQueryRepo.ReadById(*prevProfileId)
 		if err != nil {
 			log.Printf("GetPrevContainerProfileError: %s", err)
 			return errors.New("GetPrevContainerProfileInfraError")

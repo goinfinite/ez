@@ -6,7 +6,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func GetRegistryTaggedImage(
+func ReadRegistryTaggedImage(
 	containerRegistryQueryRepo repository.ContainerRegistryQueryRepo,
 	imageAddress valueObject.ContainerImageAddress,
 ) (entity.RegistryTaggedImage, error) {

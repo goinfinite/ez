@@ -26,7 +26,7 @@ func NewNetworkPortPanic(value interface{}) NetworkPort {
 	return np
 }
 
-func (np NetworkPort) Get() uint64 {
+func (np NetworkPort) Read() uint64 {
 	return uint64(np)
 }
 

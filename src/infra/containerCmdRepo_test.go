@@ -55,7 +55,7 @@ func deleteDummyContainer(
 	containerQueryRepo *ContainerQueryRepo,
 	containerCmdRepo *ContainerCmdRepo,
 ) error {
-	containers, err := containerQueryRepo.Get()
+	containers, err := containerQueryRepo.Read()
 	if err != nil {
 		return err
 	}
@@ -86,9 +86,9 @@ func TestContainerCmdRepo(t *testing.T) {
 
 	t.Run("UpdateContainer", func(t *testing.T) {
 		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		containers, err := containerQueryRepo.GetByAccId(accId)
+		containers, err := containerQueryRepo.ReadByAccountId(accId)
 		if err != nil {
-			t.Errorf("GetContainersFailed: %v", err)
+			t.Errorf("ReadContainersFailed: %v", err)
 		}
 
 		if len(containers) == 0 {

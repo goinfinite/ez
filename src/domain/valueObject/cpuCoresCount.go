@@ -26,7 +26,7 @@ func NewCpuCoresCountPanic(value interface{}) CpuCoresCount {
 	return ccc
 }
 
-func (ccc CpuCoresCount) Get() float64 {
+func (ccc CpuCoresCount) Read() float64 {
 	return float64(ccc)
 }
 

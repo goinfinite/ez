@@ -20,13 +20,13 @@ func NewO11yController(
 	}
 }
 
-func (repo *O11yController) GetO11yOverview() *cobra.Command {
+func (repo *O11yController) ReadO11yOverview() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "overview",
-		Short: "GetOverview",
+		Short: "ReadOverview",
 		Run: func(cmd *cobra.Command, args []string) {
 			o11yQueryRepo := o11yInfra.NewO11yQueryRepo(repo.transientDbSvc)
-			o11yOverview, err := useCase.GetO11yOverview(o11yQueryRepo)
+			o11yOverview, err := useCase.ReadO11yOverview(o11yQueryRepo)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}

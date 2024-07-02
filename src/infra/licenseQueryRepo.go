@@ -28,7 +28,7 @@ func NewLicenseQueryRepo(
 	}
 }
 
-func (repo *LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
+func (repo *LicenseQueryRepo) Read() (entity.LicenseInfo, error) {
 	var licenseInfo entity.LicenseInfo
 
 	var licenseInfoModel dbModel.LicenseInfo
@@ -47,7 +47,7 @@ func (repo *LicenseQueryRepo) Get() (entity.LicenseInfo, error) {
 	return licenseInfoModel.ToEntity()
 }
 
-func (repo *LicenseQueryRepo) GetIntegrityHash() (valueObject.Hash, error) {
+func (repo *LicenseQueryRepo) ReadIntegrityHash() (valueObject.Hash, error) {
 	var licenseInfoHash valueObject.Hash
 
 	licenseInfoHashStr, err := repo.transientDbSvc.Get(LicenseInfoHashKey)

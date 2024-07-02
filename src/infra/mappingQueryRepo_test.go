@@ -12,8 +12,8 @@ func TestMappingQueryRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	mappingQueryRepo := NewMappingQueryRepo(persistentDbSvc)
 
-	t.Run("GetMappings", func(t *testing.T) {
-		mappingList, err := mappingQueryRepo.Get()
+	t.Run("ReadMappings", func(t *testing.T) {
+		mappingList, err := mappingQueryRepo.Read()
 		if err != nil {
 			t.Error(err)
 			return
@@ -26,20 +26,20 @@ func TestMappingQueryRepo(t *testing.T) {
 	})
 
 	t.Run("GetMappingById", func(t *testing.T) {
-		mapping, err := mappingQueryRepo.GetById(1)
+		mapping, err := mappingQueryRepo.ReadById(1)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		if mapping.Id.Get() != 1 {
+		if mapping.Id.Read() != 1 {
 			t.Error("MappingNotFound")
 			return
 		}
 	})
 
-	t.Run("GetTargetById", func(t *testing.T) {
-		_, err := mappingQueryRepo.GetTargetById(1)
+	t.Run("ReadTargetById", func(t *testing.T) {
+		_, err := mappingQueryRepo.ReadTargetById(1)
 		if err != nil {
 			t.Error(err)
 			return

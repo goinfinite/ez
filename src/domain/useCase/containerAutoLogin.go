@@ -14,7 +14,7 @@ func ContainerAutoLogin(
 	containerCmdRepo repository.ContainerCmdRepo,
 	autoLoginDto dto.ContainerAutoLogin,
 ) (accessToken valueObject.AccessTokenValue, err error) {
-	containerEntity, err := containerQueryRepo.GetById(autoLoginDto.ContainerId)
+	containerEntity, err := containerQueryRepo.ReadById(autoLoginDto.ContainerId)
 	if err != nil {
 		return accessToken, errors.New("ContainerNotFound")
 	}

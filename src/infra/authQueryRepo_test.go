@@ -47,7 +47,7 @@ func TestAuthQueryRepo(t *testing.T) {
 			valueObject.NewLocalhostIpAddress(),
 		)
 
-		_, err := authQueryRepo.GetAccessTokenDetails(token.TokenStr)
+		_, err := authQueryRepo.ReadAccessTokenDetails(token.TokenStr)
 		if err != nil {
 			t.Error(err)
 		}
@@ -57,7 +57,7 @@ func TestAuthQueryRepo(t *testing.T) {
 		invalidToken, _ := valueObject.NewAccessTokenValue(
 			"invalidTokenInvalidTokenInvalidTokenInvalidTokenInvalidToken",
 		)
-		_, err := authQueryRepo.GetAccessTokenDetails(invalidToken)
+		_, err := authQueryRepo.ReadAccessTokenDetails(invalidToken)
 		if err == nil {
 			t.Error("ExpectingError")
 		}
@@ -71,7 +71,7 @@ func TestAuthQueryRepo(t *testing.T) {
 			t.Error(err)
 		}
 
-		_, err = authQueryRepo.GetAccessTokenDetails(apiKey)
+		_, err = authQueryRepo.ReadAccessTokenDetails(apiKey)
 		if err != nil {
 			t.Error(err)
 		}

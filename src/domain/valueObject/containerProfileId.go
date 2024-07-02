@@ -26,7 +26,7 @@ func NewContainerProfileIdPanic(value interface{}) ContainerProfileId {
 	return rpId
 }
 
-func (id ContainerProfileId) Get() uint64 {
+func (id ContainerProfileId) Read() uint64 {
 	return uint64(id)
 }
 

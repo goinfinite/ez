@@ -27,7 +27,7 @@ func NewContainerService(
 
 func (service *ContainerService) Read() ServiceOutput {
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
-	containersList, err := useCase.GetContainers(containerQueryRepo)
+	containersList, err := useCase.ReadContainers(containerQueryRepo)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -37,7 +37,7 @@ func (service *ContainerService) Read() ServiceOutput {
 
 func (service *ContainerService) ReadWithMetrics() ServiceOutput {
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
-	containersList, err := useCase.GetContainersWithMetrics(containerQueryRepo)
+	containersList, err := useCase.ReadContainersWithMetrics(containerQueryRepo)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}

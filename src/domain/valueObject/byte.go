@@ -39,12 +39,12 @@ func NewBytePanic(value interface{}) Byte {
 	return byte
 }
 
-func (b Byte) Get() int64 {
+func (b Byte) Read() int64 {
 	return int64(b)
 }
 
 func (b Byte) ToKiB() int64 {
-	return b.Get() / 1024
+	return b.Read() / 1024
 }
 
 func (b Byte) ToMiB() int64 {

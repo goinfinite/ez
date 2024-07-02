@@ -54,7 +54,7 @@ func GenerateSessionToken(
 		return accessToken, errors.New("InvalidCredentials")
 	}
 
-	accountDetails, err := accountQueryRepo.GetByUsername(loginDto.Username)
+	accountDetails, err := accountQueryRepo.ReadByUsername(loginDto.Username)
 	if err != nil {
 		return accessToken, errors.New("AccountNotFound")
 	}

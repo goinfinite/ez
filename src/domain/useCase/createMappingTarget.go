@@ -14,13 +14,13 @@ func CreateMappingTarget(
 	containerQueryRepo repository.ContainerQueryRepo,
 	createDto dto.CreateMappingTarget,
 ) error {
-	mappingEntity, err := mappingQueryRepo.GetById(createDto.MappingId)
+	mappingEntity, err := mappingQueryRepo.ReadById(createDto.MappingId)
 	if err != nil {
 		log.Printf("GetMappingError: %s", err)
 		return errors.New("GetMappingInfraError")
 	}
 
-	containerEntity, err := containerQueryRepo.GetById(createDto.ContainerId)
+	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
 	if err != nil {
 		log.Printf("GetContainerError: %s", err)
 		return errors.New("GetContainerInfraError")

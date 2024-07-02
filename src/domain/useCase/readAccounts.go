@@ -8,13 +8,14 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetAccounts(
+func ReadAccounts(
 	accountQueryRepo repository.AccountQueryRepo,
 ) ([]entity.Account, error) {
-	accs, err := accountQueryRepo.Get()
+	accountsList, err := accountQueryRepo.Read()
 	if err != nil {
-		log.Printf("GetAccountsError: %s", err)
-		return nil, errors.New("GetAccountsInfraError")
+		log.Printf("ReadAccountsError: %s", err)
+		return nil, errors.New("ReadAccountsInfraError")
 	}
-	return accs, nil
+
+	return accountsList, nil
 }

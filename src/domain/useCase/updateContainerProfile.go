@@ -14,10 +14,10 @@ func updateContainersWithProfileId(
 	containerCmdRepo repository.ContainerCmdRepo,
 	profileId valueObject.ContainerProfileId,
 ) error {
-	containers, err := containerQueryRepo.Get()
+	containers, err := containerQueryRepo.Read()
 	if err != nil {
-		log.Printf("GetContainersError: %s", err)
-		return errors.New("GetContainersInfraError")
+		log.Printf("ReadContainersError: %s", err)
+		return errors.New("ReadContainersInfraError")
 	}
 
 	for _, container := range containers {
@@ -49,7 +49,7 @@ func UpdateContainerProfile(
 	containerCmdRepo repository.ContainerCmdRepo,
 	updateContainerProfileDto dto.UpdateContainerProfile,
 ) error {
-	_, err := containerProfileQueryRepo.GetById(updateContainerProfileDto.Id)
+	_, err := containerProfileQueryRepo.ReadById(updateContainerProfileDto.Id)
 	if err != nil {
 		return errors.New("ContainerProfileNotFound")
 	}

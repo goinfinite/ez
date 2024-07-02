@@ -8,10 +8,10 @@ import (
 	"github.com/speedianet/control/src/domain/repository"
 )
 
-func GetScheduledTasks(
+func ReadScheduledTasks(
 	scheduledTaskQueryRepo repository.ScheduledTaskQueryRepo,
 ) ([]entity.ScheduledTask, error) {
-	scheduledTasks, err := scheduledTaskQueryRepo.Get()
+	scheduledTasks, err := scheduledTaskQueryRepo.Read()
 	if err != nil {
 		log.Printf("GetTasksError: %s", err)
 		return nil, errors.New("GetTasksInfraError")

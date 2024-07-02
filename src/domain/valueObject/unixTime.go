@@ -35,7 +35,7 @@ func NewUnixTimeWithGoTime(goTime time.Time) UnixTime {
 	return UnixTime(goTime.Unix())
 }
 
-func (vo UnixTime) Get() int64 {
+func (vo UnixTime) Read() int64 {
 	return time.Unix(int64(vo), 0).UTC().Unix()
 }
 
