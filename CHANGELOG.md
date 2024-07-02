@@ -1,7 +1,13 @@
 # Changelog
 
 ```log
-0.0.3 - 2024/X/X
+0.0.4 - XX/XX
+feat: add trail db service
+feat: add security events
+feat: limit failed logins attempts per ip
+fix: rename all "get"(s) to "read"(s)
+
+0.0.3 - 2024/06/28
 feat: add async tasks
 feat: make container deployment async
 

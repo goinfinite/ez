@@ -559,7 +559,7 @@ info:
     url: https://speedia.net/tos/
   termsOfService: https://speedia.net/tos/
   title: ControlApi
-  version: 0.0.3
+  version: 0.0.4
 paths:
   /v1/account/:
     get:
