@@ -15,7 +15,7 @@ func CreateAccount(
 	securityCmdRepo repository.SecurityCmdRepo,
 	createDto dto.CreateAccount,
 ) error {
-	_, err := accountQueryRepo.GetByUsername(createDto.Username)
+	_, err := accountQueryRepo.ReadByUsername(createDto.Username)
 	if err == nil {
 		return errors.New("AccountAlreadyExists")
 	}
@@ -37,12 +37,7 @@ func CreateAccount(
 	)
 
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, &eventDetails, createDto.IpAddress, nil,
+		eventType, &eventDetails, &createDto.IpAddress, nil,
 	)
-	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 }

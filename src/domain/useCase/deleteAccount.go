@@ -14,25 +14,24 @@ func DeleteAccount(
 	accountCmdRepo repository.AccountCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
 	securityCmdRepo repository.SecurityCmdRepo,
-	accountId valueObject.AccountId,
-	ipAddress *valueObject.IpAddress,
+	deleteDto dto.DeleteAccount,
 ) error {
-	_, err := accountQueryRepo.GetById(accountId)
+	_, err := accountQueryRepo.ReadById(deleteDto.AccountId)
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}
 
-	containers, err := containerQueryRepo.GetByAccId(accountId)
+	containers, err := containerQueryRepo.ReadByAccountId(deleteDto.AccountId)
 	if err != nil {
-		log.Printf("GetContainersByAccIdError: %s", err)
-		return errors.New("GetContainersByAccIdInfraError")
+		log.Printf("ReadContainersByAccIdError: %s", err)
+		return errors.New("ReadContainersByAccIdInfraError")
 	}
 
 	if len(containers) > 0 {
 		return errors.New("AccountHasContainers")
 	}
 
-	err = accountCmdRepo.Delete(accountId)
+	err = accountCmdRepo.Delete(deleteDto.AccountId)
 	if err != nil {
 		log.Printf("DeleteAccountError: %s", err)
 		return errors.New("DeleteAccountInfraError")
@@ -40,12 +39,7 @@ func DeleteAccount(
 
 	eventType, _ := valueObject.NewSecurityEventType("account-deleted")
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, nil, ipAddress, &accountId,
+		eventType, nil, &deleteDto.IpAddress, &deleteDto.AccountId,
 	)
-	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 }

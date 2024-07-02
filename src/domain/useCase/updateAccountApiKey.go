@@ -15,7 +15,7 @@ func UpdateAccountApiKey(
 	securityCmdRepo repository.SecurityCmdRepo,
 	updateDto dto.UpdateAccount,
 ) (newKey valueObject.AccessTokenValue, err error) {
-	_, err = accountQueryRepo.GetById(updateDto.AccountId)
+	_, err = accountQueryRepo.ReadById(updateDto.AccountId)
 	if err != nil {
 		return newKey, errors.New("AccountNotFound")
 	}
@@ -28,7 +28,7 @@ func UpdateAccountApiKey(
 
 	eventType, _ := valueObject.NewSecurityEventType("account-api-key-updated")
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, nil, updateDto.IpAddress, &updateDto.AccountId,
+		eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
 	)
 	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 	if err != nil {

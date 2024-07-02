@@ -15,7 +15,7 @@ func UpdateAccount(
 	securityCmdRepo repository.SecurityCmdRepo,
 	updateDto dto.UpdateAccount,
 ) error {
-	_, err := accountQueryRepo.GetById(updateDto.AccountId)
+	_, err := accountQueryRepo.ReadById(updateDto.AccountId)
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}
@@ -29,7 +29,7 @@ func UpdateAccount(
 
 		eventType, _ := valueObject.NewSecurityEventType("account-password-updated")
 		createSecurityEventDto := dto.NewCreateSecurityEvent(
-			eventType, nil, updateDto.IpAddress, &updateDto.AccountId,
+			eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
 		)
 		err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 		if err != nil {
@@ -49,12 +49,7 @@ func UpdateAccount(
 
 	eventType, _ := valueObject.NewSecurityEventType("account-quota-updated")
 	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, nil, updateDto.IpAddress, &updateDto.AccountId,
+		eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
 	)
-	err = CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return CreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 }
