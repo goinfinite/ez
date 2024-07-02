@@ -48,6 +48,7 @@ func CliInit() {
 
 	persistentDbSvc := cliInit.PersistentDatabaseService()
 	transientDbSvc := cliInit.TransientDatabaseService()
+	trailDbSvc := cliInit.TrailDatabaseService()
 
 	isLicenseRefresh := false
 	if len(os.Args) > 2 {
@@ -60,7 +61,7 @@ func CliInit() {
 
 	cliMiddleware.SporadicLicenseValidation(persistentDbSvc, transientDbSvc)
 
-	router := NewRouter(persistentDbSvc, transientDbSvc)
+	router := NewRouter(persistentDbSvc, transientDbSvc, trailDbSvc)
 	router.RegisterRoutes()
 
 	RunRootCmd()

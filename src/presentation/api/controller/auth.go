@@ -14,12 +14,17 @@ import (
 
 type AuthController struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewAuthController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *AuthController {
-	return &AuthController{persistentDbSvc: persistentDbSvc}
+	return &AuthController{
+		persistentDbSvc: persistentDbSvc,
+		trailDbSvc:      trailDbSvc,
+	}
 }
 
 // AuthLogin godoc
@@ -61,8 +66,8 @@ func (controller *AuthController) Login(c echo.Context) error {
 	authQueryRepo := infra.NewAuthQueryRepo(controller.persistentDbSvc)
 	authCmdRepo := infra.AuthCmdRepo{}
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
-	securityQueryRepo := infra.NewSecurityQueryRepo(controller.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(controller.persistentDbSvc)
+	securityQueryRepo := infra.NewSecurityQueryRepo(controller.trailDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(controller.trailDbSvc)
 
 	accessToken, err := useCase.GenerateSessionToken(
 		authQueryRepo, authCmdRepo, accountQueryRepo,

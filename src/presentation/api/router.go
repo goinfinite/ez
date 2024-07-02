@@ -15,17 +15,20 @@ type Router struct {
 	baseRoute       *echo.Group
 	persistentDbSvc *db.PersistentDatabaseService
 	transientDbSvc  *db.TransientDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewRouter(
 	baseRoute *echo.Group,
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *Router {
 	return &Router{
 		baseRoute:       baseRoute,
 		persistentDbSvc: persistentDbSvc,
 		transientDbSvc:  transientDbSvc,
+		trailDbSvc:      trailDbSvc,
 	}
 }
 
@@ -37,14 +40,18 @@ func (router *Router) swaggerRoute() {
 func (router *Router) authRoutes() {
 	authGroup := router.baseRoute.Group("/v1/auth")
 
-	authController := apiController.NewAuthController(router.persistentDbSvc)
+	authController := apiController.NewAuthController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	authGroup.POST("/login/", authController.Login)
 }
 
 func (router *Router) accountRoutes() {
 	accountGroup := router.baseRoute.Group("/v1/account")
 
-	accountController := apiController.NewAccountController(router.persistentDbSvc)
+	accountController := apiController.NewAccountController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	accountGroup.GET("/", accountController.Read)
 	accountGroup.POST("/", accountController.Create)
 	accountGroup.PUT("/", accountController.Update)

@@ -37,10 +37,11 @@ func NewCustomLogger() *log.Logger {
 func HttpServerInit(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) {
 	e := echo.New()
 
-	api.ApiInit(e, persistentDbSvc, transientDbSvc)
+	api.ApiInit(e, persistentDbSvc, transientDbSvc, trailDbSvc)
 	ui.UiInit(e, persistentDbSvc, transientDbSvc)
 
 	httpServer := http.Server{

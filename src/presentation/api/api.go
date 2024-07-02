@@ -30,6 +30,7 @@ func ApiInit(
 	e *echo.Echo,
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) {
 	sharedMiddleware.CheckEnvs()
 
@@ -39,7 +40,9 @@ func ApiInit(
 	e.Pre(apiMiddleware.AddTrailingSlash(basePath))
 	e.Use(apiMiddleware.PanicHandler)
 	e.Use(apiMiddleware.SetDefaultHeaders(basePath))
-	e.Use(apiMiddleware.SetDatabaseServices(persistentDbSvc, transientDbSvc))
+	e.Use(apiMiddleware.SetDatabaseServices(
+		persistentDbSvc, transientDbSvc, trailDbSvc,
+	))
 	e.Use(apiMiddleware.ReadOnlyMode(basePath))
 
 	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
@@ -48,6 +51,6 @@ func ApiInit(
 
 	e.Use(apiMiddleware.Auth(basePath))
 
-	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc)
+	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc, trailDbSvc)
 	router.RegisterRoutes()
 }

@@ -7,13 +7,13 @@ import (
 )
 
 type SecurityCmdRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc *db.TrailDatabaseService
 }
 
 func NewSecurityCmdRepo(
-	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *SecurityCmdRepo {
-	return &SecurityCmdRepo{persistentDbSvc: persistentDbSvc}
+	return &SecurityCmdRepo{trailDbSvc: trailDbSvc}
 }
 
 func (repo *SecurityCmdRepo) CreateEvent(createDto dto.CreateSecurityEvent) error {
@@ -43,7 +43,7 @@ func (repo *SecurityCmdRepo) CreateEvent(createDto dto.CreateSecurityEvent) erro
 		accountIdUintPtr,
 	)
 
-	return repo.persistentDbSvc.Handler.Create(&securityEventModel).Error
+	return repo.trailDbSvc.Handler.Create(&securityEventModel).Error
 }
 
 func (repo *SecurityCmdRepo) DeleteEvents(deleteDto dto.DeleteSecurityEvents) error {
@@ -61,7 +61,7 @@ func (repo *SecurityCmdRepo) DeleteEvents(deleteDto dto.DeleteSecurityEvents) er
 		deleteConditionsMap["account_id"] = deleteDto.AccountId.Read()
 	}
 
-	return repo.persistentDbSvc.Handler.
+	return repo.trailDbSvc.Handler.
 		Where(deleteConditionsMap).
 		Delete(&dbModel.SecurityEvent{}).
 		Error

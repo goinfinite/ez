@@ -10,8 +10,8 @@ import (
 
 func TestSecurityCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	persistentDbSvc := testHelpers.GetPersistentDbSvc()
-	securityCmdRepo := NewSecurityCmdRepo(persistentDbSvc)
+	trailDbSvc := testHelpers.GetTrailDbSvc()
+	securityCmdRepo := NewSecurityCmdRepo(trailDbSvc)
 
 	t.Run("CreateSecurityEvent", func(t *testing.T) {
 		eventType, _ := valueObject.NewSecurityEventType("failed-login")

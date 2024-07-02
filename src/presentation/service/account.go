@@ -11,12 +11,17 @@ import (
 
 type AccountService struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewAccountService(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *AccountService {
-	return &AccountService{persistentDbSvc: persistentDbSvc}
+	return &AccountService{
+		persistentDbSvc: persistentDbSvc,
+		trailDbSvc:      trailDbSvc,
+	}
 }
 
 func (service *AccountService) Read() ServiceOutput {
@@ -67,7 +72,7 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(service.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(service.trailDbSvc)
 
 	err = useCase.CreateAccount(
 		accountQueryRepo, accountCmdRepo, securityCmdRepo, createDto,
@@ -132,7 +137,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(service.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(service.trailDbSvc)
 
 	if updateDto.ShouldUpdateApiKey != nil && *updateDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
@@ -169,7 +174,7 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(service.persistentDbSvc)
+	securityCmdRepo := infra.NewSecurityCmdRepo(service.trailDbSvc)
 
 	var ipAddress valueObject.IpAddress
 	if _, exists := input["ipAddress"]; exists {

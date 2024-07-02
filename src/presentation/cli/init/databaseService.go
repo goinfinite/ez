@@ -14,8 +14,17 @@ func PersistentDatabaseService() *db.PersistentDatabaseService {
 func TransientDatabaseService() *db.TransientDatabaseService {
 	transientDbSvc, err := db.NewTransientDatabaseService()
 	if err != nil {
-		panic("PersistentDatabaseConnectionError:" + err.Error())
+		panic("TransientDatabaseConnectionError:" + err.Error())
 	}
 
 	return transientDbSvc
+}
+
+func TrailDatabaseService() *db.TrailDatabaseService {
+	trailDbSvc, err := db.NewTrailDatabaseService()
+	if err != nil {
+		panic("TrailDatabaseConnectionError:" + err.Error())
+	}
+
+	return trailDbSvc
 }

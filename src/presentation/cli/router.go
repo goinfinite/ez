@@ -12,15 +12,18 @@ import (
 type Router struct {
 	persistentDbSvc *db.PersistentDatabaseService
 	transientDbSvc  *db.TransientDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewRouter(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) Router {
 	return Router{
 		persistentDbSvc: persistentDbSvc,
 		transientDbSvc:  transientDbSvc,
+		trailDbSvc:      trailDbSvc,
 	}
 }
 
@@ -30,7 +33,9 @@ func (router *Router) accountRoutes() {
 		Short: "AccountManagement",
 	}
 
-	accountController := cliController.NewAccountController(router.persistentDbSvc)
+	accountController := cliController.NewAccountController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	accountCmd.AddCommand(accountController.Read())
 	accountCmd.AddCommand(accountController.Create())
 	accountCmd.AddCommand(accountController.Update())
@@ -150,7 +155,9 @@ func (router *Router) systemRoutes() {
 		Use:   "serve",
 		Short: "ServeApiDashboard",
 		Run: func(cmd *cobra.Command, args []string) {
-			presentation.HttpServerInit(router.persistentDbSvc, router.transientDbSvc)
+			presentation.HttpServerInit(
+				router.persistentDbSvc, router.transientDbSvc, router.trailDbSvc,
+			)
 		},
 	}
 

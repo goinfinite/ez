@@ -9,8 +9,8 @@ import (
 
 func TestSecurityQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
-	persistentDbSvc := testHelpers.GetPersistentDbSvc()
-	securityQueryRepo := NewSecurityQueryRepo(persistentDbSvc)
+	trailDbSvc := testHelpers.GetTrailDbSvc()
+	securityQueryRepo := NewSecurityQueryRepo(trailDbSvc)
 
 	t.Run("ReadSecurityEvents", func(t *testing.T) {
 		readDto := dto.NewReadSecurityEvents(nil, nil, nil, nil)

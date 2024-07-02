@@ -34,3 +34,11 @@ func GetTransientDbSvc() *db.TransientDatabaseService {
 	}
 	return transientDbSvc
 }
+
+func GetTrailDbSvc() *db.TrailDatabaseService {
+	trailDbSvc, err := db.NewTrailDatabaseService()
+	if err != nil {
+		panic("GetTrailDbSvcError: " + err.Error())
+	}
+	return trailDbSvc
+}

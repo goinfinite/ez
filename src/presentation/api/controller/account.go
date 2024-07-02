@@ -21,9 +21,10 @@ type AccountController struct {
 
 func NewAccountController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *AccountController {
 	return &AccountController{
-		accountService:  service.NewAccountService(persistentDbSvc),
+		accountService:  service.NewAccountService(persistentDbSvc, trailDbSvc),
 		persistentDbSvc: persistentDbSvc,
 	}
 }

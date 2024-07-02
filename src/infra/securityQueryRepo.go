@@ -10,13 +10,13 @@ import (
 )
 
 type SecurityQueryRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc *db.TrailDatabaseService
 }
 
 func NewSecurityQueryRepo(
-	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *SecurityQueryRepo {
-	return &SecurityQueryRepo{persistentDbSvc: persistentDbSvc}
+	return &SecurityQueryRepo{trailDbSvc: trailDbSvc}
 }
 
 func (repo *SecurityQueryRepo) ReadEvents(
@@ -24,7 +24,7 @@ func (repo *SecurityQueryRepo) ReadEvents(
 ) ([]entity.SecurityEvent, error) {
 	securityEvents := []entity.SecurityEvent{}
 
-	dbQuery := repo.persistentDbSvc.Handler.Model(&dbModel.SecurityEvent{})
+	dbQuery := repo.trailDbSvc.Handler.Model(&dbModel.SecurityEvent{})
 	if readDto.Type != nil {
 		dbQuery = dbQuery.Where("type = ?", readDto.Type.String())
 	}
