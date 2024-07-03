@@ -8,6 +8,10 @@ import (
 	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 )
 
+const (
+	ApiBasePath string = "/api"
+)
+
 // @title			ControlApi
 // @version			0.0.4
 // @description		Speedia Control API
@@ -25,7 +29,7 @@ import (
 // @name						Authorization
 // @description					Type "Bearer" + JWT token or API key.
 
-// @BasePath	/_/api
+// @BasePath	/api
 func ApiInit(
 	e *echo.Echo,
 	persistentDbSvc *db.PersistentDatabaseService,
@@ -34,22 +38,21 @@ func ApiInit(
 ) {
 	sharedMiddleware.CheckEnvs()
 
-	basePath := "/_/api"
-	baseRoute := e.Group(basePath)
+	baseRoute := e.Group(ApiBasePath)
 
-	e.Pre(apiMiddleware.AddTrailingSlash(basePath))
+	e.Pre(apiMiddleware.AddTrailingSlash(ApiBasePath))
 	e.Use(apiMiddleware.PanicHandler)
-	e.Use(apiMiddleware.SetDefaultHeaders(basePath))
+	e.Use(apiMiddleware.SetDefaultHeaders(ApiBasePath))
 	e.Use(apiMiddleware.SetDatabaseServices(
 		persistentDbSvc, transientDbSvc, trailDbSvc,
 	))
-	e.Use(apiMiddleware.ReadOnlyMode(basePath))
+	e.Use(apiMiddleware.ReadOnlyMode(ApiBasePath))
 
 	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 
 	apiInit.BootContainers(persistentDbSvc)
 
-	e.Use(apiMiddleware.Auth(basePath))
+	e.Use(apiMiddleware.Auth(ApiBasePath))
 
 	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc, trailDbSvc)
 	router.RegisterRoutes()
