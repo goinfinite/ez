@@ -52,6 +52,10 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 	ssl_certificate_key /var/speedia/pki/control.key;
 	{{ range . }}
 	location /{{ .ContainerId }}/ {
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Proxied-By "Speedia Control";
+		proxy_set_header X-Container-Id "{{ .ContainerId }}";
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
 	}
 	{{- end }}
@@ -65,6 +69,10 @@ server {
 	ssl_certificate_key /var/speedia/pki/control.key;
 
 	location / {
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Proxied-By "Speedia Control";
+		proxy_set_header X-Container-Id "{{ .ContainerId }}";
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
 	}
 }
