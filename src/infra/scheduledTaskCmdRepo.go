@@ -27,13 +27,6 @@ func (repo *ScheduledTaskCmdRepo) Create(
 ) error {
 	newTaskStatus, _ := valueObject.NewScheduledTaskStatus("pending")
 
-	tags := []string{}
-	if len(createDto.Tags) > 0 {
-		for _, tag := range createDto.Tags {
-			tags = append(tags, tag.String())
-		}
-	}
-
 	var runAtPtr *time.Time
 	if createDto.RunAt != nil {
 		runAt := time.Unix(createDto.RunAt.Read(), 0)
@@ -41,15 +34,8 @@ func (repo *ScheduledTaskCmdRepo) Create(
 	}
 
 	scheduledTaskModel := dbModel.NewScheduledTask(
-		0,
-		createDto.Name.String(),
-		newTaskStatus.String(),
-		createDto.Command.String(),
-		tags,
-		createDto.TimeoutSecs,
-		runAtPtr,
-		nil,
-		nil,
+		0, createDto.Name.String(), newTaskStatus.String(), createDto.Command.String(),
+		createDto.Tags, createDto.TimeoutSecs, runAtPtr, nil, nil,
 	)
 
 	return repo.persistentDbSvc.Handler.Create(&scheduledTaskModel).Error

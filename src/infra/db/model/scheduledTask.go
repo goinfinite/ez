@@ -1,6 +1,7 @@
 package dbModel
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -26,16 +27,35 @@ func (ScheduledTask) TableName() string {
 	return "scheduled_tasks"
 }
 
+func (ScheduledTask) JoinTags(tags []valueObject.ScheduledTaskTag) string {
+	tagsStr := ""
+	for _, tag := range tags {
+		tagsStr += tag.String() + ";"
+	}
+	return strings.TrimSuffix(tagsStr, ";")
+}
+
+func (ScheduledTask) SplitTags(tagsStr string) []valueObject.ScheduledTaskTag {
+	rawTagsList := strings.Split(tagsStr, ";")
+	var tags []valueObject.ScheduledTaskTag
+	for tagIndex, rawTag := range rawTagsList {
+		tag, err := valueObject.NewScheduledTaskTag(rawTag)
+		if err != nil {
+			log.Printf("[index %d] %s", tagIndex, err)
+			continue
+		}
+		tags = append(tags, tag)
+	}
+	return tags
+}
+
 func NewScheduledTask(
 	id uint,
-	name string,
-	status string,
-	command string,
-	tags []string,
+	name, status, command string,
+	tags []valueObject.ScheduledTaskTag,
 	timeoutSecs *uint,
 	runAt *time.Time,
-	output *string,
-	err *string,
+	output, err *string,
 ) ScheduledTask {
 	model := ScheduledTask{
 		Name:        name,
@@ -52,7 +72,7 @@ func NewScheduledTask(
 	}
 
 	if len(tags) > 0 {
-		modelTags := strings.Join(tags, ";")
+		modelTags := model.JoinTags(tags)
 		model.Tags = &modelTags
 	}
 
@@ -82,14 +102,7 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 
 	tags := []valueObject.ScheduledTaskTag{}
 	if model.Tags != nil {
-		tagsParts := strings.Split(*model.Tags, ";")
-		for _, tagPart := range tagsParts {
-			tag, err := valueObject.NewScheduledTaskTag(tagPart)
-			if err != nil {
-				return taskEntity, err
-			}
-			tags = append(tags, tag)
-		}
+		tags = model.SplitTags(*model.Tags)
 	}
 
 	var timeoutSecs *uint
@@ -125,16 +138,7 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewScheduledTask(
-		id,
-		name,
-		status,
-		command,
-		tags,
-		timeoutSecs,
-		runAtPtr,
-		outputPtr,
-		taskErrorPtr,
-		createdAt,
-		updatedAt,
+		id, name, status, command, tags, timeoutSecs, runAtPtr, outputPtr,
+		taskErrorPtr, createdAt, updatedAt,
 	), nil
 }
