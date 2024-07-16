@@ -13,7 +13,6 @@ func DeleteAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
-	securityCmdRepo repository.SecurityCmdRepo,
 	deleteDto dto.DeleteAccount,
 ) error {
 	_, err := accountQueryRepo.ReadById(deleteDto.AccountId)
@@ -37,11 +36,11 @@ func DeleteAccount(
 		return errors.New("DeleteAccountInfraError")
 	}
 
-	eventType, _ := valueObject.NewSecurityEventType("account-deleted")
-	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, nil, &deleteDto.IpAddress, &deleteDto.AccountId,
+	recordCode, _ := valueObject.NewActivityRecordCode("AccountDeleted")
+	CreateSecurityActivityRecord(
+		&recordCode, &deleteDto.IpAddress, &deleteDto.OperatorAccountId,
+		&deleteDto.AccountId, nil,
 	)
-	AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	return nil
 }

@@ -12,7 +12,6 @@ import (
 func UpdateAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
-	securityCmdRepo repository.SecurityCmdRepo,
 	updateDto dto.UpdateAccount,
 ) error {
 	_, err := accountQueryRepo.ReadById(updateDto.AccountId)
@@ -27,11 +26,11 @@ func UpdateAccount(
 			return errors.New("UpdateAccountPasswordInfraError")
 		}
 
-		eventType, _ := valueObject.NewSecurityEventType("account-password-updated")
-		createSecurityEventDto := dto.NewCreateSecurityEvent(
-			eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
+		recordCode, _ := valueObject.NewActivityRecordCode("AccountPasswordUpdated")
+		CreateSecurityActivityRecord(
+			&recordCode, &updateDto.IpAddress, &updateDto.OperatorAccountId,
+			&updateDto.AccountId, nil,
 		)
-		AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 	}
 
 	if updateDto.Quota == nil {
@@ -44,11 +43,11 @@ func UpdateAccount(
 		return errors.New("UpdateAccountQuotaInfraError")
 	}
 
-	eventType, _ := valueObject.NewSecurityEventType("account-quota-updated")
-	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
+	recordCode, _ := valueObject.NewActivityRecordCode("AccountQuotaUpdated")
+	CreateSecurityActivityRecord(
+		&recordCode, &updateDto.IpAddress, &updateDto.OperatorAccountId,
+		&updateDto.AccountId, nil,
 	)
-	AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	return nil
 }

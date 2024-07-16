@@ -12,7 +12,6 @@ import (
 func UpdateAccountApiKey(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
-	securityCmdRepo repository.SecurityCmdRepo,
 	updateDto dto.UpdateAccount,
 ) (newKey valueObject.AccessTokenValue, err error) {
 	_, err = accountQueryRepo.ReadById(updateDto.AccountId)
@@ -26,11 +25,11 @@ func UpdateAccountApiKey(
 		return newKey, errors.New("UpdateAccountApiKeyInfraError")
 	}
 
-	eventType, _ := valueObject.NewSecurityEventType("account-api-key-updated")
-	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, nil, &updateDto.IpAddress, &updateDto.AccountId,
+	recordCode, _ := valueObject.NewActivityRecordCode("AccountApiKeyUpdated")
+	CreateSecurityActivityRecord(
+		&recordCode, &updateDto.IpAddress, &updateDto.OperatorAccountId,
+		&updateDto.AccountId, nil,
 	)
-	AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	return newKey, nil
 }
