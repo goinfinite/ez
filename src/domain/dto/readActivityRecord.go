@@ -5,7 +5,7 @@ import (
 )
 
 type ReadActivityRecords struct {
-	Level              valueObject.ActivityRecordLevel    `json:"level"`
+	Level              *valueObject.ActivityRecordLevel   `json:"level,omitempty"`
 	Code               *valueObject.ActivityRecordCode    `json:"code,omitempty"`
 	Message            *valueObject.ActivityRecordMessage `json:"message,omitempty"`
 	IpAddress          *valueObject.IpAddress             `json:"ipAddress,omitempty"`
@@ -15,11 +15,11 @@ type ReadActivityRecords struct {
 	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
 	ContainerProfileId *valueObject.ContainerProfileId    `json:"containerProfileId,omitempty"`
 	MappingId          *valueObject.MappingId             `json:"mappingId,omitempty"`
-	CreatedAt          *valueObject.UnixTime              `json:"createdAt"`
+	CreatedAt          *valueObject.UnixTime              `json:"createdAt,omitempty"`
 }
 
 func NewReadActivityRecords(
-	level valueObject.ActivityRecordLevel,
+	level *valueObject.ActivityRecordLevel,
 	code *valueObject.ActivityRecordCode,
 	message *valueObject.ActivityRecordMessage,
 	ipAddress *valueObject.IpAddress,
