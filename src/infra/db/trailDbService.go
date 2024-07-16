@@ -32,10 +32,10 @@ func NewTrailDatabaseService() (*TrailDatabaseService, error) {
 
 func (service *TrailDatabaseService) RunMigrations() error {
 	err := service.Handler.AutoMigrate(
-		&dbModel.SecurityEvent{},
+		&dbModel.ActivityRecord{},
 	)
 	if err != nil {
-		return errors.New("TrailDatabaseMigrationError")
+		return errors.New("TrailDatabaseMigrationError: " + err.Error())
 	}
 
 	return nil
