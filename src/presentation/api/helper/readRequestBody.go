@@ -9,13 +9,13 @@ import (
 )
 
 func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
-	requestData := map[string]interface{}{}
+	requestBody := map[string]interface{}{}
 
 	contentType := c.Request().Header.Get("Content-Type")
 
 	switch {
 	case strings.HasPrefix(contentType, "application/json"):
-		if err := c.Bind(&requestData); err != nil {
+		if err := c.Bind(&requestBody); err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidJsonBody")
 		}
 	case strings.HasPrefix(contentType, "application/x-www-form-urlencoded"):
@@ -25,7 +25,7 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 		}
 		for k, v := range formData {
 			if len(v) > 0 {
-				requestData[k] = v[0]
+				requestBody[k] = v[0]
 			}
 		}
 	case strings.HasPrefix(contentType, "multipart/form-data"):
@@ -36,28 +36,31 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 
 		for k, v := range multipartFormData.Value {
 			if len(v) > 0 {
-				requestData[k] = v[0]
+				requestBody[k] = v[0]
 			}
 		}
 
 		if len(multipartFormData.File) > 0 {
-			requestDataFiles := map[string]*multipart.FileHeader{}
+			requestBodyFiles := map[string]*multipart.FileHeader{}
 
 			for k, v := range multipartFormData.File {
 				if len(v) > 0 {
-					requestDataFiles[k] = v[0]
+					requestBodyFiles[k] = v[0]
 				}
 			}
 
-			requestData["files"] = requestDataFiles
+			requestBody["files"] = requestBodyFiles
 		}
 	default:
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidContentType")
 	}
 
-	if len(requestData) == 0 {
+	if len(requestBody) == 0 {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "EmptyRequestBody")
 	}
 
-	return requestData, nil
+	requestBody["operatorAccountId"] = c.Get("accountId")
+	requestBody["ipAddress"] = c.RealIP()
+
+	return requestBody, nil
 }
