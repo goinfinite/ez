@@ -13,13 +13,11 @@ import (
 type AuthCmdRepo struct {
 }
 
-func (repo AuthCmdRepo) GenerateSessionToken(
+func (repo AuthCmdRepo) CreateSessionToken(
 	accountId valueObject.AccountId,
 	expiresIn valueObject.UnixTime,
 	ipAddress valueObject.IpAddress,
-) (entity.AccessToken, error) {
-	var accessToken entity.AccessToken
-
+) (accessToken entity.AccessToken, err error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	apiUrl, err := os.Hostname()
 	if err != nil {

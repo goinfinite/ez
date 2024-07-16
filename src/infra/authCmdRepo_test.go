@@ -13,7 +13,7 @@ func TestAuthCmdRepo(t *testing.T) {
 
 	t.Run("GetSessionToken", func(t *testing.T) {
 		authCmdRepo := AuthCmdRepo{}
-		_, err := authCmdRepo.GenerateSessionToken(
+		_, err := authCmdRepo.CreateSessionToken(
 			valueObject.AccountId(1000),
 			valueObject.NewUnixTimeAfterNow(3*time.Hour),
 			valueObject.NewLocalhostIpAddress(),
