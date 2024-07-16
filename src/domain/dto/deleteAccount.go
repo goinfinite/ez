@@ -5,16 +5,19 @@ import (
 )
 
 type DeleteAccount struct {
-	AccountId valueObject.AccountId `json:"accountId"`
-	IpAddress valueObject.IpAddress `json:"-"`
+	AccountId         valueObject.AccountId `json:"accountId"`
+	OperatorAccountId valueObject.AccountId `json:"-"`
+	IpAddress         valueObject.IpAddress `json:"-"`
 }
 
 func NewDeleteAccount(
 	accountId valueObject.AccountId,
+	operatorAccountId valueObject.AccountId,
 	ipAddress valueObject.IpAddress,
 ) DeleteAccount {
 	return DeleteAccount{
-		AccountId: accountId,
-		IpAddress: ipAddress,
+		AccountId:         accountId,
+		OperatorAccountId: operatorAccountId,
+		IpAddress:         ipAddress,
 	}
 }
