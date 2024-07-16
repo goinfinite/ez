@@ -7,14 +7,14 @@ import (
 	"github.com/speedianet/control/src/domain/dto"
 )
 
-func TestSecurityQueryRepo(t *testing.T) {
+func TestActivityRecordQueryRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	trailDbSvc := testHelpers.GetTrailDbSvc()
-	securityQueryRepo := NewSecurityQueryRepo(trailDbSvc)
+	activityRecordQueryRepo := NewActivityRecordQueryRepo(trailDbSvc)
 
-	t.Run("ReadSecurityEvents", func(t *testing.T) {
-		readDto := dto.NewReadSecurityEvents(nil, nil, nil, nil)
-		_, err := securityQueryRepo.ReadEvents(readDto)
+	t.Run("ReadActivityRecordQuery", func(t *testing.T) {
+		readDto := dto.ReadActivityRecords{}
+		_, err := activityRecordQueryRepo.Read(readDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
