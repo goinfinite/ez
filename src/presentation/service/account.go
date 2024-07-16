@@ -9,19 +9,18 @@ import (
 	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
 
+var LocalOperatorAccountId, _ = valueObject.NewAccountId(0)
+var LocalOperatorIpAddress = valueObject.NewLocalhostIpAddress()
+
 type AccountService struct {
 	persistentDbSvc *db.PersistentDatabaseService
-	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewAccountService(
 	persistentDbSvc *db.PersistentDatabaseService,
 	trailDbSvc *db.TrailDatabaseService,
 ) *AccountService {
-	return &AccountService{
-		persistentDbSvc: persistentDbSvc,
-		trailDbSvc:      trailDbSvc,
-	}
+	return &AccountService{persistentDbSvc: persistentDbSvc}
 }
 
 func (service *AccountService) Read() ServiceOutput {
@@ -60,7 +59,15 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 		quotaPtr = &accountQuota
 	}
 
-	var ipAddress valueObject.IpAddress
+	operatorAccountId := LocalOperatorAccountId
+	if _, exists := input["operatorAccountId"]; exists {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	ipAddress := LocalOperatorIpAddress
 	if _, exists := input["ipAddress"]; exists {
 		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
@@ -68,15 +75,14 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
-	createDto := dto.NewCreateAccount(username, password, quotaPtr, ipAddress)
+	createDto := dto.NewCreateAccount(
+		username, password, quotaPtr, operatorAccountId, ipAddress,
+	)
 
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(service.trailDbSvc)
 
-	err = useCase.CreateAccount(
-		accountQueryRepo, accountCmdRepo, securityCmdRepo, createDto,
-	)
+	err = useCase.CreateAccount(accountQueryRepo, accountCmdRepo, createDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -123,7 +129,15 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 		quotaPtr = &accountQuota
 	}
 
-	var ipAddress valueObject.IpAddress
+	operatorAccountId := LocalOperatorAccountId
+	if _, exists := input["operatorAccountId"]; exists {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	ipAddress := LocalOperatorIpAddress
 	if _, exists := input["ipAddress"]; exists {
 		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
@@ -132,16 +146,16 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	}
 
 	updateDto := dto.NewUpdateAccount(
-		accountId, passwordPtr, shouldUpdateApiKeyPtr, quotaPtr, ipAddress,
+		accountId, passwordPtr, shouldUpdateApiKeyPtr, quotaPtr,
+		operatorAccountId, ipAddress,
 	)
 
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(service.trailDbSvc)
 
 	if updateDto.ShouldUpdateApiKey != nil && *updateDto.ShouldUpdateApiKey {
 		newKey, err := useCase.UpdateAccountApiKey(
-			accountQueryRepo, accountCmdRepo, securityCmdRepo, updateDto,
+			accountQueryRepo, accountCmdRepo, updateDto,
 		)
 		if err != nil {
 			return NewServiceOutput(InfraError, err.Error())
@@ -149,9 +163,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 		return NewServiceOutput(Success, newKey)
 	}
 
-	err = useCase.UpdateAccount(
-		accountQueryRepo, accountCmdRepo, securityCmdRepo, updateDto,
-	)
+	err = useCase.UpdateAccount(accountQueryRepo, accountCmdRepo, updateDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -174,9 +186,16 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
-	securityCmdRepo := infra.NewSecurityCmdRepo(service.trailDbSvc)
 
-	var ipAddress valueObject.IpAddress
+	operatorAccountId := LocalOperatorAccountId
+	if _, exists := input["operatorAccountId"]; exists {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	ipAddress := LocalOperatorIpAddress
 	if _, exists := input["ipAddress"]; exists {
 		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
@@ -184,10 +203,10 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
-	deleteDto := dto.NewDeleteAccount(accountId, ipAddress)
+	deleteDto := dto.NewDeleteAccount(accountId, operatorAccountId, ipAddress)
 
 	err = useCase.DeleteAccount(
-		accountQueryRepo, accountCmdRepo, containerQueryRepo, securityCmdRepo, deleteDto,
+		accountQueryRepo, accountCmdRepo, containerQueryRepo, deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
