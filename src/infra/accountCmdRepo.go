@@ -60,18 +60,19 @@ func (repo *AccountCmdRepo) updateFilesystemQuota(
 	return nil
 }
 
-func (repo *AccountCmdRepo) Create(createDto dto.CreateAccount) error {
+func (repo *AccountCmdRepo) Create(
+	createDto dto.CreateAccount,
+) (accountId valueObject.AccountId, err error) {
 	passHash, err := bcrypt.GenerateFromPassword(
 		[]byte(createDto.Password.String()),
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
-		return err
+		return accountId, err
 	}
 
 	createAccountCmd := exec.Command(
-		"useradd",
-		"-m",
+		"useradd", "-m",
 		"-d", "/var/data/"+createDto.Username.String(),
 		"-s", "/usr/sbin/nologin",
 		"-p", string(passHash),
@@ -80,54 +81,50 @@ func (repo *AccountCmdRepo) Create(createDto dto.CreateAccount) error {
 
 	err = createAccountCmd.Run()
 	if err != nil {
-		return err
+		return accountId, err
 	}
 
 	userInfo, err := user.Lookup(createDto.Username.String())
 	if err != nil {
-		return err
+		return accountId, err
 	}
-	accId, err := valueObject.NewAccountId(userInfo.Uid)
+	accountId, err = valueObject.NewAccountId(userInfo.Uid)
 	if err != nil {
-		return err
+		return accountId, err
 	}
 	gid, err := valueObject.NewGroupId(userInfo.Gid)
 	if err != nil {
-		return err
+		return accountId, err
 	}
 
 	nowUnixTime := valueObject.NewUnixTimeNow()
 	accEntity := entity.NewAccount(
-		accId,
-		gid,
-		createDto.Username,
-		*createDto.Quota,
+		accountId, gid, createDto.Username, *createDto.Quota,
 		valueObject.NewAccountQuotaWithBlankValues(),
-		nowUnixTime,
-		nowUnixTime,
+		nowUnixTime, nowUnixTime,
 	)
 
 	accModel, err := dbModel.Account{}.ToModel(accEntity)
 	if err != nil {
-		return err
+		return accountId, err
 	}
 
 	err = repo.persistentDbSvc.Handler.Create(&accModel).Error
 	if err != nil {
-		return err
+		return accountId, err
 	}
 
-	err = repo.updateFilesystemQuota(accId, *createDto.Quota)
+	err = repo.updateFilesystemQuota(accountId, *createDto.Quota)
 	if err != nil {
-		return err
+		return accountId, err
 	}
 
-	err = infraHelper.EnableLingering(accId)
+	err = infraHelper.EnableLingering(accountId)
 	if err != nil {
-		return errors.New("EnableLingeringFailed: " + err.Error())
+		return accountId, errors.New("EnableLingeringFailed: " + err.Error())
 	}
 
-	return nil
+	return accountId, nil
 }
 
 func (repo *AccountCmdRepo) getUsernameById(

@@ -12,7 +12,6 @@ import (
 func CreateAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
-	securityCmdRepo repository.SecurityCmdRepo,
 	createDto dto.CreateAccount,
 ) error {
 	_, err := accountQueryRepo.ReadByUsername(createDto.Username)
@@ -25,20 +24,17 @@ func CreateAccount(
 		createDto.Quota = &defaultQuota
 	}
 
-	err = accountCmdRepo.Create(createDto)
+	accountId, err := accountCmdRepo.Create(createDto)
 	if err != nil {
 		log.Printf("CreateAccountError: %s", err)
 		return errors.New("CreateAccountInfraError")
 	}
 
-	eventType, _ := valueObject.NewSecurityEventType("account-created")
-	eventDetails, _ := valueObject.NewSecurityEventDetails(
-		"Username: " + createDto.Username.String(),
+	recordCode, _ := valueObject.NewActivityRecordCode("AccountCreated")
+	CreateSecurityActivityRecord(
+		&recordCode, &createDto.IpAddress, &createDto.OperatorAccountId,
+		&accountId, &createDto.Username,
 	)
-	createSecurityEventDto := dto.NewCreateSecurityEvent(
-		eventType, &eventDetails, &createDto.IpAddress, nil,
-	)
-	AsyncCreateSecurityEvent(securityCmdRepo, createSecurityEventDto)
 
 	return nil
 }

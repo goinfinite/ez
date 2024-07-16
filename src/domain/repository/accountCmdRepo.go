@@ -6,7 +6,7 @@ import (
 )
 
 type AccountCmdRepo interface {
-	Create(createAccount dto.CreateAccount) error
+	Create(createAccount dto.CreateAccount) (valueObject.AccountId, error)
 	Delete(accId valueObject.AccountId) error
 	UpdatePassword(accId valueObject.AccountId, password valueObject.Password) error
 	UpdateApiKey(accId valueObject.AccountId) (valueObject.AccessTokenValue, error)

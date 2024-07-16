@@ -15,10 +15,13 @@ func addDummyUser() error {
 	password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	ipAddress := valueObject.NewLocalhostIpAddress()
-	createDto := dto.NewCreateAccount(username, password, &quota, ipAddress)
+	operatorAccountId, _ := valueObject.NewAccountId(0)
+	createDto := dto.NewCreateAccount(
+		username, password, &quota, operatorAccountId, ipAddress,
+	)
 
 	accountCmdRepo := NewAccountCmdRepo(testHelpers.GetPersistentDbSvc())
-	err := accountCmdRepo.Create(createDto)
+	_, err := accountCmdRepo.Create(createDto)
 	if err != nil {
 		return err
 	}
@@ -62,9 +65,12 @@ func TestAccountCmdRepo(t *testing.T) {
 		password, _ := valueObject.NewPassword("invalid")
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
 		ipAddress := valueObject.NewLocalhostIpAddress()
-		createDto := dto.NewCreateAccount(username, password, &quota, ipAddress)
+		operatorAccountId, _ := valueObject.NewAccountId(0)
+		createDto := dto.NewCreateAccount(
+			username, password, &quota, operatorAccountId, ipAddress,
+		)
 
-		err := accountCmdRepo.Create(createDto)
+		_, err := accountCmdRepo.Create(createDto)
 		if err == nil {
 			t.Error("AccountShouldNotBeAdded")
 		}
