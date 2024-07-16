@@ -5,6 +5,6 @@ import (
 	"github.com/speedianet/control/src/domain/entity"
 )
 
-type SecurityQueryRepo interface {
-	ReadEvents(readDto dto.ReadSecurityEvents) ([]entity.SecurityEvent, error)
+type ActivityRecordQueryRepo interface {
+	Read(readDto dto.ReadActivityRecords) ([]entity.ActivityRecord, error)
 }
