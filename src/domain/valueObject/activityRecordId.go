@@ -18,6 +18,10 @@ func NewActivityRecordId(value interface{}) (ActivityRecordId, error) {
 	return ActivityRecordId(id), nil
 }
 
+func (vo ActivityRecordId) Read() uint64 {
+	return uint64(vo)
+}
+
 func (vo ActivityRecordId) String() string {
 	return strconv.FormatUint(uint64(vo), 10)
 }
