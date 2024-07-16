@@ -1,12 +1,9 @@
 package infra
 
 import (
-	"encoding/json"
 	"errors"
-	"log"
 	"os"
 
-	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
@@ -179,33 +176,6 @@ func (repo ServerCmdRepo) DeleteOneTimerSvc(svcName valueObject.ServiceName) err
 	}
 
 	return nil
-}
-
-func (repo ServerCmdRepo) AddServerLog(
-	level valueObject.ServerLogLevel,
-	operation valueObject.ServerLogOperation,
-	payload valueObject.ServerLogPayload,
-) {
-	logEntity := entity.NewServerLog(level, operation, payload)
-	logFilePath := "/var/log/control.log"
-	jsonLogEntry, err := json.Marshal(logEntity)
-	if err != nil {
-		return
-	}
-	logContent := string(jsonLogEntry) + "\n"
-
-	logFile, err := os.OpenFile(
-		logFilePath,
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-		0640,
-	)
-	if err != nil {
-		return
-	}
-	defer logFile.Close()
-
-	_, _ = logFile.WriteString(logContent)
-	log.Print(logContent)
 }
 
 func (repo ServerCmdRepo) SendServerMessage(message string) {
