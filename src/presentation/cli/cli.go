@@ -8,7 +8,6 @@ import (
 	cliController "github.com/speedianet/control/src/presentation/cli/controller"
 	cliInit "github.com/speedianet/control/src/presentation/cli/init"
 	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
-	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 	"github.com/spf13/cobra"
 )
 
@@ -33,6 +32,9 @@ func CliInit() {
 	defer cliMiddleware.PanicHandler()
 	cliMiddleware.PreventRootless()
 
+	cliMiddleware.CheckEnvs()
+	cliMiddleware.LogHandler()
+
 	isSystemInstall := false
 	if len(os.Args) > 1 {
 		isSystemInstall = os.Args[1] == "sys-install"
@@ -44,8 +46,6 @@ func CliInit() {
 		RunRootCmd()
 	}
 
-	sharedMiddleware.CheckEnvs()
-
 	persistentDbSvc := cliInit.PersistentDatabaseService()
 	transientDbSvc := cliInit.TransientDatabaseService()
 	trailDbSvc := cliInit.TrailDatabaseService()
@@ -56,7 +56,7 @@ func CliInit() {
 	}
 
 	if !isLicenseRefresh {
-		sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
+		cliMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 	}
 
 	cliMiddleware.SporadicLicenseValidation(persistentDbSvc, transientDbSvc)

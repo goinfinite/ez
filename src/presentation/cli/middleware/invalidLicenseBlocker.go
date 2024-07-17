@@ -1,4 +1,4 @@
-package sharedMiddleware
+package cliMiddleware
 
 import (
 	"log"
@@ -17,9 +17,7 @@ func InvalidLicenseBlocker(
 	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
 
 	err := useCase.InvalidLicenseBlocker(
-		licenseQueryRepo,
-		containerQueryRepo,
-		containerCmdRepo,
+		licenseQueryRepo, containerQueryRepo, containerCmdRepo,
 	)
 	if err != nil {
 		log.Fatal(err)

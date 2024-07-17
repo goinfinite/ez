@@ -5,7 +5,6 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 	apiInit "github.com/speedianet/control/src/presentation/api/init"
 	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
-	sharedMiddleware "github.com/speedianet/control/src/presentation/shared/middleware"
 )
 
 const (
@@ -36,8 +35,6 @@ func ApiInit(
 	transientDbSvc *db.TransientDatabaseService,
 	trailDbSvc *db.TrailDatabaseService,
 ) {
-	sharedMiddleware.CheckEnvs()
-
 	baseRoute := e.Group(ApiBasePath)
 
 	e.Pre(apiMiddleware.AddTrailingSlash(ApiBasePath))
@@ -47,8 +44,6 @@ func ApiInit(
 		persistentDbSvc, transientDbSvc, trailDbSvc,
 	))
 	e.Use(apiMiddleware.ReadOnlyMode(ApiBasePath))
-
-	sharedMiddleware.InvalidLicenseBlocker(persistentDbSvc, transientDbSvc)
 
 	apiInit.BootContainers(persistentDbSvc)
 
