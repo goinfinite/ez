@@ -1,13 +1,13 @@
 package useCase
 
 import (
-	"log"
-
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func CreateSecurityActivityRecord(
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	code *valueObject.ActivityRecordCode,
 	ipAddress *valueObject.IpAddress,
 	operatorAccountId *valueObject.AccountId,
@@ -25,5 +25,7 @@ func CreateSecurityActivityRecord(
 		Username:          username,
 	}
 
-	log.Print(createDto)
+	go func() {
+		_ = activityRecordCmdRepo.Create(createDto)
+	}()
 }

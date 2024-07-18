@@ -12,6 +12,7 @@ import (
 func UpdateAccountApiKey(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	updateDto dto.UpdateAccount,
 ) (newKey valueObject.AccessTokenValue, err error) {
 	_, err = accountQueryRepo.ReadById(updateDto.AccountId)
@@ -27,8 +28,8 @@ func UpdateAccountApiKey(
 
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountApiKeyUpdated")
 	CreateSecurityActivityRecord(
-		&recordCode, &updateDto.IpAddress, &updateDto.OperatorAccountId,
-		&updateDto.AccountId, nil,
+		activityRecordCmdRepo, &recordCode, &updateDto.IpAddress,
+		&updateDto.OperatorAccountId, &updateDto.AccountId, nil,
 	)
 
 	return newKey, nil

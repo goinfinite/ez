@@ -12,6 +12,7 @@ import (
 func CreateAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateAccount,
 ) error {
 	_, err := accountQueryRepo.ReadByUsername(createDto.Username)
@@ -32,8 +33,8 @@ func CreateAccount(
 
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountCreated")
 	CreateSecurityActivityRecord(
-		&recordCode, &createDto.IpAddress, &createDto.OperatorAccountId,
-		&accountId, &createDto.Username,
+		activityRecordCmdRepo, &recordCode, &createDto.IpAddress,
+		&createDto.OperatorAccountId, &accountId, &createDto.Username,
 	)
 
 	return nil

@@ -12,6 +12,7 @@ import (
 func UpdateAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	updateDto dto.UpdateAccount,
 ) error {
 	_, err := accountQueryRepo.ReadById(updateDto.AccountId)
@@ -28,8 +29,8 @@ func UpdateAccount(
 
 		recordCode, _ := valueObject.NewActivityRecordCode("AccountPasswordUpdated")
 		CreateSecurityActivityRecord(
-			&recordCode, &updateDto.IpAddress, &updateDto.OperatorAccountId,
-			&updateDto.AccountId, nil,
+			activityRecordCmdRepo, &recordCode, &updateDto.IpAddress,
+			&updateDto.OperatorAccountId, &updateDto.AccountId, nil,
 		)
 	}
 
@@ -45,8 +46,8 @@ func UpdateAccount(
 
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountQuotaUpdated")
 	CreateSecurityActivityRecord(
-		&recordCode, &updateDto.IpAddress, &updateDto.OperatorAccountId,
-		&updateDto.AccountId, nil,
+		activityRecordCmdRepo, &recordCode, &updateDto.IpAddress,
+		&updateDto.OperatorAccountId, &updateDto.AccountId, nil,
 	)
 
 	return nil

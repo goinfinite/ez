@@ -13,6 +13,7 @@ func DeleteAccount(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	deleteDto dto.DeleteAccount,
 ) error {
 	_, err := accountQueryRepo.ReadById(deleteDto.AccountId)
@@ -38,8 +39,8 @@ func DeleteAccount(
 
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountDeleted")
 	CreateSecurityActivityRecord(
-		&recordCode, &deleteDto.IpAddress, &deleteDto.OperatorAccountId,
-		&deleteDto.AccountId, nil,
+		activityRecordCmdRepo, &recordCode, &deleteDto.IpAddress,
+		&deleteDto.OperatorAccountId, &deleteDto.AccountId, nil,
 	)
 
 	return nil
