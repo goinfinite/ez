@@ -66,6 +66,7 @@
     "quadlet",
     "responsetype",
     "russian",
+    "samber",
     "serviceid",
     "shirou",
     "Skippable",
@@ -83,6 +84,8 @@
     "uuid",
     "vhconf",
     "vhost",
-    "vhosts"
+    "vhosts",
+    "zerolog",
+    "Zerolog"
   ]
 }
