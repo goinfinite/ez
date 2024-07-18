@@ -5,6 +5,7 @@
 refactor: security events to activity records
 feat: add zerolog as slog handler
 fix: remove http custom logger
+fix: remove orphan mappings files
 
 0.0.4 - 2024/07/12
 feat: add trail db service
