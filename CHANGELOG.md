@@ -1,7 +1,12 @@
 # Changelog
 
 ```log
-0.0.4 - XX/XX
+0.0.5 - 2024/XX/XX
+refactor: security events to activity records
+feat: add zerolog as slog handler
+fix: remove http custom logger
+
+0.0.4 - 2024/07/12
 feat: add trail db service
 feat: add security events
 feat: limit failed logins attempts per ip

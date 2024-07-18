@@ -12,7 +12,7 @@ const (
 )
 
 // @title			ControlApi
-// @version			0.0.4
+// @version			0.0.5
 // @description		Speedia Control API
 // @termsOfService	https://speedia.net/tos/
 

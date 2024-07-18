@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/speedianet/control/src/infra/db"
+	infraEnvs "github.com/speedianet/control/src/infra/envs"
 	"github.com/speedianet/control/src/presentation"
 	cliController "github.com/speedianet/control/src/presentation/cli/controller"
 	"github.com/spf13/cobra"
@@ -147,7 +148,7 @@ func (router *Router) systemRoutes() {
 		Use:   "version",
 		Short: "PrintVersion",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Speedia Control v0.0.4")
+			fmt.Println("Speedia Control " + infraEnvs.SpeediaControlVersion)
 		},
 	}
 
