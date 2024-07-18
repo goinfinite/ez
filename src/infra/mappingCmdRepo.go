@@ -2,7 +2,7 @@ package infra
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"slices"
 	"strings"
 	"text/template"
@@ -16,8 +16,8 @@ import (
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
-var nginxStreamConfDir = "/var/nginx/stream.d"
-var nginxHttpConfDir = "/var/nginx/http.d"
+var nginxStreamConfDir string = "/var/nginx/stream.d"
+var nginxHttpConfDir string = "/var/nginx/http.d"
 
 type MappingCmdRepo struct {
 	persistentDbSvc    *db.PersistentDatabaseService
@@ -75,6 +75,27 @@ func (repo *MappingCmdRepo) updateWebServerFile() error {
 	}
 
 	for _, mappingEntity := range mappings {
+		mappingFileDir := nginxStreamConfDir
+		switch mappingEntity.Protocol.String() {
+		case "http", "grpc", "ws":
+			mappingFileDir = nginxHttpConfDir
+		}
+
+		mappingIdStr := mappingEntity.Id.String()
+		mappingFile := mappingFileDir + "/mapping-" + mappingIdStr + ".conf"
+
+		if len(mappingEntity.Targets) == 0 {
+			err = infraHelper.RemoveFile(mappingFile)
+			if err != nil {
+				slog.Error(
+					"RemoveMappingFileError",
+					slog.String("mappingId", mappingIdStr),
+					slog.Any("error", err),
+				)
+			}
+			continue
+		}
+
 		fileTemplate := `upstream mapping_{{ .Id }}_backend {
 {{- range .Targets }}
 	server localhost:{{ .ContainerPrivatePort }};
@@ -91,6 +112,8 @@ server {
 		{{- if eq .Protocol "http" "ws" }}
 		proxy_pass http://mapping_{{ .Id }}_backend;
 		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
 		{{- end }}
 		{{- if eq .Protocol "ws" }}
 		proxy_http_version 1.1;
@@ -107,37 +130,34 @@ server {
 }
 {{- end }}
 `
-
-		if len(mappingEntity.Targets) == 0 {
-			fileTemplate = ``
-		}
-
-		mappingIdStr := mappingEntity.Id.String()
 		templatePtr, err := template.New("mappingFile").Parse(fileTemplate)
 		if err != nil {
-			log.Printf("[%s] MappingTemplateParsingError: %s", mappingIdStr, err.Error())
+			slog.Error(
+				"MappingTemplateParsingError",
+				slog.String("mappingId", mappingIdStr), slog.Any("error", err),
+			)
 			continue
 		}
 
 		var mappingFileContent strings.Builder
 		err = templatePtr.Execute(&mappingFileContent, mappingEntity)
 		if err != nil {
-			log.Printf("[%s] MappingTemplateExecutionError: %s", mappingIdStr, err.Error())
+			slog.Error(
+				"MappingTemplateExecutionError",
+				slog.String("mappingId", mappingIdStr), slog.Any("error", err),
+			)
 			continue
 		}
 
-		mappingDir := nginxStreamConfDir
-		switch mappingEntity.Protocol.String() {
-		case "http", "grpc", "ws":
-			mappingDir = nginxHttpConfDir
-		}
-
-		mappingFile := mappingDir + "/mapping-" + mappingIdStr + ".conf"
 		mappingContentStr := strings.TrimSpace(mappingFileContent.String()) + "\n"
 
 		err = infraHelper.UpdateFile(mappingFile, mappingContentStr, true)
 		if err != nil {
-			log.Printf("[%s] UpdateMappingFileError: %s", mappingIdStr, err.Error())
+			slog.Error(
+				"UpdateMappingFileError",
+				slog.String("mappingId", mappingIdStr), slog.Any("error", err),
+			)
+			continue
 		}
 	}
 
@@ -215,9 +235,11 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		bindingProtocolStr := portBinding.Protocol.String()
 		mappingProtocolStr := mappingEntity.Protocol.String()
 		if bindingProtocolStr != mappingProtocolStr {
-			log.Printf(
-				"[%s] MappingVsBindingProtocolMismatch: %s != %s",
-				mappingPublicPortStr, mappingProtocolStr, bindingProtocolStr,
+			slog.Error(
+				"MappingVsBindingProtocolMismatch",
+				slog.String("mappingPublicPort", mappingPublicPortStr),
+				slog.String("mappingProtocol", mappingProtocolStr),
+				slog.String("bindingProtocol", bindingProtocolStr),
 			)
 			continue
 		}
