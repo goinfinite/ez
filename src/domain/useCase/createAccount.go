@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -27,7 +27,7 @@ func CreateAccount(
 
 	accountId, err := accountCmdRepo.Create(createDto)
 	if err != nil {
-		log.Printf("CreateAccountError: %s", err)
+		slog.Error("CreateAccountInfraError", slog.Any("error", err))
 		return errors.New("CreateAccountInfraError")
 	}
 

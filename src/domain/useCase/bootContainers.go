@@ -2,6 +2,7 @@ package useCase
 
 import (
 	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -34,8 +35,10 @@ func BootContainers(
 
 		err = containerCmdRepo.Update(updateDto)
 		if err != nil {
-			log.Printf(
-				"[ContainerId: %s] UpdateContainerError: %s", currentContainer.Id, err,
+			slog.Error(
+				"UpdateContainerInfraError",
+				slog.String("containerId", currentContainer.Id.String()),
+				slog.Any("error", err),
 			)
 			continue
 		}

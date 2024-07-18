@@ -3,6 +3,7 @@ package useCase
 import (
 	"errors"
 	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -20,32 +21,28 @@ func CreateContainer(
 	createDto dto.CreateContainer,
 ) error {
 	err := CheckAccountQuota(
-		accountQueryRepo,
-		createDto.AccountId,
-		containerProfileQueryRepo,
-		*createDto.ProfileId,
-		nil,
+		accountQueryRepo, createDto.AccountId, containerProfileQueryRepo,
+		*createDto.ProfileId, nil,
 	)
 	if err != nil {
-		log.Printf("QuotaCheckError: %s", err)
+		slog.Error("QuotaCheckError", slog.Any("error", err))
 		return err
 	}
 
 	_, err = containerQueryRepo.ReadByHostname(createDto.Hostname)
 	if err == nil {
-		log.Printf("ContainerHostnameAlreadyExists: %s", createDto.Hostname)
 		return errors.New("ContainerHostnameAlreadyExists")
 	}
 
 	containerId, err := containerCmdRepo.Create(createDto)
 	if err != nil {
-		log.Printf("CreateContainerError: %s", err)
+		slog.Error("CreateContainerInfraError", slog.Any("error", err))
 		return errors.New("CreateContainerInfraError")
 	}
 
 	err = accountCmdRepo.UpdateQuotaUsage(createDto.AccountId)
 	if err != nil {
-		log.Printf("UpdateAccountQuotaError: %s", err)
+		slog.Error("UpdateAccountQuotaError", slog.Any("error", err))
 		return errors.New("UpdateAccountQuotaError")
 	}
 
@@ -59,7 +56,7 @@ func CreateContainer(
 	if createDto.ImageAddress.IsSpeediaOs() {
 		err = containerProxyCmdRepo.Create(containerId)
 		if err != nil {
-			log.Printf("CreateContainerProxyError: %s", err)
+			slog.Error("CreateContainerProxyInfraError", slog.Any("error", err))
 			return errors.New("CreateContainerProxyInfraError")
 		}
 	}
@@ -76,7 +73,7 @@ func CreateContainer(
 		containerId,
 	)
 	if err != nil {
-		log.Printf("CreateAutoMappingsError: %s", err)
+		slog.Error("CreateAutoMappingsError", slog.Any("error", err))
 	}
 
 	return nil

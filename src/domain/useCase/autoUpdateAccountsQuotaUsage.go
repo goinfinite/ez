@@ -1,7 +1,7 @@
 package useCase
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/repository"
 )
@@ -10,16 +10,20 @@ func AutoUpdateAccountsQuotaUsage(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 ) {
-	accs, err := accountQueryRepo.Read()
+	accounts, err := accountQueryRepo.Read()
 	if err != nil {
-		log.Printf("GetAccountsError: %v", err)
+		slog.Error("ReadAccountsInfraError", slog.Any("error", err))
 		return
 	}
 
-	for _, acc := range accs {
-		err := accountCmdRepo.UpdateQuotaUsage(acc.Id)
+	for _, account := range accounts {
+		err := accountCmdRepo.UpdateQuotaUsage(account.Id)
 		if err != nil {
-			log.Printf("UpdateQuotaUsageError: %v [accId: %s]", acc.Id, err)
+			slog.Error(
+				"UpdateQuotaUsageInfraError",
+				slog.Uint64("accountId", account.Id.Read()),
+				slog.Any("error", err),
+			)
 			continue
 		}
 	}
