@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -20,10 +20,10 @@ func DeleteMapping(
 
 	err = mappingCmdRepo.Delete(mappingId)
 	if err != nil {
+		slog.Error("DeleteMappingInfraError", slog.Any("error", err))
 		return errors.New("DeleteMappingError")
 	}
 
-	log.Printf("MappingId '%v' deleted.", mappingId)
-
+	slog.Info("MappingDeleted", slog.Uint64("mappingId", mappingId.Read()))
 	return nil
 }
