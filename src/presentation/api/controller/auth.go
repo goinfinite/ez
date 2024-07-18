@@ -67,10 +67,11 @@ func (controller *AuthController) Login(c echo.Context) error {
 	authCmdRepo := infra.AuthCmdRepo{}
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	activityRecordQueryRepo := infra.NewActivityRecordQueryRepo(controller.trailDbSvc)
+	activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
 
 	accessToken, err := useCase.CreateSessionToken(
 		authQueryRepo, authCmdRepo, accountQueryRepo,
-		activityRecordQueryRepo, loginDto,
+		activityRecordQueryRepo, activityRecordCmdRepo, loginDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusUnauthorized, err.Error())
