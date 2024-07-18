@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/speedianet/control/src/domain/repository"
@@ -16,18 +16,21 @@ func mappingsJanitor(
 ) error {
 	targets, err := mappingQueryRepo.ReadTargetsByContainerId(containerId)
 	if err != nil {
-		log.Printf("[%v] ReadTargetsByContainerIdError: %s", containerId, err)
+		slog.Error(
+			"ReadTargetsByContainerIdInfraError",
+			slog.String("containerId", containerId.String()),
+			slog.Any("error", err),
+		)
 		return nil
 	}
 
 	for _, target := range targets {
-		err = mappingCmdRepo.DeleteTarget(target.MappingId, target.Id)
+		err = DeleteMappingTarget(
+			mappingQueryRepo, mappingCmdRepo, target.MappingId, target.Id,
+		)
 		if err != nil {
-			log.Printf("[%v] DeleteTargetError: %s", target.Id, err)
 			continue
 		}
-
-		log.Printf("TargetId '%v' deleted.", target.Id)
 	}
 
 	mappings, err := mappingQueryRepo.Read()
@@ -50,13 +53,10 @@ func mappingsJanitor(
 			continue
 		}
 
-		err = mappingCmdRepo.Delete(mapping.Id)
+		err = DeleteMapping(mappingQueryRepo, mappingCmdRepo, mapping.Id)
 		if err != nil {
-			log.Printf("[%v] DeleteMappingError: %s", mapping.Id, err)
 			continue
 		}
-
-		log.Printf("MappingId '%v' deleted.", mapping.Id)
 	}
 
 	return nil
@@ -74,7 +74,6 @@ func DeleteContainer(
 ) error {
 	_, err := containerQueryRepo.ReadById(containerId)
 	if err != nil {
-		log.Printf("ContainerNotFound: %s", err)
 		return errors.New("ContainerNotFound")
 	}
 
@@ -85,22 +84,22 @@ func DeleteContainer(
 
 	err = containerProxyCmdRepo.Delete(containerId)
 	if err != nil {
-		log.Printf("DeleteContainerProxyError: %s", err)
+		slog.Error("DeleteContainerProxyInfraError", slog.Any("error", err))
 		return errors.New("DeleteContainerProxyInfraError")
 	}
 
 	err = containerCmdRepo.Delete(accountId, containerId)
 	if err != nil {
-		log.Printf("DeleteContainerError: %s", err)
+		slog.Error("DeleteContainerInfraError", slog.Any("error", err))
 		return errors.New("DeleteContainerInfraError")
 	}
 
-	log.Printf("ContainerId '%v' deleted.", containerId)
+	slog.Info("ContainerDeleted", slog.String("containerId", containerId.String()))
 
 	err = accountCmdRepo.UpdateQuotaUsage(accountId)
 	if err != nil {
-		log.Printf("UpdateAccountQuotaError: %s", err)
-		return errors.New("UpdateAccountQuotaError")
+		slog.Error("UpdateAccountQuotaInfraError", slog.Any("error", err))
+		return errors.New("UpdateAccountQuotaInfraError")
 	}
 
 	return nil

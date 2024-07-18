@@ -2,7 +2,6 @@ package useCase
 
 import (
 	"errors"
-	"log"
 	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -25,7 +24,6 @@ func CreateContainer(
 		*createDto.ProfileId, nil,
 	)
 	if err != nil {
-		slog.Error("QuotaCheckError", slog.Any("error", err))
 		return err
 	}
 
@@ -42,15 +40,15 @@ func CreateContainer(
 
 	err = accountCmdRepo.UpdateQuotaUsage(createDto.AccountId)
 	if err != nil {
-		slog.Error("UpdateAccountQuotaError", slog.Any("error", err))
-		return errors.New("UpdateAccountQuotaError")
+		slog.Error("UpdateAccountQuotaInfraError", slog.Any("error", err))
+		return errors.New("UpdateAccountQuotaInfraError")
 	}
 
-	log.Printf(
-		"ContainerId '%s' (%s) created for AccountId '%s'.",
-		containerId.String(),
-		createDto.ImageAddress.String(),
-		createDto.AccountId.String(),
+	slog.Info(
+		"ContainerCreated",
+		slog.String("containerId", containerId.String()),
+		slog.String("imageAddress", createDto.ImageAddress.String()),
+		slog.String("accountId", createDto.AccountId.String()),
 	)
 
 	if createDto.ImageAddress.IsSpeediaOs() {
@@ -66,14 +64,11 @@ func CreateContainer(
 	}
 
 	err = CreateMappingsWithContainerId(
-		containerQueryRepo,
-		mappingQueryRepo,
-		mappingCmdRepo,
-		containerProxyCmdRepo,
-		containerId,
+		containerQueryRepo, mappingQueryRepo, mappingCmdRepo,
+		containerProxyCmdRepo, containerId,
 	)
 	if err != nil {
-		slog.Error("CreateAutoMappingsError", slog.Any("error", err))
+		return errors.New("CreateAutoMappingsError: " + err.Error())
 	}
 
 	return nil
