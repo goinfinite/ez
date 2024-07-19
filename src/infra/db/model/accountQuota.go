@@ -7,14 +7,15 @@ import (
 )
 
 type AccountQuota struct {
-	ID          uint    `gorm:"primarykey"`
-	CpuCores    float64 `gorm:"not null"`
-	MemoryBytes uint64  `gorm:"not null"`
-	DiskBytes   uint64  `gorm:"not null"`
-	Inodes      uint64  `gorm:"not null"`
-	AccountID   uint
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                      uint   `gorm:"primarykey"`
+	Millicores              uint   `gorm:"not null"`
+	MemoryBytes             uint64 `gorm:"not null"`
+	StorageBytes            uint64 `gorm:"not null"`
+	StorageInodes           uint64 `gorm:"not null"`
+	StoragePerformanceUnits uint   `gorm:"not null"`
+	AccountID               uint
+	CreatedAt               time.Time
+	UpdatedAt               time.Time
 }
 
 func (AccountQuota) TableName() string {
@@ -22,43 +23,44 @@ func (AccountQuota) TableName() string {
 }
 
 func (AccountQuota) ToModel(
-	vo valueObject.AccountQuota,
-	accId uint,
+	vo valueObject.AccountQuota, accountId uint,
 ) (AccountQuota, error) {
 	return AccountQuota{
-		CpuCores:    vo.CpuCores.Read(),
-		MemoryBytes: uint64(vo.MemoryBytes.Read()),
-		DiskBytes:   uint64(vo.DiskBytes.Read()),
-		Inodes:      vo.Inodes.Read(),
-		AccountID:   accId,
+		Millicores:              vo.Millicores.Uint(),
+		MemoryBytes:             uint64(vo.MemoryBytes),
+		StorageBytes:            uint64(vo.StorageBytes),
+		StorageInodes:           vo.StorageInodes,
+		StoragePerformanceUnits: vo.StoragePerformanceUnits.Uint(),
+		AccountID:               accountId,
+		CreatedAt:               time.Now(),
+		UpdatedAt:               time.Now(),
 	}, nil
 }
 
-func (model AccountQuota) ToValueObject() (valueObject.AccountQuota, error) {
-	cpuCores, err := valueObject.NewCpuCoresCount(model.CpuCores)
+func (model AccountQuota) ToValueObject() (vo valueObject.AccountQuota, err error) {
+	millicores, err := valueObject.NewMillicores(model.Millicores)
 	if err != nil {
-		return valueObject.AccountQuota{}, err
+		return vo, err
 	}
 
 	memoryBytes, err := valueObject.NewByte(model.MemoryBytes)
 	if err != nil {
-		return valueObject.AccountQuota{}, err
+		return vo, err
 	}
 
-	diskBytes, err := valueObject.NewByte(model.DiskBytes)
+	storageBytes, err := valueObject.NewByte(model.StorageBytes)
 	if err != nil {
-		return valueObject.AccountQuota{}, err
+		return vo, err
 	}
 
-	inodes, err := valueObject.NewInodesCount(model.Inodes)
+	storagePerformanceUnits, err := valueObject.NewStoragePerformanceUnits(
+		model.StoragePerformanceUnits,
+	)
 	if err != nil {
-		return valueObject.AccountQuota{}, err
+		return vo, err
 	}
 
 	return valueObject.NewAccountQuota(
-		cpuCores,
-		memoryBytes,
-		diskBytes,
-		inodes,
+		millicores, memoryBytes, storageBytes, model.StorageInodes, storagePerformanceUnits,
 	), nil
 }
