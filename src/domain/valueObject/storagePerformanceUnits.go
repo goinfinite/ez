@@ -25,6 +25,10 @@ func NewStoragePerformanceUnits(value interface{}) (StoragePerformanceUnits, err
 	return StoragePerformanceUnits(uintValue), nil
 }
 
+func (vo StoragePerformanceUnits) Uint() uint {
+	return uint(vo)
+}
+
 func (vo StoragePerformanceUnits) String() string {
 	return strconv.FormatUint(uint64(vo), 10)
 }

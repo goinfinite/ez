@@ -22,6 +22,10 @@ func (vo Millicores) ReadAsCores() float64 {
 	return float64(vo) / 1000
 }
 
+func (vo Millicores) Uint() uint {
+	return uint(vo)
+}
+
 func (vo Millicores) String() string {
 	return strconv.FormatUint(uint64(vo), 10)
 }
