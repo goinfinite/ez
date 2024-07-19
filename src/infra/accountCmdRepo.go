@@ -3,6 +3,7 @@ package infra
 import (
 	"encoding/hex"
 	"errors"
+	"log/slog"
 	"os"
 	"os/user"
 	"strconv"
@@ -354,17 +355,38 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	storagePerformanceUnitsUsage := uint(0)
 
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
+	profileIdProfileEntityMap := map[valueObject.ContainerProfileId]entity.ContainerProfile{}
 	for _, container := range containers {
-		containerProfile, err := profileQueryRepo.ReadById(
-			container.ProfileId,
-		)
-		if err != nil {
+		if _, exists := profileIdProfileEntityMap[container.ProfileId]; exists {
 			continue
 		}
 
-		containerMillicores := containerProfile.BaseSpecs.Millicores.Uint()
-		containerMemoryBytes := containerProfile.BaseSpecs.MemoryBytes.Read()
-		storagePerformanceUnits := containerProfile.BaseSpecs.StoragePerformanceUnits.Uint()
+		profileEntity, err := profileQueryRepo.ReadById(container.ProfileId)
+		if err != nil {
+			slog.Debug(
+				"ReadProfileByIdError",
+				slog.Uint64("profileId", container.ProfileId.Read()),
+				slog.Any("error", err),
+			)
+			continue
+		}
+
+		profileIdProfileEntityMap[container.ProfileId] = profileEntity
+	}
+
+	for _, container := range containers {
+		profileEntity, exists := profileIdProfileEntityMap[container.ProfileId]
+		if !exists {
+			slog.Debug(
+				"ProfileNotFoundForContainer",
+				slog.String("containerId", container.Id.String()),
+			)
+			continue
+		}
+
+		containerMillicores := profileEntity.BaseSpecs.Millicores.Uint()
+		containerMemoryBytes := profileEntity.BaseSpecs.MemoryBytes.Read()
+		storagePerformanceUnits := profileEntity.BaseSpecs.StoragePerformanceUnits.Uint()
 
 		millicoresUsage += containerMillicores
 		memoryBytesUsage += containerMemoryBytes
