@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -24,11 +24,8 @@ func UpdateContainer(
 	shouldUpdateQuota := updateDto.ProfileId != nil
 	if shouldUpdateQuota {
 		err = CheckAccountQuota(
-			accountQueryRepo,
-			updateDto.AccountId,
-			containerProfileQueryRepo,
-			*updateDto.ProfileId,
-			&containerEntity.ProfileId,
+			accountQueryRepo, containerProfileQueryRepo, updateDto.AccountId,
+			*updateDto.ProfileId, &containerEntity.ProfileId,
 		)
 		if err != nil {
 			return err
@@ -37,14 +34,14 @@ func UpdateContainer(
 
 	err = containerCmdRepo.Update(updateDto)
 	if err != nil {
-		log.Printf("UpdateContainerError: %s", err)
+		slog.Error("UpdateContainerInfraError", slog.Any("error", err))
 		return errors.New("UpdateContainerInfraError")
 	}
 
 	if shouldUpdateQuota {
 		err = accountCmdRepo.UpdateQuotaUsage(updateDto.AccountId)
 		if err != nil {
-			log.Printf("UpdateAccountQuotaError: %s", err)
+			slog.Error("UpdateAccountQuotaInfraError", slog.Any("error", err))
 			return errors.New("UpdateAccountQuotaError")
 		}
 	}

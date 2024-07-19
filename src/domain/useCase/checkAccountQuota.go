@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
@@ -11,51 +11,51 @@ import (
 
 func CheckAccountQuota(
 	accountQueryRepo repository.AccountQueryRepo,
-	accId valueObject.AccountId,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
+	accountId valueObject.AccountId,
 	newProfileId valueObject.ContainerProfileId,
 	prevProfileId *valueObject.ContainerProfileId,
 ) error {
-	accEntity, err := accountQueryRepo.ReadById(accId)
+	accountEntity, err := accountQueryRepo.ReadById(accountId)
 	if err != nil {
-		log.Printf("GetAccountInfoError: %s", err)
+		slog.Error("GetAccountInfoInfraError", slog.Any("error", err))
 		return errors.New("GetAccountInfoInfraError")
 	}
 
-	newProfile, err := containerProfileQueryRepo.ReadById(newProfileId)
+	newProfileEntity, err := containerProfileQueryRepo.ReadById(newProfileId)
 	if err != nil {
-		log.Printf("GetNewContainerProfileError: %s", err)
+		slog.Error("GetNewContainerProfileInfraError", slog.Any("error", err))
 		return errors.New("GetNewContainerProfileInfraError")
 	}
 
-	var prevProfilePtr *entity.ContainerProfile
+	var prevProfileEntityPtr *entity.ContainerProfile
 	if prevProfileId != nil {
-		prevProfile, err := containerProfileQueryRepo.ReadById(*prevProfileId)
+		prevProfileEntity, err := containerProfileQueryRepo.ReadById(*prevProfileId)
 		if err != nil {
-			log.Printf("GetPrevContainerProfileError: %s", err)
+			slog.Error("GetPrevContainerProfileInfraError", slog.Any("error", err))
 			return errors.New("GetPrevContainerProfileInfraError")
 		}
-		prevProfilePtr = &prevProfile
+		prevProfileEntityPtr = &prevProfileEntity
 	}
 
-	accCpuLimit := accEntity.Quota.CpuCores
-	accMemoryLimit := accEntity.Quota.MemoryBytes
+	accountCpuLimit := accountEntity.Quota.Millicores
+	accountMemoryLimit := accountEntity.Quota.MemoryBytes
 
-	accCpuUsage := accEntity.QuotaUsage.CpuCores
-	accMemoryUsage := accEntity.QuotaUsage.MemoryBytes
-	if prevProfilePtr != nil {
-		accCpuUsage -= prevProfilePtr.BaseSpecs.CpuCores
-		accMemoryUsage -= prevProfilePtr.BaseSpecs.MemoryBytes
+	accountCpuUsage := accountEntity.QuotaUsage.Millicores
+	accountMemoryUsage := accountEntity.QuotaUsage.MemoryBytes
+	if prevProfileEntityPtr != nil {
+		accountCpuUsage -= prevProfileEntityPtr.BaseSpecs.Millicores
+		accountMemoryUsage -= prevProfileEntityPtr.BaseSpecs.MemoryBytes
 	}
 
-	newContainerCpuLimit := newProfile.BaseSpecs.CpuCores
-	newContainerMemoryLimit := newProfile.BaseSpecs.MemoryBytes
+	newContainerCpuLimit := newProfileEntity.BaseSpecs.Millicores
+	newContainerMemoryLimit := newProfileEntity.BaseSpecs.MemoryBytes
 
-	if accCpuUsage+newContainerCpuLimit > accCpuLimit {
+	if accountCpuUsage+newContainerCpuLimit > accountCpuLimit {
 		return errors.New("CpuQuotaUsageExceeded")
 	}
 
-	if accMemoryUsage+newContainerMemoryLimit > accMemoryLimit {
+	if accountMemoryUsage+newContainerMemoryLimit > accountMemoryLimit {
 		return errors.New("MemoryQuotaUsageExceeded")
 	}
 

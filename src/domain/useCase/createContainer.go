@@ -20,7 +20,7 @@ func CreateContainer(
 	createDto dto.CreateContainer,
 ) error {
 	err := CheckAccountQuota(
-		accountQueryRepo, createDto.AccountId, containerProfileQueryRepo,
+		accountQueryRepo, containerProfileQueryRepo, createDto.AccountId,
 		*createDto.ProfileId, nil,
 	)
 	if err != nil {
