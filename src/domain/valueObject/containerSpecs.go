@@ -2,60 +2,62 @@ package valueObject
 
 import (
 	"errors"
-	"strconv"
 	"strings"
 )
 
 type ContainerSpecs struct {
-	CpuCores    CpuCoresCount `json:"cpuCores"`
-	MemoryBytes Byte          `json:"memoryBytes"`
+	Millicores              Millicores              `json:"millicores"`
+	MemoryBytes             Byte                    `json:"memoryBytes"`
+	StoragePerformanceUnits StoragePerformanceUnits `json:"storagePerformanceUnits"`
 }
 
-func NewContainerSpecs(cpuCores CpuCoresCount, memoryBytes Byte) ContainerSpecs {
+func NewContainerSpecs(
+	millicores Millicores, memoryBytes Byte, storagePerformanceUnits StoragePerformanceUnits,
+) ContainerSpecs {
 	return ContainerSpecs{
-		CpuCores:    cpuCores,
-		MemoryBytes: memoryBytes,
+		Millicores:              millicores,
+		MemoryBytes:             memoryBytes,
+		StoragePerformanceUnits: storagePerformanceUnits,
 	}
 }
 
-func NewContainerSpecsFromString(value string) (ContainerSpecs, error) {
+func NewContainerSpecsFromString(value string) (specs ContainerSpecs, err error) {
 	if value == "" {
-		return ContainerSpecs{}, errors.New("InvalidContainerSpecs")
+		return specs, errors.New("InvalidContainerSpecs")
 	}
 
 	if !strings.Contains(value, ":") {
-		return ContainerSpecs{}, errors.New("InvalidContainerSpecs")
+		return specs, errors.New("InvalidContainerSpecs")
 	}
 
 	specParts := strings.Split(value, ":")
 	if len(specParts) != 2 {
-		return ContainerSpecs{}, errors.New("InvalidContainerSpecs")
+		return specs, errors.New("InvalidContainerSpecs")
 	}
 
-	cpuCores, err := NewCpuCoresCount(specParts[0])
+	millicores, err := NewMillicores(specParts[0])
 	if err != nil {
-		return ContainerSpecs{}, err
+		return specs, err
 	}
 
-	memory, err := strconv.ParseUint(specParts[1], 10, 64)
+	memory, err := NewByte(specParts[1])
 	if err != nil {
-		return ContainerSpecs{}, errors.New("InvalidMemoryLimit")
+		return specs, err
 	}
 
-	return NewContainerSpecs(
-		cpuCores,
-		Byte(int64(memory)),
-	), nil
-}
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits(1)
+	if len(specParts) == 3 {
+		storagePerformanceUnits, err = NewStoragePerformanceUnits(specParts[2])
+		if err != nil {
+			return specs, err
+		}
+	}
 
-func (specs ContainerSpecs) GetCpuCores() CpuCoresCount {
-	return specs.CpuCores
-}
-
-func (specs ContainerSpecs) GetMemoryBytes() Byte {
-	return specs.MemoryBytes
+	return NewContainerSpecs(millicores, memory, storagePerformanceUnits), nil
 }
 
 func (specs ContainerSpecs) String() string {
-	return specs.CpuCores.String() + ":" + specs.MemoryBytes.String()
+	return specs.Millicores.String() + ":" +
+		specs.MemoryBytes.String() + ":" +
+		specs.StoragePerformanceUnits.String()
 }

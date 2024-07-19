@@ -2,88 +2,100 @@ package valueObject
 
 import (
 	"errors"
+	"strconv"
 	"strings"
-
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type AccountQuota struct {
-	CpuCores    CpuCoresCount `json:"cpuCores"`
-	MemoryBytes Byte          `json:"memoryBytes"`
-	DiskBytes   Byte          `json:"diskBytes"`
-	Inodes      InodesCount   `json:"inodes"`
+	Millicores              Millicores              `json:"millicores"`
+	MemoryBytes             Byte                    `json:"memoryBytes"`
+	StorageBytes            Byte                    `json:"storageBytes"`
+	StorageInodes           uint64                  `json:"storageInodes"`
+	StoragePerformanceUnits StoragePerformanceUnits `json:"storagePerformanceUnits"`
 }
 
 func NewAccountQuota(
-	cpuCores CpuCoresCount,
-	memoryBytes Byte,
-	diskBytes Byte,
-	inodes InodesCount,
+	millicores Millicores,
+	memoryBytes, storageBytes Byte,
+	storageInodes uint64,
+	storagePerformanceUnits StoragePerformanceUnits,
 ) AccountQuota {
 	return AccountQuota{
-		CpuCores:    cpuCores,
-		MemoryBytes: memoryBytes,
-		DiskBytes:   diskBytes,
-		Inodes:      inodes,
+		Millicores:              millicores,
+		MemoryBytes:             memoryBytes,
+		StorageBytes:            storageBytes,
+		StorageInodes:           storageInodes,
+		StoragePerformanceUnits: storagePerformanceUnits,
 	}
 }
 
-func NewAccountQuotaFromString(value string) (AccountQuota, error) {
+func NewAccountQuotaFromString(value string) (quota AccountQuota, err error) {
 	if value == "" {
-		return AccountQuota{}, errors.New("InvalidAccountQuotaValue")
+		return quota, errors.New("InvalidAccountQuotaValue")
 	}
 
 	if !strings.Contains(value, ":") {
-		return AccountQuota{}, errors.New("InvalidAccountQuotaFormat")
+		return quota, errors.New("InvalidAccountQuotaFormat")
 	}
 
-	specParts := strings.Split(value, ":")
-	if len(specParts) != 4 {
-		return AccountQuota{}, errors.New("InvalidAccountQuotaStructure")
+	quotaParts := strings.Split(value, ":")
+	if len(quotaParts) != 5 {
+		return quota, errors.New("InvalidAccountQuotaStructure")
 	}
 
-	cpuCores, err := NewCpuCoresCount(specParts[0])
+	millicores, err := NewMillicores(quotaParts[0])
 	if err != nil {
-		return AccountQuota{}, err
+		return quota, err
 	}
 
-	memory, err := voHelper.InterfaceToUint64(specParts[1])
+	memoryBytes, err := NewByte(quotaParts[1])
 	if err != nil {
-		return AccountQuota{}, errors.New("InvalidMemoryLimit")
+		return quota, err
 	}
 
-	disk, err := voHelper.InterfaceToUint64(specParts[2])
+	storageBytes, err := NewByte(quotaParts[2])
 	if err != nil {
-		return AccountQuota{}, errors.New("InvalidDiskLimit")
+		return quota, err
 	}
 
-	inodes, err := NewInodesCount(specParts[3])
+	storageInodes, err := strconv.ParseUint(quotaParts[3], 10, 64)
 	if err != nil {
-		return AccountQuota{}, err
+		return quota, errors.New("InvalidAccountQuotaInodes")
+	}
+
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits(1)
+	if len(quotaParts) == 5 {
+		storagePerformanceUnits, err = NewStoragePerformanceUnits(quotaParts[4])
+		if err != nil {
+			return quota, err
+		}
 	}
 
 	return NewAccountQuota(
-		cpuCores,
-		Byte(int64(memory)),
-		Byte(int64(disk)),
-		inodes,
+		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
 	), nil
 }
 
 func NewAccountQuotaWithDefaultValues() AccountQuota {
-	return AccountQuota{
-		CpuCores:    NewCpuCoresCountPanic(0.5),
-		MemoryBytes: NewBytePanic(1073741824),
-		DiskBytes:   NewBytePanic(5368709120),
-		Inodes:      NewInodesCountPanic(500000),
-	}
+	millicores, _ := NewMillicores("500")
+	memoryBytes, _ := NewByte("1073741824")
+	storageBytes, _ := NewByte("5368709120")
+	storageInodes := uint64(500000)
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits("1")
+
+	return NewAccountQuota(
+		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
+	)
 }
 
 func NewAccountQuotaWithBlankValues() AccountQuota {
-	return AccountQuota{
-		CpuCores:    NewCpuCoresCountPanic(0),
-		MemoryBytes: NewBytePanic(0),
-		DiskBytes:   NewBytePanic(0),
-		Inodes:      NewInodesCountPanic(0),
-	}
+	millicores, _ := NewMillicores("0")
+	memoryBytes, _ := NewByte("0")
+	storageBytes, _ := NewByte("0")
+	storageInodes := uint64(0)
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits("0")
+
+	return NewAccountQuota(
+		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
+	)
 }

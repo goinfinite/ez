@@ -8,9 +8,9 @@ type StorageUnitInfo struct {
 	FreeBytes         Byte           `json:"freeBytes"`
 	UsedBytes         Byte           `json:"usedBytes"`
 	UsedPercent       float64        `json:"usedPercent"`
-	TotalInodes       InodesCount    `json:"totalInodes"`
-	FreeInodes        InodesCount    `json:"freeInodes"`
-	UsedInodes        InodesCount    `json:"usedInodes"`
+	TotalInodes       uint64         `json:"totalInodes"`
+	FreeInodes        uint64         `json:"freeInodes"`
+	UsedInodes        uint64         `json:"usedInodes"`
 	UsedInodesPercent float64        `json:"usedInodesPercent"`
 	ReadBytes         Byte           `json:"readBytes"`
 	ReadOpsCount      uint64         `json:"readOpsCount"`
@@ -22,13 +22,9 @@ func NewStorageUnitInfo(
 	deviceName DeviceName,
 	mountPoint UnixFilePath,
 	fileSystem UnixFileSystem,
-	totalBytes Byte,
-	freeBytes Byte,
-	usedBytes Byte,
+	totalBytes, freeBytes, usedBytes Byte,
 	usedPercent float64,
-	totalInodes InodesCount,
-	freeInodes InodesCount,
-	usedInodes InodesCount,
+	totalInodes, freeInodes, usedInodes uint64,
 	usedInodesPercent float64,
 	readBytes Byte,
 	readOpsCount uint64,

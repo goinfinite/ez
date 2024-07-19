@@ -1,29 +1,25 @@
 package valueObject
 
 type ContainerMetrics struct {
-	CurrentCpuPercent  float64     `json:"currentCpuPercent"`
-	AverageCpuPercent  float64     `json:"avgCpuPercent"`
-	MemoryBytes        Byte        `json:"memoryBytes"`
-	MemoryPercent      float64     `json:"memoryPercent"`
-	StorageInputBytes  Byte        `json:"storageInputBytes"`
-	StorageOutputBytes Byte        `json:"storageOutputBytes"`
-	StorageSpaceBytes  Byte        `json:"storageSpaceBytes"`
-	StorageInodesCount InodesCount `json:"storageInodesCount"`
-	NetInputBytes      Byte        `json:"netInputBytes"`
-	NetOutputBytes     Byte        `json:"netOutputBytes"`
+	CurrentCpuPercent  float64 `json:"currentCpuPercent"`
+	AverageCpuPercent  float64 `json:"avgCpuPercent"`
+	MemoryBytes        Byte    `json:"memoryBytes"`
+	MemoryPercent      float64 `json:"memoryPercent"`
+	StorageInputBytes  Byte    `json:"storageInputBytes"`
+	StorageOutputBytes Byte    `json:"storageOutputBytes"`
+	StorageSpaceBytes  Byte    `json:"storageSpaceBytes"`
+	StorageInodesCount uint64  `json:"storageInodesCount"`
+	NetInputBytes      Byte    `json:"netInputBytes"`
+	NetOutputBytes     Byte    `json:"netOutputBytes"`
 }
 
 func NewContainerMetrics(
-	currentCpuPercent float64,
-	averageCpuPercent float64,
+	currentCpuPercent, averageCpuPercent float64,
 	memoryBytes Byte,
 	memoryPercent float64,
-	storageInputBytes Byte,
-	storageOutputBytes Byte,
-	storageSpaceBytes Byte,
-	storageInodesCount InodesCount,
-	netInputBytes Byte,
-	netOutputBytes Byte,
+	storageInputBytes, storageOutputBytes, storageSpaceBytes Byte,
+	storageInodesCount uint64,
+	netInputBytes, netOutputBytes Byte,
 ) ContainerMetrics {
 	return ContainerMetrics{
 		CurrentCpuPercent:  currentCpuPercent,

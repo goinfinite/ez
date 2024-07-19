@@ -1,15 +1,15 @@
 package valueObject
 
 type HardwareSpecs struct {
-	CpuModelName     CpuModelName  `json:"cpuModelName"`
-	CpuCoresCount    CpuCoresCount `json:"cpuCoresCount"`
-	CpuFrequency     float64       `json:"cpuFrequency"`
-	MemoryTotalBytes Byte          `json:"memoryTotalBytes"`
+	CpuModelName     CpuModelName `json:"cpuModelName"`
+	CpuCoresCount    float64      `json:"cpuCoresCount"`
+	CpuFrequency     float64      `json:"cpuFrequency"`
+	MemoryTotalBytes Byte         `json:"memoryTotalBytes"`
 }
 
 func NewHardwareSpecs(
 	cpuModelName CpuModelName,
-	cpuCoresCount CpuCoresCount,
+	cpuCoresCount float64,
 	cpuFrequency float64,
 	memoryTotalBytes Byte,
 ) HardwareSpecs {
