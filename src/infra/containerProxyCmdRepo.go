@@ -11,7 +11,7 @@ import (
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
-const ProxyWebServerFile = "/var/nginx/http.d/container-proxy.conf"
+const ProxyWebServerFile string = "/var/nginx/http.d/container-proxy.conf"
 
 type ContainerProxyCmdRepo struct {
 	persistentDbSvc    *db.PersistentDatabaseService
@@ -41,9 +41,10 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 
 	controlHostname, err := valueObject.NewFqdn(rawControlHostname)
 	if err != nil {
-		return errors.New("InvalidControlHostname: " + err.Error())
+		return errors.New("InvalidSpeediaControlHostname: " + err.Error())
 	}
 
+	//cspell:disable
 	fileTemplate := `server {
 	listen 1618 ssl;
 	server_name ` + controlHostname.String() + `;
@@ -52,11 +53,19 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 	ssl_certificate_key /var/speedia/pki/control.key;
 	{{ range . }}
 	location /{{ .ContainerId }}/ {
+		sub_filter_once off;
+		sub_filter_types application/javascript;
+		sub_filter '"/_/"' '"/{{ .ContainerId }}/_/"';
+		sub_filter 'src="/_/' 'src="/{{ .ContainerId }}/_/';
+		sub_filter 'href="/_/' 'href="/{{ .ContainerId }}/_/';
+		sub_filter 'src=/_/' 'src=/{{ .ContainerId }}/_/';
+		sub_filter 'href=/_/' 'href=/{{ .ContainerId }}/_/';
+
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
 		proxy_set_header X-Proxied-By "Speedia Control";
 		proxy_set_header X-Container-Id "{{ .ContainerId }}";
-		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
+		proxy_pass https://localhost:{{ .ContainerPrivatePort }}/;
 	}
 	{{- end }}
 }
@@ -77,6 +86,7 @@ server {
 	}
 }
 {{ end }}`
+	//cspell:enable
 
 	if len(proxyModels) == 0 {
 		fileTemplate = ``
