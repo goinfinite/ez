@@ -18,6 +18,8 @@ import (
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
+const PublicIpTransientKey string = "PublicIp"
+
 type O11yQueryRepo struct {
 	transientDbSvc *db.TransientDatabaseService
 }
@@ -39,8 +41,29 @@ func (repo *O11yQueryRepo) getUptime() (uint64, error) {
 	return uint64(sysinfo.Uptime), nil
 }
 
+func (repo *O11yQueryRepo) ReadServerPublicIpAddress() (
+	ipAddress valueObject.IpAddress, err error,
+) {
+	cachedIpAddressStr, err := repo.transientDbSvc.Get(PublicIpTransientKey)
+	if err == nil {
+		return valueObject.NewIpAddress(cachedIpAddressStr)
+	}
+
+	serverPublicIpAddress, err := infraHelper.ReadServerPublicIpAddress()
+	if err != nil {
+		return ipAddress, errors.New("ReadServerPublicIpAddressError: " + err.Error())
+	}
+
+	err = repo.transientDbSvc.Set(PublicIpTransientKey, serverPublicIpAddress.String())
+	if err != nil {
+		return ipAddress, errors.New("PersistPublicIpFailed: " + err.Error())
+	}
+
+	return serverPublicIpAddress, nil
+}
+
 func (repo *O11yQueryRepo) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
-	var storageInfos []valueObject.StorageUnitInfo
+	storageInfos := []valueObject.StorageUnitInfo{}
 
 	initialStats, err := disk.IOCounters()
 	if err != nil {
@@ -63,14 +86,7 @@ func (repo *O11yQueryRepo) getStorageUnitInfos() ([]valueObject.StorageUnitInfo,
 	}
 
 	desireableFileSystems := []string{
-		"xfs",
-		"btrfs",
-		"ext4",
-		"ext3",
-		"ext2",
-		"zfs",
-		"vfat",
-		"ntfs",
+		"xfs", "btrfs", "ext4", "ext3", "ext2", "zfs", "vfat", "ntfs",
 	}
 	scannedDevices := []string{}
 	for _, partition := range partitions {
@@ -118,9 +134,9 @@ func (repo *O11yQueryRepo) getStorageUnitInfos() ([]valueObject.StorageUnitInfo,
 			valueObject.Byte(usageStat.Free),
 			valueObject.Byte(usageStat.Used),
 			infraHelper.RoundFloat(usageStat.UsedPercent),
-			valueObject.InodesCount(usageStat.InodesTotal),
-			valueObject.InodesCount(usageStat.InodesFree),
-			valueObject.InodesCount(usageStat.InodesUsed),
+			usageStat.InodesTotal,
+			usageStat.InodesFree,
+			usageStat.InodesUsed,
 			infraHelper.RoundFloat(usageStat.InodesUsedPercent),
 			valueObject.Byte(readBytes),
 			readOpsCount,
@@ -144,9 +160,9 @@ func (repo *O11yQueryRepo) getMemLimit() (uint64, error) {
 	return memInfo.Total, nil
 }
 
-func (repo *O11yQueryRepo) getHardwareSpecs() (valueObject.HardwareSpecs, error) {
-	var hardwareSpecs valueObject.HardwareSpecs
-
+func (repo *O11yQueryRepo) getHardwareSpecs() (
+	hardwareSpecs valueObject.HardwareSpecs, err error,
+) {
 	cpuInfo, err := cpu.Info()
 	if err != nil {
 		return hardwareSpecs, errors.New("GetCpuInfoFailed")
@@ -163,10 +179,7 @@ func (repo *O11yQueryRepo) getHardwareSpecs() (valueObject.HardwareSpecs, error)
 
 	cpuFrequency := infraHelper.RoundFloat(cpuInfo[0].Mhz)
 
-	cpuCores, err := valueObject.NewCpuCoresCount(len(cpuInfo))
-	if err != nil {
-		return hardwareSpecs, errors.New("GetCpuCoresCountFailed")
-	}
+	cpuCoresCount := float64(len(cpuInfo))
 
 	memoryLimit, err := repo.getMemLimit()
 	if err != nil {
@@ -175,7 +188,7 @@ func (repo *O11yQueryRepo) getHardwareSpecs() (valueObject.HardwareSpecs, error)
 
 	return valueObject.NewHardwareSpecs(
 		cpuModel,
-		cpuCores,
+		cpuCoresCount,
 		cpuFrequency,
 		valueObject.Byte(memoryLimit),
 	), nil
@@ -320,7 +333,7 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (valueObject.HostResourceUsage
 	), nil
 }
 
-func (repo *O11yQueryRepo) ReadOverview() (entity.O11yOverview, error) {
+func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err error) {
 	hostnameStr, err := os.Hostname()
 	if err != nil {
 		hostnameStr = "localhost"
@@ -328,7 +341,7 @@ func (repo *O11yQueryRepo) ReadOverview() (entity.O11yOverview, error) {
 
 	hostname, err := valueObject.NewFqdn(hostnameStr)
 	if err != nil {
-		return entity.O11yOverview{}, errors.New("GetHostnameFailed")
+		return overview, errors.New("GetHostnameFailed")
 	}
 
 	uptime, err := repo.getUptime()
@@ -336,28 +349,22 @@ func (repo *O11yQueryRepo) ReadOverview() (entity.O11yOverview, error) {
 		uptime = 0
 	}
 
-	publicIpAddress, err := infraHelper.GetPublicIpAddress(repo.transientDbSvc)
+	publicIpAddress, err := infraHelper.ReadServerPublicIpAddress()
 	if err != nil {
 		publicIpAddress, _ = valueObject.NewIpAddress("0.0.0.0")
 	}
 
 	hardwareSpecs, err := repo.getHardwareSpecs()
 	if err != nil {
-		log.Printf("GetHardwareSpecsFailed: %v", err)
-		return entity.O11yOverview{}, errors.New("GetHardwareSpecsFailed")
+		return overview, errors.New("GetHardwareSpecsFailed: " + err.Error())
 	}
 
 	currentResourceUsage, err := repo.getHostResourceUsage()
 	if err != nil {
-		log.Printf("GetHostResourceUsageFailed: %v", err)
-		return entity.O11yOverview{}, errors.New("GetHostResourceUsageFailed")
+		return overview, errors.New("GetHostResourceUsageFailed: " + err.Error())
 	}
 
 	return entity.NewO11yOverview(
-		hostname,
-		uptime,
-		publicIpAddress,
-		hardwareSpecs,
-		currentResourceUsage,
+		hostname, uptime, publicIpAddress, hardwareSpecs, currentResourceUsage,
 	), nil
 }

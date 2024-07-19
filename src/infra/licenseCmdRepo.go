@@ -13,6 +13,7 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
+	o11yInfra "github.com/speedianet/control/src/infra/o11y"
 	"gorm.io/gorm"
 )
 
@@ -93,7 +94,8 @@ func (repo *LicenseCmdRepo) generateFingerprint() (
 	fingerprintFirstPart := hwUuid + rootFsUuid + privateIp + installationUnixTime
 	firstPartShortHashStr := infraHelper.GenShortHash(fingerprintFirstPart)
 
-	publicIp, err := infraHelper.GetPublicIpAddress(repo.transientDbSvc)
+	o11yQueryRepo := o11yInfra.NewO11yQueryRepo(repo.transientDbSvc)
+	publicIp, err := o11yQueryRepo.ReadServerPublicIpAddress()
 	if err != nil {
 		return fingerprint, err
 	}
