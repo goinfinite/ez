@@ -111,8 +111,8 @@ func TestAccountCmdRepo(t *testing.T) {
 
 		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
-		quota.CpuCores = valueObject.NewCpuCoresCountPanic(1)
-		quota.DiskBytes = valueObject.NewBytePanic(1073741824)
+		quota.Millicores, _ = valueObject.NewMillicores(1000)
+		quota.StorageBytes, _ = valueObject.NewByte(1073741824)
 
 		err := accountCmdRepo.UpdateQuota(accountId, quota)
 		if err != nil {
@@ -142,7 +142,7 @@ func TestAccountCmdRepo(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if accEntity.QuotaUsage.DiskBytes.Read() < 100000000 {
+		if accEntity.QuotaUsage.StorageBytes.Read() < 100000000 {
 			t.Error("QuotaUsageNotUpdated")
 		}
 
