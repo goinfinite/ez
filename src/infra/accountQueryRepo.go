@@ -28,7 +28,7 @@ func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
 		Preload("Quota").
 		Preload("QuotaUsage").Find(&accountModels).Error
 	if err != nil {
-		return accountEntities, errors.New("DatabaseQueryAccountsError")
+		return accountEntities, errors.New("QueryAccountsError: " + err.Error())
 	}
 
 	for _, accountModel := range accountModels {
@@ -38,7 +38,7 @@ func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
 				slog.Any("error", err.Error()),
 				slog.Uint64("accountId", uint64(accountModel.ID)),
 			)
-			log.Printf("AccountModelToEntityError: %v", err.Error())
+			log.Printf("ModelToEntityError: %v", err.Error())
 			continue
 		}
 
@@ -50,34 +50,39 @@ func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
 
 func (repo *AccountQueryRepo) ReadByUsername(
 	username valueObject.Username,
-) (entity.Account, error) {
+) (accountEntity entity.Account, err error) {
 	accountEntities, err := repo.Read()
 	if err != nil {
-		return entity.Account{}, errors.New("AccountQueryError")
+		return accountEntity, errors.New("ReadAccountsError: " + err.Error())
 	}
 
+	usernameStr := username.String()
 	for _, accountEntity := range accountEntities {
-		if accountEntity.Username.String() == username.String() {
-			return accountEntity, nil
+		if accountEntity.Username.String() != usernameStr {
+			continue
 		}
+
+		return accountEntity, nil
 	}
 
-	return entity.Account{}, errors.New("AccountNotFound")
+	return accountEntity, errors.New("AccountNotFound")
 }
 
 func (repo *AccountQueryRepo) ReadById(
 	accountId valueObject.AccountId,
-) (entity.Account, error) {
+) (accountEntity entity.Account, err error) {
 	accountEntities, err := repo.Read()
 	if err != nil {
-		return entity.Account{}, errors.New("AccountQueryError")
+		return accountEntity, errors.New("ReadAccountsError: " + err.Error())
 	}
 
 	for _, accountEntity := range accountEntities {
-		if accountEntity.Id.String() == accountId.String() {
-			return accountEntity, nil
+		if accountEntity.Id.String() != accountId.String() {
+			continue
 		}
+
+		return accountEntity, nil
 	}
 
-	return entity.Account{}, errors.New("AccountNotFound")
+	return accountEntity, errors.New("AccountNotFound")
 }
