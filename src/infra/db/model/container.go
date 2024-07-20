@@ -1,7 +1,7 @@
 package dbModel
 
 import (
-	"errors"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -11,16 +11,16 @@ import (
 
 type Container struct {
 	ID            string `gorm:"primarykey"`
-	AccountID     uint   `gorm:"not null"`
+	AccountID     uint64 `gorm:"not null"`
 	Hostname      string `gorm:"not null"`
 	Status        bool   `gorm:"not null"`
 	ImageAddress  string `gorm:"not null"`
 	ImageHash     string `gorm:"not null"`
 	PortBindings  []ContainerPortBinding
 	RestartPolicy string `gorm:"not null"`
-	RestartCount  uint
+	RestartCount  uint64
 	Entrypoint    *string
-	ProfileID     uint `gorm:"not null"`
+	ProfileID     uint64 `gorm:"not null"`
 	Envs          *string
 	CreatedAt     time.Time `gorm:"not null"`
 	UpdatedAt     time.Time `gorm:"not null"`
@@ -32,9 +32,34 @@ func (Container) TableName() string {
 	return "containers"
 }
 
-func (model Container) ToEntity() (entity.Container, error) {
-	var containerEntity entity.Container
+func (Container) JoinEnvs(envs []valueObject.ContainerEnv) string {
+	envsStr := ""
+	for _, env := range envs {
+		envsStr += env.String() + ";"
+	}
 
+	return strings.TrimSuffix(envsStr, ";")
+}
+
+func (Container) SplitEnvs(envsStr string) []valueObject.ContainerEnv {
+	rawEnvsList := strings.Split(envsStr, ";")
+	var envs []valueObject.ContainerEnv
+	for _, rawEnv := range rawEnvsList {
+		env, err := valueObject.NewContainerEnv(rawEnv)
+		if err != nil {
+			slog.Debug(
+				"CreateContainerEnvError",
+				slog.String("rawEnv", rawEnv), slog.Any("error", err),
+			)
+			continue
+		}
+		envs = append(envs, env)
+	}
+
+	return envs
+}
+
+func (model Container) ToEntity() (containerEntity entity.Container, err error) {
 	id, err := valueObject.NewContainerId(model.ID)
 	if err != nil {
 		return containerEntity, err
@@ -107,37 +132,13 @@ func (model Container) ToEntity() (entity.Container, error) {
 
 	envs := []valueObject.ContainerEnv{}
 	if model.Envs != nil {
-		envsParts := strings.Split(*model.Envs, ";")
-		if len(envsParts) == 0 {
-			return containerEntity, errors.New("InvalidEnvs")
-		}
-
-		for _, envPart := range envsParts {
-			env, err := valueObject.NewContainerEnv(envPart)
-			if err != nil {
-				return containerEntity, err
-			}
-			envs = append(envs, env)
-		}
+		envs = model.SplitEnvs(*model.Envs)
 	}
 
 	return entity.NewContainer(
-		id,
-		accountId,
-		hostname,
-		model.Status,
-		imageAddress,
-		imageHash,
-		portBindings,
-		restartPolicy,
-		uint64(model.RestartCount),
-		entryPointPtr,
-		profileId,
-		envs,
-		createdAt,
-		updatedAt,
-		startedAtPtr,
-		stoppedAtPtr,
+		id, accountId, hostname, model.Status, imageAddress, imageHash, portBindings,
+		restartPolicy, model.RestartCount, entryPointPtr, profileId, envs,
+		createdAt, updatedAt, startedAtPtr, stoppedAtPtr,
 	), nil
 }
 
@@ -165,28 +166,24 @@ func (Container) ToModel(entity entity.Container) Container {
 
 	var envsPtr *string
 	if len(entity.Envs) > 0 {
-		envs := ""
-		for _, env := range entity.Envs {
-			envs += env.String() + ";"
-		}
-		envs = strings.TrimSuffix(envs, ";")
+		envs := Container{}.JoinEnvs(entity.Envs)
 		envsPtr = &envs
 	}
 
 	return Container{
 		ID:            entity.Id.String(),
-		AccountID:     uint(entity.AccountId.Uint64()),
+		AccountID:     entity.AccountId.Uint64(),
 		Hostname:      entity.Hostname.String(),
 		Status:        entity.Status,
 		ImageAddress:  entity.ImageAddress.String(),
 		ImageHash:     entity.ImageHash.String(),
 		PortBindings:  portBindingModels,
 		RestartPolicy: entity.RestartPolicy.String(),
-		RestartCount:  uint(entity.RestartCount),
+		RestartCount:  entity.RestartCount,
 		Entrypoint:    entrypointStrPtr,
 		CreatedAt:     time.Unix(entity.CreatedAt.Read(), 0),
 		StartedAt:     startedAtPtr,
-		ProfileID:     uint(entity.ProfileId.Read()),
+		ProfileID:     entity.ProfileId.Uint64(),
 		Envs:          envsPtr,
 	}
 }
