@@ -4,7 +4,7 @@ import "github.com/speedianet/control/src/domain/valueObject"
 
 type Account struct {
 	Id         valueObject.AccountId    `json:"id"`
-	GroupId    valueObject.GroupId      `json:"groupId"`
+	GroupId    valueObject.UnixGroupId  `json:"groupId"`
 	Username   valueObject.Username     `json:"username"`
 	Quota      valueObject.AccountQuota `json:"quota"`
 	QuotaUsage valueObject.AccountQuota `json:"quotaUsage"`
@@ -14,7 +14,7 @@ type Account struct {
 
 func NewAccount(
 	id valueObject.AccountId,
-	groupId valueObject.GroupId,
+	groupId valueObject.UnixGroupId,
 	username valueObject.Username,
 	quota valueObject.AccountQuota,
 	quotaUsage valueObject.AccountQuota,
