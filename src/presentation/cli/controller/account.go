@@ -65,7 +65,10 @@ func (controller *AccountController) Create() *cobra.Command {
 	cmd.MarkFlagRequired("username")
 	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
 	cmd.MarkFlagRequired("password")
-	cmd.Flags().StringVarP(&quotaStr, "quota", "q", "", "AccountQuota (cpu:memory:disk:inodes)")
+	cmd.Flags().StringVarP(
+		&quotaStr, "quota", "q", "",
+		"AccountQuota (cpu:memory:storage:inodes:storagePerformanceUnits)",
+	)
 	return cmd
 }
 
@@ -111,7 +114,10 @@ func (controller *AccountController) Update() *cobra.Command {
 	cmd.Flags().BoolVarP(
 		&shouldUpdateApiKeyBool, "update-api-key", "k", false, "ShouldUpdateApiKey",
 	)
-	cmd.Flags().StringVarP(&quotaStr, "quota", "q", "", "AccountQuota (cpu:memory:disk:inodes)")
+	cmd.Flags().StringVarP(
+		&quotaStr, "quota", "q", "",
+		"AccountQuota (cpu:memory:storage:inodes:storagePerformanceUnits)",
+	)
 	return cmd
 }
 

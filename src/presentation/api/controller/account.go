@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
@@ -47,7 +48,7 @@ func (controller *AccountController) accountQuotaFactory(
 ) (accountQuota valueObject.AccountQuota, err error) {
 	quotaMap, quotaMapOk := quota.(map[string]interface{})
 	if !quotaMapOk {
-		return valueObject.AccountQuota{}, errors.New("InvalidQuotaStructure")
+		return accountQuota, errors.New("InvalidQuotaStructure")
 	}
 
 	accountQuota = valueObject.NewAccountQuotaWithDefaultValues()
@@ -55,9 +56,21 @@ func (controller *AccountController) accountQuotaFactory(
 		accountQuota = valueObject.NewAccountQuotaWithBlankValues()
 	}
 
-	cpuCores := accountQuota.CpuCores
+	millicores := accountQuota.Millicores
 	if quotaMap["cpuCores"] != nil {
-		cpuCores, err = valueObject.NewCpuCoresCount(quotaMap["cpuCores"])
+		cpuCoresUint, err := voHelper.InterfaceToUint(quotaMap["cpuCores"])
+		if err != nil {
+			return accountQuota, err
+		}
+
+		millicores, err = valueObject.NewMillicores(cpuCoresUint * 1000)
+		if err != nil {
+			return accountQuota, err
+		}
+	}
+
+	if quotaMap["millicores"] != nil {
+		millicores, err = valueObject.NewMillicores(quotaMap["millicores"])
 		if err != nil {
 			return accountQuota, err
 		}
@@ -71,23 +84,43 @@ func (controller *AccountController) accountQuotaFactory(
 		}
 	}
 
-	diskBytes := accountQuota.DiskBytes
+	storageBytes := accountQuota.StorageBytes
 	if quotaMap["diskBytes"] != nil {
-		diskBytes, err = valueObject.NewByte(quotaMap["diskBytes"])
+		quotaMap["storageBytes"] = quotaMap["diskBytes"]
+	}
+
+	if quotaMap["storageBytes"] != nil {
+		storageBytes, err = valueObject.NewByte(quotaMap["storageBytes"])
 		if err != nil {
 			return accountQuota, err
 		}
 	}
 
-	inodes := accountQuota.Inodes
+	storageInodes := accountQuota.StorageInodes
 	if quotaMap["inodes"] != nil {
-		inodes, err = valueObject.NewInodesCount(quotaMap["inodes"])
+		quotaMap["storageInodes"] = quotaMap["inodes"]
+	}
+
+	if quotaMap["storageInodes"] != nil {
+		storageInodes, err = voHelper.InterfaceToUint64(quotaMap["storageInodes"])
+		if err != nil {
+			return accountQuota, errors.New("InvalidStorageInodes")
+		}
+	}
+
+	storagePerformanceUnits := accountQuota.StoragePerformanceUnits
+	if quotaMap["storagePerformanceUnits"] != nil {
+		storagePerformanceUnits, err = valueObject.NewStoragePerformanceUnits(
+			quotaMap["storagePerformanceUnits"],
+		)
 		if err != nil {
 			return accountQuota, err
 		}
 	}
 
-	return valueObject.NewAccountQuota(cpuCores, memoryBytes, diskBytes, inodes), nil
+	return valueObject.NewAccountQuota(
+		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
+	), nil
 }
 
 // CreateAccount godoc
