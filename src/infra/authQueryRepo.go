@@ -91,17 +91,17 @@ func (repo *AuthQueryRepo) getTokenDetailsFromSession(
 func (repo *AuthQueryRepo) getKeyHash(
 	accountId valueObject.AccountId,
 ) (string, error) {
-	accModel := dbModel.Account{ID: accountId.Uint64()}
-	err := repo.persistentDbSvc.Handler.Model(&accModel).First(&accModel).Error
+	accountModel := dbModel.Account{ID: accountId.Uint64()}
+	err := repo.persistentDbSvc.Handler.Model(&accountModel).First(&accountModel).Error
 	if err != nil {
 		return "", errors.New("AccountNotFound")
 	}
 
-	if accModel.KeyHash == nil {
+	if accountModel.KeyHash == nil {
 		return "", errors.New("UserKeyHashNotFound")
 	}
 
-	return *accModel.KeyHash, nil
+	return *accountModel.KeyHash, nil
 }
 
 func (repo *AuthQueryRepo) getTokenDetailsFromApiKey(
