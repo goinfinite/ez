@@ -191,6 +191,21 @@ func (repo *ContainerCmdRepo) getAccountHomeDir(
 	)
 }
 
+func (repo *ContainerCmdRepo) getDataDevice() (string, error) {
+	deviceId, err := infraHelper.RunCmdWithSubShell("lsblk | awk '/\\/var\\/data/{print $1}'")
+	if err != nil {
+		return "", err
+	}
+
+	deviceId = strings.TrimSpace(deviceId)
+
+	if len(deviceId) == 0 {
+		return "", errors.New("DataDeviceNotFound")
+	}
+
+	return "/dev/" + deviceId, nil
+}
+
 func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
@@ -209,7 +224,19 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 	cpuQuotaCoresStr := strconv.FormatFloat(cpuQuotaCores, 'f', -1, 64)
 	cpuQuotaPercentile := cpuQuotaCores * 100
 	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
+
 	memoryBytesStr := containerProfile.BaseSpecs.MemoryBytes.String()
+
+	dataDevice, err := repo.getDataDevice()
+	if err != nil {
+		return errors.New("GetDataDeviceError: " + err.Error())
+	}
+
+	storagePerformanceLimits := containerProfile.BaseSpecs.StoragePerformanceUnits.ReadLimits()
+	readBytesStr := storagePerformanceLimits.ReadBytes.String()
+	writeBytesStr := storagePerformanceLimits.WriteBytes.String()
+	readIopsStr := strconv.FormatUint(storagePerformanceLimits.ReadIops, 10)
+	writeIopsStr := strconv.FormatUint(storagePerformanceLimits.WriteIops, 10)
 
 	containerIdStr := containerId.String()
 
@@ -227,7 +254,17 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 CPUQuota=` + cpuQuotaPercentileStr + `
 MemoryMax=` + memoryBytesStr + `
 MemorySwapMax=0
-ExecStartPre=/usr/bin/podman update --cpus ` + cpuQuotaCoresStr + ` --memory ` + containerProfile.BaseSpecs.MemoryBytes.String() + ` ` + containerIdStr + `
+IOReadBandwidthMax=` + dataDevice + readBytesStr + `
+IOWriteBandwidthMax=` + dataDevice + writeBytesStr + `
+IOReadIOPSMax=` + dataDevice + readIopsStr + `
+IOWriteIOPSMax=` + dataDevice + writeIopsStr + `
+ExecStartPre=/usr/bin/podman update --cpus ` + cpuQuotaCoresStr +
+		` --memory ` + memoryBytesStr +
+		` --device-read-bps ` + dataDevice + readBytesStr +
+		` --device-write-bps ` + dataDevice + writeBytesStr +
+		` --device-read-iops ` + dataDevice + readIopsStr +
+		` --device-write-iops ` + dataDevice + writeIopsStr +
+		` ` + containerIdStr + `
 ExecStart=/usr/bin/podman start ` + containerIdStr + `
 ExecStop=/usr/bin/podman stop -t 30 ` + containerIdStr + `
 TimeoutStartSec=30
