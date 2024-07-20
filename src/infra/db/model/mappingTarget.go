@@ -8,8 +8,8 @@ import (
 )
 
 type MappingTarget struct {
-	ID                   uint `gorm:"primarykey"`
-	MappingID            uint
+	ID                   uint64 `gorm:"primarykey"`
+	MappingID            uint64
 	ContainerId          string
 	ContainerHostname    string
 	ContainerPrivatePort uint
@@ -22,10 +22,8 @@ func (MappingTarget) TableName() string {
 }
 
 func NewMappingTarget(
-	id uint,
-	mappingId uint,
-	containerId string,
-	containerHostname string,
+	id, mappingId uint64,
+	containerId, containerHostname string,
 	containerPrivatePort uint,
 ) MappingTarget {
 	targetModel := MappingTarget{
@@ -71,10 +69,6 @@ func (model MappingTarget) ToEntity() (entity.MappingTarget, error) {
 	}
 
 	return entity.NewMappingTarget(
-		id,
-		mappingId,
-		containerId,
-		containerHostname,
-		containerPrivatePort,
+		id, mappingId, containerId, containerHostname, containerPrivatePort,
 	), nil
 }

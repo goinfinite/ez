@@ -34,7 +34,7 @@ func TestMappingCmdRepo(t *testing.T) {
 	})
 
 	t.Run("CreateTargets", func(t *testing.T) {
-		mappingId := valueObject.NewMappingIdPanic(1)
+		mappingId, _ := valueObject.NewMappingId(1)
 		containers, err := containerQueryRepo.Read()
 		if err != nil {
 			t.Errorf("ReadContainersFailed: %v", err)

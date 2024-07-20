@@ -51,7 +51,7 @@ func (repo *MappingQueryRepo) ReadById(
 	var mappingModel dbModel.Mapping
 	err = repo.persistentDbSvc.Handler.
 		Preload("Targets").
-		Where("id = ?", id.Read()).
+		Where("id = ?", id.Uint64()).
 		First(&mappingModel).Error
 	if err != nil {
 		return mappingEntity, errors.New("MappingNotFound")
@@ -93,7 +93,7 @@ func (repo *MappingQueryRepo) ReadTargetById(
 	var mappingTargetModel dbModel.MappingTarget
 
 	err = repo.persistentDbSvc.Handler.
-		Where("id = ?", id.Read()).
+		Where("id = ?", id.Uint64()).
 		First(&mappingTargetModel).Error
 	if err != nil {
 		return mappingTargetEntity, errors.New("MappingTargetNotFound")

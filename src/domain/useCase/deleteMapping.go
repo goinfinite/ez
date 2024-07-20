@@ -24,6 +24,6 @@ func DeleteMapping(
 		return errors.New("DeleteMappingError")
 	}
 
-	slog.Info("MappingDeleted", slog.Uint64("mappingId", mappingId.Read()))
+	slog.Info("MappingDeleted", slog.Uint64("mappingId", mappingId.Uint64()))
 	return nil
 }

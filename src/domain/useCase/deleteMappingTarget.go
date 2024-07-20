@@ -27,8 +27,8 @@ func DeleteMappingTarget(
 
 	slog.Info(
 		"MappingTargetDeleted",
-		slog.Uint64("mappingId", mappingId.Read()),
-		slog.Uint64("targetId", targetId.Read()),
+		slog.Uint64("mappingId", mappingId.Uint64()),
+		slog.Uint64("targetId", targetId.Uint64()),
 	)
 
 	return nil

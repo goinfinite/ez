@@ -43,14 +43,9 @@ func (repo *MappingCmdRepo) Create(
 	}
 
 	mappingModel := dbModel.NewMapping(
-		0,
-		uint(createDto.AccountId.Uint64()),
-		hostnamePtr,
-		uint(createDto.PublicPort.Read()),
-		createDto.Protocol.String(),
-		[]dbModel.MappingTarget{},
-		time.Now(),
-		time.Now(),
+		0, createDto.AccountId.Uint64(), hostnamePtr,
+		uint(createDto.PublicPort.Read()), createDto.Protocol.String(),
+		[]dbModel.MappingTarget{}, time.Now(), time.Now(),
 	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&mappingModel)
@@ -252,7 +247,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 
 	targetModel := dbModel.NewMappingTarget(
 		0,
-		uint(createDto.MappingId.Read()),
+		createDto.MappingId.Uint64(),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
 		uint(containerPrivatePort),
@@ -269,12 +264,12 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 	ormSvc := repo.persistentDbSvc.Handler
 
-	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Read()).Error
+	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Uint64()).Error
 	if err != nil {
 		return err
 	}
 
-	err = ormSvc.Delete(dbModel.Mapping{}, id.Read()).Error
+	err = ormSvc.Delete(dbModel.Mapping{}, id.Uint64()).Error
 	if err != nil {
 		return err
 	}
@@ -287,7 +282,7 @@ func (repo *MappingCmdRepo) DeleteTarget(
 	targetId valueObject.MappingTargetId,
 ) error {
 	err := repo.persistentDbSvc.Handler.Delete(
-		dbModel.MappingTarget{}, "id = ?", targetId.Read(),
+		dbModel.MappingTarget{}, "id = ?", targetId.Uint64(),
 	).Error
 	if err != nil {
 		return err

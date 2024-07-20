@@ -8,8 +8,8 @@ import (
 )
 
 type Mapping struct {
-	ID         uint `gorm:"primarykey"`
-	AccountID  uint
+	ID         uint64 `gorm:"primarykey"`
+	AccountID  uint64
 	Hostname   *string
 	PublicPort uint
 	Protocol   string
@@ -23,14 +23,12 @@ func (Mapping) TableName() string {
 }
 
 func NewMapping(
-	id uint,
-	accountId uint,
+	id, accountId uint64,
 	hostname *string,
 	publicPort uint,
 	protocol string,
 	targets []MappingTarget,
-	createdAt time.Time,
-	updatedAt time.Time,
+	createdAt, updatedAt time.Time,
 ) Mapping {
 	mappingModel := Mapping{
 		AccountID:  accountId,

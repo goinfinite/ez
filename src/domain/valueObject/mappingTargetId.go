@@ -18,18 +18,10 @@ func NewMappingTargetId(value interface{}) (MappingTargetId, error) {
 	return MappingTargetId(targetId), nil
 }
 
-func NewMappingTargetIdPanic(value interface{}) MappingTargetId {
-	targetId, err := NewMappingTargetId(value)
-	if err != nil {
-		panic(err)
-	}
-	return targetId
+func (vo MappingTargetId) Uint64() uint64 {
+	return uint64(vo)
 }
 
-func (id MappingTargetId) Read() uint64 {
-	return uint64(id)
-}
-
-func (id MappingTargetId) String() string {
-	return strconv.FormatUint(uint64(id), 10)
+func (vo MappingTargetId) String() string {
+	return strconv.FormatUint(uint64(vo), 10)
 }

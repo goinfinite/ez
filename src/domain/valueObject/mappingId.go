@@ -10,26 +10,18 @@ import (
 type MappingId uint64
 
 func NewMappingId(value interface{}) (MappingId, error) {
-	mappingId, err := voHelper.InterfaceToUint64(value)
+	uintValue, err := voHelper.InterfaceToUint64(value)
 	if err != nil {
 		return 0, errors.New("InvalidMappingId")
 	}
 
-	return MappingId(mappingId), nil
+	return MappingId(uintValue), nil
 }
 
-func NewMappingIdPanic(value interface{}) MappingId {
-	mappingId, err := NewMappingId(value)
-	if err != nil {
-		panic(err)
-	}
-	return mappingId
+func (vo MappingId) Uint64() uint64 {
+	return uint64(vo)
 }
 
-func (id MappingId) Read() uint64 {
-	return uint64(id)
-}
-
-func (id MappingId) String() string {
-	return strconv.FormatUint(uint64(id), 10)
+func (vo MappingId) String() string {
+	return strconv.FormatUint(uint64(vo), 10)
 }

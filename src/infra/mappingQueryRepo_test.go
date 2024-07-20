@@ -32,7 +32,7 @@ func TestMappingQueryRepo(t *testing.T) {
 			return
 		}
 
-		if mapping.Id.Read() != 1 {
+		if mapping.Id.Uint64() != 1 {
 			t.Error("MappingNotFound")
 			return
 		}
