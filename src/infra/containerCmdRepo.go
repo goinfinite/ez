@@ -244,10 +244,10 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 		"/usr/bin/podman", "update",
 		"--cpus", cpuQuotaCoresStr,
 		"--memory", memoryBytesStr,
-		"--device-read-bps", dataDevice + readBytesStr,
-		"--device-write-bps", dataDevice + writeBytesStr,
-		"--device-read-iops", dataDevice + readIopsStr,
-		"--device-write-iops", dataDevice + writeIopsStr,
+		"--device-read-bps=" + dataDevice + ":" + readBytesStr,
+		"--device-write-bps=" + dataDevice + ":" + writeBytesStr,
+		"--device-read-iops=" + dataDevice + ":" + readIopsStr,
+		"--device-write-iops=" + dataDevice + ":" + writeIopsStr,
 		containerIdStr,
 	}
 	podmanUpdateCmdStr := strings.Join(podmanUpdateCmd, " ")
@@ -266,10 +266,10 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 CPUQuota=` + cpuQuotaPercentileStr + `
 MemoryMax=` + memoryBytesStr + `
 MemorySwapMax=0
-IOReadBandwidthMax=` + dataDevice + readBytesStr + `
-IOWriteBandwidthMax=` + dataDevice + writeBytesStr + `
-IOReadIOPSMax=` + dataDevice + readIopsStr + `
-IOWriteIOPSMax=` + dataDevice + writeIopsStr + `
+IOReadBandwidthMax=` + dataDevice + ` ` + readBytesStr + `
+IOWriteBandwidthMax=` + dataDevice + ` ` + writeBytesStr + `
+IOReadIOPSMax=` + dataDevice + ` ` + readIopsStr + `
+IOWriteIOPSMax=` + dataDevice + ` ` + writeIopsStr + `
 ExecStartPre=` + podmanUpdateCmdStr + `
 ExecStart=/usr/bin/podman start ` + containerIdStr + `
 ExecStop=/usr/bin/podman stop -t 30 ` + containerIdStr + `
@@ -312,7 +312,7 @@ WantedBy=default.target
 
 	// Podman doesn't read the systemd unit file on reload, so it's necessary to
 	// update the container specs directly as well.
-	_, err = infraHelper.RunCmdAsUser(accountId, podmanUpdateCmdStr)
+	_, err = infraHelper.RunCmdAsUserWithSubShell(accountId, podmanUpdateCmdStr)
 	if err != nil {
 		ignorableError := "error opening file"
 		if !strings.Contains(err.Error(), ignorableError) {
