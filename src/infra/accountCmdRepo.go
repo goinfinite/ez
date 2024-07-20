@@ -30,7 +30,7 @@ func NewAccountCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *AccountCm
 func (repo *AccountCmdRepo) updateFilesystemQuota(
 	accountId valueObject.AccountId, quota valueObject.AccountQuota,
 ) error {
-	diskBytesStr := quota.StorageBytes.String()
+	storageBytesStr := quota.StorageBytes.String()
 	inodesStr := strconv.FormatUint(quota.StorageInodes, 10)
 	accountIdStr := accountId.String()
 
@@ -40,7 +40,7 @@ func (repo *AccountCmdRepo) updateFilesystemQuota(
 
 	xfsFlags := "-x -c 'limit -u"
 	if shouldUpdateDiskQuota {
-		xfsFlags += " bhard=" + diskBytesStr
+		xfsFlags += " bhard=" + storageBytesStr
 	}
 	if shouldUpdateInodeQuota {
 		xfsFlags += " ihard=" + inodesStr
@@ -59,11 +59,10 @@ func (repo *AccountCmdRepo) Create(
 	createDto dto.CreateAccount,
 ) (accountId valueObject.AccountId, err error) {
 	passHash, err := bcrypt.GenerateFromPassword(
-		[]byte(createDto.Password.String()),
-		bcrypt.DefaultCost,
+		[]byte(createDto.Password.String()), bcrypt.DefaultCost,
 	)
 	if err != nil {
-		return accountId, err
+		return accountId, errors.New("PassHashError: " + err.Error())
 	}
 
 	usernameStr := createDto.Username.String()
@@ -80,8 +79,9 @@ func (repo *AccountCmdRepo) Create(
 
 	userInfo, err := user.Lookup(usernameStr)
 	if err != nil {
-		return accountId, err
+		return accountId, errors.New("UserLookupFailed: " + err.Error())
 	}
+
 	accountId, err = valueObject.NewAccountId(userInfo.Uid)
 	if err != nil {
 		return accountId, err
@@ -98,12 +98,12 @@ func (repo *AccountCmdRepo) Create(
 		nowUnixTime, nowUnixTime,
 	)
 
-	accModel, err := dbModel.Account{}.ToModel(accountEntity)
+	accountModel, err := dbModel.Account{}.ToModel(accountEntity)
 	if err != nil {
 		return accountId, err
 	}
 
-	err = repo.persistentDbSvc.Handler.Create(&accModel).Error
+	err = repo.persistentDbSvc.Handler.Create(&accountModel).Error
 	if err != nil {
 		return accountId, err
 	}
@@ -124,13 +124,13 @@ func (repo *AccountCmdRepo) Create(
 func (repo *AccountCmdRepo) getUsernameById(
 	accountId valueObject.AccountId,
 ) (valueObject.Username, error) {
-	accQuery := NewAccountQueryRepo(repo.persistentDbSvc)
-	accDetails, err := accQuery.ReadById(accountId)
+	accountQuery := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQuery.ReadById(accountId)
 	if err != nil {
 		return "", err
 	}
 
-	return accDetails.Username, nil
+	return accountEntity.Username, nil
 }
 
 func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
@@ -160,8 +160,8 @@ func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
 		return err
 	}
 
-	model := dbModel.Account{}
-	modelId := accountId.Uint64()
+	accountModel := dbModel.Account{}
+	accountIdUint64 := accountId.Uint64()
 
 	relatedTables := []string{
 		dbModel.AccountQuota{}.TableName(),
@@ -170,14 +170,14 @@ func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
 
 	for _, tableName := range relatedTables {
 		err := repo.persistentDbSvc.Handler.Exec(
-			"DELETE FROM "+tableName+" WHERE account_id = ?", modelId,
+			"DELETE FROM "+tableName+" WHERE account_id = ?", accountIdUint64,
 		).Error
 		if err != nil {
 			return errors.New("DeleteAccRelatedTablesDbError: " + err.Error())
 		}
 	}
 
-	err = repo.persistentDbSvc.Handler.Delete(model, modelId).Error
+	err = repo.persistentDbSvc.Handler.Delete(accountModel, accountIdUint64).Error
 	if err != nil {
 		return errors.New("DeleteAccDbError: " + err.Error())
 	}
@@ -189,11 +189,10 @@ func (repo *AccountCmdRepo) UpdatePassword(
 	accountId valueObject.AccountId, password valueObject.Password,
 ) error {
 	passHash, err := bcrypt.GenerateFromPassword(
-		[]byte(password.String()),
-		bcrypt.DefaultCost,
+		[]byte(password.String()), bcrypt.DefaultCost,
 	)
 	if err != nil {
-		return err
+		return errors.New("PassHashError: " + err.Error())
 	}
 
 	username, err := repo.getUsernameById(accountId)
@@ -206,37 +205,38 @@ func (repo *AccountCmdRepo) UpdatePassword(
 		return errors.New("UserModFailed: " + err.Error())
 	}
 
-	accModel := dbModel.Account{ID: accountId.Uint64()}
+	accountModel := dbModel.Account{ID: accountId.Uint64()}
 	return repo.persistentDbSvc.Handler.
-		Model(&accModel).
+		Model(&accountModel).
 		Update("updated_at", time.Now()).
 		Error
 }
 
 func (repo *AccountCmdRepo) UpdateApiKey(
 	accountId valueObject.AccountId,
-) (valueObject.AccessTokenValue, error) {
-	uuid := uuid.New()
+) (tokenValue valueObject.AccessTokenValue, err error) {
+	uuidStr := uuid.New().String()
 	secretKey := os.Getenv("ACC_API_KEY_SECRET")
-	apiKeyPlainText := accountId.String() + ":" + uuid.String()
+	apiKeyPlainText := accountId.String() + ":" + uuidStr
 
 	encryptedApiKey, err := infraHelper.EncryptStr(secretKey, apiKeyPlainText)
 	if err != nil {
-		return "", err
+		return tokenValue, err
 	}
 
 	apiKey, err := valueObject.NewAccessTokenValue(encryptedApiKey)
 	if err != nil {
-		return "", err
+		return tokenValue, err
 	}
 
-	uuidHash := infraHelper.GenStrongHash(uuid.String())
+	uuidHash := infraHelper.GenStrongHash(uuidStr)
 
-	accModel := dbModel.Account{ID: accountId.Uint64()}
-	updateResult := repo.persistentDbSvc.Handler.Model(&accModel).
+	accountModel := dbModel.Account{ID: accountId.Uint64()}
+	updateResult := repo.persistentDbSvc.Handler.
+		Model(&accountModel).
 		Update("key_hash", uuidHash)
 	if updateResult.Error != nil {
-		return "", err
+		return tokenValue, err
 	}
 
 	return apiKey, nil
@@ -250,7 +250,7 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 	updateMap := map[string]interface{}{}
 
 	if quota.Millicores.Uint() > 0 {
-		updateMap["cpu_cores"] = quota.Millicores.Uint()
+		updateMap["millicores"] = quota.Millicores.Uint()
 	}
 
 	if quota.MemoryBytes.Read() >= 0 {
@@ -258,10 +258,16 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 	}
 
 	if quota.StorageBytes.Read() >= 0 {
-		updateMap["disk_bytes"] = uint64(quota.StorageBytes.Read())
+		updateMap["storage_bytes"] = uint64(quota.StorageBytes.Read())
 	}
 
-	updateMap["inodes"] = quota.StorageInodes
+	if quota.StorageInodes > 0 {
+		updateMap["storage_inodes"] = quota.StorageInodes
+	}
+
+	if quota.StoragePerformanceUnits.Uint() > 0 {
+		updateMap["storage_performance_units"] = quota.StoragePerformanceUnits.Uint()
+	}
 
 	return repo.persistentDbSvc.Handler.
 		Table(tableName).
@@ -346,9 +352,6 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	if err != nil {
 		return err
 	}
-	millicoresUsage := uint(0)
-	memoryBytesUsage := int64(0)
-	storagePerformanceUnitsUsage := uint(0)
 
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
 	profileIdProfileEntityMap := map[valueObject.ContainerProfileId]entity.ContainerProfile{}
@@ -370,6 +373,10 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 		profileIdProfileEntityMap[container.ProfileId] = profileEntity
 	}
 
+	millicoresUsage := uint(0)
+	memoryBytesUsage := int64(0)
+	storagePerformanceUnitsUsage := uint(0)
+
 	for _, container := range containers {
 		profileEntity, exists := profileIdProfileEntityMap[container.ProfileId]
 		if !exists {
@@ -389,8 +396,16 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 		storagePerformanceUnitsUsage += storagePerformanceUnits
 	}
 
-	millicores, _ := valueObject.NewMillicores(millicoresUsage)
-	memoryBytes, _ := valueObject.NewByte(memoryBytesUsage)
+	millicores, err := valueObject.NewMillicores(millicoresUsage)
+	if err != nil {
+		return err
+	}
+
+	memoryBytes, err := valueObject.NewByte(memoryBytesUsage)
+	if err != nil {
+		return err
+	}
+
 	storagePerformanceUnits, _ := valueObject.NewStoragePerformanceUnits(
 		storagePerformanceUnitsUsage,
 	)
@@ -401,8 +416,6 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	)
 
 	return repo.updateQuotaTable(
-		dbModel.AccountQuotaUsage{}.TableName(),
-		accountId,
-		quota,
+		dbModel.AccountQuotaUsage{}.TableName(), accountId, quota,
 	)
 }
