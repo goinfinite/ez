@@ -7,9 +7,9 @@ type CreateContainerProfile struct {
 	BaseSpecs              valueObject.ContainerSpecs       `json:"baseSpecs"`
 	MaxSpecs               *valueObject.ContainerSpecs      `json:"maxSpecs"`
 	ScalingPolicy          *valueObject.ScalingPolicy       `json:"scalingPolicy"`
-	ScalingThreshold       *uint64                          `json:"scalingThreshold"`
-	ScalingMaxDurationSecs *uint64                          `json:"scalingMaxDurationSecs"`
-	ScalingIntervalSecs    *uint64                          `json:"scalingIntervalSecs"`
+	ScalingThreshold       *uint                            `json:"scalingThreshold"`
+	ScalingMaxDurationSecs *uint                            `json:"scalingMaxDurationSecs"`
+	ScalingIntervalSecs    *uint                            `json:"scalingIntervalSecs"`
 	HostMinCapacityPercent *valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
 }
 
@@ -18,9 +18,7 @@ func NewCreateContainerProfile(
 	baseSpecs valueObject.ContainerSpecs,
 	maxSpecs *valueObject.ContainerSpecs,
 	scalingPolicy *valueObject.ScalingPolicy,
-	scalingThreshold *uint64,
-	scalingMaxDurationSecs *uint64,
-	scalingIntervalSecs *uint64,
+	scalingThreshold, scalingMaxDurationSecs, scalingIntervalSecs *uint,
 	hostMinCapacityPercent *valueObject.HostMinCapacity,
 ) CreateContainerProfile {
 	return CreateContainerProfile{

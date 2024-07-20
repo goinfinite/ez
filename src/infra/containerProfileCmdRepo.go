@@ -1,8 +1,6 @@
 package infra
 
 import (
-	"errors"
-
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
@@ -27,12 +25,7 @@ func (repo *ContainerProfileCmdRepo) Create(
 		return err
 	}
 
-	err = repo.persistentDbSvc.Handler.Create(&containerProfileModel).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return repo.persistentDbSvc.Handler.Create(&containerProfileModel).Error
 }
 
 func (repo *ContainerProfileCmdRepo) Update(
@@ -57,45 +50,31 @@ func (repo *ContainerProfileCmdRepo) Update(
 	}
 
 	if updateDto.ScalingThreshold != nil {
-		updateMap["scaling_threshold"] = uint64(*updateDto.ScalingThreshold)
+		updateMap["scaling_threshold"] = *updateDto.ScalingThreshold
 	}
 
 	if updateDto.ScalingMaxDurationSecs != nil {
-		updateMap["scaling_max_duration_secs"] = uint64(
-			*updateDto.ScalingMaxDurationSecs,
-		)
+		updateMap["scaling_max_duration_secs"] = *updateDto.ScalingMaxDurationSecs
 	}
 
 	if updateDto.ScalingIntervalSecs != nil {
-		updateMap["scaling_interval_secs"] = uint64(
-			*updateDto.ScalingIntervalSecs,
-		)
+		updateMap["scaling_interval_secs"] = *updateDto.ScalingIntervalSecs
 	}
 
 	if updateDto.HostMinCapacityPercent != nil {
-		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Read()
+		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Float64()
 	}
 
-	err := repo.persistentDbSvc.Handler.Table(dbModel.ContainerProfile{}.TableName()).
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.ContainerProfile{}).
 		Where("id = ?", updateDto.Id.String()).
 		Updates(updateMap).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (repo *ContainerProfileCmdRepo) Delete(
 	profileId valueObject.ContainerProfileId,
 ) error {
-	err := repo.persistentDbSvc.Handler.Delete(
-		dbModel.ContainerProfile{},
-		profileId.Read(),
-	).Error
-	if err != nil {
-		return errors.New("DeleteContainerProfileDbError")
-	}
-
-	return nil
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.ContainerProfile{}).
+		Delete(dbModel.ContainerProfile{}, profileId.Uint64()).Error
 }

@@ -10,9 +10,9 @@ type ContainerProfile struct {
 	BaseSpecs              valueObject.ContainerSpecs       `json:"baseSpecs"`
 	MaxSpecs               *valueObject.ContainerSpecs      `json:"maxSpecs"`
 	ScalingPolicy          *valueObject.ScalingPolicy       `json:"scalingPolicy"`
-	ScalingThreshold       *uint64                          `json:"scalingThreshold"`
-	ScalingMaxDurationSecs *uint64                          `json:"scalingMaxDurationSecs"`
-	ScalingIntervalSecs    *uint64                          `json:"scalingIntervalSecs"`
+	ScalingThreshold       *uint                            `json:"scalingThreshold"`
+	ScalingMaxDurationSecs *uint                            `json:"scalingMaxDurationSecs"`
+	ScalingIntervalSecs    *uint                            `json:"scalingIntervalSecs"`
 	HostMinCapacityPercent *valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
 }
 
@@ -22,9 +22,7 @@ func NewContainerProfile(
 	baseSpecs valueObject.ContainerSpecs,
 	maxSpecs *valueObject.ContainerSpecs,
 	scalingPolicy *valueObject.ScalingPolicy,
-	scalingThreshold *uint64,
-	scalingMaxDurationSecs *uint64,
-	scalingIntervalSecs *uint64,
+	scalingThreshold, scalingMaxDurationSecs, scalingIntervalSecs *uint,
 	hostMinCapacityPercent *valueObject.HostMinCapacity,
 ) (ContainerProfile, error) {
 	return ContainerProfile{
@@ -43,18 +41,12 @@ func NewContainerProfile(
 func DefaultContainerProfile() ContainerProfile {
 	profileId, _ := valueObject.NewContainerProfileId(1)
 	profileName, _ := valueObject.NewContainerProfileName("default")
-	baseSpecs, _ := valueObject.NewContainerSpecsFromString("0.5:1073741824")
+	baseSpecs, _ := valueObject.NewContainerSpecsFromString("500:1073741824:1")
 
 	return ContainerProfile{
-		Id:                     profileId,
-		Name:                   profileName,
-		BaseSpecs:              baseSpecs,
-		MaxSpecs:               nil,
-		ScalingPolicy:          nil,
-		ScalingThreshold:       nil,
-		ScalingMaxDurationSecs: nil,
-		ScalingIntervalSecs:    nil,
-		HostMinCapacityPercent: nil,
+		Id:        profileId,
+		Name:      profileName,
+		BaseSpecs: baseSpecs,
 	}
 }
 
@@ -63,7 +55,7 @@ func InitialContainerProfiles() []ContainerProfile {
 
 	profileId, _ := valueObject.NewContainerProfileId(2)
 	profileName, _ := valueObject.NewContainerProfileName("small")
-	baseSpecs, _ := valueObject.NewContainerSpecsFromString("1:2147483648")
+	baseSpecs, _ := valueObject.NewContainerSpecsFromString("1000:2147483648:2")
 
 	smallProfile := ContainerProfile{
 		Id:        profileId,
@@ -73,29 +65,22 @@ func InitialContainerProfiles() []ContainerProfile {
 
 	profileId, _ = valueObject.NewContainerProfileId(3)
 	profileName, _ = valueObject.NewContainerProfileName("smallWithAutoScaling")
-	baseSpecs, _ = valueObject.NewContainerSpecsFromString("1:2147483648")
-	maxSpecs, _ := valueObject.NewContainerSpecsFromString("2:4294967296")
+	baseSpecs, _ = valueObject.NewContainerSpecsFromString("1000:2147483648:2")
+	maxSpecs, _ := valueObject.NewContainerSpecsFromString("2000:4294967296:3")
 	scalingPolicy, _ := valueObject.NewScalingPolicy("cpu")
-	scalingThreshold := uint64(80)
-	scalingMaxDurationSecs := uint64(3600)
-	scalingIntervalSecs := uint64(86400)
+	scalingThreshold := uint(80)
+	scalingMaxDurationSecs := uint(3600)
+	scalingIntervalSecs := uint(86400)
 	hostMinCapacityPercent, _ := valueObject.NewHostMinCapacity(20)
 
 	smallWithAutoScalingProfile, _ := NewContainerProfile(
-		profileId,
-		profileName,
-		baseSpecs,
-		&maxSpecs,
-		&scalingPolicy,
-		&scalingThreshold,
-		&scalingMaxDurationSecs,
-		&scalingIntervalSecs,
-		&hostMinCapacityPercent,
+		profileId, profileName, baseSpecs, &maxSpecs, &scalingPolicy, &scalingThreshold,
+		&scalingMaxDurationSecs, &scalingIntervalSecs, &hostMinCapacityPercent,
 	)
 
 	profileId, _ = valueObject.NewContainerProfileId(4)
 	profileName, _ = valueObject.NewContainerProfileName("medium")
-	baseSpecs, _ = valueObject.NewContainerSpecsFromString("2:4294967296")
+	baseSpecs, _ = valueObject.NewContainerSpecsFromString("2000:4294967296:4")
 
 	mediumProfile := ContainerProfile{
 		Id:        profileId,
@@ -105,7 +90,7 @@ func InitialContainerProfiles() []ContainerProfile {
 
 	profileId, _ = valueObject.NewContainerProfileId(5)
 	profileName, _ = valueObject.NewContainerProfileName("large")
-	baseSpecs, _ = valueObject.NewContainerSpecsFromString("4:8589934592")
+	baseSpecs, _ = valueObject.NewContainerSpecsFromString("4000:8589934592:5")
 
 	largeProfile := ContainerProfile{
 		Id:        profileId,
@@ -114,10 +99,7 @@ func InitialContainerProfiles() []ContainerProfile {
 	}
 
 	return []ContainerProfile{
-		defaultProfile,
-		smallProfile,
-		smallWithAutoScalingProfile,
-		mediumProfile,
-		largeProfile,
+		defaultProfile, smallProfile, smallWithAutoScalingProfile,
+		mediumProfile, largeProfile,
 	}
 }

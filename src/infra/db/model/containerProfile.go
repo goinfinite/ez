@@ -7,14 +7,14 @@ import (
 )
 
 type ContainerProfile struct {
-	ID                     uint   `gorm:"primarykey"`
+	ID                     uint64 `gorm:"primarykey"`
 	Name                   string `gorm:"not null"`
 	BaseSpecs              string `gorm:"not null"`
 	MaxSpecs               *string
 	ScalingPolicy          *string
-	ScalingThreshold       *uint64
-	ScalingMaxDurationSecs *uint64
-	ScalingIntervalSecs    *uint64
+	ScalingThreshold       *uint
+	ScalingMaxDurationSecs *uint
+	ScalingIntervalSecs    *uint
 	HostMinCapacityPercent *float64
 }
 
@@ -49,64 +49,42 @@ func (ContainerProfile) ToModel(
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	var scalingThresholdPtr *uint64
-	if entity.ScalingThreshold != nil {
-		scalingThreshold := uint64(*entity.ScalingThreshold)
-		scalingThresholdPtr = &scalingThreshold
-	}
-
-	var scalingMaxDurationSecsPtr *uint64
-	if entity.ScalingMaxDurationSecs != nil {
-		scalingMaxDurationSecs := uint64(*entity.ScalingMaxDurationSecs)
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
-	}
-
-	var scalingIntervalSecsPtr *uint64
-	if entity.ScalingIntervalSecs != nil {
-		scalingIntervalSecs := uint64(*entity.ScalingIntervalSecs)
-		scalingIntervalSecsPtr = &scalingIntervalSecs
-	}
-
-	var hostMinCapacityPercentPtr *float64
-	if entity.HostMinCapacityPercent != nil {
-		hostMinCapacityPercent := float64(*entity.HostMinCapacityPercent)
-		hostMinCapacityPercentPtr = &hostMinCapacityPercent
-	}
+	hostMinCapacityPercentFloat64 := entity.HostMinCapacityPercent.Float64()
 
 	return ContainerProfile{
-		ID:                     uint(entity.Id.Read()),
+		ID:                     entity.Id.Uint64(),
 		Name:                   entity.Name.String(),
 		BaseSpecs:              entity.BaseSpecs.String(),
 		MaxSpecs:               maxSpecsPtr,
 		ScalingPolicy:          scalingPolicyPtr,
-		ScalingThreshold:       scalingThresholdPtr,
-		ScalingMaxDurationSecs: scalingMaxDurationSecsPtr,
-		ScalingIntervalSecs:    scalingIntervalSecsPtr,
-		HostMinCapacityPercent: hostMinCapacityPercentPtr,
+		ScalingThreshold:       entity.ScalingThreshold,
+		ScalingMaxDurationSecs: entity.ScalingMaxDurationSecs,
+		ScalingIntervalSecs:    entity.ScalingIntervalSecs,
+		HostMinCapacityPercent: &hostMinCapacityPercentFloat64,
 	}, nil
 }
 
-func (model ContainerProfile) ToEntity() (entity.ContainerProfile, error) {
-	rpId, err := valueObject.NewContainerProfileId(model.ID)
+func (model ContainerProfile) ToEntity() (profileEntity entity.ContainerProfile, err error) {
+	profileId, err := valueObject.NewContainerProfileId(model.ID)
 	if err != nil {
-		return entity.ContainerProfile{}, err
+		return profileEntity, err
 	}
 
 	name, err := valueObject.NewContainerProfileName(model.Name)
 	if err != nil {
-		return entity.ContainerProfile{}, err
+		return profileEntity, err
 	}
 
 	baseSpecs, err := valueObject.NewContainerSpecsFromString(model.BaseSpecs)
 	if err != nil {
-		return entity.ContainerProfile{}, err
+		return profileEntity, err
 	}
 
 	var maxSpecsPtr *valueObject.ContainerSpecs
 	if model.MaxSpecs != nil {
 		maxSpecs, err := valueObject.NewContainerSpecsFromString(*model.MaxSpecs)
 		if err != nil {
-			return entity.ContainerProfile{}, err
+			return profileEntity, err
 		}
 		maxSpecsPtr = &maxSpecs
 	}
@@ -115,27 +93,9 @@ func (model ContainerProfile) ToEntity() (entity.ContainerProfile, error) {
 	if model.ScalingPolicy != nil {
 		scalingPolicy, err := valueObject.NewScalingPolicy(*model.ScalingPolicy)
 		if err != nil {
-			return entity.ContainerProfile{}, err
+			return profileEntity, err
 		}
 		scalingPolicyPtr = &scalingPolicy
-	}
-
-	var scalingThresholdPtr *uint64
-	if model.ScalingThreshold != nil {
-		scalingThreshold := uint64(*model.ScalingThreshold)
-		scalingThresholdPtr = &scalingThreshold
-	}
-
-	var scalingMaxDurationSecsPtr *uint64
-	if model.ScalingMaxDurationSecs != nil {
-		scalingMaxDurationSecs := uint64(*model.ScalingMaxDurationSecs)
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
-	}
-
-	var scalingIntervalSecsPtr *uint64
-	if model.ScalingIntervalSecs != nil {
-		scalingIntervalSecs := uint64(*model.ScalingIntervalSecs)
-		scalingIntervalSecsPtr = &scalingIntervalSecs
 	}
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
@@ -144,21 +104,14 @@ func (model ContainerProfile) ToEntity() (entity.ContainerProfile, error) {
 			*model.HostMinCapacityPercent,
 		)
 		if err != nil {
-			return entity.ContainerProfile{}, err
+			return profileEntity, err
 		}
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
 	return entity.NewContainerProfile(
-		rpId,
-		name,
-		baseSpecs,
-		maxSpecsPtr,
-		scalingPolicyPtr,
-		scalingThresholdPtr,
-		scalingMaxDurationSecsPtr,
-		scalingIntervalSecsPtr,
-		hostMinCapacityPercentPtr,
+		profileId, name, baseSpecs, maxSpecsPtr, scalingPolicyPtr, model.ScalingThreshold,
+		model.ScalingMaxDurationSecs, model.ScalingIntervalSecs, hostMinCapacityPercentPtr,
 	)
 }
 
@@ -177,28 +130,10 @@ func (ContainerProfile) AddDtoToModel(
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	var scalingThresholdPtr *uint64
-	if dto.ScalingThreshold != nil {
-		scalingThreshold := uint64(*dto.ScalingThreshold)
-		scalingThresholdPtr = &scalingThreshold
-	}
-
-	var scalingMaxDurationSecsPtr *uint64
-	if dto.ScalingMaxDurationSecs != nil {
-		scalingMaxDurationSecs := uint64(*dto.ScalingMaxDurationSecs)
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
-	}
-
-	var scalingIntervalSecsPtr *uint64
-	if dto.ScalingIntervalSecs != nil {
-		scalingIntervalSecs := uint64(*dto.ScalingIntervalSecs)
-		scalingIntervalSecsPtr = &scalingIntervalSecs
-	}
-
 	var hostMinCapacityPercentPtr *float64
 	if dto.HostMinCapacityPercent != nil {
-		hostMinCapacityPercent := float64(*dto.HostMinCapacityPercent)
-		hostMinCapacityPercentPtr = &hostMinCapacityPercent
+		hostMinCapacityPercentFloat64 := dto.HostMinCapacityPercent.Float64()
+		hostMinCapacityPercentPtr = &hostMinCapacityPercentFloat64
 	}
 
 	return ContainerProfile{
@@ -206,9 +141,9 @@ func (ContainerProfile) AddDtoToModel(
 		BaseSpecs:              dto.BaseSpecs.String(),
 		MaxSpecs:               maxSpecsPtr,
 		ScalingPolicy:          scalingPolicyPtr,
-		ScalingThreshold:       scalingThresholdPtr,
-		ScalingMaxDurationSecs: scalingMaxDurationSecsPtr,
-		ScalingIntervalSecs:    scalingIntervalSecsPtr,
+		ScalingThreshold:       dto.ScalingThreshold,
+		ScalingMaxDurationSecs: dto.ScalingMaxDurationSecs,
+		ScalingIntervalSecs:    dto.ScalingIntervalSecs,
 		HostMinCapacityPercent: hostMinCapacityPercentPtr,
 	}, nil
 }

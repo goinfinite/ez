@@ -33,14 +33,11 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 		)
 
 		scalingPolicy := valueObject.ScalingPolicy("cpu")
-		threshold := uint64(80)
-		maxDuration := uint64(3600)
-		interval := uint64(86400)
 		hostMinCapacityPercent, _ := valueObject.NewHostMinCapacity(10)
 
 		createDto := dto.NewCreateContainerProfile(
-			name, baseSpecs, &maxSpecs, &scalingPolicy, &threshold, &maxDuration,
-			&interval, &hostMinCapacityPercent,
+			name, baseSpecs, &maxSpecs, &scalingPolicy, nil, nil, nil,
+			&hostMinCapacityPercent,
 		)
 
 		err := containerProfileCmdRepo.Create(createDto)
