@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type AccountQuota struct {
@@ -29,59 +31,65 @@ func NewAccountQuota(
 	}
 }
 
+// format: [millicores][:memoryBytes][:storageBytes][:storageInodes][:storagePerformanceUnits]
 func NewAccountQuotaFromString(value string) (quota AccountQuota, err error) {
-	if value == "" {
-		return quota, errors.New("InvalidAccountQuotaValue")
+	value = strings.TrimSpace(value)
+	value = strings.ToLower(value)
+
+	quotaRegex := `^(?:(?P<millicores>\d{1,19}))?(?::?(?P<memoryBytes>\d{1,19}))?(?::(?P<storageBytes>\d{1,19}))?(?::(?P<storageInodes>\d{1,19}))?(?::(?P<storagePerformanceUnits>\d{1,19}))?$`
+	quotaParts := voHelper.FindNamedGroupsMatches(quotaRegex, value)
+	if len(quotaParts) == 0 {
+		return quota, errors.New("InvalidQuotaStructure")
 	}
 
-	if !strings.Contains(value, ":") {
-		return quota, errors.New("InvalidAccountQuotaFormat")
-	}
+	quota = NewAccountQuotaWithDefaultValues()
 
-	quotaParts := strings.Split(value, ":")
-	if len(quotaParts) != 5 {
-		return quota, errors.New("InvalidAccountQuotaStructure")
-	}
-
-	millicores, err := NewMillicores(quotaParts[0])
-	if err != nil {
-		return quota, err
-	}
-
-	memoryBytes, err := NewByte(quotaParts[1])
-	if err != nil {
-		return quota, err
-	}
-
-	storageBytes, err := NewByte(quotaParts[2])
-	if err != nil {
-		return quota, err
-	}
-
-	storageInodes, err := strconv.ParseUint(quotaParts[3], 10, 64)
-	if err != nil {
-		return quota, errors.New("InvalidAccountQuotaInodes")
-	}
-
-	storagePerformanceUnits, _ := NewStoragePerformanceUnits(1)
-	if len(quotaParts) == 5 {
-		storagePerformanceUnits, err = NewStoragePerformanceUnits(quotaParts[4])
+	if quotaParts["millicores"] != "" {
+		quota.Millicores, err = NewMillicores(quotaParts["millicores"])
 		if err != nil {
 			return quota, err
 		}
 	}
 
-	return NewAccountQuota(
-		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
-	), nil
+	if quotaParts["memoryBytes"] == "" {
+		quota.MemoryBytes, err = NewByte(quotaParts["memoryBytes"])
+		if err != nil {
+			return quota, err
+		}
+	}
+
+	if quotaParts["storageBytes"] == "" {
+		quota.StorageBytes, err = NewByte(quotaParts["storageBytes"])
+		if err != nil {
+			return quota, err
+		}
+	}
+
+	if quotaParts["storageInodes"] == "" {
+		quota.StorageInodes, err = strconv.ParseUint(quotaParts["storageInodes"], 10, 64)
+		if err != nil {
+			return quota, errors.New("InvalidStorageInodes")
+		}
+	}
+
+	if quotaParts["storagePerformanceUnits"] == "" {
+		quota.StoragePerformanceUnits, err = NewStoragePerformanceUnits(
+			quotaParts["storagePerformanceUnits"],
+		)
+		if err != nil {
+			return quota, err
+		}
+	}
+
+	return quota, nil
 }
 
 func NewAccountQuotaWithDefaultValues() AccountQuota {
-	millicores, _ := NewMillicores("500")
-	memoryBytes, _ := NewByte("1073741824")
-	storageBytes, _ := NewByte("5368709120")
+	millicores, _ := NewMillicores(1000)
+	memoryBytes, _ := NewByte(2147483648)
+	storageBytes, _ := NewByte(5368709120)
 	storageInodes := uint64(500000)
-	storagePerformanceUnits, _ := NewStoragePerformanceUnits("1")
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits(5)
 
 	return NewAccountQuota(
 		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
@@ -89,11 +97,11 @@ func NewAccountQuotaWithDefaultValues() AccountQuota {
 }
 
 func NewAccountQuotaWithBlankValues() AccountQuota {
-	millicores, _ := NewMillicores("0")
-	memoryBytes, _ := NewByte("0")
-	storageBytes, _ := NewByte("0")
+	millicores, _ := NewMillicores(0)
+	memoryBytes, _ := NewByte(0)
+	storageBytes, _ := NewByte(0)
 	storageInodes := uint64(0)
-	storagePerformanceUnits, _ := NewStoragePerformanceUnits("0")
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits(0)
 
 	return NewAccountQuota(
 		millicores, memoryBytes, storageBytes, storageInodes, storagePerformanceUnits,
