@@ -191,7 +191,7 @@ func (repo *ContainerCmdRepo) getAccountHomeDir(
 	)
 }
 
-func (repo *ContainerCmdRepo) getDataDevice() (string, error) {
+func (repo *ContainerCmdRepo) getStorageDataDevice() (string, error) {
 	deviceId, err := infraHelper.RunCmdWithSubShell("lsblk | awk '/\\/var\\/data/{print $1}'")
 	if err != nil {
 		return "", err
@@ -227,7 +227,7 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 
 	memoryBytesStr := containerProfile.BaseSpecs.MemoryBytes.String()
 
-	dataDevice, err := repo.getDataDevice()
+	dataDevice, err := repo.getStorageDataDevice()
 	if err != nil {
 		return errors.New("GetDataDeviceError: " + err.Error())
 	}
@@ -239,6 +239,18 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 	writeIopsStr := strconv.FormatUint(storagePerformanceLimits.WriteIops, 10)
 
 	containerIdStr := containerId.String()
+
+	podmanUpdateCmd := []string{
+		"/usr/bin/podman", "update",
+		"--cpus", cpuQuotaCoresStr,
+		"--memory", memoryBytesStr,
+		"--device-read-bps", dataDevice + readBytesStr,
+		"--device-write-bps", dataDevice + writeBytesStr,
+		"--device-read-iops", dataDevice + readIopsStr,
+		"--device-write-iops", dataDevice + writeIopsStr,
+		containerIdStr,
+	}
+	podmanUpdateCmdStr := strings.Join(podmanUpdateCmd, " ")
 
 	systemdUnitTemplate := `[Unit]
 Description=` + containerName + ` Container
@@ -258,13 +270,7 @@ IOReadBandwidthMax=` + dataDevice + readBytesStr + `
 IOWriteBandwidthMax=` + dataDevice + writeBytesStr + `
 IOReadIOPSMax=` + dataDevice + readIopsStr + `
 IOWriteIOPSMax=` + dataDevice + writeIopsStr + `
-ExecStartPre=/usr/bin/podman update --cpus ` + cpuQuotaCoresStr +
-		` --memory ` + memoryBytesStr +
-		` --device-read-bps ` + dataDevice + readBytesStr +
-		` --device-write-bps ` + dataDevice + writeBytesStr +
-		` --device-read-iops ` + dataDevice + readIopsStr +
-		` --device-write-iops ` + dataDevice + writeIopsStr +
-		` ` + containerIdStr + `
+ExecStartPre=` + podmanUpdateCmdStr + `
 ExecStart=/usr/bin/podman start ` + containerIdStr + `
 ExecStop=/usr/bin/podman stop -t 30 ` + containerIdStr + `
 TimeoutStartSec=30
@@ -299,23 +305,14 @@ WantedBy=default.target
 		return errors.New("ChownSystemdUnitFileError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"systemctl", "--user", "daemon-reload",
-	)
+	_, err = infraHelper.RunCmdAsUser(accountId, "systemctl", "--user", "daemon-reload")
 	if err != nil {
 		return errors.New("SystemdDaemonReloadError: " + err.Error())
 	}
 
 	// Podman doesn't read the systemd unit file on reload, so it's necessary to
 	// update the container specs directly as well.
-	_, err = infraHelper.RunCmdAsUser(
-		accountId,
-		"podman", "update",
-		"--cpus", cpuQuotaCoresStr,
-		"--memory", containerProfile.BaseSpecs.MemoryBytes.String(),
-		containerIdStr,
-	)
+	_, err = infraHelper.RunCmdAsUser(accountId, podmanUpdateCmdStr)
 	if err != nil {
 		ignorableError := "error opening file"
 		if !strings.Contains(err.Error(), ignorableError) {
