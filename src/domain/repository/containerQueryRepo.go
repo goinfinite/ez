@@ -10,6 +10,6 @@ type ContainerQueryRepo interface {
 	Read() ([]entity.Container, error)
 	ReadById(containerId valueObject.ContainerId) (entity.Container, error)
 	ReadByHostname(hostname valueObject.Fqdn) (entity.Container, error)
-	ReadByAccountId(accId valueObject.AccountId) ([]entity.Container, error)
+	ReadByAccountId(accountId valueObject.AccountId) ([]entity.Container, error)
 	ReadWithMetrics() ([]dto.ContainerWithMetrics, error)
 }

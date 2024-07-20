@@ -175,7 +175,7 @@ func (Container) ToModel(entity entity.Container) Container {
 
 	return Container{
 		ID:            entity.Id.String(),
-		AccountID:     uint(entity.AccountId.Read()),
+		AccountID:     uint(entity.AccountId.Uint64()),
 		Hostname:      entity.Hostname.String(),
 		Status:        entity.Status,
 		ImageAddress:  entity.ImageAddress.String(),

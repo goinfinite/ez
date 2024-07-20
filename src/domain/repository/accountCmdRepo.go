@@ -7,9 +7,9 @@ import (
 
 type AccountCmdRepo interface {
 	Create(createAccount dto.CreateAccount) (valueObject.AccountId, error)
-	Delete(accId valueObject.AccountId) error
-	UpdatePassword(accId valueObject.AccountId, password valueObject.Password) error
-	UpdateApiKey(accId valueObject.AccountId) (valueObject.AccessTokenValue, error)
-	UpdateQuota(accId valueObject.AccountId, quota valueObject.AccountQuota) error
-	UpdateQuotaUsage(accId valueObject.AccountId) error
+	Delete(accountId valueObject.AccountId) error
+	UpdatePassword(accountId valueObject.AccountId, password valueObject.Password) error
+	UpdateApiKey(accountId valueObject.AccountId) (valueObject.AccessTokenValue, error)
+	UpdateQuota(accountId valueObject.AccountId, quota valueObject.AccountQuota) error
+	UpdateQuotaUsage(accountId valueObject.AccountId) error
 }

@@ -32,7 +32,7 @@ func (repo AuthCmdRepo) CreateSessionToken(
 		"iat":        now.Unix(),
 		"nbf":        now.Unix(),
 		"exp":        tokenExpiration.Unix(),
-		"accountId":  accountId.Read(),
+		"accountId":  accountId.Uint64(),
 		"originalIp": ipAddress.String(),
 	}
 

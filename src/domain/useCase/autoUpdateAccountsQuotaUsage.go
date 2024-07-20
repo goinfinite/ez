@@ -21,7 +21,7 @@ func AutoUpdateAccountsQuotaUsage(
 		if err != nil {
 			slog.Error(
 				"UpdateQuotaUsageInfraError",
-				slog.Uint64("accountId", account.Id.Read()),
+				slog.Uint64("accountId", account.Id.Uint64()),
 				slog.Any("error", err),
 			)
 			continue

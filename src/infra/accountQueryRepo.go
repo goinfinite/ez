@@ -3,6 +3,7 @@ package infra
 import (
 	"errors"
 	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -19,41 +20,45 @@ func NewAccountQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *Account
 }
 
 func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
-	var accEntities []entity.Account
+	accountEntities := []entity.Account{}
 
-	var accModels []dbModel.Account
-
-	err := repo.persistentDbSvc.Handler.Model(&dbModel.Account{}).
+	var accountModels []dbModel.Account
+	err := repo.persistentDbSvc.Handler.
+		Model(&dbModel.Account{}).
 		Preload("Quota").
-		Preload("QuotaUsage").Find(&accModels).Error
+		Preload("QuotaUsage").Find(&accountModels).Error
 	if err != nil {
-		return accEntities, errors.New("DatabaseQueryAccountsError")
+		return accountEntities, errors.New("DatabaseQueryAccountsError")
 	}
 
-	for _, accModel := range accModels {
-		accEntity, err := accModel.ToEntity()
+	for _, accountModel := range accountModels {
+		accountEntity, err := accountModel.ToEntity()
 		if err != nil {
+			slog.Debug("ModelToEntityError",
+				slog.Any("error", err.Error()),
+				slog.Uint64("accountId", uint64(accountModel.ID)),
+			)
 			log.Printf("AccountModelToEntityError: %v", err.Error())
 			continue
 		}
 
-		accEntities = append(accEntities, accEntity)
+		accountEntities = append(accountEntities, accountEntity)
 	}
 
-	return accEntities, nil
+	return accountEntities, nil
 }
 
 func (repo *AccountQueryRepo) ReadByUsername(
 	username valueObject.Username,
 ) (entity.Account, error) {
-	accEntities, err := repo.Read()
+	accountEntities, err := repo.Read()
 	if err != nil {
 		return entity.Account{}, errors.New("AccountQueryError")
 	}
 
-	for _, accEntity := range accEntities {
-		if accEntity.Username.String() == username.String() {
-			return accEntity, nil
+	for _, accountEntity := range accountEntities {
+		if accountEntity.Username.String() == username.String() {
+			return accountEntity, nil
 		}
 	}
 
@@ -63,14 +68,14 @@ func (repo *AccountQueryRepo) ReadByUsername(
 func (repo *AccountQueryRepo) ReadById(
 	accountId valueObject.AccountId,
 ) (entity.Account, error) {
-	accEntities, err := repo.Read()
+	accountEntities, err := repo.Read()
 	if err != nil {
 		return entity.Account{}, errors.New("AccountQueryError")
 	}
 
-	for _, accEntity := range accEntities {
-		if accEntity.Id.String() == accountId.String() {
-			return accEntity, nil
+	for _, accountEntity := range accountEntities {
+		if accountEntity.Id.String() == accountId.String() {
+			return accountEntity, nil
 		}
 	}
 

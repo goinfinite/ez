@@ -8,12 +8,12 @@ import "github.com/speedianet/control/src/domain/valueObject"
 // The solution is to enable lingering for the user when adding the
 // first container and disable it when removing the account.
 
-func EnableLingering(accId valueObject.AccountId) error {
-	_, err := RunCmd("loginctl", "enable-linger", accId.String())
+func EnableLingering(accountId valueObject.AccountId) error {
+	_, err := RunCmd("loginctl", "enable-linger", accountId.String())
 	return err
 }
 
-func DisableLingering(accId valueObject.AccountId) error {
-	_, err := RunCmd("loginctl", "disable-linger", accId.String())
+func DisableLingering(accountId valueObject.AccountId) error {
+	_, err := RunCmd("loginctl", "disable-linger", accountId.String())
 	return err
 }

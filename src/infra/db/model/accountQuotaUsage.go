@@ -7,13 +7,13 @@ import (
 )
 
 type AccountQuotaUsage struct {
-	ID                      uint   `gorm:"primarykey"`
+	ID                      uint64 `gorm:"primarykey"`
 	Millicores              uint   `gorm:"not null"`
 	MemoryBytes             uint64 `gorm:"not null"`
 	StorageBytes            uint64 `gorm:"not null"`
 	StorageInodes           uint64 `gorm:"not null"`
 	StoragePerformanceUnits uint   `gorm:"not null"`
-	AccountID               uint
+	AccountID               uint64
 	CreatedAt               time.Time
 	UpdatedAt               time.Time
 }
@@ -23,7 +23,7 @@ func (AccountQuotaUsage) TableName() string {
 }
 
 func (AccountQuotaUsage) ToModel(
-	vo valueObject.AccountQuota, accountId uint,
+	vo valueObject.AccountQuota, accountId uint64,
 ) (AccountQuotaUsage, error) {
 	return AccountQuotaUsage{
 		Millicores:              vo.Millicores.Uint(),

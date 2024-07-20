@@ -52,16 +52,16 @@ func RunCmdWithSubShell(command string) (string, error) {
 }
 
 func RunCmdAsUser(
-	accId valueObject.AccountId,
+	accountId valueObject.AccountId,
 	command string,
 	args ...string,
 ) (string, error) {
-	userInfo, err := user.LookupId(accId.String())
+	userInfo, err := user.LookupId(accountId.String())
 	if err != nil {
 		return "", errors.New("AccountIdNotFound")
 	}
 
-	gId, err := valueObject.NewGroupId(userInfo.Gid)
+	gId, err := valueObject.NewUnixGroupId(userInfo.Gid)
 	if err != nil {
 		return "", errors.New("GroupIdNotFound")
 	}
@@ -70,7 +70,7 @@ func RunCmdAsUser(
 	execCmd.SysProcAttr = &syscall.SysProcAttr{}
 	execCmd.Dir = userInfo.HomeDir
 	execCmd.SysProcAttr.Credential = &syscall.Credential{
-		Uid: uint32(accId),
+		Uid: uint32(accountId),
 		Gid: uint32(gId),
 	}
 	execCmd.Env = []string{
@@ -83,8 +83,8 @@ func RunCmdAsUser(
 		"LANG=en_US.UTF-8",
 		"PWD=" + userInfo.HomeDir,
 		"TERM=xterm-256color",
-		"XDG_RUNTIME_DIR=/run/user/" + accId.String(),
-		"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + accId.String() + "/bus",
+		"XDG_RUNTIME_DIR=/run/user/" + accountId.String(),
+		"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + accountId.String() + "/bus",
 	}
 	return runExecCmd(execCmd)
 }

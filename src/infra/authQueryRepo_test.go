@@ -64,9 +64,8 @@ func TestAuthQueryRepo(t *testing.T) {
 	})
 
 	t.Run("ValidAccountApiKey", func(t *testing.T) {
-		apiKey, err := accountCmdRepo.UpdateApiKey(
-			valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID")),
-		)
+		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
+		apiKey, err := accountCmdRepo.UpdateApiKey(accountId)
 		if err != nil {
 			t.Error(err)
 		}

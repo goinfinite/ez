@@ -44,7 +44,7 @@ func (repo *MappingCmdRepo) Create(
 
 	mappingModel := dbModel.NewMapping(
 		0,
-		uint(createDto.AccountId.Read()),
+		uint(createDto.AccountId.Uint64()),
 		hostnamePtr,
 		uint(createDto.PublicPort.Read()),
 		createDto.Protocol.String(),

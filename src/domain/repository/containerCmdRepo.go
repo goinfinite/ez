@@ -9,7 +9,7 @@ type ContainerCmdRepo interface {
 	Create(createDto dto.CreateContainer) (valueObject.ContainerId, error)
 	Update(updateDto dto.UpdateContainer) error
 	Delete(
-		accId valueObject.AccountId,
+		accountId valueObject.AccountId,
 		containerId valueObject.ContainerId,
 	) error
 	GenerateContainerSessionToken(

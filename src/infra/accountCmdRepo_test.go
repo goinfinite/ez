@@ -30,8 +30,7 @@ func addDummyUser() error {
 }
 
 func deleteDummyUser() error {
-	accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-
+	accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 	accountCmdRepo := NewAccountCmdRepo(testHelpers.GetPersistentDbSvc())
 	err := accountCmdRepo.Delete(accountId)
 	if err != nil {
@@ -52,6 +51,7 @@ func TestAccountCmdRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	accountQueryRepo := NewAccountQueryRepo(persistentDbSvc)
 	accountCmdRepo := NewAccountCmdRepo(persistentDbSvc)
+	accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 
 	t.Run("AddValidAccount", func(t *testing.T) {
 		err := addDummyUser()
@@ -86,7 +86,6 @@ func TestAccountCmdRepo(t *testing.T) {
 	t.Run("UpdatePasswordValidAccount", func(t *testing.T) {
 		resetDummyUser()
 
-		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		newPassword, _ := valueObject.NewPassword("newPassword")
 
 		err := accountCmdRepo.UpdatePassword(accountId, newPassword)
@@ -98,8 +97,6 @@ func TestAccountCmdRepo(t *testing.T) {
 	t.Run("UpdateApiKeyValidAccount", func(t *testing.T) {
 		resetDummyUser()
 
-		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-
 		_, err := accountCmdRepo.UpdateApiKey(accountId)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)
@@ -109,7 +106,6 @@ func TestAccountCmdRepo(t *testing.T) {
 	t.Run("UpdateQuotaValidAccount", func(t *testing.T) {
 		resetDummyUser()
 
-		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
 		quota.Millicores, _ = valueObject.NewMillicores(1000)
 		quota.StorageBytes, _ = valueObject.NewByte(1073741824)
@@ -130,19 +126,18 @@ func TestAccountCmdRepo(t *testing.T) {
 			t.Error(err)
 		}
 
-		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		os.Chown(testFilePath, int(accId.Read()), int(accId.Read()))
+		os.Chown(testFilePath, int(accountId.Uint64()), int(accountId.Uint64()))
 
-		err = accountCmdRepo.UpdateQuotaUsage(accId)
+		err = accountCmdRepo.UpdateQuotaUsage(accountId)
 		if err != nil {
 			t.Error(err)
 		}
 
-		accEntity, err := accountQueryRepo.ReadById(accId)
+		accountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
 			t.Error(err)
 		}
-		if accEntity.QuotaUsage.StorageBytes.Read() < 100000000 {
+		if accountEntity.QuotaUsage.StorageBytes.Read() < 100000000 {
 			t.Error("QuotaUsageNotUpdated")
 		}
 

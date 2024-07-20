@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"encoding/hex"
 	"errors"
 	"log/slog"
 	"os"
@@ -18,7 +17,6 @@ import (
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/crypto/sha3"
 )
 
 type AccountCmdRepo struct {
@@ -88,7 +86,7 @@ func (repo *AccountCmdRepo) Create(
 	if err != nil {
 		return accountId, err
 	}
-	gid, err := valueObject.NewGroupId(userInfo.Gid)
+	gid, err := valueObject.NewUnixGroupId(userInfo.Gid)
 	if err != nil {
 		return accountId, err
 	}
@@ -163,7 +161,7 @@ func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
 	}
 
 	model := dbModel.Account{}
-	modelId := accountId.Read()
+	modelId := accountId.Uint64()
 
 	relatedTables := []string{
 		dbModel.AccountQuota{}.TableName(),
@@ -208,7 +206,7 @@ func (repo *AccountCmdRepo) UpdatePassword(
 		return errors.New("UserModFailed: " + err.Error())
 	}
 
-	accModel := dbModel.Account{ID: uint(accountId.Read())}
+	accModel := dbModel.Account{ID: accountId.Uint64()}
 	return repo.persistentDbSvc.Handler.
 		Model(&accModel).
 		Update("updated_at", time.Now()).
@@ -232,11 +230,9 @@ func (repo *AccountCmdRepo) UpdateApiKey(
 		return "", err
 	}
 
-	hash := sha3.New256()
-	hash.Write([]byte(uuid.String()))
-	uuidHash := hex.EncodeToString(hash.Sum(nil))
+	uuidHash := infraHelper.GenStrongHash(uuid.String())
 
-	accModel := dbModel.Account{ID: uint(accountId.Read())}
+	accModel := dbModel.Account{ID: accountId.Uint64()}
 	updateResult := repo.persistentDbSvc.Handler.Model(&accModel).
 		Update("key_hash", uuidHash)
 	if updateResult.Error != nil {
@@ -269,7 +265,7 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 
 	return repo.persistentDbSvc.Handler.
 		Table(tableName).
-		Where("account_id = ?", uint(accountId.Read())).
+		Where("account_id = ?", accountId.Uint64()).
 		Updates(updateMap).Error
 }
 

@@ -16,7 +16,7 @@ func TestMappingCmdRepo(t *testing.T) {
 	containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
 
 	t.Run("CreateMapping", func(t *testing.T) {
-		accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 		hostname := valueObject.NewFqdnPanic("speedia.net")
 
 		createMapping := dto.NewCreateMapping(

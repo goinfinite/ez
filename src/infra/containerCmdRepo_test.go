@@ -21,7 +21,7 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 		valueObject.NewContainerEnvPanic("CONTROL_ENV2=testing"),
 	}
 
-	accountId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+	accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 
 	launchScript, err := valueObject.NewLaunchScript(
 		"printenv > /tmp/hello.txt",
@@ -85,8 +85,8 @@ func TestContainerCmdRepo(t *testing.T) {
 	})
 
 	t.Run("UpdateContainer", func(t *testing.T) {
-		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
-		containers, err := containerQueryRepo.ReadByAccountId(accId)
+		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
+		containers, err := containerQueryRepo.ReadByAccountId(accountId)
 		if err != nil {
 			t.Errorf("ReadContainersFailed: %v", err)
 		}
@@ -96,7 +96,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		}
 
 		updateContainer := dto.NewUpdateContainer(
-			accId,
+			accountId,
 			containers[0].Id,
 			nil,
 			nil,

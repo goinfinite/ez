@@ -89,7 +89,7 @@ func (service *ContainerService) Create(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	accId, err := valueObject.NewAccountId(input["accountId"])
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -172,7 +172,7 @@ func (service *ContainerService) Create(
 	if shouldSchedule {
 		cliCmd := "/var/speedia/control container create"
 		createParams := []string{
-			"--account-id", accId.String(),
+			"--account-id", accountId.String(),
 			"--hostname", hostname.String(),
 			"--image-address", imgAddr.String(),
 		}
@@ -242,7 +242,7 @@ func (service *ContainerService) Create(
 	}
 
 	createContainerDto := dto.NewCreateContainer(
-		accId, hostname, imgAddr, portBindings, restartPolicyPtr, entrypointPtr,
+		accountId, hostname, imgAddr, portBindings, restartPolicyPtr, entrypointPtr,
 		profileIdPtr, envs, launchScriptPtr, autoCreateMappings,
 	)
 
@@ -275,7 +275,7 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	accId, err := valueObject.NewAccountId(input["accountId"])
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -304,7 +304,7 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 	}
 
 	updateContainerDto := dto.NewUpdateContainer(
-		accId,
+		accountId,
 		containerId,
 		containerStatusPtr,
 		profileIdPtr,

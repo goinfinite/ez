@@ -103,14 +103,14 @@ func (repo *ContainerQueryRepo) ReadByHostname(
 }
 
 func (repo *ContainerQueryRepo) ReadByAccountId(
-	accId valueObject.AccountId,
+	accountId valueObject.AccountId,
 ) ([]entity.Container, error) {
 	containers := []entity.Container{}
 
 	containerModels := []dbModel.Container{}
 	err := repo.persistentDbSvc.Handler.
 		Preload("PortBindings").
-		Where("account_id = ?", accId.Read()).
+		Where("account_id = ?", accountId.Uint64()).
 		Find(&containerModels).Error
 	if err != nil {
 		return containers, err
@@ -263,12 +263,12 @@ func (repo *ContainerQueryRepo) containerMetricsFactory(
 }
 
 func (repo *ContainerQueryRepo) getWithMetricsByAccId(
-	accId valueObject.AccountId,
+	accountId valueObject.AccountId,
 ) ([]dto.ContainerWithMetrics, error) {
 	containersWithMetrics := []dto.ContainerWithMetrics{}
 
 	containersMetricsStr, err := infraHelper.RunCmdAsUser(
-		accId,
+		accountId,
 		"podman", "stats", "--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
 	)
 	if err != nil {
@@ -276,14 +276,14 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 	}
 
 	runningContainersMetrics, err := repo.containerMetricsFactory(
-		accId,
+		accountId,
 		containersMetricsStr,
 	)
 	if err != nil {
 		return containersWithMetrics, err
 	}
 
-	containerEntities, err := repo.ReadByAccountId(accId)
+	containerEntities, err := repo.ReadByAccountId(accountId)
 	if err != nil {
 		return containersWithMetrics, err
 	}

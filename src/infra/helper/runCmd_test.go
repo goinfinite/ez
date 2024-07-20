@@ -37,11 +37,11 @@ func TestRunCmd(t *testing.T) {
 	})
 
 	t.Run("RunCmdAsUser", func(t *testing.T) {
-		accId := valueObject.NewAccountIdPanic(os.Getenv("DUMMY_USER_ID"))
+		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 		command := "whoami"
 		args := []string{}
 
-		stdOut, err := RunCmdAsUser(accId, command, args...)
+		stdOut, err := RunCmdAsUser(accountId, command, args...)
 		if err != nil {
 			t.Errorf("Expected no error, got %s", err)
 		}
