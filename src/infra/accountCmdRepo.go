@@ -364,7 +364,7 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 		if err != nil {
 			slog.Debug(
 				"ReadProfileByIdError",
-				slog.Uint64("profileId", container.ProfileId.Read()),
+				slog.Uint64("profileId", container.ProfileId.Uint64()),
 				slog.Any("error", err),
 			)
 			continue

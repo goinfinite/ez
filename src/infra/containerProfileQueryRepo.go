@@ -2,7 +2,7 @@ package infra
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -21,20 +21,24 @@ func NewContainerProfileQueryRepo(
 }
 
 func (repo *ContainerProfileQueryRepo) Read() ([]entity.ContainerProfile, error) {
-	var profileEntities []entity.ContainerProfile
-	var profileModels []dbModel.ContainerProfile
+	profileEntities := []entity.ContainerProfile{}
 
+	var profileModels []dbModel.ContainerProfile
 	err := repo.persistentDbSvc.Handler.
 		Model(&dbModel.ContainerProfile{}).
 		Find(&profileModels).Error
 	if err != nil {
-		return profileEntities, errors.New("DbQueryContainerProfilesError")
+		return profileEntities, errors.New("QueryContainerProfilesError: " + err.Error())
 	}
 
 	for _, profileModel := range profileModels {
 		profileEntity, err := profileModel.ToEntity()
 		if err != nil {
-			log.Printf("ProfileModelToEntityError: %v", err.Error())
+			slog.Debug(
+				"ModelToEntityError",
+				slog.Uint64("id", profileModel.ID),
+				slog.Any("error", err),
+			)
 			continue
 		}
 
@@ -45,20 +49,15 @@ func (repo *ContainerProfileQueryRepo) Read() ([]entity.ContainerProfile, error)
 }
 
 func (repo *ContainerProfileQueryRepo) ReadById(
-	id valueObject.ContainerProfileId,
-) (entity.ContainerProfile, error) {
-	profileModel := dbModel.ContainerProfile{ID: uint(id.Read())}
-	err := repo.persistentDbSvc.Handler.
+	profileId valueObject.ContainerProfileId,
+) (profileEntity entity.ContainerProfile, err error) {
+	profileModel := dbModel.ContainerProfile{ID: profileId.Uint64()}
+	err = repo.persistentDbSvc.Handler.
 		Model(&profileModel).
 		First(&profileModel).Error
 	if err != nil {
-		return entity.ContainerProfile{}, err
+		return profileEntity, err
 	}
 
-	profileEntity, err := profileModel.ToEntity()
-	if err != nil {
-		return entity.ContainerProfile{}, errors.New("ProfileModelToEntityError")
-	}
-
-	return profileEntity, nil
+	return profileModel.ToEntity()
 }

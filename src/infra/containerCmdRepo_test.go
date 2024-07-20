@@ -14,7 +14,7 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 
 	restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
 
-	profileId := valueObject.NewContainerProfileIdPanic(0)
+	profileId, _ := valueObject.NewContainerProfileId(0)
 
 	envs := []valueObject.ContainerEnv{
 		valueObject.NewContainerEnvPanic("CONTROL_ENV1=testing"),
