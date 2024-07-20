@@ -42,7 +42,7 @@ func (repo *LicenseCmdRepo) GenerateIntegrityHash(
 		return integrityHash, errors.New("MarshalLicenseInfoFailed: " + err.Error())
 	}
 
-	licenseInfoHashStr := infraHelper.GenHash(string(licenseInfoJson))
+	licenseInfoHashStr := infraHelper.GenStrongHash(string(licenseInfoJson))
 	return valueObject.NewHash(licenseInfoHashStr)
 }
 
@@ -56,7 +56,7 @@ func (repo *LicenseCmdRepo) GenerateNonceHash() (valueObject.Hash, error) {
 		return nonceHash, err
 	}
 
-	nonceHashStr := infraHelper.GenShortHash(currentHourInEpoch)
+	nonceHashStr := infraHelper.GenStrongShortHash(currentHourInEpoch)
 
 	return valueObject.NewHash(nonceHashStr)
 }
@@ -92,7 +92,7 @@ func (repo *LicenseCmdRepo) generateFingerprint() (
 	}
 
 	fingerprintFirstPart := hwUuid + rootFsUuid + privateIp + installationUnixTime
-	firstPartShortHashStr := infraHelper.GenShortHash(fingerprintFirstPart)
+	firstPartShortHashStr := infraHelper.GenStrongShortHash(fingerprintFirstPart)
 
 	o11yQueryRepo := o11yInfra.NewO11yQueryRepo(repo.transientDbSvc)
 	publicIp, err := o11yQueryRepo.ReadServerPublicIpAddress()
@@ -108,7 +108,7 @@ func (repo *LicenseCmdRepo) generateFingerprint() (
 	}
 
 	fingerprintSecondPart := publicIp.String() + macAddress
-	secondPartShortHashStr := infraHelper.GenShortHash(fingerprintSecondPart)
+	secondPartShortHashStr := infraHelper.GenStrongShortHash(fingerprintSecondPart)
 
 	licenseCmdRepo := NewLicenseCmdRepo(repo.persistentDbSvc, repo.transientDbSvc)
 	thirdPartShortHashStr, err := licenseCmdRepo.GenerateNonceHash()
