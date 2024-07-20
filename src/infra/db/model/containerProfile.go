@@ -49,7 +49,11 @@ func (ContainerProfile) ToModel(
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	hostMinCapacityPercentFloat64 := entity.HostMinCapacityPercent.Float64()
+	var hostMinCapacityPercentPtr *float64
+	if entity.HostMinCapacityPercent != nil {
+		hostMinCapacityPercentFloat64 := entity.HostMinCapacityPercent.Float64()
+		hostMinCapacityPercentPtr = &hostMinCapacityPercentFloat64
+	}
 
 	return ContainerProfile{
 		ID:                     entity.Id.Uint64(),
@@ -60,7 +64,7 @@ func (ContainerProfile) ToModel(
 		ScalingThreshold:       entity.ScalingThreshold,
 		ScalingMaxDurationSecs: entity.ScalingMaxDurationSecs,
 		ScalingIntervalSecs:    entity.ScalingIntervalSecs,
-		HostMinCapacityPercent: &hostMinCapacityPercentFloat64,
+		HostMinCapacityPercent: hostMinCapacityPercentPtr,
 	}, nil
 }
 
