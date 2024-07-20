@@ -10,10 +10,10 @@ import (
 type StoragePerformanceUnits uint
 
 type StoragePerformanceUnitsLimits struct {
-	ReadBytes  Byte `json:"readBytes"`
-	WriteBytes Byte `json:"writeBytes"`
-	ReadIops   uint `json:"readIops"`
-	WriteIops  uint `json:"writeIops"`
+	ReadBytes  Byte   `json:"readBytes"`
+	WriteBytes Byte   `json:"writeBytes"`
+	ReadIops   uint64 `json:"readIops"`
+	WriteIops  uint64 `json:"writeIops"`
 }
 
 func NewStoragePerformanceUnits(value interface{}) (StoragePerformanceUnits, error) {
@@ -37,7 +37,7 @@ func (vo StoragePerformanceUnits) ReadLimits() StoragePerformanceUnitsLimits {
 	return StoragePerformanceUnitsLimits{
 		ReadBytes:  Byte(int(vo) * 5000000),
 		WriteBytes: Byte(int(vo) * 5000000),
-		ReadIops:   uint(vo) * 250,
-		WriteIops:  uint(vo) * 250,
+		ReadIops:   uint64(vo) * 250,
+		WriteIops:  uint64(vo) * 250,
 	}
 }
