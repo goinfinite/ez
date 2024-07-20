@@ -253,7 +253,7 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 ) error {
 	updateMap := map[string]interface{}{}
 
-	if quota.Millicores.Uint() >= 0 {
+	if quota.Millicores.Uint() > 0 {
 		updateMap["cpu_cores"] = quota.Millicores.Uint()
 	}
 
