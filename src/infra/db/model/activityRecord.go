@@ -8,17 +8,17 @@ import (
 )
 
 type ActivityRecord struct {
-	ID                 uint   `gorm:"primarykey"`
+	ID                 uint64 `gorm:"primarykey"`
 	Level              string `gorm:"not null"`
 	Code               *string
 	Message            *string
 	IpAddress          *string
-	OperatorAccountId  *uint
-	TargetAccountId    *uint
+	OperatorAccountId  *uint64
+	TargetAccountId    *uint64
 	Username           *string
 	ContainerId        *string
-	ContainerProfileId *uint
-	MappingId          *uint
+	ContainerProfileId *uint64
+	MappingId          *uint64
 	CreatedAt          time.Time `gorm:"not null"`
 }
 
@@ -27,12 +27,12 @@ func (ActivityRecord) TableName() string {
 }
 
 func NewActivityRecord(
-	id uint,
+	id uint64,
 	level string,
 	code, message, ipAddress *string,
-	operatorAccountId, targetAccountId *uint,
+	operatorAccountId, targetAccountId *uint64,
 	username, containerId *string,
-	containerProfileId, mappingId *uint,
+	containerProfileId, mappingId *uint64,
 ) ActivityRecord {
 	model := ActivityRecord{
 		Level:              level,

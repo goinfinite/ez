@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -46,12 +46,12 @@ func (repo *ActivityRecordQueryRepo) Read(
 	}
 
 	if readDto.OperatorAccountId != nil {
-		operatorAccountId := uint(readDto.OperatorAccountId.Uint64())
+		operatorAccountId := readDto.OperatorAccountId.Uint64()
 		readModel.OperatorAccountId = &operatorAccountId
 	}
 
 	if readDto.TargetAccountId != nil {
-		targetAccountId := uint(readDto.TargetAccountId.Uint64())
+		targetAccountId := readDto.TargetAccountId.Uint64()
 		readModel.TargetAccountId = &targetAccountId
 	}
 
@@ -66,12 +66,12 @@ func (repo *ActivityRecordQueryRepo) Read(
 	}
 
 	if readDto.ContainerProfileId != nil {
-		containerProfileId := uint(readDto.ContainerProfileId.Read())
+		containerProfileId := readDto.ContainerProfileId.Uint64()
 		readModel.ContainerProfileId = &containerProfileId
 	}
 
 	if readDto.MappingId != nil {
-		mappingId := uint(readDto.MappingId.Read())
+		mappingId := readDto.MappingId.Uint64()
 		readModel.MappingId = &mappingId
 	}
 
@@ -89,7 +89,11 @@ func (repo *ActivityRecordQueryRepo) Read(
 	for _, activityRecordEventModel := range activityRecordEventModels {
 		activityRecordEvent, err := activityRecordEventModel.ToEntity()
 		if err != nil {
-			log.Printf("EventModelToEntityError: %v", err.Error())
+			slog.Debug(
+				"ModelToEntityError",
+				slog.Uint64("id", activityRecordEventModel.ID),
+				slog.Any("error", err),
+			)
 			continue
 		}
 		activityRecordEvents = append(activityRecordEvents, activityRecordEvent)
