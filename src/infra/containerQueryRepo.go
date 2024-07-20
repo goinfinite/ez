@@ -3,7 +3,8 @@ package infra
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"log/slog"
+	"strconv"
 	"strings"
 
 	"github.com/speedianet/control/src/domain/dto"
@@ -38,7 +39,11 @@ func (repo *ContainerQueryRepo) Read() ([]entity.Container, error) {
 	for _, containerModel := range containerModels {
 		containerEntity, err := containerModel.ToEntity()
 		if err != nil {
-			log.Printf("[%s] %s", containerModel.ID, err.Error())
+			slog.Debug(
+				"ContainerModelToEntityError",
+				slog.String("containerId", containerModel.ID),
+				slog.Any("error", err),
+			)
 			continue
 		}
 		containers = append(containers, containerEntity)
@@ -49,9 +54,7 @@ func (repo *ContainerQueryRepo) Read() ([]entity.Container, error) {
 
 func (repo *ContainerQueryRepo) ReadById(
 	containerId valueObject.ContainerId,
-) (entity.Container, error) {
-	var containerEntity entity.Container
-
+) (containerEntity entity.Container, err error) {
 	var containerModel dbModel.Container
 	queryResult := repo.persistentDbSvc.Handler.
 		Preload("PortBindings").
@@ -66,7 +69,7 @@ func (repo *ContainerQueryRepo) ReadById(
 		return containerEntity, errors.New("ContainerNotFound")
 	}
 
-	containerEntity, err := containerModel.ToEntity()
+	containerEntity, err = containerModel.ToEntity()
 	if err != nil {
 		return containerEntity, err
 	}
@@ -76,9 +79,7 @@ func (repo *ContainerQueryRepo) ReadById(
 
 func (repo *ContainerQueryRepo) ReadByHostname(
 	hostname valueObject.Fqdn,
-) (entity.Container, error) {
-	var containerEntity entity.Container
-
+) (containerEntity entity.Container, err error) {
 	var containerModel dbModel.Container
 	queryResult := repo.persistentDbSvc.Handler.
 		Preload("PortBindings").
@@ -93,7 +94,7 @@ func (repo *ContainerQueryRepo) ReadByHostname(
 		return containerEntity, errors.New("ContainerNotFound")
 	}
 
-	containerEntity, err := containerModel.ToEntity()
+	containerEntity, err = containerModel.ToEntity()
 	if err != nil {
 		return containerEntity, err
 	}
@@ -118,7 +119,11 @@ func (repo *ContainerQueryRepo) ReadByAccountId(
 	for _, containerModel := range containerModels {
 		containerEntity, err := containerModel.ToEntity()
 		if err != nil {
-			log.Printf("[%s] %s", containerModel.ID, err.Error())
+			slog.Debug(
+				"ContainerModelToEntityError",
+				slog.String("containerId", containerModel.ID),
+				slog.Any("error", err),
+			)
 			continue
 		}
 		containers = append(containers, containerEntity)
@@ -222,8 +227,7 @@ func (repo *ContainerQueryRepo) containerMetricsFactory(
 
 		blockUsageStr, err := infraHelper.RunCmdAsUser(
 			accountId,
-			"bash",
-			"-c",
+			"bash", "-c",
 			"timeout 1 podman exec -it "+containerId.String()+
 				" df --output=used,iused / | tail -n 1",
 		)
@@ -241,22 +245,15 @@ func (repo *ContainerQueryRepo) containerMetricsFactory(
 			blockBytes, _ = valueObject.NewByte(0)
 		}
 
-		inodesCount, err := valueObject.NewInodesCount(blockUsageParts[1])
+		inodesCount, err := strconv.ParseUint(blockUsageParts[1], 10, 64)
 		if err != nil {
-			inodesCount, _ = valueObject.NewInodesCount(0)
+			inodesCount = 0
 		}
 
 		containerMetrics := valueObject.NewContainerMetrics(
-			infraHelper.RoundFloat(cpuPercent),
-			avgCpu,
-			memBytes,
-			infraHelper.RoundFloat(memPercent),
-			blockInput,
-			blockOutput,
-			blockBytes,
-			inodesCount,
-			netInput,
-			netOutput,
+			infraHelper.RoundFloat(cpuPercent), avgCpu, memBytes,
+			infraHelper.RoundFloat(memPercent), blockInput, blockOutput,
+			blockBytes, inodesCount, netInput, netOutput,
 		)
 
 		containersMetrics[containerId] = containerMetrics
@@ -268,16 +265,11 @@ func (repo *ContainerQueryRepo) containerMetricsFactory(
 func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 	accId valueObject.AccountId,
 ) ([]dto.ContainerWithMetrics, error) {
-	var containersWithMetrics []dto.ContainerWithMetrics
+	containersWithMetrics := []dto.ContainerWithMetrics{}
 
 	containersMetricsStr, err := infraHelper.RunCmdAsUser(
 		accId,
-		"podman",
-		"stats",
-		"--no-stream",
-		"--no-reset",
-		"--format",
-		"{{json .ContainerStats}}",
+		"podman", "stats", "--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
 	)
 	if err != nil {
 		return containersWithMetrics, errors.New("AccPodmanStatsError" + err.Error())
@@ -307,8 +299,7 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 		}
 
 		containerWithMetrics := dto.NewContainerWithMetrics(
-			container,
-			containerMetrics,
+			container, containerMetrics,
 		)
 		containersWithMetrics = append(containersWithMetrics, containerWithMetrics)
 	}
@@ -319,15 +310,19 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 func (repo *ContainerQueryRepo) ReadWithMetrics() ([]dto.ContainerWithMetrics, error) {
 	containersWithMetrics := []dto.ContainerWithMetrics{}
 
-	accsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Read()
+	accountsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Read()
 	if err != nil {
 		return containersWithMetrics, err
 	}
 
-	for _, acc := range accsList {
-		accContainersWithMetrics, err := repo.getWithMetricsByAccId(acc.Id)
+	for _, account := range accountsList {
+		accContainersWithMetrics, err := repo.getWithMetricsByAccId(account.Id)
 		if err != nil {
-			log.Printf("AccId '%s' skipped: %s", acc.Id.String(), err.Error())
+			slog.Debug(
+				"ReadAccountContainersWithMetricsError",
+				slog.String("accountId", account.Id.String()),
+				slog.Any("error", err),
+			)
 			continue
 		}
 

@@ -12,35 +12,35 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	containerProfileCmdRepo := NewContainerProfileCmdRepo(persistentDbSvc)
+	profileId, _ := valueObject.NewContainerProfileId(2)
 
 	t.Run("CreateContainerProfile", func(t *testing.T) {
-		name := valueObject.NewContainerProfileNamePanic("testContainerProfile")
+		name, _ := valueObject.NewContainerProfileName("testContainerProfile")
+		baseMillicores, _ := valueObject.NewMillicores(1000)
+		baseMemoryBytes, _ := valueObject.NewByte(1073741824)
+		basePerformanceUnits, _ := valueObject.NewStoragePerformanceUnits(1)
 
 		baseSpecs := valueObject.NewContainerSpecs(
-			valueObject.NewCpuCoresCountPanic(1),
-			valueObject.NewBytePanic(1073741824),
+			baseMillicores, baseMemoryBytes, basePerformanceUnits,
 		)
 
+		maxMillicores, _ := valueObject.NewMillicores(2000)
+		maxMemoryBytes, _ := valueObject.NewByte(2147483648)
+		maxPerformanceUnits, _ := valueObject.NewStoragePerformanceUnits(2)
+
 		maxSpecs := valueObject.NewContainerSpecs(
-			valueObject.NewCpuCoresCountPanic(2),
-			valueObject.NewBytePanic(2147483648),
+			maxMillicores, maxMemoryBytes, maxPerformanceUnits,
 		)
 
 		scalingPolicy := valueObject.ScalingPolicy("cpu")
 		threshold := uint64(80)
 		maxDuration := uint64(3600)
 		interval := uint64(86400)
-		hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(10)
+		hostMinCapacityPercent, _ := valueObject.NewHostMinCapacity(10)
 
 		createDto := dto.NewCreateContainerProfile(
-			name,
-			baseSpecs,
-			&maxSpecs,
-			&scalingPolicy,
-			&threshold,
-			&maxDuration,
-			&interval,
-			&hostMinCapacityPercent,
+			name, baseSpecs, &maxSpecs, &scalingPolicy, &threshold, &maxDuration,
+			&interval, &hostMinCapacityPercent,
 		)
 
 		err := containerProfileCmdRepo.Create(createDto)
@@ -50,35 +50,26 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 	})
 
 	t.Run("UpdateContainerProfile", func(t *testing.T) {
-		id := valueObject.NewContainerProfileIdPanic(2)
+		maxMillicores, _ := valueObject.NewMillicores(4000)
+		maxMemoryBytes, _ := valueObject.NewByte(4294967296)
+		maxPerformanceUnits, _ := valueObject.NewStoragePerformanceUnits(3)
 
 		maxSpecs := valueObject.NewContainerSpecs(
-			valueObject.NewCpuCoresCountPanic(4),
-			valueObject.NewBytePanic(4294967296),
+			maxMillicores, maxMemoryBytes, maxPerformanceUnits,
 		)
 
-		addDto := dto.NewUpdateContainerProfile(
-			id,
-			nil,
-			nil,
-			&maxSpecs,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
+		updateDto := dto.NewUpdateContainerProfile(
+			profileId, nil, nil, &maxSpecs, nil, nil, nil, nil, nil,
 		)
 
-		err := containerProfileCmdRepo.Update(addDto)
+		err := containerProfileCmdRepo.Update(updateDto)
 		if err != nil {
 			t.Errorf("UpdateContainerProfileFailed: %v", err)
 		}
 	})
 
 	t.Run("DeleteContainerProfile", func(t *testing.T) {
-		id := valueObject.NewContainerProfileIdPanic(2)
-
-		err := containerProfileCmdRepo.Delete(id)
+		err := containerProfileCmdRepo.Delete(profileId)
 		if err != nil {
 			t.Errorf("DeleteContainerProfileFailed: %v", err)
 		}

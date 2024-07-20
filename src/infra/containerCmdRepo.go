@@ -204,7 +204,10 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 	if err != nil {
 		return err
 	}
-	cpuQuotaPercentile := containerProfile.BaseSpecs.CpuCores.Read() * 100
+
+	cpuQuotaCores := containerProfile.BaseSpecs.Millicores.ReadAsCores()
+	cpuQuotaCoresStr := strconv.FormatFloat(cpuQuotaCores, 'f', -1, 64)
+	cpuQuotaPercentile := cpuQuotaCores * 100
 	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"
 	memoryBytesStr := containerProfile.BaseSpecs.MemoryBytes.String()
 
@@ -224,7 +227,7 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 CPUQuota=` + cpuQuotaPercentileStr + `
 MemoryMax=` + memoryBytesStr + `
 MemorySwapMax=0
-ExecStartPre=/usr/bin/podman update --cpus ` + containerProfile.BaseSpecs.CpuCores.String() + ` --memory ` + containerProfile.BaseSpecs.MemoryBytes.String() + ` ` + containerIdStr + `
+ExecStartPre=/usr/bin/podman update --cpus ` + cpuQuotaCoresStr + ` --memory ` + containerProfile.BaseSpecs.MemoryBytes.String() + ` ` + containerIdStr + `
 ExecStart=/usr/bin/podman start ` + containerIdStr + `
 ExecStop=/usr/bin/podman stop -t 30 ` + containerIdStr + `
 TimeoutStartSec=30
@@ -272,7 +275,7 @@ WantedBy=default.target
 	_, err = infraHelper.RunCmdAsUser(
 		accountId,
 		"podman", "update",
-		"--cpus", containerProfile.BaseSpecs.CpuCores.String(),
+		"--cpus", cpuQuotaCoresStr,
 		"--memory", containerProfile.BaseSpecs.MemoryBytes.String(),
 		containerIdStr,
 	)
