@@ -1,9 +1,6 @@
 package cliController
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -45,51 +42,33 @@ func (controller *ContainerProfileController) ReadContainerProfiles() *cobra.Com
 	return cmd
 }
 
-func (controller *ContainerProfileController) parseContainerSpecs(
-	specStr string,
-) valueObject.ContainerSpecs {
-	specParts := strings.Split(specStr, ":")
-	if len(specParts) != 2 {
-		panic("InvalidContainerSpecs")
-	}
-
-	cpuCores, err := valueObject.NewCpuCoresCount(specParts[0])
-	if err != nil {
-		panic("InvalidCpuCoresLimit")
-	}
-
-	memory, err := strconv.ParseInt(specParts[1], 10, 64)
-	if err != nil {
-		panic("InvalidMemoryLimit")
-	}
-
-	return valueObject.NewContainerSpecs(
-		cpuCores,
-		valueObject.Byte(memory),
-	)
-}
-
 func (controller *ContainerProfileController) CreateContainerProfile() *cobra.Command {
 	var nameStr string
 	var baseSpecsStr string
 	var maxSpecsStr string
 	var scalingPolicyStr string
-	var scalingThreshold uint64
-	var scalingMaxDurationSecs uint64
-	var scalingIntervalSecs uint64
+	var scalingThreshold uint
+	var scalingMaxDurationSecs uint
+	var scalingIntervalSecs uint
 	var hostMinCapacityPercent float64
 
 	cmd := &cobra.Command{
-		Use:   "add",
-		Short: "AddNewContainerProfile",
+		Use:   "create",
+		Short: "CreateNewContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			name := valueObject.NewContainerProfileNamePanic(nameStr)
 
-			baseSpecs := controller.parseContainerSpecs(baseSpecsStr)
+			baseSpecs, err := valueObject.NewContainerSpecsFromString(baseSpecsStr)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
 			if maxSpecsStr != "" {
-				maxSpecs := controller.parseContainerSpecs(maxSpecsStr)
+				maxSpecs, err := valueObject.NewContainerSpecsFromString(maxSpecsStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				maxSpecsPtr = &maxSpecs
 			}
 
@@ -99,44 +78,42 @@ func (controller *ContainerProfileController) CreateContainerProfile() *cobra.Co
 				scalingPolicyPtr = &scalingPolicy
 			}
 
-			var scalingThresholdPtr *uint64
+			var scalingThresholdPtr *uint
 			if scalingThreshold != 0 {
 				scalingThresholdPtr = &scalingThreshold
 			}
 
-			var scalingMaxDurationSecsPtr *uint64
+			var scalingMaxDurationSecsPtr *uint
 			if scalingMaxDurationSecs != 0 {
 				scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 			}
 
-			var scalingIntervalSecsPtr *uint64
+			var scalingIntervalSecsPtr *uint
 			if scalingIntervalSecs != 0 {
 				scalingIntervalSecsPtr = &scalingIntervalSecs
 			}
 
 			var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
 			if hostMinCapacityPercent != 0 {
-				hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(hostMinCapacityPercent)
+				hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
+					hostMinCapacityPercent,
+				)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				hostMinCapacityPercentPtr = &hostMinCapacityPercent
 			}
 
 			dto := dto.NewCreateContainerProfile(
-				name,
-				baseSpecs,
-				maxSpecsPtr,
-				scalingPolicyPtr,
-				scalingThresholdPtr,
-				scalingMaxDurationSecsPtr,
-				scalingIntervalSecsPtr,
-				hostMinCapacityPercentPtr,
+				name, baseSpecs, maxSpecsPtr, scalingPolicyPtr, scalingThresholdPtr,
+				scalingMaxDurationSecsPtr, scalingIntervalSecsPtr, hostMinCapacityPercentPtr,
 			)
 
-			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
-
-			err := useCase.CreateContainerProfile(
-				containerProfileCmdRepo,
-				dto,
+			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(
+				controller.persistentDbSvc,
 			)
+
+			err = useCase.CreateContainerProfile(containerProfileCmdRepo, dto)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())
 			}
@@ -148,54 +125,28 @@ func (controller *ContainerProfileController) CreateContainerProfile() *cobra.Co
 	cmd.Flags().StringVarP(&nameStr, "name", "n", "", "Name")
 	cmd.MarkFlagRequired("name")
 	cmd.Flags().StringVarP(
-		&baseSpecsStr,
-		"base-specs",
-		"b",
-		"",
-		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
+		&baseSpecsStr, "base-specs", "b", "",
+		"BaseSpecs (millicores:memoryBytes:storagePerformanceUnits)",
 	)
 	cmd.MarkFlagRequired("base-specs")
 	cmd.Flags().StringVarP(
-		&maxSpecsStr,
-		"max-specs",
-		"m",
-		"",
-		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
+		&maxSpecsStr, "max-specs", "m", "",
+		"MaxSpecs (millicores:memoryBytes:storagePerformanceUnits)",
 	)
 	cmd.Flags().StringVarP(
-		&scalingPolicyStr,
-		"policy",
-		"p",
-		"",
-		"ScalingPolicy",
+		&scalingPolicyStr, "policy", "p", "", "ScalingPolicy",
 	)
-	cmd.Flags().Uint64VarP(
-		&scalingThreshold,
-		"threshold",
-		"t",
-		0,
-		"ScalingThreshold",
+	cmd.Flags().UintVarP(
+		&scalingThreshold, "threshold", "t", 0, "ScalingThreshold",
 	)
-	cmd.Flags().Uint64VarP(
-		&scalingMaxDurationSecs,
-		"max-duration",
-		"d",
-		0,
-		"ScalingMaxDurationSecs",
+	cmd.Flags().UintVarP(
+		&scalingMaxDurationSecs, "max-duration", "d", 0, "ScalingMaxDurationSecs",
 	)
-	cmd.Flags().Uint64VarP(
-		&scalingIntervalSecs,
-		"interval",
-		"v",
-		0,
-		"ScalingIntervalSecs",
+	cmd.Flags().UintVarP(
+		&scalingIntervalSecs, "interval", "v", 0, "ScalingIntervalSecs",
 	)
 	cmd.Flags().Float64VarP(
-		&hostMinCapacityPercent,
-		"min-capacity",
-		"c",
-		0,
-		"HostMinCapacityPercent",
+		&hostMinCapacityPercent, "min-capacity", "c", 0, "HostMinCapacityPercent",
 	)
 	return cmd
 }
@@ -206,16 +157,19 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 	var baseSpecsStr string
 	var maxSpecsStr string
 	var scalingPolicyStr string
-	var scalingThreshold uint64
-	var scalingMaxDurationSecs uint64
-	var scalingIntervalSecs uint64
+	var scalingThreshold uint
+	var scalingMaxDurationSecs uint
+	var scalingIntervalSecs uint
 	var hostMinCapacityPercent float64
 
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
-			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
+			profileId, err := valueObject.NewContainerProfileId(profileIdUint)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
 
 			var namePtr *valueObject.ContainerProfileName
 			if nameStr != "" {
@@ -225,13 +179,19 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 
 			var baseSpecsPtr *valueObject.ContainerSpecs
 			if baseSpecsStr != "" {
-				baseSpecs := controller.parseContainerSpecs(baseSpecsStr)
+				baseSpecs, err := valueObject.NewContainerSpecsFromString(baseSpecsStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				baseSpecsPtr = &baseSpecs
 			}
 
 			var maxSpecsPtr *valueObject.ContainerSpecs
 			if maxSpecsStr != "" {
-				maxSpecs := controller.parseContainerSpecs(maxSpecsStr)
+				maxSpecs, err := valueObject.NewContainerSpecsFromString(maxSpecsStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				maxSpecsPtr = &maxSpecs
 			}
 
@@ -241,24 +201,29 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 				scalingPolicyPtr = &scalingPolicy
 			}
 
-			var scalingThresholdPtr *uint64
+			var scalingThresholdPtr *uint
 			if scalingThreshold != 0 {
 				scalingThresholdPtr = &scalingThreshold
 			}
 
-			var scalingMaxDurationSecsPtr *uint64
+			var scalingMaxDurationSecsPtr *uint
 			if scalingMaxDurationSecs != 0 {
 				scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 			}
 
-			var scalingIntervalSecsPtr *uint64
+			var scalingIntervalSecsPtr *uint
 			if scalingIntervalSecs != 0 {
 				scalingIntervalSecsPtr = &scalingIntervalSecs
 			}
 
 			var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
 			if hostMinCapacityPercent != 0 {
-				hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(hostMinCapacityPercent)
+				hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
+					hostMinCapacityPercent,
+				)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				hostMinCapacityPercentPtr = &hostMinCapacityPercent
 			}
 
@@ -274,12 +239,14 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 				hostMinCapacityPercentPtr,
 			)
 
-			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistentDbSvc)
+			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(
+				controller.persistentDbSvc,
+			)
 			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
 			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
 
-			err := useCase.UpdateContainerProfile(
+			err = useCase.UpdateContainerProfile(
 				containerProfileQueryRepo,
 				containerProfileCmdRepo,
 				containerQueryRepo,
@@ -298,53 +265,27 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 	cmd.MarkFlagRequired("id")
 	cmd.Flags().StringVarP(&nameStr, "name", "n", "", "Name")
 	cmd.Flags().StringVarP(
-		&baseSpecsStr,
-		"base-specs",
-		"b",
-		"",
-		"BaseSpecs (cpuCoresFloat:memoryBytesUint)",
+		&baseSpecsStr, "base-specs", "b", "",
+		"BaseSpecs (millicores:memoryBytes:storagePerformanceUnits)",
 	)
 	cmd.Flags().StringVarP(
-		&maxSpecsStr,
-		"max-specs",
-		"m",
-		"",
-		"MaxSpecs (cpuCoresFloat:memoryBytesUint)",
+		&maxSpecsStr, "max-specs", "m", "",
+		"MaxSpecs (millicores:memoryBytes:storagePerformanceUnits)",
 	)
 	cmd.Flags().StringVarP(
-		&scalingPolicyStr,
-		"policy",
-		"p",
-		"",
-		"ScalingPolicy",
+		&scalingPolicyStr, "policy", "p", "", "ScalingPolicy",
 	)
-	cmd.Flags().Uint64VarP(
-		&scalingThreshold,
-		"threshold",
-		"t",
-		0,
-		"ScalingThreshold",
+	cmd.Flags().UintVarP(
+		&scalingThreshold, "threshold", "t", 0, "ScalingThreshold",
 	)
-	cmd.Flags().Uint64VarP(
-		&scalingMaxDurationSecs,
-		"max-duration",
-		"d",
-		0,
-		"ScalingMaxDurationSecs",
+	cmd.Flags().UintVarP(
+		&scalingMaxDurationSecs, "max-duration", "d", 0, "ScalingMaxDurationSecs",
 	)
-	cmd.Flags().Uint64VarP(
-		&scalingIntervalSecs,
-		"interval",
-		"v",
-		0,
-		"ScalingIntervalSecs",
+	cmd.Flags().UintVarP(
+		&scalingIntervalSecs, "interval", "v", 0, "ScalingIntervalSecs",
 	)
 	cmd.Flags().Float64VarP(
-		&hostMinCapacityPercent,
-		"min-capacity",
-		"c",
-		0,
-		"HostMinCapacityPercent",
+		&hostMinCapacityPercent, "min-capacity", "c", 0, "HostMinCapacityPercent",
 	)
 	return cmd
 }
@@ -356,19 +297,19 @@ func (controller *ContainerProfileController) DeleteContainerProfile() *cobra.Co
 		Use:   "delete",
 		Short: "DeleteContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
-			profileId := valueObject.NewContainerProfileIdPanic(profileIdUint)
+			profileId, err := valueObject.NewContainerProfileId(profileIdUint)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
 
 			containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(controller.persistentDbSvc)
 			containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(controller.persistentDbSvc)
 			containerQueryRepo := infra.NewContainerQueryRepo(controller.persistentDbSvc)
 			containerCmdRepo := infra.NewContainerCmdRepo(controller.persistentDbSvc)
 
-			err := useCase.DeleteContainerProfile(
-				containerProfileQueryRepo,
-				containerProfileCmdRepo,
-				containerQueryRepo,
-				containerCmdRepo,
-				profileId,
+			err = useCase.DeleteContainerProfile(
+				containerProfileQueryRepo, containerProfileCmdRepo, containerQueryRepo,
+				containerCmdRepo, profileId,
 			)
 			if err != nil {
 				cliHelper.ResponseWrapper(false, err.Error())

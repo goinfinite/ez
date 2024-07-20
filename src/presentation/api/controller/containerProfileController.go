@@ -33,18 +33,52 @@ func ReadContainerProfilesController(c echo.Context) error {
 	return apiHelper.ResponseWrapper(c, http.StatusOK, profilesList)
 }
 
-func parseContainerSpecs(rawSpecs map[string]interface{}) valueObject.ContainerSpecs {
-	cpuCores, _ := valueObject.NewCpuCoresCount(0)
+func parseContainerSpecs(
+	rawSpecs map[string]interface{},
+) (specs valueObject.ContainerSpecs, err error) {
+	defaultSpecs := valueObject.NewContainerSpecsWithDefaultValues()
+
+	millicores := defaultSpecs.Millicores
 	if rawSpecs["cpuCores"] != nil {
-		cpuCores = valueObject.NewCpuCoresCountPanic(rawSpecs["cpuCores"])
+		cpuCoresUint, err := voHelper.InterfaceToUint(rawSpecs["cpuCores"])
+		if err != nil {
+			return specs, err
+		}
+
+		millicores, err = valueObject.NewMillicores(cpuCoresUint * 1000)
+		if err != nil {
+			return specs, err
+		}
 	}
 
-	memoryBytes, _ := valueObject.NewByte(0)
+	if rawSpecs["millicores"] != nil {
+		millicores, err = valueObject.NewMillicores(rawSpecs["millicores"])
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	memoryBytes := defaultSpecs.MemoryBytes
 	if rawSpecs["memoryBytes"] != nil {
-		memoryBytes = valueObject.NewBytePanic(rawSpecs["memoryBytes"])
+		memoryBytes, err = valueObject.NewByte(rawSpecs["memoryBytes"])
+		if err != nil {
+			return specs, err
+		}
 	}
 
-	return valueObject.NewContainerSpecs(cpuCores, memoryBytes)
+	storagePerformanceUnits := defaultSpecs.StoragePerformanceUnits
+	if rawSpecs["storagePerformanceUnits"] != nil {
+		storagePerformanceUnits, err = valueObject.NewStoragePerformanceUnits(
+			rawSpecs["storagePerformanceUnits"],
+		)
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	return valueObject.NewContainerSpecs(
+		millicores, memoryBytes, storagePerformanceUnits,
+	), nil
 }
 
 // CreateContainerProfile	 godoc
@@ -72,7 +106,10 @@ func CreateContainerProfileController(c echo.Context) error {
 	if !assertOk {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "InvalidBaseSpecs")
 	}
-	baseSpecs := parseContainerSpecs(baseSpecsMap)
+	baseSpecs, err := parseContainerSpecs(baseSpecsMap)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
 
 	var maxSpecsPtr *valueObject.ContainerSpecs
 	if requestBody["maxSpecs"] != nil {
@@ -80,7 +117,10 @@ func CreateContainerProfileController(c echo.Context) error {
 		if !assertOk {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "InvalidMaxSpecs")
 		}
-		maxSpecs := parseContainerSpecs(maxSpecsMap)
+		maxSpecs, err := parseContainerSpecs(maxSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
 		maxSpecsPtr = &maxSpecs
 	}
 
@@ -92,44 +132,38 @@ func CreateContainerProfileController(c echo.Context) error {
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	var scalingThresholdPtr *uint64
+	var scalingThresholdPtr *uint
 	if requestBody["scalingThreshold"] != nil {
-		scalingThreshold, err := voHelper.InterfaceToUint64(requestBody["scalingThreshold"])
+		scalingThreshold, err := voHelper.InterfaceToUint(requestBody["scalingThreshold"])
 		if err != nil {
 			return apiHelper.ResponseWrapper(
-				c,
-				http.StatusBadRequest,
-				"InvalidScalingThreshold",
+				c, http.StatusBadRequest, "InvalidScalingThreshold",
 			)
 		}
 		scalingThresholdPtr = &scalingThreshold
 	}
 
-	var scalingMaxDurationSecsPtr *uint64
+	var scalingMaxDurationSecsPtr *uint
 	if requestBody["scalingMaxDurationSecs"] != nil {
-		scalingMaxDurationSecs, err := voHelper.InterfaceToUint64(
+		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
 			requestBody["scalingMaxDurationSecs"],
 		)
 		if err != nil {
 			return apiHelper.ResponseWrapper(
-				c,
-				http.StatusBadRequest,
-				"InvalidScalingMaxDurationSecs",
+				c, http.StatusBadRequest, "InvalidScalingMaxDurationSecs",
 			)
 		}
 		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 	}
 
-	var scalingIntervalSecsPtr *uint64
+	var scalingIntervalSecsPtr *uint
 	if requestBody["scalingIntervalSecs"] != nil {
-		scalingIntervalSecs, err := voHelper.InterfaceToUint64(
+		scalingIntervalSecs, err := voHelper.InterfaceToUint(
 			requestBody["scalingIntervalSecs"],
 		)
 		if err != nil {
 			return apiHelper.ResponseWrapper(
-				c,
-				http.StatusBadRequest,
-				"InvalidScalingIntervalSecs",
+				c, http.StatusBadRequest, "InvalidScalingIntervalSecs",
 			)
 		}
 		scalingIntervalSecsPtr = &scalingIntervalSecs
@@ -137,9 +171,14 @@ func CreateContainerProfileController(c echo.Context) error {
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
 	if requestBody["hostMinCapacityPercent"] != nil {
-		hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(
+		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
 			requestBody["hostMinCapacityPercent"],
 		)
+		if err != nil {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, err.Error(),
+			)
+		}
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
@@ -157,10 +196,7 @@ func CreateContainerProfileController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(persistentDbSvc)
 
-	err = useCase.CreateContainerProfile(
-		containerProfileCmdRepo,
-		dto,
-	)
+	err = useCase.CreateContainerProfile(containerProfileCmdRepo, dto)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
 	}
@@ -187,7 +223,10 @@ func UpdateContainerProfileController(c echo.Context) error {
 	requiredParams := []string{"id"}
 	apiHelper.CheckMissingParams(requestBody, requiredParams)
 
-	id := valueObject.NewContainerProfileIdPanic(requestBody["id"])
+	id, err := valueObject.NewContainerProfileId(requestBody["id"])
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
 
 	var namePtr *valueObject.ContainerProfileName
 	if requestBody["name"] != nil {
@@ -201,7 +240,10 @@ func UpdateContainerProfileController(c echo.Context) error {
 		if !assertOk {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "InvalidBaseSpecs")
 		}
-		baseSpecs := parseContainerSpecs(baseSpecsMap)
+		baseSpecs, err := parseContainerSpecs(baseSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
 		baseSpecsPtr = &baseSpecs
 	}
 
@@ -211,7 +253,10 @@ func UpdateContainerProfileController(c echo.Context) error {
 		if !assertOk {
 			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "InvalidMaxSpecs")
 		}
-		maxSpecs := parseContainerSpecs(maxSpecsMap)
+		maxSpecs, err := parseContainerSpecs(maxSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
 		maxSpecsPtr = &maxSpecs
 	}
 
@@ -223,9 +268,9 @@ func UpdateContainerProfileController(c echo.Context) error {
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	var scalingThresholdPtr *uint64
+	var scalingThresholdPtr *uint
 	if requestBody["scalingThreshold"] != nil {
-		scalingThreshold, err := voHelper.InterfaceToUint64(requestBody["scalingThreshold"])
+		scalingThreshold, err := voHelper.InterfaceToUint(requestBody["scalingThreshold"])
 		if err != nil {
 			return apiHelper.ResponseWrapper(
 				c,
@@ -236,9 +281,9 @@ func UpdateContainerProfileController(c echo.Context) error {
 		scalingThresholdPtr = &scalingThreshold
 	}
 
-	var scalingMaxDurationSecsPtr *uint64
+	var scalingMaxDurationSecsPtr *uint
 	if requestBody["scalingMaxDurationSecs"] != nil {
-		scalingMaxDurationSecs, err := voHelper.InterfaceToUint64(
+		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
 			requestBody["scalingMaxDurationSecs"],
 		)
 		if err != nil {
@@ -251,9 +296,9 @@ func UpdateContainerProfileController(c echo.Context) error {
 		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 	}
 
-	var scalingIntervalSecsPtr *uint64
+	var scalingIntervalSecsPtr *uint
 	if requestBody["scalingIntervalSecs"] != nil {
-		scalingIntervalSecs, err := voHelper.InterfaceToUint64(
+		scalingIntervalSecs, err := voHelper.InterfaceToUint(
 			requestBody["scalingIntervalSecs"],
 		)
 		if err != nil {
@@ -268,9 +313,14 @@ func UpdateContainerProfileController(c echo.Context) error {
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
 	if requestBody["hostMinCapacityPercent"] != nil {
-		hostMinCapacityPercent := valueObject.NewHostMinCapacityPanic(
+		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
 			requestBody["hostMinCapacityPercent"],
 		)
+		if err != nil {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, err.Error(),
+			)
+		}
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
@@ -317,7 +367,10 @@ func UpdateContainerProfileController(c echo.Context) error {
 // @Success      200 {object} object{} "ContainerProfileDeleted"
 // @Router       /v1/container/profile/{profileId}/ [delete]
 func DeleteContainerProfileController(c echo.Context) error {
-	profileId := valueObject.NewContainerProfileIdPanic(c.Param("profileId"))
+	profileId, err := valueObject.NewContainerProfileId(c.Param("profileId"))
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
 
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(persistentDbSvc)
@@ -325,7 +378,7 @@ func DeleteContainerProfileController(c echo.Context) error {
 	containerQueryRepo := infra.NewContainerQueryRepo(persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(persistentDbSvc)
 
-	err := useCase.DeleteContainerProfile(
+	err = useCase.DeleteContainerProfile(
 		containerProfileQueryRepo,
 		containerProfileCmdRepo,
 		containerQueryRepo,
