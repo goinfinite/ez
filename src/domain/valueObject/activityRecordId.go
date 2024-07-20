@@ -10,15 +10,15 @@ import (
 type ActivityRecordId uint64
 
 func NewActivityRecordId(value interface{}) (ActivityRecordId, error) {
-	id, err := voHelper.InterfaceToUint64(value)
+	uintValue, err := voHelper.InterfaceToUint64(value)
 	if err != nil {
 		return 0, errors.New("InvalidActivityRecordId")
 	}
 
-	return ActivityRecordId(id), nil
+	return ActivityRecordId(uintValue), nil
 }
 
-func (vo ActivityRecordId) Read() uint64 {
+func (vo ActivityRecordId) Uint64() uint64 {
 	return uint64(vo)
 }
 
