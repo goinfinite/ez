@@ -88,3 +88,9 @@ func RunCmdAsUser(
 	}
 	return runExecCmd(execCmd)
 }
+
+func RunCmdAsUserWithSubShell(
+	accountId valueObject.AccountId, command string,
+) (string, error) {
+	return RunCmdAsUser(accountId, "bash", "-c", "source /etc/profile; "+command)
+}
