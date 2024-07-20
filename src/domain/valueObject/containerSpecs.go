@@ -3,6 +3,8 @@ package valueObject
 import (
 	"errors"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type ContainerSpecs struct {
@@ -21,39 +23,53 @@ func NewContainerSpecs(
 	}
 }
 
+// format: [millicores]:[memoryBytes]:[storagePerformanceUnits]
 func NewContainerSpecsFromString(value string) (specs ContainerSpecs, err error) {
-	if value == "" {
-		return specs, errors.New("InvalidContainerSpecs")
+	value = strings.TrimSpace(value)
+	value = strings.ToLower(value)
+
+	specsRegex := `^(?:(?P<millicores>\d{1,19}))?:(?P<memoryBytes>\d{1,19}):(?P<storagePerformanceUnits>\d{1,19})$`
+	specsParts := voHelper.FindNamedGroupsMatches(specsRegex, value)
+	if len(specsParts) == 0 {
+		return specs, errors.New("InvalidSpecsStructure")
 	}
 
-	if !strings.Contains(value, ":") {
-		return specs, errors.New("InvalidContainerSpecs")
-	}
+	specs = NewContainerSpecsWithDefaultValues()
 
-	specParts := strings.Split(value, ":")
-	if len(specParts) != 2 {
-		return specs, errors.New("InvalidContainerSpecs")
-	}
-
-	millicores, err := NewMillicores(specParts[0])
-	if err != nil {
-		return specs, err
-	}
-
-	memory, err := NewByte(specParts[1])
-	if err != nil {
-		return specs, err
-	}
-
-	storagePerformanceUnits, _ := NewStoragePerformanceUnits(1)
-	if len(specParts) == 3 {
-		storagePerformanceUnits, err = NewStoragePerformanceUnits(specParts[2])
+	if specsParts["millicores"] != "" {
+		specs.Millicores, err = NewMillicores(specsParts["millicores"])
 		if err != nil {
 			return specs, err
 		}
 	}
 
-	return NewContainerSpecs(millicores, memory, storagePerformanceUnits), nil
+	if specsParts["memoryBytes"] != "" {
+		specs.MemoryBytes, err = NewByte(specsParts["memoryBytes"])
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	if specsParts["storagePerformanceUnits"] != "" {
+		specs.StoragePerformanceUnits, err = NewStoragePerformanceUnits(
+			specsParts["storagePerformanceUnits"],
+		)
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	return specs, nil
+}
+
+func NewContainerSpecsWithDefaultValues() ContainerSpecs {
+	millicores, _ := NewMillicores(500)
+	memoryBytes, _ := NewByte(1073741824)
+	storagePerformanceUnits, _ := NewStoragePerformanceUnits(1)
+
+	return NewContainerSpecs(
+		millicores, memoryBytes, storagePerformanceUnits,
+	)
 }
 
 func (specs ContainerSpecs) String() string {
