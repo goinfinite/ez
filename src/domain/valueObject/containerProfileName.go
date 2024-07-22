@@ -3,33 +3,28 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-const containerProfileNameRegex string = `^\w[\w -]{1,30}\w$`
+const containerProfileNameRegex string = `^\w[\w\ \-]{1,64}\w$`
 
 type ContainerProfileName string
 
-func NewContainerProfileName(value string) (ContainerProfileName, error) {
-	user := ContainerProfileName(value)
-	if !user.isValid() {
-		return "", errors.New("InvalidContainerProfileName")
+func NewContainerProfileName(value interface{}) (name ContainerProfileName, err error) {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
+		return name, errors.New("ContainerProfileNameMustBeString")
 	}
-	return user, nil
-}
 
-func NewContainerProfileNamePanic(value string) ContainerProfileName {
-	user := ContainerProfileName(value)
-	if !user.isValid() {
-		panic("InvalidContainerProfileName")
-	}
-	return user
-}
-
-func (user ContainerProfileName) isValid() bool {
 	re := regexp.MustCompile(containerProfileNameRegex)
-	return re.MatchString(string(user))
+	if !re.MatchString(stringValue) {
+		return name, errors.New("InvalidContainerProfileName")
+	}
+
+	return ContainerProfileName(stringValue), nil
 }
 
-func (user ContainerProfileName) String() string {
-	return string(user)
+func (vo ContainerProfileName) String() string {
+	return string(vo)
 }
