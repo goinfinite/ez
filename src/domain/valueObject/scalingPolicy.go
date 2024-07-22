@@ -4,24 +4,36 @@ import (
 	"errors"
 	"slices"
 	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type ScalingPolicy string
 
 var ValidScalingPolicies = []string{
-	"connection",
-	"cpu",
-	"memory",
+	"connection", "cpu", "memory",
 }
 
-func NewScalingPolicy(value string) (ScalingPolicy, error) {
-	value = strings.TrimSpace(value)
-	value = strings.ToLower(value)
-
-	if !slices.Contains(ValidScalingPolicies, value) {
-		return "", errors.New("InvalidScalingPolicy")
+func NewScalingPolicy(value interface{}) (policy ScalingPolicy, err error) {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
+		return policy, errors.New("ScalingPolicyMustBeString")
 	}
-	return ScalingPolicy(value), nil
+
+	stringValue = strings.ToLower(stringValue)
+
+	if !slices.Contains(ValidScalingPolicies, stringValue) {
+		switch stringValue {
+		case "connections", "conn", "conns":
+			stringValue = "connection"
+		case "mem", "ram":
+			stringValue = "memory"
+		default:
+			return policy, errors.New("InvalidScalingPolicy")
+		}
+	}
+
+	return ScalingPolicy(stringValue), nil
 }
 
 func DefaultScalingPolicy() ScalingPolicy {
@@ -29,14 +41,6 @@ func DefaultScalingPolicy() ScalingPolicy {
 	return scalingPolicy
 }
 
-func NewScalingPolicyPanic(value string) ScalingPolicy {
-	scalingPolicy, err := NewScalingPolicy(value)
-	if err != nil {
-		panic(err)
-	}
-	return scalingPolicy
-}
-
-func (sp ScalingPolicy) String() string {
-	return string(sp)
+func (vo ScalingPolicy) String() string {
+	return string(vo)
 }
