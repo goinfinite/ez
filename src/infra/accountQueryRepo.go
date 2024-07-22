@@ -2,7 +2,6 @@ package infra
 
 import (
 	"errors"
-	"log"
 	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
@@ -34,11 +33,11 @@ func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
 	for _, accountModel := range accountModels {
 		accountEntity, err := accountModel.ToEntity()
 		if err != nil {
-			slog.Debug("ModelToEntityError",
+			slog.Debug(
+				"ModelToEntityError",
 				slog.Any("error", err.Error()),
-				slog.Uint64("accountId", uint64(accountModel.ID)),
+				slog.Uint64("accountId", accountModel.ID),
 			)
-			log.Printf("ModelToEntityError: %v", err.Error())
 			continue
 		}
 
