@@ -1,7 +1,14 @@
 # Changelog
 
 ```log
-0.0.5 - 2024/XX/XX
+0.0.6 - 2024/XX/XX
+feat: add storage performance units
+fix!: renamed "cpuCores" => "millicores"
+fix!: renamed "diskBytes" => "storageBytes"
+fix!: renamed "inodes" => "storageInodes"
+fix!: replaced uint to uint64 for profile, mapping and target's ids
+
+0.0.5 - 2024/07/18
 refactor: security events to activity records
 feat: add zerolog as slog handler
 fix: remove http custom logger
