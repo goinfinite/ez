@@ -61,7 +61,6 @@ func (router *Router) accountRoutes() {
 
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/v1/container")
-
 	containerController := apiController.NewContainerController(router.persistentDbSvc)
 	containerGroup.GET("/", containerController.Read)
 	containerGroup.GET("/metrics/", containerController.ReadWithMetrics)
@@ -74,13 +73,13 @@ func (router *Router) containerRoutes() {
 	)
 
 	containerProfileGroup := containerGroup.Group("/profile")
-	containerProfileGroup.GET("/", apiController.ReadContainerProfilesController)
-	containerProfileGroup.POST("/", apiController.CreateContainerProfileController)
-	containerProfileGroup.PUT("/", apiController.UpdateContainerProfileController)
-	containerProfileGroup.DELETE(
-		"/:profileId/",
-		apiController.DeleteContainerProfileController,
+	containerProfileController := apiController.NewContainerProfileController(
+		router.persistentDbSvc,
 	)
+	containerProfileGroup.GET("/", containerProfileController.Read)
+	containerProfileGroup.POST("/", containerProfileController.Create)
+	containerProfileGroup.PUT("/", containerProfileController.Update)
+	containerProfileGroup.DELETE("/:profileId/", containerProfileController.Delete)
 
 	containerRegistryGroup := containerGroup.Group("/registry")
 	containerRegistryGroup.GET("/image/", apiController.GetContainerRegistryImagesController)

@@ -1,0 +1,211 @@
+package apiController
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/domain/valueObject"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
+	"github.com/speedianet/control/src/infra/db"
+	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
+	"github.com/speedianet/control/src/presentation/service"
+)
+
+type ContainerProfileController struct {
+	containerProfileService *service.ContainerProfileService
+}
+
+func NewContainerProfileController(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *ContainerProfileController {
+	return &ContainerProfileController{
+		containerProfileService: service.NewContainerProfileService(persistentDbSvc),
+	}
+}
+
+// ReadContainerProfiles	 godoc
+// @Summary      ReadContainerProfiles
+// @Description  List container profiles.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Success      200 {array} entity.ContainerProfile
+// @Router       /v1/container/profile/ [get]
+func (controller *ContainerProfileController) Read(c echo.Context) error {
+	return apiHelper.ServiceResponseWrapper(c, controller.containerProfileService.Read())
+}
+
+func parseContainerSpecs(
+	rawSpecs map[string]interface{},
+) (specs valueObject.ContainerSpecs, err error) {
+	defaultSpecs := valueObject.NewContainerSpecsWithDefaultValues()
+
+	millicores := defaultSpecs.Millicores
+	if rawSpecs["cpuCores"] != nil {
+		cpuCoresUint, err := voHelper.InterfaceToUint(rawSpecs["cpuCores"])
+		if err != nil {
+			return specs, err
+		}
+
+		millicores, err = valueObject.NewMillicores(cpuCoresUint * 1000)
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	if rawSpecs["millicores"] != nil {
+		millicores, err = valueObject.NewMillicores(rawSpecs["millicores"])
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	memoryBytes := defaultSpecs.MemoryBytes
+	if rawSpecs["memoryBytes"] != nil {
+		memoryBytes, err = valueObject.NewByte(rawSpecs["memoryBytes"])
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	storagePerformanceUnits := defaultSpecs.StoragePerformanceUnits
+	if rawSpecs["storagePerformanceUnits"] != nil {
+		storagePerformanceUnits, err = valueObject.NewStoragePerformanceUnits(
+			rawSpecs["storagePerformanceUnits"],
+		)
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	return valueObject.NewContainerSpecs(
+		millicores, memoryBytes, storagePerformanceUnits,
+	), nil
+}
+
+// CreateContainerProfile	 godoc
+// @Summary      CreateNewContainerProfile
+// @Description  Create a new container profile.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createContainerProfileDto 	  body    dto.CreateContainerProfile  true  "NewContainerProfile (Only name and baseSpecs are required.)"
+// @Success      201 {object} object{} "ContainerProfileCreated"
+// @Router       /v1/container/profile/ [post]
+func (controller *ContainerProfileController) Create(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	if requestBody["baseSpecs"] != nil {
+		baseSpecsMap, assertOk := requestBody["baseSpecs"].(map[string]interface{})
+		if !assertOk {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, "InvalidBaseSpecsStructure",
+			)
+		}
+
+		baseSpecs, err := parseContainerSpecs(baseSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		requestBody["baseSpecs"] = baseSpecs
+	}
+
+	if requestBody["maxSpecs"] != nil {
+		maxSpecsMap, assertOk := requestBody["maxSpecs"].(map[string]interface{})
+		if !assertOk {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, "InvalidMaxSpecsStructure",
+			)
+		}
+
+		maxSpecs, err := parseContainerSpecs(maxSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		requestBody["maxSpecs"] = maxSpecs
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerProfileService.Create(requestBody),
+	)
+}
+
+// UpdateContainerProfile godoc
+// @Summary      UpdateContainerProfile
+// @Description  Update a container profile.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        updateContainerProfileDto 	  body dto.UpdateContainerProfile  true  "UpdateContainerProfile (Only id is required.)"
+// @Success      200 {object} object{} "ContainerProfileUpdated"
+// @Router       /v1/container/profile/ [put]
+func (controller *ContainerProfileController) Update(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	if requestBody["baseSpecs"] != nil {
+		baseSpecsMap, assertOk := requestBody["baseSpecs"].(map[string]interface{})
+		if !assertOk {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, "InvalidBaseSpecsStructure",
+			)
+		}
+
+		baseSpecs, err := parseContainerSpecs(baseSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		requestBody["baseSpecs"] = baseSpecs
+	}
+
+	if requestBody["maxSpecs"] != nil {
+		maxSpecsMap, assertOk := requestBody["maxSpecs"].(map[string]interface{})
+		if !assertOk {
+			return apiHelper.ResponseWrapper(
+				c, http.StatusBadRequest, "InvalidMaxSpecsStructure",
+			)
+		}
+
+		maxSpecs, err := parseContainerSpecs(maxSpecsMap)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		requestBody["maxSpecs"] = maxSpecs
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerProfileService.Update(requestBody),
+	)
+}
+
+// DeleteContainerProfile godoc
+// @Summary      DeleteContainerProfile
+// @Description  Delete a container profile.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        profileId 	  path   string  true  "ProfileId"
+// @Success      200 {object} object{} "ContainerProfileDeleted"
+// @Router       /v1/container/profile/{profileId}/ [delete]
+func (controller *ContainerProfileController) Delete(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"id": c.Param("profileId"),
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerProfileService.Delete(requestBody),
+	)
+}

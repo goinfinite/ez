@@ -62,11 +62,13 @@ func (router *Router) containerRoutes() {
 		Short: "ContainerProfileManagement",
 	}
 
-	containerProfileController := cliController.NewContainerProfileController(router.persistentDbSvc)
-	containerProfileCmd.AddCommand(containerProfileController.ReadContainerProfiles())
-	containerProfileCmd.AddCommand(containerProfileController.CreateContainerProfile())
-	containerProfileCmd.AddCommand(containerProfileController.UpdateContainerProfile())
-	containerProfileCmd.AddCommand(containerProfileController.DeleteContainerProfile())
+	containerProfileController := cliController.NewContainerProfileController(
+		router.persistentDbSvc,
+	)
+	containerProfileCmd.AddCommand(containerProfileController.Read())
+	containerProfileCmd.AddCommand(containerProfileController.Create())
+	containerProfileCmd.AddCommand(containerProfileController.Update())
+	containerProfileCmd.AddCommand(containerProfileController.Delete())
 
 	var containerRegistryCmd = &cobra.Command{
 		Use:   "registry",
