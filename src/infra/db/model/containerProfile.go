@@ -15,7 +15,7 @@ type ContainerProfile struct {
 	ScalingThreshold       *uint
 	ScalingMaxDurationSecs *uint
 	ScalingIntervalSecs    *uint
-	HostMinCapacityPercent *float64
+	HostMinCapacityPercent *uint8
 }
 
 func (ContainerProfile) TableName() string {
@@ -49,10 +49,10 @@ func (ContainerProfile) ToModel(
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	var hostMinCapacityPercentPtr *float64
+	var hostMinCapacityPercentPtr *uint8
 	if entity.HostMinCapacityPercent != nil {
-		hostMinCapacityPercentFloat64 := entity.HostMinCapacityPercent.Float64()
-		hostMinCapacityPercentPtr = &hostMinCapacityPercentFloat64
+		hostMinCapacityPercentUint8 := entity.HostMinCapacityPercent.Uint8()
+		hostMinCapacityPercentPtr = &hostMinCapacityPercentUint8
 	}
 
 	return ContainerProfile{
@@ -134,10 +134,10 @@ func (ContainerProfile) AddDtoToModel(
 		scalingPolicyPtr = &scalingPolicy
 	}
 
-	var hostMinCapacityPercentPtr *float64
+	var hostMinCapacityPercentPtr *uint8
 	if dto.HostMinCapacityPercent != nil {
-		hostMinCapacityPercentFloat64 := dto.HostMinCapacityPercent.Float64()
-		hostMinCapacityPercentPtr = &hostMinCapacityPercentFloat64
+		hostMinCapacityPercentUint8 := dto.HostMinCapacityPercent.Uint8()
+		hostMinCapacityPercentPtr = &hostMinCapacityPercentUint8
 	}
 
 	return ContainerProfile{

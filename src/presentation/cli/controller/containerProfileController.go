@@ -160,7 +160,7 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 	var scalingThreshold uint
 	var scalingMaxDurationSecs uint
 	var scalingIntervalSecs uint
-	var hostMinCapacityPercent float64
+	var hostMinCapacityPercent uint8
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -284,7 +284,7 @@ func (controller *ContainerProfileController) UpdateContainerProfile() *cobra.Co
 	cmd.Flags().UintVarP(
 		&scalingIntervalSecs, "interval", "v", 0, "ScalingIntervalSecs",
 	)
-	cmd.Flags().Float64VarP(
+	cmd.Flags().Uint8VarP(
 		&hostMinCapacityPercent, "min-capacity", "c", 0, "HostMinCapacityPercent",
 	)
 	return cmd

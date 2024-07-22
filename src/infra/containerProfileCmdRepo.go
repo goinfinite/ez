@@ -62,7 +62,7 @@ func (repo *ContainerProfileCmdRepo) Update(
 	}
 
 	if updateDto.HostMinCapacityPercent != nil {
-		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Float64()
+		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Uint8()
 	}
 
 	return repo.persistentDbSvc.Handler.
