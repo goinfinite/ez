@@ -3,6 +3,7 @@ module github.com/speedianet/control
 go 1.22
 
 require (
+	github.com/a-h/templ v0.2.747
 	github.com/alecthomas/chroma v0.10.0
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/glebarez/sqlite v1.11.0

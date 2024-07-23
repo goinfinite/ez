@@ -45,8 +45,8 @@ Note: If you use Pastebin, make sure you're downloading the raw file and not the
 7. Install git and Go and reboot:
 
 ```
-transactional-update pkg install git
-curl -L https://go.dev/dl/go1.22.2.linux-amd64.tar.gz -o go.tar.gz
+transactional-update pkg install git make
+curl -L https://go.dev/dl/go1.22.5.linux-amd64.tar.gz -o go.tar.gz
 tar -C /usr/local -xzf go.tar.gz
 rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
@@ -70,6 +70,7 @@ Replace `the_github_key` with the path to your private key and remember to chmod
 ```
 go install github.com/swaggo/swag/cmd/swag@latest
 go install github.com/cosmtrek/air@latest
+go install github.com/a-h/templ/cmd/templ@latest
 git config --global user.name "yourgithubnick"
 git config --global user.email yourgithubemail
 git clone git@github.com:speedianet/control.git
@@ -102,6 +103,9 @@ redhat.vscode-yaml
 streetsidesoftware.code-spell-checker
 streetsidesoftware.code-spell-checker-portuguese-brazilian
 timonwong.shellcheck
+bradlc.vscode-tailwindcss
+Trapfether.tailwind-raw-reorder
+a-h.templ
 ```
 
 12. The install process also creates a systemd unit to run the project. Use the following commands to disable the service so you can run the project manually with Air during development:

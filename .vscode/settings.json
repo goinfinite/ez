@@ -78,6 +78,7 @@
     "sqlite",
     "supervisord",
     "swaggo",
+    "templ",
     "Tokenise",
     "Totalram",
     "Upstreams",
@@ -89,5 +90,15 @@
     "vhosts",
     "zerolog",
     "Zerolog"
-  ]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "templ": "html"
+  },
+  "editor.formatOnSave": true,
+  "[templ]": {
+    "editor.defaultFormatter": "a-h.templ"
+  },
+  "emmet.includeLanguages": {
+    "templ": "html"
+  }
 }
