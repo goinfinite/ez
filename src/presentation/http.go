@@ -2,8 +2,9 @@ package presentation
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
@@ -45,6 +46,7 @@ ______________________________________________________________________________
 
 	err := httpServer.ListenAndServeTLS(certFile, keyFile)
 	if err != http.ErrServerClosed {
-		log.Fatal(err)
+		slog.Error("HttpServerError", slog.Any("error", err))
+		os.Exit(1)
 	}
 }
