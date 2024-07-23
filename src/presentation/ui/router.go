@@ -3,12 +3,15 @@ package ui
 import (
 	"embed"
 	"io/fs"
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
 	"github.com/speedianet/control/src/presentation/api"
+	"github.com/speedianet/control/src/presentation/ui/presenter"
 )
 
 type Router struct {
@@ -30,25 +33,34 @@ func NewRouter(
 }
 
 //go:embed dist/*
-var frontFiles embed.FS
+var previousDashFiles embed.FS
 
-func UiFs() http.Handler {
-	frontFileFs, err := fs.Sub(frontFiles, "dist")
-	if err != nil {
-		panic(err)
-	}
+func (router *Router) containerRoutes() {
+	containerGroup := router.baseRoute.Group("/container")
 
-	return http.FileServer(http.FS(frontFileFs))
+	containerProfileGroup := containerGroup.Group("/profile")
+	profilePresenter := presenter.NewContainerProfilePresenter(router.persistentDbSvc)
+	containerProfileGroup.GET("/", profilePresenter.Handler)
 }
 
-func (router *Router) rootRoute() {
-	router.baseRoute.GET("/*", echo.WrapHandler(
-		http.StripPrefix("/_", UiFs())),
+func (router *Router) previousDashboardRoute() {
+	dashFilesFs, err := fs.Sub(previousDashFiles, "dist")
+	if err != nil {
+		slog.Error("ReadPreviousDashFilesError", slog.Any("error", err))
+		os.Exit(1)
+	}
+	dashFileServer := http.FileServer(http.FS(dashFilesFs))
+
+	previousDashGroup := router.baseRoute.Group("/_")
+	previousDashGroup.GET(
+		"/*",
+		echo.WrapHandler(http.StripPrefix("/_", dashFileServer)),
 	)
 }
 
 func (router *Router) RegisterRoutes() {
-	router.rootRoute()
+	router.containerRoutes()
+	router.previousDashboardRoute()
 
 	router.baseRoute.RouteNotFound("/*", func(c echo.Context) error {
 		urlPath := c.Request().URL.Path

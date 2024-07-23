@@ -10,7 +10,7 @@ func UiInit(
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
 ) {
-	basePath := "/_"
+	basePath := ""
 	baseRoute := e.Group(basePath)
 
 	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc)
