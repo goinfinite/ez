@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"encoding/json"
+
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -102,4 +104,9 @@ func InitialContainerProfiles() []ContainerProfile {
 		defaultProfile, smallProfile, smallWithAutoScalingProfile,
 		mediumProfile, largeProfile,
 	}
+}
+
+func (entity ContainerProfile) JsonSerialize() string {
+	jsonBytes, _ := json.Marshal(entity)
+	return string(jsonBytes)
 }
