@@ -1,0 +1,25 @@
+package layout
+
+import "github.com/speedianet/control/src/presentation/ui/component/util"
+
+templ MainLayout(pageContent templ.Component) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>Speedia Control</title>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
+			<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.12/dist/htmx.min.js" integrity="sha256-RJMXreeIHpSVENthSZHhlcOgmcTHkcJNrOxV+fSipFI=" crossorigin="anonymous"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.13.9/dist/cdn.min.js" integrity="sha256-jFBwr6faTqqhp3sVi4/VTxJ0FpaF9YGZN1ZGLl/5QYM=" crossorigin="anonymous"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js" integrity="sha256-5Va7QwUhC/J6Qt62aqKNuki+mUiEAweeDKx6cP2qU7M=" crossorigin="anonymous"></script>
+		</head>
+		<body class="bg-slate-800 text-white">
+			@util.LoadingOverlay()
+			@Header()
+			<div class="main mt-10">
+				@pageContent
+			</div>
+			@util.Toast()
+		</body>
+	</html>
+}

@@ -1,0 +1,70 @@
+package page
+
+import "github.com/speedianet/control/src/domain/entity"
+
+templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
+	<div class="container mx-auto" x-data="profileManager">
+		<div class="flex flex-col space-y-8 lg:flex-row lg:justify-evenly lg:space-y-0">
+			<div class="card w-full md:w-1/2">
+				@ContainerProfilesTable(profiles)
+			</div>
+		</div>
+	</div>
+}
+
+templ ContainerProfilesTable(profiles []entity.ContainerProfile) {
+	<table
+		id="profiles-table"
+		hx-get="/"
+		hx-trigger="submit from:form delay:500ms, click from:button.delete-profile delay:500ms"
+		hx-select="#profiles-table"
+		hx-target="#profiles-table"
+		hx-swap="outerHTML transition:true"
+		class="w-full table-auto border-collapse transition-all duration-300 ease-in-out"
+	>
+		<thead class="text-xs uppercase bg-gray-700 text-gray-400">
+			<tr class="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800">
+				<th scope="col" class="px-6 py-3">Id</th>
+				<th scope="col" class="px-6 py-3">Name</th>
+				<th scope="col" class="px-6 py-3">Nickname</th>
+				<th scope="col" class="px-6 py-3">Phone</th>
+				<th scope="col" class="px-6 py-3"></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, profile := range profiles {
+				<tr class="border-b  border-gray-700 odd:bg-gray-900 even:bg-gray-800">
+					<td class="px-6 py-4">{ profile.Id.String() }</td>
+					<td class="px-6 py-4">{ profile.Name.String() }</td>
+					<td class="px-6 py-4">{ profile.BaseSpecs.String() }</td>
+					<td class="inline-flex px-6 py-4">
+						<button
+							type="button"
+							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
+							class="me-2 inline-flex items-center rounded-full p-2.5 text-center text-sm font-medium  focus:outline-none focus:ring-4  bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+						>
+							<svg class="h-6 w-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"></path>
+							</svg>
+						</button>
+						<button
+							hx-delete={ "/api/v1/profile/" + profile.Id.String() + "/" }
+							hx-swap="none"
+							type="button"
+							class="delete-profile me-2 inline-flex items-center rounded-full p-2.5 text-center text-sm font-medium  focus:outline-none focus:ring-4  bg-red-600 hover:bg-red-700 focus:ring-red-800"
+						>
+							<svg class="h-6 w-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"></path>
+							</svg>
+						</button>
+					</td>
+				</tr>
+			}
+			if len(profiles) == 0 {
+				<tr class="border-b  border-gray-700 odd:bg-gray-900 even:bg-gray-800">
+					<td class="px-6 py-4" colspan="5">No profiles found</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
