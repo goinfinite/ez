@@ -8,6 +8,7 @@ import (
 
 	"github.com/rs/zerolog"
 	slogZerolog "github.com/samber/slog-zerolog/v2"
+	"golang.org/x/term"
 )
 
 func LogHandler() {
@@ -18,7 +19,13 @@ func LogHandler() {
 	if logLevelEnvVar != "" {
 		switch logLevelEnvVar {
 		case "DEBUG", "debug":
-			logWriter = zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+			stdoutFileDescriptor := int(os.Stdout.Fd())
+			isInteractiveSession := term.IsTerminal(stdoutFileDescriptor)
+			if isInteractiveSession {
+				logWriter = zerolog.ConsoleWriter{
+					Out: os.Stderr, TimeFormat: time.RFC3339,
+				}
+			}
 			logLevel = zerolog.DebugLevel
 		case "INFO", "info":
 			logLevel = zerolog.InfoLevel
