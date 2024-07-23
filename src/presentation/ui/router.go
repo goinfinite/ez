@@ -35,6 +35,23 @@ func NewRouter(
 //go:embed dist/*
 var previousDashFiles embed.FS
 
+//go:embed assets/*
+var assetsFiles embed.FS
+
+func (router *Router) assetsRoute() {
+	assetsFs, err := fs.Sub(assetsFiles, "assets")
+	if err != nil {
+		slog.Error("ReadAssetsFilesError", slog.Any("error", err))
+		os.Exit(1)
+	}
+	assetsFileServer := http.FileServer(http.FS(assetsFs))
+
+	router.baseRoute.GET(
+		"/assets/*",
+		echo.WrapHandler(http.StripPrefix("/assets/", assetsFileServer)),
+	)
+}
+
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/container")
 
@@ -59,6 +76,7 @@ func (router *Router) previousDashboardRoute() {
 }
 
 func (router *Router) RegisterRoutes() {
+	router.assetsRoute()
 	router.containerRoutes()
 	router.previousDashboardRoute()
 
