@@ -49,7 +49,9 @@ script ToastGlobalState() {
 }
 
 templ Toast() {
+	<!-- Toast JavaScript -->
 	@ToastGlobalState()
+	<!-- Toast HTML -->
 	<div
 		id="toast"
 		x-data
@@ -57,7 +59,7 @@ templ Toast() {
 		x-transition
 		x-cloak
 		un-cloak
-		class="fixed bottom-5 right-5 mb-4 flex w-full max-w-xs items-center rounded-lg shadow-xl bg-slate-700 text-gray-300"
+		class="fixed bottom-5 right-5 mb-4 flex w-full max-w-xs items-center rounded-lg bg-slate-700 text-gray-300 shadow-xl"
 		role="alert"
 	>
 		<div
@@ -82,7 +84,7 @@ templ Toast() {
 		<button
 			@click="$store.toast.clearToast()"
 			type="button"
-			class="-mx-1.5 -my-1.5 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg p-1.5 focus:ring-2 focus:ring-gray-300 bg-slate-700 text-gray-500 hover:bg-slate-600 hover:text-white"
+			class="-mx-1.5 -my-1.5 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-700 p-1.5 text-gray-500 hover:bg-slate-600 hover:text-white focus:ring-2 focus:ring-gray-300"
 			aria-label="Close"
 		>
 			<span class="sr-only">Close</span>

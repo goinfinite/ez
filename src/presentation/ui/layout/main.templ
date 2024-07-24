@@ -53,6 +53,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 		<body class="bg-control-primary flex text-white">
 			@util.LoadingOverlay()
 			@Sidebar(currentUrl)
+			<!-- Page Content -->
 			<div class="w-full p-4">
 				@pageContent
 			</div>
