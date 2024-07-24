@@ -1,5 +1,7 @@
 package layout
 
+import infraEnvs "github.com/speedianet/control/src/infra/envs"
+
 type SidebarItem struct {
 	Label             string
 	Icon              string
@@ -28,16 +30,36 @@ func sidebarItemsGetter(currentUrl string) []SidebarItem {
 }
 
 templ Sidebar(currentUrl string) {
-	<sidebar class="h-screen w-28 bg-neutral-950 bg-opacity-40">
-		<div class="my-6 w-full">
-			<a href="/_/#/overview" class="mx-auto mb-2 flex w-[84px] max-w-[84px] items-center justify-center">
+	<!-- Sidebar JavaScript -->
+	<script defer type="text/javascript">
+	function clearSession() {
+		document.cookie = "control-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+		window.location.href = "/_/#/login";
+	}
+	</script>
+	<!-- Sidebar HTML -->
+	<sidebar class="flex h-screen w-28 flex-col items-center justify-center bg-neutral-950 bg-opacity-40">
+		<div class="my-6">
+			<a
+				href="/_/#/overview"
+				class="mx-auto mb-2 flex w-[84px] max-w-[84px] items-center justify-center"
+			>
 				<img
 					src="/assets/control-logo-dark.svg"
 					alt="Speedia Control"
 				/>
 			</a>
+			<p class="text-center text-xs">v{ infraEnvs.SpeediaControlVersion }</p>
 		</div>
-		<div class="mt-4 w-full">
+		<button
+			type="button"
+			onclick="clearSession()"
+			class="hover:bg-speedia-primary flex items-center justify-center rounded-sm border border-neutral-500 bg-transparent px-4 py-2 text-center text-xs font-medium text-neutral-400 hover:border-transparent hover:text-white focus:outline-none"
+		>
+			<i class="ph-bold ph-sign-out pr-1"></i>
+			logout
+		</button>
+		<div class="mt-4">
 			<ul>
 				for _, item := range sidebarItemsGetter(currentUrl) {
 					<li class={ "my-2 p-2 transition-all hover:bg-neutral-100 hover:bg-opacity-10" + item.AdditionalClasses }>
