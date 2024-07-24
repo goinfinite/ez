@@ -1,0 +1,10 @@
+package misc
+
+templ PageTitle(pageName string, pageDescription string, pageIcon string) {
+	<!-- Page Title -->
+	<span class="flex text-3xl">
+		<i class={ "ph-duotone " + pageIcon + " text-4xl mr-1 text-speedia-primary" }></i>
+		<h1>{ pageName }</h1>
+	</span>
+	<p class="mb-6 mt-4 text-sm">{ pageDescription }</p>
+}
