@@ -54,7 +54,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			@util.LoadingOverlay()
 			@Sidebar(currentUrl)
 			<!-- Page Content -->
-			<div class="w-full p-4">
+			<div class="w-full p-6">
 				@pageContent
 			</div>
 			@util.Toast()
