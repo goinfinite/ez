@@ -2,12 +2,12 @@ package page
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/presentation/ui/component/misc"
+	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 )
 
 templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
-	@misc.PageTitle(
+	@componentMisc.PageTitle(
 		"Container Profiles",
 		"Container Profiles enable you to establish standardized settings that govern container hardware resource limits, autoscaling policies, and other configurations.",
 		"ph-intersect-square",
