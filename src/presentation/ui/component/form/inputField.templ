@@ -1,0 +1,18 @@
+package componentForm
+
+templ InputField(
+	inputType string,
+	id string,
+	name string,
+	addAttributes templ.Attributes,
+) {
+	<label for={ id } class="mb-2 block text-sm font-medium text-white">{ name }</label>
+	<input
+		type={ inputType }
+		id={ id }
+		name={ id }
+		{ addAttributes... }
+		autocomplete="off"
+		class="mb-4 block w-full rounded-lg border border-gray-600 bg-slate-700 p-2.5 text-sm text-white placeholder-gray-400"
+	/>
+}
