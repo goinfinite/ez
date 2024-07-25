@@ -4,11 +4,9 @@ import (
 	"fmt"
 )
 
-func FormatPointer[ParamType interface{}](
-	pointer *ParamType, nilPlaceholder string,
-) string {
+func FormatPointer[ParamType interface{}](pointer *ParamType) string {
 	if pointer == nil {
-		return nilPlaceholder
+		return "-"
 	}
 
 	return fmt.Sprintf("%v", *pointer)

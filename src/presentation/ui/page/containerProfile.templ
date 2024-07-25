@@ -2,6 +2,7 @@ package page
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
+	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 )
@@ -47,23 +48,22 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
 					<td class="w-80 px-6 py-4">
 						<p>{ profile.Name.String() }</p>
-						<span>{ profile.BaseSpecs.String() }</span>
-						<span>{ uiHelper.FormatPointer(profile.MaxSpecs, "") }</span>
+						@componentContainer.ProfileSummarySmallTag(profile)
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingPolicy, "-") }
+						{ uiHelper.FormatPointer(profile.ScalingPolicy) }
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingThreshold, "-") }
+						{ uiHelper.FormatPointer(profile.ScalingThreshold) }
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingMaxDurationSecs, "-") }
+						{ uiHelper.FormatPointer(profile.ScalingMaxDurationSecs) }
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingIntervalSecs, "-") }
+						{ uiHelper.FormatPointer(profile.ScalingIntervalSecs) }
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.HostMinCapacityPercent, "-") }
+						{ uiHelper.FormatPointer(profile.HostMinCapacityPercent) }
 					</td>
 					<td class="inline-flex px-6 py-4">
 						<button
