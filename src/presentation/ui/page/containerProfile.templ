@@ -3,6 +3,7 @@ package page
 import (
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/presentation/ui/component/misc"
+	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 )
 
 templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
@@ -12,37 +13,58 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 		"ph-intersect-square",
 	)
 	<div class="container flex" x-data="profileManager">
-		<div class="card w-full">
-			@ContainerProfilesTable(profiles)
+		<div id="profiles-tables" class="card w-full">
+			@ContainerProfilesTextualTable(profiles)
 		</div>
 	</div>
 }
 
-templ ContainerProfilesTable(profiles []entity.ContainerProfile) {
+templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 	<table
-		id="profiles-table"
-		hx-get="/"
+		id="profiles-textual-table"
+		hx-get="/container/profile/"
 		hx-trigger="submit from:form delay:500ms, click from:button.delete-profile delay:500ms"
-		hx-select="#profiles-table"
-		hx-target="#profiles-table"
+		hx-select="#profiles-tables"
+		hx-target="#profiles-tables"
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-gray-700 text-xs uppercase text-gray-400">
-			<tr class="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800">
+		<thead class="bg-neutral-950 bg-opacity-40 text-xs uppercase text-gray-400">
+			<tr class="border-b border-neutral-500">
 				<th scope="col" class="px-6 py-3">Id</th>
 				<th scope="col" class="px-6 py-3">Name</th>
-				<th scope="col" class="px-6 py-3">Nickname</th>
-				<th scope="col" class="px-6 py-3">Phone</th>
+				<th scope="col" class="px-6 py-3">Scaling Policy</th>
+				<th scope="col" class="px-6 py-3">Scaling Threshold</th>
+				<th scope="col" class="px-6 py-3">Scaling Max Duration (seconds)</th>
+				<th scope="col" class="px-6 py-3">Scaling Interval (seconds)</th>
+				<th scope="col" class="px-6 py-3">Host Minimal Capacity (%)</th>
 				<th scope="col" class="px-6 py-3"></th>
 			</tr>
 		</thead>
 		<tbody>
 			for _, profile := range profiles {
-				<tr class="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800">
+				<tr class="border-b border-neutral-500 bg-neutral-950 odd:bg-opacity-20 even:bg-opacity-40">
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
-					<td class="px-6 py-4">{ profile.Name.String() }</td>
-					<td class="px-6 py-4">{ profile.BaseSpecs.String() }</td>
+					<td class="w-80 px-6 py-4">
+						<p>{ profile.Name.String() }</p>
+						<span>{ profile.BaseSpecs.String() }</span>
+						<span>{ uiHelper.FormatPointer(profile.MaxSpecs, "") }</span>
+					</td>
+					<td class="px-6 py-4">
+						{ uiHelper.FormatPointer(profile.ScalingPolicy, "-") }
+					</td>
+					<td class="px-6 py-4">
+						{ uiHelper.FormatPointer(profile.ScalingThreshold, "-") }
+					</td>
+					<td class="px-6 py-4">
+						{ uiHelper.FormatPointer(profile.ScalingMaxDurationSecs, "-") }
+					</td>
+					<td class="px-6 py-4">
+						{ uiHelper.FormatPointer(profile.ScalingIntervalSecs, "-") }
+					</td>
+					<td class="px-6 py-4">
+						{ uiHelper.FormatPointer(profile.HostMinCapacityPercent, "-") }
+					</td>
 					<td class="inline-flex px-6 py-4">
 						<button
 							type="button"
