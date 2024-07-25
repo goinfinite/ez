@@ -7,13 +7,32 @@ import (
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 )
 
+script ContainerProfileIndexLocalState() {
+	document.addEventListener('alpine:init', () => {
+        Alpine.data('containerProfileManager', () => ({
+			containerProfile: {},
+			isUpdateModalOpen: false,
+
+			openUpdateModal(containerProfileData) {
+				this.containerProfile = containerProfileData;
+				this.isUpdateModalOpen = true;
+			},
+
+			closeUpdateModal() {
+				this.isUpdateModalOpen = false;
+			},
+    	}))
+	})
+}
+
 templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
+	@ContainerProfileIndexLocalState()
 	@componentMisc.PageTitle(
 		"Container Profiles",
 		"Container Profiles enable you to establish standardized settings that govern container hardware resource limits, autoscaling policies, and other configurations.",
 		"ph-intersect-square",
 	)
-	<div class="container flex" x-data="profileManager">
+	<div class="container flex" x-data="containerProfileManager">
 		<div id="profiles-tables" class="card w-full">
 			@ContainerProfilesTextualTable(profiles)
 		</div>
@@ -30,23 +49,23 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-neutral-950 bg-opacity-40 text-xs uppercase text-gray-400">
-			<tr class="border-b border-neutral-500">
-				<th scope="col" class="px-6 py-3">Id</th>
-				<th scope="col" class="px-6 py-3">Name</th>
-				<th scope="col" class="px-6 py-3">Scaling Policy</th>
-				<th scope="col" class="px-6 py-3">Scaling Threshold</th>
-				<th scope="col" class="px-6 py-3">Scaling Max Duration (seconds)</th>
-				<th scope="col" class="px-6 py-3">Scaling Interval (seconds)</th>
-				<th scope="col" class="px-6 py-3">Host Minimal Capacity (%)</th>
-				<th scope="col" class="px-6 py-3"></th>
+		<thead class="bg-neutral-950 bg-opacity-50 text-xs uppercase text-neutral-400">
+			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+				<th scope="col" class="px-5 py-3">Id</th>
+				<th scope="col" class="px-5 py-3 text-left">Name</th>
+				<th scope="col" class="px-5 py-3">Scaling Policy</th>
+				<th scope="col" class="px-5 py-3">Scaling Threshold</th>
+				<th scope="col" class="px-5 py-3">Scaling Max Duration (seconds)</th>
+				<th scope="col" class="px-5 py-3">Scaling Interval (seconds)</th>
+				<th scope="col" class="px-5 py-3">Host Minimal Capacity (%)</th>
+				<th scope="col" class="px-5 py-3"></th>
 			</tr>
 		</thead>
 		<tbody>
 			for _, profile := range profiles {
-				<tr class="border-b border-neutral-500 bg-neutral-950 odd:bg-opacity-20 even:bg-opacity-40">
+				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 text-center odd:bg-opacity-20 even:bg-opacity-40">
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
-					<td class="w-80 px-6 py-4">
+					<td class="w-80 px-6 py-4 text-left">
 						<p>{ profile.Name.String() }</p>
 						@componentContainer.ProfileSummarySmallTag(profile)
 					</td>
