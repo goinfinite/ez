@@ -1,0 +1,30 @@
+package componentContainer
+
+import (
+	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
+	"strconv"
+)
+
+func formatProfileSummarySmallTag(specs *valueObject.ContainerSpecs) string {
+	if specs == nil {
+		return ""
+	}
+
+	millicoresStr := strconv.FormatFloat(specs.Millicores.ReadAsCores(), 'f', -1, 64)
+	memoryGibiBytesStr := strconv.FormatInt(specs.MemoryBytes.ToGiB(), 10)
+
+	return "<strong>" + millicoresStr + "</strong> CPU " +
+		"<span class=\"text-[8px] align-middle\">//</span> <strong>" +
+		memoryGibiBytesStr + "</strong> GiB RAM"
+}
+
+templ ProfileSummarySmallTag(profile entity.ContainerProfile) {
+	<small class="border-speedia-primary rounded border p-1 align-middle text-xs">
+		@templ.Raw(formatProfileSummarySmallTag(&profile.BaseSpecs))
+		if profile.MaxSpecs != nil {
+			<i class="ph-bold ph-arrows-out-simple mx-1"></i>
+			@templ.Raw(formatProfileSummarySmallTag(profile.MaxSpecs))
+		}
+	</small>
+}
