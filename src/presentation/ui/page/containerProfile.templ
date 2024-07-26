@@ -185,7 +185,7 @@ templ UpdateContainerProfileFormModal() {
 							"containerProfile.baseSpecs.storagePerformanceUnits",
 						)
 						<small class="-mt-1.5 mb-2 block rounded-md border border-slate-500 border-opacity-20 bg-slate-500 bg-opacity-10 p-1 text-center text-[10px] text-neutral-100">
-							<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit = <strong><span>5</span> MiB/s & <span>250</span> operations</strong> of read and write
+							<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
 						</small>
 					</div>
 					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
