@@ -57,7 +57,7 @@ func Auth(apiBasePath string) echo.MiddlewareFunc {
 			}
 
 			rawAccessToken := ""
-			accessTokenCookie, err := c.Cookie("control-auth-token")
+			accessTokenCookie, err := c.Cookie("control-access-token")
 			if err == nil {
 				rawAccessToken = accessTokenCookie.Value
 			}
