@@ -1,9 +1,11 @@
 package componentForm
 
 templ NumberRangeInputField(
-	id, label, min, max, bindValuePath string,
+	id, label, min, max, step, bindValuePath string,
 ) {
-	<label for={ id } class="mb-2 mt-4 block text-sm font-medium text-white">{ label }</label>
+	if label != "" {
+		<label for={ id } class="mb-2 mt-4 block text-sm font-medium text-white">{ label }</label>
+	}
 	<div class="mb-4 flex flex-row items-center space-x-2">
 		<div class="w-1/3">
 			<input
@@ -21,6 +23,7 @@ templ NumberRangeInputField(
 				type="range"
 				min={ min }
 				max={ max }
+				step={ step }
 				x-bind:value={ bindValuePath }
 				x-on:change={ bindValuePath + " = $event.target.value" }
 				class="accent-speedia-primary h-2 w-full cursor-pointer appearance-none rounded-md bg-neutral-50 bg-opacity-20"
