@@ -18,6 +18,15 @@ func NewMillicores(value interface{}) (Millicores, error) {
 	return Millicores(uintValue), nil
 }
 
+func NewCpuCores(value interface{}) (Millicores, error) {
+	floatValue, err := voHelper.InterfaceToFloat64(value)
+	if err != nil {
+		return 0, errors.New("InvalidCpuCores")
+	}
+
+	return Millicores(floatValue * 1000), nil
+}
+
 func (vo Millicores) ReadAsCores() float64 {
 	return float64(vo) / 1000
 }

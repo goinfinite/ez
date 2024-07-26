@@ -18,6 +18,24 @@ func NewByte(value interface{}) (Byte, error) {
 	return Byte(intValue), nil
 }
 
+func NewMebibyte(value interface{}) (Byte, error) {
+	intValue, err := voHelper.InterfaceToInt64(value)
+	if err != nil {
+		return 0, errors.New("InvalidMebibytes")
+	}
+
+	return Byte(intValue * 1048576), nil
+}
+
+func NewGibibyte(value interface{}) (Byte, error) {
+	intValue, err := voHelper.InterfaceToInt64(value)
+	if err != nil {
+		return 0, errors.New("InvalidGibibytes")
+	}
+
+	return Byte(intValue * 1073741824), nil
+}
+
 func (vo Byte) Int64() int64 {
 	return int64(vo)
 }
