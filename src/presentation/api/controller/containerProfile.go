@@ -5,7 +5,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/domain/valueObject"
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -43,12 +42,7 @@ func parseContainerSpecs(
 
 	millicores := defaultSpecs.Millicores
 	if rawSpecs["cpuCores"] != nil {
-		cpuCoresUint, err := voHelper.InterfaceToUint(rawSpecs["cpuCores"])
-		if err != nil {
-			return specs, err
-		}
-
-		millicores, err = valueObject.NewMillicores(cpuCoresUint * 1000)
+		millicores, err = valueObject.NewCpuCores(rawSpecs["cpuCores"])
 		if err != nil {
 			return specs, err
 		}
@@ -62,6 +56,20 @@ func parseContainerSpecs(
 	}
 
 	memoryBytes := defaultSpecs.MemoryBytes
+	if rawSpecs["memoryMebibytes"] != nil {
+		memoryBytes, err = valueObject.NewMebibyte(rawSpecs["memoryMebibytes"])
+		if err != nil {
+			return specs, err
+		}
+	}
+
+	if rawSpecs["memoryGibibytes"] != nil {
+		memoryBytes, err = valueObject.NewGibibyte(rawSpecs["memoryGibibytes"])
+		if err != nil {
+			return specs, err
+		}
+	}
+
 	if rawSpecs["memoryBytes"] != nil {
 		memoryBytes, err = valueObject.NewByte(rawSpecs["memoryBytes"])
 		if err != nil {
@@ -91,7 +99,7 @@ func parseContainerSpecs(
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createContainerProfileDto 	  body    dto.CreateContainerProfile  true  "NewContainerProfile (Only name and baseSpecs are required.)"
+// @Param        createContainerProfileDto 	  body    dto.CreateContainerProfile  true  "Only 'name' and 'baseSpecs' are required. Human-readable fields such as 'cpuCores', 'memoryMebibytes' and similar will be converted to their technical counterpart automatically, you don't need to provide all of them."
 // @Success      201 {object} object{} "ContainerProfileCreated"
 // @Router       /v1/container/profile/ [post]
 func (controller *ContainerProfileController) Create(c echo.Context) error {
@@ -144,7 +152,7 @@ func (controller *ContainerProfileController) Create(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        updateContainerProfileDto 	  body dto.UpdateContainerProfile  true  "UpdateContainerProfile (Only id is required.)"
+// @Param        updateContainerProfileDto 	  body dto.UpdateContainerProfile  true  "Only 'id' is required. Human-readable fields such as 'cpuCores', 'memoryMebibytes' and similar will be converted to their technical counterpart automatically, you don't need to provide all of them."
 // @Success      200 {object} object{} "ContainerProfileUpdated"
 // @Router       /v1/container/profile/ [put]
 func (controller *ContainerProfileController) Update(c echo.Context) error {
