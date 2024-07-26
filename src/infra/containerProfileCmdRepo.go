@@ -42,7 +42,11 @@ func (repo *ContainerProfileCmdRepo) Update(
 	}
 
 	if updateDto.MaxSpecs != nil {
-		updateMap["max_specs"] = updateDto.MaxSpecs.String()
+		maxSpecsStr := updateDto.MaxSpecs.String()
+		updateMap["max_specs"] = maxSpecsStr
+		if maxSpecsStr == "0:0:0" {
+			updateMap["max_specs"] = nil
+		}
 	}
 
 	if updateDto.ScalingPolicy != nil {
