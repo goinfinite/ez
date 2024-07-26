@@ -137,7 +137,7 @@ func TestAccountCmdRepo(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if accountEntity.QuotaUsage.StorageBytes.Read() < 100000000 {
+		if accountEntity.QuotaUsage.StorageBytes.Int64() < 100000000 {
 			t.Error("QuotaUsageNotUpdated")
 		}
 

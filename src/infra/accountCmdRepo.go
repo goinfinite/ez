@@ -34,7 +34,7 @@ func (repo *AccountCmdRepo) updateFilesystemQuota(
 	inodesStr := strconv.FormatUint(quota.StorageInodes, 10)
 	accountIdStr := accountId.String()
 
-	shouldUpdateDiskQuota := quota.StorageBytes.Read() > 0
+	shouldUpdateDiskQuota := quota.StorageBytes.Int64() > 0
 	shouldUpdateInodeQuota := quota.StorageInodes > 0
 	shouldRemoveQuota := !shouldUpdateDiskQuota && !shouldUpdateInodeQuota
 
@@ -253,12 +253,12 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 		updateMap["millicores"] = quota.Millicores.Uint()
 	}
 
-	if quota.MemoryBytes.Read() >= 0 {
-		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Read())
+	if quota.MemoryBytes.Int64() >= 0 {
+		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Int64())
 	}
 
-	if quota.StorageBytes.Read() >= 0 {
-		updateMap["storage_bytes"] = uint64(quota.StorageBytes.Read())
+	if quota.StorageBytes.Int64() >= 0 {
+		updateMap["storage_bytes"] = uint64(quota.StorageBytes.Int64())
 	}
 
 	if quota.StorageInodes > 0 {
@@ -388,7 +388,7 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 		}
 
 		containerMillicores := profileEntity.BaseSpecs.Millicores.Uint()
-		containerMemoryBytes := profileEntity.BaseSpecs.MemoryBytes.Read()
+		containerMemoryBytes := profileEntity.BaseSpecs.MemoryBytes.Int64()
 		storagePerformanceUnits := profileEntity.BaseSpecs.StoragePerformanceUnits.Uint()
 
 		millicoresUsage += containerMillicores
