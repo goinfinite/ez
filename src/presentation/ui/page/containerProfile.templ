@@ -156,14 +156,14 @@ templ UpdateContainerProfileFormModal() {
 				@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
 				<div class="flex flex-row space-x-4">
 					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
-						<h3>Base Specifications</h3>
+						<h3 class="font-bold">Base Specifications</h3>
 						<p class="text-xs">The amount of resources the container can use on regular basis.</p>
 						@componentForm.NumberRangeInputField(
 							"baseSpecs.cpuCores", "CPU Cores", "0", "32", "0.5",
 							"containerProfile.baseSpecs.cpuCores",
 						)
 						<div class="mb-2 inline-flex w-full items-center justify-between">
-							<label class="text-sm font-medium text-white">RAM Memory</label>
+							<label class="text-sm font-bold text-neutral-50">RAM Memory</label>
 							<label class="inline-flex cursor-pointer items-center rounded-md border border-neutral-50 border-opacity-10 p-1">
 								<span class="mr-1 text-[10px] font-medium text-gray-300">MiB</span>
 								<input type="checkbox" x-model:value="gibibyteSelector" class="peer sr-only"/>
@@ -188,19 +188,19 @@ templ UpdateContainerProfileFormModal() {
 							"1", "100", "1",
 							"containerProfile.baseSpecs.storagePerformanceUnits",
 						)
-						<small class="-mt-1.5 mb-2 block rounded-md border border-slate-500 border-opacity-20 bg-slate-500 bg-opacity-10 p-1 text-center text-[11px] text-neutral-100">
+						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
 							<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
 						</small>
 					</div>
 					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
-						<h3>Max Specifications</h3>
+						<h3 class="font-bold">Max Specifications</h3>
 						<p class="text-xs">The amount of resources the container may use during an autoscaling window.</p>
 						@componentForm.NumberRangeInputField(
 							"maxSpecs.cpuCores", "CPU Cores", "0", "32", "0.5",
 							"containerProfile.maxSpecs.cpuCores",
 						)
 						<div class="mb-2 inline-flex w-full items-center justify-between">
-							<label class="text-sm font-medium text-white">RAM Memory</label>
+							<label class="text-sm font-bold text-neutral-50">RAM Memory</label>
 							<label class="inline-flex cursor-pointer items-center rounded-md border border-neutral-50 border-opacity-10 p-1">
 								<span class="mr-1 text-[10px] font-medium text-gray-300">MiB</span>
 								<input type="checkbox" x-model:value="gibibyteSelector" class="peer sr-only"/>
@@ -225,7 +225,7 @@ templ UpdateContainerProfileFormModal() {
 							"1", "100", "1",
 							"containerProfile.maxSpecs.storagePerformanceUnits",
 						)
-						<small class="-mt-1.5 mb-2 block rounded-md border border-slate-500 border-opacity-20 bg-slate-500 bg-opacity-10 p-1 text-center text-[11px] text-neutral-100">
+						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
 							<strong x-text="containerProfile.maxSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
 						</small>
 					</div>
