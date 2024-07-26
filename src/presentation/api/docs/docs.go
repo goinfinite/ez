@@ -73,7 +73,7 @@ const docTemplate = `{
                 "summary": "UpdateAccount",
                 "parameters": [
                     {
-                        "description": "UpdateAccount (Only accountId is required.)",
+                        "description": "Only 'accountId' is required. Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically.",
                         "name": "updateDto",
                         "in": "body",
                         "required": true,
@@ -110,7 +110,7 @@ const docTemplate = `{
                 "summary": "CreateAccount",
                 "parameters": [
                     {
-                        "description": "NewAccount",
+                        "description": "Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically.",
                         "name": "createDto",
                         "in": "body",
                         "required": true,
@@ -446,7 +446,7 @@ const docTemplate = `{
                 "summary": "UpdateContainerProfile",
                 "parameters": [
                     {
-                        "description": "UpdateContainerProfile (Only id is required.)",
+                        "description": "Only 'id' is required. Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically.",
                         "name": "updateContainerProfileDto",
                         "in": "body",
                         "required": true,
@@ -470,7 +470,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Add a new container profile.",
+                "description": "Create a new container profile.",
                 "consumes": [
                     "application/json"
                 ],
@@ -480,10 +480,10 @@ const docTemplate = `{
                 "tags": [
                     "container"
                 ],
-                "summary": "AddNewContainerProfile",
+                "summary": "CreateNewContainerProfile",
                 "parameters": [
                     {
-                        "description": "NewContainerProfile (Only name and baseSpecs are required.)",
+                        "description": "Only 'name' and 'baseSpecs' are required. Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically.",
                         "name": "createContainerProfileDto",
                         "in": "body",
                         "required": true,
@@ -1097,7 +1097,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
                 },
                 "hostMinCapacityPercent": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "maxSpecs": {
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
@@ -1205,7 +1205,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
                 },
                 "hostMinCapacityPercent": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1350,7 +1350,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
                 },
                 "hostMinCapacityPercent": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1610,13 +1610,31 @@ const docTemplate = `{
                 "cpuCores": {
                     "type": "number"
                 },
-                "diskBytes": {
-                    "type": "integer"
-                },
-                "inodes": {
-                    "type": "integer"
-                },
                 "memoryBytes": {
+                    "type": "integer"
+                },
+                "memoryGibibytes": {
+                    "type": "integer"
+                },
+                "memoryMebibytes": {
+                    "type": "integer"
+                },
+                "millicores": {
+                    "type": "integer"
+                },
+                "storageBytes": {
+                    "type": "integer"
+                },
+                "storageGibibytes": {
+                    "type": "integer"
+                },
+                "storageInodes": {
+                    "type": "integer"
+                },
+                "storageMebibytes": {
+                    "type": "integer"
+                },
+                "storagePerformanceUnits": {
                     "type": "integer"
                 }
             }
@@ -1663,6 +1681,18 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "memoryBytes": {
+                    "type": "integer"
+                },
+                "memoryGibibytes": {
+                    "type": "integer"
+                },
+                "memoryMebibytes": {
+                    "type": "integer"
+                },
+                "millicores": {
+                    "type": "integer"
+                },
+                "storagePerformanceUnits": {
                     "type": "integer"
                 }
             }

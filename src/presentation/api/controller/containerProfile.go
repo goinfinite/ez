@@ -99,7 +99,7 @@ func parseContainerSpecs(
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createContainerProfileDto 	  body    dto.CreateContainerProfile  true  "Only 'name' and 'baseSpecs' are required. Human-readable fields such as 'cpuCores', 'memoryMebibytes' and similar will be converted to their technical counterpart automatically, you don't need to provide all of them."
+// @Param        createContainerProfileDto 	  body    dto.CreateContainerProfile  true  "Only 'name' and 'baseSpecs' are required. Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically."
 // @Success      201 {object} object{} "ContainerProfileCreated"
 // @Router       /v1/container/profile/ [post]
 func (controller *ContainerProfileController) Create(c echo.Context) error {
@@ -152,7 +152,7 @@ func (controller *ContainerProfileController) Create(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        updateContainerProfileDto 	  body dto.UpdateContainerProfile  true  "Only 'id' is required. Human-readable fields such as 'cpuCores', 'memoryMebibytes' and similar will be converted to their technical counterpart automatically, you don't need to provide all of them."
+// @Param        updateContainerProfileDto 	  body dto.UpdateContainerProfile  true  "Only 'id' is required. Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically."
 // @Success      200 {object} object{} "ContainerProfileUpdated"
 // @Router       /v1/container/profile/ [put]
 func (controller *ContainerProfileController) Update(c echo.Context) error {

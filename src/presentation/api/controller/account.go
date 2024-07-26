@@ -130,7 +130,7 @@ func (controller *AccountController) accountQuotaFactory(
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createDto 	  body    dto.CreateAccount  true  "NewAccount"
+// @Param        createDto 	  body    dto.CreateAccount  true  "Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically."
 // @Success      201 {object} object{} "AccountCreated"
 // @Router       /v1/account/ [post]
 func (controller *AccountController) Create(c echo.Context) error {
@@ -159,7 +159,7 @@ func (controller *AccountController) Create(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        updateDto 	  body dto.UpdateAccount  true  "UpdateAccount (Only accountId is required.)"
+// @Param        updateDto 	  body dto.UpdateAccount  true  "Only 'accountId' is required. Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical counterpart ('millicores' etc) automatically."
 // @Success      200 {object} object{} "AccountUpdated message or NewKeyString"
 // @Router       /v1/account/ [put]
 func (controller *AccountController) Update(c echo.Context) error {

@@ -82,7 +82,7 @@ definitions:
       baseSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
-        type: number
+        type: integer
       maxSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       name:
@@ -152,7 +152,7 @@ definitions:
       baseSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
-        type: number
+        type: integer
       id:
         type: integer
       maxSpecs:
@@ -247,7 +247,7 @@ definitions:
       baseSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
-        type: number
+        type: integer
       id:
         type: integer
       maxSpecs:
@@ -418,11 +418,23 @@ definitions:
     properties:
       cpuCores:
         type: number
-      diskBytes:
-        type: integer
-      inodes:
-        type: integer
       memoryBytes:
+        type: integer
+      memoryGibibytes:
+        type: integer
+      memoryMebibytes:
+        type: integer
+      millicores:
+        type: integer
+      storageBytes:
+        type: integer
+      storageGibibytes:
+        type: integer
+      storageInodes:
+        type: integer
+      storageMebibytes:
+        type: integer
+      storagePerformanceUnits:
         type: integer
     type: object
   valueObject.ContainerMetrics:
@@ -453,6 +465,14 @@ definitions:
       cpuCores:
         type: number
       memoryBytes:
+        type: integer
+      memoryGibibytes:
+        type: integer
+      memoryMebibytes:
+        type: integer
+      millicores:
+        type: integer
+      storagePerformanceUnits:
         type: integer
     type: object
   valueObject.HardwareSpecs:
@@ -585,7 +605,8 @@ paths:
       - application/json
       description: Create a new account.
       parameters:
-      - description: NewAccount
+      - description: Human-readable fields ('cpuCores', 'memoryMebibytes' etc) will
+          be converted to their technical counterpart ('millicores' etc) automatically.
         in: body
         name: createDto
         required: true
@@ -608,7 +629,9 @@ paths:
       - application/json
       description: Update an account.
       parameters:
-      - description: UpdateAccount (Only accountId is required.)
+      - description: Only 'accountId' is required. Human-readable fields ('cpuCores',
+          'memoryMebibytes' etc) will be converted to their technical counterpart
+          ('millicores' etc) automatically.
         in: body
         name: updateDto
         required: true
@@ -848,9 +871,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add a new container profile.
+      description: Create a new container profile.
       parameters:
-      - description: NewContainerProfile (Only name and baseSpecs are required.)
+      - description: Only 'name' and 'baseSpecs' are required. Human-readable fields
+          ('cpuCores', 'memoryMebibytes' etc) will be converted to their technical
+          counterpart ('millicores' etc) automatically.
         in: body
         name: createContainerProfileDto
         required: true
@@ -865,7 +890,7 @@ paths:
             type: object
       security:
       - Bearer: []
-      summary: AddNewContainerProfile
+      summary: CreateNewContainerProfile
       tags:
       - container
     put:
@@ -873,7 +898,9 @@ paths:
       - application/json
       description: Update a container profile.
       parameters:
-      - description: UpdateContainerProfile (Only id is required.)
+      - description: Only 'id' is required. Human-readable fields ('cpuCores', 'memoryMebibytes'
+          etc) will be converted to their technical counterpart ('millicores' etc)
+          automatically.
         in: body
         name: updateContainerProfileDto
         required: true
