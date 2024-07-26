@@ -149,7 +149,7 @@ templ UpdateContainerProfileFormModal() {
 				hx-swap="none"
 			>
 				<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
-				@componentForm.InputField("text", "name", "Name", templ.Attributes{"x-model:value": "containerProfile.name"})
+				@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
 				<div class="flex flex-row space-x-4">
 					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
 						<h3>Base Specifications</h3>
