@@ -2,63 +2,42 @@ package valueObject
 
 import (
 	"errors"
-	"reflect"
 	"strconv"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 type Byte int64
 
 func NewByte(value interface{}) (Byte, error) {
-	var byte int64
-	var err error
-	switch v := value.(type) {
-	case string:
-		byte, err = strconv.ParseInt(v, 10, 64)
-	case int, int8, int16, int32, int64:
-		byte = int64(reflect.ValueOf(v).Int())
-	case uint, uint8, uint16, uint32, uint64:
-		byte = int64(reflect.ValueOf(v).Uint())
-	case float32, float64:
-		byte = int64(reflect.ValueOf(v).Float())
-	default:
-		err = errors.New("InvalidByte")
-	}
-
+	intValue, err := voHelper.InterfaceToInt64(value)
 	if err != nil {
 		return 0, errors.New("InvalidByte")
 	}
 
-	return Byte(byte), nil
+	return Byte(intValue), nil
 }
 
-func NewBytePanic(value interface{}) Byte {
-	byte, err := NewByte(value)
-	if err != nil {
-		panic(err)
-	}
-	return byte
+func (vo Byte) Int64() int64 {
+	return int64(vo)
 }
 
-func (b Byte) Read() int64 {
-	return int64(b)
+func (vo Byte) ToKiB() int64 {
+	return vo.Int64() / 1024
 }
 
-func (b Byte) ToKiB() int64 {
-	return b.Read() / 1024
+func (vo Byte) ToMiB() int64 {
+	return vo.Int64() / 1048576
 }
 
-func (b Byte) ToMiB() int64 {
-	return b.ToKiB() / 1024
+func (vo Byte) ToGiB() int64 {
+	return vo.Int64() / 1073741824
 }
 
-func (b Byte) ToGiB() int64 {
-	return b.ToMiB() / 1024
+func (vo Byte) ToTiB() int64 {
+	return vo.Int64() / 1099511627776
 }
 
-func (b Byte) ToTiB() int64 {
-	return b.ToGiB() / 1024
-}
-
-func (b Byte) String() string {
-	return strconv.FormatInt(int64(b), 10)
+func (vo Byte) String() string {
+	return strconv.FormatInt(int64(vo), 10)
 }
