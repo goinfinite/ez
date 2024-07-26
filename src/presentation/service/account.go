@@ -98,6 +98,10 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 }
 
 func (service *AccountService) Update(input map[string]interface{}) ServiceOutput {
+	if _, exists := input["id"]; exists {
+		input["accountId"] = input["id"]
+	}
+
 	requiredParams := []string{"accountId"}
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
