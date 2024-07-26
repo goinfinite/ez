@@ -9,16 +9,26 @@ import (
 
 type ContainerSpecs struct {
 	Millicores              Millicores              `json:"millicores"`
+	CpuCores                float64                 `json:"cpuCores"`
 	MemoryBytes             Byte                    `json:"memoryBytes"`
+	MemoryMebibytes         int64                   `json:"memoryMebibytes"`
+	MemoryGibibytes         int64                   `json:"memoryGibibytes"`
 	StoragePerformanceUnits StoragePerformanceUnits `json:"storagePerformanceUnits"`
 }
 
 func NewContainerSpecs(
 	millicores Millicores, memoryBytes Byte, storagePerformanceUnits StoragePerformanceUnits,
 ) ContainerSpecs {
+	cpuCores := millicores.ReadAsCores()
+	memoryMebibytes := memoryBytes.ToMiB()
+	memoryGibibytes := memoryBytes.ToGiB()
+
 	return ContainerSpecs{
 		Millicores:              millicores,
+		CpuCores:                cpuCores,
 		MemoryBytes:             memoryBytes,
+		MemoryMebibytes:         memoryMebibytes,
+		MemoryGibibytes:         memoryGibibytes,
 		StoragePerformanceUnits: storagePerformanceUnits,
 	}
 }
@@ -59,7 +69,7 @@ func NewContainerSpecsFromString(value string) (specs ContainerSpecs, err error)
 		}
 	}
 
-	return specs, nil
+	return NewContainerSpecs(specs.Millicores, specs.MemoryBytes, specs.StoragePerformanceUnits), nil
 }
 
 func NewContainerSpecsWithDefaultValues() ContainerSpecs {

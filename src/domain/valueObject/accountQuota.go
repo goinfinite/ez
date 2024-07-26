@@ -10,8 +10,13 @@ import (
 
 type AccountQuota struct {
 	Millicores              Millicores              `json:"millicores"`
+	CpuCores                float64                 `json:"cpuCores"`
 	MemoryBytes             Byte                    `json:"memoryBytes"`
+	MemoryMebibytes         int64                   `json:"memoryMebibytes"`
+	MemoryGibibytes         int64                   `json:"memoryGibibytes"`
 	StorageBytes            Byte                    `json:"storageBytes"`
+	StorageMebibytes        int64                   `json:"storageMebibytes"`
+	StorageGibibytes        int64                   `json:"storageGibibytes"`
 	StorageInodes           uint64                  `json:"storageInodes"`
 	StoragePerformanceUnits StoragePerformanceUnits `json:"storagePerformanceUnits"`
 }
@@ -22,10 +27,21 @@ func NewAccountQuota(
 	storageInodes uint64,
 	storagePerformanceUnits StoragePerformanceUnits,
 ) AccountQuota {
+	cpuCores := millicores.ReadAsCores()
+	memoryMebibytes := memoryBytes.ToMiB()
+	memoryGibibytes := memoryBytes.ToGiB()
+	storageMebibytes := storageBytes.ToMiB()
+	storageGibibytes := storageBytes.ToGiB()
+
 	return AccountQuota{
 		Millicores:              millicores,
+		CpuCores:                cpuCores,
 		MemoryBytes:             memoryBytes,
+		MemoryMebibytes:         memoryMebibytes,
+		MemoryGibibytes:         memoryGibibytes,
 		StorageBytes:            storageBytes,
+		StorageMebibytes:        storageMebibytes,
+		StorageGibibytes:        storageGibibytes,
 		StorageInodes:           storageInodes,
 		StoragePerformanceUnits: storagePerformanceUnits,
 	}
@@ -81,7 +97,10 @@ func NewAccountQuotaFromString(value string) (quota AccountQuota, err error) {
 		}
 	}
 
-	return quota, nil
+	return NewAccountQuota(
+		quota.Millicores, quota.MemoryBytes, quota.StorageBytes,
+		quota.StorageInodes, quota.StoragePerformanceUnits,
+	), nil
 }
 
 func NewAccountQuotaWithDefaultValues() AccountQuota {
