@@ -107,6 +107,10 @@ func InitialContainerProfiles() []ContainerProfile {
 }
 
 func (entity ContainerProfile) JsonSerialize() string {
+	if entity.MaxSpecs == nil {
+		entity.MaxSpecs = &valueObject.ContainerSpecs{}
+	}
+
 	jsonBytes, _ := json.Marshal(entity)
 	return string(jsonBytes)
 }
