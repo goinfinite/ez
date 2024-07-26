@@ -13,8 +13,7 @@ templ NumberRangeInputField(
 				type="number"
 				class="block w-full rounded-md border border-neutral-50 border-opacity-5 bg-neutral-50 bg-opacity-5 p-2.5 text-sm text-white placeholder-neutral-400"
 				placeholder="0"
-				x-bind:value={ bindValuePath }
-				x-on:change={ bindValuePath + " = $event.target.value" }
+				x-model:value={ bindValuePath }
 			/>
 		</div>
 		<div class="w-2/3">
@@ -24,8 +23,7 @@ templ NumberRangeInputField(
 				min={ min }
 				max={ max }
 				step={ step }
-				x-bind:value={ bindValuePath }
-				x-on:change={ bindValuePath + " = $event.target.value" }
+				x-model:value={ bindValuePath }
 				class="accent-speedia-primary h-2 w-full cursor-pointer appearance-none rounded-md bg-neutral-50 bg-opacity-20"
 			/>
 			<span class="float-left text-xs text-neutral-400">{ min }</span>
