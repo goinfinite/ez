@@ -8,6 +8,28 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func StringDotNotationToHierarchicalMap(
+	hierarchicalMap map[string]interface{}, remainingKeys []string, finalValue string,
+) map[string]interface{} {
+	if len(remainingKeys) == 1 {
+		hierarchicalMap[remainingKeys[0]] = finalValue
+		return hierarchicalMap
+	}
+
+	parentKey := remainingKeys[0]
+	nextKeys := remainingKeys[1:]
+
+	if _, exists := hierarchicalMap[parentKey]; !exists {
+		hierarchicalMap[parentKey] = make(map[string]interface{})
+	}
+
+	hierarchicalMap[parentKey] = StringDotNotationToHierarchicalMap(
+		hierarchicalMap[parentKey].(map[string]interface{}), nextKeys, finalValue,
+	)
+
+	return hierarchicalMap
+}
+
 func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 	requestBody := map[string]interface{}{}
 
@@ -23,10 +45,25 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidFormData")
 		}
-		for k, v := range formData {
-			if len(v) > 0 {
-				requestBody[k] = v[0]
+
+		for formKey, keyValues := range formData {
+			if len(keyValues) != 1 {
+				continue
 			}
+			keyValue := keyValues[0]
+
+			isNestedKey := strings.Contains(formKey, ".")
+			if !isNestedKey {
+				requestBody[formKey] = keyValue
+				continue
+			}
+
+			keyParts := strings.Split(formKey, ".")
+			if len(keyParts) < 2 {
+				continue
+			}
+
+			requestBody = StringDotNotationToHierarchicalMap(requestBody, keyParts, keyValue)
 		}
 	case strings.HasPrefix(contentType, "multipart/form-data"):
 		multipartFormData, err := c.MultipartForm()
