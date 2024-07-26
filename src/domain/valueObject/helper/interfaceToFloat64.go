@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func InterfaceToFloat(input interface{}) (output float64, err error) {
+func InterfaceToFloat64(input interface{}) (output float64, err error) {
 	defaultErr := errors.New("InvalidInput")
 
 	switch v := input.(type) {
