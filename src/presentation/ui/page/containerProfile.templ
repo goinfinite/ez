@@ -11,7 +11,13 @@ import (
 script ContainerProfileIndexLocalState() {
 	document.addEventListener('alpine:init', () => {
         Alpine.data('containerProfileManager', () => ({
-			containerProfile: {},
+			containerProfile: {
+				'id': '', 'name': '',
+				'baseSpecs': {'millicores': 0, 'memoryBytes': 0, 'storagePerformanceUnits': 0},
+				'maxSpecs': null, 'scalingPolicy': null, 'scalingThreshold': null,
+				'scalingMaxDurationSecs': null, 'scalingIntervalSecs': null,
+				'hostMinCapacityPercent': null,
+			},
 			isUpdateModalOpen: false,
 
 			openUpdateModal(containerProfileData) {
@@ -122,7 +128,7 @@ templ UpdateContainerProfileFormModal() {
 		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50 transition-all duration-300 ease-in-out"
 	>
 		<div
-			class="bg-control-primary relative mx-auto mt-24 max-w-xl rounded-md bg-opacity-95 p-6 drop-shadow-xl"
+			class="bg-control-primary max-w-3/5 relative mx-auto mt-20 rounded-md bg-opacity-95 p-6 drop-shadow-xl xl:mt-24 xl:max-w-3xl"
 			@click.away="closeUpdateModal()"
 		>
 			<div class="mb-6 flex justify-between align-middle">
@@ -140,12 +146,43 @@ templ UpdateContainerProfileFormModal() {
 			>
 				<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 				@componentForm.InputField("text", "name", "Name", templ.Attributes{"x-bind:value": "containerProfile.name"})
+				<div class="flex flex-row space-x-4">
+					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
+						<h3>Base Specifications</h3>
+						<p class="text-xs">The amount of resources the container can use regularly.</p>
+						@componentForm.NumberRangeInputField(
+							"baseSpecs.Millicores", "Millicores",
+							"0", "100000", "0",
+							templ.Attributes{"x-bind:value": "containerProfile.baseSpecs.millicores"},
+						)
+						<small class="-mt-2 mb-2 block rounded-md border border-slate-500 border-opacity-20 bg-slate-500 bg-opacity-10 p-1 text-center text-[10px] text-neutral-100">
+							<strong>1000</strong> millicores = <strong>1</strong> CPU core
+						</small>
+						@componentForm.NumberRangeInputField(
+							"baseSpecs.memoryBytes", "RAM Memory (GiB)",
+							"0", "107374182400", "1073741824",
+							templ.Attributes{"x-bind:value": "containerProfile.baseSpecs.memoryBytes"},
+						)
+						@componentForm.NumberRangeInputField(
+							"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
+							"0", "100", "0",
+							templ.Attributes{"x-bind:value": "containerProfile.baseSpecs.storagePerformanceUnits"},
+						)
+						<small class="-mt-2 block rounded-md border border-slate-500 border-opacity-20 bg-slate-500 bg-opacity-10 p-1 text-center text-[10px] text-neutral-100">
+							<strong>1</strong> unit = <strong>5 MiB/s & 250 operations</strong> of read and write
+						</small>
+					</div>
+					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
+						<h3>Max Specifications</h3>
+						<p class="text-xs">The amount of resources the container may use during an autoscaling window.</p>
+					</div>
+				</div>
 				<button
 					type="submit"
 					@click="closeUpdateModal()"
-					class="bg-speedia-primary mt-3 rounded-full px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+					class="bg-speedia-primary border-speedia-primary mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
 				>
-					Update
+					<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
 				</button>
 			</form>
 		</div>
