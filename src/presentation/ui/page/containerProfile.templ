@@ -30,6 +30,9 @@ script ContainerProfileIndexLocalState() {
 			scalingIntervalHoursSelector: true,
 			scalingMaxDurationHoursSelector: true,
 			isUpdateModalOpen: false,
+			get isScalingPolicyConn() {
+				return this.containerProfile.scalingPolicy == 'connection';
+			},
 
 			openUpdateModal(containerProfileData) {
 				this.containerProfile = containerProfileData;
@@ -240,6 +243,31 @@ templ UpdateContainerProfileFormModal() {
 										"containerProfile.scalingIntervalHours",
 										"scalingIntervalMinutes", "minute(s)", "1", "1440", "5",
 										"containerProfile.scalingIntervalMinutes",
+									)
+								</div>
+							</div>
+							<div class="flex flex-row">
+								<div class="mr-[4%] basis-1/2">
+									<template x-if="isScalingPolicyConn">
+										@componentForm.NumberRangeInputField(
+											"scalingThreshold", "Connections Threshold",
+											"conn(s)", "1", "1000", "10",
+											"containerProfile.scalingThreshold",
+										)
+									</template>
+									<template x-if="!isScalingPolicyConn">
+										@componentForm.NumberRangeInputField(
+											"scalingThreshold", "Resource Usage Threshold",
+											"%", "0", "100", "1",
+											"containerProfile.scalingThreshold",
+										)
+									</template>
+								</div>
+								<div class="basis-1/2">
+									@componentForm.NumberRangeInputField(
+										"hostMinCapacity", "Minimum Free Host Capacity",
+										"%", "0", "100", "1",
+										"containerProfile.hostMinCapacityPercent",
 									)
 								</div>
 							</div>
