@@ -2,6 +2,7 @@ package page
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
 	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
@@ -243,7 +244,12 @@ templ UpdateContainerProfileFormModal() {
 							Advanced Settings
 							<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
 						</summary>
-						<p class="mt-4 text-neutral-50"></p>
+						<div class="p-4">
+							@componentForm.SelectInput(
+								"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
+								valueObject.ValidScalingPolicies,
+							)
+						</div>
 					</details>
 				</section>
 				<button
