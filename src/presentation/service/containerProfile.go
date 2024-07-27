@@ -196,6 +196,26 @@ func (service *ContainerProfileService) Update(
 		}
 		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 	}
+	if _, exists := input["scalingMaxDurationMinutes"]; exists {
+		scalingMaxDurationMinutes, err := voHelper.InterfaceToUint16(
+			input["scalingMaxDurationMinutes"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, "InvalidScalingMaxDurationMinutes")
+		}
+		scalingMaxDurationSecs := uint(scalingMaxDurationMinutes) * 60
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
+	if _, exists := input["scalingMaxDurationHours"]; exists {
+		scalingMaxDurationHours, err := voHelper.InterfaceToUint8(
+			input["scalingMaxDurationHours"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, "InvalidScalingMaxDurationHours")
+		}
+		scalingMaxDurationSecs := uint(scalingMaxDurationHours) * 3600
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
 
 	var scalingIntervalSecsPtr *uint
 	if _, exists := input["scalingIntervalSecs"]; exists {
@@ -203,6 +223,26 @@ func (service *ContainerProfileService) Update(
 		if err != nil {
 			return NewServiceOutput(UserError, "InvalidScalingIntervalSecs")
 		}
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+	if _, exists := input["scalingIntervalMinutes"]; exists {
+		scalingIntervalMinutes, err := voHelper.InterfaceToUint16(
+			input["scalingIntervalMinutes"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, "InvalidScalingIntervalMinutes")
+		}
+		scalingIntervalSecs := uint(scalingIntervalMinutes) * 60
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+	if _, exists := input["scalingIntervalHours"]; exists {
+		scalingIntervalHours, err := voHelper.InterfaceToUint8(
+			input["scalingIntervalHours"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, "InvalidScalingIntervalHours")
+		}
+		scalingIntervalSecs := uint(scalingIntervalHours) * 3600
 		scalingIntervalSecsPtr = &scalingIntervalSecs
 	}
 
