@@ -169,27 +169,13 @@ templ UpdateContainerProfileFormModal() {
 							"baseSpecs.cpuCores", "CPU Cores", "0", "32", "0.5",
 							"containerProfile.baseSpecs.cpuCores",
 						)
-						<div class="mb-2 inline-flex w-full items-center justify-between">
-							<label class="text-sm font-bold text-neutral-50">RAM Memory</label>
-							<label class="inline-flex cursor-pointer items-center rounded-md border border-neutral-50 border-opacity-10 p-1">
-								<span class="mr-1 text-[10px] font-medium text-gray-300">MiB</span>
-								<input type="checkbox" x-model:value="gibibyteSelector" class="peer sr-only"/>
-								<div class="peer-checked:bg-speedia-primary peer relative h-4 w-7 rounded-md border-neutral-600 bg-neutral-50 bg-opacity-20 after:absolute after:start-[2px] after:top-[2px] after:h-3 after:w-3 after:rounded-full after:border after:border-neutral-300 after:bg-neutral-100 after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full"></div>
-								<span class="ml-1 text-[10px] font-medium text-gray-300">GiB</span>
-							</label>
-						</div>
-						<template x-if="gibibyteSelector">
-							@componentForm.NumberRangeInputField(
-								"baseSpecs.memoryGibibytes", "", "1", "64", "1",
-								"containerProfile.baseSpecs.memoryGibibytes",
-							)
-						</template>
-						<template x-if="!gibibyteSelector">
-							@componentForm.NumberRangeInputField(
-								"baseSpecs.memoryMebibytes", "", "100", "65536", "100",
-								"containerProfile.baseSpecs.memoryMebibytes",
-							)
-						</template>
+						@componentForm.DualNumberRangeInputField(
+							"RAM Memory", "gibibyteSelector",
+							"memoryGibibytes", "GiB", "1", "64", "1",
+							"containerProfile.baseSpecs.memoryGibibytes",
+							"memoryMebibytes", "MiB", "100", "65536", "100",
+							"containerProfile.baseSpecs.memoryMebibytes",
+						)
 						@componentForm.NumberRangeInputField(
 							"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
 							"1", "100", "1",
@@ -206,27 +192,13 @@ templ UpdateContainerProfileFormModal() {
 							"maxSpecs.cpuCores", "CPU Cores", "0", "32", "0.5",
 							"containerProfile.maxSpecs.cpuCores",
 						)
-						<div class="mb-2 inline-flex w-full items-center justify-between">
-							<label class="text-sm font-bold text-neutral-50">RAM Memory</label>
-							<label class="inline-flex cursor-pointer items-center rounded-md border border-neutral-50 border-opacity-10 p-1">
-								<span class="mr-1 text-[10px] font-medium text-gray-300">MiB</span>
-								<input type="checkbox" x-model:value="gibibyteSelector" class="peer sr-only"/>
-								<div class="peer-checked:bg-speedia-primary peer relative h-4 w-7 rounded-md border-neutral-600 bg-neutral-50 bg-opacity-20 after:absolute after:start-[2px] after:top-[2px] after:h-3 after:w-3 after:rounded-full after:border after:border-neutral-300 after:bg-neutral-100 after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full"></div>
-								<span class="ml-1 text-[10px] font-medium text-gray-300">GiB</span>
-							</label>
-						</div>
-						<template x-if="gibibyteSelector">
-							@componentForm.NumberRangeInputField(
-								"maxSpecs.memoryGibibytes", "", "1", "64", "1",
-								"containerProfile.maxSpecs.memoryGibibytes",
-							)
-						</template>
-						<template x-if="!gibibyteSelector">
-							@componentForm.NumberRangeInputField(
-								"maxSpecs.memoryMebibytes", "", "100", "65536", "100",
-								"containerProfile.maxSpecs.memoryMebibytes",
-							)
-						</template>
+						@componentForm.DualNumberRangeInputField(
+							"RAM Memory", "gibibyteSelector",
+							"memoryGibibytes", "GiB", "1", "64", "1",
+							"containerProfile.maxSpecs.memoryGibibytes",
+							"memoryMebibytes", "MiB", "100", "65536", "100",
+							"containerProfile.maxSpecs.memoryMebibytes",
+						)
 						@componentForm.NumberRangeInputField(
 							"maxSpecs.storagePerformanceUnits", "Storage Performance Units",
 							"1", "100", "1",
