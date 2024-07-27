@@ -38,8 +38,8 @@ templ Sidebar(currentUrl string) {
 	}
 	</script>
 	<!-- Sidebar HTML -->
-	<sidebar class="flex h-screen w-28 flex-col items-center justify-center bg-neutral-950 bg-opacity-40">
-		<div class="my-6">
+	<sidebar class="flex h-screen w-28 flex-col items-center bg-neutral-950 bg-opacity-40">
+		<div class="my-7">
 			<a
 				href="/_/#/overview"
 				class="mx-auto mb-2 flex w-[84px] max-w-[84px] items-center justify-center"
@@ -54,15 +54,15 @@ templ Sidebar(currentUrl string) {
 		<button
 			type="button"
 			onclick="clearSession()"
-			class="hover:bg-speedia-primary flex items-center justify-center rounded-sm border border-neutral-500 bg-transparent px-4 py-2 text-center text-xs font-medium text-neutral-400 hover:border-transparent hover:text-white focus:outline-none"
+			class="hover:bg-speedia-primary flex items-center justify-center rounded-sm border border-neutral-500 bg-transparent px-4 py-2 text-center text-xs font-medium text-neutral-400 transition-all hover:border-transparent hover:text-white focus:outline-none"
 		>
-			<i class="ph-bold ph-sign-out pr-1"></i>
+			<i class="ph-bold ph-sign-out pr-1 pt-1"></i>
 			logout
 		</button>
 		<div class="mt-4">
 			<ul>
 				for _, item := range sidebarItemsGetter(currentUrl) {
-					<li class={ "my-2 p-2 transition-all hover:bg-neutral-100 hover:bg-opacity-10" + item.AdditionalClasses }>
+					<li class={ "my-2 py-3 px-2 transition-all hover:bg-neutral-100 hover:bg-opacity-10" + item.AdditionalClasses }>
 						<a href={ templ.URL(item.Link) }>
 							<div class="mx-auto mb-1 flex h-[48px] max-h-[48px] w-[48px] max-w-[48px] items-center justify-center rounded-full bg-neutral-950 bg-opacity-40 p-2">
 								<i class={ "ph-duotone " + item.Icon + " block text-3xl" }></i>
