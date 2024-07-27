@@ -7,15 +7,19 @@ import (
 )
 
 type ContainerProfile struct {
-	Id                     valueObject.ContainerProfileId   `json:"id"`
-	Name                   valueObject.ContainerProfileName `json:"name"`
-	BaseSpecs              valueObject.ContainerSpecs       `json:"baseSpecs"`
-	MaxSpecs               *valueObject.ContainerSpecs      `json:"maxSpecs"`
-	ScalingPolicy          *valueObject.ScalingPolicy       `json:"scalingPolicy"`
-	ScalingThreshold       *uint                            `json:"scalingThreshold"`
-	ScalingMaxDurationSecs *uint                            `json:"scalingMaxDurationSecs"`
-	ScalingIntervalSecs    *uint                            `json:"scalingIntervalSecs"`
-	HostMinCapacityPercent *valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
+	Id                        valueObject.ContainerProfileId   `json:"id"`
+	Name                      valueObject.ContainerProfileName `json:"name"`
+	BaseSpecs                 valueObject.ContainerSpecs       `json:"baseSpecs"`
+	MaxSpecs                  *valueObject.ContainerSpecs      `json:"maxSpecs"`
+	ScalingPolicy             *valueObject.ScalingPolicy       `json:"scalingPolicy"`
+	ScalingThreshold          *uint                            `json:"scalingThreshold"`
+	ScalingMaxDurationSecs    *uint                            `json:"scalingMaxDurationSecs"`
+	ScalingMaxDurationMinutes *uint16                          `json:"scalingMaxDurationMinutes"`
+	ScalingMaxDurationHours   *uint8                           `json:"scalingMaxDurationHours"`
+	ScalingIntervalSecs       *uint                            `json:"scalingIntervalSecs"`
+	ScalingIntervalMinutes    *uint16                          `json:"scalingIntervalMinutes"`
+	ScalingIntervalHours      *uint8                           `json:"scalingIntervalHours"`
+	HostMinCapacityPercent    *valueObject.HostMinCapacity     `json:"hostMinCapacityPercent"`
 }
 
 func NewContainerProfile(
@@ -27,16 +31,38 @@ func NewContainerProfile(
 	scalingThreshold, scalingMaxDurationSecs, scalingIntervalSecs *uint,
 	hostMinCapacityPercent *valueObject.HostMinCapacity,
 ) (ContainerProfile, error) {
+	var scalingMaxDurationMinutesPtr *uint16
+	var scalingMaxDurationHoursPtr *uint8
+	if scalingMaxDurationSecs != nil {
+		durationMinutes := uint16(*scalingMaxDurationSecs / 60)
+		scalingMaxDurationMinutesPtr = &durationMinutes
+		durationHours := uint8(*scalingMaxDurationSecs / 3600)
+		scalingMaxDurationHoursPtr = &durationHours
+	}
+
+	var scalingIntervalMinutesPtr *uint16
+	var scalingIntervalHoursPtr *uint8
+	if scalingIntervalSecs != nil {
+		intervalMinutes := uint16(*scalingIntervalSecs / 60)
+		scalingIntervalMinutesPtr = &intervalMinutes
+		intervalHours := uint8(*scalingIntervalSecs / 3600)
+		scalingIntervalHoursPtr = &intervalHours
+	}
+
 	return ContainerProfile{
-		Id:                     id,
-		Name:                   name,
-		BaseSpecs:              baseSpecs,
-		MaxSpecs:               maxSpecs,
-		ScalingPolicy:          scalingPolicy,
-		ScalingThreshold:       scalingThreshold,
-		ScalingMaxDurationSecs: scalingMaxDurationSecs,
-		ScalingIntervalSecs:    scalingIntervalSecs,
-		HostMinCapacityPercent: hostMinCapacityPercent,
+		Id:                        id,
+		Name:                      name,
+		BaseSpecs:                 baseSpecs,
+		MaxSpecs:                  maxSpecs,
+		ScalingPolicy:             scalingPolicy,
+		ScalingThreshold:          scalingThreshold,
+		ScalingMaxDurationSecs:    scalingMaxDurationSecs,
+		ScalingMaxDurationMinutes: scalingMaxDurationMinutesPtr,
+		ScalingMaxDurationHours:   scalingMaxDurationHoursPtr,
+		ScalingIntervalSecs:       scalingIntervalSecs,
+		ScalingIntervalMinutes:    scalingIntervalMinutesPtr,
+		ScalingIntervalHours:      scalingIntervalHoursPtr,
+		HostMinCapacityPercent:    hostMinCapacityPercent,
 	}, nil
 }
 
