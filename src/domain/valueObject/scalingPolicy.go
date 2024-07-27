@@ -10,9 +10,7 @@ import (
 
 type ScalingPolicy string
 
-var ValidScalingPolicies = []string{
-	"connection", "cpu", "memory",
-}
+var ValidScalingPolicies = []string{"cpu", "memory", "connection"}
 
 func NewScalingPolicy(value interface{}) (policy ScalingPolicy, err error) {
 	stringValue, err := voHelper.InterfaceToString(value)
