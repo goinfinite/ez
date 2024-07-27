@@ -23,22 +23,39 @@ script ContainerProfileIndexLocalState() {
 					'memoryGibibytes': null, 'storagePerformanceUnits': null,
 				},
 				'scalingPolicy': null, 'scalingThreshold': null,
-				'scalingMaxDurationSecs': null, 'scalingIntervalSecs': null,
+				'scalingMaxDurationSecs': null, 'scalingMaxDurationMinutes': null,
+				'scalingMaxDurationHours': null, 'scalingIntervalSecs': null,
+				'scalingIntervalMinutes': null, 'scalingIntervalHours': null,
 				'hostMinCapacityPercent': null,
 			},
 			gibibyteSelector: true,
 			scalingIntervalHoursSelector: true,
 			scalingMaxDurationHoursSelector: true,
-			isUpdateModalOpen: false,
 			get isScalingPolicyConn() {
 				return this.containerProfile.scalingPolicy == 'connection';
 			},
 
+			isUpdateModalOpen: false,
 			openUpdateModal(containerProfileData) {
 				this.containerProfile = containerProfileData;
+
+				this.gibibyteSelector = true;
+				if (this.containerProfile.baseSpecs.memoryGibibytes < 1) {
+					this.gibibyteSelector = false;
+				}
+
+				this.scalingIntervalHoursSelector = true;
+				if (this.containerProfile.scalingIntervalHours < 1) {
+					this.scalingIntervalHoursSelector = false;
+				}
+
+				this.scalingMaxDurationHoursSelector = true;
+				if (this.containerProfile.scalingMaxDurationHours < 1) {
+					this.scalingMaxDurationHoursSelector = false;
+				}
+				
 				this.isUpdateModalOpen = true;
 			},
-
 			closeUpdateModal() {
 				this.isUpdateModalOpen = false;
 			},
@@ -77,9 +94,9 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 				<th scope="col" class="px-5 py-3 text-left">Name</th>
 				<th scope="col" class="px-5 py-3">Scaling Policy</th>
 				<th scope="col" class="px-5 py-3">Scaling Threshold</th>
-				<th scope="col" class="px-5 py-3">Scaling Max Duration (seconds)</th>
-				<th scope="col" class="px-5 py-3">Scaling Interval (seconds)</th>
-				<th scope="col" class="px-5 py-3">Host Minimal Capacity (%)</th>
+				<th scope="col" class="px-5 py-3">Scaling Max Duration</th>
+				<th scope="col" class="px-5 py-3">Scaling Interval</th>
+				<th scope="col" class="px-5 py-3">Minimum Free Host Capacity (%)</th>
 				<th scope="col" class="px-5 py-3"></th>
 			</tr>
 		</thead>
@@ -95,13 +112,42 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 						{ uiHelper.FormatPointer(profile.ScalingPolicy) }
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingThreshold) }
+						if profile.ScalingThreshold != nil {
+							if profile.ScalingPolicy.String() == "connection" {
+								{ uiHelper.FormatPointer(profile.ScalingThreshold) }
+								<span class="text-xs">conn(s)</span>
+							} else {
+								{ uiHelper.FormatPointer(profile.ScalingThreshold) }<span class="text-xs">%</span>
+							}
+						} else {
+							-
+						}
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingMaxDurationSecs) }
+						if profile.ScalingMaxDurationSecs != nil {
+							if *profile.ScalingMaxDurationHours > 0 {
+								{ uiHelper.FormatPointer(profile.ScalingMaxDurationHours) }
+								<span class="text-xs">hour(s)</span>
+							} else {
+								{ uiHelper.FormatPointer(profile.ScalingMaxDurationMinutes) }
+								<span class="text-xs">min(s)</span>
+							}
+						} else {
+							-
+						}
 					</td>
 					<td class="px-6 py-4">
-						{ uiHelper.FormatPointer(profile.ScalingIntervalSecs) }
+						if profile.ScalingIntervalSecs != nil {
+							if *profile.ScalingIntervalHours > 0 {
+								{ uiHelper.FormatPointer(profile.ScalingIntervalHours) }
+								<span class="text-xs">hour(s)</span>
+							} else {
+								{ uiHelper.FormatPointer(profile.ScalingIntervalMinutes) }
+								<span class="text-xs">min(s)</span>
+							}
+						} else {
+							-
+						}
 					</td>
 					<td class="px-6 py-4">
 						{ uiHelper.FormatPointer(profile.HostMinCapacityPercent) }
@@ -176,7 +222,7 @@ templ UpdateContainerProfileFormModal() {
 						)
 						@componentForm.DualNumberRangeInputField(
 							"RAM Memory", "gibibyteSelector",
-							"memoryGibibytes", "GiB", "1", "64", "1",
+							"baseSpecs.memoryGibibytes", "GiB", "1", "64", "1",
 							"containerProfile.baseSpecs.memoryGibibytes",
 							"memoryMebibytes", "MiB", "100", "65536", "100",
 							"containerProfile.baseSpecs.memoryMebibytes",
@@ -199,7 +245,7 @@ templ UpdateContainerProfileFormModal() {
 						)
 						@componentForm.DualNumberRangeInputField(
 							"RAM Memory", "gibibyteSelector",
-							"memoryGibibytes", "GiB", "1", "64", "1",
+							"maxSpecs.memoryGibibytes", "GiB", "1", "64", "1",
 							"containerProfile.maxSpecs.memoryGibibytes",
 							"memoryMebibytes", "MiB", "100", "65536", "100",
 							"containerProfile.maxSpecs.memoryMebibytes",
