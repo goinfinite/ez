@@ -27,6 +27,7 @@ script ContainerProfileIndexLocalState() {
 				'hostMinCapacityPercent': null,
 			},
 			gibibyteSelector: true,
+			scalingIntervalHoursSelector: true,
 			isUpdateModalOpen: false,
 
 			openUpdateModal(containerProfileData) {
@@ -220,6 +221,13 @@ templ UpdateContainerProfileFormModal() {
 							@componentForm.SelectInput(
 								"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
 								valueObject.ValidScalingPolicies,
+							)
+							@componentForm.DualNumberRangeInputField(
+								"Scaling Interval", "scalingIntervalHoursSelector",
+								"scalingIntervalHours", "Hours", "1", "24", "1",
+								"containerProfile.scalingIntervalHours",
+								"scalingIntervalMinutes", "Minutes", "1", "1440", "5",
+								"containerProfile.scalingIntervalMinutes",
 							)
 						</div>
 					</details>
