@@ -3,16 +3,18 @@ package componentForm
 templ SelectInput(
 	id, label, bindValuePath string, options []string,
 ) {
-	if label != "" {
-		<label for={ id } class="mb-2 mt-4 block text-sm font-bold text-neutral-50">{ label }</label>
-	}
-	<select
-		id={ id }
-		x-model:value={ bindValuePath }
-		class="hover:border-opacity-15 mb-4 block w-full rounded-md border border-neutral-50 border-opacity-5 bg-neutral-50 bg-opacity-5 p-2.5 text-sm text-white placeholder-neutral-400 outline-none duration-300 focus-visible:border-opacity-75"
-	>
-		for _, option := range options {
-			<option class="bg-control-primary checked:bg-speedia-primary bg-opacity-90" value={ option }>{ option }</option>
+	<div>
+		if label != "" {
+			<label for={ id } class="mb-2 mt-4 block text-sm font-bold text-neutral-50">{ label }</label>
 		}
-	</select>
+		<select
+			id={ id }
+			x-model:value={ bindValuePath }
+			class="hover:border-opacity-15 mb-4 block w-full rounded-md border border-neutral-50 border-opacity-5 bg-neutral-50 bg-opacity-5 p-2.5 text-sm text-white placeholder-neutral-400 outline-none duration-300 focus-visible:border-opacity-75"
+		>
+			for _, option := range options {
+				<option class="bg-control-primary checked:bg-speedia-primary bg-opacity-90" value={ option }>{ option }</option>
+			}
+		</select>
+	</div>
 }
