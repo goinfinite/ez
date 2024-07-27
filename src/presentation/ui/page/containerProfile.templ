@@ -28,6 +28,7 @@ script ContainerProfileIndexLocalState() {
 			},
 			gibibyteSelector: true,
 			scalingIntervalHoursSelector: true,
+			scalingMaxDurationHoursSelector: true,
 			isUpdateModalOpen: false,
 
 			openUpdateModal(containerProfileData) {
@@ -217,18 +218,31 @@ templ UpdateContainerProfileFormModal() {
 							Advanced Settings
 							<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
 						</summary>
-						<div class="p-4">
+						<div class="p-2">
 							@componentForm.SelectInput(
 								"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
 								valueObject.ValidScalingPolicies,
 							)
-							@componentForm.DualNumberRangeInputField(
-								"Scaling Interval", "scalingIntervalHoursSelector",
-								"scalingIntervalHours", "hours", "1", "24", "1",
-								"containerProfile.scalingIntervalHours",
-								"scalingIntervalMinutes", "minutes", "1", "1440", "5",
-								"containerProfile.scalingIntervalMinutes",
-							)
+							<div class="flex flex-row">
+								<div class="mr-[4%] basis-1/2">
+									@componentForm.DualNumberRangeInputField(
+										"Scaling Max Duration", "scalingMaxDurationHoursSelector",
+										"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
+										"containerProfile.scalingMaxDurationHours",
+										"scalingMaxDurationMinutes", "minute(s)", "1", "1440", "5",
+										"containerProfile.scalingMaxDurationMinutes",
+									)
+								</div>
+								<div class="basis-1/2">
+									@componentForm.DualNumberRangeInputField(
+										"Scaling Interval", "scalingIntervalHoursSelector",
+										"scalingIntervalHours", "hour(s)", "1", "24", "1",
+										"containerProfile.scalingIntervalHours",
+										"scalingIntervalMinutes", "minute(s)", "1", "1440", "5",
+										"containerProfile.scalingIntervalMinutes",
+									)
+								</div>
+							</div>
 						</div>
 					</details>
 				</section>
