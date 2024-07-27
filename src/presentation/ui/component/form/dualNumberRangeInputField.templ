@@ -16,12 +16,12 @@ templ DualNumberRangeInputField(
 	</div>
 	<template x-if={ mainSelectorBindValuePath }>
 		@NumberRangeInputField(
-			firstId, "", firstMin, firstMax, firstStep, firstBindValuePath,
+			firstId, "", firstShortLabel, firstMin, firstMax, firstStep, firstBindValuePath,
 		)
 	</template>
 	<template x-if={ "!" + mainSelectorBindValuePath }>
 		@NumberRangeInputField(
-			secondId, "", secondMin, secondMax, secondStep, secondBindValuePath,
+			secondId, "", secondShortLabel, secondMin, secondMax, secondStep, secondBindValuePath,
 		)
 	</template>
 }

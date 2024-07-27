@@ -167,7 +167,7 @@ templ UpdateContainerProfileFormModal() {
 						<h3 class="font-bold">Base Specifications</h3>
 						<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
 						@componentForm.NumberRangeInputField(
-							"baseSpecs.cpuCores", "CPU Cores", "0", "32", "0.5",
+							"baseSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
 							"containerProfile.baseSpecs.cpuCores",
 						)
 						@componentForm.DualNumberRangeInputField(
@@ -179,7 +179,7 @@ templ UpdateContainerProfileFormModal() {
 						)
 						@componentForm.NumberRangeInputField(
 							"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
-							"1", "100", "1",
+							"", "1", "100", "1",
 							"containerProfile.baseSpecs.storagePerformanceUnits",
 						)
 						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
@@ -190,7 +190,7 @@ templ UpdateContainerProfileFormModal() {
 						<h3 class="font-bold">Max Specifications</h3>
 						<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
 						@componentForm.NumberRangeInputField(
-							"maxSpecs.cpuCores", "CPU Cores", "0", "32", "0.5",
+							"maxSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
 							"containerProfile.maxSpecs.cpuCores",
 						)
 						@componentForm.DualNumberRangeInputField(
@@ -202,7 +202,7 @@ templ UpdateContainerProfileFormModal() {
 						)
 						@componentForm.NumberRangeInputField(
 							"maxSpecs.storagePerformanceUnits", "Storage Performance Units",
-							"1", "100", "1",
+							"", "1", "100", "1",
 							"containerProfile.maxSpecs.storagePerformanceUnits",
 						)
 						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
@@ -224,9 +224,9 @@ templ UpdateContainerProfileFormModal() {
 							)
 							@componentForm.DualNumberRangeInputField(
 								"Scaling Interval", "scalingIntervalHoursSelector",
-								"scalingIntervalHours", "Hours", "1", "24", "1",
+								"scalingIntervalHours", "hours", "1", "24", "1",
 								"containerProfile.scalingIntervalHours",
-								"scalingIntervalMinutes", "Minutes", "1", "1440", "5",
+								"scalingIntervalMinutes", "minutes", "1", "1440", "5",
 								"containerProfile.scalingIntervalMinutes",
 							)
 						</div>
