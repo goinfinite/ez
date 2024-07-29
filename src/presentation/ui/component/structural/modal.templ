@@ -1,0 +1,35 @@
+package componentStructural
+
+templ Modal(
+	title, isOpenState, closeModalFunction, elementIdStatePath string,
+) {
+	<!-- Modal HTML -->
+	<div
+		x-show={ isOpenState }
+		x-transition:enter="transition ease-out duration-500"
+		x-transition:enter-start="opacity-0"
+		x-transition:enter-end="opacity-100"
+		x-transition:leave="transition ease-in duration-150"
+		x-transition:leave-start="opacity-100"
+		x-transition:leave-end="opacity-0"
+		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
+	>
+		<div
+			class="bg-control-primary max-w-3/5 relative mx-auto mt-20 rounded-md bg-opacity-95 p-6 drop-shadow-xl xl:mt-24 xl:max-w-3xl"
+			@click.away={ closeModalFunction }
+		>
+			<div class="mb-6 flex justify-between align-middle">
+				<h2 class="text-2xl">
+					{ title }
+					if elementIdStatePath != "" {
+						<strong>#<span x-text="elementIdBindPath"></span></strong>
+					}
+				</h2>
+				<button @click={ closeModalFunction } class="bg-transparent text-gray-400 hover:text-gray-300">
+					<i class="ph-bold ph-x-circle text-3xl"></i>
+				</button>
+			</div>
+			{ children... }
+		</div>
+	</div>
+}
