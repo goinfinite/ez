@@ -22,7 +22,7 @@ templ Modal(
 				<h2 class="text-2xl">
 					{ title }
 					if elementIdStatePath != "" {
-						<strong>#<span x-text="elementIdBindPath"></span></strong>
+						<strong>#<span x-text={ elementIdStatePath }></span></strong>
 					}
 				</h2>
 				<button @click={ closeModalFunction } class="bg-transparent text-gray-400 hover:text-gray-300">
