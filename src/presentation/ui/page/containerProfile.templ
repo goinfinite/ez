@@ -29,6 +29,7 @@ script ContainerProfileIndexLocalState() {
 				'scalingIntervalMinutes': null, 'scalingIntervalHours': null,
 				'hostMinCapacityPercent': null,
 			},
+			textualViewSelector: true,
 			gibibyteSelector: true,
 			scalingIntervalHoursSelector: true,
 			scalingMaxDurationHoursSelector: true,
@@ -184,133 +185,141 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 
 templ UpdateContainerProfileFormModal() {
 	@componentStructural.Modal(
-		"Update Container Profile",
-		"isUpdateModalOpen",
-		"closeUpdateModal()",
-		"containerProfile.id",
+		"Update Container Profile", "isUpdateModalOpen",
+		"closeUpdateModal()", "containerProfile.id",
 	) {
-		<form
-			hx-put="/api/v1/container/profile/"
-			hx-indicator="#loading-overlay"
-			hx-swap="none"
-		>
-			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
-			@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
-			<div class="flex flex-row space-x-4">
-				<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
-					<h3 class="font-bold">Base Specifications</h3>
-					<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
-					@componentForm.NumberRangeInputField(
-						"baseSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
-						"containerProfile.baseSpecs.cpuCores",
-					)
-					@componentForm.DualNumberRangeInputField(
-						"RAM Memory", "gibibyteSelector",
-						"baseSpecs.memoryGibibytes", "GiB", "1", "64", "1",
-						"containerProfile.baseSpecs.memoryGibibytes",
-						"memoryMebibytes", "MiB", "100", "65536", "100",
-						"containerProfile.baseSpecs.memoryMebibytes",
-					)
-					@componentForm.NumberRangeInputField(
-						"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
-						"", "1", "100", "1",
-						"containerProfile.baseSpecs.storagePerformanceUnits",
-					)
-					<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
-						<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
-					</small>
-				</div>
-				<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
-					<h3 class="font-bold">Max Specifications</h3>
-					<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
-					@componentForm.NumberRangeInputField(
-						"maxSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
-						"containerProfile.maxSpecs.cpuCores",
-					)
-					@componentForm.DualNumberRangeInputField(
-						"RAM Memory", "gibibyteSelector",
-						"maxSpecs.memoryGibibytes", "GiB", "1", "64", "1",
-						"containerProfile.maxSpecs.memoryGibibytes",
-						"memoryMebibytes", "MiB", "100", "65536", "100",
-						"containerProfile.maxSpecs.memoryMebibytes",
-					)
-					@componentForm.NumberRangeInputField(
-						"maxSpecs.storagePerformanceUnits", "Storage Performance Units",
-						"", "1", "100", "1",
-						"containerProfile.maxSpecs.storagePerformanceUnits",
-					)
-					<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
-						<strong x-text="containerProfile.maxSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
-					</small>
-				</div>
-			</div>
-			<section class="mt-4 w-full rounded-md">
-				<details class="group rounded-md bg-neutral-950 bg-opacity-20 p-4 group-open:bg-opacity-30">
-					<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
-						<i class="ph-duotone ph-gear mr-2 text-2xl"></i>
-						<span class="font-bold">Advanced Settings</span>
-						<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
-					</summary>
-					<div class="p-2">
-						@componentForm.SelectInput(
-							"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
-							valueObject.ValidScalingPolicies,
-						)
-						<div class="flex flex-row">
-							<div class="mr-[4%] basis-1/2">
-								@componentForm.DualNumberRangeInputField(
-									"Scaling Max Duration", "scalingMaxDurationHoursSelector",
-									"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
-									"containerProfile.scalingMaxDurationHours",
-									"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
-									"containerProfile.scalingMaxDurationMinutes",
-								)
-							</div>
-							<div class="basis-1/2">
-								@componentForm.DualNumberRangeInputField(
-									"Scaling Interval", "scalingIntervalHoursSelector",
-									"scalingIntervalHours", "hour(s)", "1", "24", "1",
-									"containerProfile.scalingIntervalHours",
-									"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
-									"containerProfile.scalingIntervalMinutes",
-								)
-							</div>
-						</div>
-						<div class="flex flex-row">
-							<div class="mr-[4%] basis-1/2">
-								<template x-if="isScalingPolicyConn">
-									@componentForm.NumberRangeInputField(
-										"scalingThreshold", "Connections Threshold",
-										"conn(s)", "1", "1000", "10",
-										"containerProfile.scalingThreshold",
-									)
-								</template>
-								<template x-if="!isScalingPolicyConn">
-									@componentForm.NumberRangeInputField(
-										"scalingThreshold", "Resource Usage Threshold",
-										"%", "0", "100", "1",
-										"containerProfile.scalingThreshold",
-									)
-								</template>
-							</div>
-							<div class="basis-1/2">
-								@componentForm.NumberRangeInputField(
-									"hostMinCapacityPercent", "Minimum Free Host Capacity",
-									"%", "0", "100", "1",
-									"containerProfile.hostMinCapacityPercent",
-								)
-							</div>
-						</div>
-					</div>
-				</details>
-			</section>
-			<button
-				type="submit"
-				@click="closeUpdateModal()"
-				class="bg-speedia-primary border-speedia-primary mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+		<div class="float-right mb-4">
+			@componentForm.IconToggle(
+				"ph-table", "Form View", "ph-chat-circle-dots", "Textual View", "textualViewSelector",
+			)
+		</div>
+		<div id="tab-textual-view" x-show="textualViewSelector">
+			Textual View
+		</div>
+		<div id="tab-form-view" x-show="!textualViewSelector">
+			<form
+				hx-put="/api/v1/container/profile/"
+				hx-indicator="#loading-overlay"
+				hx-swap="none"
 			>
-				<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
-			</button>
-		</form>
+				<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
+				@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
+				<div class="flex flex-row space-x-4">
+					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
+						<h3 class="font-bold">Base Specifications</h3>
+						<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
+						@componentForm.NumberRangeInputField(
+							"baseSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
+							"containerProfile.baseSpecs.cpuCores",
+						)
+						@componentForm.DualNumberRangeInputField(
+							"RAM Memory", "gibibyteSelector",
+							"baseSpecs.memoryGibibytes", "GiB", "1", "64", "1",
+							"containerProfile.baseSpecs.memoryGibibytes",
+							"memoryMebibytes", "MiB", "100", "65536", "100",
+							"containerProfile.baseSpecs.memoryMebibytes",
+						)
+						@componentForm.NumberRangeInputField(
+							"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
+							"", "1", "100", "1",
+							"containerProfile.baseSpecs.storagePerformanceUnits",
+						)
+						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
+							<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
+						</small>
+					</div>
+					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
+						<h3 class="font-bold">Max Specifications</h3>
+						<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
+						@componentForm.NumberRangeInputField(
+							"maxSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
+							"containerProfile.maxSpecs.cpuCores",
+						)
+						@componentForm.DualNumberRangeInputField(
+							"RAM Memory", "gibibyteSelector",
+							"maxSpecs.memoryGibibytes", "GiB", "1", "64", "1",
+							"containerProfile.maxSpecs.memoryGibibytes",
+							"memoryMebibytes", "MiB", "100", "65536", "100",
+							"containerProfile.maxSpecs.memoryMebibytes",
+						)
+						@componentForm.NumberRangeInputField(
+							"maxSpecs.storagePerformanceUnits", "Storage Performance Units",
+							"", "1", "100", "1",
+							"containerProfile.maxSpecs.storagePerformanceUnits",
+						)
+						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
+							<strong x-text="containerProfile.maxSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
+						</small>
+					</div>
+				</div>
+				<section class="mt-4 w-full rounded-md">
+					<details class="group rounded-md bg-neutral-950 bg-opacity-20 p-4 group-open:bg-opacity-30">
+						<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
+							<i class="ph-duotone ph-gear mr-2 text-2xl"></i>
+							<span class="font-bold">Advanced Settings</span>
+							<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
+						</summary>
+						<div class="p-2">
+							@componentForm.SelectInput(
+								"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
+								valueObject.ValidScalingPolicies,
+							)
+							<div class="flex flex-row">
+								<div class="mr-[4%] basis-1/2">
+									@componentForm.DualNumberRangeInputField(
+										"Scaling Max Duration", "scalingMaxDurationHoursSelector",
+										"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
+										"containerProfile.scalingMaxDurationHours",
+										"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
+										"containerProfile.scalingMaxDurationMinutes",
+									)
+								</div>
+								<div class="basis-1/2">
+									@componentForm.DualNumberRangeInputField(
+										"Scaling Interval", "scalingIntervalHoursSelector",
+										"scalingIntervalHours", "hour(s)", "1", "24", "1",
+										"containerProfile.scalingIntervalHours",
+										"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
+										"containerProfile.scalingIntervalMinutes",
+									)
+								</div>
+							</div>
+							<div class="flex flex-row">
+								<div class="mr-[4%] basis-1/2">
+									<template x-if="isScalingPolicyConn">
+										@componentForm.NumberRangeInputField(
+											"scalingThreshold", "Connections Threshold",
+											"conn(s)", "1", "1000", "10",
+											"containerProfile.scalingThreshold",
+										)
+									</template>
+									<template x-if="!isScalingPolicyConn">
+										@componentForm.NumberRangeInputField(
+											"scalingThreshold", "Resource Usage Threshold",
+											"%", "0", "100", "1",
+											"containerProfile.scalingThreshold",
+										)
+									</template>
+								</div>
+								<div class="basis-1/2">
+									@componentForm.NumberRangeInputField(
+										"hostMinCapacityPercent", "Minimum Free Host Capacity",
+										"%", "0", "100", "1",
+										"containerProfile.hostMinCapacityPercent",
+									)
+								</div>
+							</div>
+						</div>
+					</details>
+				</section>
+				<button
+					type="submit"
+					@click="closeUpdateModal()"
+					class="bg-speedia-primary border-speedia-primary mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+				>
+					<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
+				</button>
+			</form>
+		</div>
 	}
 }
