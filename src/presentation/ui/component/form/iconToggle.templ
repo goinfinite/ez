@@ -5,11 +5,11 @@ templ IconToggle(
 ) {
 	<label class="relative flex cursor-pointer flex-wrap items-center gap-2">
 		<input
-			class="checked:bg-speedia-primary checked:ring-speedia-primary checked:hover:bg-speedia-primary peer relative h-8 w-16 cursor-pointer appearance-none rounded-lg ring-2 ring-inset ring-neutral-50 ring-opacity-50 transition-colors checked:hover:bg-opacity-80 focus-visible:outline-none"
+			class="checked:bg-speedia-primary checked:ring-speedia-primary checked:hover:bg-speedia-primary peer relative h-8 w-16 cursor-pointer appearance-none rounded-lg ring-2 ring-inset ring-neutral-50 ring-opacity-50 transition-colors hover:bg-neutral-50 hover:bg-opacity-20 checked:hover:bg-opacity-70 focus-visible:outline-none"
 			type="checkbox"
 			x-model={ bindValuePath }
 		/>
-		<div class="bg-control-primary group absolute flex h-8 w-8 items-center justify-center rounded-xl text-neutral-50 opacity-100 ring-2 ring-neutral-50 transition-opacity hover:overflow-visible peer-checked:opacity-0 peer-hover:text-opacity-50 peer-hover:ring-opacity-50">
+		<div class="bg-control-primary group absolute flex h-8 w-8 items-center justify-center rounded-xl text-neutral-50 opacity-100 ring-2 ring-neutral-50 transition-opacity hover:overflow-visible peer-checked:opacity-0">
 			<i class={ "ph-duotone " + uncheckedIcon + " text-2xl" }></i>
 			if uncheckedTooltip != "" {
 				<span
