@@ -12,7 +12,7 @@ templ NumberRangeInputField(
 				<input
 					name={ id }
 					type="number"
-					class="hover:border-opacity-15 peer relative block w-full rounded-md border border-neutral-50 border-opacity-5 bg-neutral-50 bg-opacity-5 p-2.5 text-sm text-white placeholder-neutral-400 outline-none duration-300 focus-visible:border-opacity-75"
+					class="hover:border-control-100 bg-control-300 border-control-200 focus-visible:border-control-50 peer relative block w-full rounded-md border p-2.5 text-sm text-neutral-50 placeholder-neutral-400 outline-none duration-300"
 					placeholder="0"
 					x-model:value={ bindValuePath }
 				/>
@@ -28,7 +28,7 @@ templ NumberRangeInputField(
 					max={ max }
 					step={ step }
 					x-model:value={ bindValuePath }
-					class="accent-speedia-primary h-2 w-full cursor-pointer appearance-none rounded-md bg-neutral-50 bg-opacity-20 hover:bg-opacity-25 focus:outline-none active:bg-opacity-30"
+					class="accent-speedia-500 bg-control-300 hover:bg-control-200 active:bg-control-100 h-2 w-full cursor-pointer appearance-none rounded-md focus:outline-none"
 				/>
 				<span class="float-left text-xs text-neutral-400">{ min }</span>
 				<span class="float-right text-xs text-neutral-400">{ max }</span>

@@ -90,7 +90,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-neutral-950 bg-opacity-50 text-xs uppercase text-neutral-400">
+		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
 			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 				<th scope="col" class="px-5 py-3">Id</th>
 				<th scope="col" class="px-5 py-3 text-left">Name</th>
@@ -104,7 +104,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 		</thead>
 		<tbody>
 			for _, profile := range profiles {
-				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 text-center odd:bg-opacity-20 even:bg-opacity-40">
+				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
 					<td class="w-80 px-6 py-4 text-left">
 						<p>{ profile.Name.String() }</p>
@@ -188,7 +188,7 @@ templ UpdateContainerProfileFormModal() {
 		"Update Container Profile", "isUpdateModalOpen",
 		"closeUpdateModal()", "containerProfile.id",
 	) {
-		<div class="float-right mb-4">
+		<div class="mb-4">
 			@componentForm.IconToggle(
 				"ph-table", "Form View", "ph-chat-circle-dots", "Textual View", "textualViewSelector",
 			)
@@ -315,7 +315,7 @@ templ UpdateContainerProfileFormModal() {
 				<button
 					type="submit"
 					@click="closeUpdateModal()"
-					class="bg-speedia-primary border-speedia-primary mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+					class="bg-speedia-500 border-speedia-500 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
 				>
 					<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
 				</button>

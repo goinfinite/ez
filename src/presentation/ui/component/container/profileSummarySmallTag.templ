@@ -20,7 +20,7 @@ func formatProfileSummarySmallTag(specs *valueObject.ContainerSpecs) string {
 }
 
 templ ProfileSummarySmallTag(profile entity.ContainerProfile) {
-	<small class="border-speedia-primary rounded border p-1 align-middle text-xs">
+	<small class="border-speedia-500 rounded border p-1 align-middle text-xs">
 		@templ.Raw(formatProfileSummarySmallTag(&profile.BaseSpecs))
 		if profile.MaxSpecs != nil {
 			<i class="ph-bold ph-arrows-out-simple mx-1"></i>

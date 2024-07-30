@@ -22,7 +22,7 @@ func sidebarItemsGetter(currentUrl string) []SidebarItem {
 			continue
 		}
 
-		sidebarItems[itemIndex].AdditionalClasses = " text-speedia-primary"
+		sidebarItems[itemIndex].AdditionalClasses = " text-speedia-500"
 		break
 	}
 
@@ -38,7 +38,7 @@ templ Sidebar(currentUrl string) {
 	}
 	</script>
 	<!-- Sidebar HTML -->
-	<sidebar class="flex h-screen w-28 flex-col items-center bg-neutral-950 bg-opacity-40">
+	<sidebar class="bg-control-900 flex h-screen w-28 flex-col items-center">
 		<div class="my-7">
 			<a
 				href="/_/#/overview"
@@ -54,7 +54,7 @@ templ Sidebar(currentUrl string) {
 		<button
 			type="button"
 			onclick="clearSession()"
-			class="hover:bg-speedia-primary flex items-center justify-center rounded-sm border border-neutral-500 bg-transparent px-4 py-2 text-center text-xs font-medium text-neutral-400 transition-all hover:border-transparent hover:text-white focus:outline-none"
+			class="hover:bg-speedia-500 flex items-center justify-center rounded-sm border border-neutral-500 bg-transparent px-4 py-2 text-center text-xs font-medium text-neutral-400 transition-all hover:border-transparent hover:text-white focus:outline-none"
 		>
 			<i class="ph-bold ph-sign-out pr-1 pt-1"></i>
 			logout
