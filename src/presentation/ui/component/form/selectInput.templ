@@ -3,19 +3,26 @@ package componentForm
 templ SelectInput(
 	id, label, bindValuePath string, options []string,
 ) {
-	<div>
-		if label != "" {
-			<label for={ id } class="mb-2 mt-4 block text-sm font-bold text-neutral-50">{ label }</label>
-		}
+	<div class="relative my-6">
 		<select
 			id={ id }
 			name={ id }
 			x-model:value={ bindValuePath }
-			class="hover:border-opacity-15 mb-4 block w-full rounded-md border border-neutral-50 border-opacity-5 bg-neutral-50 bg-opacity-5 p-2.5 text-sm text-white placeholder-neutral-400 outline-none duration-300 focus-visible:border-opacity-75"
+			placeholder={ label }
+			class="bg-control-300 border-control-200 autofill:bg-control-300 focus:border-control-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 		>
 			for _, option := range options {
-				<option class="bg-control-primary checked:bg-speedia-primary bg-opacity-90" value={ option }>{ option }</option>
+				<option class="bg-control-500 checked:bg-speedia-500 bg-opacity-90" value={ option }>{ option }</option>
 			}
 		</select>
+		if label != "" {
+			<label
+				for={ id }
+				class="from-control-300 via-control-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+			>
+				{ label }
+			</label>
+		}
+		<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
 	</div>
 }
