@@ -29,13 +29,15 @@ templ Modal(
 					}
 				</h2>
 				<div class="inline-flex space-x-5">
-					@componentForm.IconToggle(
-						"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
-						"textualViewSelector",
-					)
+					<div class="opacity-75 hover:opacity-100 active:opacity-100">
+						@componentForm.IconToggle(
+							"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
+							"textualViewSelector",
+						)
+					</div>
 					<button
 						@click={ closeModalFunction }
-						class="bg-transparent hover:text-neutral-300"
+						class="bg-transparent opacity-75 hover:opacity-100 active:opacity-100"
 					>
 						<i class="ph-bold ph-x-square align-middle text-3xl"></i>
 					</button>
