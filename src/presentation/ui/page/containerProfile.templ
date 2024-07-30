@@ -185,14 +185,9 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 
 templ UpdateContainerProfileFormModal() {
 	@componentStructural.Modal(
-		"Update Container Profile", "isUpdateModalOpen",
-		"closeUpdateModal()", "containerProfile.id",
+		"Update Container Profile", "isUpdateModalOpen", "closeUpdateModal()",
+		"containerProfile.id", true,
 	) {
-		<div class="mb-4">
-			@componentForm.IconToggle(
-				"ph-table", "Form View", "ph-chat-circle-dots", "Textual View", "textualViewSelector",
-			)
-		</div>
 		<div id="tab-textual-view" x-show="textualViewSelector">
 			Textual View
 		</div>
@@ -205,9 +200,11 @@ templ UpdateContainerProfileFormModal() {
 				<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 				@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
 				<div class="flex flex-row space-x-4">
-					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
-						<h3 class="font-bold">Base Specifications</h3>
-						<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
+					<div class="space-y-5.5 w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
+						<div>
+							<h3 class="font-bold">Base Specifications</h3>
+							<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
+						</div>
 						@componentForm.NumberRangeInputField(
 							"baseSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
 							"containerProfile.baseSpecs.cpuCores",
@@ -219,18 +216,22 @@ templ UpdateContainerProfileFormModal() {
 							"memoryMebibytes", "MiB", "100", "65536", "100",
 							"containerProfile.baseSpecs.memoryMebibytes",
 						)
-						@componentForm.NumberRangeInputField(
-							"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
-							"", "1", "100", "1",
-							"containerProfile.baseSpecs.storagePerformanceUnits",
-						)
-						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
-							<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
-						</small>
+						<div>
+							@componentForm.NumberRangeInputField(
+								"baseSpecs.storagePerformanceUnits", "Storage Performance Units",
+								"", "1", "100", "1",
+								"containerProfile.baseSpecs.storagePerformanceUnits",
+							)
+							<small class="mt-3 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
+								<strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
+							</small>
+						</div>
 					</div>
-					<div class="w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
-						<h3 class="font-bold">Max Specifications</h3>
-						<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
+					<div class="space-y-5.5 w-1/2 rounded-md bg-neutral-950 bg-opacity-20 p-4">
+						<div>
+							<h3 class="font-bold">Max Specifications</h3>
+							<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
+						</div>
 						@componentForm.NumberRangeInputField(
 							"maxSpecs.cpuCores", "CPU Cores", "", "0", "32", "0.5",
 							"containerProfile.maxSpecs.cpuCores",
@@ -242,14 +243,16 @@ templ UpdateContainerProfileFormModal() {
 							"memoryMebibytes", "MiB", "100", "65536", "100",
 							"containerProfile.maxSpecs.memoryMebibytes",
 						)
-						@componentForm.NumberRangeInputField(
-							"maxSpecs.storagePerformanceUnits", "Storage Performance Units",
-							"", "1", "100", "1",
-							"containerProfile.maxSpecs.storagePerformanceUnits",
-						)
-						<small class="-mt-1.5 mb-2 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
-							<strong x-text="containerProfile.maxSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
-						</small>
+						<div>
+							@componentForm.NumberRangeInputField(
+								"maxSpecs.storagePerformanceUnits", "Storage Performance Units",
+								"", "1", "100", "1",
+								"containerProfile.maxSpecs.storagePerformanceUnits",
+							)
+							<small class="mt-3 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
+								<strong x-text="containerProfile.maxSpecs.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> operations</strong> of read and write
+							</small>
+						</div>
 					</div>
 				</div>
 				<section class="mt-4 w-full rounded-md">
@@ -259,13 +262,13 @@ templ UpdateContainerProfileFormModal() {
 							<span class="font-bold">Advanced Settings</span>
 							<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
 						</summary>
-						<div class="p-2">
+						<div class="space-y-5.5 p-2">
 							@componentForm.SelectInput(
 								"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
 								valueObject.ValidScalingPolicies,
 							)
-							<div class="flex flex-row">
-								<div class="mr-[4%] basis-1/2">
+							<div class="flex flex-row space-x-6">
+								<div class="basis-1/2">
 									@componentForm.DualNumberRangeInputField(
 										"Scaling Max Duration", "scalingMaxDurationHoursSelector",
 										"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
@@ -284,8 +287,8 @@ templ UpdateContainerProfileFormModal() {
 									)
 								</div>
 							</div>
-							<div class="flex flex-row">
-								<div class="mr-[4%] basis-1/2">
+							<div class="flex flex-row space-x-6">
+								<div class="basis-1/2">
 									<template x-if="isScalingPolicyConn">
 										@componentForm.NumberRangeInputField(
 											"scalingThreshold", "Connections Threshold",
