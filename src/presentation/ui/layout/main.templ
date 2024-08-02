@@ -5,7 +5,7 @@ import componentUtil "github.com/speedianet/control/src/presentation/ui/componen
 script MainLayoutState() {
 	document.addEventListener('alpine:initializing', () => {
 		Alpine.store('main', {
-			textualViewSelector: Alpine.$persist(true).as('dash.textualViewSelector'),
+			textualViewSelector: Alpine.$persist(false).as('dash.textualViewSelector'),
 		});
 	});
 }
