@@ -2,6 +2,14 @@ package layout
 
 import componentUtil "github.com/speedianet/control/src/presentation/ui/component/util"
 
+script MainLayoutState() {
+	document.addEventListener('alpine:initializing', () => {
+		Alpine.store('main', {
+			textualViewSelector: Alpine.$persist(true).as('dash.textualViewSelector'),
+		});
+	});
+}
+
 templ MainLayout(pageContent templ.Component, currentUrl string) {
 	<!DOCTYPE html>
 	<html>
@@ -84,6 +92,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" integrity="sha256-NY2a+7GrW++i9IBhowd25bzXcH9BCmBrqYX5i8OxwDQ=" crossorigin="anonymous"></script>
 		</head>
 		<body class="bg-control-500 flex text-white">
+			@MainLayoutState()
 			@componentUtil.LoadingOverlay()
 			@Sidebar(currentUrl)
 			<!-- Page Content -->

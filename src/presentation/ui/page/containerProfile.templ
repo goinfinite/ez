@@ -43,7 +43,6 @@ script ContainerProfileIndexLocalState() {
 				'hostMinCapacityPercent': null
 			},
 
-			textualViewSelector: true,
 			gibibyteSelector: true,
 			preferedByteSuffix: 'GiB',
 			scalingIntervalHoursSelector: true,
@@ -444,11 +443,11 @@ templ UpdateContainerProfileModal() {
 	) {
 		<div
 			id="tab-textual-view"
-			x-show="textualViewSelector"
+			x-show="$store.main.textualViewSelector"
 		>
 			@UpdateContainerProfileTextualForm()
 		</div>
-		<div id="tab-form-view" x-show="!textualViewSelector">
+		<div id="tab-form-view" x-show="!$store.main.textualViewSelector">
 			@UpdateContainerProfileRegularForm()
 		</div>
 	}
