@@ -8,6 +8,9 @@ import (
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
+	"log"
+	"strings"
+	"text/template"
 )
 
 script ContainerProfileIndexLocalState() {
@@ -96,7 +99,12 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 	)
 	<div class="container flex" x-data="containerProfileManager">
 		<div id="profiles-tables" class="card w-full">
-			@ContainerProfilesRegularFormTable(profiles)
+			<template x-if="!$store.main.textualViewSelector">
+				@ContainerProfilesRegularFormTable(profiles)
+			</template>
+			<template x-if="$store.main.textualViewSelector">
+				@ContainerProfilesTextualTable(profiles)
+			</template>
 		</div>
 		@UpdateContainerProfileModal()
 	</div>
@@ -104,7 +112,7 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 
 templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 	<table
-		id="profiles-form-table"
+		id="profiles-regular-form-table"
 		hx-get="/container/profile/"
 		hx-trigger="submit from:form delay:500ms, click from:button#delete-profile delay:500ms"
 		hx-select="#profiles-tables"
@@ -175,6 +183,106 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 					</td>
 					<td class="px-6 py-4">
 						{ uiHelper.FormatPointer(profile.HostMinCapacityPercent) }
+					</td>
+					<td class="inline-flex px-6 py-4">
+						<button
+							type="button"
+							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
+							class="me-2 inline-flex items-center rounded-full bg-neutral-50 bg-opacity-20 p-3 text-center font-medium hover:bg-opacity-40"
+						>
+							<i class="ph-bold ph-pencil text-xl"></i>
+						</button>
+						<button
+							id="delete-profile"
+							hx-delete={ "/api/v1/container/profile/" + profile.Id.String() + "/" }
+							hx-swap="none"
+							type="button"
+							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
+						>
+							<i class="ph-bold ph-trash text-xl"></i>
+						</button>
+					</td>
+				</tr>
+			}
+			if len(profiles) == 0 {
+				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+					<td class="px-6 py-4" colspan="12">No profiles found.</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
+	strongTag := "<strong class=\"bg-control-300 rounded-md px-1.5 py-0.5\">"
+	strongTagClose := "</strong>"
+	scalingThresholdSuffix := "%"
+	if profile.ScalingPolicy != nil && *profile.ScalingPolicy == "connection" {
+		scalingThresholdSuffix = "conn(s)"
+	}
+
+	descriptionTemplate := `<p>
+	The ` + strongTag + `{{ .Name }}` + strongTagClose + ` profile allows containers to utilize ` +
+		strongTag + `{{ .BaseSpecs.CpuCores }}` + strongTagClose + ` CPU core(s), ` +
+		strongTag + `{{ .BaseSpecs.MemoryGibibytes }}` + strongTagClose + ` GiB of RAM memory, and ` +
+		strongTag + `{{ .BaseSpecs.StoragePerformanceUnits }}` + strongTagClose + ` storage performance unit(s) ` +
+		`<small class="text-neutral-400">(<strong x-text="{{ .BaseSpecs.StoragePerformanceUnits }} * 5"></strong> MiB/s & ` +
+		`<strong x-text="{{ .BaseSpecs.StoragePerformanceUnits }} * 250"></strong> ops/s of read and write)</small>.
+{{ if .MaxSpecs }}
+		Optionally, containers using this profile can scale up to ` +
+		strongTag + `{{ .MaxSpecs.CpuCores }}` + strongTagClose + ` CPU cores, ` +
+		strongTag + `{{ .MaxSpecs.MemoryGibibytes }}` + strongTagClose + ` GiB of RAM, and ` +
+		strongTag + `{{ .MaxSpecs.StoragePerformanceUnits }}` + strongTagClose + ` storage performance units ` +
+		`<small class="text-neutral-400">(<strong x-text="{{ .MaxSpecs.StoragePerformanceUnits }} * 5"></strong> MiB/s & ` +
+		`<strong x-text="{{ .MaxSpecs.StoragePerformanceUnits }} * 250"></strong> ops)</small>, ` +
+		`during periods of ` + strongTag + `{{ .ScalingMaxDurationHours }}` + strongTagClose + ` hour(s) at regular intervals of ` +
+		strongTag + `{{ .ScalingIntervalHours }}` + strongTagClose + ` hour(s), provided the ` +
+		strongTag + `{{ .ScalingPolicy }}` + strongTagClose + ` usage exceeds ` +
+		strongTag + `{{ .ScalingThreshold }}` + strongTagClose + scalingThresholdSuffix + ` 
+		and the host machine has at least ` +
+		strongTag + `{{ .HostMinCapacityPercent }}` + strongTagClose + `% free capacity available.
+{{ end }}
+</p>`
+
+	templatePtr, err := template.New("profileDescription").Parse(descriptionTemplate)
+	if err != nil {
+		log.Printf("Error parsing profile description template: %v", err)
+		return ""
+	}
+
+	var profileDescriptionStr strings.Builder
+	err = templatePtr.Execute(&profileDescriptionStr, profile)
+	if err != nil {
+		log.Printf("Error executing profile description template: %v", err)
+		return ""
+	}
+
+	return profileDescriptionStr.String()
+}
+
+templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
+	<table
+		id="profiles-textual-table"
+		hx-get="/container/profile/"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-profile delay:500ms"
+		hx-select="#profiles-tables"
+		hx-target="#profiles-tables"
+		hx-swap="outerHTML transition:true"
+		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
+	>
+		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+				<th scope="col" class="px-5 py-3">Id</th>
+				<th scope="col" class="px-5 py-3 text-left">Description</th>
+				<th scope="col" class="px-5 py-3"></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, profile := range profiles {
+				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+					<td class="px-6 py-4">{ profile.Id.String() }</td>
+					<td class="min-w-80 px-6 py-4 text-left text-[15px] leading-loose">
+						@templ.Raw(profileTextualDescriptionFactory(profile))
 					</td>
 					<td class="inline-flex px-6 py-4">
 						<button
@@ -334,7 +442,7 @@ templ UpdateContainerProfileRegularForm() {
 		<button
 			type="submit"
 			@click="closeUpdateModal()"
-			class="bg-speedia-500 border-speedia-500 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+			class="bg-speedia-500 border-control-200 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
 		>
 			<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
 		</button>
@@ -429,7 +537,7 @@ templ UpdateContainerProfileTextualForm() {
 		<button
 			type="submit"
 			@click="closeUpdateModal()"
-			class="bg-speedia-500 border-speedia-500 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+			class="bg-speedia-500 border-control-200 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
 		>
 			<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
 		</button>
@@ -441,11 +549,11 @@ templ UpdateContainerProfileModal() {
 		"Update Container Profile", "isUpdateModalOpen", "closeUpdateModal()",
 		"containerProfile.id", true,
 	) {
-		<div id="tab-form-view" x-show="!$store.main.textualViewSelector">
+		<template x-if="!$store.main.textualViewSelector">
 			@UpdateContainerProfileRegularForm()
-		</div>
-		<div id="tab-textual-view" x-show="$store.main.textualViewSelector">
+		</template>
+		<template x-if="$store.main.textualViewSelector">
 			@UpdateContainerProfileTextualForm()
-		</div>
+		</template>
 	}
 }
