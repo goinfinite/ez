@@ -5,7 +5,6 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
 	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
-	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 	"log"
@@ -15,37 +14,45 @@ import (
 
 script ContainerProfileIndexLocalState() {
 	document.addEventListener('alpine:init', () => {
-		Alpine.data('containerProfileManager', () => ({
-			containerProfile: {
-				'id': '',
-				'name': '',
-				'baseSpecs': {
-					'millicores': 0,
-					'cpuCores': 0,
-					'memoryBytes': 0,
-					'memoryMebibytes': 0,
-					'memoryGibibytes': 0,
-					'storagePerformanceUnits': 0
-				},
-				'maxSpecs': {
-					'millicores': null,
-					'cpuCores': null,
-					'memoryBytes': null,
-					'memoryMebibytes': null,
-					'memoryGibibytes': null,
-					'storagePerformanceUnits': null
-				},
-				'scalingPolicy': null,
-				'scalingThreshold': null,
-				'scalingMaxDurationSecs': null,
-				'scalingMaxDurationMinutes': null,
-				'scalingMaxDurationHours': null,
-				'scalingIntervalSecs': null,
-				'scalingIntervalMinutes': null,
-				'scalingIntervalHours': null,
-				'hostMinCapacityPercent': null
+		Alpine.data('containerProfile', () => ({
+			// Primary State
+			containerProfile: {},
+			resetContainerProfile() {
+				this.containerProfile = {
+					'id': '',
+					'name': '',
+					'baseSpecs': {
+						'millicores': 0,
+						'cpuCores': 0,
+						'memoryBytes': 0,
+						'memoryMebibytes': 0,
+						'memoryGibibytes': 0,
+						'storagePerformanceUnits': 0
+					},
+					'maxSpecs': {
+						'millicores': null,
+						'cpuCores': null,
+						'memoryBytes': null,
+						'memoryMebibytes': null,
+						'memoryGibibytes': null,
+						'storagePerformanceUnits': null
+					},
+					'scalingPolicy': null,
+					'scalingThreshold': null,
+					'scalingMaxDurationSecs': null,
+					'scalingMaxDurationMinutes': null,
+					'scalingMaxDurationHours': null,
+					'scalingIntervalSecs': null,
+					'scalingIntervalMinutes': null,
+					'scalingIntervalHours': null,
+					'hostMinCapacityPercent': null
+				};
+			},
+			init() {
+				this.resetContainerProfile();
 			},
 
+			// Auxiliary States
 			gibibyteSelector: true,
 			preferedByteSuffix: 'GiB',
 			scalingIntervalHoursSelector: true,
@@ -56,8 +63,10 @@ script ContainerProfileIndexLocalState() {
 				return this.containerProfile.scalingPolicy == 'connection';
 			},
 
+			// Modal States
 			isUpdateModalOpen: false,
 			openUpdateModal(containerProfileData) {
+				this.resetContainerProfile();
 				this.containerProfile = containerProfileData;
 				
 				this.gibibyteSelector = true;
@@ -84,20 +93,48 @@ script ContainerProfileIndexLocalState() {
 				this.isUpdateModalOpen = true;
 			},
 			closeUpdateModal() {
+				this.resetContainerProfile();
 				this.isUpdateModalOpen = false;
 			},
+
+			isCreateModalOpen: false,
+			openCreateModal() {
+				this.resetContainerProfile();
+				this.isCreateModalOpen = true;
+			},
+			closeCreateModal() {
+				this.resetContainerProfile();
+				this.isCreateModalOpen = false;
+			}
 		}))
 	})
 }
 
 templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 	@ContainerProfileIndexLocalState()
-	@componentMisc.PageTitle(
-		"Container Profiles",
-		"Container Profiles enable you to establish standardized settings that govern container hardware resource limits, autoscaling policies, and other configurations.",
-		"ph-intersect-square",
-	)
-	<div class="container flex" x-data="containerProfileManager">
+	<div class="flex flex-col" x-data="containerProfile">
+		<div class="mb-6 flex flex-row items-center justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Container Profiles",
+					"Container Profiles enable you to establish standardized settings that govern container hardware resource limits, autoscaling policies, and other configurations.",
+					"ph-intersect-square",
+				)
+			</div>
+			<div class="my-4 flex space-x-5">
+				@componentForm.IconToggle(
+					"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
+					"$store.main.textualViewSelector",
+				)
+				<button
+					type="submit"
+					@click="openCreateModal()"
+					class="bg-speedia-500 hover:bg-speedia-300 rounded-md border-none px-3 py-2 text-center text-base font-bold lowercase text-white"
+				>
+					<i class="ph-duotone ph-plus-square mr-1 align-middle text-2xl"></i> Create Container Profile
+				</button>
+			</div>
+		</div>
 		<div id="profiles-tables" class="card w-full">
 			<template x-if="!$store.main.textualViewSelector">
 				@ContainerProfilesRegularFormTable(profiles)
@@ -284,7 +321,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 					<td class="min-w-80 px-6 py-4 text-left text-[15px] leading-loose">
 						@templ.Raw(profileTextualDescriptionFactory(profile))
 					</td>
-					<td class="inline-flex px-6 py-4">
+					<td class="flex flex-row px-6 py-4 align-middle">
 						<button
 							type="button"
 							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
