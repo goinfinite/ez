@@ -107,7 +107,7 @@ func (service *ContainerService) Create(
 	}
 
 	portBindings := []valueObject.PortBinding{}
-	if _, exists := input["portBindings"]; exists {
+	if input["portBindings"] != nil {
 		var assertOk bool
 		portBindings, assertOk = input["portBindings"].([]valueObject.PortBinding)
 		if !assertOk {
@@ -116,7 +116,7 @@ func (service *ContainerService) Create(
 	}
 
 	var restartPolicyPtr *valueObject.ContainerRestartPolicy
-	if _, exists := input["restartPolicy"]; exists {
+	if input["restartPolicy"] != nil {
 		restartPolicy, err := valueObject.NewContainerRestartPolicy(input["restartPolicy"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -125,7 +125,7 @@ func (service *ContainerService) Create(
 	}
 
 	var entrypointPtr *valueObject.ContainerEntrypoint
-	if _, exists := input["entrypoint"]; exists {
+	if input["entrypoint"] != nil {
 		entrypoint, err := valueObject.NewContainerEntrypoint(input["entrypoint"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -134,7 +134,7 @@ func (service *ContainerService) Create(
 	}
 
 	var profileIdPtr *valueObject.ContainerProfileId
-	if _, exists := input["profileId"]; exists {
+	if input["profileId"] != nil {
 		profileId, err := valueObject.NewContainerProfileId(input["profileId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -143,7 +143,7 @@ func (service *ContainerService) Create(
 	}
 
 	envs := []valueObject.ContainerEnv{}
-	if _, exists := input["envs"]; exists {
+	if input["envs"] != nil {
 		var assertOk bool
 		envs, assertOk = input["envs"].([]valueObject.ContainerEnv)
 		if !assertOk {
@@ -152,7 +152,7 @@ func (service *ContainerService) Create(
 	}
 
 	var launchScriptPtr *valueObject.LaunchScript
-	if _, exists := input["launchScript"]; exists {
+	if input["launchScript"] != nil {
 		launchScript, assertOk := input["launchScript"].(valueObject.LaunchScript)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidLaunchScript")
@@ -161,7 +161,7 @@ func (service *ContainerService) Create(
 	}
 
 	autoCreateMappings := true
-	if _, exists := input["autoCreateMappings"]; exists {
+	if input["autoCreateMappings"] != nil {
 		autoCreateMappings, err = serviceHelper.ParseBoolParam(input["autoCreateMappings"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -284,7 +284,7 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 	}
 
 	var containerStatusPtr *bool
-	if _, exists := input["status"]; exists {
+	if input["status"] != nil {
 		containerStatus, err := serviceHelper.ParseBoolParam(input["status"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -293,7 +293,7 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 	}
 
 	var profileIdPtr *valueObject.ContainerProfileId
-	if _, exists := input["profileId"]; exists {
+	if input["profileId"] != nil {
 		profileId, err := valueObject.NewContainerProfileId(input["profileId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())

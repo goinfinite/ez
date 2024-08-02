@@ -45,7 +45,7 @@ func (service *ScheduledTaskService) Update(input map[string]interface{}) Servic
 	}
 
 	var taskStatusPtr *valueObject.ScheduledTaskStatus
-	if _, exists := input["status"]; exists {
+	if input["status"] != nil {
 		taskStatus, err := valueObject.NewScheduledTaskStatus(input["status"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -54,7 +54,7 @@ func (service *ScheduledTaskService) Update(input map[string]interface{}) Servic
 	}
 
 	var runAtPtr *valueObject.UnixTime
-	if _, exists := input["runAt"]; exists {
+	if input["runAt"] != nil {
 		runAt, err := valueObject.NewUnixTime(input["runAt"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())

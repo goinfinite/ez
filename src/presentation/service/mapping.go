@@ -45,7 +45,7 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 	}
 
 	var hostnamePtr *valueObject.Fqdn
-	if _, exists := input["hostname"]; exists {
+	if input["hostname"] != nil {
 		hostname, err := valueObject.NewFqdn(input["hostname"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -59,7 +59,7 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 	}
 
 	protocol := valueObject.GuessNetworkProtocolByPort(publicPort)
-	if _, exists := input["protocol"]; exists {
+	if input["protocol"] != nil {
 		protocol, err = valueObject.NewNetworkProtocol(input["protocol"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())

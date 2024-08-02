@@ -54,7 +54,7 @@ func (service *ContainerProfileService) Create(
 	}
 
 	var maxSpecsPtr *valueObject.ContainerSpecs
-	if _, exists := input["maxSpecs"]; exists {
+	if input["maxSpecs"] != nil {
 		maxSpecs, assertOk := input["maxSpecs"].(valueObject.ContainerSpecs)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidMaxSpecsStructure")
@@ -63,7 +63,7 @@ func (service *ContainerProfileService) Create(
 	}
 
 	var scalingPolicyPtr *valueObject.ScalingPolicy
-	if _, exists := input["scalingPolicy"]; exists {
+	if input["scalingPolicy"] != nil {
 		scalingPolicy, err := valueObject.NewScalingPolicy(input["scalingPolicy"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -72,7 +72,7 @@ func (service *ContainerProfileService) Create(
 	}
 
 	var scalingThresholdPtr *uint
-	if _, exists := input["scalingThreshold"]; exists {
+	if input["scalingThreshold"] != nil {
 		scalingThreshold, err := voHelper.InterfaceToUint(input["scalingThreshold"])
 		if err != nil {
 			return NewServiceOutput(UserError, "InvalidScalingThreshold")
@@ -81,7 +81,7 @@ func (service *ContainerProfileService) Create(
 	}
 
 	var scalingMaxDurationSecsPtr *uint
-	if _, exists := input["scalingMaxDurationSecs"]; exists {
+	if input["scalingMaxDurationSecs"] != nil {
 		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
 			input["scalingMaxDurationSecs"],
 		)
@@ -92,7 +92,7 @@ func (service *ContainerProfileService) Create(
 	}
 
 	var scalingIntervalSecsPtr *uint
-	if _, exists := input["scalingIntervalSecs"]; exists {
+	if input["scalingIntervalSecs"] != nil {
 		scalingIntervalSecs, err := voHelper.InterfaceToUint(input["scalingIntervalSecs"])
 		if err != nil {
 			return NewServiceOutput(UserError, "InvalidScalingIntervalSecs")
@@ -101,7 +101,7 @@ func (service *ContainerProfileService) Create(
 	}
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
-	if _, exists := input["hostMinCapacityPercent"]; exists {
+	if input["hostMinCapacityPercent"] != nil {
 		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
 			input["hostMinCapacityPercent"],
 		)
@@ -142,7 +142,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var profileNamePtr *valueObject.ContainerProfileName
-	if _, exists := input["name"]; exists {
+	if input["name"] != nil {
 		profileName, err := valueObject.NewContainerProfileName(input["name"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -151,7 +151,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var baseSpecsPtr *valueObject.ContainerSpecs
-	if _, exists := input["baseSpecs"]; exists {
+	if input["baseSpecs"] != nil {
 		baseSpecs, assertOk := input["baseSpecs"].(valueObject.ContainerSpecs)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidBaseSpecsStructure")
@@ -160,7 +160,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var maxSpecsPtr *valueObject.ContainerSpecs
-	if _, exists := input["maxSpecs"]; exists {
+	if input["maxSpecs"] != nil {
 		maxSpecs, assertOk := input["maxSpecs"].(valueObject.ContainerSpecs)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidMaxSpecsStructure")
@@ -169,7 +169,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var scalingPolicyPtr *valueObject.ScalingPolicy
-	if _, exists := input["scalingPolicy"]; exists {
+	if input["scalingPolicy"] != nil {
 		scalingPolicy, err := valueObject.NewScalingPolicy(input["scalingPolicy"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -178,7 +178,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var scalingThresholdPtr *uint
-	if _, exists := input["scalingThreshold"]; exists {
+	if input["scalingThreshold"] != nil {
 		scalingThreshold, err := voHelper.InterfaceToUint(input["scalingThreshold"])
 		if err != nil {
 			return NewServiceOutput(UserError, "InvalidScalingThreshold")
@@ -187,7 +187,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var scalingMaxDurationSecsPtr *uint
-	if _, exists := input["scalingMaxDurationSecs"]; exists {
+	if input["scalingMaxDurationSecs"] != nil {
 		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
 			input["scalingMaxDurationSecs"],
 		)
@@ -196,7 +196,7 @@ func (service *ContainerProfileService) Update(
 		}
 		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 	}
-	if _, exists := input["scalingMaxDurationMinutes"]; exists {
+	if input["scalingMaxDurationMinutes"] != nil {
 		scalingMaxDurationMinutes, err := voHelper.InterfaceToUint16(
 			input["scalingMaxDurationMinutes"],
 		)
@@ -206,7 +206,7 @@ func (service *ContainerProfileService) Update(
 		scalingMaxDurationSecs := uint(scalingMaxDurationMinutes) * 60
 		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
 	}
-	if _, exists := input["scalingMaxDurationHours"]; exists {
+	if input["scalingMaxDurationHours"] != nil {
 		scalingMaxDurationHours, err := voHelper.InterfaceToUint8(
 			input["scalingMaxDurationHours"],
 		)
@@ -218,14 +218,14 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var scalingIntervalSecsPtr *uint
-	if _, exists := input["scalingIntervalSecs"]; exists {
+	if input["scalingIntervalSecs"] != nil {
 		scalingIntervalSecs, err := voHelper.InterfaceToUint(input["scalingIntervalSecs"])
 		if err != nil {
 			return NewServiceOutput(UserError, "InvalidScalingIntervalSecs")
 		}
 		scalingIntervalSecsPtr = &scalingIntervalSecs
 	}
-	if _, exists := input["scalingIntervalMinutes"]; exists {
+	if input["scalingIntervalMinutes"] != nil {
 		scalingIntervalMinutes, err := voHelper.InterfaceToUint16(
 			input["scalingIntervalMinutes"],
 		)
@@ -235,7 +235,7 @@ func (service *ContainerProfileService) Update(
 		scalingIntervalSecs := uint(scalingIntervalMinutes) * 60
 		scalingIntervalSecsPtr = &scalingIntervalSecs
 	}
-	if _, exists := input["scalingIntervalHours"]; exists {
+	if input["scalingIntervalHours"] != nil {
 		scalingIntervalHours, err := voHelper.InterfaceToUint8(
 			input["scalingIntervalHours"],
 		)
@@ -247,7 +247,7 @@ func (service *ContainerProfileService) Update(
 	}
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
-	if _, exists := input["hostMinCapacityPercent"]; exists {
+	if input["hostMinCapacityPercent"] != nil {
 		hostMinCapacityPercent, err := valueObject.NewHostMinCapacity(
 			input["hostMinCapacityPercent"],
 		)

@@ -58,7 +58,7 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 	}
 
 	var quotaPtr *valueObject.AccountQuota
-	if _, exists := input["quota"]; exists {
+	if input["quota"] != nil {
 		accountQuota, assertOk := input["quota"].(valueObject.AccountQuota)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidQuota")
@@ -67,7 +67,7 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 	}
 
 	operatorAccountId := LocalOperatorAccountId
-	if _, exists := input["operatorAccountId"]; exists {
+	if input["operatorAccountId"] != nil {
 		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -75,7 +75,7 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 	}
 
 	ipAddress := LocalOperatorIpAddress
-	if _, exists := input["ipAddress"]; exists {
+	if input["ipAddress"] != nil {
 		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -98,7 +98,7 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 }
 
 func (service *AccountService) Update(input map[string]interface{}) ServiceOutput {
-	if _, exists := input["id"]; exists {
+	if input["id"] != nil {
 		input["accountId"] = input["id"]
 	}
 
@@ -114,7 +114,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	}
 
 	var passwordPtr *valueObject.Password
-	if _, exists := input["password"]; exists {
+	if input["password"] != nil {
 		password, err := valueObject.NewPassword(input["password"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -123,7 +123,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	}
 
 	var shouldUpdateApiKeyPtr *bool
-	if _, exists := input["shouldUpdateApiKey"]; exists {
+	if input["shouldUpdateApiKey"] != nil {
 		shouldUpdateApiKey, assertOk := input["shouldUpdateApiKey"].(bool)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidShouldUpdateApiKey")
@@ -132,7 +132,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	}
 
 	var quotaPtr *valueObject.AccountQuota
-	if _, exists := input["quota"]; exists {
+	if input["quota"] != nil {
 		accountQuota, assertOk := input["quota"].(valueObject.AccountQuota)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidQuota")
@@ -141,7 +141,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	}
 
 	operatorAccountId := LocalOperatorAccountId
-	if _, exists := input["operatorAccountId"]; exists {
+	if input["operatorAccountId"] != nil {
 		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -149,7 +149,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	}
 
 	ipAddress := LocalOperatorIpAddress
-	if _, exists := input["ipAddress"]; exists {
+	if input["ipAddress"] != nil {
 		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -196,7 +196,7 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 	}
 
 	operatorAccountId := LocalOperatorAccountId
-	if _, exists := input["operatorAccountId"]; exists {
+	if input["operatorAccountId"] != nil {
 		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
@@ -204,7 +204,7 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 	}
 
 	ipAddress := LocalOperatorIpAddress
-	if _, exists := input["ipAddress"]; exists {
+	if input["ipAddress"] != nil {
 		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
