@@ -183,7 +183,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 								{ uiHelper.FormatPointer(profile.ScalingThreshold) }
 								<span class="text-xs">conn(s)</span>
 							} else {
-								{ uiHelper.FormatPointer(profile.ScalingThreshold) }<span class="text-xs">%</span>
+								{ uiHelper.FormatPointer(profile.ScalingThreshold) }<i class="text-xs">%</i>
 							}
 						} else {
 							-
@@ -193,10 +193,10 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 						if profile.ScalingMaxDurationSecs != nil {
 							if *profile.ScalingMaxDurationHours > 0 {
 								{ uiHelper.FormatPointer(profile.ScalingMaxDurationHours) }
-								<span class="text-xs">hour(s)</span>
+								<i class="text-xs">hour(s)</i>
 							} else {
 								{ uiHelper.FormatPointer(profile.ScalingMaxDurationMinutes) }
-								<span class="text-xs">min(s)</span>
+								<i class="text-xs">min(s)</i>
 							}
 						} else {
 							-
@@ -206,10 +206,10 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 						if profile.ScalingIntervalSecs != nil {
 							if *profile.ScalingIntervalHours > 0 {
 								{ uiHelper.FormatPointer(profile.ScalingIntervalHours) }
-								<span class="text-xs">hour(s)</span>
+								<i class="text-xs">hour(s)</i>
 							} else {
 								{ uiHelper.FormatPointer(profile.ScalingIntervalMinutes) }
-								<span class="text-xs">min(s)</span>
+								<i class="text-xs">min(s)</i>
 							}
 						} else {
 							-
@@ -258,11 +258,6 @@ func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
 		return "<strong class=\"bg-control-300 rounded-md px-1.5 py-0.5\">" + innerContentStr + "</strong>"
 	}
 
-	scalingThresholdSuffix := "%"
-	if profile.ScalingPolicy != nil && *profile.ScalingPolicy == "connection" {
-		scalingThresholdSuffix = "conn(s)"
-	}
-
 	scalingMaxDuration := ""
 	if profile.ScalingMaxDurationSecs != nil {
 		durationStr := strconv.FormatUint(uint64(*profile.ScalingMaxDurationMinutes), 10)
@@ -273,7 +268,7 @@ func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
 			durationSuffix = "hour(s)"
 		}
 
-		scalingMaxDuration = highlightTag(durationStr) + " " + durationSuffix
+		scalingMaxDuration = highlightTag(durationStr) + " <i>" + durationSuffix + "</i>"
 	}
 
 	scalingInterval := ""
@@ -286,8 +281,14 @@ func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
 			intervalSuffix = "hour(s)"
 		}
 
-		scalingInterval = highlightTag(intervalStr) + " " + intervalSuffix
+		scalingInterval = highlightTag(intervalStr) + " <i>" + intervalSuffix + "</i>"
 	}
+
+	scalingThresholdSuffix := "%"
+	if profile.ScalingPolicy != nil && *profile.ScalingPolicy == "connection" {
+		scalingThresholdSuffix = "conn(s)"
+	}
+	scalingThresholdSuffix = "<i>" + scalingThresholdSuffix + "</i>"
 
 	descriptionTemplate := `<p>
 	The {{ highlight .Name }} profile allows containers to utilize
@@ -317,7 +318,7 @@ func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
 	{{- if .ScalingIntervalSecs }} at regular intervals of ` + scalingInterval + `,{{- end -}}
 	{{- if .ScalingPolicy }}{{if .ScalingThreshold}} provided the {{ highlight .ScalingPolicy }} usage exceeds
 	{{ highlight .ScalingThreshold }}` + scalingThresholdSuffix + `{{- end -}}{{- end -}}
-	{{- if .HostMinCapacityPercent -}}, if the host machine has at least {{ highlight .HostMinCapacityPercent }}% free capacity available{{- end -}}
+	{{- if .HostMinCapacityPercent -}}, if the host machine has at least {{ highlight .HostMinCapacityPercent }}<i>%</i> free capacity available{{- end -}}
 	.{{- end -}}</p>`
 
 	templateCustomFunctions := template.FuncMap{
@@ -605,11 +606,11 @@ templ UpdateContainerProfileTextualForm() {
 			usage exceeds
 			<div class="max-w-16 ml-1 inline-flex">
 				@componentForm.InputField("number", "scalingThreshold", "", "containerProfile.scalingThreshold", true)
-			</div><span x-show="!isScalingPolicyConn">%</span><span x-show="isScalingPolicyConn" class="ml-1">conn(s)</span> and the host machine has at least
+			</div><i x-show="!isScalingPolicyConn">%</i><span x-show="isScalingPolicyConn" class="ml-1">conn(s)</span> and the host machine has at least
 			<div class="max-w-12 ml-2 inline-flex">
 				@componentForm.InputField("number", "hostMinCapacityPercent", "", "containerProfile.hostMinCapacityPercent", true)
 			</div>
-			% free capacity available.
+			<i>%</i> free capacity available.
 		</div>
 		<div class="mt-4">
 			@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
