@@ -269,7 +269,7 @@ templ UpdateContainerProfileTextualForm() {
 				@componentForm.SelectInput("", "", "preferedScalingMaxDurationSuffix", []string{"hour(s)", "min(s)"}, true)
 			</div>
 			at regular intervals of
-			<div class="max-w-42 ml-2 inline-flex space-x-1">
+			<div class="max-w-42 inline-flex space-x-1">
 				<template x-if="preferedScalingIntervalSuffix == 'hour(s)'">
 					@componentForm.InputField("number", "containerProfile.scalingIntervalHours", "", "containerProfile.scalingIntervalHours", true)
 				</template>
@@ -283,7 +283,7 @@ templ UpdateContainerProfileTextualForm() {
 				@componentForm.SelectInput("scalingPolicy", "", "containerProfile.scalingPolicy", valueObject.ValidScalingPolicies, true)
 			</div>
 			usage exceeds
-			<div class="max-w-16 ml-2 inline-flex">
+			<div class="max-w-16 ml-1 inline-flex">
 				@componentForm.InputField("number", "containerProfile.scalingThreshold", "", "containerProfile.scalingThreshold", true)
 			</div><span x-show="!isScalingPolicyConn">%</span><span x-show="isScalingPolicyConn" class="ml-1">conn(s)</span> and the host machine has at least
 			<div class="max-w-12 ml-2 inline-flex">
@@ -381,26 +381,6 @@ templ UpdateContainerProfileRegularForm() {
 					)
 					<div class="flex flex-row space-x-6">
 						<div class="basis-1/2">
-							@componentForm.DualNumberRangeInputField(
-								"Scaling Max Duration", "scalingMaxDurationHoursSelector",
-								"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
-								"containerProfile.scalingMaxDurationHours",
-								"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
-								"containerProfile.scalingMaxDurationMinutes",
-							)
-						</div>
-						<div class="basis-1/2">
-							@componentForm.DualNumberRangeInputField(
-								"Scaling Interval", "scalingIntervalHoursSelector",
-								"scalingIntervalHours", "hour(s)", "1", "24", "1",
-								"containerProfile.scalingIntervalHours",
-								"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
-								"containerProfile.scalingIntervalMinutes",
-							)
-						</div>
-					</div>
-					<div class="flex flex-row space-x-6">
-						<div class="basis-1/2">
 							<template x-if="isScalingPolicyConn">
 								@componentForm.NumberRangeInputField(
 									"scalingThreshold", "Connections Threshold",
@@ -421,6 +401,26 @@ templ UpdateContainerProfileRegularForm() {
 								"hostMinCapacityPercent", "Minimum Free Host Capacity",
 								"%", "0", "100", "1",
 								"containerProfile.hostMinCapacityPercent",
+							)
+						</div>
+					</div>
+					<div class="flex flex-row space-x-6">
+						<div class="basis-1/2">
+							@componentForm.DualNumberRangeInputField(
+								"Scaling Max Duration", "scalingMaxDurationHoursSelector",
+								"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
+								"containerProfile.scalingMaxDurationHours",
+								"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
+								"containerProfile.scalingMaxDurationMinutes",
+							)
+						</div>
+						<div class="basis-1/2">
+							@componentForm.DualNumberRangeInputField(
+								"Scaling Interval", "scalingIntervalHoursSelector",
+								"scalingIntervalHours", "hour(s)", "1", "24", "1",
+								"containerProfile.scalingIntervalHours",
+								"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
+								"containerProfile.scalingIntervalMinutes",
 							)
 						</div>
 					</div>
