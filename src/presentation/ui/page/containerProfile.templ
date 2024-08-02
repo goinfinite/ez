@@ -190,17 +190,67 @@ templ UpdateContainerProfileTextualForm() {
 		hx-swap="none"
 	>
 		<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
-		<div class="bg-control-600 rounded-md p-8 text-center text-xl">
-			Profile
-			<div class="mx-2 inline-flex">
-				@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
+		<div class="bg-control-500 rounded-md p-6 text-center text-lg leading-10">
+			The
+			<div class="w-50 mx-2 inline-flex">
+				@componentForm.InputField("text", "name", "", "containerProfile.name", true)
 			</div>
-			allows containers to use
-			<div class="mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.baseSpecs.cpuCores", "CPU Cores", "containerProfile.baseSpecs.cpuCores")
+			profile allows containers to utilize
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.baseSpecs.cpuCores", "", "containerProfile.baseSpecs.cpuCores", true)
 			</div>
-			CPU cores, <strong x-text="containerProfile.baseSpecs.memoryGibibytes"></strong> GiB of RAM, and <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits"></strong> storage performance units.
+			CPU cores,
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
+			</div>
+			GiB of RAM, and
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.baseSpecs.storagePerformanceUnits", "", "containerProfile.baseSpecs.storagePerformanceUnits", true)
+			</div>
+			storage performance units, equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> operations per second { "for" } read and write.
 		</div>
+		<div class="bg-control-600 mt-4 rounded-md p-6 text-center text-base leading-9">
+			Optionally, containers using this profile can scale up to
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.maxSpecs.cpuCores", "", "containerProfile.maxSpecs.cpuCores", true)
+			</div>
+			CPU cores,
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.maxSpecs.memoryGibibytes", "", "containerProfile.maxSpecs.memoryGibibytes", true)
+			</div>
+			GiB of RAM, and
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.maxSpecs.storagePerformanceUnits", "", "containerProfile.maxSpecs.storagePerformanceUnits", true)
+			</div>
+			storage performance units <small>(<strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> ops</strong>)</small>
+			during periods of
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.scalingMaxDurationHours", "", "containerProfile.scalingMaxDurationHours", true)
+			</div>
+			hour(s) at regular intervals of
+			<div class="max-w-12 mx-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.scalingIntervalHours", "", "containerProfile.scalingIntervalHours", true)
+			</div>
+			hour(s), provided the
+			<div class="w-30 mx-2 inline-flex">
+				@componentForm.SelectInput("scalingPolicy", "", "containerProfile.scalingPolicy", valueObject.ValidScalingPolicies, true)
+			</div>
+			usage exceeds
+			<div class="max-w-12 ml-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.scalingThreshold", "", "containerProfile.scalingThreshold", true)
+			</div><span x-show="!isScalingPolicyConn">%</span><span x-show="isScalingPolicyConn" class="ml-2">conn(s)</span> and the host machine has at least
+			<div class="max-w-12 ml-2 inline-flex">
+				@componentForm.InputField("number", "containerProfile.hostMinCapacityPercent", "", "containerProfile.hostMinCapacityPercent", true)
+			</div>
+			% free capacity available.
+		</div>
+		<button
+			type="submit"
+			@click="closeUpdateModal()"
+			class="bg-speedia-500 border-speedia-500 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
+		>
+			<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
+		</button>
 	</form>
 }
 
@@ -212,10 +262,10 @@ templ UpdateContainerProfileRegularForm() {
 	>
 		<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 		<div class="my-6">
-			@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name")
+			@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name", false)
 		</div>
 		<div class="flex flex-row space-x-4">
-			<div class="space-y-5.5 bg-control-600 w-1/2 rounded-md p-4">
+			<div class="space-y-5.5 bg-control-500 w-1/2 rounded-md p-4">
 				<div>
 					<h3 class="font-bold">Base Specifications</h3>
 					<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
@@ -242,7 +292,7 @@ templ UpdateContainerProfileRegularForm() {
 					</small>
 				</div>
 			</div>
-			<div class="space-y-5.5 bg-control-600 w-1/2 rounded-md p-4">
+			<div class="space-y-5.5 bg-control-500 w-1/2 rounded-md p-4">
 				<div>
 					<h3 class="font-bold">Max Specifications</h3>
 					<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
@@ -271,7 +321,7 @@ templ UpdateContainerProfileRegularForm() {
 			</div>
 		</div>
 		<section class="mt-4 w-full rounded-md">
-			<details class="bg-control-600 group rounded-md p-4 group-open:bg-opacity-30">
+			<details class="bg-control-500 group rounded-md p-4 group-open:bg-opacity-30">
 				<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
 					<i class="ph-duotone ph-gear mr-2 text-2xl"></i>
 					<span class="font-bold">Advanced Settings</span>
@@ -280,7 +330,7 @@ templ UpdateContainerProfileRegularForm() {
 				<div class="space-y-5.5 mt-5 py-2">
 					@componentForm.SelectInput(
 						"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
-						valueObject.ValidScalingPolicies,
+						valueObject.ValidScalingPolicies, false,
 					)
 					<div class="flex flex-row space-x-6">
 						<div class="basis-1/2">
