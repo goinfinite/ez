@@ -220,61 +220,61 @@ templ UpdateContainerProfileTextualForm() {
 			</div>
 			profile allows containers to utilize
 			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.baseSpecs.cpuCores", "", "containerProfile.baseSpecs.cpuCores", true)
+				@componentForm.InputField("number", "baseSpecs.cpuCores", "", "containerProfile.baseSpecs.cpuCores", true)
 			</div>
 			CPU core(s),
 			<div class="w-42 mr-2 inline-flex space-x-1">
 				<template x-if="preferedByteSuffix == 'GiB'">
-					@componentForm.InputField("number", "containerProfile.baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
+					@componentForm.InputField("number", "baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
 				</template>
 				<template x-if="preferedByteSuffix == 'MiB'">
-					@componentForm.InputField("number", "containerProfile.baseSpecs.memoryMebibytes", "", "containerProfile.baseSpecs.memoryMebibytes", true)
+					@componentForm.InputField("number", "baseSpecs.memoryMebibytes", "", "containerProfile.baseSpecs.memoryMebibytes", true)
 				</template>
 				@componentForm.SelectInput("", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
 			</div>
 			of RAM memory, and
 			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.baseSpecs.storagePerformanceUnits", "", "containerProfile.baseSpecs.storagePerformanceUnits", true)
+				@componentForm.InputField("number", "baseSpecs.storagePerformanceUnits", "", "containerProfile.baseSpecs.storagePerformanceUnits", true)
 			</div>
 			storage performance unit(s) <small class="text-neutral-400">(equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> ops/s of read and write)</small>.
 		</div>
 		<div class="bg-control-600 mt-4 rounded-md p-6 text-center text-base leading-9">
 			Optionally, containers using this profile can scale up to
 			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.maxSpecs.cpuCores", "", "containerProfile.maxSpecs.cpuCores", true)
+				@componentForm.InputField("number", "maxSpecs.cpuCores", "", "containerProfile.maxSpecs.cpuCores", true)
 			</div>
 			CPU cores,
 			<div class="w-42 mr-2 inline-flex space-x-1">
 				<template x-if="preferedByteSuffix == 'GiB'">
-					@componentForm.InputField("number", "containerProfile.maxSpecs.memoryGibibytes", "", "containerProfile.maxSpecs.memoryGibibytes", true)
+					@componentForm.InputField("number", "maxSpecs.memoryGibibytes", "", "containerProfile.maxSpecs.memoryGibibytes", true)
 				</template>
 				<template x-if="preferedByteSuffix == 'MiB'">
-					@componentForm.InputField("number", "containerProfile.maxSpecs.memoryMebibytes", "", "containerProfile.maxSpecs.memoryMebibytes", true)
+					@componentForm.InputField("number", "maxSpecs.memoryMebibytes", "", "containerProfile.maxSpecs.memoryMebibytes", true)
 				</template>
 				@componentForm.SelectInput("", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
 			</div>
 			of RAM, and
 			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.maxSpecs.storagePerformanceUnits", "", "containerProfile.maxSpecs.storagePerformanceUnits", true)
+				@componentForm.InputField("number", "maxSpecs.storagePerformanceUnits", "", "containerProfile.maxSpecs.storagePerformanceUnits", true)
 			</div>
 			storage performance units <small>(<strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> ops</strong>)</small>,
 			during periods of
 			<div class="w-42 mr-2 inline-flex space-x-1">
 				<template x-if="preferedScalingMaxDurationSuffix == 'hour(s)'">
-					@componentForm.InputField("number", "containerProfile.scalingMaxDurationHours", "", "containerProfile.scalingMaxDurationHours", true)
+					@componentForm.InputField("number", "scalingMaxDurationHours", "", "containerProfile.scalingMaxDurationHours", true)
 				</template>
 				<template x-if="preferedScalingMaxDurationSuffix == 'min(s)'">
-					@componentForm.InputField("number", "containerProfile.scalingMaxDurationMinutes", "", "containerProfile.scalingMaxDurationMinutes", true)
+					@componentForm.InputField("number", "scalingMaxDurationMinutes", "", "containerProfile.scalingMaxDurationMinutes", true)
 				</template>
 				@componentForm.SelectInput("", "", "preferedScalingMaxDurationSuffix", []string{"hour(s)", "min(s)"}, true)
 			</div>
 			at regular intervals of
 			<div class="max-w-42 inline-flex space-x-1">
 				<template x-if="preferedScalingIntervalSuffix == 'hour(s)'">
-					@componentForm.InputField("number", "containerProfile.scalingIntervalHours", "", "containerProfile.scalingIntervalHours", true)
+					@componentForm.InputField("number", "scalingIntervalHours", "", "containerProfile.scalingIntervalHours", true)
 				</template>
 				<template x-if="preferedScalingIntervalSuffix == 'min(s)'">
-					@componentForm.InputField("number", "containerProfile.scalingIntervalMinutes", "", "containerProfile.scalingIntervalMinutes", true)
+					@componentForm.InputField("number", "scalingIntervalMinutes", "", "containerProfile.scalingIntervalMinutes", true)
 				</template>
 				@componentForm.SelectInput("", "", "preferedScalingIntervalSuffix", []string{"hour(s)", "min(s)"}, true)
 			</div>
@@ -284,10 +284,10 @@ templ UpdateContainerProfileTextualForm() {
 			</div>
 			usage exceeds
 			<div class="max-w-16 ml-1 inline-flex">
-				@componentForm.InputField("number", "containerProfile.scalingThreshold", "", "containerProfile.scalingThreshold", true)
+				@componentForm.InputField("number", "scalingThreshold", "", "containerProfile.scalingThreshold", true)
 			</div><span x-show="!isScalingPolicyConn">%</span><span x-show="isScalingPolicyConn" class="ml-1">conn(s)</span> and the host machine has at least
 			<div class="max-w-12 ml-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.hostMinCapacityPercent", "", "containerProfile.hostMinCapacityPercent", true)
+				@componentForm.InputField("number", "hostMinCapacityPercent", "", "containerProfile.hostMinCapacityPercent", true)
 			</div>
 			% free capacity available.
 		</div>
