@@ -12,25 +12,40 @@ import (
 
 script ContainerProfileIndexLocalState() {
 	document.addEventListener('alpine:init', () => {
-        Alpine.data('containerProfileManager', () => ({
+		Alpine.data('containerProfileManager', () => ({
 			containerProfile: {
-				'id': '', 'name': '',
+				'id': '',
+				'name': '',
 				'baseSpecs': {
-					'millicores': 0, 'cpuCores': 0, 'memoryBytes': 0, 'memoryMebibytes': 0,
-					'memoryGibibytes': 0, 'storagePerformanceUnits': 0,
+					'millicores': 0,
+					'cpuCores': 0,
+					'memoryBytes': 0,
+					'memoryMebibytes': 0,
+					'memoryGibibytes': 0,
+					'storagePerformanceUnits': 0
 				},
 				'maxSpecs': {
-					'millicores': null, 'cpuCores': null, 'memoryBytes': null, 'memoryMebibytes': null,
-					'memoryGibibytes': null, 'storagePerformanceUnits': null,
+					'millicores': null,
+					'cpuCores': null,
+					'memoryBytes': null,
+					'memoryMebibytes': null,
+					'memoryGibibytes': null,
+					'storagePerformanceUnits': null
 				},
-				'scalingPolicy': null, 'scalingThreshold': null,
-				'scalingMaxDurationSecs': null, 'scalingMaxDurationMinutes': null,
-				'scalingMaxDurationHours': null, 'scalingIntervalSecs': null,
-				'scalingIntervalMinutes': null, 'scalingIntervalHours': null,
-				'hostMinCapacityPercent': null,
+				'scalingPolicy': null,
+				'scalingThreshold': null,
+				'scalingMaxDurationSecs': null,
+				'scalingMaxDurationMinutes': null,
+				'scalingMaxDurationHours': null,
+				'scalingIntervalSecs': null,
+				'scalingIntervalMinutes': null,
+				'scalingIntervalHours': null,
+				'hostMinCapacityPercent': null
 			},
 			textualViewSelector: true,
 			gibibyteSelector: true,
+			preferedByteSuffix: 'GiB',
+
 			scalingIntervalHoursSelector: true,
 			scalingMaxDurationHoursSelector: true,
 			get isScalingPolicyConn() {
@@ -40,7 +55,7 @@ script ContainerProfileIndexLocalState() {
 			isUpdateModalOpen: false,
 			openUpdateModal(containerProfileData) {
 				this.containerProfile = containerProfileData;
-
+				
 				this.gibibyteSelector = true;
 				if (this.containerProfile.baseSpecs.memoryGibibytes < 1) {
 					this.gibibyteSelector = false;
@@ -55,13 +70,13 @@ script ContainerProfileIndexLocalState() {
 				if (this.containerProfile.scalingMaxDurationHours < 1) {
 					this.scalingMaxDurationHoursSelector = false;
 				}
-				
+
 				this.isUpdateModalOpen = true;
 			},
 			closeUpdateModal() {
 				this.isUpdateModalOpen = false;
 			},
-    	}))
+		}))
 	})
 }
 
@@ -200,14 +215,20 @@ templ UpdateContainerProfileTextualForm() {
 				@componentForm.InputField("number", "containerProfile.baseSpecs.cpuCores", "", "containerProfile.baseSpecs.cpuCores", true)
 			</div>
 			CPU cores,
-			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
+			<div class="w-42 mr-2 inline-flex space-x-2">
+				<template x-if="preferedByteSuffix == 'GiB'">
+					@componentForm.InputField("number", "containerProfile.baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
+				</template>
+				<template x-if="preferedByteSuffix == 'MiB'">
+					@componentForm.InputField("number", "containerProfile.baseSpecs.memoryMebibytes", "", "containerProfile.baseSpecs.memoryMebibytes", true)
+				</template>
+				@componentForm.SelectInput("preferedByteSuffix", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
 			</div>
-			GiB of RAM, and
+			of RAM, and
 			<div class="max-w-12 mx-2 inline-flex">
 				@componentForm.InputField("number", "containerProfile.baseSpecs.storagePerformanceUnits", "", "containerProfile.baseSpecs.storagePerformanceUnits", true)
 			</div>
-			storage performance units, equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> operations per second { "for" } read and write.
+			storage performance units (equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> operations per second { "for" } read and write).
 		</div>
 		<div class="bg-control-600 mt-4 rounded-md p-6 text-center text-base leading-9">
 			Optionally, containers using this profile can scale up to
@@ -215,10 +236,16 @@ templ UpdateContainerProfileTextualForm() {
 				@componentForm.InputField("number", "containerProfile.maxSpecs.cpuCores", "", "containerProfile.maxSpecs.cpuCores", true)
 			</div>
 			CPU cores,
-			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "containerProfile.maxSpecs.memoryGibibytes", "", "containerProfile.maxSpecs.memoryGibibytes", true)
+			<div class="w-42 mr-2 inline-flex space-x-2">
+				<template x-if="preferedByteSuffix == 'GiB'">
+					@componentForm.InputField("number", "containerProfile.maxSpecs.memoryGibibytes", "", "containerProfile.maxSpecs.memoryGibibytes", true)
+				</template>
+				<template x-if="preferedByteSuffix == 'MiB'">
+					@componentForm.InputField("number", "containerProfile.maxSpecs.memoryMebibytes", "", "containerProfile.maxSpecs.memoryMebibytes", true)
+				</template>
+				@componentForm.SelectInput("preferedByteSuffix", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
 			</div>
-			GiB of RAM, and
+			of RAM, and
 			<div class="max-w-12 mx-2 inline-flex">
 				@componentForm.InputField("number", "containerProfile.maxSpecs.storagePerformanceUnits", "", "containerProfile.maxSpecs.storagePerformanceUnits", true)
 			</div>
