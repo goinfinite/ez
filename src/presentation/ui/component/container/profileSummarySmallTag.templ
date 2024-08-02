@@ -11,10 +11,14 @@ func formatProfileSummarySmallTag(specs *valueObject.ContainerSpecs) string {
 		return ""
 	}
 
-	millicoresStr := strconv.FormatFloat(specs.CpuCores, 'f', 1, 64)
+	cpuCoresStr := strconv.FormatFloat(specs.CpuCores, 'f', 1, 64)
 	memoryGibiBytesStr := strconv.FormatInt(specs.MemoryGibibytes, 10)
 
-	return "<strong>" + millicoresStr + "</strong> CPU " +
+	if specs.CpuCores == 0 {
+		return "<strong>" + memoryGibiBytesStr + "</strong> GiB RAM"
+	}
+
+	return "<strong>" + cpuCoresStr + "</strong> CPU " +
 		"<span class=\"text-[8px] align-middle\">//</span> <strong>" +
 		memoryGibiBytesStr + "</strong> GiB RAM"
 }
