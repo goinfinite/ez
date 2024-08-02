@@ -54,19 +54,35 @@ func (repo *ContainerProfileCmdRepo) Update(
 	}
 
 	if updateDto.ScalingThreshold != nil {
-		updateMap["scaling_threshold"] = *updateDto.ScalingThreshold
+		thresholdUint := *updateDto.ScalingThreshold
+		updateMap["scaling_threshold"] = thresholdUint
+		if thresholdUint == 0 {
+			updateMap["scaling_threshold"] = nil
+		}
 	}
 
 	if updateDto.ScalingMaxDurationSecs != nil {
-		updateMap["scaling_max_duration_secs"] = *updateDto.ScalingMaxDurationSecs
+		durationUint := *updateDto.ScalingMaxDurationSecs
+		updateMap["scaling_max_duration_secs"] = durationUint
+		if durationUint == 0 {
+			updateMap["scaling_max_duration_secs"] = nil
+		}
 	}
 
 	if updateDto.ScalingIntervalSecs != nil {
-		updateMap["scaling_interval_secs"] = *updateDto.ScalingIntervalSecs
+		intervalUint := *updateDto.ScalingIntervalSecs
+		updateMap["scaling_interval_secs"] = intervalUint
+		if intervalUint == 0 {
+			updateMap["scaling_interval_secs"] = nil
+		}
 	}
 
 	if updateDto.HostMinCapacityPercent != nil {
-		updateMap["host_min_capacity_percent"] = updateDto.HostMinCapacityPercent.Uint8()
+		percentUint := updateDto.HostMinCapacityPercent.Uint8()
+		updateMap["host_min_capacity_percent"] = percentUint
+		if percentUint == 0 {
+			updateMap["host_min_capacity_percent"] = nil
+		}
 	}
 
 	return repo.persistentDbSvc.Handler.
