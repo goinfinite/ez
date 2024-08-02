@@ -1,6 +1,8 @@
 package page
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
@@ -8,6 +10,7 @@ import (
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 	"log"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -93,7 +96,6 @@ script ContainerProfileIndexLocalState() {
 				this.isUpdateModalOpen = true;
 			},
 			closeUpdateModal() {
-				this.resetContainerProfile();
 				this.isUpdateModalOpen = false;
 			},
 
@@ -103,7 +105,6 @@ script ContainerProfileIndexLocalState() {
 				this.isCreateModalOpen = true;
 			},
 			closeCreateModal() {
-				this.resetContainerProfile();
 				this.isCreateModalOpen = false;
 			}
 		}))
@@ -247,50 +248,97 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 }
 
 func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
-	strongTag := "<strong class=\"bg-control-300 rounded-md px-1.5 py-0.5\">"
-	strongTagClose := "</strong>"
+	highlightTag := func(innerContent interface{}) string {
+		innerContentBytes, err := json.Marshal(innerContent)
+		if err != nil {
+			return "-"
+		}
+		innerContentStr := strings.Trim(string(innerContentBytes), "\"")
+
+		return "<strong class=\"bg-control-300 rounded-md px-1.5 py-0.5\">" + innerContentStr + "</strong>"
+	}
+
 	scalingThresholdSuffix := "%"
 	if profile.ScalingPolicy != nil && *profile.ScalingPolicy == "connection" {
 		scalingThresholdSuffix = "conn(s)"
 	}
 
-	descriptionTemplate := `<p>
-	The ` + strongTag + `{{ .Name }}` + strongTagClose + ` profile allows containers to utilize ` +
-		strongTag + `{{ .BaseSpecs.CpuCores }}` + strongTagClose + ` CPU core(s), ` +
-		strongTag + `{{ .BaseSpecs.MemoryGibibytes }}` + strongTagClose + ` GiB of RAM memory, and ` +
-		strongTag + `{{ .BaseSpecs.StoragePerformanceUnits }}` + strongTagClose + ` storage performance unit(s) ` +
-		`<small class="text-neutral-400">(<strong x-text="{{ .BaseSpecs.StoragePerformanceUnits }} * 5"></strong> MiB/s & ` +
-		`<strong x-text="{{ .BaseSpecs.StoragePerformanceUnits }} * 250"></strong> ops/s of read and write)</small>.
-{{ if .MaxSpecs }}
-		Optionally, containers using this profile can scale up to ` +
-		strongTag + `{{ .MaxSpecs.CpuCores }}` + strongTagClose + ` CPU cores, ` +
-		strongTag + `{{ .MaxSpecs.MemoryGibibytes }}` + strongTagClose + ` GiB of RAM, and ` +
-		strongTag + `{{ .MaxSpecs.StoragePerformanceUnits }}` + strongTagClose + ` storage performance units ` +
-		`<small class="text-neutral-400">(<strong x-text="{{ .MaxSpecs.StoragePerformanceUnits }} * 5"></strong> MiB/s & ` +
-		`<strong x-text="{{ .MaxSpecs.StoragePerformanceUnits }} * 250"></strong> ops)</small>, ` +
-		`during periods of ` + strongTag + `{{ .ScalingMaxDurationHours }}` + strongTagClose + ` hour(s) at regular intervals of ` +
-		strongTag + `{{ .ScalingIntervalHours }}` + strongTagClose + ` hour(s), provided the ` +
-		strongTag + `{{ .ScalingPolicy }}` + strongTagClose + ` usage exceeds ` +
-		strongTag + `{{ .ScalingThreshold }}` + strongTagClose + scalingThresholdSuffix + ` 
-		and the host machine has at least ` +
-		strongTag + `{{ .HostMinCapacityPercent }}` + strongTagClose + `% free capacity available.
-{{ end }}
-</p>`
+	scalingMaxDuration := ""
+	if profile.ScalingMaxDurationSecs != nil {
+		durationStr := strconv.FormatUint(uint64(*profile.ScalingMaxDurationMinutes), 10)
+		durationSuffix := "min(s)"
 
-	templatePtr, err := template.New("profileDescription").Parse(descriptionTemplate)
+		if *profile.ScalingMaxDurationHours > 0 {
+			durationStr = strconv.FormatUint(uint64(*profile.ScalingMaxDurationHours), 10)
+			durationSuffix = "hour(s)"
+		}
+
+		scalingMaxDuration = highlightTag(durationStr) + " " + durationSuffix
+	}
+
+	scalingInterval := ""
+	if profile.ScalingIntervalSecs != nil {
+		intervalStr := strconv.FormatUint(uint64(*profile.ScalingIntervalMinutes), 10)
+		intervalSuffix := "min(s)"
+
+		if *profile.ScalingIntervalHours > 0 {
+			intervalStr = strconv.FormatUint(uint64(*profile.ScalingIntervalHours), 10)
+			intervalSuffix = "hour(s)"
+		}
+
+		scalingInterval = highlightTag(intervalStr) + " " + intervalSuffix
+	}
+
+	descriptionTemplate := `<p>
+	The {{ highlight .Name }} profile allows containers to utilize
+	{{ highlight .BaseSpecs.CpuCores }} CPU core(s),
+	{{ highlight .BaseSpecs.MemoryGibibytes }} GiB of RAM memory, and
+	{{ highlight .BaseSpecs.StoragePerformanceUnits }} storage performance unit(s)
+	<small class="text-neutral-400">
+		(<strong x-text="{{ .BaseSpecs.StoragePerformanceUnits }} * 5"></strong> MiB/s &
+		<strong x-text="{{ .BaseSpecs.StoragePerformanceUnits }} * 250"></strong> ops/s of read and write).
+	</small>
+	{{ if .MaxSpecs }}
+	Optionally, containers using this profile can scale up to
+	{{- if .MaxSpecs.CpuCores -}}
+	{{ highlight .MaxSpecs.CpuCores }} CPU cores,
+	{{- end -}}
+	{{- if .MaxSpecs.MemoryGibibytes -}}
+	{{ highlight .MaxSpecs.MemoryGibibytes }} GiB of RAM
+	{{- end -}}
+	{{- if .MaxSpecs.StoragePerformanceUnits -}}
+	, and {{ highlight .MaxSpecs.StoragePerformanceUnits }} storage performance units
+	<small class="text-neutral-400">
+		(<strong x-text="{{ .MaxSpecs.StoragePerformanceUnits }} * 5"></strong> MiB/s &
+		<strong x-text="{{ .MaxSpecs.StoragePerformanceUnits }} * 250"></strong> ops)
+	</small>
+	{{- end -}}
+	{{- if .ScalingMaxDurationSecs -}}, during periods of ` + scalingMaxDuration + `{{- end -}}
+	{{- if .ScalingIntervalSecs }} at regular intervals of ` + scalingInterval + `,{{- end -}}
+	{{- if .ScalingPolicy }}{{if .ScalingThreshold}} provided the {{ highlight .ScalingPolicy }} usage exceeds
+	{{ highlight .ScalingThreshold }}` + scalingThresholdSuffix + `{{- end -}}{{- end -}}
+	{{- if .HostMinCapacityPercent -}}, if the host machine has at least {{ highlight .HostMinCapacityPercent }}% free capacity available{{- end -}}
+	.{{- end -}}</p>`
+
+	templateCustomFunctions := template.FuncMap{
+		"highlight": highlightTag,
+	}
+
+	templatePtr, err := template.New("profileDescription").
+		Funcs(templateCustomFunctions).Parse(descriptionTemplate)
 	if err != nil {
 		log.Printf("Error parsing profile description template: %v", err)
 		return ""
 	}
 
-	var profileDescriptionStr strings.Builder
-	err = templatePtr.Execute(&profileDescriptionStr, profile)
+	var profileDescriptionBuf bytes.Buffer
+	err = templatePtr.Execute(&profileDescriptionBuf, profile)
 	if err != nil {
 		log.Printf("Error executing profile description template: %v", err)
 		return ""
 	}
 
-	return profileDescriptionStr.String()
+	return profileDescriptionBuf.String()
 }
 
 templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
