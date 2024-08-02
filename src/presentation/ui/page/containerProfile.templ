@@ -126,13 +126,9 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 					"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
 					"$store.main.textualViewSelector",
 				)
-				<button
-					type="submit"
-					@click="openCreateModal()"
-					class="bg-speedia-500 hover:bg-speedia-300 rounded-md border-none px-3 py-2 text-center text-base font-bold lowercase text-white"
-				>
-					<i class="ph-duotone ph-plus-square mr-1 align-middle text-2xl"></i> Create Container Profile
-				</button>
+				@componentForm.SubmitButton(
+					"Create Container Profile", "ph-plus-square", "openCreateModal()", false,
+				)
 			</div>
 		</div>
 		<div id="profiles-tables" class="card w-full">
@@ -225,7 +221,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 						<button
 							type="button"
 							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
-							class="me-2 inline-flex items-center rounded-full bg-neutral-50 bg-opacity-20 p-3 text-center font-medium hover:bg-opacity-40"
+							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
 						>
 							<i class="ph-bold ph-pencil text-xl"></i>
 						</button>
@@ -325,7 +321,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 						<button
 							type="button"
 							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
-							class="me-2 inline-flex items-center rounded-full bg-neutral-50 bg-opacity-20 p-3 text-center font-medium hover:bg-opacity-40"
+							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
 						>
 							<i class="ph-bold ph-pencil text-xl"></i>
 						</button>
@@ -476,13 +472,9 @@ templ UpdateContainerProfileRegularForm() {
 				</div>
 			</details>
 		</section>
-		<button
-			type="submit"
-			@click="closeUpdateModal()"
-			class="bg-speedia-500 border-control-200 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
-		>
-			<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
-		</button>
+		<div class="mt-4">
+			@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+		</div>
 	</form>
 }
 
@@ -571,13 +563,9 @@ templ UpdateContainerProfileTextualForm() {
 			</div>
 			% free capacity available.
 		</div>
-		<button
-			type="submit"
-			@click="closeUpdateModal()"
-			class="bg-speedia-500 border-control-200 mb-1 mt-5 w-full rounded-md border bg-opacity-90 px-5 py-2.5 text-center text-sm font-bold lowercase text-white hover:brightness-125"
-		>
-			<i class="ph-duotone ph-check-fat mr-1 align-middle"></i> Update
-		</button>
+		<div class="mt-4">
+			@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+		</div>
 	</form>
 }
 
