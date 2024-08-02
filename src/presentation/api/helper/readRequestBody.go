@@ -51,6 +51,9 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 				continue
 			}
 			keyValue := keyValues[0]
+			if keyValue == "" {
+				continue
+			}
 
 			isNestedKey := strings.Contains(formKey, ".")
 			if !isNestedKey {
