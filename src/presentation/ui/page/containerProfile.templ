@@ -215,14 +215,14 @@ templ UpdateContainerProfileTextualForm() {
 		<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 		<div class="bg-control-500 rounded-md p-6 text-center text-lg leading-10">
 			The
-			<div class="w-50 mx-2 inline-flex">
+			<div class="mx-2 inline-flex w-64">
 				@componentForm.InputField("text", "name", "", "containerProfile.name", true)
 			</div>
 			profile allows containers to utilize
 			<div class="max-w-12 mx-2 inline-flex">
 				@componentForm.InputField("number", "containerProfile.baseSpecs.cpuCores", "", "containerProfile.baseSpecs.cpuCores", true)
 			</div>
-			CPU cores,
+			CPU core(s),
 			<div class="w-42 mr-2 inline-flex space-x-1">
 				<template x-if="preferedByteSuffix == 'GiB'">
 					@componentForm.InputField("number", "containerProfile.baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
@@ -232,11 +232,11 @@ templ UpdateContainerProfileTextualForm() {
 				</template>
 				@componentForm.SelectInput("", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
 			</div>
-			of RAM, and
+			of RAM memory, and
 			<div class="max-w-12 mx-2 inline-flex">
 				@componentForm.InputField("number", "containerProfile.baseSpecs.storagePerformanceUnits", "", "containerProfile.baseSpecs.storagePerformanceUnits", true)
 			</div>
-			storage performance units (equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> operations per second { "for" } read and write).
+			storage performance unit(s) <small class="text-neutral-400">(equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> ops/s of read and write)</small>.
 		</div>
 		<div class="bg-control-600 mt-4 rounded-md p-6 text-center text-base leading-9">
 			Optionally, containers using this profile can scale up to
