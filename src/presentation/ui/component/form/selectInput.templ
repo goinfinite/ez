@@ -1,15 +1,19 @@
 package componentForm
 
 templ SelectInput(
-	id, label, bindValuePath string, options []string,
+	id, label, bindValuePath string, options []string, denseMode bool,
 ) {
-	<div class="relative">
+	<div class="relative w-full">
 		<select
 			id={ id }
 			name={ id }
 			x-model:value={ bindValuePath }
 			placeholder={ label }
-			class="bg-control-300 hover:border-control-100 border-control-200 autofill:bg-control-300 focus:border-control-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			if denseMode {
+				class="bg-control-300 hover:border-control-100 border-control-200 autofill:bg-control-300 focus:border-control-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
+			} else {
+				class="bg-control-300 hover:border-control-100 border-control-200 autofill:bg-control-300 focus:border-control-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			}
 		>
 			for _, option := range options {
 				<option class="bg-control-500 checked:bg-speedia-500 bg-opacity-90" value={ option }>{ option }</option>
