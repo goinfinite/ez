@@ -544,13 +544,20 @@ templ ContainerProfileRegularForm(action string) {
 	</form>
 }
 
-templ UpdateContainerProfileTextualForm() {
+templ ContainerProfileTextualForm(action string) {
 	<form
-		hx-put="/api/v1/container/profile/"
+		if action == "create" {
+			hx-post="/api/v1/container/profile/"
+		}
+		if action == "update" {
+			hx-put="/api/v1/container/profile/"
+		}
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 	>
-		<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
+		if action == "update" {
+			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
+		}
 		<div class="bg-control-500 rounded-md p-6 text-center text-lg leading-10">
 			The
 			<div class="mx-2 inline-flex w-64">
@@ -630,7 +637,12 @@ templ UpdateContainerProfileTextualForm() {
 			<i>%</i> free capacity available.
 		</div>
 		<div class="mt-4">
-			@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+			switch action {
+				case "create":
+					@componentForm.SubmitButton("Create", "ph-check-fat", "closeCreateModal()", false)
+				case "update":
+					@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+			}
 		</div>
 	</form>
 }
@@ -644,7 +656,7 @@ templ CreateContainerProfileModal() {
 			@ContainerProfileRegularForm("create")
 		</template>
 		<template x-if="$store.main.textualViewSelector">
-			@UpdateContainerProfileTextualForm()
+			@ContainerProfileTextualForm("create")
 		</template>
 	}
 }
@@ -658,7 +670,7 @@ templ UpdateContainerProfileModal() {
 			@ContainerProfileRegularForm("update")
 		</template>
 		<template x-if="$store.main.textualViewSelector">
-			@UpdateContainerProfileTextualForm()
+			@ContainerProfileTextualForm("update")
 		</template>
 	}
 }
