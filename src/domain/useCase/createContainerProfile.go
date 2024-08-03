@@ -12,7 +12,7 @@ import (
 var (
 	ContainerProfileDefaultScalingThreshold       uint = 80
 	ContainerProfileDefaultScalingMaxDurationSecs uint = 3600
-	ContainerProfileDefaultScalingIntervalSecs    uint = 180
+	ContainerProfileDefaultScalingIntervalSecs    uint = 86400
 )
 
 func CreateContainerProfile(
