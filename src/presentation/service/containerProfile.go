@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -31,6 +33,76 @@ func (service *ContainerProfileService) Read() ServiceOutput {
 	}
 
 	return NewServiceOutput(Success, profilesList)
+}
+
+func (service *ContainerProfileService) parseScalingMaxDuration(
+	input map[string]interface{},
+) (scalingMaxDurationSecsPtr *uint, err error) {
+	if input["scalingMaxDurationSecs"] != nil {
+		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
+			input["scalingMaxDurationSecs"],
+		)
+		if err != nil {
+			return nil, errors.New("InvalidScalingMaxDurationSecs")
+		}
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
+	if input["scalingMaxDurationMinutes"] != nil {
+		scalingMaxDurationMinutes, err := voHelper.InterfaceToUint16(
+			input["scalingMaxDurationMinutes"],
+		)
+		if err != nil {
+			return nil, errors.New("InvalidScalingMaxDurationMinutes")
+		}
+		scalingMaxDurationSecs := uint(scalingMaxDurationMinutes) * 60
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
+	if input["scalingMaxDurationHours"] != nil {
+		scalingMaxDurationHours, err := voHelper.InterfaceToUint8(
+			input["scalingMaxDurationHours"],
+		)
+		if err != nil {
+			return nil, errors.New("InvalidScalingMaxDurationHours")
+		}
+		scalingMaxDurationSecs := uint(scalingMaxDurationHours) * 3600
+		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	}
+
+	return scalingMaxDurationSecsPtr, nil
+}
+
+func (service *ContainerProfileService) parseScalingInterval(
+	input map[string]interface{},
+) (scalingIntervalSecsPtr *uint, err error) {
+	if input["scalingIntervalSecs"] != nil {
+		scalingIntervalSecs, err := voHelper.InterfaceToUint(input["scalingIntervalSecs"])
+		if err != nil {
+			return nil, errors.New("InvalidScalingIntervalSecs")
+		}
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+	if input["scalingIntervalMinutes"] != nil {
+		scalingIntervalMinutes, err := voHelper.InterfaceToUint16(
+			input["scalingIntervalMinutes"],
+		)
+		if err != nil {
+			return nil, errors.New("InvalidScalingIntervalMinutes")
+		}
+		scalingIntervalSecs := uint(scalingIntervalMinutes) * 60
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+	if input["scalingIntervalHours"] != nil {
+		scalingIntervalHours, err := voHelper.InterfaceToUint8(
+			input["scalingIntervalHours"],
+		)
+		if err != nil {
+			return nil, errors.New("InvalidScalingIntervalHours")
+		}
+		scalingIntervalSecs := uint(scalingIntervalHours) * 3600
+		scalingIntervalSecsPtr = &scalingIntervalSecs
+	}
+
+	return scalingIntervalSecsPtr, nil
 }
 
 func (service *ContainerProfileService) Create(
@@ -80,24 +152,14 @@ func (service *ContainerProfileService) Create(
 		scalingThresholdPtr = &scalingThreshold
 	}
 
-	var scalingMaxDurationSecsPtr *uint
-	if input["scalingMaxDurationSecs"] != nil {
-		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
-			input["scalingMaxDurationSecs"],
-		)
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingMaxDurationSecs")
-		}
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	scalingMaxDurationSecsPtr, err := service.parseScalingMaxDuration(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
-	var scalingIntervalSecsPtr *uint
-	if input["scalingIntervalSecs"] != nil {
-		scalingIntervalSecs, err := voHelper.InterfaceToUint(input["scalingIntervalSecs"])
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingIntervalSecs")
-		}
-		scalingIntervalSecsPtr = &scalingIntervalSecs
+	scalingIntervalSecsPtr, err := service.parseScalingInterval(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
@@ -186,64 +248,14 @@ func (service *ContainerProfileService) Update(
 		scalingThresholdPtr = &scalingThreshold
 	}
 
-	var scalingMaxDurationSecsPtr *uint
-	if input["scalingMaxDurationSecs"] != nil {
-		scalingMaxDurationSecs, err := voHelper.InterfaceToUint(
-			input["scalingMaxDurationSecs"],
-		)
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingMaxDurationSecs")
-		}
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
-	}
-	if input["scalingMaxDurationMinutes"] != nil {
-		scalingMaxDurationMinutes, err := voHelper.InterfaceToUint16(
-			input["scalingMaxDurationMinutes"],
-		)
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingMaxDurationMinutes")
-		}
-		scalingMaxDurationSecs := uint(scalingMaxDurationMinutes) * 60
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
-	}
-	if input["scalingMaxDurationHours"] != nil {
-		scalingMaxDurationHours, err := voHelper.InterfaceToUint8(
-			input["scalingMaxDurationHours"],
-		)
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingMaxDurationHours")
-		}
-		scalingMaxDurationSecs := uint(scalingMaxDurationHours) * 3600
-		scalingMaxDurationSecsPtr = &scalingMaxDurationSecs
+	scalingMaxDurationSecsPtr, err := service.parseScalingMaxDuration(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
-	var scalingIntervalSecsPtr *uint
-	if input["scalingIntervalSecs"] != nil {
-		scalingIntervalSecs, err := voHelper.InterfaceToUint(input["scalingIntervalSecs"])
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingIntervalSecs")
-		}
-		scalingIntervalSecsPtr = &scalingIntervalSecs
-	}
-	if input["scalingIntervalMinutes"] != nil {
-		scalingIntervalMinutes, err := voHelper.InterfaceToUint16(
-			input["scalingIntervalMinutes"],
-		)
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingIntervalMinutes")
-		}
-		scalingIntervalSecs := uint(scalingIntervalMinutes) * 60
-		scalingIntervalSecsPtr = &scalingIntervalSecs
-	}
-	if input["scalingIntervalHours"] != nil {
-		scalingIntervalHours, err := voHelper.InterfaceToUint8(
-			input["scalingIntervalHours"],
-		)
-		if err != nil {
-			return NewServiceOutput(UserError, "InvalidScalingIntervalHours")
-		}
-		scalingIntervalSecs := uint(scalingIntervalHours) * 3600
-		scalingIntervalSecsPtr = &scalingIntervalSecs
+	scalingIntervalSecsPtr, err := service.parseScalingInterval(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
 	var hostMinCapacityPercentPtr *valueObject.HostMinCapacity
