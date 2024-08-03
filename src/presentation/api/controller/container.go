@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/domain/valueObject"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -82,7 +83,7 @@ func (controller *ContainerController) AutoLogin(c echo.Context) error {
 	var err error
 	shouldRedirect := true
 	if rawShouldRedirect := c.QueryParam("shouldRedirect"); rawShouldRedirect != "" {
-		shouldRedirect, err = apiHelper.ParseBoolParam(shouldRedirect)
+		shouldRedirect, err = voHelper.InterfaceToBool(rawShouldRedirect)
 		if err != nil {
 			shouldRedirect = false
 		}

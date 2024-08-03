@@ -1,4 +1,4 @@
-package apiHelper
+package voHelper
 
 import (
 	"errors"
@@ -6,12 +6,9 @@ import (
 	"strconv"
 )
 
-func ParseBoolParam(value interface{}) (bool, error) {
+func InterfaceToBool(input interface{}) (output bool, err error) {
 	defaultErr := errors.New("InvalidBool")
-
-	var output bool
-	var err error
-	switch v := value.(type) {
+	switch v := input.(type) {
 	case bool:
 		output = v
 	case string:
