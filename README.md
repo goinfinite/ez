@@ -84,7 +84,7 @@ chmod +x /var/speedia/control
 /var/speedia/control sys-install
 ```
 
-11. **The system will reboot** and once you get the final success message on the logs (`/var/log/control.log`), you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
+11. **The system will reboot** and once see control running via systemd, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found on the VMWare interface which you used to SSH. If you don't see it, just use `exit` to return to the login screen and the IP will be displayed there.
 
@@ -157,15 +157,23 @@ chmod +x /var/speedia/control
 /var/speedia/control sys-install
 ```
 
-4. The system will reboot and once you get the success message on the logs (check file `/var/log/control.log`), you are good to go.
+4. The system will reboot and once you see control binary running via systemd, you should be able to access the dashboard on the VM IP address on port 3141.
+
+There will be no log messages on the console for now, the installation process will be refactored soon so that the entire process happens on the Web UI.
+
+### Web UIs
+
+This project has two web UIs, the previous Vue.js frontend and the new HTMX frontend. The Vue.js frontend is deprecated and will be removed in the future. It's available at `/_/` and the HTMX frontend is available at `/`.
+
+The HTMX frontend has a hot reload feature that will reload the page when the assets are changed. It's based on a websocket connection that the client listens to and will reload the page when the server stops responding (which is when Air is rebuilding the binary after a file change). To enable this feature, simply put a `DEV_MODE=true` in the `.env` file.
 
 ## REST API
 
-The REST API is exposed on port 3141.
+The REST API is exposed on port 3141 via HTTPS on the endpoint `/api/`. The API endpoint are versioned and the version is part of the URL.
 
 ### Swagger // OpenAPI
 
-The API is documented using Swagger/OpenAPI 2.0 and the documentation can be found on the `/v1/swagger` endpoint.
+The API is documented using Swagger/OpenAPI 2.0 and the documentation can be found on the `/api/swagger/` endpoint.
 
 To generate the swagger documentation, you must use the following command:
 
