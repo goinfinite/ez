@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
+	uiMiddleware "github.com/speedianet/control/src/presentation/ui/middleware"
 )
 
 func UiInit(
@@ -12,6 +13,8 @@ func UiInit(
 ) {
 	basePath := ""
 	baseRoute := e.Group(basePath)
+
+	e.Use(uiMiddleware.Authentication(persistentDbSvc))
 
 	router := NewRouter(baseRoute, persistentDbSvc, transientDbSvc)
 	router.RegisterRoutes()
