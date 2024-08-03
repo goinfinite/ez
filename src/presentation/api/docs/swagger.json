@@ -13,7 +13,7 @@
             "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
             "url": "https://speedia.net/tos/"
         },
-        "version": "0.0.5"
+        "version": "0.0.6"
     },
     "basePath": "/api",
     "paths": {
@@ -1354,7 +1354,19 @@
                 "name": {
                     "type": "string"
                 },
+                "scalingIntervalHours": {
+                    "type": "integer"
+                },
+                "scalingIntervalMinutes": {
+                    "type": "integer"
+                },
                 "scalingIntervalSecs": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationHours": {
+                    "type": "integer"
+                },
+                "scalingMaxDurationMinutes": {
                     "type": "integer"
                 },
                 "scalingMaxDurationSecs": {

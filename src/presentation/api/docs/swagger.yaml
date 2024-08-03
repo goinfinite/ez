@@ -254,7 +254,15 @@ definitions:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       name:
         type: string
+      scalingIntervalHours:
+        type: integer
+      scalingIntervalMinutes:
+        type: integer
       scalingIntervalSecs:
+        type: integer
+      scalingMaxDurationHours:
+        type: integer
+      scalingMaxDurationMinutes:
         type: integer
       scalingMaxDurationSecs:
         type: integer
@@ -579,7 +587,7 @@ info:
     url: https://speedia.net/tos/
   termsOfService: https://speedia.net/tos/
   title: ControlApi
-  version: 0.0.5
+  version: 0.0.6
 paths:
   /v1/account/:
     get:
