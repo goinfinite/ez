@@ -399,10 +399,8 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 							<i class="ph-bold ph-pencil text-xl"></i>
 						</button>
 						<button
-							id="delete-profile"
-							hx-delete={ "/api/v1/container/profile/" + profile.Id.String() + "/" }
-							hx-swap="none"
 							type="button"
+							@click={ "openDeleteModal(" + profile.Id.String() + ", '" + profile.Name.String() + "')" }
 							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
 						>
 							<i class="ph-bold ph-trash text-xl"></i>
