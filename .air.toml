@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
 bin = "/var/speedia/control"
-cmd = "make build && make refresh"
+cmd = "make build"
 exclude_dir = [".git", "bin", "logs", "tmp", "vendor", "src/devUtils"]
 exclude_regex = [".*_templ.go"]
 follow_symlink = false
