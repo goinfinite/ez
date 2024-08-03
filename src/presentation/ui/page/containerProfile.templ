@@ -9,7 +9,6 @@ import (
 	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
-	"log"
 	"strconv"
 	"strings"
 	"text/template"
@@ -110,7 +109,27 @@ script ContainerProfileIndexLocalState() {
 			},
 			closeCreateModal() {
 				this.isCreateModalOpen = false;
-			}
+			},
+			isDeleteModalOpen: false,
+			openDeleteModal(profileId, profileName) {
+				this.resetPrimaryState();
+				this.resetAuxiliaryStates();
+
+				this.containerProfile.id = profileId;
+				this.containerProfile.name = profileName;
+				this.isDeleteModalOpen = true;
+			},
+			closeDeleteModal() {
+				this.isDeleteModalOpen = false;
+			},
+			deleteElement() {
+				htmx.ajax(
+					'DELETE',
+					'/api/v1/container/profile/' + this.containerProfile.id + '/',
+					{swap: 'none'},
+				);
+				this.closeDeleteModal();
+			},
 		}))
 	})
 }
@@ -146,6 +165,10 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 		</div>
 		@CreateContainerProfileModal()
 		@UpdateContainerProfileModal()
+		@componentStructural.DeleteModal(
+			"isDeleteModalOpen", "closeDeleteModal()", "deleteElement()",
+			"containerProfile.name", "containerProfile.id",
+		)
 	</div>
 }
 
@@ -153,7 +176,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 	<table
 		id="profiles-regular-form-table"
 		hx-get="/container/profile/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-profile delay:500ms"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
 		hx-select="#profiles-tables"
 		hx-target="#profiles-tables"
 		hx-swap="outerHTML transition:true"
@@ -232,10 +255,8 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 							<i class="ph-bold ph-pencil text-xl"></i>
 						</button>
 						<button
-							id="delete-profile"
-							hx-delete={ "/api/v1/container/profile/" + profile.Id.String() + "/" }
-							hx-swap="none"
 							type="button"
+							@click={ "openDeleteModal(" + profile.Id.String() + ", '" + profile.Name.String() + "')" }
 							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
 						>
 							<i class="ph-bold ph-trash text-xl"></i>
@@ -333,14 +354,12 @@ func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
 	templatePtr, err := template.New("profileDescription").
 		Funcs(templateCustomFunctions).Parse(descriptionTemplate)
 	if err != nil {
-		log.Printf("Error parsing profile description template: %v", err)
 		return ""
 	}
 
 	var profileDescriptionBuf bytes.Buffer
 	err = templatePtr.Execute(&profileDescriptionBuf, profile)
 	if err != nil {
-		log.Printf("Error executing profile description template: %v", err)
 		return ""
 	}
 
@@ -351,7 +370,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 	<table
 		id="profiles-textual-table"
 		hx-get="/container/profile/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-profile delay:500ms"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
 		hx-select="#profiles-tables"
 		hx-target="#profiles-tables"
 		hx-swap="outerHTML transition:true"
