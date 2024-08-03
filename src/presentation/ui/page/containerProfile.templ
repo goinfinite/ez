@@ -20,7 +20,7 @@ script ContainerProfileIndexLocalState() {
 		Alpine.data('containerProfile', () => ({
 			// Primary State
 			containerProfile: {},
-			resetContainerProfile() {
+			resetPrimaryState() {
 				this.containerProfile = {
 					'id': '',
 					'name': '',
@@ -52,7 +52,7 @@ script ContainerProfileIndexLocalState() {
 				};
 			},
 			init() {
-				this.resetContainerProfile();
+				this.resetPrimaryState();
 			},
 
 			// Auxiliary States
@@ -65,29 +65,32 @@ script ContainerProfileIndexLocalState() {
 			get isScalingPolicyConn() {
 				return this.containerProfile.scalingPolicy == 'connection';
 			},
+			resetAuxiliaryStates() {
+				this.gibibyteSelector = true;
+				this.preferedByteSuffix = 'GiB';
+				this.scalingIntervalHoursSelector = true;
+				this.scalingMaxDurationHoursSelector = true;
+				this.preferedScalingIntervalSuffix = 'hour(s)';
+				this.preferedScalingMaxDurationSuffix = 'hour(s)';
+			},
 
 			// Modal States
 			isUpdateModalOpen: false,
 			openUpdateModal(containerProfileData) {
-				this.resetContainerProfile();
+				this.resetPrimaryState();
+				this.resetAuxiliaryStates();
+
 				this.containerProfile = containerProfileData;
-				
-				this.gibibyteSelector = true;
-				this.preferedByteSuffix = 'GiB';
 				if (this.containerProfile.baseSpecs.memoryGibibytes < 1) {
 					this.preferedByteSuffix = 'MiB';
 					this.gibibyteSelector = false;
 				}
 
-				this.scalingIntervalHoursSelector = true;
-				this.preferedScalingIntervalSuffix = 'hour(s)';
 				if (this.containerProfile.scalingIntervalHours < 1) {
 					this.scalingIntervalHoursSelector = false;
 					this.preferedScalingIntervalSuffix = 'min(s)';
 				}
 
-				this.scalingMaxDurationHoursSelector = true;
-				this.preferedScalingMaxDurationSuffix = 'hour(s)';
 				if (this.containerProfile.scalingMaxDurationHours < 1) {
 					this.scalingMaxDurationHoursSelector = false;
 					this.preferedScalingMaxDurationSuffix = 'min(s)';
@@ -98,10 +101,11 @@ script ContainerProfileIndexLocalState() {
 			closeUpdateModal() {
 				this.isUpdateModalOpen = false;
 			},
-
 			isCreateModalOpen: false,
 			openCreateModal() {
-				this.resetContainerProfile();
+				this.resetPrimaryState();
+				this.resetAuxiliaryStates();
+
 				this.isCreateModalOpen = true;
 			},
 			closeCreateModal() {
@@ -140,6 +144,7 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 				@ContainerProfilesTextualTable(profiles)
 			</template>
 		</div>
+		@CreateContainerProfileModal()
 		@UpdateContainerProfileModal()
 	</div>
 }
@@ -395,13 +400,20 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 	</table>
 }
 
-templ UpdateContainerProfileRegularForm() {
+templ ContainerProfileRegularForm(action string) {
 	<form
-		hx-put="/api/v1/container/profile/"
+		if action == "create" {
+			hx-post="/api/v1/container/profile/"
+		}
+		if action == "update" {
+			hx-put="/api/v1/container/profile/"
+		}
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 	>
-		<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
+		if action == "update" {
+			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
+		}
 		<div class="my-6">
 			@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name", false)
 		</div>
@@ -522,7 +534,12 @@ templ UpdateContainerProfileRegularForm() {
 			</details>
 		</section>
 		<div class="mt-4">
-			@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+			switch action {
+				case "create":
+					@componentForm.SubmitButton("Create", "ph-check-fat", "closeCreateModal()", false)
+				case "update":
+					@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+			}
 		</div>
 	</form>
 }
@@ -618,13 +635,27 @@ templ UpdateContainerProfileTextualForm() {
 	</form>
 }
 
+templ CreateContainerProfileModal() {
+	@componentStructural.Modal(
+		"Create Container Profile", "isCreateModalOpen", "closeCreateModal()",
+		"", true,
+	) {
+		<template x-if="!$store.main.textualViewSelector">
+			@ContainerProfileRegularForm("create")
+		</template>
+		<template x-if="$store.main.textualViewSelector">
+			@UpdateContainerProfileTextualForm()
+		</template>
+	}
+}
+
 templ UpdateContainerProfileModal() {
 	@componentStructural.Modal(
 		"Update Container Profile", "isUpdateModalOpen", "closeUpdateModal()",
 		"containerProfile.id", true,
 	) {
 		<template x-if="!$store.main.textualViewSelector">
-			@UpdateContainerProfileRegularForm()
+			@ContainerProfileRegularForm("update")
 		</template>
 		<template x-if="$store.main.textualViewSelector">
 			@UpdateContainerProfileTextualForm()
