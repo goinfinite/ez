@@ -9,9 +9,11 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra/db"
 	"github.com/speedianet/control/src/presentation/api"
 	"github.com/speedianet/control/src/presentation/ui/presenter"
+	"golang.org/x/net/websocket"
 )
 
 type Router struct {
@@ -60,6 +62,28 @@ func (router *Router) containerRoutes() {
 	containerProfileGroup.GET("/", profilePresenter.Handler)
 }
 
+func (router *Router) devRoutes() {
+	devGroup := router.baseRoute.Group("/dev")
+	devGroup.GET("/hot-reload", func(c echo.Context) error {
+		websocket.Handler(func(ws *websocket.Conn) {
+			defer ws.Close()
+			for {
+				err := websocket.Message.Send(ws, "WS Hot Reload Activated!")
+				if err != nil {
+					break
+				}
+
+				msgReceived := ""
+				err = websocket.Message.Receive(ws, &msgReceived)
+				if err != nil {
+					break
+				}
+			}
+		}).ServeHTTP(c.Response(), c.Request())
+		return nil
+	})
+}
+
 func (router *Router) previousDashboardRoute() {
 	dashFilesFs, err := fs.Sub(previousDashFiles, "dist")
 	if err != nil {
@@ -78,6 +102,11 @@ func (router *Router) previousDashboardRoute() {
 func (router *Router) RegisterRoutes() {
 	router.assetsRoute()
 	router.containerRoutes()
+
+	if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {
+		router.devRoutes()
+	}
+
 	router.previousDashboardRoute()
 
 	router.baseRoute.RouteNotFound("/*", func(c echo.Context) error {
