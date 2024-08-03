@@ -1,7 +1,8 @@
 # Changelog
 
 ```log
-0.0.6 - 2024/XX/XX
+0.0.6 - 2024/08/03
+refactor: container profile frontend with HTMX and Alpine.js
 feat: add storage performance units
 fix!: renamed "cpuCores" => "millicores"
 fix!: renamed "diskBytes" => "storageBytes"
