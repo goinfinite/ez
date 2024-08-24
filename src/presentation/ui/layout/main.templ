@@ -10,6 +10,12 @@ script MainLayoutState() {
 	document.addEventListener('alpine:initializing', () => {
 		Alpine.store('main', {
 			textualViewSelector: Alpine.$persist(false).as('dash.textualViewSelector'),
+
+			init() {
+				Alpine.watch(() => this.textualViewSelector, () => {
+					htmx.process(document.body);
+				});
+			}
 		});
 	});
 }
