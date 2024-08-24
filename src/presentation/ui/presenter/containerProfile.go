@@ -30,11 +30,11 @@ func (presenter *ContainerProfilePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	contactEntities, assertOk := responseOutput.Body.([]entity.ContainerProfile)
+	profileEntities, assertOk := responseOutput.Body.([]entity.ContainerProfile)
 	if !assertOk {
 		return nil
 	}
 
-	pageContent := page.ContainerProfileIndex(contactEntities)
+	pageContent := page.ContainerProfileIndex(profileEntities)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
