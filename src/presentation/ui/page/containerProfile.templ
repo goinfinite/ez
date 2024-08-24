@@ -198,7 +198,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 			for _, profile := range profiles {
 				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
-					<td class="w-80 px-6 py-4 text-left">
+					<td class="w-84 px-6 py-4 text-left">
 						<p>{ profile.Name.String() }</p>
 						@componentContainer.ProfileSummarySmallTag(profile)
 					</td>
