@@ -1,6 +1,9 @@
 # Changelog
 
 ```log
+0.0.7 - 2024/XX/XX
+fix: call htmx.process() when Alpine.js changes the DOM
+
 0.0.6 - 2024/08/03
 refactor: container profile frontend with HTMX and Alpine.js
 feat: add storage performance units

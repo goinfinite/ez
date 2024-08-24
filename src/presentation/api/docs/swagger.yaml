@@ -587,7 +587,7 @@ info:
     url: https://speedia.net/tos/
   termsOfService: https://speedia.net/tos/
   title: ControlApi
-  version: 0.0.6
+  version: 0.0.7
 paths:
   /v1/account/:
     get:
