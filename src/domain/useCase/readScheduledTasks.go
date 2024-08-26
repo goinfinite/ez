@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
@@ -13,8 +13,8 @@ func ReadScheduledTasks(
 ) ([]entity.ScheduledTask, error) {
 	scheduledTasks, err := scheduledTaskQueryRepo.Read()
 	if err != nil {
-		log.Printf("GetTasksError: %s", err)
-		return nil, errors.New("GetTasksInfraError")
+		slog.Error("GetTasksInfraError", slog.Any("error", err))
+		return scheduledTasks, errors.New("GetTasksInfraError")
 	}
 
 	return scheduledTasks, nil

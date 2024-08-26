@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
@@ -15,7 +15,7 @@ func ReadRegistryTaggedImage(
 ) (taggedImage entity.RegistryTaggedImage, err error) {
 	taggedImage, err = containerRegistryQueryRepo.ReadTaggedImage(imageAddress)
 	if err != nil {
-		log.Printf("ReadTaggedImageError: %s", err)
+		slog.Error("ReadTaggedImageInfraError", slog.Any("error", err))
 		return taggedImage, errors.New("ReadTaggedImageInfraError")
 	}
 

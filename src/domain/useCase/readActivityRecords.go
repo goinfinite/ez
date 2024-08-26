@@ -1,7 +1,7 @@
 package useCase
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -14,7 +14,7 @@ func ReadActivityRecords(
 ) (activityRecords []entity.ActivityRecord) {
 	activityRecords, err := activityRecordQueryRepo.Read(readDto)
 	if err != nil {
-		log.Printf("ReadActivityRecordsInfraError: %s", err)
+		slog.Error("ReadActivityRecordsInfraError", slog.Any("error", err))
 	}
 
 	return activityRecords

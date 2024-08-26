@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
@@ -15,8 +15,8 @@ func ReadRegistryImages(
 ) ([]entity.RegistryImage, error) {
 	imagesList, err := containerRegistryQueryRepo.ReadImages(imageName)
 	if err != nil {
-		log.Printf("ReadImagesError: %s", err)
-		return nil, errors.New("ReadImagesInfraError")
+		slog.Error("ReadImagesInfraError", slog.Any("error", err))
+		return imagesList, errors.New("ReadImagesInfraError")
 	}
 
 	return imagesList, nil

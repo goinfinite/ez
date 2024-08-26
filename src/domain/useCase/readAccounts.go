@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
@@ -13,8 +13,8 @@ func ReadAccounts(
 ) ([]entity.Account, error) {
 	accountsList, err := accountQueryRepo.Read()
 	if err != nil {
-		log.Printf("ReadAccountsError: %s", err)
-		return nil, errors.New("ReadAccountsInfraError")
+		slog.Error("ReadAccountsInfraError", slog.Any("error", err))
+		return accountsList, errors.New("ReadAccountsInfraError")
 	}
 
 	return accountsList, nil
