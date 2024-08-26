@@ -24,6 +24,7 @@ func TestNewContainerImageAddress(t *testing.T) {
 			"docker.io/rocket.chat:latest",
 			"docker.io/rocket.chat:3.18.0",
 			"https://docker.io/rocket.chat:3.18.0-rc1",
+			"localhost/backup_image:latest",
 		}
 
 		for _, path := range validContainerImageAddresses {

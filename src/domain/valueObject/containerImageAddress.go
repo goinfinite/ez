@@ -31,7 +31,9 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 	}
 
 	if valueParts["fqdn"] == "" {
-		stringValue = "docker.io/" + stringValue
+		if !strings.HasPrefix(stringValue, "localhost") {
+			stringValue = "docker.io/" + stringValue
+		}
 	}
 
 	if !strings.Contains(stringValue, "/") {
