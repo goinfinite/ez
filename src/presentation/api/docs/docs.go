@@ -366,6 +366,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/container/image/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List container images.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "ReadContainerImages",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.ContainerImage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/metrics/": {
             "get": {
                 "security": [
@@ -1343,6 +1374,29 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.ContainerImage": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "integer"
+                },
+                "imageAddress": {
+                    "type": "string"
+                },
+                "imageHash": {
+                    "type": "string"
+                },
+                "isa": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "snapshotAttributes": {
+                    "$ref": "#/definitions/valueObject.ContainerSnapshotAttributes"
+                }
+            }
+        },
         "entity.ContainerProfile": {
             "type": "object",
             "properties": {
@@ -1683,6 +1737,29 @@ const docTemplate = `{
                 },
                 "storageSpaceBytes": {
                     "type": "integer"
+                }
+            }
+        },
+        "valueObject.ContainerSnapshotAttributes": {
+            "type": "object",
+            "properties": {
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
+                "restartPolicy": {
+                    "type": "string"
                 }
             }
         },

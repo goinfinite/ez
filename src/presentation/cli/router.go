@@ -79,8 +79,17 @@ func (router *Router) containerRoutes() {
 	containerRegistryCmd.AddCommand(containerRegistryController.ReadRegistryImages())
 	containerRegistryCmd.AddCommand(containerRegistryController.ReadRegistryTaggedImage())
 
+	var containerImageCmd = &cobra.Command{
+		Use:   "image",
+		Short: "ContainerImageManagement",
+	}
+
+	containerImageController := cliController.NewContainerImageController(router.persistentDbSvc)
+	containerImageCmd.AddCommand(containerImageController.Read())
+
 	containerCmd.AddCommand(containerProfileCmd)
 	containerCmd.AddCommand(containerRegistryCmd)
+	containerCmd.AddCommand(containerImageCmd)
 	rootCmd.AddCommand(containerCmd)
 }
 

@@ -242,6 +242,21 @@ definitions:
       updatedAt:
         type: integer
     type: object
+  entity.ContainerImage:
+    properties:
+      createdAt:
+        type: integer
+      imageAddress:
+        type: string
+      imageHash:
+        type: string
+      isa:
+        type: string
+      sizeBytes:
+        type: integer
+      snapshotAttributes:
+        $ref: '#/definitions/valueObject.ContainerSnapshotAttributes'
+    type: object
   entity.ContainerProfile:
     properties:
       baseSpecs:
@@ -467,6 +482,21 @@ definitions:
         type: integer
       storageSpaceBytes:
         type: integer
+    type: object
+  valueObject.ContainerSnapshotAttributes:
+    properties:
+      entrypoint:
+        type: string
+      envs:
+        items:
+          type: string
+        type: array
+      portBindings:
+        items:
+          $ref: '#/definitions/valueObject.PortBinding'
+        type: array
+      restartPolicy:
+        type: string
     type: object
   valueObject.ContainerSpecs:
     properties:
@@ -836,6 +866,25 @@ paths:
       security:
       - Bearer: []
       summary: ContainerAutoLogin
+      tags:
+      - container
+  /v1/container/image/:
+    get:
+      consumes:
+      - application/json
+      description: List container images.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.ContainerImage'
+            type: array
+      security:
+      - Bearer: []
+      summary: ReadContainerImages
       tags:
       - container
   /v1/container/metrics/:

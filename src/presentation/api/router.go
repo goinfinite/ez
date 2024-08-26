@@ -87,6 +87,12 @@ func (router *Router) containerRoutes() {
 		"/image/tagged/",
 		apiController.GetContainerRegistryTaggedImageController,
 	)
+
+	containerImageGroup := containerGroup.Group("/image")
+	containerImageController := apiController.NewContainerImageController(
+		router.persistentDbSvc,
+	)
+	containerImageGroup.GET("/", containerImageController.Read)
 }
 
 func (router *Router) licenseRoutes() {
