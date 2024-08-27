@@ -1,6 +1,8 @@
 package cliController
 
 import (
+	"log/slog"
+
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
@@ -51,10 +53,15 @@ func (controller *ContainerController) parsePortBindings(
 	portBindingsSlice []string,
 ) []valueObject.PortBinding {
 	portBindings := []valueObject.PortBinding{}
-	for _, portBindingStr := range portBindingsSlice {
-		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
+	for _, rawPortBinding := range portBindingsSlice {
+		portBinding, err := valueObject.NewPortBindingFromString(rawPortBinding)
 		if err != nil {
-			panic(err.Error() + ": " + portBindingStr)
+			slog.Debug(
+				"ParsePortBindingsError",
+				slog.String("rawPortBinding", rawPortBinding),
+				slog.Any("error", err),
+			)
+			continue
 		}
 
 		portBindings = append(portBindings, portBinding...)
@@ -67,8 +74,15 @@ func (controller *ContainerController) parseContainerEnvs(
 	envsSlice []string,
 ) []valueObject.ContainerEnv {
 	envs := []valueObject.ContainerEnv{}
-	for _, envStr := range envsSlice {
-		env := valueObject.NewContainerEnvPanic(envStr)
+	for _, rawEnv := range envsSlice {
+		env, err := valueObject.NewContainerEnv(rawEnv)
+		if err != nil {
+			slog.Debug(
+				"ParseContainerEnvsError",
+				slog.String("rawEnv", rawEnv), slog.Any("error", err),
+			)
+			continue
+		}
 		envs = append(envs, env)
 	}
 

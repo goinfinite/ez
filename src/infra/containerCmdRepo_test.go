@@ -16,10 +16,9 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 
 	profileId, _ := valueObject.NewContainerProfileId(0)
 
-	envs := []valueObject.ContainerEnv{
-		valueObject.NewContainerEnvPanic("CONTROL_ENV1=testing"),
-		valueObject.NewContainerEnvPanic("CONTROL_ENV2=testing"),
-	}
+	env1, _ := valueObject.NewContainerEnv("CONTROL_ENV1=testing")
+	env2, _ := valueObject.NewContainerEnv("CONTROL_ENV2=testing")
+	envs := []valueObject.ContainerEnv{env1, env2}
 
 	accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 

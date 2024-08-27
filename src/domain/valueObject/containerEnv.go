@@ -3,33 +3,28 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
 const containerEnvRegex string = `^\w{1,1000}=.{1,1000}$`
 
 type ContainerEnv string
 
-func NewContainerEnv(value string) (ContainerEnv, error) {
-	containerEnv := ContainerEnv(value)
-	if !containerEnv.isValid() {
-		return "", errors.New("InvalidContainerEnv")
+func NewContainerEnv(value interface{}) (env ContainerEnv, err error) {
+	stringValue, err := voHelper.InterfaceToString(value)
+	if err != nil {
+		return env, errors.New("ContainerEnvMustBeString")
 	}
-	return containerEnv, nil
-}
 
-func NewContainerEnvPanic(value string) ContainerEnv {
-	containerEnv := ContainerEnv(value)
-	if !containerEnv.isValid() {
-		panic("InvalidContainerEnv")
-	}
-	return containerEnv
-}
-
-func (containerEnv ContainerEnv) isValid() bool {
 	re := regexp.MustCompile(containerEnvRegex)
-	return re.MatchString(string(containerEnv))
+	if !re.MatchString(stringValue) {
+		return env, errors.New("InvalidContainerEnv")
+	}
+
+	return ContainerEnv(stringValue), nil
 }
 
-func (containerEnv ContainerEnv) String() string {
-	return string(containerEnv)
+func (vo ContainerEnv) String() string {
+	return string(vo)
 }
