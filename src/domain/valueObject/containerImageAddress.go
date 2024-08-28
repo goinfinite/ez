@@ -8,7 +8,7 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-const containerImageAddressRegex string = `^(?P<schema>https?://)?(?:(?P<fqdn>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+)?:?(?:(?P<port>\d{1,6}))?/)?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\.\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
+const containerImageAddressRegex string = `^(?P<schema>https?://)?(?:(?P<hostname>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])*)?:?(?:(?P<port>\d{1,6}))?/)?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\.\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
 
 type ContainerImageAddress string
 
@@ -18,7 +18,6 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 		return "", errors.New("ContainerImageAddressMustBeString")
 	}
 
-	stringValue = strings.TrimSpace(stringValue)
 	stringValue = strings.ToLower(stringValue)
 
 	valueParts := voHelper.FindNamedGroupsMatches(containerImageAddressRegex, stringValue)
@@ -30,10 +29,8 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 		stringValue = strings.TrimPrefix(stringValue, valueParts["schema"])
 	}
 
-	if valueParts["fqdn"] == "" {
-		if !strings.HasPrefix(stringValue, "localhost") {
-			stringValue = "docker.io/" + stringValue
-		}
+	if valueParts["hostname"] == "" {
+		stringValue = "docker.io/" + stringValue
 	}
 
 	if !strings.Contains(stringValue, "/") {
@@ -41,8 +38,7 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 	}
 
 	re := regexp.MustCompile(containerImageAddressRegex)
-	isValid := re.MatchString(stringValue)
-	if !isValid {
+	if !re.MatchString(stringValue) {
 		return "", errors.New("InvalidContainerImageAddress")
 	}
 
