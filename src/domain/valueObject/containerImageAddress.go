@@ -8,7 +8,7 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-const containerImageAddressRegex string = `^(?P<schema>https?://)?(?:(?P<hostname>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])*)?:?(?:(?P<port>\d{1,6}))?/)?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\.\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
+const containerImageAddressRegex string = `^(?P<schema>https?://)?(?:(?P<hostname>[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9][a-z0-9-]{0,61}[a-z0-9])+|localhost)?:?(?:(?P<port>\d{1,6}))?/)?(?:(?P<orgName>[\w\_\-]{1,128})/)?(?P<imageName>[\w\.\_\-]{1,128}):?(?P<imageTag>[\w\.\_\-]{1,128})?$`
 
 type ContainerImageAddress string
 
@@ -62,7 +62,7 @@ func (vo ContainerImageAddress) getParts() map[string]string {
 }
 
 func (vo ContainerImageAddress) GetFqdn() (Fqdn, error) {
-	return NewFqdn(vo.getParts()["fqdn"])
+	return NewFqdn(vo.getParts()["hostname"])
 }
 
 func (vo ContainerImageAddress) GetOrgName() (RegistryPublisherName, error) {
