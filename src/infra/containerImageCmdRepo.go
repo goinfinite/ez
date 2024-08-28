@@ -2,6 +2,7 @@ package infra
 
 import (
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
@@ -14,6 +15,27 @@ func NewContainerImageCmdRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *ContainerImageCmdRepo {
 	return &ContainerImageCmdRepo{persistentDbSvc: persistentDbSvc}
+}
+
+func (repo *ContainerImageCmdRepo) CreateSnapshot(
+	createDto dto.CreateContainerSnapshotImage,
+) (imageId valueObject.ContainerImageId, err error) {
+	unixTimeNow := valueObject.NewUnixTimeNow()
+	containerIdStr := createDto.ContainerId.String()
+	snapshotName := containerIdStr + ":" + unixTimeNow.String()
+
+	rawImageId, err := infraHelper.RunCmdAsUser(
+		createDto.AccountId,
+		"podman", "commit", "--quiet",
+		"--author", "control:"+createDto.OperatorAccountId.String(),
+		containerIdStr,
+		"localhost/"+createDto.AccountId.String()+"/"+snapshotName,
+	)
+	if err != nil {
+		return imageId, err
+	}
+
+	return valueObject.NewContainerImageId(rawImageId)
 }
 
 func (repo *ContainerImageCmdRepo) Delete(
