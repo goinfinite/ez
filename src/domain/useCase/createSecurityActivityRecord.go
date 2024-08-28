@@ -90,6 +90,24 @@ func (uc *CreateSecurityActivityRecord) DeleteAccount(
 	uc.createActivityRecord(createRecordDto)
 }
 
+func (uc *CreateSecurityActivityRecord) CreateContainerSnapshotImage(
+	createDto dto.CreateContainerSnapshotImage,
+	imageId valueObject.ContainerImageId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerSnapshotImageCreated")
+	createRecordDto := dto.CreateActivityRecord{
+		Level:             uc.recordLevel,
+		Code:              &recordCode,
+		IpAddress:         &createDto.IpAddress,
+		OperatorAccountId: &createDto.OperatorAccountId,
+		TargetAccountId:   &createDto.AccountId,
+		ContainerId:       &createDto.ContainerId,
+		ContainerImageId:  &imageId,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
 func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 	deleteDto dto.DeleteContainerImage,
 ) {
