@@ -1,6 +1,8 @@
 package useCase
 
 import (
+	"log/slog"
+
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -25,7 +27,14 @@ func (uc *CreateSecurityActivityRecord) createActivityRecord(
 	createDto dto.CreateActivityRecord,
 ) {
 	go func() {
-		_ = uc.activityRecordCmdRepo.Create(createDto)
+		err := uc.activityRecordCmdRepo.Create(createDto)
+		if err != nil {
+			slog.Debug(
+				"CreateSecurityActivityRecordError",
+				slog.Any("createDto", createDto),
+				slog.Any("error", err),
+			)
+		}
 	}()
 }
 
