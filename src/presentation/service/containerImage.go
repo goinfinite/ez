@@ -49,7 +49,7 @@ func (service *ContainerImageService) Delete(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	imageId, err := valueObject.NewContainerImageId(input["id"])
+	imageId, err := valueObject.NewContainerImageId(input["imageId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
