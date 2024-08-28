@@ -31,11 +31,6 @@ func CreateAccount(
 		return errors.New("CreateAccountInfraError")
 	}
 
-	recordCode, _ := valueObject.NewActivityRecordCode("AccountCreated")
-	CreateSecurityActivityRecord(
-		activityRecordCmdRepo, &recordCode, &createDto.IpAddress,
-		&createDto.OperatorAccountId, &accountId, &createDto.Username,
-	)
-
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).CreateAccount(createDto, accountId)
 	return nil
 }

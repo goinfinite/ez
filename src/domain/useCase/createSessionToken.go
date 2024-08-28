@@ -50,10 +50,7 @@ func CreateSessionToken(
 
 	if !authQueryRepo.IsLoginValid(loginDto) {
 		recordCode, _ := valueObject.NewActivityRecordCode("LoginFailed")
-		CreateSecurityActivityRecord(
-			activityRecordCmdRepo, &recordCode, loginDto.IpAddress,
-			nil, nil, &loginDto.Username,
-		)
+		NewCreateSecurityActivityRecord(activityRecordCmdRepo).CreateSessionToken(loginDto, recordCode)
 
 		return accessToken, errors.New("InvalidCredentials")
 	}
@@ -64,10 +61,7 @@ func CreateSessionToken(
 	}
 
 	recordCode, _ := valueObject.NewActivityRecordCode("LoginSuccessful")
-	CreateSecurityActivityRecord(
-		activityRecordCmdRepo, &recordCode, loginDto.IpAddress, nil,
-		&accountEntity.Id, &loginDto.Username,
-	)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).CreateSessionToken(loginDto, recordCode)
 
 	expiresIn := valueObject.NewUnixTimeAfterNow(SessionTokenExpiresIn)
 

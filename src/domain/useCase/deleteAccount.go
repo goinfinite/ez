@@ -6,7 +6,6 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func DeleteAccount(
@@ -37,11 +36,6 @@ func DeleteAccount(
 		return errors.New("DeleteAccountInfraError")
 	}
 
-	recordCode, _ := valueObject.NewActivityRecordCode("AccountDeleted")
-	CreateSecurityActivityRecord(
-		activityRecordCmdRepo, &recordCode, &deleteDto.IpAddress,
-		&deleteDto.OperatorAccountId, &deleteDto.AccountId, nil,
-	)
-
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).DeleteAccount(deleteDto)
 	return nil
 }

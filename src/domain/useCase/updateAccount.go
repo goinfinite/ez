@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -23,15 +23,16 @@ func UpdateAccount(
 	if updateDto.Password != nil {
 		err = accountCmdRepo.UpdatePassword(updateDto.AccountId, *updateDto.Password)
 		if err != nil {
-			log.Printf("UpdateAccountPasswordError: %s", err)
+			slog.Error(
+				"UpdateAccountPasswordInfraError",
+				slog.String("accountId", updateDto.AccountId.String()),
+				slog.Any("error", err),
+			)
 			return errors.New("UpdateAccountPasswordInfraError")
 		}
 
 		recordCode, _ := valueObject.NewActivityRecordCode("AccountPasswordUpdated")
-		CreateSecurityActivityRecord(
-			activityRecordCmdRepo, &recordCode, &updateDto.IpAddress,
-			&updateDto.OperatorAccountId, &updateDto.AccountId, nil,
-		)
+		NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(recordCode, updateDto)
 	}
 
 	if updateDto.Quota == nil {
@@ -40,15 +41,15 @@ func UpdateAccount(
 
 	err = accountCmdRepo.UpdateQuota(updateDto.AccountId, *updateDto.Quota)
 	if err != nil {
-		log.Printf("UpdateAccountQuotaError: %s", err)
+		slog.Error(
+			"UpdateAccountQuotaInfraError",
+			slog.String("accountId", updateDto.AccountId.String()),
+			slog.Any("error", err),
+		)
 		return errors.New("UpdateAccountQuotaInfraError")
 	}
 
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountQuotaUpdated")
-	CreateSecurityActivityRecord(
-		activityRecordCmdRepo, &recordCode, &updateDto.IpAddress,
-		&updateDto.OperatorAccountId, &updateDto.AccountId, nil,
-	)
-
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(recordCode, updateDto)
 	return nil
 }

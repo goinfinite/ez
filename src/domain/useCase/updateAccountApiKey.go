@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -22,15 +22,16 @@ func UpdateAccountApiKey(
 
 	newKey, err = accountCmdRepo.UpdateApiKey(updateDto.AccountId)
 	if err != nil {
-		log.Printf("UpdateAccountApiKeyError: %s", err)
+		slog.Error(
+			"UpdateAccountApiKeyInfraError",
+			slog.String("accountId", updateDto.AccountId.String()),
+			slog.Any("error", err),
+		)
 		return newKey, errors.New("UpdateAccountApiKeyInfraError")
 	}
 
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountApiKeyUpdated")
-	CreateSecurityActivityRecord(
-		activityRecordCmdRepo, &recordCode, &updateDto.IpAddress,
-		&updateDto.OperatorAccountId, &updateDto.AccountId, nil,
-	)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(recordCode, updateDto)
 
 	return newKey, nil
 }
