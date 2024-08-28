@@ -187,49 +187,57 @@ func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 			continue
 		}
 
+		accountIdStr := account.Id.String()
 		for _, rawContainerImageId := range rawContainerImagesIds {
 			if rawContainerImageId == "" {
 				continue
 			}
 
-			rawContainerImageAttributesStr, err := infraHelper.RunCmdAsUser(
-				account.Id, "podman", "inspect", rawContainerImageId, "--format", "{{json .}}",
-			)
+			imageId, err := valueObject.NewContainerImageId(rawContainerImageId)
 			if err != nil {
 				slog.Debug(
-					"PodmanInspectImageError",
-					slog.String("accountId", account.Id.String()),
-					slog.String("imageId", rawContainerImageId),
+					"ContainerImageIdParseError",
+					slog.String("accountId", accountIdStr),
+					slog.String("rawImageId", rawContainerImageId),
 					slog.Any("error", err),
 				)
 				continue
 			}
 
-			rawContainerImageAttributes := map[string]interface{}{}
-			err = json.Unmarshal([]byte(rawContainerImageAttributesStr), &rawContainerImageAttributes)
+			containerImage, err := repo.ReadById(account.Id, imageId)
 			if err != nil {
 				slog.Debug(
-					"ContainerImageAttributesUnmarshalError",
-					slog.String("accountId", account.Id.String()),
-					slog.String("imageId", rawContainerImageId),
+					"ContainerImageReadError",
+					slog.String("accountId", accountIdStr),
+					slog.String("imageId", imageId.String()),
 					slog.Any("error", err),
 				)
 				continue
 			}
 
-			containerImage, err := repo.containerImageFactory(rawContainerImageAttributes)
-			if err != nil {
-				slog.Debug(
-					"ContainerImageFactoryError",
-					slog.String("accountId", account.Id.String()),
-					slog.String("imageId", rawContainerImageId),
-					slog.Any("error", err),
-				)
-				continue
-			}
 			containerImages = append(containerImages, containerImage)
 		}
 	}
 
 	return containerImages, nil
+}
+
+func (repo *ContainerImageQueryRepo) ReadById(
+	accountId valueObject.AccountId,
+	imageId valueObject.ContainerImageId,
+) (containerImage entity.ContainerImage, err error) {
+	rawContainerImageAttributesStr, err := infraHelper.RunCmdAsUser(
+		accountId, "podman", "inspect", imageId.String(), "--format", "{{json .}}",
+	)
+	if err != nil {
+		return containerImage, err
+	}
+
+	rawContainerImageAttributes := map[string]interface{}{}
+	err = json.Unmarshal([]byte(rawContainerImageAttributesStr), &rawContainerImageAttributes)
+	if err != nil {
+		return containerImage, err
+	}
+
+	return repo.containerImageFactory(rawContainerImageAttributes)
 }
