@@ -14,5 +14,6 @@ type CreateActivityRecord struct {
 	Username           *valueObject.Username              `json:"username,omitempty"`
 	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
 	ContainerProfileId *valueObject.ContainerProfileId    `json:"containerProfileId,omitempty"`
+	ContainerImageId   *valueObject.ContainerImageId      `json:"containerImageId,omitempty"`
 	MappingId          *valueObject.MappingId             `json:"mappingId,omitempty"`
 }
