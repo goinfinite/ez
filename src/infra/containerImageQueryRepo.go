@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -37,7 +38,7 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
-	rawImageNames, assertOk := rawContainerImage["Names"].([]interface{})
+	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
 	if !assertOk {
 		return containerImage, errors.New("InvalidContainerImageNames")
 	}
@@ -64,7 +65,18 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
-	isa, err := valueObject.NewInstructionSetArchitecture("amd64")
+	rawIsa, assertOk := rawContainerImage["Architecture"].(string)
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageIsa")
+	}
+	// TODO: support arm, armv7 and arm64 in the future.
+	switch rawIsa {
+	case "amd64", "x86-64":
+		rawIsa = "amd64"
+	default:
+		return containerImage, errors.New("UnsupportedContainerImageIsa")
+	}
+	isa, err := valueObject.NewInstructionSetArchitecture(rawIsa)
 	if err != nil {
 		return containerImage, err
 	}
@@ -78,17 +90,74 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
-	rawCreatedAt, assertOk := rawContainerImage["Created"].(float64)
+	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
 	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageCreatedAt")
-	}
-	createdAt, err := valueObject.NewUnixTime(rawCreatedAt)
-	if err != nil {
-		return containerImage, err
+		return containerImage, errors.New("InvalidContainerImageConfig")
 	}
 
+	rawPortBindings, assertOk := rawConfig["ExposedPorts"].(map[string]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImagePortBindings")
+	}
+	portBindings := []valueObject.PortBinding{}
+	for rawPortBinding := range rawPortBindings {
+		rawPortBinding = strings.ReplaceAll(rawPortBinding, "/tcp", "")
+		parsedPortBindings, err := valueObject.NewPortBindingFromString(rawPortBinding)
+		if err != nil {
+			return containerImage, err
+		}
+
+		portBindings = append(portBindings, parsedPortBindings...)
+	}
+
+	rawEnvs, assertOk := rawConfig["Env"].([]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageEnv")
+	}
+	envs := []valueObject.ContainerEnv{}
+	for _, rawEnv := range rawEnvs {
+		parsedEnv, err := valueObject.NewContainerEnv(rawEnv)
+		if err != nil {
+			return containerImage, err
+		}
+
+		envs = append(envs, parsedEnv)
+	}
+
+	rawEntrypointSlice, assertOk := rawConfig["Entrypoint"].([]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageEntrypoint")
+	}
+	rawEntrypoint := ""
+	for _, rawEntrypointItem := range rawEntrypointSlice {
+		rawEntrypointPart, assertOk := rawEntrypointItem.(string)
+		if !assertOk {
+			continue
+		}
+		rawEntrypoint += rawEntrypointPart + " "
+	}
+	var entrypointPtr *valueObject.ContainerEntrypoint
+	if rawEntrypoint != "" {
+		entrypoint, err := valueObject.NewContainerEntrypoint(rawEntrypoint)
+		if err != nil {
+			return containerImage, err
+		}
+		entrypointPtr = &entrypoint
+	}
+
+	rawCreated, assertOk := rawContainerImage["Created"].(string)
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageCreated")
+	}
+	createdTime, err := time.Parse(time.RFC3339Nano, rawCreated)
+	if err != nil {
+		return containerImage, errors.New("ParseContainerImageCreatedError")
+	}
+	createdAt := valueObject.NewUnixTimeWithGoTime(createdTime)
+
 	return entity.NewContainerImage(
-		imageId, imageAddress, imageHash, isa, sizeBytes, nil, createdAt,
+		imageId, imageAddress, imageHash, isa, sizeBytes,
+		portBindings, envs, entrypointPtr, createdAt,
 	), nil
 }
 
@@ -101,34 +170,59 @@ func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 	}
 
 	for _, account := range accountsList {
-		containerImagesStr, err := infraHelper.RunCmdAsUser(
-			account.Id, "podman", "images", "--format", "json",
+		rawContainerImagesIdsStr, err := infraHelper.RunCmdAsUser(
+			account.Id, "podman", "images", "--format", "{{.Id}}",
 		)
 		if err != nil {
 			slog.Debug(
-				"PodmanListImagesError",
+				"PodmanListImagesIdError",
 				slog.String("accountId", account.Id.String()),
 				slog.Any("error", err),
 			)
 			continue
 		}
 
-		rawContainerImages := []map[string]interface{}{}
-		err = json.Unmarshal([]byte(containerImagesStr), &rawContainerImages)
-		if err != nil {
-			slog.Debug(
-				"UnmarshalContainerImagesError",
-				slog.String("accountId", account.Id.String()),
-				slog.Any("error", err),
-			)
+		rawContainerImagesIds := strings.Split(rawContainerImagesIdsStr, "\n")
+		if len(rawContainerImagesIds) == 0 {
+			continue
 		}
 
-		for _, rawContainerImage := range rawContainerImages {
-			containerImage, err := repo.containerImageFactory(rawContainerImage)
+		for _, rawContainerImageId := range rawContainerImagesIds {
+			if rawContainerImageId == "" {
+				continue
+			}
+
+			rawContainerImageAttributesStr, err := infraHelper.RunCmdAsUser(
+				account.Id, "podman", "inspect", rawContainerImageId, "--format", "{{json .}}",
+			)
+			if err != nil {
+				slog.Debug(
+					"PodmanInspectImageError",
+					slog.String("accountId", account.Id.String()),
+					slog.String("imageId", rawContainerImageId),
+					slog.Any("error", err),
+				)
+				continue
+			}
+
+			rawContainerImageAttributes := map[string]interface{}{}
+			err = json.Unmarshal([]byte(rawContainerImageAttributesStr), &rawContainerImageAttributes)
+			if err != nil {
+				slog.Debug(
+					"ContainerImageAttributesUnmarshalError",
+					slog.String("accountId", account.Id.String()),
+					slog.String("imageId", rawContainerImageId),
+					slog.Any("error", err),
+				)
+				continue
+			}
+
+			containerImage, err := repo.containerImageFactory(rawContainerImageAttributes)
 			if err != nil {
 				slog.Debug(
 					"ContainerImageFactoryError",
 					slog.String("accountId", account.Id.String()),
+					slog.String("imageId", rawContainerImageId),
 					slog.Any("error", err),
 				)
 				continue
