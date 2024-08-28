@@ -7,6 +7,7 @@ import (
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
@@ -162,7 +163,7 @@ func (service *ContainerService) Create(
 
 	autoCreateMappings := true
 	if input["autoCreateMappings"] != nil {
-		autoCreateMappings, err = serviceHelper.ParseBoolParam(input["autoCreateMappings"])
+		autoCreateMappings, err = voHelper.InterfaceToBool(input["autoCreateMappings"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
@@ -285,7 +286,7 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 
 	var containerStatusPtr *bool
 	if input["status"] != nil {
-		containerStatus, err := serviceHelper.ParseBoolParam(input["status"])
+		containerStatus, err := voHelper.InterfaceToBool(input["status"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
