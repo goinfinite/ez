@@ -91,23 +91,21 @@ func (controller *ContainerController) parseContainerEnvs(
 
 func (controller *ContainerController) Create() *cobra.Command {
 	var accountIdUint uint64
-	var hostnameStr string
-	var containerImageAddressStr string
+	var hostnameStr, containerImageAddressStr string
 	var portBindingsSlice []string
-	var restartPolicyStr string
-	var entrypointStr string
+	var restartPolicyStr, entrypointStr string
 	var profileId uint64
 	var envsSlice []string
-	var launchScriptFilePathStr string
-	var autoCreateMappings bool
+	var launchScriptFilePathStr, autoCreateMappingsBoolStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "CreateNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId": accountIdUint,
-				"hostname":  hostnameStr,
+				"accountId":          accountIdUint,
+				"hostname":           hostnameStr,
+				"autoCreateMappings": autoCreateMappingsBoolStr,
 			}
 
 			if containerImageAddressStr != "" {
@@ -160,10 +158,6 @@ func (controller *ContainerController) Create() *cobra.Command {
 				requestBody["launchScript"] = launchScript
 			}
 
-			if !autoCreateMappings {
-				requestBody["autoCreateMappings"] = autoCreateMappings
-			}
-
 			cliHelper.ServiceResponseWrapper(
 				controller.containerService.Create(requestBody, false),
 			)
@@ -186,8 +180,8 @@ func (controller *ContainerController) Create() *cobra.Command {
 	cmd.Flags().StringVarP(
 		&launchScriptFilePathStr, "launch-script-path", "l", "", "Launch script file path",
 	)
-	cmd.Flags().BoolVarP(
-		&autoCreateMappings, "auto-create-mappings", "m", true, "AutoCreateMappings",
+	cmd.Flags().StringVarP(
+		&autoCreateMappingsBoolStr, "auto-create-mappings", "m", "true", "AutoCreateMappings",
 	)
 	return cmd
 }

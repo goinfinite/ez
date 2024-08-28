@@ -73,25 +73,19 @@ func (controller *AccountController) Create() *cobra.Command {
 }
 
 func (controller *AccountController) Update() *cobra.Command {
-	var accountIdStr string
-	var passwordStr string
-	shouldUpdateApiKeyBool := false
-	var quotaStr string
+	var accountIdStr, passwordStr, shouldUpdateApiKeyBoolStr, quotaStr string
 
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "UpdateAccount (pass or apiKey)",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId": accountIdStr,
+				"accountId":          accountIdStr,
+				"shouldUpdateApiKey": shouldUpdateApiKeyBoolStr,
 			}
 
 			if passwordStr != "" {
 				requestBody["password"] = passwordStr
-			}
-
-			if shouldUpdateApiKeyBool {
-				requestBody["shouldUpdateApiKey"] = true
 			}
 
 			if quotaStr != "" {
@@ -111,8 +105,8 @@ func (controller *AccountController) Update() *cobra.Command {
 	cmd.Flags().StringVarP(&accountIdStr, "id", "i", "", "AccountId")
 	cmd.MarkFlagRequired("id")
 	cmd.Flags().StringVarP(&passwordStr, "password", "p", "", "Password")
-	cmd.Flags().BoolVarP(
-		&shouldUpdateApiKeyBool, "update-api-key", "k", false, "ShouldUpdateApiKey",
+	cmd.Flags().StringVarP(
+		&shouldUpdateApiKeyBoolStr, "update-api-key", "k", "false", "ShouldUpdateApiKey",
 	)
 	cmd.Flags().StringVarP(
 		&quotaStr, "quota", "q", "",
