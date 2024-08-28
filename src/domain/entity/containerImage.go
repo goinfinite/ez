@@ -4,6 +4,7 @@ import "github.com/speedianet/control/src/domain/valueObject"
 
 type ContainerImage struct {
 	Id           valueObject.ContainerImageId           `json:"id"`
+	AccountId    valueObject.AccountId                  `json:"accountId"`
 	ImageAddress valueObject.ContainerImageAddress      `json:"imageAddress"`
 	ImageHash    valueObject.Hash                       `json:"imageHash"`
 	Isa          valueObject.InstructionSetArchitecture `json:"isa"`
@@ -16,6 +17,7 @@ type ContainerImage struct {
 
 func NewContainerImage(
 	id valueObject.ContainerImageId,
+	accountId valueObject.AccountId,
 	imageAddress valueObject.ContainerImageAddress,
 	imageHash valueObject.Hash,
 	isa valueObject.InstructionSetArchitecture,
@@ -27,6 +29,7 @@ func NewContainerImage(
 ) ContainerImage {
 	return ContainerImage{
 		Id:           id,
+		AccountId:    accountId,
 		ImageAddress: imageAddress,
 		ImageHash:    imageHash,
 		Isa:          isa,

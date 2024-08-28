@@ -24,6 +24,7 @@ func NewContainerImageQueryRepo(
 }
 
 func (repo *ContainerImageQueryRepo) containerImageFactory(
+	accountId valueObject.AccountId,
 	rawContainerImage map[string]interface{},
 ) (containerImage entity.ContainerImage, err error) {
 	rawImageId, assertOk := rawContainerImage["Id"].(string)
@@ -156,7 +157,7 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	createdAt := valueObject.NewUnixTimeWithGoTime(createdTime)
 
 	return entity.NewContainerImage(
-		imageId, imageAddress, imageHash, isa, sizeBytes,
+		imageId, accountId, imageAddress, imageHash, isa, sizeBytes,
 		portBindings, envs, entrypointPtr, createdAt,
 	), nil
 }
@@ -239,5 +240,5 @@ func (repo *ContainerImageQueryRepo) ReadById(
 		return containerImage, err
 	}
 
-	return repo.containerImageFactory(rawContainerImageAttributes)
+	return repo.containerImageFactory(accountId, rawContainerImageAttributes)
 }
