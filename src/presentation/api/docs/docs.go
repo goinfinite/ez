@@ -397,6 +397,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/container/image/snapshot/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new container snapshot image.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "CreateContainerSnapshotImage",
+                "parameters": [
+                    {
+                        "description": "Asynchronous Snapshot Image Creation",
+                        "name": "createContainerSnapshotImageDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateContainerSnapshotImage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerSnapshotImageCreationScheduled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/image/{accountId}/{imageId}/": {
             "delete": {
                 "security": [
@@ -1194,6 +1233,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateContainerSnapshotImage": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "containerId": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateMapping": {
             "type": "object",
             "properties": {
@@ -1421,6 +1471,9 @@ const docTemplate = `{
         "entity.ContainerImage": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "createdAt": {
                     "type": "integer"
                 },

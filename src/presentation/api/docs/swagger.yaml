@@ -96,6 +96,13 @@ definitions:
       scalingThreshold:
         type: integer
     type: object
+  dto.CreateContainerSnapshotImage:
+    properties:
+      accountId:
+        type: integer
+      containerId:
+        type: string
+    type: object
   dto.CreateMapping:
     properties:
       accountId:
@@ -244,6 +251,8 @@ definitions:
     type: object
   entity.ContainerImage:
     properties:
+      accountId:
+        type: integer
       createdAt:
         type: integer
       entrypoint:
@@ -908,6 +917,30 @@ paths:
       security:
       - Bearer: []
       summary: DeleteContainerImage
+      tags:
+      - container
+  /v1/container/image/snapshot/:
+    post:
+      consumes:
+      - application/json
+      description: Create a new container snapshot image.
+      parameters:
+      - description: Asynchronous Snapshot Image Creation
+        in: body
+        name: createContainerSnapshotImageDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContainerSnapshotImage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ContainerSnapshotImageCreationScheduled
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateContainerSnapshotImage
       tags:
       - container
   /v1/container/metrics/:

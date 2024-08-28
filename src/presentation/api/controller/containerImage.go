@@ -33,6 +33,27 @@ func (controller *ContainerImageController) Read(c echo.Context) error {
 	return apiHelper.ServiceResponseWrapper(c, controller.containerImageService.Read())
 }
 
+// CreateContainerSnapshotImage	 godoc
+// @Summary      CreateContainerSnapshotImage
+// @Description  Create a new container snapshot image.
+// @Tags         container
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createContainerSnapshotImageDto 	  body    dto.CreateContainerSnapshotImage  true  "Asynchronous Snapshot Image Creation"
+// @Success      201 {object} object{} "ContainerSnapshotImageCreationScheduled"
+// @Router       /v1/container/image/snapshot/ [post]
+func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerImageService.CreateSnapshot(requestBody, true),
+	)
+}
+
 // DeleteContainerImage godoc
 // @Summary      DeleteContainerImage
 // @Description  Delete a container image.

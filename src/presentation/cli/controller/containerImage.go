@@ -31,6 +31,31 @@ func (controller *ContainerImageController) Read() *cobra.Command {
 	return cmd
 }
 
+func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
+	var accountIdUint uint64
+	var containerIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "create-snapshot",
+		Short: "CreateContainerSnapshotImage",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"accountId":   accountIdUint,
+				"containerId": containerIdStr,
+			}
+			cliHelper.ServiceResponseWrapper(
+				controller.containerImageService.CreateSnapshot(requestBody, false),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.MarkFlagRequired("container-id")
+	return cmd
+}
+
 func (controller *ContainerImageController) Delete() *cobra.Command {
 	var accountIdStr, imageIdStr string
 

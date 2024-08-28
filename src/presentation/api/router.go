@@ -93,6 +93,7 @@ func (router *Router) containerRoutes() {
 		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerImageGroup.GET("/", containerImageController.Read)
+	containerImageGroup.POST("/snapshot/", containerImageController.CreateSnapshot)
 	containerImageGroup.DELETE("/:imageId/", containerImageController.Delete)
 }
 
