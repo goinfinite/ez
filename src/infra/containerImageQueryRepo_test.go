@@ -11,15 +11,14 @@ func TestContainerImageQueryRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	containerImageQueryRepo := NewContainerImageQueryRepo(persistentDbSvc)
 
-	t.Run("ReadImageImages", func(t *testing.T) {
-		images, err := containerImageQueryRepo.Read()
+	t.Run("ReadImages", func(t *testing.T) {
+		imagesList, err := containerImageQueryRepo.Read()
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 
-		if len(images) == 0 {
-			t.Error("NoImagesFound")
+		if len(imagesList) == 0 {
+			t.Fatal("NoImagesFound")
 		}
 	})
 }
