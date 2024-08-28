@@ -2,6 +2,7 @@
 
 ```log
 0.0.7 - 2024/XX/XX
+feat: container images
 fix: call htmx.process() when Alpine.js changes the DOM
 
 0.0.6 - 2024/08/03
