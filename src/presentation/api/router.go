@@ -90,9 +90,10 @@ func (router *Router) containerRoutes() {
 
 	containerImageGroup := containerGroup.Group("/image")
 	containerImageController := apiController.NewContainerImageController(
-		router.persistentDbSvc,
+		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerImageGroup.GET("/", containerImageController.Read)
+	containerImageGroup.DELETE("/:imageId/", containerImageController.Delete)
 }
 
 func (router *Router) licenseRoutes() {

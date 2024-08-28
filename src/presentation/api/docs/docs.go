@@ -397,6 +397,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/container/image/{accountId}/{imageId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a container image.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "DeleteContainerImage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ImageId",
+                        "name": "imageId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerImageDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/metrics/": {
             "get": {
                 "security": [
@@ -1380,6 +1424,18 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "integer"
                 },
+                "entrypoint": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
                 "imageAddress": {
                     "type": "string"
                 },
@@ -1389,11 +1445,14 @@ const docTemplate = `{
                 "isa": {
                     "type": "string"
                 },
+                "portBindings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/valueObject.PortBinding"
+                    }
+                },
                 "sizeBytes": {
                     "type": "integer"
-                },
-                "snapshotAttributes": {
-                    "$ref": "#/definitions/valueObject.ContainerSnapshotAttributes"
                 }
             }
         },
@@ -1737,29 +1796,6 @@ const docTemplate = `{
                 },
                 "storageSpaceBytes": {
                     "type": "integer"
-                }
-            }
-        },
-        "valueObject.ContainerSnapshotAttributes": {
-            "type": "object",
-            "properties": {
-                "entrypoint": {
-                    "type": "string"
-                },
-                "envs": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "portBindings": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/valueObject.PortBinding"
-                    }
-                },
-                "restartPolicy": {
-                    "type": "string"
                 }
             }
         },

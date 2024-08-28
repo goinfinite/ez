@@ -84,8 +84,11 @@ func (router *Router) containerRoutes() {
 		Short: "ContainerImageManagement",
 	}
 
-	containerImageController := cliController.NewContainerImageController(router.persistentDbSvc)
+	containerImageController := cliController.NewContainerImageController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	containerImageCmd.AddCommand(containerImageController.Read())
+	containerImageCmd.AddCommand(containerImageController.Delete())
 
 	containerCmd.AddCommand(containerProfileCmd)
 	containerCmd.AddCommand(containerRegistryCmd)
