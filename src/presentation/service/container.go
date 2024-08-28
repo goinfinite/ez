@@ -10,6 +10,7 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
+	infraEnvs "github.com/speedianet/control/src/infra/envs"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
@@ -170,7 +171,7 @@ func (service *ContainerService) Create(
 	}
 
 	if shouldSchedule {
-		cliCmd := "/var/speedia/control container create"
+		cliCmd := infraEnvs.SpeediaControlBinary + " container create"
 		createParams := []string{
 			"--account-id", accountId.String(),
 			"--hostname", hostname.String(),
