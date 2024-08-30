@@ -10,4 +10,5 @@ type ContainerImageCmdRepo interface {
 		valueObject.ContainerImageId, error,
 	)
 	Delete(deleteDto dto.DeleteContainerImage) error
+	Export(exportDto dto.ExportContainerImage) (valueObject.Url, error)
 }
