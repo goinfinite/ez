@@ -11,6 +11,7 @@ func TestContainerImageCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	containerImageCmdRepo := NewContainerImageCmdRepo(persistentDbSvc)
+	containerImageQueryRepo := NewContainerImageQueryRepo(persistentDbSvc)
 
 	t.Run("CreateSnapshot", func(t *testing.T) {
 		containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
@@ -32,8 +33,26 @@ func TestContainerImageCmdRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("ExportImage", func(t *testing.T) {
+		imagesList, err := containerImageQueryRepo.Read()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(imagesList) == 0 {
+			t.Fatal("NoImagesFound")
+		}
+
+		exportDto := dto.ExportContainerImage{
+			AccountId: imagesList[0].AccountId,
+			ImageId:   imagesList[0].Id,
+		}
+		_, err = containerImageCmdRepo.Export(exportDto)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
 	t.Run("DeleteImage", func(t *testing.T) {
-		containerImageQueryRepo := NewContainerImageQueryRepo(persistentDbSvc)
 		imagesList, err := containerImageQueryRepo.Read()
 		if err != nil {
 			t.Fatal(err)
