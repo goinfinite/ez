@@ -116,7 +116,7 @@ func (service *ContainerImageService) CreateSnapshot(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, "ContainerSnapshotImageCreated")
+	return NewServiceOutput(Created, "ContainerSnapshotImageCreated")
 }
 
 func (service *ContainerImageService) Delete(
