@@ -17,6 +17,7 @@ type ActivityRecord struct {
 	Username           *valueObject.Username              `json:"username,omitempty"`
 	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
 	ContainerProfileId *valueObject.ContainerProfileId    `json:"containerProfileId,omitempty"`
+	ContainerImageId   *valueObject.ContainerImageId      `json:"containerImageId,omitempty"`
 	MappingId          *valueObject.MappingId             `json:"mappingId,omitempty"`
 	CreatedAt          valueObject.UnixTime               `json:"createdAt"`
 }
@@ -32,6 +33,7 @@ func NewActivityRecord(
 	username *valueObject.Username,
 	containerId *valueObject.ContainerId,
 	containerProfileId *valueObject.ContainerProfileId,
+	containerImageId *valueObject.ContainerImageId,
 	mappingId *valueObject.MappingId,
 	createdAt valueObject.UnixTime,
 ) (activityRecord ActivityRecord, err error) {
@@ -40,13 +42,18 @@ func NewActivityRecord(
 	}
 
 	return ActivityRecord{
-		Id:                id,
-		Level:             level,
-		Code:              code,
-		Message:           message,
-		IpAddress:         ipAddress,
-		OperatorAccountId: operatorAccountId,
-		TargetAccountId:   targetAccountId,
-		CreatedAt:         createdAt,
+		Id:                 id,
+		Level:              level,
+		Code:               code,
+		Message:            message,
+		IpAddress:          ipAddress,
+		OperatorAccountId:  operatorAccountId,
+		TargetAccountId:    targetAccountId,
+		Username:           username,
+		ContainerId:        containerId,
+		ContainerProfileId: containerProfileId,
+		ContainerImageId:   containerImageId,
+		MappingId:          mappingId,
+		CreatedAt:          createdAt,
 	}, nil
 }

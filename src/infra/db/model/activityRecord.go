@@ -18,6 +18,7 @@ type ActivityRecord struct {
 	Username           *string
 	ContainerId        *string
 	ContainerProfileId *uint64
+	ContainerImageId   *string
 	MappingId          *uint64
 	CreatedAt          time.Time `gorm:"not null"`
 }
@@ -32,7 +33,10 @@ func NewActivityRecord(
 	code, message, ipAddress *string,
 	operatorAccountId, targetAccountId *uint64,
 	username, containerId *string,
-	containerProfileId, mappingId *uint64,
+	containerProfileId *uint64,
+	containerImageId *string,
+	mappingId *uint64,
+
 ) ActivityRecord {
 	model := ActivityRecord{
 		Level:              level,
@@ -44,6 +48,7 @@ func NewActivityRecord(
 		Username:           username,
 		ContainerId:        containerId,
 		ContainerProfileId: containerProfileId,
+		ContainerImageId:   containerImageId,
 		MappingId:          mappingId,
 	}
 
@@ -137,6 +142,15 @@ func (model ActivityRecord) ToEntity() (recordEntity entity.ActivityRecord, err 
 		containerProfileIdPtr = &containerProfileId
 	}
 
+	var containerImageIdPtr *valueObject.ContainerImageId
+	if model.ContainerImageId != nil {
+		containerImageId, err := valueObject.NewContainerImageId(*model.ContainerImageId)
+		if err != nil {
+			return recordEntity, err
+		}
+		containerImageIdPtr = &containerImageId
+	}
+
 	var mappingIdPtr *valueObject.MappingId
 	if model.MappingId != nil {
 		mappingId, err := valueObject.NewMappingId(*model.MappingId)
@@ -151,6 +165,6 @@ func (model ActivityRecord) ToEntity() (recordEntity entity.ActivityRecord, err 
 	return entity.NewActivityRecord(
 		id, level, codePtr, messagePtr, ipAddressPtr, operatorAccountIdPtr,
 		targetAccountIdPtr, usernamePtr, containerIdPtr, containerProfileIdPtr,
-		mappingIdPtr, createdAt,
+		containerImageIdPtr, mappingIdPtr, createdAt,
 	)
 }

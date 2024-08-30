@@ -65,6 +65,12 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 		containerProfileIdPtr = &containerProfileId
 	}
 
+	var containerImageIdPtr *string
+	if createDto.ContainerImageId != nil {
+		containerImageId := createDto.ContainerImageId.String()
+		containerImageIdPtr = &containerImageId
+	}
+
 	var mappingIdPtr *uint64
 	if createDto.MappingId != nil {
 		mappingId := createDto.MappingId.Uint64()
@@ -74,7 +80,7 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 	securityEventModel := dbModel.NewActivityRecord(
 		0, createDto.Level.String(), codePtr, messagePtr, ipAddressPtr,
 		operatorAccountIdPtr, targetAccountIdPtr, usernamePtr, containerIdPtr,
-		containerProfileIdPtr, mappingIdPtr,
+		containerProfileIdPtr, containerImageIdPtr, mappingIdPtr,
 	)
 
 	return repo.trailDbSvc.Handler.Create(&securityEventModel).Error
@@ -128,6 +134,11 @@ func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) e
 	if deleteDto.ContainerProfileId != nil {
 		containerProfileId := deleteDto.ContainerProfileId.Uint64()
 		deleteModel.ContainerProfileId = &containerProfileId
+	}
+
+	if deleteDto.ContainerImageId != nil {
+		containerImageIdStr := deleteDto.ContainerImageId.String()
+		deleteModel.ContainerImageId = &containerImageIdStr
 	}
 
 	if deleteDto.MappingId != nil {
