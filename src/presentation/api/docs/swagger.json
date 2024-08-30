@@ -1732,8 +1732,14 @@
                 "createdAt": {
                     "type": "integer"
                 },
+                "elapsedSecs": {
+                    "type": "integer"
+                },
                 "err": {
                     "type": "string"
+                },
+                "finishedAt": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1745,6 +1751,9 @@
                     "type": "string"
                 },
                 "runAt": {
+                    "type": "integer"
+                },
+                "startedAt": {
                     "type": "integer"
                 },
                 "status": {

@@ -1739,8 +1739,14 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "integer"
                 },
+                "elapsedSecs": {
+                    "type": "integer"
+                },
                 "err": {
                     "type": "string"
+                },
+                "finishedAt": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1752,6 +1758,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "runAt": {
+                    "type": "integer"
+                },
+                "startedAt": {
                     "type": "integer"
                 },
                 "status": {

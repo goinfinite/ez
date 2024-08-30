@@ -427,8 +427,12 @@ definitions:
         type: string
       createdAt:
         type: integer
+      elapsedSecs:
+        type: integer
       err:
         type: string
+      finishedAt:
+        type: integer
       id:
         type: integer
       name:
@@ -436,6 +440,8 @@ definitions:
       output:
         type: string
       runAt:
+        type: integer
+      startedAt:
         type: integer
       status:
         type: string
