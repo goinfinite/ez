@@ -34,6 +34,9 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	if err != nil {
 		return imageId, err
 	}
+	if len(rawImageId) > 12 {
+		rawImageId = rawImageId[:12]
+	}
 
 	return valueObject.NewContainerImageId(rawImageId)
 }
