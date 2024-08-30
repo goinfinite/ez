@@ -26,16 +26,14 @@ func NewCreateSecurityActivityRecord(
 func (uc *CreateSecurityActivityRecord) createActivityRecord(
 	createDto dto.CreateActivityRecord,
 ) {
-	go func() {
-		err := uc.activityRecordCmdRepo.Create(createDto)
-		if err != nil {
-			slog.Debug(
-				"CreateSecurityActivityRecordError",
-				slog.Any("createDto", createDto),
-				slog.Any("error", err),
-			)
-		}
-	}()
+	err := uc.activityRecordCmdRepo.Create(createDto)
+	if err != nil {
+		slog.Debug(
+			"CreateSecurityActivityRecordError",
+			slog.Any("createDto", createDto),
+			slog.Any("error", err),
+		)
+	}
 }
 
 func (uc *CreateSecurityActivityRecord) CreateSessionToken(
