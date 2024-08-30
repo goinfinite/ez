@@ -1,7 +1,7 @@
 package dbModel
 
 import (
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -19,6 +19,9 @@ type ScheduledTask struct {
 	RunAt       *time.Time
 	Output      *string
 	Error       *string
+	StartedAt   *time.Time
+	FinishedAt  *time.Time
+	ElapsedSecs *uint
 	CreatedAt   time.Time `gorm:"not null"`
 	UpdatedAt   time.Time `gorm:"not null"`
 }
@@ -41,7 +44,7 @@ func (ScheduledTask) SplitTags(tagsStr string) []valueObject.ScheduledTaskTag {
 	for tagIndex, rawTag := range rawTagsList {
 		tag, err := valueObject.NewScheduledTaskTag(rawTag)
 		if err != nil {
-			log.Printf("[index %d] %s", tagIndex, err)
+			slog.Debug(err.Error(), slog.Int("index", tagIndex))
 			continue
 		}
 		tags = append(tags, tag)
@@ -56,6 +59,8 @@ func NewScheduledTask(
 	timeoutSecs *uint,
 	runAt *time.Time,
 	output, err *string,
+	startedAt, finishedAt *time.Time,
+	elapsedSecs *uint,
 ) ScheduledTask {
 	model := ScheduledTask{
 		Name:        name,
@@ -65,6 +70,9 @@ func NewScheduledTask(
 		RunAt:       runAt,
 		Output:      output,
 		Error:       err,
+		StartedAt:   startedAt,
+		FinishedAt:  finishedAt,
+		ElapsedSecs: elapsedSecs,
 	}
 
 	if id != 0 {
@@ -134,11 +142,23 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 		taskErrorPtr = &taskError
 	}
 
+	var startedAtPtr *valueObject.UnixTime
+	if model.StartedAt != nil {
+		startedAt := valueObject.NewUnixTimeWithGoTime(*model.StartedAt)
+		startedAtPtr = &startedAt
+	}
+
+	var finishedAtPtr *valueObject.UnixTime
+	if model.FinishedAt != nil {
+		finishedAt := valueObject.NewUnixTimeWithGoTime(*model.FinishedAt)
+		finishedAtPtr = &finishedAt
+	}
+
 	createdAt := valueObject.NewUnixTimeWithGoTime(model.CreatedAt)
 	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewScheduledTask(
 		id, name, status, command, tags, timeoutSecs, runAtPtr, outputPtr,
-		taskErrorPtr, createdAt, updatedAt,
+		taskErrorPtr, startedAtPtr, finishedAtPtr, model.ElapsedSecs, createdAt, updatedAt,
 	), nil
 }

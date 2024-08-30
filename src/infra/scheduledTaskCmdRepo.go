@@ -35,7 +35,7 @@ func (repo *ScheduledTaskCmdRepo) Create(
 
 	scheduledTaskModel := dbModel.NewScheduledTask(
 		0, createDto.Name.String(), newTaskStatus.String(), createDto.Command.String(),
-		createDto.Tags, createDto.TimeoutSecs, runAtPtr, nil, nil,
+		createDto.Tags, createDto.TimeoutSecs, runAtPtr, nil, nil, nil, nil, nil,
 	)
 
 	return repo.persistentDbSvc.Handler.Create(&scheduledTaskModel).Error
@@ -79,6 +79,8 @@ func (repo *ScheduledTaskCmdRepo) Run(
 		timeoutStr = strconv.FormatUint(uint64(*pendingTask.TimeoutSecs), 10)
 	}
 
+	startedAtUnixTime := valueObject.NewUnixTimeNow()
+
 	cmdWithTimeout := "timeout --kill-after=10s " + timeoutStr + " " + pendingTask.Command.String()
 	rawOutput, rawError := infraHelper.RunCmdWithSubShell(cmdWithTimeout)
 
@@ -87,8 +89,14 @@ func (repo *ScheduledTaskCmdRepo) Run(
 		finalStatus, _ = valueObject.NewScheduledTaskStatus("failed")
 	}
 
+	finishedAtUnixTime := valueObject.NewUnixTimeNow()
+	elapsedSecs := uint(finishedAtUnixTime.Read() - startedAtUnixTime.Read())
+
 	updateMap := map[string]interface{}{
-		"status": finalStatus.String(),
+		"status":       finalStatus.String(),
+		"started_at":   startedAtUnixTime.GetAsGoTime(),
+		"finished_at":  finishedAtUnixTime.GetAsGoTime(),
+		"elapsed_secs": elapsedSecs,
 	}
 
 	if len(rawOutput) > 0 {
