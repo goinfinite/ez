@@ -126,7 +126,7 @@ func (router *Router) o11yRoutes() {
 }
 
 func (router *Router) scheduledTaskRoutes() {
-	scheduledTaskGroup := router.baseRoute.Group("/v1/scheduled-task")
+	scheduledTaskGroup := router.baseRoute.Group("/v1/task")
 
 	scheduledTaskController := apiController.NewScheduledTaskController(router.persistentDbSvc)
 	scheduledTaskGroup.GET("/", scheduledTaskController.Read)
