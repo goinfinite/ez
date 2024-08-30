@@ -2,19 +2,14 @@ package valueObject
 
 import (
 	"errors"
-	"slices"
+	"regexp"
 
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-type ActivityRecordCode string
+const activityRecordRegex string = `^[A-Za-z]\w{2,128}$`
 
-var ValidActivityRecordCodes = []string{
-	"LoginFailed", "LoginSuccessful",
-	"AccountCreated", "AccountDeleted",
-	"AccountPasswordUpdated", "AccountApiKeyUpdated", "AccountQuotaUpdated",
-	"UnauthorizedAccess",
-}
+type ActivityRecordCode string
 
 func NewActivityRecordCode(value interface{}) (ActivityRecordCode, error) {
 	stringValue, err := voHelper.InterfaceToString(value)
@@ -22,7 +17,8 @@ func NewActivityRecordCode(value interface{}) (ActivityRecordCode, error) {
 		return "", errors.New("ActivityRecordCodeMustBeString")
 	}
 
-	if !slices.Contains(ValidActivityRecordCodes, stringValue) {
+	re := regexp.MustCompile(activityRecordRegex)
+	if !re.MatchString(stringValue) {
 		return "", errors.New("InvalidActivityRecordCode")
 	}
 
