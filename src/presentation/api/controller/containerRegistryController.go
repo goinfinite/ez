@@ -14,7 +14,7 @@ import (
 // GetContainerRegistryImages	 godoc
 // @Summary      GetContainerRegistryImages
 // @Description  Get container registry images.
-// @Tags         container
+// @Tags         containerRegistry
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -46,7 +46,7 @@ func GetContainerRegistryImagesController(c echo.Context) error {
 // GetContainerRegistryTaggedImage	 godoc
 // @Summary      GetContainerRegistryTaggedImage
 // @Description  Get container registry tagged image.
-// @Tags         container
+// @Tags         containerRegistry
 // @Accept       json
 // @Produce      json
 // @Security     Bearer

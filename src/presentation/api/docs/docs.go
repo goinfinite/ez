@@ -565,7 +565,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerProfile"
                 ],
                 "summary": "ReadContainerProfiles",
                 "responses": {
@@ -594,7 +594,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerProfile"
                 ],
                 "summary": "UpdateContainerProfile",
                 "parameters": [
@@ -631,7 +631,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerProfile"
                 ],
                 "summary": "CreateNewContainerProfile",
                 "parameters": [
@@ -670,7 +670,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerProfile"
                 ],
                 "summary": "DeleteContainerProfile",
                 "parameters": [
@@ -707,7 +707,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerRegistry"
                 ],
                 "summary": "GetContainerRegistryImages",
                 "parameters": [
@@ -746,7 +746,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerRegistry"
                 ],
                 "summary": "GetContainerRegistryTaggedImage",
                 "parameters": [

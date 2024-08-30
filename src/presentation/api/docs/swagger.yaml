@@ -1017,7 +1017,7 @@ paths:
       - Bearer: []
       summary: ReadContainerProfiles
       tags:
-      - container
+      - containerProfile
     post:
       consumes:
       - application/json
@@ -1042,7 +1042,7 @@ paths:
       - Bearer: []
       summary: CreateNewContainerProfile
       tags:
-      - container
+      - containerProfile
     put:
       consumes:
       - application/json
@@ -1067,7 +1067,7 @@ paths:
       - Bearer: []
       summary: UpdateContainerProfile
       tags:
-      - container
+      - containerProfile
   /v1/container/profile/{profileId}/:
     delete:
       consumes:
@@ -1090,7 +1090,7 @@ paths:
       - Bearer: []
       summary: DeleteContainerProfile
       tags:
-      - container
+      - containerProfile
   /v1/container/registry/image/:
     get:
       consumes:
@@ -1114,7 +1114,7 @@ paths:
       - Bearer: []
       summary: GetContainerRegistryImages
       tags:
-      - container
+      - containerRegistry
   /v1/container/registry/image/tagged/:
     get:
       consumes:
@@ -1137,7 +1137,7 @@ paths:
       - Bearer: []
       summary: GetContainerRegistryTaggedImage
       tags:
-      - container
+      - containerRegistry
   /v1/license/:
     get:
       consumes:

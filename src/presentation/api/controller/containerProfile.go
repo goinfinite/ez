@@ -25,7 +25,7 @@ func NewContainerProfileController(
 // ReadContainerProfiles	 godoc
 // @Summary      ReadContainerProfiles
 // @Description  List container profiles.
-// @Tags         container
+// @Tags         containerProfile
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -95,7 +95,7 @@ func parseContainerSpecs(
 // CreateContainerProfile	 godoc
 // @Summary      CreateNewContainerProfile
 // @Description  Create a new container profile.
-// @Tags         container
+// @Tags         containerProfile
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -148,7 +148,7 @@ func (controller *ContainerProfileController) Create(c echo.Context) error {
 // UpdateContainerProfile godoc
 // @Summary      UpdateContainerProfile
 // @Description  Update a container profile.
-// @Tags         container
+// @Tags         containerProfile
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -201,7 +201,7 @@ func (controller *ContainerProfileController) Update(c echo.Context) error {
 // DeleteContainerProfile godoc
 // @Summary      DeleteContainerProfile
 // @Description  Delete a container profile.
-// @Tags         container
+// @Tags         containerProfile
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
