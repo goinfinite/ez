@@ -381,7 +381,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerImage"
                 ],
                 "summary": "ReadContainerImages",
                 "responses": {
@@ -392,6 +392,45 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/entity.ContainerImage"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/image/export/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Export a container image.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "containerImage"
+                ],
+                "summary": "ExportContainerImage",
+                "parameters": [
+                    {
+                        "description": "ExportContainerImageDto",
+                        "name": "exportContainerImageDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ExportContainerImage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect to the compressed image file download URL.",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -412,7 +451,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerImage"
                 ],
                 "summary": "CreateContainerSnapshotImage",
                 "parameters": [
@@ -451,7 +490,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "container"
+                    "containerImage"
                 ],
                 "summary": "DeleteContainerImage",
                 "parameters": [
@@ -1275,6 +1314,17 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.ExportContainerImage": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "imageId": {
+                    "type": "string"
                 }
             }
         },

@@ -56,15 +56,41 @@ func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 	return cmd
 }
 
+func (controller *ContainerImageController) Export() *cobra.Command {
+	var accountIdUint uint64
+	var imageIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "export",
+		Short: "ExportContainerImage",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"accountId": accountIdUint,
+				"imageId":   imageIdStr,
+			}
+			cliHelper.ServiceResponseWrapper(
+				controller.containerImageService.Export(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&imageIdStr, "image-id", "i", "", "ImageId")
+	cmd.MarkFlagRequired("image-id")
+	return cmd
+}
+
 func (controller *ContainerImageController) Delete() *cobra.Command {
-	var accountIdStr, imageIdStr string
+	var accountIdUint uint64
+	var imageIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainerImage",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId": accountIdStr,
+				"accountId": accountIdUint,
 				"imageId":   imageIdStr,
 			}
 
@@ -74,7 +100,7 @@ func (controller *ContainerImageController) Delete() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&accountIdStr, "account-id", "a", "", "AccountId")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
 	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&imageIdStr, "image-id", "i", "", "ImageId")
 	cmd.MarkFlagRequired("image-id")

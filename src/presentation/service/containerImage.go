@@ -119,6 +119,57 @@ func (service *ContainerImageService) CreateSnapshot(
 	return NewServiceOutput(Created, "ContainerSnapshotImageCreated")
 }
 
+func (service *ContainerImageService) Export(
+	input map[string]interface{},
+) ServiceOutput {
+	requiredParams := []string{"accountId", "imageId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	imageId, err := valueObject.NewContainerImageId(input["imageId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	ipAddress := LocalOperatorIpAddress
+	if input["ipAddress"] != nil {
+		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	exportDto := dto.NewExportContainerImage(accountId, imageId, operatorAccountId, ipAddress)
+
+	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
+
+	downloadUrl, err := useCase.ExportContainerImage(
+		service.containerImageQueryRepo, containerImageCmdRepo,
+		service.activityRecordCmdRepo, exportDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, downloadUrl.String())
+}
+
 func (service *ContainerImageService) Delete(
 	input map[string]interface{},
 ) ServiceOutput {

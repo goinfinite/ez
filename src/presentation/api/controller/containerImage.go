@@ -1,6 +1,8 @@
 package apiController
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
@@ -23,7 +25,7 @@ func NewContainerImageController(
 // ReadContainerImages	 godoc
 // @Summary      ReadContainerImages
 // @Description  List container images.
-// @Tags         container
+// @Tags         containerImage
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -36,7 +38,7 @@ func (controller *ContainerImageController) Read(c echo.Context) error {
 // CreateContainerSnapshotImage	 godoc
 // @Summary      CreateContainerSnapshotImage
 // @Description  Create a new container snapshot image.
-// @Tags         container
+// @Tags         containerImage
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -54,10 +56,39 @@ func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error
 	)
 }
 
+// ExportContainerImage	 godoc
+// @Summary      ExportContainerImage
+// @Description  Export a container image.
+// @Tags         containerImage
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        exportContainerImageDto 	  body    dto.ExportContainerImage  true "ExportContainerImageDto"
+// @Success      302 {string} string "Redirect to the compressed image file download URL."
+// @Router       /v1/container/image/export/ [post]
+func (controller *ContainerImageController) Export(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	serviceResponse := controller.containerImageService.Export(requestBody)
+	if serviceResponse.Status == service.Success {
+		bodyStr, assertOk := serviceResponse.Body.(string)
+		if !assertOk {
+			return apiHelper.ServiceResponseWrapper(c, serviceResponse)
+		}
+
+		return c.Redirect(http.StatusTemporaryRedirect, bodyStr)
+	}
+
+	return apiHelper.ServiceResponseWrapper(c, serviceResponse)
+}
+
 // DeleteContainerImage godoc
 // @Summary      DeleteContainerImage
 // @Description  Delete a container image.
-// @Tags         container
+// @Tags         containerImage
 // @Accept       json
 // @Produce      json
 // @Security     Bearer

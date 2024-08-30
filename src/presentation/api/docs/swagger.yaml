@@ -125,6 +125,13 @@ definitions:
       mappingId:
         type: integer
     type: object
+  dto.ExportContainerImage:
+    properties:
+      accountId:
+        type: integer
+      imageId:
+        type: string
+    type: object
   dto.Login:
     properties:
       password:
@@ -896,7 +903,7 @@ paths:
       - Bearer: []
       summary: ReadContainerImages
       tags:
-      - container
+      - containerImage
   /v1/container/image/{accountId}/{imageId}/:
     delete:
       consumes:
@@ -924,7 +931,31 @@ paths:
       - Bearer: []
       summary: DeleteContainerImage
       tags:
-      - container
+      - containerImage
+  /v1/container/image/export/:
+    post:
+      consumes:
+      - application/json
+      description: Export a container image.
+      parameters:
+      - description: ExportContainerImageDto
+        in: body
+        name: exportContainerImageDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ExportContainerImage'
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to the compressed image file download URL.
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: ExportContainerImage
+      tags:
+      - containerImage
   /v1/container/image/snapshot/:
     post:
       consumes:
@@ -948,7 +979,7 @@ paths:
       - Bearer: []
       summary: CreateContainerSnapshotImage
       tags:
-      - container
+      - containerImage
   /v1/container/metrics/:
     get:
       consumes:
