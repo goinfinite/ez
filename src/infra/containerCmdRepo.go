@@ -58,7 +58,7 @@ func (repo *ContainerCmdRepo) calibratePortBindings(
 			&nextPrivatePort,
 		)
 
-		if originalPortBinding.PublicPort.Read() == 0 {
+		if originalPortBinding.PublicPort.Uint16() == 0 {
 			calibratedPortBindings = append(
 				calibratedPortBindings,
 				calibratedPortBinding,

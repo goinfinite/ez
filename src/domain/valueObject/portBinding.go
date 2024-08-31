@@ -584,7 +584,7 @@ func NewPortBindingFromString(value string) (portBindings []PortBinding, err err
 
 	rawContainerPortStr := portBindingParts["containerPort"]
 	if rawContainerPortStr == "" {
-		if publicPort.Read() == 0 {
+		if publicPort.Uint16() == 0 {
 			return portBindings, errors.New("UnknownContainerPort")
 		}
 		rawContainerPortStr = publicPort.String()

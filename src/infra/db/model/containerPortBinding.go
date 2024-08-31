@@ -9,13 +9,13 @@ import (
 )
 
 type ContainerPortBinding struct {
-	ID            uint   `gorm:"primarykey"`
+	ID            uint64 `gorm:"primarykey"`
 	ContainerID   string `gorm:"not null"`
 	ServiceName   string `gorm:"not null"`
-	PublicPort    uint   `gorm:"not null"`
-	ContainerPort uint   `gorm:"not null"`
+	PublicPort    uint16 `gorm:"not null"`
+	ContainerPort uint16 `gorm:"not null"`
 	Protocol      string `gorm:"not null"`
-	PrivatePort   uint   `gorm:"not null"`
+	PrivatePort   uint16 `gorm:"not null"`
 }
 
 func (ContainerPortBinding) TableName() string {
@@ -29,16 +29,16 @@ func (ContainerPortBinding) ToModel(
 	return ContainerPortBinding{
 		ContainerID:   containerId.String(),
 		ServiceName:   vo.ServiceName.String(),
-		PublicPort:    uint(vo.PublicPort.Read()),
-		ContainerPort: uint(vo.ContainerPort.Read()),
+		PublicPort:    vo.PublicPort.Uint16(),
+		ContainerPort: vo.ContainerPort.Uint16(),
 		Protocol:      vo.Protocol.String(),
-		PrivatePort:   uint(vo.PrivatePort.Read()),
+		PrivatePort:   vo.PrivatePort.Uint16(),
 	}
 }
 
-func (model ContainerPortBinding) ToValueObject() (valueObject.PortBinding, error) {
-	var portBinding valueObject.PortBinding
-
+func (model ContainerPortBinding) ToValueObject() (
+	portBinding valueObject.PortBinding, err error,
+) {
 	serviceName, err := valueObject.NewServiceName(model.ServiceName)
 	if err != nil {
 		return portBinding, err
@@ -65,11 +65,7 @@ func (model ContainerPortBinding) ToValueObject() (valueObject.PortBinding, erro
 	}
 
 	return valueObject.NewPortBinding(
-		serviceName,
-		publicPort,
-		containerPort,
-		protocol,
-		&privatePort,
+		serviceName, publicPort, containerPort, protocol, &privatePort,
 	), nil
 }
 
@@ -77,7 +73,7 @@ func (model ContainerPortBinding) getUnusablePorts(
 	ormSvc *gorm.DB,
 	portType string,
 	portsToIgnore []valueObject.NetworkPort,
-) (unusablePorts []uint, err error) {
+) (unusablePorts []uint16, err error) {
 	err = ormSvc.Model(model).Select(portType).
 		Order(portType + " asc").Find(&unusablePorts).Error
 	if err != nil {
@@ -88,9 +84,9 @@ func (model ContainerPortBinding) getUnusablePorts(
 		return unusablePorts, nil
 	}
 
-	portsToIgnoreUint := []uint{}
+	portsToIgnoreUint := []uint16{}
 	for _, port := range portsToIgnore {
-		portsToIgnoreUint = append(portsToIgnoreUint, uint(port.Read()))
+		portsToIgnoreUint = append(portsToIgnoreUint, port.Uint16())
 	}
 	unusablePorts = append(unusablePorts, portsToIgnoreUint...)
 	unusablePorts = slices.Compact(unusablePorts)
@@ -100,9 +96,9 @@ func (model ContainerPortBinding) getUnusablePorts(
 }
 
 func (model ContainerPortBinding) getNextAvailablePort(
-	notUsablePorts []uint,
-	initialPort uint,
-	maxPort uint,
+	notUsablePorts []uint16,
+	initialPort uint16,
+	maxPort uint16,
 ) (nextAvailablePort valueObject.NetworkPort, err error) {
 	nextPort := initialPort
 	for _, port := range notUsablePorts {
@@ -138,8 +134,7 @@ func (model ContainerPortBinding) GetNextAvailablePrivatePort(
 		return nextAvailablePort, err
 	}
 
-	maxPort := uint(60000)
-	return model.getNextAvailablePort(unusablePorts, 40000, maxPort)
+	return model.getNextAvailablePort(unusablePorts, 40000, 60000)
 }
 
 func (model ContainerPortBinding) GetNextAvailablePublicPort(
@@ -161,7 +156,7 @@ func (model ContainerPortBinding) GetNextAvailablePublicPort(
 		return nextAvailablePort, err
 	}
 
-	minPortUint := uint(publicPortInterval.Min.Read())
-	maxPortUint := uint(publicPortInterval.Max.Read())
-	return model.getNextAvailablePort(unusablePorts, minPortUint, maxPortUint)
+	return model.getNextAvailablePort(
+		unusablePorts, publicPortInterval.Min.Uint16(), publicPortInterval.Max.Uint16(),
+	)
 }

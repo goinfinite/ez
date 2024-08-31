@@ -7,29 +7,21 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-type NetworkPort uint64
+type NetworkPort uint16
 
-func NewNetworkPort(value interface{}) (NetworkPort, error) {
-	np, err := voHelper.InterfaceToUint64(value)
+func NewNetworkPort(value interface{}) (networkPort NetworkPort, err error) {
+	uintValue, err := voHelper.InterfaceToUint16(value)
 	if err != nil {
-		return 0, errors.New("InvalidNetworkPort")
+		return networkPort, errors.New("NetworkPortMustBeUint16")
 	}
 
-	return NetworkPort(np), nil
+	return NetworkPort(uintValue), nil
 }
 
-func NewNetworkPortPanic(value interface{}) NetworkPort {
-	np, err := NewNetworkPort(value)
-	if err != nil {
-		panic(err)
-	}
-	return np
+func (vo NetworkPort) Uint16() uint16 {
+	return uint16(vo)
 }
 
-func (np NetworkPort) Read() uint64 {
-	return uint64(np)
-}
-
-func (np NetworkPort) String() string {
-	return strconv.FormatUint(uint64(np), 10)
+func (vo NetworkPort) String() string {
+	return strconv.FormatUint(uint64(vo), 10)
 }

@@ -19,12 +19,11 @@ func TestMappingCmdRepo(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 		hostname := valueObject.NewFqdnPanic("speedia.net")
 
+		port, _ := valueObject.NewNetworkPort(80)
+		protocol, _ := valueObject.NewNetworkProtocol("http")
+
 		createMapping := dto.NewCreateMapping(
-			accountId,
-			&hostname,
-			valueObject.NewNetworkPortPanic(80),
-			valueObject.NewNetworkProtocolPanic("http"),
-			[]valueObject.ContainerId{},
+			accountId, &hostname, port, protocol, []valueObject.ContainerId{},
 		)
 
 		_, err := mappingCmdRepo.Create(createMapping)

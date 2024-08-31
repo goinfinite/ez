@@ -122,13 +122,13 @@ func (repo *ContainerProxyCmdRepo) Create(containerId valueObject.ContainerId) e
 		return err
 	}
 
-	containerPrivatePort := uint64(0)
+	containerPrivatePort := uint16(0)
 	for _, portBinding := range containerEntity.PortBindings {
 		if portBinding.ContainerPort.String() != "1618" {
 			continue
 		}
 
-		containerPrivatePort = portBinding.PrivatePort.Read()
+		containerPrivatePort = portBinding.PrivatePort.Uint16()
 	}
 	if containerPrivatePort == 0 {
 		return errors.New("SpeediaOsPrivatePortNotFound")
