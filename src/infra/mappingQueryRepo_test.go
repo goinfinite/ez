@@ -47,7 +47,7 @@ func TestMappingQueryRepo(t *testing.T) {
 	})
 
 	t.Run("GetByProtocol", func(t *testing.T) {
-		protocol := valueObject.NewNetworkProtocolPanic("http")
+		protocol, _ := valueObject.NewNetworkProtocol("http")
 		_, err := mappingQueryRepo.GetByProtocol(protocol)
 		if err != nil {
 			t.Error(err)

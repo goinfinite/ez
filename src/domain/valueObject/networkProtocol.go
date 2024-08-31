@@ -11,14 +11,7 @@ import (
 type NetworkProtocol string
 
 var ValidNetworkProtocols = []string{
-	"http",
-	"https",
-	"ws",
-	"wss",
-	"grpc",
-	"grpcs",
-	"tcp",
-	"udp",
+	"http", "https", "ws", "wss", "grpc", "grpcs", "tcp", "udp",
 }
 
 func NewNetworkProtocol(value interface{}) (NetworkProtocol, error) {
@@ -27,30 +20,21 @@ func NewNetworkProtocol(value interface{}) (NetworkProtocol, error) {
 		return "", errors.New("NetworkProtocolMustBeString")
 	}
 
-	stringValue = strings.TrimSpace(stringValue)
 	stringValue = strings.ToLower(stringValue)
-
 	if !slices.Contains(ValidNetworkProtocols, stringValue) {
 		return "", errors.New("InvalidNetworkProtocol")
 	}
+
 	return NetworkProtocol(stringValue), nil
 }
 
-func NewNetworkProtocolPanic(value string) NetworkProtocol {
-	np, err := NewNetworkProtocol(value)
-	if err != nil {
-		panic(err)
-	}
-	return np
-}
-
-func (np NetworkProtocol) String() string {
-	return string(np)
+func (vo NetworkProtocol) String() string {
+	return string(vo)
 }
 
 func GuessNetworkProtocolByPort(port NetworkPort) NetworkProtocol {
 	protocolStr := "tcp"
-	switch port.Read() {
+	switch port.Uint16() {
 	case 53, 123, 514:
 		protocolStr = "udp"
 	case 80, 2368, 3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009, 5000, 5601, 8000, 8001, 8002, 8065, 8080, 8081:
