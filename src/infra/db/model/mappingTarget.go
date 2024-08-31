@@ -12,7 +12,7 @@ type MappingTarget struct {
 	MappingID            uint64
 	ContainerId          string
 	ContainerHostname    string
-	ContainerPrivatePort uint
+	ContainerPrivatePort uint16
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 }
@@ -24,7 +24,7 @@ func (MappingTarget) TableName() string {
 func NewMappingTarget(
 	id, mappingId uint64,
 	containerId, containerHostname string,
-	containerPrivatePort uint,
+	containerPrivatePort uint16,
 ) MappingTarget {
 	targetModel := MappingTarget{
 		MappingID:            mappingId,
