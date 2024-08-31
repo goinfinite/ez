@@ -44,7 +44,7 @@ func (repo *MappingCmdRepo) Create(
 
 	mappingModel := dbModel.NewMapping(
 		0, createDto.AccountId.Uint64(), hostnamePtr,
-		uint(createDto.PublicPort.Read()), createDto.Protocol.String(),
+		uint(createDto.PublicPort.Uint16()), createDto.Protocol.String(),
 		[]dbModel.MappingTarget{}, time.Now(), time.Now(),
 	)
 
@@ -166,15 +166,29 @@ server {
 		sslMappings = append(sslMappings, mapping)
 	}
 
-	fileTemplate := `{{ range . }}
-map $ssl_preread_server_name $ssl_{{.PublicPort}}_vhost_upstream_map {
+	publicPortSslMappingsSliceMap := map[uint16][]entity.Mapping{}
+	for _, mapping := range sslMappings {
+		publicPortUint := mapping.PublicPort.Uint16()
+		if _, exists := publicPortSslMappingsSliceMap[publicPortUint]; !exists {
+			publicPortSslMappingsSliceMap[publicPortUint] = []entity.Mapping{}
+		}
+
+		publicPortSslMappingsSliceMap[publicPortUint] = append(
+			publicPortSslMappingsSliceMap[publicPortUint], mapping,
+		)
+	}
+
+	fileTemplate := `{{ range $publicPort, $mappings := . }}
+map $ssl_preread_server_name $ssl_{{ $publicPort }}_vhost_upstream_map {
+{{- range . }}
 	{{ .Hostname }} mapping_{{ .Id }}_backend;
 	www.{{ .Hostname }} mapping_{{ .Id }}_backend;
+{{- end }}
 }
 
 server {
-	listen {{ .PublicPort }};
-	proxy_pass $ssl_{{ .PublicPort }}_vhost_upstream_map;
+	listen {{ $publicPort }};
+	proxy_pass $ssl_{{ $publicPort }}_vhost_upstream_map;
 	ssl_preread on;
 }
 {{ end }}`
@@ -189,7 +203,7 @@ server {
 	}
 
 	var sslFileContent strings.Builder
-	err = templatePtr.Execute(&sslFileContent, sslMappings)
+	err = templatePtr.Execute(&sslFileContent, publicPortSslMappingsSliceMap)
 	if err != nil {
 		return errors.New("SslTemplateExecutionError: " + err.Error())
 	}
@@ -220,7 +234,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		return err
 	}
 
-	containerPrivatePort := uint64(0)
+	containerPrivatePort := uint16(0)
 	mappingPublicPortStr := mappingEntity.PublicPort.String()
 	for _, portBinding := range containerEntity.PortBindings {
 		if portBinding.PublicPort.String() != mappingPublicPortStr {
@@ -239,7 +253,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 			continue
 		}
 
-		containerPrivatePort = portBinding.PrivatePort.Read()
+		containerPrivatePort = portBinding.PrivatePort.Uint16()
 	}
 	if containerPrivatePort == 0 {
 		return errors.New("ContainerPrivatePortNotFound")
@@ -250,15 +264,28 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		createDto.MappingId.Uint64(),
 		containerEntity.Id.String(),
 		containerEntity.Hostname.String(),
-		uint(containerPrivatePort),
+		containerPrivatePort,
 	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)
 	if createResult.Error != nil {
 		return createResult.Error
 	}
+	targetId, err := valueObject.NewMappingTargetId(targetModel.ID)
+	if err != nil {
+		return errors.New("MappingTargetIdCreationError: " + err.Error())
+	}
 
-	return repo.updateWebServerFile()
+	err = repo.updateWebServerFile()
+	if err != nil {
+		deleteErr := repo.DeleteTarget(createDto.MappingId, targetId)
+		if deleteErr != nil {
+			return errors.New("DeleteTargetFailed: " + deleteErr.Error())
+		}
+		return errors.New("UpdateWebServerFileFailed: " + err.Error())
+	}
+
+	return nil
 }
 
 func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
