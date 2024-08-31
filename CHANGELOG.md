@@ -4,6 +4,7 @@
 0.0.7 - 2024/XX/XX
 feat: container images
 fix: call htmx.process() when Alpine.js changes the DOM
+fix: duplicated ssl map blocks bug
 
 0.0.6 - 2024/08/03
 refactor: container profile frontend with HTMX and Alpine.js
