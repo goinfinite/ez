@@ -159,7 +159,7 @@ func (service *ContainerImageService) Export(
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 
-	downloadUrl, err := useCase.ExportContainerImage(
+	archiveFile, err := useCase.ExportContainerImage(
 		service.containerImageQueryRepo, containerImageCmdRepo,
 		service.activityRecordCmdRepo, exportDto,
 	)
@@ -167,7 +167,7 @@ func (service *ContainerImageService) Export(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, downloadUrl.String())
+	return NewServiceOutput(Success, archiveFile)
 }
 
 func (service *ContainerImageService) Delete(

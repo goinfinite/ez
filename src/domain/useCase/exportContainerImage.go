@@ -5,8 +5,8 @@ import (
 	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func ExportContainerImage(
@@ -14,19 +14,19 @@ func ExportContainerImage(
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	exportDto dto.ExportContainerImage,
-) (downloadUrl valueObject.Url, err error) {
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
 	_, err = containerImageQueryRepo.ReadById(exportDto.AccountId, exportDto.ImageId)
 	if err != nil {
-		return downloadUrl, errors.New("ContainerImageNotFound")
+		return archiveFile, errors.New("ContainerImageNotFound")
 	}
 
-	downloadUrl, err = containerImageCmdRepo.Export(exportDto)
+	archiveFile, err = containerImageCmdRepo.Export(exportDto)
 	if err != nil {
 		slog.Error("ExportContainerImageInfraError", slog.Any("error", err))
-		return downloadUrl, errors.New("ExportContainerImageError")
+		return archiveFile, errors.New("ExportContainerImageError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).ExportContainerImage(exportDto)
 
-	return downloadUrl, nil
+	return archiveFile, nil
 }

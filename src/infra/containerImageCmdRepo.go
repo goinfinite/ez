@@ -2,6 +2,7 @@ package infra
 
 import (
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
@@ -43,8 +44,14 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 
 func (repo *ContainerImageCmdRepo) Export(
 	exportDto dto.ExportContainerImage,
-) (downloadUrl valueObject.Url, err error) {
-	return valueObject.NewUrl("http://localhost")
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	accountId := exportDto.AccountId
+	unixFilePath, _ := valueObject.NewUnixFilePath("/file.tar.gz")
+	downloadUrl, _ := valueObject.NewUrl("http://localhost" + unixFilePath.String())
+	sizeBytes, _ := valueObject.NewByte(123456789)
+	return entity.NewContainerImageArchiveFile(
+		accountId, unixFilePath, downloadUrl, sizeBytes, valueObject.NewUnixTimeNow(),
+	), nil
 }
 
 func (repo *ContainerImageCmdRepo) Delete(

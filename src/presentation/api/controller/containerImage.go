@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -64,7 +65,7 @@ func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error
 // @Produce      json
 // @Security     Bearer
 // @Param        exportContainerImageDto 	  body    dto.ExportContainerImage  true "ExportContainerImageDto"
-// @Success      302 {string} string "Redirect to the compressed image file download URL."
+// @Success      302 {string} string "Redirect to the archive image file download URL."
 // @Router       /v1/container/image/export/ [post]
 func (controller *ContainerImageController) Export(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
@@ -73,16 +74,16 @@ func (controller *ContainerImageController) Export(c echo.Context) error {
 	}
 
 	serviceResponse := controller.containerImageService.Export(requestBody)
-	if serviceResponse.Status == service.Success {
-		bodyStr, assertOk := serviceResponse.Body.(string)
-		if !assertOk {
-			return apiHelper.ServiceResponseWrapper(c, serviceResponse)
-		}
-
-		return c.Redirect(http.StatusTemporaryRedirect, bodyStr)
+	if serviceResponse.Status != service.Success {
+		return apiHelper.ServiceResponseWrapper(c, serviceResponse)
 	}
 
-	return apiHelper.ServiceResponseWrapper(c, serviceResponse)
+	archiveFile, assertOk := serviceResponse.Body.(entity.ContainerImageArchiveFile)
+	if !assertOk {
+		return apiHelper.ServiceResponseWrapper(c, serviceResponse)
+	}
+
+	return c.Redirect(http.StatusFound, archiveFile.DownloadUrl.String())
 }
 
 // DeleteContainerImage godoc

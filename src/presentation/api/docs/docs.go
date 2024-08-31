@@ -428,7 +428,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "302": {
-                        "description": "Redirect to the compressed image file download URL.",
+                        "description": "Redirect to the archive image file download URL.",
                         "schema": {
                             "type": "string"
                         }
