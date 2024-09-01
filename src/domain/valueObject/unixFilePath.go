@@ -2,34 +2,77 @@ package valueObject
 
 import (
 	"errors"
+	"path/filepath"
 	"regexp"
+	"strings"
+
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
-const unixFilePathRegexExpression = `^\/(?:[\w\p{Latin}\. \-]+\/)*[\w\p{Latin}\. \-]*$`
+const unixFilePathRegexExpression = `^\/?[^\n\r\t\f\0\?\[\]\<\>]+$`
+const unixFileRelativePathRegexExpression = `\.\.\/|^\.\/|^\/\.\/`
 
 type UnixFilePath string
 
-func NewUnixFilePath(unixFilePathStr string) (UnixFilePath, error) {
-	unixFilePath := UnixFilePath(unixFilePathStr)
-	if !unixFilePath.isValid() {
-		return "", errors.New("InvalidUnixFilePath")
-	}
-	return unixFilePath, nil
-}
-
-func NewUnixFilePathPanic(unixFilePathStr string) UnixFilePath {
-	unixFilePath, err := NewUnixFilePath(unixFilePathStr)
+func NewUnixFilePath(value interface{}) (filePath UnixFilePath, err error) {
+	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
-		panic(err)
+		return filePath, errors.New("UnixFilePathValueMustBeString")
 	}
-	return unixFilePath
+
+	unixFilePathRegex := regexp.MustCompile(unixFilePathRegexExpression)
+	if !unixFilePathRegex.MatchString(stringValue) {
+		return filePath, errors.New("InvalidUnixFilePath")
+	}
+
+	isOnlyFileName := !strings.Contains(stringValue, "/")
+	if isOnlyFileName {
+		return filePath, errors.New("PathIsFileNameOnly")
+	}
+
+	unixFileRelativePathRegex := regexp.MustCompile(unixFileRelativePathRegexExpression)
+	if unixFileRelativePathRegex.MatchString(stringValue) {
+		return filePath, errors.New("RelativePathNotAllowed")
+	}
+
+	return UnixFilePath(stringValue), nil
 }
 
-func (unixFilePath UnixFilePath) isValid() bool {
-	unixFilePathRegexRegex := regexp.MustCompile(unixFilePathRegexExpression)
-	return unixFilePathRegexRegex.MatchString(string(unixFilePath))
+func (vo UnixFilePath) ReadWithoutExtension() UnixFilePath {
+	unixFilePathExtStr := filepath.Ext(string(vo))
+	if unixFilePathExtStr == "" {
+		return vo
+	}
+
+	unixFilePathWithoutExtStr := strings.TrimSuffix(string(vo), unixFilePathExtStr)
+	unixFilePathWithoutExt, _ := NewUnixFilePath(unixFilePathWithoutExtStr)
+	return unixFilePathWithoutExt
 }
 
-func (unixFilePath UnixFilePath) String() string {
-	return string(unixFilePath)
+func (vo UnixFilePath) ReadFileName() UnixFileName {
+	unixFileBase := filepath.Base(string(vo))
+	unixFileName, _ := NewUnixFileName(unixFileBase)
+	return unixFileName
+}
+
+func (vo UnixFilePath) ReadFileNameWithoutExtension() UnixFileName {
+	unixFileBase := filepath.Base(string(vo))
+	unixFilePathExt := filepath.Ext(string(vo))
+	unixFileBaseWithoutExtStr := strings.TrimSuffix(string(unixFileBase), unixFilePathExt)
+	unixFileNameWithoutExt, _ := NewUnixFileName(unixFileBaseWithoutExtStr)
+	return unixFileNameWithoutExt
+}
+
+func (vo UnixFilePath) ReadFileExtension() (UnixFileExtension, error) {
+	unixFileExtensionStr := filepath.Ext(string(vo))
+	return NewUnixFileExtension(unixFileExtensionStr)
+}
+
+func (vo UnixFilePath) ReadFileDir() UnixFilePath {
+	unixFileDirPath, _ := NewUnixFilePath(filepath.Dir(string(vo)))
+	return unixFileDirPath
+}
+
+func (vo UnixFilePath) String() string {
+	return string(vo)
 }
