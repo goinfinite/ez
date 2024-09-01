@@ -65,13 +65,12 @@ func (service *ContainerImageService) CreateSnapshot(
 			"--account-id", accountId.String(),
 			"--container-id", containerId.String(),
 		}
-
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
 		taskName, _ := valueObject.NewScheduledTaskName("CreateContainerSnapshotImage")
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
-		taskTag, _ := valueObject.NewScheduledTaskTag("container")
+		taskTag, _ := valueObject.NewScheduledTaskTag("containerImage")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
 		timeoutSeconds := uint(900)
 
@@ -120,7 +119,7 @@ func (service *ContainerImageService) CreateSnapshot(
 }
 
 func (service *ContainerImageService) Export(
-	input map[string]interface{},
+	input map[string]interface{}, shouldSchedule bool,
 ) ServiceOutput {
 	requiredParams := []string{"accountId", "imageId"}
 
@@ -137,6 +136,33 @@ func (service *ContainerImageService) Export(
 	imageId, err := valueObject.NewContainerImageId(input["imageId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
+	}
+
+	if shouldSchedule {
+		cliCmd := infraEnvs.SpeediaControlBinary + " container image export"
+		exportParams := []string{
+			"--account-id", accountId.String(),
+			"--image-id", imageId.String(),
+		}
+		cliCmd = cliCmd + " " + strings.Join(exportParams, " ")
+
+		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
+		taskName, _ := valueObject.NewScheduledTaskName("ExportContainerImage")
+		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
+		taskTag, _ := valueObject.NewScheduledTaskTag("containerImage")
+		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		timeoutSeconds := uint(900)
+
+		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
+			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+		)
+
+		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+
+		return NewServiceOutput(Created, "ContainerImageExportScheduled")
 	}
 
 	operatorAccountId := LocalOperatorAccountId

@@ -404,7 +404,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Export a container image.",
+                "description": "Export a container image to a file. This is an asynchronous operation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -427,10 +427,10 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "302": {
-                        "description": "Redirect to the archive image file download URL.",
+                    "201": {
+                        "description": "ContainerImageExportScheduled",
                         "schema": {
-                            "type": "string"
+                            "type": "object"
                         }
                     }
                 }
@@ -443,7 +443,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Create a new container snapshot image.",
+                "description": "Create a new container snapshot image. This is an asynchronous operation.",
                 "consumes": [
                     "application/json"
                 ],

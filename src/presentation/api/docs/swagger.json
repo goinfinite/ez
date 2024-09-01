@@ -397,7 +397,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "Export a container image.",
+                "description": "Export a container image to a file. This is an asynchronous operation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -420,10 +420,10 @@
                     }
                 ],
                 "responses": {
-                    "302": {
-                        "description": "Redirect to the archive image file download URL.",
+                    "201": {
+                        "description": "ContainerImageExportScheduled",
                         "schema": {
-                            "type": "string"
+                            "type": "object"
                         }
                     }
                 }
@@ -436,7 +436,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "Create a new container snapshot image.",
+                "description": "Create a new container snapshot image. This is an asynchronous operation.",
                 "consumes": [
                     "application/json"
                 ],

@@ -1,10 +1,7 @@
 package apiController
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
@@ -38,7 +35,7 @@ func (controller *ContainerImageController) Read(c echo.Context) error {
 
 // CreateContainerSnapshotImage	 godoc
 // @Summary      CreateContainerSnapshotImage
-// @Description  Create a new container snapshot image.
+// @Description  Create a new container snapshot image. This is an asynchronous operation.
 // @Tags         containerImage
 // @Accept       json
 // @Produce      json
@@ -59,13 +56,13 @@ func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error
 
 // ExportContainerImage	 godoc
 // @Summary      ExportContainerImage
-// @Description  Export a container image.
+// @Description  Export a container image to a file. This is an asynchronous operation.
 // @Tags         containerImage
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
 // @Param        exportContainerImageDto 	  body    dto.ExportContainerImage  true "ExportContainerImageDto"
-// @Success      302 {string} string "Redirect to the archive image file download URL."
+// @Success      201 {object} object{} "ContainerImageExportScheduled"
 // @Router       /v1/container/image/export/ [post]
 func (controller *ContainerImageController) Export(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
@@ -73,17 +70,9 @@ func (controller *ContainerImageController) Export(c echo.Context) error {
 		return err
 	}
 
-	serviceResponse := controller.containerImageService.Export(requestBody)
-	if serviceResponse.Status != service.Success {
-		return apiHelper.ServiceResponseWrapper(c, serviceResponse)
-	}
-
-	archiveFile, assertOk := serviceResponse.Body.(entity.ContainerImageArchiveFile)
-	if !assertOk {
-		return apiHelper.ServiceResponseWrapper(c, serviceResponse)
-	}
-
-	return c.Redirect(http.StatusFound, archiveFile.DownloadUrl.String())
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerImageService.Export(requestBody, true),
+	)
 }
 
 // DeleteContainerImage godoc

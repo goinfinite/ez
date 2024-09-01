@@ -69,7 +69,7 @@ func (controller *ContainerImageController) Export() *cobra.Command {
 				"imageId":   imageIdStr,
 			}
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.Export(requestBody),
+				controller.containerImageService.Export(requestBody, false),
 			)
 		},
 	}

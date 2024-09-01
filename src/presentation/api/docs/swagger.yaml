@@ -936,7 +936,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Export a container image.
+      description: Export a container image to a file. This is an asynchronous operation.
       parameters:
       - description: ExportContainerImageDto
         in: body
@@ -947,10 +947,10 @@ paths:
       produces:
       - application/json
       responses:
-        "302":
-          description: Redirect to the archive image file download URL.
+        "201":
+          description: ContainerImageExportScheduled
           schema:
-            type: string
+            type: object
       security:
       - Bearer: []
       summary: ExportContainerImage
@@ -960,7 +960,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new container snapshot image.
+      description: Create a new container snapshot image. This is an asynchronous
+        operation.
       parameters:
       - description: Asynchronous Snapshot Image Creation
         in: body
