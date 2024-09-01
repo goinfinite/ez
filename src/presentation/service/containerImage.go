@@ -107,9 +107,11 @@ func (service *ContainerImageService) CreateSnapshot(
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainerSnapshotImage(
-		containerImageCmdRepo, service.activityRecordCmdRepo, createSnapshotImageDto,
+		containerImageCmdRepo, containerQueryRepo, service.activityRecordCmdRepo,
+		createSnapshotImageDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
