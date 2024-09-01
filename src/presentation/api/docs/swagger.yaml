@@ -932,6 +932,34 @@ paths:
       summary: DeleteContainerImage
       tags:
       - containerImage
+  /v1/container/image/archive/{accountId}/{imageId}/:
+    get:
+      consumes:
+      - application/json
+      description: Download a container image archive file.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: ImageId
+        in: path
+        name: imageId
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: ContainerImageArchiveFile
+          schema:
+            type: file
+      security:
+      - Bearer: []
+      summary: DownloadContainerImageArchiveFile
+      tags:
+      - containerImage
   /v1/container/image/export/:
     post:
       consumes:
@@ -963,7 +991,7 @@ paths:
       description: Create a new container snapshot image. This is an asynchronous
         operation.
       parameters:
-      - description: Asynchronous Snapshot Image Creation
+      - description: CreateContainerSnapshotImageDto
         in: body
         name: createContainerSnapshotImageDto
         required: true

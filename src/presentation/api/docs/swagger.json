@@ -390,6 +390,50 @@
                 }
             }
         },
+        "/v1/container/image/archive/{accountId}/{imageId}/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Download a container image archive file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "containerImage"
+                ],
+                "summary": "DownloadContainerImageArchiveFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ImageId",
+                        "name": "imageId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ContainerImageArchiveFile",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/image/export/": {
             "post": {
                 "security": [
@@ -449,7 +493,7 @@
                 "summary": "CreateContainerSnapshotImage",
                 "parameters": [
                     {
-                        "description": "Asynchronous Snapshot Image Creation",
+                        "description": "CreateContainerSnapshotImageDto",
                         "name": "createContainerSnapshotImageDto",
                         "in": "body",
                         "required": true,
