@@ -70,6 +70,11 @@ func (repo *ActivityRecordQueryRepo) Read(
 		readModel.ContainerProfileId = &containerProfileId
 	}
 
+	if readDto.ContainerImageId != nil {
+		containerImageId := readDto.ContainerImageId.String()
+		readModel.ContainerImageId = &containerImageId
+	}
+
 	if readDto.MappingId != nil {
 		mappingId := readDto.MappingId.Uint64()
 		readModel.MappingId = &mappingId
