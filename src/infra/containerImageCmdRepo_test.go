@@ -33,25 +33,6 @@ func TestContainerImageCmdRepo(t *testing.T) {
 		}
 	})
 
-	t.Run("ExportImage", func(t *testing.T) {
-		imagesList, err := containerImageQueryRepo.Read()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(imagesList) == 0 {
-			t.Fatal("NoImagesFound")
-		}
-
-		exportDto := dto.ExportContainerImage{
-			AccountId: imagesList[0].AccountId,
-			ImageId:   imagesList[0].Id,
-		}
-		_, err = containerImageCmdRepo.Export(exportDto)
-		if err != nil {
-			t.Fatal(err)
-		}
-	})
-
 	t.Run("DeleteImage", func(t *testing.T) {
 		imagesList, err := containerImageQueryRepo.Read()
 		if err != nil {
@@ -63,6 +44,25 @@ func TestContainerImageCmdRepo(t *testing.T) {
 			ImageId:   imagesList[0].Id,
 		}
 		err = containerImageCmdRepo.Delete(deleteDto)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("CreateArchiveFile", func(t *testing.T) {
+		imagesList, err := containerImageQueryRepo.Read()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(imagesList) == 0 {
+			t.Fatal("NoImagesFound")
+		}
+
+		createDto := dto.CreateContainerImageArchiveFile{
+			AccountId: imagesList[0].AccountId,
+			ImageId:   imagesList[0].Id,
+		}
+		_, err = containerImageCmdRepo.CreateArchiveFile(createDto)
 		if err != nil {
 			t.Fatal(err)
 		}

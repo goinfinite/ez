@@ -42,18 +42,6 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	return valueObject.NewContainerImageId(rawImageId)
 }
 
-func (repo *ContainerImageCmdRepo) Export(
-	exportDto dto.ExportContainerImage,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	unixFilePath, _ := valueObject.NewUnixFilePath("/file.tar.gz")
-	downloadUrl, _ := valueObject.NewUrl("http://localhost" + unixFilePath.String())
-	sizeBytes, _ := valueObject.NewByte(123456789)
-	return entity.NewContainerImageArchiveFile(
-		exportDto.ImageId, exportDto.AccountId, unixFilePath, downloadUrl,
-		sizeBytes, valueObject.NewUnixTimeNow(),
-	), nil
-}
-
 func (repo *ContainerImageCmdRepo) Delete(
 	deleteDto dto.DeleteContainerImage,
 ) error {
@@ -61,6 +49,18 @@ func (repo *ContainerImageCmdRepo) Delete(
 		deleteDto.AccountId, "podman", "image", "rm", deleteDto.ImageId.String(),
 	)
 	return err
+}
+
+func (repo *ContainerImageCmdRepo) CreateArchiveFile(
+	createDto dto.CreateContainerImageArchiveFile,
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	unixFilePath, _ := valueObject.NewUnixFilePath("/file.tar.gz")
+	downloadUrl, _ := valueObject.NewUrl("http://localhost" + unixFilePath.String())
+	sizeBytes, _ := valueObject.NewByte(123456789)
+	return entity.NewContainerImageArchiveFile(
+		createDto.ImageId, createDto.AccountId, unixFilePath, downloadUrl,
+		sizeBytes, valueObject.NewUnixTimeNow(),
+	), nil
 }
 
 func (repo *ContainerImageCmdRepo) DeleteArchiveFile(

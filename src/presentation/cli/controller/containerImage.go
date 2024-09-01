@@ -31,6 +31,31 @@ func (controller *ContainerImageController) Read() *cobra.Command {
 	return cmd
 }
 
+func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
+	var accountIdUint uint64
+	var containerIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "create-snapshot",
+		Short: "CreateContainerSnapshotImage",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"accountId":   accountIdUint,
+				"containerId": containerIdStr,
+			}
+			cliHelper.ServiceResponseWrapper(
+				controller.containerImageService.CreateSnapshot(requestBody, false),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.MarkFlagRequired("container-id")
+	return cmd
+}
+
 func (controller *ContainerImageController) Delete() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
@@ -57,45 +82,33 @@ func (controller *ContainerImageController) Delete() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
-	var accountIdUint uint64
-	var containerIdStr string
-
+func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-snapshot",
-		Short: "CreateContainerSnapshotImage",
+		Use:   "get",
+		Short: "ReadContainerImageArchiveFiles",
 		Run: func(cmd *cobra.Command, args []string) {
-			requestBody := map[string]interface{}{
-				"accountId":   accountIdUint,
-				"containerId": containerIdStr,
-			}
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.CreateSnapshot(requestBody, false),
+				controller.containerImageService.ReadArchiveFiles(),
 			)
 		},
 	}
-
-	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("account-id")
-	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
-	cmd.MarkFlagRequired("container-id")
 	return cmd
 }
 
-func (controller *ContainerImageController) Export() *cobra.Command {
+func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
 
 	cmd := &cobra.Command{
-		Use:   "export",
-		Short: "ExportContainerImage",
+		Use:   "create",
+		Short: "CreateContainerImageArchiveFile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
 				"accountId": accountIdUint,
 				"imageId":   imageIdStr,
 			}
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.Export(requestBody, false),
+				controller.containerImageService.CreateArchiveFile(requestBody, false),
 			)
 		},
 	}
@@ -107,25 +120,12 @@ func (controller *ContainerImageController) Export() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "get-archive-files",
-		Short: "ReadContainerImageArchiveFiles",
-		Run: func(cmd *cobra.Command, args []string) {
-			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.ReadArchiveFiles(),
-			)
-		},
-	}
-	return cmd
-}
-
 func (controller *ContainerImageController) DeleteArchiveFile() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
 
 	cmd := &cobra.Command{
-		Use:   "delete-archive-file",
+		Use:   "delete",
 		Short: "DeleteContainerImageArchiveFile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{

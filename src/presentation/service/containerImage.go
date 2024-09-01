@@ -38,56 +38,6 @@ func (service *ContainerImageService) Read() ServiceOutput {
 	return NewServiceOutput(Success, imagesList)
 }
 
-func (service *ContainerImageService) Delete(
-	input map[string]interface{},
-) ServiceOutput {
-	requiredParams := []string{"accountId", "imageId"}
-	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
-	if err != nil {
-		return NewServiceOutput(UserError, err.Error())
-	}
-
-	accountId, err := valueObject.NewAccountId(input["accountId"])
-	if err != nil {
-		return NewServiceOutput(UserError, err.Error())
-	}
-
-	imageId, err := valueObject.NewContainerImageId(input["imageId"])
-	if err != nil {
-		return NewServiceOutput(UserError, err.Error())
-	}
-
-	operatorAccountId := LocalOperatorAccountId
-	if input["operatorAccountId"] != nil {
-		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
-		}
-	}
-
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
-		}
-	}
-
-	deleteDto := dto.NewDeleteContainerImage(accountId, imageId, operatorAccountId, ipAddress)
-
-	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
-
-	err = useCase.DeleteContainerImage(
-		service.containerImageQueryRepo, containerImageCmdRepo,
-		service.activityRecordCmdRepo, deleteDto,
-	)
-	if err != nil {
-		return NewServiceOutput(InfraError, err.Error())
-	}
-
-	return NewServiceOutput(Success, "ContainerImageDeleted")
-}
-
 func (service *ContainerImageService) CreateSnapshot(
 	input map[string]interface{},
 	shouldSchedule bool,
@@ -168,8 +118,68 @@ func (service *ContainerImageService) CreateSnapshot(
 	return NewServiceOutput(Created, "ContainerSnapshotImageCreated")
 }
 
-func (service *ContainerImageService) Export(
-	input map[string]interface{}, shouldSchedule bool,
+func (service *ContainerImageService) Delete(
+	input map[string]interface{},
+) ServiceOutput {
+	requiredParams := []string{"accountId", "imageId"}
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	imageId, err := valueObject.NewContainerImageId(input["imageId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	ipAddress := LocalOperatorIpAddress
+	if input["ipAddress"] != nil {
+		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteContainerImage(accountId, imageId, operatorAccountId, ipAddress)
+
+	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
+
+	err = useCase.DeleteContainerImage(
+		service.containerImageQueryRepo, containerImageCmdRepo,
+		service.activityRecordCmdRepo, deleteDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "ContainerImageDeleted")
+}
+
+func (service *ContainerImageService) ReadArchiveFiles() ServiceOutput {
+	filesList, err := useCase.ReadContainerImageArchiveFiles(service.containerImageQueryRepo)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, filesList)
+}
+
+func (service *ContainerImageService) CreateArchiveFile(
+	input map[string]interface{},
+	shouldSchedule bool,
 ) ServiceOutput {
 	requiredParams := []string{"accountId", "imageId"}
 
@@ -189,17 +199,17 @@ func (service *ContainerImageService) Export(
 	}
 
 	if shouldSchedule {
-		cliCmd := infraEnvs.SpeediaControlBinary + " container image export"
-		exportParams := []string{
+		cliCmd := infraEnvs.SpeediaControlBinary + " container image archive create"
+		createParams := []string{
 			"--account-id", accountId.String(),
 			"--image-id", imageId.String(),
 		}
-		cliCmd = cliCmd + " " + strings.Join(exportParams, " ")
+		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
-		taskName, _ := valueObject.NewScheduledTaskName("ExportContainerImage")
+		taskName, _ := valueObject.NewScheduledTaskName("CreateContainerImageArchiveFile")
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
-		taskTag, _ := valueObject.NewScheduledTaskTag("containerImage")
+		taskTag, _ := valueObject.NewScheduledTaskTag("containerImageArchive")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
 		timeoutSeconds := uint(900)
 
@@ -212,7 +222,7 @@ func (service *ContainerImageService) Export(
 			return NewServiceOutput(InfraError, err.Error())
 		}
 
-		return NewServiceOutput(Created, "ContainerImageExportScheduled")
+		return NewServiceOutput(Created, "ContainerImageArchiveFileCreationScheduled")
 	}
 
 	operatorAccountId := LocalOperatorAccountId
@@ -231,28 +241,21 @@ func (service *ContainerImageService) Export(
 		}
 	}
 
-	exportDto := dto.NewExportContainerImage(accountId, imageId, operatorAccountId, ipAddress)
+	createDto := dto.NewCreateContainerImageArchiveFile(
+		accountId, imageId, operatorAccountId, ipAddress,
+	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 
-	archiveFile, err := useCase.ExportContainerImage(
+	archiveFile, err := useCase.CreateContainerImageArchiveFile(
 		service.containerImageQueryRepo, containerImageCmdRepo,
-		service.activityRecordCmdRepo, exportDto,
+		service.activityRecordCmdRepo, createDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
 	return NewServiceOutput(Success, archiveFile)
-}
-
-func (service *ContainerImageService) ReadArchiveFiles() ServiceOutput {
-	filesList, err := useCase.ReadContainerImageArchiveFiles(service.containerImageQueryRepo)
-	if err != nil {
-		return NewServiceOutput(InfraError, err.Error())
-	}
-
-	return NewServiceOutput(Success, filesList)
 }
 
 func (service *ContainerImageService) DeleteArchiveFile(

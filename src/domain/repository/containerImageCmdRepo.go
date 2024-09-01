@@ -7,10 +7,13 @@ import (
 )
 
 type ContainerImageCmdRepo interface {
-	CreateSnapshot(createDto dto.CreateContainerSnapshotImage) (
+	CreateSnapshot(dto.CreateContainerSnapshotImage) (
 		valueObject.ContainerImageId, error,
 	)
-	Delete(deleteDto dto.DeleteContainerImage) error
-	Export(exportDto dto.ExportContainerImage) (entity.ContainerImageArchiveFile, error)
-	DeleteArchiveFile(deleteDto dto.DeleteContainerImageArchiveFile) error
+	Delete(dto.DeleteContainerImage) error
+
+	CreateArchiveFile(
+		dto.CreateContainerImageArchiveFile,
+	) (entity.ContainerImageArchiveFile, error)
+	DeleteArchiveFile(dto.DeleteContainerImageArchiveFile) error
 }

@@ -41,6 +41,27 @@ func (controller *ContainerImageController) Read(c echo.Context) error {
 	return apiHelper.ServiceResponseWrapper(c, controller.containerImageService.Read())
 }
 
+// CreateContainerSnapshotImage	 godoc
+// @Summary      CreateContainerSnapshotImage
+// @Description  Create a new container snapshot image. This is an asynchronous operation.
+// @Tags         containerImage
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createContainerSnapshotImageDto 	  body    dto.CreateContainerSnapshotImage  true  "CreateContainerSnapshotImageDto"
+// @Success      201 {object} object{} "ContainerSnapshotImageCreationScheduled"
+// @Router       /v1/container/image/snapshot/ [post]
+func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerImageService.CreateSnapshot(requestBody, true),
+	)
+}
+
 // DeleteContainerImage godoc
 // @Summary      DeleteContainerImage
 // @Description  Delete a container image.
@@ -63,52 +84,10 @@ func (controller *ContainerImageController) Delete(c echo.Context) error {
 	)
 }
 
-// CreateContainerSnapshotImage	 godoc
-// @Summary      CreateContainerSnapshotImage
-// @Description  Create a new container snapshot image. This is an asynchronous operation.
-// @Tags         containerImage
-// @Accept       json
-// @Produce      json
-// @Security     Bearer
-// @Param        createContainerSnapshotImageDto 	  body    dto.CreateContainerSnapshotImage  true  "CreateContainerSnapshotImageDto"
-// @Success      201 {object} object{} "ContainerSnapshotImageCreationScheduled"
-// @Router       /v1/container/image/snapshot/ [post]
-func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error {
-	requestBody, err := apiHelper.ReadRequestBody(c)
-	if err != nil {
-		return err
-	}
-
-	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.CreateSnapshot(requestBody, true),
-	)
-}
-
-// ExportContainerImage	 godoc
-// @Summary      ExportContainerImage
-// @Description  Export a container image to a file. This is an asynchronous operation.
-// @Tags         containerImage
-// @Accept       json
-// @Produce      json
-// @Security     Bearer
-// @Param        exportContainerImageDto 	  body    dto.ExportContainerImage  true "ExportContainerImageDto"
-// @Success      201 {object} object{} "ContainerImageExportScheduled"
-// @Router       /v1/container/image/export/ [post]
-func (controller *ContainerImageController) Export(c echo.Context) error {
-	requestBody, err := apiHelper.ReadRequestBody(c)
-	if err != nil {
-		return err
-	}
-
-	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.Export(requestBody, true),
-	)
-}
-
 // ReadContainerImageArchiveFiles	 godoc
 // @Summary      ReadContainerImageArchiveFiles
 // @Description  List container image archive files.
-// @Tags         containerImage
+// @Tags         containerImageArchive
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -123,7 +102,7 @@ func (controller *ContainerImageController) ReadArchiveFiles(c echo.Context) err
 // DownloadContainerImageArchiveFile	 godoc
 // @Summary      DownloadContainerImageArchiveFile
 // @Description  Download a container image archive file.
-// @Tags         containerImage
+// @Tags         containerImageArchive
 // @Accept       json
 // @Produce      octet-stream
 // @Security     Bearer
@@ -163,10 +142,31 @@ func (controller *ContainerImageController) ReadArchiveFile(c echo.Context) erro
 	)
 }
 
+// CreateContainerImageArchiveFile	 godoc
+// @Summary      CreateContainerImageArchiveFile
+// @Description  Export a container image to a file. This is an asynchronous operation.
+// @Tags         containerImageArchive
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createContainerImageArchiveFileDto 	  body    dto.CreateContainerImageArchiveFile  true  "CreateContainerImageArchiveFileDto"
+// @Success      201 {object} object{} "ContainerImageArchiveFileCreationScheduled"
+// @Router       /v1/container/image/archive/ [post]
+func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerImageService.CreateArchiveFile(requestBody, true),
+	)
+}
+
 // DeleteContainerImageArchiveFile	 godoc
 // @Summary      DeleteContainerImageArchiveFile
 // @Description  Delete a container image archive file.
-// @Tags         containerImage
+// @Tags         containerImageArchive
 // @Accept       json
 // @Produce      json
 // @Security     Bearer

@@ -77,6 +77,13 @@ definitions:
       restartPolicy:
         type: string
     type: object
+  dto.CreateContainerImageArchiveFile:
+    properties:
+      accountId:
+        type: integer
+      imageId:
+        type: string
+    type: object
   dto.CreateContainerProfile:
     properties:
       baseSpecs:
@@ -124,13 +131,6 @@ definitions:
         type: string
       mappingId:
         type: integer
-    type: object
-  dto.ExportContainerImage:
-    properties:
-      accountId:
-        type: integer
-      imageId:
-        type: string
     type: object
   dto.Login:
     properties:
@@ -965,7 +965,30 @@ paths:
       - Bearer: []
       summary: ReadContainerImageArchiveFiles
       tags:
-      - containerImage
+      - containerImageArchive
+    post:
+      consumes:
+      - application/json
+      description: Export a container image to a file. This is an asynchronous operation.
+      parameters:
+      - description: CreateContainerImageArchiveFileDto
+        in: body
+        name: createContainerImageArchiveFileDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContainerImageArchiveFile'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ContainerImageArchiveFileCreationScheduled
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateContainerImageArchiveFile
+      tags:
+      - containerImageArchive
   /v1/container/image/archive/{accountId}/{imageId}/:
     delete:
       consumes:
@@ -993,7 +1016,7 @@ paths:
       - Bearer: []
       summary: DeleteContainerImageArchiveFile
       tags:
-      - containerImage
+      - containerImageArchive
     get:
       consumes:
       - application/json
@@ -1020,31 +1043,7 @@ paths:
       - Bearer: []
       summary: DownloadContainerImageArchiveFile
       tags:
-      - containerImage
-  /v1/container/image/export/:
-    post:
-      consumes:
-      - application/json
-      description: Export a container image to a file. This is an asynchronous operation.
-      parameters:
-      - description: ExportContainerImageDto
-        in: body
-        name: exportContainerImageDto
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ExportContainerImage'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ContainerImageExportScheduled
-          schema:
-            type: object
-      security:
-      - Bearer: []
-      summary: ExportContainerImage
-      tags:
-      - containerImage
+      - containerImageArchive
   /v1/container/image/snapshot/:
     post:
       consumes:

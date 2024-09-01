@@ -95,13 +95,15 @@ func (router *Router) containerRoutes() {
 	containerImageGroup.GET("/", containerImageController.Read)
 	containerImageGroup.DELETE("/:accountId/:imageId/", containerImageController.Delete)
 	containerImageGroup.POST("/snapshot/", containerImageController.CreateSnapshot)
-	containerImageGroup.POST("/export/", containerImageController.Export)
-	containerImageGroup.GET("/archive/", containerImageController.ReadArchiveFiles)
-	containerImageGroup.GET(
-		"/archive/:accountId/:imageId/", containerImageController.ReadArchiveFile,
+
+	containerImageArchiveGroup := containerImageGroup.Group("/archive")
+	containerImageArchiveGroup.GET("/", containerImageController.ReadArchiveFiles)
+	containerImageArchiveGroup.GET(
+		"/:accountId/:imageId/", containerImageController.ReadArchiveFile,
 	)
-	containerImageGroup.DELETE(
-		"/archive/:accountId/:imageId/", containerImageController.DeleteArchiveFile,
+	containerImageArchiveGroup.POST("/", containerImageController.CreateArchiveFile)
+	containerImageArchiveGroup.DELETE(
+		"/:accountId/:imageId/", containerImageController.DeleteArchiveFile,
 	)
 }
 

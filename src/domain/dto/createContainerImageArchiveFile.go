@@ -4,20 +4,20 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-type ExportContainerImage struct {
+type CreateContainerImageArchiveFile struct {
 	AccountId         valueObject.AccountId        `json:"accountId"`
 	ImageId           valueObject.ContainerImageId `json:"imageId"`
 	OperatorAccountId valueObject.AccountId        `json:"-"`
 	IpAddress         valueObject.IpAddress        `json:"-"`
 }
 
-func NewExportContainerImage(
+func NewCreateContainerImageArchiveFile(
 	accountId valueObject.AccountId,
 	imageId valueObject.ContainerImageId,
 	operatorAccountId valueObject.AccountId,
 	ipAddress valueObject.IpAddress,
-) ExportContainerImage {
-	return ExportContainerImage{
+) CreateContainerImageArchiveFile {
+	return CreateContainerImageArchiveFile{
 		AccountId:         accountId,
 		ImageId:           imageId,
 		OperatorAccountId: operatorAccountId,

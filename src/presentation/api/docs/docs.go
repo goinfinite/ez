@@ -412,7 +412,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "containerImage"
+                    "containerImageArchive"
                 ],
                 "summary": "ReadContainerImageArchiveFiles",
                 "responses": {
@@ -423,6 +423,43 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/entity.ContainerImageArchiveFile"
                             }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Export a container image to a file. This is an asynchronous operation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "containerImageArchive"
+                ],
+                "summary": "CreateContainerImageArchiveFile",
+                "parameters": [
+                    {
+                        "description": "CreateContainerImageArchiveFileDto",
+                        "name": "createContainerImageArchiveFileDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateContainerImageArchiveFile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerImageArchiveFileCreationScheduled",
+                        "schema": {
+                            "type": "object"
                         }
                     }
                 }
@@ -443,7 +480,7 @@ const docTemplate = `{
                     "application/octet-stream"
                 ],
                 "tags": [
-                    "containerImage"
+                    "containerImageArchive"
                 ],
                 "summary": "DownloadContainerImageArchiveFile",
                 "parameters": [
@@ -485,7 +522,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "containerImage"
+                    "containerImageArchive"
                 ],
                 "summary": "DeleteContainerImageArchiveFile",
                 "parameters": [
@@ -507,45 +544,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "ContainerImageArchiveFileDeleted",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/container/image/export/": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Export a container image to a file. This is an asynchronous operation.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "containerImage"
-                ],
-                "summary": "ExportContainerImage",
-                "parameters": [
-                    {
-                        "description": "ExportContainerImageDto",
-                        "name": "exportContainerImageDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.ExportContainerImage"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "ContainerImageExportScheduled",
                         "schema": {
                             "type": "object"
                         }
@@ -1360,6 +1358,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateContainerImageArchiveFile": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "imageId": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateContainerProfile": {
             "type": "object",
             "properties": {
@@ -1431,17 +1440,6 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
-                }
-            }
-        },
-        "dto.ExportContainerImage": {
-            "type": "object",
-            "properties": {
-                "accountId": {
-                    "type": "integer"
-                },
-                "imageId": {
-                    "type": "string"
                 }
             }
         },

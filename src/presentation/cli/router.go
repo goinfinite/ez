@@ -90,9 +90,15 @@ func (router *Router) containerRoutes() {
 	containerImageCmd.AddCommand(containerImageController.Read())
 	containerImageCmd.AddCommand(containerImageController.Delete())
 	containerImageCmd.AddCommand(containerImageController.CreateSnapshot())
-	containerImageCmd.AddCommand(containerImageController.Export())
-	containerImageCmd.AddCommand(containerImageController.ReadArchiveFiles())
-	containerImageCmd.AddCommand(containerImageController.DeleteArchiveFile())
+
+	var containerImageArchiveCmd = &cobra.Command{
+		Use:   "archive",
+		Short: "ContainerImageArchiveManagement",
+	}
+	containerImageArchiveCmd.AddCommand(containerImageController.ReadArchiveFiles())
+	containerImageArchiveCmd.AddCommand(containerImageController.CreateArchiveFile())
+	containerImageArchiveCmd.AddCommand(containerImageController.DeleteArchiveFile())
+	containerImageCmd.AddCommand(containerImageArchiveCmd)
 
 	containerCmd.AddCommand(containerProfileCmd)
 	containerCmd.AddCommand(containerRegistryCmd)
