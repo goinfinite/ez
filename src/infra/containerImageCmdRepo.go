@@ -62,3 +62,9 @@ func (repo *ContainerImageCmdRepo) Delete(
 	)
 	return err
 }
+
+func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
+	deleteDto dto.DeleteContainerImageArchiveFile,
+) error {
+	return nil
+}
