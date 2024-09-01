@@ -146,3 +146,19 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 
 	uc.createActivityRecord(createRecordDto)
 }
+
+func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
+	deleteDto dto.DeleteContainerImageArchiveFile,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		Level:             uc.recordLevel,
+		Code:              &recordCode,
+		IpAddress:         &deleteDto.IpAddress,
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		TargetAccountId:   &deleteDto.AccountId,
+		ContainerImageId:  &deleteDto.ImageId,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}

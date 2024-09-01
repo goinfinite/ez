@@ -12,4 +12,5 @@ type ContainerImageCmdRepo interface {
 	)
 	Delete(deleteDto dto.DeleteContainerImage) error
 	Export(exportDto dto.ExportContainerImage) (entity.ContainerImageArchiveFile, error)
+	DeleteArchiveFile(deleteDto dto.DeleteContainerImageArchiveFile) error
 }
