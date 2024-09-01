@@ -196,6 +196,15 @@ func (service *ContainerImageService) Export(
 	return NewServiceOutput(Success, archiveFile)
 }
 
+func (service *ContainerImageService) ReadArchiveFiles() ServiceOutput {
+	filesList, err := useCase.ReadContainerImageArchiveFiles(service.containerImageQueryRepo)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, filesList)
+}
+
 func (service *ContainerImageService) Delete(
 	input map[string]interface{},
 ) ServiceOutput {

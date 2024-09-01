@@ -90,6 +90,7 @@ func (router *Router) containerRoutes() {
 	containerImageCmd.AddCommand(containerImageController.Read())
 	containerImageCmd.AddCommand(containerImageController.CreateSnapshot())
 	containerImageCmd.AddCommand(containerImageController.Export())
+	containerImageCmd.AddCommand(containerImageController.ReadArchiveFiles())
 	containerImageCmd.AddCommand(containerImageController.Delete())
 
 	containerCmd.AddCommand(containerProfileCmd)

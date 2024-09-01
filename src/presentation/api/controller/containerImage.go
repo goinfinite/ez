@@ -83,6 +83,21 @@ func (controller *ContainerImageController) Export(c echo.Context) error {
 	)
 }
 
+// ReadContainerImageArchiveFiles	 godoc
+// @Summary      ReadContainerImageArchiveFiles
+// @Description  List container image archive files.
+// @Tags         containerImage
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Success      200 {array} entity.ContainerImageArchiveFile
+// @Router       /v1/container/image/archive/ [get]
+func (controller *ContainerImageController) ReadArchiveFiles(c echo.Context) error {
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerImageService.ReadArchiveFiles(),
+	)
+}
+
 // DownloadContainerImageArchiveFile	 godoc
 // @Summary      DownloadContainerImageArchiveFile
 // @Description  Download a container image archive file.

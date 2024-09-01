@@ -397,6 +397,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/container/image/archive/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List container image archive files.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "containerImage"
+                ],
+                "summary": "ReadContainerImageArchiveFiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.ContainerImageArchiveFile"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/image/archive/{accountId}/{imageId}/": {
             "get": {
                 "security": [
@@ -1600,6 +1631,29 @@ const docTemplate = `{
                 },
                 "sizeBytes": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.ContainerImageArchiveFile": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "downloadUrl": {
+                    "type": "string"
+                },
+                "imageId": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "unixFilePath": {
+                    "type": "string"
                 }
             }
         },

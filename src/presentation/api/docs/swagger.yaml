@@ -283,6 +283,21 @@ definitions:
       sizeBytes:
         type: integer
     type: object
+  entity.ContainerImageArchiveFile:
+    properties:
+      accountId:
+        type: integer
+      createdAt:
+        type: integer
+      downloadUrl:
+        type: string
+      imageId:
+        type: string
+      sizeBytes:
+        type: integer
+      unixFilePath:
+        type: string
+    type: object
   entity.ContainerProfile:
     properties:
       baseSpecs:
@@ -930,6 +945,25 @@ paths:
       security:
       - Bearer: []
       summary: DeleteContainerImage
+      tags:
+      - containerImage
+  /v1/container/image/archive/:
+    get:
+      consumes:
+      - application/json
+      description: List container image archive files.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.ContainerImageArchiveFile'
+            type: array
+      security:
+      - Bearer: []
+      summary: ReadContainerImageArchiveFiles
       tags:
       - containerImage
   /v1/container/image/archive/{accountId}/{imageId}/:

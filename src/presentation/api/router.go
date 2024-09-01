@@ -95,6 +95,7 @@ func (router *Router) containerRoutes() {
 	containerImageGroup.GET("/", containerImageController.Read)
 	containerImageGroup.POST("/snapshot/", containerImageController.CreateSnapshot)
 	containerImageGroup.POST("/export/", containerImageController.Export)
+	containerImageGroup.GET("/archive/", containerImageController.ReadArchiveFiles)
 	containerImageGroup.GET(
 		"/archive/:accountId/:imageId/", containerImageController.ReadArchiveFile,
 	)

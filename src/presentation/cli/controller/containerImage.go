@@ -81,6 +81,19 @@ func (controller *ContainerImageController) Export() *cobra.Command {
 	return cmd
 }
 
+func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-archive-files",
+		Short: "ReadContainerImageArchiveFiles",
+		Run: func(cmd *cobra.Command, args []string) {
+			cliHelper.ServiceResponseWrapper(
+				controller.containerImageService.ReadArchiveFiles(),
+			)
+		},
+	}
+	return cmd
+}
+
 func (controller *ContainerImageController) Delete() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
