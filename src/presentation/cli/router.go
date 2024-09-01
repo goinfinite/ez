@@ -88,10 +88,11 @@ func (router *Router) containerRoutes() {
 		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerImageCmd.AddCommand(containerImageController.Read())
+	containerImageCmd.AddCommand(containerImageController.Delete())
 	containerImageCmd.AddCommand(containerImageController.CreateSnapshot())
 	containerImageCmd.AddCommand(containerImageController.Export())
 	containerImageCmd.AddCommand(containerImageController.ReadArchiveFiles())
-	containerImageCmd.AddCommand(containerImageController.Delete())
+	containerImageCmd.AddCommand(containerImageController.DeleteArchiveFile())
 
 	containerCmd.AddCommand(containerProfileCmd)
 	containerCmd.AddCommand(containerRegistryCmd)

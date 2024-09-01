@@ -967,6 +967,33 @@ paths:
       tags:
       - containerImage
   /v1/container/image/archive/{accountId}/{imageId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a container image archive file.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: ImageId
+        in: path
+        name: imageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ContainerImageArchiveFileDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteContainerImageArchiveFile
+      tags:
+      - containerImage
     get:
       consumes:
       - application/json

@@ -31,6 +31,32 @@ func (controller *ContainerImageController) Read() *cobra.Command {
 	return cmd
 }
 
+func (controller *ContainerImageController) Delete() *cobra.Command {
+	var accountIdUint uint64
+	var imageIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteContainerImage",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"accountId": accountIdUint,
+				"imageId":   imageIdStr,
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.containerImageService.Delete(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&imageIdStr, "image-id", "i", "", "ImageId")
+	cmd.MarkFlagRequired("image-id")
+	return cmd
+}
+
 func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 	var accountIdUint uint64
 	var containerIdStr string
@@ -94,13 +120,13 @@ func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerImageController) Delete() *cobra.Command {
+func (controller *ContainerImageController) DeleteArchiveFile() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
 
 	cmd := &cobra.Command{
-		Use:   "delete",
-		Short: "DeleteContainerImage",
+		Use:   "delete-archive-file",
+		Short: "DeleteContainerImageArchiveFile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
 				"accountId": accountIdUint,
@@ -108,7 +134,7 @@ func (controller *ContainerImageController) Delete() *cobra.Command {
 			}
 
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.Delete(requestBody),
+				controller.containerImageService.DeleteArchiveFile(requestBody),
 			)
 		},
 	}

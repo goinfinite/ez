@@ -41,6 +41,28 @@ func (controller *ContainerImageController) Read(c echo.Context) error {
 	return apiHelper.ServiceResponseWrapper(c, controller.containerImageService.Read())
 }
 
+// DeleteContainerImage godoc
+// @Summary      DeleteContainerImage
+// @Description  Delete a container image.
+// @Tags         containerImage
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        accountId 	  path   string  true  "AccountId"
+// @Param        imageId 	  path   string  true  "ImageId"
+// @Success      200 {object} object{} "ContainerImageDeleted"
+// @Router       /v1/container/image/{accountId}/{imageId}/ [delete]
+func (controller *ContainerImageController) Delete(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"accountId": c.Param("accountId"),
+		"imageId":   c.Param("imageId"),
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.containerImageService.Delete(requestBody),
+	)
+}
+
 // CreateContainerSnapshotImage	 godoc
 // @Summary      CreateContainerSnapshotImage
 // @Description  Create a new container snapshot image. This is an asynchronous operation.
@@ -141,24 +163,24 @@ func (controller *ContainerImageController) ReadArchiveFile(c echo.Context) erro
 	)
 }
 
-// DeleteContainerImage godoc
-// @Summary      DeleteContainerImage
-// @Description  Delete a container image.
+// DeleteContainerImageArchiveFile	 godoc
+// @Summary      DeleteContainerImageArchiveFile
+// @Description  Delete a container image archive file.
 // @Tags         containerImage
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
 // @Param        accountId 	  path   string  true  "AccountId"
 // @Param        imageId 	  path   string  true  "ImageId"
-// @Success      200 {object} object{} "ContainerImageDeleted"
-// @Router       /v1/container/image/{accountId}/{imageId}/ [delete]
-func (controller *ContainerImageController) Delete(c echo.Context) error {
+// @Success      200 {object} object{} "ContainerImageArchiveFileDeleted"
+// @Router       /v1/container/image/archive/{accountId}/{imageId}/ [delete]
+func (controller *ContainerImageController) DeleteArchiveFile(c echo.Context) error {
 	requestBody := map[string]interface{}{
 		"accountId": c.Param("accountId"),
 		"imageId":   c.Param("imageId"),
 	}
 
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.Delete(requestBody),
+		c, controller.containerImageService.DeleteArchiveFile(requestBody),
 	)
 }

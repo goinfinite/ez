@@ -93,13 +93,16 @@ func (router *Router) containerRoutes() {
 		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerImageGroup.GET("/", containerImageController.Read)
+	containerImageGroup.DELETE("/:accountId/:imageId/", containerImageController.Delete)
 	containerImageGroup.POST("/snapshot/", containerImageController.CreateSnapshot)
 	containerImageGroup.POST("/export/", containerImageController.Export)
 	containerImageGroup.GET("/archive/", containerImageController.ReadArchiveFiles)
 	containerImageGroup.GET(
 		"/archive/:accountId/:imageId/", containerImageController.ReadArchiveFile,
 	)
-	containerImageGroup.DELETE("/:accountId/:imageId/", containerImageController.Delete)
+	containerImageGroup.DELETE(
+		"/archive/:accountId/:imageId/", containerImageController.DeleteArchiveFile,
+	)
 }
 
 func (router *Router) licenseRoutes() {

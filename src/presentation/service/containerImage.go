@@ -38,6 +38,56 @@ func (service *ContainerImageService) Read() ServiceOutput {
 	return NewServiceOutput(Success, imagesList)
 }
 
+func (service *ContainerImageService) Delete(
+	input map[string]interface{},
+) ServiceOutput {
+	requiredParams := []string{"accountId", "imageId"}
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	imageId, err := valueObject.NewContainerImageId(input["imageId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	ipAddress := LocalOperatorIpAddress
+	if input["ipAddress"] != nil {
+		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteContainerImage(accountId, imageId, operatorAccountId, ipAddress)
+
+	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
+
+	err = useCase.DeleteContainerImage(
+		service.containerImageQueryRepo, containerImageCmdRepo,
+		service.activityRecordCmdRepo, deleteDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "ContainerImageDeleted")
+}
+
 func (service *ContainerImageService) CreateSnapshot(
 	input map[string]interface{},
 	shouldSchedule bool,
@@ -205,7 +255,7 @@ func (service *ContainerImageService) ReadArchiveFiles() ServiceOutput {
 	return NewServiceOutput(Success, filesList)
 }
 
-func (service *ContainerImageService) Delete(
+func (service *ContainerImageService) DeleteArchiveFile(
 	input map[string]interface{},
 ) ServiceOutput {
 	requiredParams := []string{"accountId", "imageId"}
@@ -240,11 +290,13 @@ func (service *ContainerImageService) Delete(
 		}
 	}
 
-	deleteDto := dto.NewDeleteContainerImage(accountId, imageId, operatorAccountId, ipAddress)
+	deleteDto := dto.NewDeleteContainerImageArchiveFile(
+		accountId, imageId, operatorAccountId, ipAddress,
+	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 
-	err = useCase.DeleteContainerImage(
+	err = useCase.DeleteContainerImageArchiveFile(
 		service.containerImageQueryRepo, containerImageCmdRepo,
 		service.activityRecordCmdRepo, deleteDto,
 	)
@@ -252,5 +304,5 @@ func (service *ContainerImageService) Delete(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, "ContainerImageDeleted")
+	return NewServiceOutput(Success, "ContainerImageArchiveFileDeleted")
 }
