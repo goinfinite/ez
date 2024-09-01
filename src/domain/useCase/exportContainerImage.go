@@ -23,7 +23,7 @@ func ExportContainerImage(
 	archiveFile, err = containerImageCmdRepo.Export(exportDto)
 	if err != nil {
 		slog.Error("ExportContainerImageInfraError", slog.Any("error", err))
-		return archiveFile, errors.New("ExportContainerImageError")
+		return archiveFile, errors.New("ExportContainerImageInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).ExportContainerImage(exportDto)
