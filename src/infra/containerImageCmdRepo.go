@@ -45,12 +45,12 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 func (repo *ContainerImageCmdRepo) Export(
 	exportDto dto.ExportContainerImage,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	accountId := exportDto.AccountId
 	unixFilePath, _ := valueObject.NewUnixFilePath("/file.tar.gz")
 	downloadUrl, _ := valueObject.NewUrl("http://localhost" + unixFilePath.String())
 	sizeBytes, _ := valueObject.NewByte(123456789)
 	return entity.NewContainerImageArchiveFile(
-		accountId, unixFilePath, downloadUrl, sizeBytes, valueObject.NewUnixTimeNow(),
+		exportDto.ImageId, exportDto.AccountId, unixFilePath, downloadUrl,
+		sizeBytes, valueObject.NewUnixTimeNow(),
 	), nil
 }
 

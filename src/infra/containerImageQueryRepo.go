@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
@@ -241,4 +242,16 @@ func (repo *ContainerImageQueryRepo) ReadById(
 	}
 
 	return repo.containerImageFactory(accountId, rawContainerImageAttributes)
+}
+
+func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
+	[]entity.ContainerImageArchiveFile, error,
+) {
+	return []entity.ContainerImageArchiveFile{}, errors.New("NotImplemented")
+}
+
+func (repo *ContainerImageQueryRepo) ReadArchiveFile(
+	readDto dto.ReadContainerImageArchiveFile,
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	return archiveFile, errors.New("NotImplemented")
 }
