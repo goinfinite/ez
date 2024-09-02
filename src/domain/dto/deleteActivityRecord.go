@@ -9,8 +9,8 @@ type DeleteActivityRecords struct {
 	Level              *valueObject.ActivityRecordLevel   `json:"level,omitempty"`
 	Code               *valueObject.ActivityRecordCode    `json:"code,omitempty"`
 	Message            *valueObject.ActivityRecordMessage `json:"message,omitempty"`
-	OperatorIpAddress  *valueObject.IpAddress             `json:"operatorIpAddress,omitempty"`
 	OperatorAccountId  *valueObject.AccountId             `json:"operatorAccountId,omitempty"`
+	OperatorIpAddress  *valueObject.IpAddress             `json:"operatorIpAddress,omitempty"`
 	TargetAccountId    *valueObject.AccountId             `json:"targetAccountId,omitempty"`
 	Username           *valueObject.Username              `json:"username,omitempty"`
 	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
@@ -25,8 +25,8 @@ func NewDeleteActivityRecords(
 	level *valueObject.ActivityRecordLevel,
 	code *valueObject.ActivityRecordCode,
 	message *valueObject.ActivityRecordMessage,
-	operatorIpAddress *valueObject.IpAddress,
 	operatorAccountId *valueObject.AccountId,
+	operatorIpAddress *valueObject.IpAddress,
 	targetAccountId *valueObject.AccountId,
 	username *valueObject.Username,
 	containerId *valueObject.ContainerId,
@@ -40,8 +40,8 @@ func NewDeleteActivityRecords(
 		Level:              level,
 		Code:               code,
 		Message:            message,
-		OperatorIpAddress:  operatorIpAddress,
 		OperatorAccountId:  operatorAccountId,
+		OperatorIpAddress:  operatorIpAddress,
 		TargetAccountId:    targetAccountId,
 		Username:           username,
 		ContainerId:        containerId,

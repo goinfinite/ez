@@ -8,8 +8,8 @@ type ReadActivityRecords struct {
 	Level              *valueObject.ActivityRecordLevel   `json:"level,omitempty"`
 	Code               *valueObject.ActivityRecordCode    `json:"code,omitempty"`
 	Message            *valueObject.ActivityRecordMessage `json:"message,omitempty"`
-	OperatorIpAddress  *valueObject.IpAddress             `json:"operatorIpAddress,omitempty"`
 	OperatorAccountId  *valueObject.AccountId             `json:"operatorAccountId,omitempty"`
+	OperatorIpAddress  *valueObject.IpAddress             `json:"operatorIpAddress,omitempty"`
 	TargetAccountId    *valueObject.AccountId             `json:"targetAccountId,omitempty"`
 	Username           *valueObject.Username              `json:"username,omitempty"`
 	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
