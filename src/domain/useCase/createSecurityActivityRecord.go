@@ -131,6 +131,21 @@ func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
 	uc.createActivityRecord(createRecordDto)
 }
 
+func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
+	importDto dto.ImportContainerImageArchiveFile,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileImported")
+	createRecordDto := dto.CreateActivityRecord{
+		Level:             uc.recordLevel,
+		Code:              &recordCode,
+		IpAddress:         &importDto.OperatorIpAddress,
+		OperatorAccountId: &importDto.OperatorAccountId,
+		TargetAccountId:   &importDto.AccountId,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
 func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 	deleteDto dto.DeleteContainerImage,
 ) {

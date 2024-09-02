@@ -15,5 +15,8 @@ type ContainerImageCmdRepo interface {
 	CreateArchiveFile(
 		dto.CreateContainerImageArchiveFile,
 	) (entity.ContainerImageArchiveFile, error)
+	ImportArchiveFile(dto.ImportContainerImageArchiveFile) (
+		valueObject.ContainerImageId, error,
+	)
 	DeleteArchiveFile(dto.DeleteContainerImageArchiveFile) error
 }
