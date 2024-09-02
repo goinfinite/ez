@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"errors"
+
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -42,6 +44,13 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	return valueObject.NewContainerImageId(rawImageId)
 }
 
+func (repo *ContainerImageCmdRepo) ImportArchiveFile(
+	importDto dto.ImportContainerImageArchiveFile,
+) (imageId valueObject.ContainerImageId, err error) {
+	imageId, _ = valueObject.NewContainerImageId("1234567890abcdef1234567890")
+	return imageId, errors.New("NotImplemented")
+}
+
 func (repo *ContainerImageCmdRepo) Delete(
 	deleteDto dto.DeleteContainerImage,
 ) error {
@@ -57,14 +66,15 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	unixFilePath, _ := valueObject.NewUnixFilePath("/file.tar.gz")
 	downloadUrl, _ := valueObject.NewUrl("http://localhost" + unixFilePath.String())
 	sizeBytes, _ := valueObject.NewByte(123456789)
+
 	return entity.NewContainerImageArchiveFile(
 		createDto.ImageId, createDto.AccountId, unixFilePath, downloadUrl,
 		sizeBytes, valueObject.NewUnixTimeNow(),
-	), nil
+	), errors.New("NotImplemented")
 }
 
 func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
 	deleteDto dto.DeleteContainerImageArchiveFile,
 ) error {
-	return nil
+	return errors.New("NotImplemented")
 }
