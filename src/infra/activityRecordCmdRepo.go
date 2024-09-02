@@ -30,8 +30,8 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 	}
 
 	var ipAddressPtr *string
-	if createDto.IpAddress != nil {
-		ipAddress := createDto.IpAddress.String()
+	if createDto.OperatorIpAddress != nil {
+		ipAddress := createDto.OperatorIpAddress.String()
 		ipAddressPtr = &ipAddress
 	}
 
@@ -88,8 +88,8 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 
 func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) error {
 	deleteModel := dbModel.ActivityRecord{}
-	if deleteDto.Id != nil {
-		deleteModel.ID = deleteDto.Id.Uint64()
+	if deleteDto.RecordId != nil {
+		deleteModel.ID = deleteDto.RecordId.Uint64()
 	}
 
 	if deleteDto.Level != nil {
@@ -106,8 +106,8 @@ func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) e
 		deleteModel.Message = &messageStr
 	}
 
-	if deleteDto.IpAddress != nil {
-		ipAddressStr := deleteDto.IpAddress.String()
+	if deleteDto.OperatorIpAddress != nil {
+		ipAddressStr := deleteDto.OperatorIpAddress.String()
 		deleteModel.IpAddress = &ipAddressStr
 	}
 

@@ -210,7 +210,9 @@ func (controller *ContainerProfileController) Update(c echo.Context) error {
 // @Router       /v1/container/profile/{profileId}/ [delete]
 func (controller *ContainerProfileController) Delete(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"id": c.Param("profileId"),
+		"profileId":         c.Param("profileId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(

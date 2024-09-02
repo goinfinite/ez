@@ -226,7 +226,7 @@ func (controller *ContainerProfileController) Delete() *cobra.Command {
 		Short: "DeleteContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"id": profileIdUint,
+				"profileId": profileIdUint,
 			}
 
 			cliHelper.ServiceResponseWrapper(

@@ -87,7 +87,7 @@ func (repo *ContainerProfileCmdRepo) Update(
 
 	return repo.persistentDbSvc.Handler.
 		Model(&dbModel.ContainerProfile{}).
-		Where("id = ?", updateDto.Id.String()).
+		Where("id = ?", updateDto.ProfileId.String()).
 		Updates(updateMap).Error
 }
 

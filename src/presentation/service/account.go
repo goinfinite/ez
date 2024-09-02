@@ -75,16 +75,16 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
 	createDto := dto.NewCreateAccount(
-		username, password, quotaPtr, operatorAccountId, ipAddress,
+		username, password, quotaPtr, operatorAccountId, operatorIpAddress,
 	)
 
 	err = useCase.CreateAccount(
@@ -149,9 +149,9 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
@@ -159,7 +159,7 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 
 	updateDto := dto.NewUpdateAccount(
 		accountId, passwordPtr, shouldUpdateApiKeyPtr, quotaPtr,
-		operatorAccountId, ipAddress,
+		operatorAccountId, operatorIpAddress,
 	)
 
 	if updateDto.ShouldUpdateApiKey != nil && *updateDto.ShouldUpdateApiKey {
@@ -204,15 +204,15 @@ func (service *AccountService) Delete(input map[string]interface{}) ServiceOutpu
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
-	deleteDto := dto.NewDeleteAccount(accountId, operatorAccountId, ipAddress)
+	deleteDto := dto.NewDeleteAccount(accountId, operatorAccountId, operatorIpAddress)
 
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 

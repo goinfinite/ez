@@ -69,8 +69,9 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 // @Router       /v1/container/auto-login/{containerId}/ [get]
 func (controller *ContainerController) AutoLogin(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"containerId": c.Param("containerId"),
-		"ipAddress":   c.RealIP(),
+		"containerId":       c.Param("containerId"),
+		"ipAddress":         c.RealIP(),
+		"operatorAccountId": c.Get("accountId"),
 	}
 
 	serviceOutput := controller.containerService.AutoLogin(requestBody)
@@ -313,8 +314,10 @@ func (controller *ContainerController) Update(c echo.Context) error {
 // @Router       /v1/container/{accountId}/{containerId}/ [delete]
 func (controller *ContainerController) Delete(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"accountId":   c.Param("accountId"),
-		"containerId": c.Param("containerId"),
+		"accountId":         c.Param("accountId"),
+		"containerId":       c.Param("containerId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(

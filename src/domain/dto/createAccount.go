@@ -7,7 +7,7 @@ type CreateAccount struct {
 	Password          valueObject.Password      `json:"password"`
 	Quota             *valueObject.AccountQuota `json:"quota"`
 	OperatorAccountId valueObject.AccountId     `json:"-"`
-	IpAddress         valueObject.IpAddress     `json:"-"`
+	OperatorIpAddress valueObject.IpAddress     `json:"-"`
 }
 
 func NewCreateAccount(
@@ -15,13 +15,13 @@ func NewCreateAccount(
 	password valueObject.Password,
 	quota *valueObject.AccountQuota,
 	operatorAccountId valueObject.AccountId,
-	ipAddress valueObject.IpAddress,
+	operatorIpAddress valueObject.IpAddress,
 ) CreateAccount {
 	return CreateAccount{
 		Username:          username,
 		Password:          password,
 		Quota:             quota,
 		OperatorAccountId: operatorAccountId,
-		IpAddress:         ipAddress,
+		OperatorIpAddress: operatorIpAddress,
 	}
 }

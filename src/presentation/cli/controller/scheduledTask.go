@@ -43,7 +43,7 @@ func (controller *ScheduledTaskController) Update() *cobra.Command {
 		Short: "UpdateScheduledTask",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"id": taskIdUint,
+				"taskId": taskIdUint,
 			}
 
 			if statusStr != "" {

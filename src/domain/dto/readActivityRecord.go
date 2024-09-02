@@ -8,7 +8,7 @@ type ReadActivityRecords struct {
 	Level              *valueObject.ActivityRecordLevel   `json:"level,omitempty"`
 	Code               *valueObject.ActivityRecordCode    `json:"code,omitempty"`
 	Message            *valueObject.ActivityRecordMessage `json:"message,omitempty"`
-	IpAddress          *valueObject.IpAddress             `json:"ipAddress,omitempty"`
+	OperatorIpAddress  *valueObject.IpAddress             `json:"operatorIpAddress,omitempty"`
 	OperatorAccountId  *valueObject.AccountId             `json:"operatorAccountId,omitempty"`
 	TargetAccountId    *valueObject.AccountId             `json:"targetAccountId,omitempty"`
 	Username           *valueObject.Username              `json:"username,omitempty"`
@@ -23,7 +23,7 @@ func NewReadActivityRecords(
 	level *valueObject.ActivityRecordLevel,
 	code *valueObject.ActivityRecordCode,
 	message *valueObject.ActivityRecordMessage,
-	ipAddress *valueObject.IpAddress,
+	operatorIpAddress *valueObject.IpAddress,
 	operatorAccountId *valueObject.AccountId,
 	targetAccountId *valueObject.AccountId,
 	username *valueObject.Username,
@@ -37,7 +37,7 @@ func NewReadActivityRecords(
 		Level:              level,
 		Code:               code,
 		Message:            message,
-		IpAddress:          ipAddress,
+		OperatorIpAddress:  operatorIpAddress,
 		OperatorAccountId:  operatorAccountId,
 		TargetAccountId:    targetAccountId,
 		Username:           username,

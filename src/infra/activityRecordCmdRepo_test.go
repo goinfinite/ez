@@ -14,15 +14,15 @@ func TestActivityRecordCmdRepo(t *testing.T) {
 	activityRecordCmdRepo := NewActivityRecordCmdRepo(trailDbSvc)
 	level, _ := valueObject.NewActivityRecordLevel("SEC")
 	recordCode, _ := valueObject.NewActivityRecordCode("LoginFailed")
-	ipAddress := valueObject.NewLocalhostIpAddress()
+	operatorIpAddress := valueObject.NewLocalhostIpAddress()
 
 	t.Run("CreateActivityRecord", func(t *testing.T) {
 		username, _ := valueObject.NewUsername("test")
 		createDto := dto.CreateActivityRecord{
-			Level:     level,
-			Code:      &recordCode,
-			IpAddress: &ipAddress,
-			Username:  &username,
+			Level:             level,
+			Code:              &recordCode,
+			OperatorIpAddress: &operatorIpAddress,
+			Username:          &username,
 		}
 
 		err := activityRecordCmdRepo.Create(createDto)

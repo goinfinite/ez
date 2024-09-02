@@ -94,16 +94,16 @@ func (service *ContainerImageService) CreateSnapshot(
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
 	createSnapshotImageDto := dto.NewCreateContainerSnapshotImage(
-		accountId, containerId, operatorAccountId, ipAddress,
+		accountId, containerId, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
@@ -147,15 +147,17 @@ func (service *ContainerImageService) Delete(
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
-	deleteDto := dto.NewDeleteContainerImage(accountId, imageId, operatorAccountId, ipAddress)
+	deleteDto := dto.NewDeleteContainerImage(
+		accountId, imageId, operatorAccountId, operatorIpAddress,
+	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 
@@ -235,16 +237,16 @@ func (service *ContainerImageService) CreateArchiveFile(
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
 	createDto := dto.NewCreateContainerImageArchiveFile(
-		accountId, imageId, operatorAccountId, ipAddress,
+		accountId, imageId, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
@@ -287,16 +289,16 @@ func (service *ContainerImageService) DeleteArchiveFile(
 		}
 	}
 
-	ipAddress := LocalOperatorIpAddress
-	if input["ipAddress"] != nil {
-		ipAddress, err = valueObject.NewIpAddress(input["ipAddress"])
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
 	}
 
 	deleteDto := dto.NewDeleteContainerImageArchiveFile(
-		accountId, imageId, operatorAccountId, ipAddress,
+		accountId, imageId, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)

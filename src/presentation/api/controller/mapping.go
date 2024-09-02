@@ -96,7 +96,9 @@ func (controller *MappingController) Create(c echo.Context) error {
 // @Router       /v1/mapping/{mappingId}/ [delete]
 func (controller *MappingController) Delete(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"mappingId": c.Param("mappingId"),
+		"mappingId":         c.Param("mappingId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(
@@ -138,8 +140,10 @@ func (controller *MappingController) CreateTarget(c echo.Context) error {
 // @Router       /v1/mapping/{mappingId}/target/{targetId}/ [delete]
 func (controller *MappingController) DeleteTarget(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"mappingId": c.Param("mappingId"),
-		"targetId":  c.Param("targetId"),
+		"mappingId":         c.Param("mappingId"),
+		"targetId":          c.Param("targetId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(

@@ -40,8 +40,8 @@ func (repo *ActivityRecordQueryRepo) Read(
 		readModel.Message = &messageStr
 	}
 
-	if readDto.IpAddress != nil {
-		ipAddressStr := readDto.IpAddress.String()
+	if readDto.OperatorIpAddress != nil {
+		ipAddressStr := readDto.OperatorIpAddress.String()
 		readModel.IpAddress = &ipAddressStr
 	}
 

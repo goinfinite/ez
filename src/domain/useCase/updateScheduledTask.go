@@ -13,7 +13,7 @@ func UpdateScheduledTask(
 	scheduledTaskCmdRepo repository.ScheduledTaskCmdRepo,
 	updateDto dto.UpdateScheduledTask,
 ) error {
-	taskEntity, err := scheduledTaskQueryRepo.ReadById(updateDto.Id)
+	taskEntity, err := scheduledTaskQueryRepo.ReadById(updateDto.TaskId)
 	if err != nil {
 		return errors.New("ScheduledTaskNotFound")
 	}
@@ -32,7 +32,7 @@ func UpdateScheduledTask(
 		return errors.New("UpdateScheduledTaskInfraError")
 	}
 
-	log.Printf("ScheduledTaskId '%v' updated.", updateDto.Id)
+	log.Printf("ScheduledTaskId '%v' updated.", updateDto.TaskId)
 
 	return nil
 }

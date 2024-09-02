@@ -8,7 +8,7 @@ type UpdateAccount struct {
 	ShouldUpdateApiKey *bool                     `json:"shouldUpdateApiKey"`
 	Quota              *valueObject.AccountQuota `json:"quota"`
 	OperatorAccountId  valueObject.AccountId     `json:"-"`
-	IpAddress          valueObject.IpAddress     `json:"-"`
+	OperatorIpAddress  valueObject.IpAddress     `json:"-"`
 }
 
 func NewUpdateAccount(
@@ -17,7 +17,7 @@ func NewUpdateAccount(
 	shouldUpdateApiKey *bool,
 	quota *valueObject.AccountQuota,
 	operatorAccountId valueObject.AccountId,
-	ipAddress valueObject.IpAddress,
+	operatorIpAddress valueObject.IpAddress,
 ) UpdateAccount {
 	return UpdateAccount{
 		AccountId:          accountId,
@@ -25,6 +25,6 @@ func NewUpdateAccount(
 		ShouldUpdateApiKey: shouldUpdateApiKey,
 		Quota:              quota,
 		OperatorAccountId:  operatorAccountId,
-		IpAddress:          ipAddress,
+		OperatorIpAddress:  operatorIpAddress,
 	}
 }

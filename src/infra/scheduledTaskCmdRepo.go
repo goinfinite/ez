@@ -60,7 +60,7 @@ func (repo *ScheduledTaskCmdRepo) Update(
 
 	return repo.persistentDbSvc.Handler.
 		Model(&dbModel.ScheduledTask{}).
-		Where("id = ?", updateDto.Id).
+		Where("id = ?", updateDto.TaskId).
 		Updates(updateMap).Error
 }
 

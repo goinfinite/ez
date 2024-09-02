@@ -78,8 +78,10 @@ func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error
 // @Router       /v1/container/image/{accountId}/{imageId}/ [delete]
 func (controller *ContainerImageController) Delete(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"accountId": c.Param("accountId"),
-		"imageId":   c.Param("imageId"),
+		"accountId":         c.Param("accountId"),
+		"imageId":           c.Param("imageId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(
@@ -244,7 +246,7 @@ func (controller *ContainerImageController) DeleteArchiveFile(c echo.Context) er
 		"accountId":         c.Param("accountId"),
 		"imageId":           c.Param("imageId"),
 		"operatorAccountId": c.Get("accountId"),
-		"ipAddress":         c.RealIP(),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(

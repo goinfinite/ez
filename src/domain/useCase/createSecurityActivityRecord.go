@@ -41,10 +41,10 @@ func (uc *CreateSecurityActivityRecord) CreateSessionToken(
 	recordCode valueObject.ActivityRecordCode,
 ) {
 	createRecordDto := dto.CreateActivityRecord{
-		Level:     uc.recordLevel,
-		Code:      &recordCode,
-		IpAddress: loginDto.IpAddress,
-		Username:  &loginDto.Username,
+		Level:             uc.recordLevel,
+		Code:              &recordCode,
+		OperatorIpAddress: loginDto.OperatorIpAddress,
+		Username:          &loginDto.Username,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -58,7 +58,7 @@ func (uc *CreateSecurityActivityRecord) CreateAccount(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &createDto.IpAddress,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
 		OperatorAccountId: &createDto.OperatorAccountId,
 		TargetAccountId:   &accountId,
 		Username:          &createDto.Username,
@@ -74,7 +74,7 @@ func (uc *CreateSecurityActivityRecord) UpdateAccount(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &updateCode,
-		IpAddress:         &updateDto.IpAddress,
+		OperatorIpAddress: &updateDto.OperatorIpAddress,
 		OperatorAccountId: &updateDto.OperatorAccountId,
 		TargetAccountId:   &updateDto.AccountId,
 	}
@@ -89,7 +89,7 @@ func (uc *CreateSecurityActivityRecord) DeleteAccount(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &deleteDto.IpAddress,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		TargetAccountId:   &deleteDto.AccountId,
 	}
@@ -105,7 +105,7 @@ func (uc *CreateSecurityActivityRecord) CreateContainerSnapshotImage(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &createDto.IpAddress,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
 		OperatorAccountId: &createDto.OperatorAccountId,
 		TargetAccountId:   &createDto.AccountId,
 		ContainerId:       &createDto.ContainerId,
@@ -122,7 +122,7 @@ func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &createDto.IpAddress,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
 		OperatorAccountId: &createDto.OperatorAccountId,
 		TargetAccountId:   &createDto.AccountId,
 		ContainerImageId:  &createDto.ImageId,
@@ -138,7 +138,7 @@ func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &importDto.OperatorIpAddress,
+		OperatorIpAddress: &importDto.OperatorIpAddress,
 		OperatorAccountId: &importDto.OperatorAccountId,
 		TargetAccountId:   &importDto.AccountId,
 	}
@@ -153,7 +153,7 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &deleteDto.IpAddress,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		TargetAccountId:   &deleteDto.AccountId,
 		ContainerImageId:  &deleteDto.ImageId,
@@ -169,7 +169,7 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
 	createRecordDto := dto.CreateActivityRecord{
 		Level:             uc.recordLevel,
 		Code:              &recordCode,
-		IpAddress:         &deleteDto.IpAddress,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		TargetAccountId:   &deleteDto.AccountId,
 		ContainerImageId:  &deleteDto.ImageId,

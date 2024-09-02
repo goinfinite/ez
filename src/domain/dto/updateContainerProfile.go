@@ -3,7 +3,7 @@ package dto
 import "github.com/speedianet/control/src/domain/valueObject"
 
 type UpdateContainerProfile struct {
-	Id                     valueObject.ContainerProfileId    `json:"id"`
+	ProfileId              valueObject.ContainerProfileId    `json:"profileId"`
 	Name                   *valueObject.ContainerProfileName `json:"name"`
 	BaseSpecs              *valueObject.ContainerSpecs       `json:"baseSpecs"`
 	MaxSpecs               *valueObject.ContainerSpecs       `json:"maxSpecs"`
@@ -15,7 +15,7 @@ type UpdateContainerProfile struct {
 }
 
 func NewUpdateContainerProfile(
-	id valueObject.ContainerProfileId,
+	profileId valueObject.ContainerProfileId,
 	name *valueObject.ContainerProfileName,
 	baseSpecs *valueObject.ContainerSpecs,
 	maxSpecs *valueObject.ContainerSpecs,
@@ -24,7 +24,7 @@ func NewUpdateContainerProfile(
 	hostMinCapacityPercent *valueObject.HostMinCapacity,
 ) UpdateContainerProfile {
 	return UpdateContainerProfile{
-		Id:                     id,
+		ProfileId:              profileId,
 		Name:                   name,
 		BaseSpecs:              baseSpecs,
 		MaxSpecs:               maxSpecs,

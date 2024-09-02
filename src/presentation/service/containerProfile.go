@@ -191,14 +191,17 @@ func (service *ContainerProfileService) Create(
 func (service *ContainerProfileService) Update(
 	input map[string]interface{},
 ) ServiceOutput {
-	requiredParams := []string{"id"}
+	if input["id"] != nil {
+		input["profileId"] = input["id"]
+	}
+	requiredParams := []string{"profileId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	profileId, err := valueObject.NewContainerProfileId(input["id"])
+	profileId, err := valueObject.NewContainerProfileId(input["profileId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -293,14 +296,17 @@ func (service *ContainerProfileService) Update(
 func (service *ContainerProfileService) Delete(
 	input map[string]interface{},
 ) ServiceOutput {
-	requiredParams := []string{"id"}
+	if input["id"] != nil {
+		input["profileId"] = input["id"]
+	}
+	requiredParams := []string{"profileId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	profileId, err := valueObject.NewContainerProfileId(input["id"])
+	profileId, err := valueObject.NewContainerProfileId(input["profileId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}

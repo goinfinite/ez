@@ -32,14 +32,18 @@ func (service *ScheduledTaskService) Read() ServiceOutput {
 }
 
 func (service *ScheduledTaskService) Update(input map[string]interface{}) ServiceOutput {
-	requiredParams := []string{"id"}
+	if input["id"] != nil {
+		input["taskId"] = input["id"]
+	}
+
+	requiredParams := []string{"taskId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	taskId, err := valueObject.NewScheduledTaskId(input["id"])
+	taskId, err := valueObject.NewScheduledTaskId(input["taskId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -63,18 +67,14 @@ func (service *ScheduledTaskService) Update(input map[string]interface{}) Servic
 	}
 
 	updateDto := dto.NewUpdateScheduledTask(
-		taskId,
-		taskStatusPtr,
-		runAtPtr,
+		taskId, taskStatusPtr, runAtPtr,
 	)
 
 	scheduledTaskQueryRepo := infra.NewScheduledTaskQueryRepo(service.persistentDbSvc)
 	scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
 
 	err = useCase.UpdateScheduledTask(
-		scheduledTaskQueryRepo,
-		scheduledTaskCmdRepo,
-		updateDto,
+		scheduledTaskQueryRepo, scheduledTaskCmdRepo, updateDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

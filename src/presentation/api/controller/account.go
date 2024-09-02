@@ -194,8 +194,8 @@ func (controller *AccountController) Update(c echo.Context) error {
 func (controller *AccountController) Delete(c echo.Context) error {
 	requestBody := map[string]interface{}{
 		"accountId":         c.Param("accountId"),
-		"ipAddress":         c.RealIP(),
 		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(
