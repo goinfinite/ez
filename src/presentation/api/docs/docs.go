@@ -465,6 +465,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/container/image/archive/import/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Import a container image from an archive file.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "containerImageArchive"
+                ],
+                "summary": "ImportContainerImageArchiveFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "ArchiveFile",
+                        "name": "archiveFile",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ContainerImageId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/image/archive/{accountId}/{imageId}/": {
             "get": {
                 "security": [

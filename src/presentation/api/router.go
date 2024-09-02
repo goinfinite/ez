@@ -102,6 +102,9 @@ func (router *Router) containerRoutes() {
 		"/:accountId/:imageId/", containerImageController.ReadArchiveFile,
 	)
 	containerImageArchiveGroup.POST("/", containerImageController.CreateArchiveFile)
+	containerImageArchiveGroup.POST(
+		"/import/", containerImageController.ImportArchiveFile,
+	)
 	containerImageArchiveGroup.DELETE(
 		"/:accountId/:imageId/", containerImageController.DeleteArchiveFile,
 	)

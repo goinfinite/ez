@@ -11,10 +11,12 @@ import (
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
 	"github.com/speedianet/control/src/presentation/service"
+	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
 
 type ContainerImageController struct {
 	persistentDbSvc       *db.PersistentDatabaseService
+	trailDbSvc            *db.TrailDatabaseService
 	containerImageService *service.ContainerImageService
 }
 
@@ -24,6 +26,7 @@ func NewContainerImageController(
 ) *ContainerImageController {
 	return &ContainerImageController{
 		persistentDbSvc:       persistentDbSvc,
+		trailDbSvc:            trailDbSvc,
 		containerImageService: service.NewContainerImageService(persistentDbSvc, trailDbSvc),
 	}
 }
@@ -163,6 +166,68 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 	)
 }
 
+// ImportContainerImageArchiveFile	godoc
+// @Summary      ImportContainerImageArchiveFile
+// @Description  Import a container image from an archive file.
+// @Tags         containerImageArchive
+// @Accept       mpfd
+// @Produce      json
+// @Security     Bearer
+// @Param        accountId		formData	string	true	"AccountId"
+// @Param        archiveFile	formData	file	true	"ArchiveFile"
+// @Success      201 {object} valueObject.ContainerImageId "ContainerImageId"
+// @Router       /v1/container/image/archive/import/ [post]
+func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	requiredParams := []string{
+		"accountId", "archiveFile", "operatorAccountId", "operatorIpAddress",
+	}
+	err = serviceHelper.RequiredParamsInspector(requestBody, requiredParams)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(requestBody["accountId"])
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	archiveFile, err := c.FormFile("archiveFile")
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	operatorAccountId, err := valueObject.NewAccountId(requestBody["operatorAccountId"])
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	operatorIpAddress, err := valueObject.NewIpAddress(requestBody["ipAddress"])
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	importDto := dto.NewImportContainerImageArchiveFile(
+		accountId, archiveFile, operatorAccountId, operatorIpAddress,
+	)
+
+	containerImageCmdRepo := infra.NewContainerImageCmdRepo(controller.persistentDbSvc)
+	activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
+
+	imageId, err := useCase.ImportContainerImageArchiveFile(
+		containerImageCmdRepo, activityRecordCmdRepo, importDto,
+	)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return apiHelper.ResponseWrapper(c, http.StatusCreated, imageId)
+}
+
 // DeleteContainerImageArchiveFile	 godoc
 // @Summary      DeleteContainerImageArchiveFile
 // @Description  Delete a container image archive file.
@@ -176,8 +241,10 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 // @Router       /v1/container/image/archive/{accountId}/{imageId}/ [delete]
 func (controller *ContainerImageController) DeleteArchiveFile(c echo.Context) error {
 	requestBody := map[string]interface{}{
-		"accountId": c.Param("accountId"),
-		"imageId":   c.Param("imageId"),
+		"accountId":         c.Param("accountId"),
+		"imageId":           c.Param("imageId"),
+		"operatorAccountId": c.Get("accountId"),
+		"ipAddress":         c.RealIP(),
 	}
 
 	return apiHelper.ServiceResponseWrapper(

@@ -1044,6 +1044,34 @@ paths:
       summary: DownloadContainerImageArchiveFile
       tags:
       - containerImageArchive
+  /v1/container/image/archive/import/:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Import a container image from an archive file.
+      parameters:
+      - description: AccountId
+        in: formData
+        name: accountId
+        required: true
+        type: string
+      - description: ArchiveFile
+        in: formData
+        name: archiveFile
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ContainerImageId
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: ImportContainerImageArchiveFile
+      tags:
+      - containerImageArchive
   /v1/container/image/snapshot/:
     post:
       consumes:
