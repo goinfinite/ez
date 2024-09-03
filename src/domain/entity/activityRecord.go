@@ -1,59 +1,53 @@
 package entity
 
 import (
-	"errors"
-
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type ActivityRecord struct {
-	Id                 valueObject.ActivityRecordId       `json:"id"`
-	Level              valueObject.ActivityRecordLevel    `json:"level"`
-	Code               *valueObject.ActivityRecordCode    `json:"code,omitempty"`
-	Message            *valueObject.ActivityRecordMessage `json:"message,omitempty"`
-	IpAddress          *valueObject.IpAddress             `json:"ipAddress,omitempty"`
-	OperatorAccountId  *valueObject.AccountId             `json:"operatorAccountId,omitempty"`
-	TargetAccountId    *valueObject.AccountId             `json:"targetAccountId,omitempty"`
-	Username           *valueObject.Username              `json:"username,omitempty"`
-	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
-	ContainerProfileId *valueObject.ContainerProfileId    `json:"containerProfileId,omitempty"`
-	ContainerImageId   *valueObject.ContainerImageId      `json:"containerImageId,omitempty"`
-	MappingId          *valueObject.MappingId             `json:"mappingId,omitempty"`
-	CreatedAt          valueObject.UnixTime               `json:"createdAt"`
+	RecordId           valueObject.ActivityRecordId    `json:"recordId"`
+	RecordLevel        valueObject.ActivityRecordLevel `json:"recordLevel"`
+	RecordCode         valueObject.ActivityRecordCode  `json:"recordCode,omitempty"`
+	OperatorAccountId  *valueObject.AccountId          `json:"operatorAccountId,omitempty"`
+	OperatorIpAddress  *valueObject.IpAddress          `json:"operatorIpAddress,omitempty"`
+	AccountId          *valueObject.AccountId          `json:"accountId,omitempty"`
+	ContainerId        *valueObject.ContainerId        `json:"containerId,omitempty"`
+	ContainerProfileId *valueObject.ContainerProfileId `json:"containerProfileId,omitempty"`
+	ContainerImageId   *valueObject.ContainerImageId   `json:"containerImageId,omitempty"`
+	MappingId          *valueObject.MappingId          `json:"mappingId,omitempty"`
+	ScheduledTaskId    *valueObject.ScheduledTaskId    `json:"scheduledTaskId,omitempty"`
+	RecordDetails      interface{}                     `json:"recordDetails,omitempty"`
+	CreatedAt          valueObject.UnixTime            `json:"createdAt"`
 }
 
 func NewActivityRecord(
-	id valueObject.ActivityRecordId,
-	level valueObject.ActivityRecordLevel,
-	code *valueObject.ActivityRecordCode,
-	message *valueObject.ActivityRecordMessage,
-	ipAddress *valueObject.IpAddress,
+	recordId valueObject.ActivityRecordId,
+	recordLevel valueObject.ActivityRecordLevel,
+	recordCode valueObject.ActivityRecordCode,
 	operatorAccountId *valueObject.AccountId,
-	targetAccountId *valueObject.AccountId,
-	username *valueObject.Username,
+	operatorIpAddress *valueObject.IpAddress,
+	accountId *valueObject.AccountId,
 	containerId *valueObject.ContainerId,
 	containerProfileId *valueObject.ContainerProfileId,
 	containerImageId *valueObject.ContainerImageId,
 	mappingId *valueObject.MappingId,
+	scheduledTaskId *valueObject.ScheduledTaskId,
+	recordDetails interface{},
 	createdAt valueObject.UnixTime,
 ) (activityRecord ActivityRecord, err error) {
-	if code == nil && message == nil {
-		return activityRecord, errors.New("CodeOrMessageRequired")
-	}
-
 	return ActivityRecord{
-		Id:                 id,
-		Level:              level,
-		Code:               code,
-		Message:            message,
-		IpAddress:          ipAddress,
+		RecordId:           recordId,
+		RecordLevel:        recordLevel,
+		RecordCode:         recordCode,
 		OperatorAccountId:  operatorAccountId,
-		TargetAccountId:    targetAccountId,
-		Username:           username,
+		OperatorIpAddress:  operatorIpAddress,
+		AccountId:          accountId,
 		ContainerId:        containerId,
 		ContainerProfileId: containerProfileId,
 		ContainerImageId:   containerImageId,
 		MappingId:          mappingId,
+		ScheduledTaskId:    scheduledTaskId,
+		RecordDetails:      recordDetails,
 		CreatedAt:          createdAt,
 	}, nil
 }

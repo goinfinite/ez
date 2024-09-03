@@ -25,24 +25,14 @@ func (repo *ActivityRecordQueryRepo) Read(
 	activityRecordEvents := []entity.ActivityRecord{}
 
 	readModel := dbModel.ActivityRecord{}
-	if readDto.Level != nil {
-		levelStr := readDto.Level.String()
-		readModel.Level = levelStr
+	if readDto.RecordLevel != nil {
+		recordLevelStr := readDto.RecordLevel.String()
+		readModel.RecordLevel = recordLevelStr
 	}
 
-	if readDto.Code != nil {
-		codeStr := readDto.Code.String()
-		readModel.Code = &codeStr
-	}
-
-	if readDto.Message != nil {
-		messageStr := readDto.Message.String()
-		readModel.Message = &messageStr
-	}
-
-	if readDto.OperatorIpAddress != nil {
-		ipAddressStr := readDto.OperatorIpAddress.String()
-		readModel.IpAddress = &ipAddressStr
+	if readDto.RecordCode != nil {
+		recordCodeStr := readDto.RecordCode.String()
+		readModel.RecordCode = recordCodeStr
 	}
 
 	if readDto.OperatorAccountId != nil {
@@ -50,14 +40,14 @@ func (repo *ActivityRecordQueryRepo) Read(
 		readModel.OperatorAccountId = &operatorAccountId
 	}
 
-	if readDto.TargetAccountId != nil {
-		targetAccountId := readDto.TargetAccountId.Uint64()
-		readModel.TargetAccountId = &targetAccountId
+	if readDto.OperatorIpAddress != nil {
+		operatorIpAddressStr := readDto.OperatorIpAddress.String()
+		readModel.OperatorIpAddress = &operatorIpAddressStr
 	}
 
-	if readDto.Username != nil {
-		usernameStr := readDto.Username.String()
-		readModel.Username = &usernameStr
+	if readDto.AccountId != nil {
+		accountId := readDto.AccountId.Uint64()
+		readModel.AccountId = &accountId
 	}
 
 	if readDto.ContainerId != nil {
@@ -80,9 +70,17 @@ func (repo *ActivityRecordQueryRepo) Read(
 		readModel.MappingId = &mappingId
 	}
 
+	if readDto.ScheduledTaskId != nil {
+		scheduledTaskId := readDto.ScheduledTaskId.Uint64()
+		readModel.ScheduledTaskId = &scheduledTaskId
+	}
+
 	dbQuery := repo.trailDbSvc.Handler.Where(&readModel)
-	if readDto.CreatedAt != nil {
-		dbQuery = dbQuery.Where("created_at >= ?", readDto.CreatedAt.GetAsGoTime())
+	if readDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", readDto.CreatedBeforeAt.GetAsGoTime())
+	}
+	if readDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
 	}
 
 	activityRecordEventModels := []dbModel.ActivityRecord{}

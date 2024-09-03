@@ -5,46 +5,49 @@ import (
 )
 
 type ReadActivityRecords struct {
-	Level              *valueObject.ActivityRecordLevel   `json:"level,omitempty"`
-	Code               *valueObject.ActivityRecordCode    `json:"code,omitempty"`
-	Message            *valueObject.ActivityRecordMessage `json:"message,omitempty"`
-	OperatorAccountId  *valueObject.AccountId             `json:"operatorAccountId,omitempty"`
-	OperatorIpAddress  *valueObject.IpAddress             `json:"operatorIpAddress,omitempty"`
-	TargetAccountId    *valueObject.AccountId             `json:"targetAccountId,omitempty"`
-	Username           *valueObject.Username              `json:"username,omitempty"`
-	ContainerId        *valueObject.ContainerId           `json:"containerId,omitempty"`
-	ContainerProfileId *valueObject.ContainerProfileId    `json:"containerProfileId,omitempty"`
-	ContainerImageId   *valueObject.ContainerImageId      `json:"containerImageId,omitempty"`
-	MappingId          *valueObject.MappingId             `json:"mappingId,omitempty"`
-	CreatedAt          *valueObject.UnixTime              `json:"createdAt,omitempty"`
+	RecordId           *valueObject.ActivityRecordId    `json:"recordId,omitempty"`
+	RecordLevel        *valueObject.ActivityRecordLevel `json:"recordLevel,omitempty"`
+	RecordCode         *valueObject.ActivityRecordCode  `json:"recordCode,omitempty"`
+	OperatorAccountId  *valueObject.AccountId           `json:"operatorAccountId,omitempty"`
+	OperatorIpAddress  *valueObject.IpAddress           `json:"operatorIpAddress,omitempty"`
+	AccountId          *valueObject.AccountId           `json:"accountId,omitempty"`
+	ContainerId        *valueObject.ContainerId         `json:"containerId,omitempty"`
+	ContainerProfileId *valueObject.ContainerProfileId  `json:"containerProfileId,omitempty"`
+	ContainerImageId   *valueObject.ContainerImageId    `json:"containerImageId,omitempty"`
+	MappingId          *valueObject.MappingId           `json:"mappingId,omitempty"`
+	ScheduledTaskId    *valueObject.ScheduledTaskId     `json:"scheduledTaskId,omitempty"`
+	CreatedBeforeAt    *valueObject.UnixTime            `json:"createdBeforeAt,omitempty"`
+	CreatedAfterAt     *valueObject.UnixTime            `json:"createdAfterAt,omitempty"`
 }
 
 func NewReadActivityRecords(
-	level *valueObject.ActivityRecordLevel,
-	code *valueObject.ActivityRecordCode,
-	message *valueObject.ActivityRecordMessage,
-	operatorIpAddress *valueObject.IpAddress,
+	recordId *valueObject.ActivityRecordId,
+	recordLevel *valueObject.ActivityRecordLevel,
+	recordCode *valueObject.ActivityRecordCode,
 	operatorAccountId *valueObject.AccountId,
-	targetAccountId *valueObject.AccountId,
-	username *valueObject.Username,
+	operatorIpAddress *valueObject.IpAddress,
+	accountId *valueObject.AccountId,
 	containerId *valueObject.ContainerId,
 	containerProfileId *valueObject.ContainerProfileId,
 	containerImageId *valueObject.ContainerImageId,
 	mappingId *valueObject.MappingId,
-	createdAt *valueObject.UnixTime,
+	scheduledTaskId *valueObject.ScheduledTaskId,
+	createdBeforeAt *valueObject.UnixTime,
+	createdAfterAt *valueObject.UnixTime,
 ) ReadActivityRecords {
 	return ReadActivityRecords{
-		Level:              level,
-		Code:               code,
-		Message:            message,
-		OperatorIpAddress:  operatorIpAddress,
+		RecordId:           recordId,
+		RecordLevel:        recordLevel,
+		RecordCode:         recordCode,
 		OperatorAccountId:  operatorAccountId,
-		TargetAccountId:    targetAccountId,
-		Username:           username,
+		OperatorIpAddress:  operatorIpAddress,
+		AccountId:          accountId,
 		ContainerId:        containerId,
 		ContainerProfileId: containerProfileId,
 		ContainerImageId:   containerImageId,
 		MappingId:          mappingId,
-		CreatedAt:          createdAt,
+		ScheduledTaskId:    scheduledTaskId,
+		CreatedBeforeAt:    createdBeforeAt,
+		CreatedAfterAt:     createdAfterAt,
 	}
 }

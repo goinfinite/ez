@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"encoding/json"
+
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
@@ -17,40 +19,22 @@ func NewActivityRecordCmdRepo(
 }
 
 func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) error {
-	var codePtr *string
-	if createDto.Code != nil {
-		code := createDto.Code.String()
-		codePtr = &code
-	}
-
-	var messagePtr *string
-	if createDto.Message != nil {
-		message := createDto.Message.String()
-		messagePtr = &message
-	}
-
-	var ipAddressPtr *string
-	if createDto.OperatorIpAddress != nil {
-		ipAddress := createDto.OperatorIpAddress.String()
-		ipAddressPtr = &ipAddress
-	}
-
 	var operatorAccountIdPtr *uint64
 	if createDto.OperatorAccountId != nil {
 		operatorAccountId := createDto.OperatorAccountId.Uint64()
 		operatorAccountIdPtr = &operatorAccountId
 	}
 
-	var targetAccountIdPtr *uint64
-	if createDto.TargetAccountId != nil {
-		targetAccountId := createDto.TargetAccountId.Uint64()
-		targetAccountIdPtr = &targetAccountId
+	var operatorIpAddressPtr *string
+	if createDto.OperatorIpAddress != nil {
+		operatorIpAddress := createDto.OperatorIpAddress.String()
+		operatorIpAddressPtr = &operatorIpAddress
 	}
 
-	var usernamePtr *string
-	if createDto.Username != nil {
-		username := createDto.Username.String()
-		usernamePtr = &username
+	var accountIdPtr *uint64
+	if createDto.AccountId != nil {
+		accountId := createDto.AccountId.Uint64()
+		accountIdPtr = &accountId
 	}
 
 	var containerIdPtr *string
@@ -77,13 +61,30 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 		mappingIdPtr = &mappingId
 	}
 
-	securityEventModel := dbModel.NewActivityRecord(
-		0, createDto.Level.String(), codePtr, messagePtr, ipAddressPtr,
-		operatorAccountIdPtr, targetAccountIdPtr, usernamePtr, containerIdPtr,
-		containerProfileIdPtr, containerImageIdPtr, mappingIdPtr,
+	var scheduledTaskIdPtr *uint64
+	if createDto.ScheduledTaskId != nil {
+		scheduledTaskId := createDto.ScheduledTaskId.Uint64()
+		scheduledTaskIdPtr = &scheduledTaskId
+	}
+
+	var recordDetails *string
+	if createDto.RecordDetails != nil {
+		recordDetailsBytes, err := json.Marshal(createDto.RecordDetails)
+		if err != nil {
+			return err
+		}
+		recordDetailsStr := string(recordDetailsBytes)
+		recordDetails = &recordDetailsStr
+	}
+
+	activityRecordModel := dbModel.NewActivityRecord(
+		0, createDto.RecordLevel.String(), createDto.RecordCode.String(),
+		operatorAccountIdPtr, operatorIpAddressPtr, accountIdPtr, containerIdPtr,
+		containerProfileIdPtr, containerImageIdPtr, mappingIdPtr, scheduledTaskIdPtr,
+		recordDetails,
 	)
 
-	return repo.trailDbSvc.Handler.Create(&securityEventModel).Error
+	return repo.trailDbSvc.Handler.Create(&activityRecordModel).Error
 }
 
 func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) error {
@@ -92,23 +93,12 @@ func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) e
 		deleteModel.ID = deleteDto.RecordId.Uint64()
 	}
 
-	if deleteDto.Level != nil {
-		deleteModel.Level = deleteDto.Level.String()
+	if deleteDto.RecordLevel != nil {
+		deleteModel.RecordLevel = deleteDto.RecordLevel.String()
 	}
 
-	if deleteDto.Code != nil {
-		codeStr := deleteDto.Code.String()
-		deleteModel.Code = &codeStr
-	}
-
-	if deleteDto.Message != nil {
-		messageStr := deleteDto.Message.String()
-		deleteModel.Message = &messageStr
-	}
-
-	if deleteDto.OperatorIpAddress != nil {
-		ipAddressStr := deleteDto.OperatorIpAddress.String()
-		deleteModel.IpAddress = &ipAddressStr
+	if deleteDto.RecordCode != nil {
+		deleteModel.RecordCode = deleteDto.RecordCode.String()
 	}
 
 	if deleteDto.OperatorAccountId != nil {
@@ -116,14 +106,14 @@ func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) e
 		deleteModel.OperatorAccountId = &operatorAccountId
 	}
 
-	if deleteDto.TargetAccountId != nil {
-		targetAccountId := deleteDto.TargetAccountId.Uint64()
-		deleteModel.TargetAccountId = &targetAccountId
+	if deleteDto.OperatorIpAddress != nil {
+		operatorIpAddressStr := deleteDto.OperatorIpAddress.String()
+		deleteModel.OperatorIpAddress = &operatorIpAddressStr
 	}
 
-	if deleteDto.Username != nil {
-		usernameStr := deleteDto.Username.String()
-		deleteModel.Username = &usernameStr
+	if deleteDto.AccountId != nil {
+		accountId := deleteDto.AccountId.Uint64()
+		deleteModel.AccountId = &accountId
 	}
 
 	if deleteDto.ContainerId != nil {
@@ -146,10 +136,18 @@ func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) e
 		deleteModel.MappingId = &mappingId
 	}
 
+	if deleteDto.ScheduledTaskId != nil {
+		scheduledTaskId := deleteDto.ScheduledTaskId.Uint64()
+		deleteModel.ScheduledTaskId = &scheduledTaskId
+	}
+
 	dbQuery := repo.trailDbSvc.Handler.Where(&deleteModel)
 
-	if deleteDto.CreatedAt != nil {
-		dbQuery.Where("created_at >= ?", deleteDto.CreatedAt.GetAsGoTime())
+	if deleteDto.CreatedBeforeAt != nil {
+		dbQuery.Where("created_at < ?", deleteDto.CreatedBeforeAt.GetAsGoTime())
+	}
+	if deleteDto.CreatedAfterAt != nil {
+		dbQuery.Where("created_at > ?", deleteDto.CreatedAfterAt.GetAsGoTime())
 	}
 
 	return dbQuery.Delete(&dbModel.ActivityRecord{}).Error
