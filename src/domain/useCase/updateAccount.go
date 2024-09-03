@@ -6,7 +6,6 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func UpdateAccount(
@@ -31,8 +30,7 @@ func UpdateAccount(
 			return errors.New("UpdateAccountPasswordInfraError")
 		}
 
-		recordCode, _ := valueObject.NewActivityRecordCode("AccountPasswordUpdated")
-		NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(recordCode, updateDto)
+		NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(updateDto)
 	}
 
 	if updateDto.Quota == nil {
@@ -49,7 +47,6 @@ func UpdateAccount(
 		return errors.New("UpdateAccountQuotaInfraError")
 	}
 
-	recordCode, _ := valueObject.NewActivityRecordCode("AccountQuotaUpdated")
-	NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(recordCode, updateDto)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateAccount(updateDto)
 	return nil
 }

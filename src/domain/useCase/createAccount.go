@@ -31,6 +31,8 @@ func CreateAccount(
 		return errors.New("CreateAccountInfraError")
 	}
 
-	NewCreateSecurityActivityRecord(activityRecordCmdRepo).CreateAccount(createDto, accountId)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		CreateAccount(createDto, accountId)
+
 	return nil
 }

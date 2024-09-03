@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -22,8 +22,8 @@ func DeleteAccount(
 
 	containers, err := containerQueryRepo.ReadByAccountId(deleteDto.AccountId)
 	if err != nil {
-		log.Printf("ReadContainersByAccIdError: %s", err)
-		return errors.New("ReadContainersByAccIdInfraError")
+		slog.Error("ReadContainersByAccountIdInfraError", slog.Any("error", err))
+		return errors.New("ReadContainersByAccountIdInfraError")
 	}
 
 	if len(containers) > 0 {
@@ -32,10 +32,11 @@ func DeleteAccount(
 
 	err = accountCmdRepo.Delete(deleteDto.AccountId)
 	if err != nil {
-		log.Printf("DeleteAccountError: %s", err)
+		slog.Error("DeleteAccountInfraError", slog.Any("error", err))
 		return errors.New("DeleteAccountInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).DeleteAccount(deleteDto)
+
 	return nil
 }
