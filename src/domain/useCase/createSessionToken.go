@@ -16,22 +16,19 @@ const SessionTokenExpiresIn time.Duration = 3 * time.Hour
 
 func getFailedLoginAttemptsCount(
 	activityRecordQueryRepo repository.ActivityRecordQueryRepo,
-	loginDto dto.Login,
+	createDto dto.CreateSessionToken,
 ) uint {
-	secLevel, _ := valueObject.NewActivityRecordLevel("SEC")
+	recordLevel, _ := valueObject.NewActivityRecordLevel("SEC")
 	recordCode, _ := valueObject.NewActivityRecordCode("LoginFailed")
 	failedAttemptsIntervalStartsAt := valueObject.NewUnixTimeBeforeNow(
 		FailedLoginAttemptsInterval,
 	)
-	readActivityRecordsDto := dto.NewReadActivityRecords(
-		&secLevel, &recordCode, nil, loginDto.OperatorIpAddress, nil, nil, nil,
-		nil, nil, nil, nil, &failedAttemptsIntervalStartsAt,
+	readDto := dto.NewReadActivityRecords(
+		nil, &recordLevel, &recordCode, nil, &createDto.OperatorIpAddress, nil, nil,
+		nil, nil, nil, nil, nil, &failedAttemptsIntervalStartsAt,
 	)
 
-	failedLoginAttempts := ReadActivityRecords(
-		activityRecordQueryRepo, readActivityRecordsDto,
-	)
-
+	failedLoginAttempts := ReadActivityRecords(activityRecordQueryRepo, readDto)
 	return uint(len(failedLoginAttempts))
 }
 
@@ -41,33 +38,33 @@ func CreateSessionToken(
 	accountQueryRepo repository.AccountQueryRepo,
 	activityRecordQueryRepo repository.ActivityRecordQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	loginDto dto.Login,
+	createDto dto.CreateSessionToken,
 ) (accessToken entity.AccessToken, err error) {
-	failedAttemptsCount := getFailedLoginAttemptsCount(activityRecordQueryRepo, loginDto)
+	failedAttemptsCount := getFailedLoginAttemptsCount(activityRecordQueryRepo, createDto)
 	if failedAttemptsCount >= MaxFailedLoginAttemptsPerIpAddress {
 		return accessToken, errors.New("MaxFailedLoginAttemptsReached")
 	}
 
-	if !authQueryRepo.IsLoginValid(loginDto) {
+	if !authQueryRepo.IsLoginValid(createDto) {
 		recordCode, _ := valueObject.NewActivityRecordCode("LoginFailed")
 		NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-			CreateSessionToken(loginDto, recordCode)
+			CreateSessionToken(recordCode, createDto)
 
 		return accessToken, errors.New("InvalidCredentials")
 	}
 
-	accountEntity, err := accountQueryRepo.ReadByUsername(loginDto.Username)
+	accountEntity, err := accountQueryRepo.ReadByUsername(createDto.Username)
 	if err != nil {
 		return accessToken, errors.New("AccountNotFound")
 	}
 
 	recordCode, _ := valueObject.NewActivityRecordCode("LoginSuccessful")
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		CreateSessionToken(loginDto, recordCode)
+		CreateSessionToken(recordCode, createDto)
 
 	expiresIn := valueObject.NewUnixTimeAfterNow(SessionTokenExpiresIn)
 
 	return authCmdRepo.CreateSessionToken(
-		accountEntity.Id, expiresIn, *loginDto.OperatorIpAddress,
+		accountEntity.Id, expiresIn, createDto.OperatorIpAddress,
 	)
 }

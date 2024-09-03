@@ -23,13 +23,14 @@ func NewAuthQueryRepo(persistentDbSvc *db.PersistentDatabaseService) *AuthQueryR
 	return &AuthQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *AuthQueryRepo) IsLoginValid(login dto.Login) bool {
+func (repo *AuthQueryRepo) IsLoginValid(createDto dto.CreateSessionToken) bool {
 	storedPassHash, err := infraHelper.RunCmdWithSubShell(
-		"getent shadow " + login.Username.String() + " | awk -F: '{print $2}'",
+		"getent shadow " + createDto.Username.String() + " | awk -F: '{print $2}'",
 	)
 	if err != nil {
-		slog.Debug("GetentShadowError",
-			slog.String("username", login.Username.String()),
+		slog.Debug(
+			"GetentShadowError",
+			slog.String("username", createDto.Username.String()),
 			slog.Any("error", err),
 		)
 		return false
@@ -41,7 +42,7 @@ func (repo *AuthQueryRepo) IsLoginValid(login dto.Login) bool {
 
 	err = bcrypt.CompareHashAndPassword(
 		[]byte(storedPassHash),
-		[]byte(login.Password.String()),
+		[]byte(createDto.Password.String()),
 	)
 	return err == nil
 }

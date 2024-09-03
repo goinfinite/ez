@@ -10,6 +10,7 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
+	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
 
 type AuthController struct {
@@ -27,13 +28,13 @@ func NewAuthController(
 	}
 }
 
-// AuthLogin godoc
-// @Summary      GenerateJwtWithCredentials
-// @Description  Generate JWT with credentials
+// CreateSessionTokenWithCredentials	 godoc
+// @Summary      CreateSessionTokenWithCredentials
+// @Description  Create a new session token with the provided credentials.
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        loginDto 	  body    dto.Login  true  "Login"
+// @Param        createSessionToken body dto.CreateSessionToken true "CreateSessionToken"
 // @Success      200 {object} entity.AccessToken
 // @Failure      401 {object} string
 // @Router       /v1/auth/login/ [post]
@@ -44,7 +45,10 @@ func (controller *AuthController) Login(c echo.Context) error {
 	}
 
 	requiredParams := []string{"username", "password"}
-	apiHelper.CheckMissingParams(requestBody, requiredParams)
+	err = serviceHelper.RequiredParamsInspector(requestBody, requiredParams)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
 
 	username, err := valueObject.NewUsername(requestBody["username"])
 	if err != nil {
@@ -56,12 +60,12 @@ func (controller *AuthController) Login(c echo.Context) error {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	ipAddress, err := valueObject.NewIpAddress(c.RealIP())
+	operatorIpAddress, err := valueObject.NewIpAddress(requestBody["ipAddress"])
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	loginDto := dto.NewLogin(username, password, &ipAddress)
+	createDto := dto.NewCreateSessionToken(username, password, operatorIpAddress)
 
 	authQueryRepo := infra.NewAuthQueryRepo(controller.persistentDbSvc)
 	authCmdRepo := infra.AuthCmdRepo{}
@@ -71,7 +75,7 @@ func (controller *AuthController) Login(c echo.Context) error {
 
 	accessToken, err := useCase.CreateSessionToken(
 		authQueryRepo, authCmdRepo, accountQueryRepo,
-		activityRecordQueryRepo, activityRecordCmdRepo, loginDto,
+		activityRecordQueryRepo, activityRecordCmdRepo, createDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusUnauthorized, err.Error())

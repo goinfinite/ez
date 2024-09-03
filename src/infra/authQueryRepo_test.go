@@ -15,15 +15,16 @@ func TestAuthQueryRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	authQueryRepo := NewAuthQueryRepo(persistentDbSvc)
 	accountCmdRepo := NewAccountCmdRepo(persistentDbSvc)
+	localIpAddress := valueObject.NewLocalhostIpAddress()
 
 	t.Run("ValidLoginCredentials", func(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 
-		login := dto.NewLogin(username, password, nil)
-		isValid := authQueryRepo.IsLoginValid(login)
+		createDto := dto.NewCreateSessionToken(username, password, localIpAddress)
+		isValid := authQueryRepo.IsLoginValid(createDto)
 		if !isValid {
-			t.Error("Expected valid login credentials, but got invalid")
+			t.Fatal("LoginCredentialsInvalid")
 		}
 	})
 
@@ -31,8 +32,8 @@ func TestAuthQueryRepo(t *testing.T) {
 		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword("wrongPassword")
 
-		login := dto.NewLogin(username, password, nil)
-		isValid := authQueryRepo.IsLoginValid(login)
+		createDto := dto.NewCreateSessionToken(username, password, localIpAddress)
+		isValid := authQueryRepo.IsLoginValid(createDto)
 		if isValid {
 			t.Error("Expected invalid login credentials, but got valid")
 		}
