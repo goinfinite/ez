@@ -14,6 +14,7 @@ func UpdateContainer(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	updateDto dto.UpdateContainer,
 ) error {
 	containerEntity, err := containerQueryRepo.ReadById(updateDto.ContainerId)
@@ -45,6 +46,8 @@ func UpdateContainer(
 			return errors.New("UpdateAccountQuotaError")
 		}
 	}
+
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateContainer(updateDto)
 
 	return nil
 }

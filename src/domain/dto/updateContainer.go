@@ -3,10 +3,12 @@ package dto
 import "github.com/speedianet/control/src/domain/valueObject"
 
 type UpdateContainer struct {
-	AccountId   valueObject.AccountId           `json:"accountId"`
-	ContainerId valueObject.ContainerId         `json:"id"`
-	Status      *bool                           `json:"status"`
-	ProfileId   *valueObject.ContainerProfileId `json:"profileId"`
+	AccountId         valueObject.AccountId           `json:"accountId"`
+	ContainerId       valueObject.ContainerId         `json:"id"`
+	Status            *bool                           `json:"status"`
+	ProfileId         *valueObject.ContainerProfileId `json:"profileId"`
+	OperatorAccountId valueObject.AccountId           `json:"-"`
+	OperatorIpAddress valueObject.IpAddress           `json:"-"`
 }
 
 func NewUpdateContainer(
@@ -14,11 +16,15 @@ func NewUpdateContainer(
 	containerId valueObject.ContainerId,
 	status *bool,
 	profileId *valueObject.ContainerProfileId,
+	operatorAccountId valueObject.AccountId,
+	operatorIpAddress valueObject.IpAddress,
 ) UpdateContainer {
 	return UpdateContainer{
-		AccountId:   accountId,
-		ContainerId: containerId,
-		Status:      status,
-		ProfileId:   profileId,
+		AccountId:         accountId,
+		ContainerId:       containerId,
+		Status:            status,
+		ProfileId:         profileId,
+		OperatorAccountId: operatorAccountId,
+		OperatorIpAddress: operatorIpAddress,
 	}
 }

@@ -1,12 +1,15 @@
 package useCase
 
 import (
-	"log"
 	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
+
+var LocalOperatorAccountId, _ = valueObject.NewAccountId(0)
+var LocalOperatorIpAddress = valueObject.NewLocalhostIpAddress()
 
 func BootContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
@@ -14,7 +17,7 @@ func BootContainers(
 ) {
 	containers, err := containerQueryRepo.Read()
 	if err != nil {
-		log.Printf("ReadContainersError: %v", err)
+		slog.Error("ReadContainersInfraError", slog.Any("error", err))
 		return
 	}
 
@@ -27,10 +30,8 @@ func BootContainers(
 
 		newContainerStatus := true
 		updateDto := dto.NewUpdateContainer(
-			currentContainer.AccountId,
-			currentContainer.Id,
-			&newContainerStatus,
-			nil,
+			currentContainer.AccountId, currentContainer.Id, &newContainerStatus,
+			nil, LocalOperatorAccountId, LocalOperatorIpAddress,
 		)
 
 		err = containerCmdRepo.Update(updateDto)
