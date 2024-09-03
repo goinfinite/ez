@@ -17,9 +17,12 @@ type ContainerController struct {
 
 func NewContainerController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerController {
 	return &ContainerController{
-		containerService: service.NewContainerService(persistentDbSvc),
+		containerService: service.NewContainerService(
+			persistentDbSvc, trailDbSvc,
+		),
 	}
 }
 

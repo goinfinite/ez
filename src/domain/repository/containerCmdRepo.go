@@ -6,13 +6,10 @@ import (
 )
 
 type ContainerCmdRepo interface {
-	Create(createDto dto.CreateContainer) (valueObject.ContainerId, error)
-	Update(updateDto dto.UpdateContainer) error
-	Delete(
-		accountId valueObject.AccountId,
-		containerId valueObject.ContainerId,
-	) error
-	GenerateContainerSessionToken(
-		autoLoginDto dto.ContainerAutoLogin,
+	Create(dto.CreateContainer) (valueObject.ContainerId, error)
+	Update(dto.UpdateContainer) error
+	Delete(dto.DeleteContainer) error
+	CreateContainerSessionToken(
+		dto.CreateContainerSessionToken,
 	) (valueObject.AccessTokenValue, error)
 }

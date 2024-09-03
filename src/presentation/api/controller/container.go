@@ -20,9 +20,12 @@ type ContainerController struct {
 
 func NewContainerController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerController {
 	return &ContainerController{
-		containerService: service.NewContainerService(persistentDbSvc),
+		containerService: service.NewContainerService(
+			persistentDbSvc, trailDbSvc,
+		),
 	}
 }
 
@@ -54,27 +57,30 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 	)
 }
 
-// ContainerAutoLogin	 godoc
-// @Summary      ContainerAutoLogin
-// @Description  Generates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).
+// CreateContainerSessionToken	 godoc
+// @Summary      CreateContainerSessionToken
+// @Description  Creates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).
 // @Tags         container
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
+// @Param        accountId	path	string	true	"AccountId"
 // @Param        containerId	path	string	true	"ContainerId"
 // @Param        shouldRedirect	query	bool	false	"ShouldRedirect (default/empty is true)"
 // @Success      200 {object} valueObject.AccessTokenValue "If shouldRedirect is set to false, the updated session token is returned."
 // @Success      302 {string} string "A redirect to Speedia OS dashboard (:1618/{containerId}/)."
 // @Failure      500 {string} string "Container is not found, not running or isn't Speedia OS."
-// @Router       /v1/container/auto-login/{containerId}/ [get]
-func (controller *ContainerController) AutoLogin(c echo.Context) error {
+// @Router       /v1/container/session/{accountId}/{containerId}/ [get]
+func (controller *ContainerController) CreateContainerSessionToken(c echo.Context) error {
 	requestBody := map[string]interface{}{
+		"accountId":         c.Param("accountId"),
 		"containerId":       c.Param("containerId"),
-		"ipAddress":         c.RealIP(),
+		"sessionIpAddress":  c.RealIP(),
 		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
 	}
 
-	serviceOutput := controller.containerService.AutoLogin(requestBody)
+	serviceOutput := controller.containerService.CreateContainerSessionToken(requestBody)
 	if serviceOutput.Status != service.Success {
 		return apiHelper.ResponseWrapper(
 			c, http.StatusInternalServerError, serviceOutput.Body,

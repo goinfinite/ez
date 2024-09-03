@@ -9,10 +9,13 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
+var LocalOperatorAccountId, _ = valueObject.NewAccountId(0)
+var LocalOperatorIpAddress = valueObject.NewLocalhostIpAddress()
+
 func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 	portBindings, _ := valueObject.NewPortBindingFromString("http")
 
-	restartPolicy := valueObject.NewContainerRestartPolicyPanic("unless-stopped")
+	restartPolicy, _ := valueObject.NewContainerRestartPolicy("always")
 
 	profileId, _ := valueObject.NewContainerProfileId(0)
 
@@ -29,25 +32,17 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 		return err
 	}
 
+	containerHostname, _ := valueObject.NewFqdn("speedia.net")
+	containerImage, _ := valueObject.NewContainerImageAddress("https://docker.io/speedianet/os")
+
 	createContainer := dto.NewCreateContainer(
-		accountId,
-		valueObject.NewFqdnPanic("speedia.net"),
-		valueObject.NewContainerImageAddressPanic("https://docker.io/speedianet/os"),
-		portBindings,
-		&restartPolicy,
-		nil,
-		&profileId,
-		envs,
-		&launchScript,
-		false,
+		accountId, containerHostname, containerImage, portBindings, &restartPolicy,
+		nil, &profileId, envs, &launchScript, false,
+		LocalOperatorAccountId, LocalOperatorIpAddress,
 	)
 
 	_, err = containerCmdRepo.Create(createContainer)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func deleteDummyContainer(
@@ -63,10 +58,12 @@ func deleteDummyContainer(
 		return nil
 	}
 
-	return containerCmdRepo.Delete(
-		containers[0].AccountId,
-		containers[0].Id,
+	deleteDto := dto.NewDeleteContainer(
+		containers[0].AccountId, containers[0].Id,
+		LocalOperatorAccountId, LocalOperatorIpAddress,
 	)
+
+	return containerCmdRepo.Delete(deleteDto)
 }
 
 func TestContainerCmdRepo(t *testing.T) {
@@ -95,10 +92,8 @@ func TestContainerCmdRepo(t *testing.T) {
 		}
 
 		updateContainer := dto.NewUpdateContainer(
-			accountId,
-			containers[0].Id,
-			nil,
-			nil,
+			accountId, containers[0].Id, nil, nil,
+			LocalOperatorAccountId, LocalOperatorIpAddress,
 		)
 
 		err = containerCmdRepo.Update(updateContainer)

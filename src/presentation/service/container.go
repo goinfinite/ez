@@ -16,16 +16,19 @@ import (
 )
 
 type ContainerService struct {
-	persistentDbSvc    *db.PersistentDatabaseService
-	containerQueryRepo *infra.ContainerQueryRepo
+	persistentDbSvc       *db.PersistentDatabaseService
+	containerQueryRepo    *infra.ContainerQueryRepo
+	activityRecordCmdRepo *infra.ActivityRecordCmdRepo
 }
 
 func NewContainerService(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerService {
 	return &ContainerService{
-		persistentDbSvc:    persistentDbSvc,
-		containerQueryRepo: infra.NewContainerQueryRepo(persistentDbSvc),
+		persistentDbSvc:       persistentDbSvc,
+		containerQueryRepo:    infra.NewContainerQueryRepo(persistentDbSvc),
+		activityRecordCmdRepo: infra.NewActivityRecordCmdRepo(trailDbSvc),
 	}
 }
 
@@ -47,10 +50,17 @@ func (service *ContainerService) ReadWithMetrics() ServiceOutput {
 	return NewServiceOutput(Success, containersList)
 }
 
-func (service *ContainerService) AutoLogin(input map[string]interface{}) ServiceOutput {
-	requiredParams := []string{"containerId", "ipAddress"}
+func (service *ContainerService) CreateContainerSessionToken(
+	input map[string]interface{},
+) ServiceOutput {
+	requiredParams := []string{"accountId", "containerId", "sessionIpAddress"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -60,16 +70,36 @@ func (service *ContainerService) AutoLogin(input map[string]interface{}) Service
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	ipAddress, err := valueObject.NewIpAddress(input["ipAddress"].(string))
+	sessionIpAddress, err := valueObject.NewIpAddress(input["sessionIpAddress"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	autoLoginDto := dto.NewContainerAutoLogin(containerId, ipAddress)
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	createDto := dto.NewCreateContainerSessionToken(
+		accountId, containerId, sessionIpAddress,
+		operatorAccountId, operatorIpAddress,
+	)
 
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
-	accessToken, err := useCase.ContainerAutoLogin(
-		service.containerQueryRepo, containerCmdRepo, autoLoginDto,
+	accessToken, err := useCase.CreateContainerSessionToken(
+		service.containerQueryRepo, containerCmdRepo,
+		service.activityRecordCmdRepo, createDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -242,9 +272,26 @@ func (service *ContainerService) Create(
 		return NewServiceOutput(Created, "ContainerCreationScheduled")
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	createContainerDto := dto.NewCreateContainer(
 		accountId, hostname, imgAddr, portBindings, restartPolicyPtr, entrypointPtr,
 		profileIdPtr, envs, launchScriptPtr, autoCreateMappings,
+		operatorAccountId, operatorIpAddress,
 	)
 
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
@@ -258,7 +305,7 @@ func (service *ContainerService) Create(
 	err = useCase.CreateContainer(
 		service.containerQueryRepo, containerCmdRepo, accountQueryRepo, accountCmdRepo,
 		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
-		containerProxyCmdRepo, createContainerDto,
+		containerProxyCmdRepo, service.activityRecordCmdRepo, createContainerDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -303,11 +350,25 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 		profileIdPtr = &profileId
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	updateContainerDto := dto.NewUpdateContainer(
-		accountId,
-		containerId,
-		containerStatusPtr,
-		profileIdPtr,
+		accountId, containerId, containerStatusPtr, profileIdPtr,
+		operatorAccountId, operatorIpAddress,
 	)
 
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
@@ -317,7 +378,7 @@ func (service *ContainerService) Update(input map[string]interface{}) ServiceOut
 
 	err = useCase.UpdateContainer(
 		service.containerQueryRepo, containerCmdRepo, accountQueryRepo, accountCmdRepo,
-		containerProfileQueryRepo, updateContainerDto,
+		containerProfileQueryRepo, service.activityRecordCmdRepo, updateContainerDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -337,15 +398,35 @@ func (service *ContainerService) Delete(input map[string]interface{}) ServiceOut
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteContainer(
+		accountId, containerId, operatorAccountId, operatorIpAddress,
+	)
+
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
-	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
 	err = useCase.DeleteContainer(
-		service.containerQueryRepo, containerCmdRepo, accountCmdRepo, mappingQueryRepo,
-		mappingCmdRepo, containerProxyCmdRepo, accountId, containerId,
+		service.containerQueryRepo, containerCmdRepo, accountCmdRepo,
+		mappingCmdRepo, containerProxyCmdRepo, service.activityRecordCmdRepo,
+		deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

@@ -61,10 +61,14 @@ func (router *Router) accountRoutes() {
 
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/v1/container")
-	containerController := apiController.NewContainerController(router.persistentDbSvc)
+	containerController := apiController.NewContainerController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	containerGroup.GET("/", containerController.Read)
 	containerGroup.GET("/metrics/", containerController.ReadWithMetrics)
-	containerGroup.GET("/auto-login/:containerId/", containerController.AutoLogin)
+	containerGroup.GET(
+		"/session/:accountId/:containerId/", containerController.CreateContainerSessionToken,
+	)
 	containerGroup.POST("/", containerController.Create)
 	containerGroup.PUT("/", containerController.Update)
 	containerGroup.DELETE(

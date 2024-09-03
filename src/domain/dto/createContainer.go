@@ -16,6 +16,8 @@ type CreateContainer struct {
 	Envs               []valueObject.ContainerEnv          `json:"envs"`
 	LaunchScript       *valueObject.LaunchScript           `json:"launchScript"`
 	AutoCreateMappings bool                                `json:"autoCreateMappings"`
+	OperatorAccountId  valueObject.AccountId               `json:"-"`
+	OperatorIpAddress  valueObject.IpAddress               `json:"-"`
 }
 
 func NewCreateContainer(
@@ -29,6 +31,8 @@ func NewCreateContainer(
 	envs []valueObject.ContainerEnv,
 	launchScript *valueObject.LaunchScript,
 	autoCreateMappings bool,
+	operatorAccountId valueObject.AccountId,
+	operatorIpAddress valueObject.IpAddress,
 ) CreateContainer {
 	if restartPolicyPtr == nil {
 		restartPolicy, _ := valueObject.NewContainerRestartPolicy("unless-stopped")
@@ -51,5 +55,7 @@ func NewCreateContainer(
 		Envs:               envs,
 		LaunchScript:       launchScript,
 		AutoCreateMappings: autoCreateMappings,
+		OperatorAccountId:  operatorAccountId,
+		OperatorIpAddress:  operatorIpAddress,
 	}
 }

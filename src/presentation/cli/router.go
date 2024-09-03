@@ -50,7 +50,9 @@ func (router *Router) containerRoutes() {
 		Short: "ContainerManagement",
 	}
 
-	containerController := cliController.NewContainerController(router.persistentDbSvc)
+	containerController := cliController.NewContainerController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	containerCmd.AddCommand(containerController.Read())
 	containerCmd.AddCommand(containerController.ReadWithMetrics())
 	containerCmd.AddCommand(containerController.Create())
@@ -75,7 +77,9 @@ func (router *Router) containerRoutes() {
 		Short: "ContainerRegistryManagement",
 	}
 
-	containerRegistryController := cliController.NewContainerRegistryController(router.persistentDbSvc)
+	containerRegistryController := cliController.NewContainerRegistryController(
+		router.persistentDbSvc,
+	)
 	containerRegistryCmd.AddCommand(containerRegistryController.ReadRegistryImages())
 	containerRegistryCmd.AddCommand(containerRegistryController.ReadRegistryTaggedImage())
 

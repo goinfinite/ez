@@ -565,11 +565,8 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		Update("profile_id", updateDto.ProfileId.String()).Error
 }
 
-func (repo *ContainerCmdRepo) Delete(
-	accountId valueObject.AccountId,
-	containerId valueObject.ContainerId,
-) error {
-	containerEntity, err := repo.containerQueryRepo.ReadById(containerId)
+func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
+	containerEntity, err := repo.containerQueryRepo.ReadById(deleteDto.ContainerId)
 	if err != nil {
 		return err
 	}
@@ -578,7 +575,7 @@ func (repo *ContainerCmdRepo) Delete(
 	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
 
 	_, err = infraHelper.RunCmdAsUser(
-		accountId,
+		deleteDto.AccountId,
 		"systemctl", "--user", "disable", "--now", systemdUnitName,
 	)
 	if err != nil {
@@ -586,25 +583,29 @@ func (repo *ContainerCmdRepo) Delete(
 	}
 
 	unitFilePath, err := infraHelper.RunCmdAsUser(
-		accountId,
+		deleteDto.AccountId,
 		"systemctl", "--user", "show", "-P", "FragmentPath", systemdUnitName,
 	)
 	if err != nil {
 		return errors.New("GetSystemdUnitFilePathError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(accountId, "rm", "-f", unitFilePath)
+	_, err = infraHelper.RunCmdAsUser(deleteDto.AccountId, "rm", "-f", unitFilePath)
 	if err != nil {
 		return errors.New("RemoveSystemdUnitFileError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(accountId, "systemctl", "--user", "daemon-reload")
+	_, err = infraHelper.RunCmdAsUser(
+		deleteDto.AccountId, "systemctl", "--user", "daemon-reload",
+	)
 	if err != nil {
 		return errors.New("SystemdDaemonReloadError: " + err.Error())
 	}
 
-	containerIdStr := containerId.String()
-	_, err = infraHelper.RunCmdAsUser(accountId, "podman", "rm", "--force", containerIdStr)
+	containerIdStr := deleteDto.ContainerId.String()
+	_, err = infraHelper.RunCmdAsUser(
+		deleteDto.AccountId, "podman", "rm", "--force", containerIdStr,
+	)
 	if err != nil {
 		return errors.New("RemoveContainerError: " + err.Error())
 	}
@@ -623,10 +624,10 @@ func (repo *ContainerCmdRepo) Delete(
 	return deleteResult.Error
 }
 
-func (repo *ContainerCmdRepo) GenerateContainerSessionToken(
-	autoLoginDto dto.ContainerAutoLogin,
+func (repo *ContainerCmdRepo) CreateContainerSessionToken(
+	createDto dto.CreateContainerSessionToken,
 ) (tokenValue valueObject.AccessTokenValue, err error) {
-	containerEntity, err := repo.containerQueryRepo.ReadById(autoLoginDto.ContainerId)
+	containerEntity, err := repo.containerQueryRepo.ReadById(createDto.ContainerId)
 	if err != nil {
 		return tokenValue, errors.New("ContainerNotFound")
 	}
@@ -645,10 +646,10 @@ func (repo *ContainerCmdRepo) GenerateContainerSessionToken(
 		return tokenValue, errors.New("UpdateControlUserPasswordFailed: " + err.Error())
 	}
 
-	ipAddressStr := autoLoginDto.IpAddress.String()
+	sessionIpAddressStr := createDto.SessionIpAddress.String()
 	loginResponseJson, err := repo.runContainerCmd(
 		containerEntity.AccountId, containerEntity.Id,
-		"os auth login -u control -p "+randomPassword+" -i "+ipAddressStr,
+		"os auth login -u control -p "+randomPassword+" -i "+sessionIpAddressStr,
 	)
 	if err != nil {
 		return tokenValue, errors.New("LoginWithControlUserFailed: " + err.Error())

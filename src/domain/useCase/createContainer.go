@@ -6,6 +6,7 @@ import (
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func CreateContainer(
@@ -17,6 +18,7 @@ func CreateContainer(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
 	containerProxyCmdRepo repository.ContainerProxyCmdRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateContainer,
 ) error {
 	err := CheckAccountQuota(
@@ -44,12 +46,8 @@ func CreateContainer(
 		return errors.New("UpdateAccountQuotaInfraError")
 	}
 
-	slog.Info(
-		"ContainerCreated",
-		slog.String("containerId", containerId.String()),
-		slog.String("imageAddress", createDto.ImageAddress.String()),
-		slog.String("accountId", createDto.AccountId.String()),
-	)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		CreateContainer(createDto, containerId)
 
 	if createDto.ImageAddress.IsSpeediaOs() {
 		err = containerProxyCmdRepo.Create(containerId)
@@ -63,12 +61,25 @@ func CreateContainer(
 		return nil
 	}
 
-	err = CreateMappingsWithContainerId(
-		containerQueryRepo, mappingQueryRepo, mappingCmdRepo,
-		containerProxyCmdRepo, containerId,
-	)
+	containerEntity, err := containerQueryRepo.ReadById(containerId)
 	if err != nil {
-		return errors.New("CreateAutoMappingsError: " + err.Error())
+		return errors.New("ContainerNotFound")
+	}
+
+	for _, portBinding := range containerEntity.PortBindings {
+		createMappingDto := dto.NewCreateMapping(
+			containerEntity.AccountId, &containerEntity.Hostname,
+			portBinding.PublicPort, portBinding.Protocol,
+			[]valueObject.ContainerId{containerId},
+			createDto.OperatorAccountId, createDto.OperatorIpAddress,
+		)
+		err = CreateMapping(
+			mappingQueryRepo, mappingCmdRepo, containerQueryRepo,
+			activityRecordCmdRepo, createMappingDto,
+		)
+		if err != nil {
+			continue
+		}
 	}
 
 	return nil

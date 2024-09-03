@@ -2,19 +2,20 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func ContainerAutoLogin(
+func CreateContainerSessionToken(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	autoLoginDto dto.ContainerAutoLogin,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
+	createDto dto.CreateContainerSessionToken,
 ) (accessToken valueObject.AccessTokenValue, err error) {
-	containerEntity, err := containerQueryRepo.ReadById(autoLoginDto.ContainerId)
+	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
 	if err != nil {
 		return accessToken, errors.New("ContainerNotFound")
 	}
@@ -27,11 +28,14 @@ func ContainerAutoLogin(
 		return accessToken, errors.New("ContainerIsNotRunning")
 	}
 
-	accessToken, err = containerCmdRepo.GenerateContainerSessionToken(autoLoginDto)
+	accessToken, err = containerCmdRepo.CreateContainerSessionToken(createDto)
 	if err != nil {
-		log.Printf("GenerateContainerSessionTokenError: %s", err)
-		return accessToken, errors.New("GenerateContainerSessionTokenInfraError")
+		slog.Error("CreateContainerSessionTokenInfraError", slog.Any("error", err))
+		return accessToken, errors.New("CreateContainerSessionTokenInfraError")
 	}
+
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		CreateContainerSessionToken(createDto)
 
 	return accessToken, nil
 }
