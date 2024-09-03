@@ -367,38 +367,3 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
 
 	uc.createActivityRecord(createRecordDto)
 }
-
-func (uc *CreateSecurityActivityRecord) CreateScheduledTask(
-	createDto dto.CreateScheduledTask,
-	taskId valueObject.ScheduledTaskId,
-) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ScheduledTaskCreated")
-	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
-		OperatorAccountId: &createDto.OperatorAccountId,
-		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
-		ScheduledTaskId:   &taskId,
-	}
-
-	uc.createActivityRecord(createRecordDto)
-}
-
-func (uc *CreateSecurityActivityRecord) UpdateScheduledTask(
-	updateDto dto.UpdateScheduledTask,
-) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ScheduledTaskUpdated")
-
-	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
-		OperatorAccountId: &updateDto.OperatorAccountId,
-		OperatorIpAddress: &updateDto.OperatorIpAddress,
-		AccountId:         &updateDto.AccountId,
-		ScheduledTaskId:   &updateDto.TaskId,
-		RecordDetails:     updateDto,
-	}
-
-	uc.createActivityRecord(createRecordDto)
-}
