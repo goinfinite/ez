@@ -107,7 +107,7 @@ func (controller *ContainerProfileController) Create() *cobra.Command {
 		"MaxSpecs (millicores:memoryBytes:storagePerformanceUnits)",
 	)
 	cmd.Flags().StringVarP(
-		&scalingPolicyStr, "policy", "p", "", "ScalingPolicy (cpu|memory|connection)",
+		&scalingPolicyStr, "policy", "s", "", "ScalingPolicy (cpu|memory|connection)",
 	)
 	cmd.Flags().UintVarP(
 		&scalingThreshold, "threshold", "t", 0, "ScalingThreshold",
@@ -201,7 +201,7 @@ func (controller *ContainerProfileController) Update() *cobra.Command {
 		"MaxSpecs (millicores:memoryBytes:storagePerformanceUnits)",
 	)
 	cmd.Flags().StringVarP(
-		&scalingPolicyStr, "policy", "p", "", "ScalingPolicy (cpu|memory|connection)",
+		&scalingPolicyStr, "policy", "s", "", "ScalingPolicy (cpu|memory|connection)",
 	)
 	cmd.Flags().UintVarP(
 		&scalingThreshold, "threshold", "t", 0, "ScalingThreshold",
