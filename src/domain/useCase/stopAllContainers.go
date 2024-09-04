@@ -2,10 +2,11 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
+	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func StopAllContainers(
@@ -20,18 +21,17 @@ func StopAllContainers(
 	for _, currentContainer := range containers {
 		newContainerStatus := false
 		updateDto := dto.NewUpdateContainer(
-			currentContainer.AccountId,
-			currentContainer.Id,
-			&newContainerStatus,
-			&currentContainer.ProfileId,
+			currentContainer.AccountId, currentContainer.Id, &newContainerStatus,
+			&currentContainer.ProfileId, valueObject.SystemAccountId,
+			valueObject.SystemIpAddress,
 		)
 
 		err = containerCmdRepo.Update(updateDto)
 		if err != nil {
-			log.Printf(
-				"[ContainerId: %s] StopContainerError: %s",
-				currentContainer.Id,
-				err,
+			slog.Error(
+				"StopContainerError",
+				slog.String("containerId", currentContainer.Id.String()),
+				slog.Any("error", err),
 			)
 			continue
 		}

@@ -1,7 +1,7 @@
 package useCase
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
@@ -18,7 +18,7 @@ func RunScheduledTasks(
 	pendingStatus, _ := valueObject.NewScheduledTaskStatus("pending")
 	pendingTasks, err := scheduledTaskQueryRepo.ReadByStatus(pendingStatus)
 	if err != nil {
-		log.Printf("GetPendingScheduledTasksError: %s", err)
+		slog.Error("ReadPendingScheduledTasksError", slog.Any("error", err))
 		return
 	}
 
@@ -40,7 +40,11 @@ func RunScheduledTasks(
 
 		err = scheduledTaskCmdRepo.Run(pendingTask)
 		if err != nil {
-			log.Printf("(%d) RunScheduledTaskError: %s", pendingTask.Id.Read(), err)
+			slog.Error(
+				"RunScheduledTaskError",
+				slog.Uint64("scheduledTaskId", pendingTask.Id.Uint64()),
+				slog.Any("error", err),
+			)
 			continue
 		}
 	}
