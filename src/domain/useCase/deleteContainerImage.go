@@ -25,6 +25,8 @@ func DeleteContainerImage(
 		return errors.New("DeleteContainerImageError")
 	}
 
-	NewCreateSecurityActivityRecord(activityRecordCmdRepo).DeleteContainerImage(deleteDto)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		DeleteContainerImage(deleteDto)
+
 	return nil
 }
