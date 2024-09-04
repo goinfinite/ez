@@ -112,11 +112,12 @@ script ContainerProfileIndexLocalState() {
 				this.isCreateModalOpen = false;
 			},
 			isDeleteModalOpen: false,
-			openDeleteModal(profileId, profileName) {
+			openDeleteModal(accountId, profileId, profileName) {
 				this.resetPrimaryState();
 				this.resetAuxiliaryStates();
 
 				this.containerProfile.id = profileId;
+				this.containerProfile.accountId = accountId;
 				this.containerProfile.name = profileName;
 				this.isDeleteModalOpen = true;
 			},
@@ -126,9 +127,7 @@ script ContainerProfileIndexLocalState() {
 			deleteElement() {
 				htmx.ajax(
 					'DELETE',
-					'/api/v1/container/profile/' +
-					this.containerProfile.accountId + '/',
-					this.containerProfile.id + '/',
+					'/api/v1/container/profile/' + this.containerProfile.accountId + '/' + this.containerProfile.id + '/',
 					{swap: 'none'},
 				);
 				this.closeDeleteModal();
@@ -259,7 +258,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 						</button>
 						<button
 							type="button"
-							@click={ "openDeleteModal(" + profile.Id.String() + ", '" + profile.Name.String() + "')" }
+							@click={ "openDeleteModal(" + profile.AccountId.String() + ", " + profile.Id.String() + ", '" + profile.Name.String() + "')" }
 							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
 						>
 							<i class="ph-bold ph-trash text-xl"></i>
@@ -403,7 +402,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 						</button>
 						<button
 							type="button"
-							@click={ "openDeleteModal(" + profile.Id.String() + ", '" + profile.Name.String() + "')" }
+							@click={ "openDeleteModal(" + profile.AccountId.String() + ", " + profile.Id.String() + ", '" + profile.Name.String() + "')" }
 							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
 						>
 							<i class="ph-bold ph-trash text-xl"></i>
