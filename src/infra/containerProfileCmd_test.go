@@ -36,11 +36,12 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 		hostMinCapacityPercent, _ := valueObject.NewHostMinCapacity(10)
 
 		createDto := dto.NewCreateContainerProfile(
-			name, baseSpecs, &maxSpecs, &scalingPolicy, nil, nil, nil,
-			&hostMinCapacityPercent,
+			valueObject.SystemAccountId, name, baseSpecs, &maxSpecs,
+			&scalingPolicy, nil, nil, nil, &hostMinCapacityPercent,
+			valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 
-		err := containerProfileCmdRepo.Create(createDto)
+		_, err := containerProfileCmdRepo.Create(createDto)
 		if err != nil {
 			t.Errorf("CreateContainerProfileFailed: %v", err)
 		}
@@ -56,7 +57,9 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 		)
 
 		updateDto := dto.NewUpdateContainerProfile(
-			profileId, nil, nil, &maxSpecs, nil, nil, nil, nil, nil,
+			valueObject.SystemAccountId, profileId, nil, nil, &maxSpecs,
+			nil, nil, nil, nil, nil, valueObject.SystemAccountId,
+			valueObject.SystemIpAddress,
 		)
 
 		err := containerProfileCmdRepo.Update(updateDto)
@@ -66,7 +69,11 @@ func TestContainerProfileCmdRepo(t *testing.T) {
 	})
 
 	t.Run("DeleteContainerProfile", func(t *testing.T) {
-		err := containerProfileCmdRepo.Delete(profileId)
+		deleteDto := dto.NewDeleteContainerProfile(
+			valueObject.SystemAccountId, profileId,
+			valueObject.SystemAccountId, valueObject.SystemIpAddress,
+		)
+		err := containerProfileCmdRepo.Delete(deleteDto)
 		if err != nil {
 			t.Errorf("DeleteContainerProfileFailed: %v", err)
 		}

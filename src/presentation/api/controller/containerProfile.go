@@ -16,9 +16,12 @@ type ContainerProfileController struct {
 
 func NewContainerProfileController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerProfileController {
 	return &ContainerProfileController{
-		containerProfileService: service.NewContainerProfileService(persistentDbSvc),
+		containerProfileService: service.NewContainerProfileService(
+			persistentDbSvc, trailDbSvc,
+		),
 	}
 }
 
@@ -205,11 +208,13 @@ func (controller *ContainerProfileController) Update(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
+// @Param        accountId 	  path   string  true  "AccountId"
 // @Param        profileId 	  path   string  true  "ProfileId"
 // @Success      200 {object} object{} "ContainerProfileDeleted"
-// @Router       /v1/container/profile/{profileId}/ [delete]
+// @Router       /v1/container/profile/{accountId}/{profileId}/ [delete]
 func (controller *ContainerProfileController) Delete(c echo.Context) error {
 	requestBody := map[string]interface{}{
+		"accountId":         c.Param("accountId"),
 		"profileId":         c.Param("profileId"),
 		"operatorAccountId": c.Get("accountId"),
 		"operatorIpAddress": c.RealIP(),

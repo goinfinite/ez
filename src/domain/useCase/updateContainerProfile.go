@@ -2,39 +2,41 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-func updateContainersWithProfileId(
+func updateContainersAfterProfileUpdate(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	profileId valueObject.ContainerProfileId,
+	updateDto dto.UpdateContainerProfile,
 ) error {
 	containers, err := containerQueryRepo.Read()
 	if err != nil {
-		log.Printf("ReadContainersError: %s", err)
+		slog.Error("ReadContainersInfraError", slog.Any("error", err))
 		return errors.New("ReadContainersInfraError")
 	}
 
 	for _, container := range containers {
-		if container.ProfileId == profileId {
+		if container.ProfileId != updateDto.ProfileId {
 			continue
 		}
 
 		updateContainerDto := dto.NewUpdateContainer(
-			container.AccountId,
-			container.Id,
-			&container.Status,
-			&profileId,
+			container.AccountId, container.Id, &container.Status,
+			&updateDto.ProfileId, updateDto.OperatorAccountId,
+			updateDto.OperatorIpAddress,
 		)
 
 		err := containerCmdRepo.Update(updateContainerDto)
 		if err != nil {
-			log.Printf("UpdateContainersWithProfileIdError: %s", err)
+			slog.Debug(
+				"UpdateContainerInfraError",
+				slog.String("containerId", container.Id.String()),
+				slog.Any("error", err),
+			)
 			continue
 		}
 	}
@@ -47,31 +49,32 @@ func UpdateContainerProfile(
 	containerProfileCmdRepo repository.ContainerProfileCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	updateContainerProfileDto dto.UpdateContainerProfile,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
+	updateDto dto.UpdateContainerProfile,
 ) error {
-	_, err := containerProfileQueryRepo.ReadById(updateContainerProfileDto.ProfileId)
+	_, err := containerProfileQueryRepo.ReadById(updateDto.ProfileId)
 	if err != nil {
 		return errors.New("ContainerProfileNotFound")
 	}
 
-	err = containerProfileCmdRepo.Update(updateContainerProfileDto)
+	err = containerProfileCmdRepo.Update(updateDto)
 	if err != nil {
-		log.Printf("UpdateContainerProfileError: %s", err)
+		slog.Error("UpdateContainerProfileInfraError", slog.Any("error", err))
 		return errors.New("UpdateContainerProfileInfraError")
 	}
 
-	shouldUpdateContainers := updateContainerProfileDto.BaseSpecs != nil
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).UpdateContainerProfile(updateDto)
+
+	shouldUpdateContainers := updateDto.BaseSpecs != nil
 	if !shouldUpdateContainers {
 		return nil
 	}
 
-	err = updateContainersWithProfileId(
-		containerQueryRepo,
-		containerCmdRepo,
-		updateContainerProfileDto.ProfileId,
+	err = updateContainersAfterProfileUpdate(
+		containerQueryRepo, containerCmdRepo, updateDto,
 	)
 	if err != nil {
-		log.Printf("UpdateContainersAfterProfileUpdateError: %s", err)
+		slog.Error("UpdateContainersAfterProfileUpdate", slog.Any("error", err))
 		return errors.New("UpdateContainersAfterProfileUpdate")
 	}
 

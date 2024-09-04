@@ -14,9 +14,12 @@ type ContainerProfileController struct {
 
 func NewContainerProfileController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerProfileController {
 	return &ContainerProfileController{
-		containerProfileService: service.NewContainerProfileService(persistentDbSvc),
+		containerProfileService: service.NewContainerProfileService(
+			persistentDbSvc, trailDbSvc,
+		),
 	}
 }
 
@@ -32,13 +35,9 @@ func (controller *ContainerProfileController) Read() *cobra.Command {
 }
 
 func (controller *ContainerProfileController) Create() *cobra.Command {
-	var nameStr string
-	var baseSpecsStr string
-	var maxSpecsStr string
-	var scalingPolicyStr string
-	var scalingThreshold uint
-	var scalingMaxDurationSecs uint
-	var scalingIntervalSecs uint
+	var accountIdUint uint64
+	var nameStr, baseSpecsStr, maxSpecsStr, scalingPolicyStr string
+	var scalingThreshold, scalingMaxDurationSecs, scalingIntervalSecs uint
 	var hostMinCapacityPercent uint8
 
 	cmd := &cobra.Command{
@@ -46,7 +45,8 @@ func (controller *ContainerProfileController) Create() *cobra.Command {
 		Short: "CreateNewContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"name": nameStr,
+				"accountId": accountIdUint,
+				"name":      nameStr,
 			}
 
 			if baseSpecsStr != "" {
@@ -93,6 +93,8 @@ func (controller *ContainerProfileController) Create() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&nameStr, "name", "n", "", "Name")
 	cmd.MarkFlagRequired("name")
 	cmd.Flags().StringVarP(
@@ -123,14 +125,9 @@ func (controller *ContainerProfileController) Create() *cobra.Command {
 }
 
 func (controller *ContainerProfileController) Update() *cobra.Command {
-	var profileIdUint uint64
-	var nameStr string
-	var baseSpecsStr string
-	var maxSpecsStr string
-	var scalingPolicyStr string
-	var scalingThreshold uint
-	var scalingMaxDurationSecs uint
-	var scalingIntervalSecs uint
+	var accountIdUint, profileIdUint uint64
+	var nameStr, baseSpecsStr, maxSpecsStr, scalingPolicyStr string
+	var scalingThreshold, scalingMaxDurationSecs, scalingIntervalSecs uint
 	var hostMinCapacityPercent uint8
 
 	cmd := &cobra.Command{
@@ -138,7 +135,8 @@ func (controller *ContainerProfileController) Update() *cobra.Command {
 		Short: "UpdateContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"id": profileIdUint,
+				"accountId": accountIdUint,
+				"profileId": profileIdUint,
 			}
 
 			if nameStr != "" {
@@ -189,8 +187,10 @@ func (controller *ContainerProfileController) Update() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ContainerProfileId")
-	cmd.MarkFlagRequired("id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().Uint64VarP(&profileIdUint, "profile-id", "p", 0, "ContainerProfileId")
+	cmd.MarkFlagRequired("profile-id")
 	cmd.Flags().StringVarP(&nameStr, "name", "n", "", "Name")
 	cmd.Flags().StringVarP(
 		&baseSpecsStr, "base-specs", "b", "",
@@ -219,13 +219,14 @@ func (controller *ContainerProfileController) Update() *cobra.Command {
 }
 
 func (controller *ContainerProfileController) Delete() *cobra.Command {
-	var profileIdUint uint64
+	var accountIdUint, profileIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteContainerProfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
+				"accountId": accountIdUint,
 				"profileId": profileIdUint,
 			}
 
@@ -235,7 +236,9 @@ func (controller *ContainerProfileController) Delete() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&profileIdUint, "id", "i", 0, "ContainerProfileId")
-	cmd.MarkFlagRequired("id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().Uint64VarP(&profileIdUint, "profile-id", "p", 0, "ContainerProfileId")
+	cmd.MarkFlagRequired("profile-id")
 	return cmd
 }

@@ -1,13 +1,13 @@
 package dbModel
 
 import (
-	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type ContainerProfile struct {
 	ID                     uint64 `gorm:"primarykey"`
+	AccountID              uint64 `gorm:"not null"`
 	Name                   string `gorm:"not null"`
 	BaseSpecs              string `gorm:"not null"`
 	MaxSpecs               *string
@@ -34,6 +34,26 @@ func (model ContainerProfile) InitialEntries() []interface{} {
 	return initialProfiles
 }
 
+func NewContainerProfile(
+	accountId uint64,
+	name, baseSpecs string,
+	maxSpecs, scalingPolicy *string,
+	scalingThreshold, scalingMaxDurationSecs, scalingIntervalSecs *uint,
+	hostMinCapacityPercent *uint8,
+) ContainerProfile {
+	return ContainerProfile{
+		AccountID:              accountId,
+		Name:                   name,
+		BaseSpecs:              baseSpecs,
+		MaxSpecs:               maxSpecs,
+		ScalingPolicy:          scalingPolicy,
+		ScalingThreshold:       scalingThreshold,
+		ScalingMaxDurationSecs: scalingMaxDurationSecs,
+		ScalingIntervalSecs:    scalingIntervalSecs,
+		HostMinCapacityPercent: hostMinCapacityPercent,
+	}
+}
+
 func (ContainerProfile) ToModel(
 	entity entity.ContainerProfile,
 ) (ContainerProfile, error) {
@@ -57,6 +77,7 @@ func (ContainerProfile) ToModel(
 
 	return ContainerProfile{
 		ID:                     entity.Id.Uint64(),
+		AccountID:              entity.AccountId.Uint64(),
 		Name:                   entity.Name.String(),
 		BaseSpecs:              entity.BaseSpecs.String(),
 		MaxSpecs:               maxSpecsPtr,
@@ -68,7 +89,14 @@ func (ContainerProfile) ToModel(
 	}, nil
 }
 
-func (model ContainerProfile) ToEntity() (profileEntity entity.ContainerProfile, err error) {
+func (model ContainerProfile) ToEntity() (
+	profileEntity entity.ContainerProfile, err error,
+) {
+	accountId, err := valueObject.NewAccountId(model.AccountID)
+	if err != nil {
+		return profileEntity, err
+	}
+
 	profileId, err := valueObject.NewContainerProfileId(model.ID)
 	if err != nil {
 		return profileEntity, err
@@ -114,40 +142,8 @@ func (model ContainerProfile) ToEntity() (profileEntity entity.ContainerProfile,
 	}
 
 	return entity.NewContainerProfile(
-		profileId, name, baseSpecs, maxSpecsPtr, scalingPolicyPtr, model.ScalingThreshold,
-		model.ScalingMaxDurationSecs, model.ScalingIntervalSecs, hostMinCapacityPercentPtr,
+		profileId, accountId, name, baseSpecs, maxSpecsPtr, scalingPolicyPtr,
+		model.ScalingThreshold, model.ScalingMaxDurationSecs,
+		model.ScalingIntervalSecs, hostMinCapacityPercentPtr,
 	)
-}
-
-func (ContainerProfile) AddDtoToModel(
-	dto dto.CreateContainerProfile,
-) (ContainerProfile, error) {
-	var maxSpecsPtr *string
-	if dto.MaxSpecs != nil {
-		maxSpecs := dto.MaxSpecs.String()
-		maxSpecsPtr = &maxSpecs
-	}
-
-	var scalingPolicyPtr *string
-	if dto.ScalingPolicy != nil {
-		scalingPolicy := dto.ScalingPolicy.String()
-		scalingPolicyPtr = &scalingPolicy
-	}
-
-	var hostMinCapacityPercentPtr *uint8
-	if dto.HostMinCapacityPercent != nil {
-		hostMinCapacityPercentUint8 := dto.HostMinCapacityPercent.Uint8()
-		hostMinCapacityPercentPtr = &hostMinCapacityPercentUint8
-	}
-
-	return ContainerProfile{
-		Name:                   dto.Name.String(),
-		BaseSpecs:              dto.BaseSpecs.String(),
-		MaxSpecs:               maxSpecsPtr,
-		ScalingPolicy:          scalingPolicyPtr,
-		ScalingThreshold:       dto.ScalingThreshold,
-		ScalingMaxDurationSecs: dto.ScalingMaxDurationSecs,
-		ScalingIntervalSecs:    dto.ScalingIntervalSecs,
-		HostMinCapacityPercent: hostMinCapacityPercentPtr,
-	}, nil
 }

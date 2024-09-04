@@ -6,7 +6,7 @@ import (
 )
 
 type ContainerProfileCmdRepo interface {
-	Create(createDto dto.CreateContainerProfile) error
-	Update(updateDto dto.UpdateContainerProfile) error
-	Delete(profileId valueObject.ContainerProfileId) error
+	Create(dto.CreateContainerProfile) (valueObject.ContainerProfileId, error)
+	Update(dto.UpdateContainerProfile) error
+	Delete(dto.DeleteContainerProfile) error
 }

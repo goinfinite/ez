@@ -78,7 +78,7 @@ func (router *Router) containerRoutes() {
 
 	containerProfileGroup := containerGroup.Group("/profile")
 	containerProfileController := apiController.NewContainerProfileController(
-		router.persistentDbSvc,
+		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerProfileGroup.GET("/", containerProfileController.Read)
 	containerProfileGroup.POST("/", containerProfileController.Create)

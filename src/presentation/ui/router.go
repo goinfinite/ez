@@ -20,17 +20,20 @@ type Router struct {
 	baseRoute       *echo.Group
 	persistentDbSvc *db.PersistentDatabaseService
 	transientDbSvc  *db.TransientDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewRouter(
 	baseRoute *echo.Group,
 	persistentDbSvc *db.PersistentDatabaseService,
 	transientDbSvc *db.TransientDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *Router {
 	return &Router{
 		baseRoute:       baseRoute,
 		persistentDbSvc: persistentDbSvc,
 		transientDbSvc:  transientDbSvc,
+		trailDbSvc:      trailDbSvc,
 	}
 }
 
@@ -58,7 +61,9 @@ func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/container")
 
 	containerProfileGroup := containerGroup.Group("/profile")
-	profilePresenter := presenter.NewContainerProfilePresenter(router.persistentDbSvc)
+	profilePresenter := presenter.NewContainerProfilePresenter(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	containerProfileGroup.GET("/", profilePresenter.Handler)
 }
 

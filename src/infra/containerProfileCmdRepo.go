@@ -19,19 +19,46 @@ func NewContainerProfileCmdRepo(
 
 func (repo *ContainerProfileCmdRepo) Create(
 	createDto dto.CreateContainerProfile,
-) error {
-	containerProfileModel, err := dbModel.ContainerProfile{}.AddDtoToModel(createDto)
-	if err != nil {
-		return err
+) (profileId valueObject.ContainerProfileId, err error) {
+	var maxSpecsPtr *string
+	if createDto.MaxSpecs != nil {
+		maxSpecs := createDto.MaxSpecs.String()
+		maxSpecsPtr = &maxSpecs
 	}
 
-	return repo.persistentDbSvc.Handler.Create(&containerProfileModel).Error
+	var scalingPolicyPtr *string
+	if createDto.ScalingPolicy != nil {
+		scalingPolicy := createDto.ScalingPolicy.String()
+		scalingPolicyPtr = &scalingPolicy
+	}
+
+	var hostMinCapacityPercentPtr *uint8
+	if createDto.HostMinCapacityPercent != nil {
+		hostMinCapacityPercentUint8 := createDto.HostMinCapacityPercent.Uint8()
+		hostMinCapacityPercentPtr = &hostMinCapacityPercentUint8
+	}
+
+	createModel := dbModel.NewContainerProfile(
+		createDto.AccountId.Uint64(), createDto.Name.String(),
+		createDto.BaseSpecs.String(), maxSpecsPtr, scalingPolicyPtr,
+		createDto.ScalingThreshold, createDto.ScalingMaxDurationSecs,
+		createDto.ScalingIntervalSecs, hostMinCapacityPercentPtr,
+	)
+
+	err = repo.persistentDbSvc.Handler.Create(&createModel).Error
+	if err != nil {
+		return profileId, err
+	}
+
+	return valueObject.NewContainerProfileId(createModel.ID)
 }
 
 func (repo *ContainerProfileCmdRepo) Update(
 	updateDto dto.UpdateContainerProfile,
 ) error {
-	updateMap := map[string]interface{}{}
+	updateMap := map[string]interface{}{
+		"account_id": updateDto.AccountId.Uint64(),
+	}
 
 	if updateDto.Name != nil {
 		updateMap["name"] = updateDto.Name.String()
@@ -92,9 +119,9 @@ func (repo *ContainerProfileCmdRepo) Update(
 }
 
 func (repo *ContainerProfileCmdRepo) Delete(
-	profileId valueObject.ContainerProfileId,
+	deleteDto dto.DeleteContainerProfile,
 ) error {
 	return repo.persistentDbSvc.Handler.
 		Model(&dbModel.ContainerProfile{}).
-		Delete(dbModel.ContainerProfile{}, profileId.Uint64()).Error
+		Delete(dbModel.ContainerProfile{}, deleteDto.ProfileId.Uint64()).Error
 }

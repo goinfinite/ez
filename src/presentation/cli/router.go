@@ -65,7 +65,7 @@ func (router *Router) containerRoutes() {
 	}
 
 	containerProfileController := cliController.NewContainerProfileController(
-		router.persistentDbSvc,
+		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerProfileCmd.AddCommand(containerProfileController.Read())
 	containerProfileCmd.AddCommand(containerProfileController.Create())

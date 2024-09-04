@@ -18,9 +18,12 @@ type ContainerProfilePresenter struct {
 
 func NewContainerProfilePresenter(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerProfilePresenter {
 	return &ContainerProfilePresenter{
-		containerProfileService: service.NewContainerProfileService(persistentDbSvc),
+		containerProfileService: service.NewContainerProfileService(
+			persistentDbSvc, trailDbSvc,
+		),
 	}
 }
 

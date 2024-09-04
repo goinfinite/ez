@@ -17,45 +17,41 @@ var (
 
 func CreateContainerProfile(
 	containerProfileCmdRepo repository.ContainerProfileCmdRepo,
-	dto dto.CreateContainerProfile,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
+	createDto dto.CreateContainerProfile,
 ) error {
-	if dto.MaxSpecs != nil {
-		if dto.ScalingPolicy == nil {
+	if createDto.MaxSpecs != nil {
+		if createDto.ScalingPolicy == nil {
 			defaultPolicy := valueObject.DefaultScalingPolicy()
-			dto.ScalingPolicy = &defaultPolicy
+			createDto.ScalingPolicy = &defaultPolicy
 		}
 
-		if dto.ScalingThreshold == nil {
-			dto.ScalingThreshold = &ContainerProfileDefaultScalingThreshold
+		if createDto.ScalingThreshold == nil {
+			createDto.ScalingThreshold = &ContainerProfileDefaultScalingThreshold
 		}
 
-		if dto.ScalingMaxDurationSecs == nil {
-			dto.ScalingMaxDurationSecs = &ContainerProfileDefaultScalingMaxDurationSecs
+		if createDto.ScalingMaxDurationSecs == nil {
+			createDto.ScalingMaxDurationSecs = &ContainerProfileDefaultScalingMaxDurationSecs
 		}
 
-		if dto.ScalingIntervalSecs == nil {
-			dto.ScalingIntervalSecs = &ContainerProfileDefaultScalingIntervalSecs
+		if createDto.ScalingIntervalSecs == nil {
+			createDto.ScalingIntervalSecs = &ContainerProfileDefaultScalingIntervalSecs
 		}
 
-		if dto.HostMinCapacityPercent == nil {
+		if createDto.HostMinCapacityPercent == nil {
 			defaultHostMinCapacity := valueObject.DefaultHostMinCapacity()
-			dto.HostMinCapacityPercent = &defaultHostMinCapacity
+			createDto.HostMinCapacityPercent = &defaultHostMinCapacity
 		}
 	}
 
-	err := containerProfileCmdRepo.Create(dto)
+	profileId, err := containerProfileCmdRepo.Create(createDto)
 	if err != nil {
-		slog.Error(
-			"CreateContainerProfileInfraError",
-			slog.Any("error", err),
-		)
+		slog.Error("CreateContainerProfileInfraError", slog.Any("error", err))
 		return errors.New("CreateContainerProfileInfraError")
 	}
 
-	slog.Info(
-		"ContainerProfileCreated",
-		slog.String("name", dto.Name.String()),
-	)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		CreateContainerProfile(createDto, profileId)
 
 	return nil
 }

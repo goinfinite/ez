@@ -15,14 +15,17 @@ import (
 type ContainerProfileService struct {
 	persistentDbSvc           *db.PersistentDatabaseService
 	containerProfileQueryRepo *infra.ContainerProfileQueryRepo
+	activityRecordCmdRepo     *infra.ActivityRecordCmdRepo
 }
 
 func NewContainerProfileService(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerProfileService {
 	return &ContainerProfileService{
 		persistentDbSvc:           persistentDbSvc,
 		containerProfileQueryRepo: infra.NewContainerProfileQueryRepo(persistentDbSvc),
+		activityRecordCmdRepo:     infra.NewActivityRecordCmdRepo(trailDbSvc),
 	}
 }
 
@@ -108,9 +111,14 @@ func (service *ContainerProfileService) parseScalingInterval(
 func (service *ContainerProfileService) Create(
 	input map[string]interface{},
 ) ServiceOutput {
-	requiredParams := []string{"name", "baseSpecs"}
+	requiredParams := []string{"accountId", "name", "baseSpecs"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -173,14 +181,33 @@ func (service *ContainerProfileService) Create(
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	createDto := dto.NewCreateContainerProfile(
-		profileName, baseSpecs, maxSpecsPtr, scalingPolicyPtr, scalingThresholdPtr,
-		scalingMaxDurationSecsPtr, scalingIntervalSecsPtr, hostMinCapacityPercentPtr,
+		accountId, profileName, baseSpecs, maxSpecsPtr, scalingPolicyPtr,
+		scalingThresholdPtr, scalingMaxDurationSecsPtr, scalingIntervalSecsPtr,
+		hostMinCapacityPercentPtr, operatorAccountId, operatorIpAddress,
 	)
 
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(service.persistentDbSvc)
 
-	err = useCase.CreateContainerProfile(containerProfileCmdRepo, createDto)
+	err = useCase.CreateContainerProfile(
+		containerProfileCmdRepo, service.activityRecordCmdRepo, createDto,
+	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -194,9 +221,14 @@ func (service *ContainerProfileService) Update(
 	if input["id"] != nil {
 		input["profileId"] = input["id"]
 	}
-	requiredParams := []string{"profileId"}
+	requiredParams := []string{"accountId", "profileId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -272,10 +304,26 @@ func (service *ContainerProfileService) Update(
 		hostMinCapacityPercentPtr = &hostMinCapacityPercent
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	updateDto := dto.NewUpdateContainerProfile(
-		profileId, profileNamePtr, baseSpecsPtr, maxSpecsPtr, scalingPolicyPtr,
+		accountId, profileId, profileNamePtr, baseSpecsPtr, maxSpecsPtr, scalingPolicyPtr,
 		scalingThresholdPtr, scalingMaxDurationSecsPtr, scalingIntervalSecsPtr,
-		hostMinCapacityPercentPtr,
+		hostMinCapacityPercentPtr, operatorAccountId, operatorIpAddress,
 	)
 
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(service.persistentDbSvc)
@@ -284,7 +332,7 @@ func (service *ContainerProfileService) Update(
 
 	err = useCase.UpdateContainerProfile(
 		service.containerProfileQueryRepo, containerProfileCmdRepo, containerQueryRepo,
-		containerCmdRepo, updateDto,
+		containerCmdRepo, service.activityRecordCmdRepo, updateDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -299,9 +347,14 @@ func (service *ContainerProfileService) Delete(
 	if input["id"] != nil {
 		input["profileId"] = input["id"]
 	}
-	requiredParams := []string{"profileId"}
+	requiredParams := []string{"accountId", "profileId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -311,13 +364,33 @@ func (service *ContainerProfileService) Delete(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteContainerProfile(
+		accountId, profileId, operatorAccountId, operatorIpAddress,
+	)
+
 	containerProfileCmdRepo := infra.NewContainerProfileCmdRepo(service.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
 
 	err = useCase.DeleteContainerProfile(
 		service.containerProfileQueryRepo, containerProfileCmdRepo, containerQueryRepo,
-		containerCmdRepo, profileId,
+		containerCmdRepo, service.activityRecordCmdRepo, deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

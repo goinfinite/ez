@@ -8,6 +8,7 @@ import (
 
 type ContainerProfile struct {
 	Id                        valueObject.ContainerProfileId   `json:"id"`
+	AccountId                 valueObject.AccountId            `json:"accountId"`
 	Name                      valueObject.ContainerProfileName `json:"name"`
 	BaseSpecs                 valueObject.ContainerSpecs       `json:"baseSpecs"`
 	MaxSpecs                  *valueObject.ContainerSpecs      `json:"maxSpecs"`
@@ -24,6 +25,7 @@ type ContainerProfile struct {
 
 func NewContainerProfile(
 	id valueObject.ContainerProfileId,
+	accountId valueObject.AccountId,
 	name valueObject.ContainerProfileName,
 	baseSpecs valueObject.ContainerSpecs,
 	maxSpecs *valueObject.ContainerSpecs,
@@ -51,6 +53,7 @@ func NewContainerProfile(
 
 	return ContainerProfile{
 		Id:                        id,
+		AccountId:                 accountId,
 		Name:                      name,
 		BaseSpecs:                 baseSpecs,
 		MaxSpecs:                  maxSpecs,
@@ -73,6 +76,7 @@ func DefaultContainerProfile() ContainerProfile {
 
 	return ContainerProfile{
 		Id:        profileId,
+		AccountId: valueObject.SystemAccountId,
 		Name:      profileName,
 		BaseSpecs: baseSpecs,
 	}
@@ -87,6 +91,7 @@ func InitialContainerProfiles() []ContainerProfile {
 
 	smallProfile := ContainerProfile{
 		Id:        profileId,
+		AccountId: valueObject.SystemAccountId,
 		Name:      profileName,
 		BaseSpecs: baseSpecs,
 	}
@@ -102,8 +107,9 @@ func InitialContainerProfiles() []ContainerProfile {
 	hostMinCapacityPercent, _ := valueObject.NewHostMinCapacity(20)
 
 	smallWithAutoScalingProfile, _ := NewContainerProfile(
-		profileId, profileName, baseSpecs, &maxSpecs, &scalingPolicy, &scalingThreshold,
-		&scalingMaxDurationSecs, &scalingIntervalSecs, &hostMinCapacityPercent,
+		profileId, valueObject.SystemAccountId, profileName, baseSpecs, &maxSpecs,
+		&scalingPolicy, &scalingThreshold, &scalingMaxDurationSecs,
+		&scalingIntervalSecs, &hostMinCapacityPercent,
 	)
 
 	profileId, _ = valueObject.NewContainerProfileId(4)
@@ -112,6 +118,7 @@ func InitialContainerProfiles() []ContainerProfile {
 
 	mediumProfile := ContainerProfile{
 		Id:        profileId,
+		AccountId: valueObject.SystemAccountId,
 		Name:      profileName,
 		BaseSpecs: baseSpecs,
 	}
@@ -122,6 +129,7 @@ func InitialContainerProfiles() []ContainerProfile {
 
 	largeProfile := ContainerProfile{
 		Id:        profileId,
+		AccountId: valueObject.SystemAccountId,
 		Name:      profileName,
 		BaseSpecs: baseSpecs,
 	}
