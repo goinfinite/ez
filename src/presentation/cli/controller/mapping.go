@@ -14,9 +14,10 @@ type MappingController struct {
 
 func NewMappingController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *MappingController {
 	return &MappingController{
-		mappingService: service.NewMappingService(persistentDbSvc),
+		mappingService: service.NewMappingService(persistentDbSvc, trailDbSvc),
 	}
 }
 
@@ -101,8 +102,8 @@ func (controller *MappingController) Delete() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&mappingIdUint, "id", "i", 0, "MappingId")
-	cmd.MarkFlagRequired("id")
+	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
+	cmd.MarkFlagRequired("mapping-id")
 	return cmd
 }
 

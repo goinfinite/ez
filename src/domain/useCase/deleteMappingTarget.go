@@ -4,32 +4,29 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 func DeleteMappingTarget(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
-	mappingId valueObject.MappingId,
-	targetId valueObject.MappingTargetId,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
+	deleteDto dto.DeleteMappingTarget,
 ) error {
-	_, err := mappingQueryRepo.ReadTargetById(targetId)
+	_, err := mappingQueryRepo.ReadTargetById(deleteDto.TargetId)
 	if err != nil {
 		return errors.New("MappingTargetNotFound")
 	}
 
-	err = mappingCmdRepo.DeleteTarget(mappingId, targetId)
+	err = mappingCmdRepo.DeleteTarget(deleteDto)
 	if err != nil {
 		slog.Error("DeleteMappingTargetInfraError", slog.Any("error", err))
 		return errors.New("DeleteMappingTargetInfraError")
 	}
 
-	slog.Info(
-		"MappingTargetDeleted",
-		slog.Uint64("mappingId", mappingId.Uint64()),
-		slog.Uint64("targetId", targetId.Uint64()),
-	)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		DeleteMappingTarget(deleteDto)
 
 	return nil
 }

@@ -10,14 +10,17 @@ import (
 )
 
 type MappingService struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	persistentDbSvc       *db.PersistentDatabaseService
+	activityRecordCmdRepo *infra.ActivityRecordCmdRepo
 }
 
 func NewMappingService(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *MappingService {
 	return &MappingService{
-		persistentDbSvc: persistentDbSvc,
+		persistentDbSvc:       persistentDbSvc,
+		activityRecordCmdRepo: infra.NewActivityRecordCmdRepo(trailDbSvc),
 	}
 }
 
@@ -71,12 +74,25 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 		return NewServiceOutput(UserError, "InvalidContainerIds")
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	createMappingDto := dto.NewCreateMapping(
-		accountId,
-		hostnamePtr,
-		publicPort,
-		protocol,
-		containerIds,
+		accountId, hostnamePtr, publicPort, protocol, containerIds,
+		operatorAccountId, operatorIpAddress,
 	)
 
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
@@ -84,10 +100,8 @@ func (service *MappingService) Create(input map[string]interface{}) ServiceOutpu
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 
 	err = useCase.CreateMapping(
-		mappingQueryRepo,
-		mappingCmdRepo,
-		containerQueryRepo,
-		createMappingDto,
+		mappingQueryRepo, mappingCmdRepo, containerQueryRepo,
+		service.activityRecordCmdRepo, createMappingDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -109,13 +123,32 @@ func (service *MappingService) Delete(input map[string]interface{}) ServiceOutpu
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteMapping(
+		mappingId, operatorAccountId, operatorIpAddress,
+	)
+
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 
 	err = useCase.DeleteMapping(
-		mappingQueryRepo,
-		mappingCmdRepo,
-		mappingId,
+		mappingQueryRepo, mappingCmdRepo, service.activityRecordCmdRepo,
+		deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -142,9 +175,24 @@ func (service *MappingService) CreateTarget(input map[string]interface{}) Servic
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	createTargetDto := dto.NewCreateMappingTarget(
-		mappingId,
-		containerId,
+		mappingId, containerId, operatorAccountId, operatorIpAddress,
 	)
 
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
@@ -152,10 +200,8 @@ func (service *MappingService) CreateTarget(input map[string]interface{}) Servic
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 
 	err = useCase.CreateMappingTarget(
-		mappingQueryRepo,
-		mappingCmdRepo,
-		containerQueryRepo,
-		createTargetDto,
+		mappingQueryRepo, mappingCmdRepo, containerQueryRepo,
+		service.activityRecordCmdRepo, createTargetDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -182,14 +228,32 @@ func (service *MappingService) DeleteTarget(input map[string]interface{}) Servic
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteMappingTarget(
+		mappingId, targetId, operatorAccountId, operatorIpAddress,
+	)
+
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 
 	err = useCase.DeleteMappingTarget(
-		mappingQueryRepo,
-		mappingCmdRepo,
-		mappingId,
-		targetId,
+		mappingQueryRepo, mappingCmdRepo, service.activityRecordCmdRepo,
+		deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

@@ -223,15 +223,17 @@ server {
 	return nil
 }
 
-func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) error {
+func (repo *MappingCmdRepo) CreateTarget(
+	createDto dto.CreateMappingTarget,
+) (targetId valueObject.MappingTargetId, err error) {
 	containerEntity, err := repo.containerQueryRepo.ReadById(createDto.ContainerId)
 	if err != nil {
-		return err
+		return targetId, err
 	}
 
 	mappingEntity, err := repo.mappingQueryRepo.ReadById(createDto.MappingId)
 	if err != nil {
-		return err
+		return targetId, err
 	}
 
 	containerPrivatePort := uint16(0)
@@ -256,7 +258,7 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 		containerPrivatePort = portBinding.PrivatePort.Uint16()
 	}
 	if containerPrivatePort == 0 {
-		return errors.New("ContainerPrivatePortNotFound")
+		return targetId, errors.New("ContainerPrivatePortNotFound")
 	}
 
 	targetModel := dbModel.NewMappingTarget(
@@ -269,34 +271,42 @@ func (repo *MappingCmdRepo) CreateTarget(createDto dto.CreateMappingTarget) erro
 
 	createResult := repo.persistentDbSvc.Handler.Create(&targetModel)
 	if createResult.Error != nil {
-		return createResult.Error
+		return targetId, createResult.Error
 	}
-	targetId, err := valueObject.NewMappingTargetId(targetModel.ID)
+	targetId, err = valueObject.NewMappingTargetId(targetModel.ID)
 	if err != nil {
-		return errors.New("MappingTargetIdCreationError: " + err.Error())
+		return targetId, errors.New("MappingTargetIdCreationError: " + err.Error())
 	}
 
 	err = repo.updateWebServerFile()
 	if err != nil {
-		deleteErr := repo.DeleteTarget(createDto.MappingId, targetId)
+		deleteTargetDto := dto.NewDeleteMappingTarget(
+			createDto.MappingId, targetId,
+			createDto.OperatorAccountId, createDto.OperatorIpAddress,
+		)
+		deleteErr := repo.DeleteTarget(deleteTargetDto)
 		if deleteErr != nil {
-			return errors.New("DeleteTargetFailed: " + deleteErr.Error())
+			return targetId, errors.New("DeleteTargetFailed: " + deleteErr.Error())
 		}
-		return errors.New("UpdateWebServerFileFailed: " + err.Error())
+		return targetId, errors.New("UpdateWebServerFileFailed: " + err.Error())
 	}
 
-	return nil
+	return targetId, nil
 }
 
-func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
+func (repo *MappingCmdRepo) Delete(deleteDto dto.DeleteMapping) error {
 	ormSvc := repo.persistentDbSvc.Handler
 
-	err := ormSvc.Delete(dbModel.MappingTarget{}, "mapping_id = ?", id.Uint64()).Error
+	mappingIdUint64 := deleteDto.MappingId.Uint64()
+
+	err := ormSvc.Delete(
+		dbModel.MappingTarget{}, "mapping_id = ?", mappingIdUint64,
+	).Error
 	if err != nil {
 		return err
 	}
 
-	err = ormSvc.Delete(dbModel.Mapping{}, id.Uint64()).Error
+	err = ormSvc.Delete(dbModel.Mapping{}, mappingIdUint64).Error
 	if err != nil {
 		return err
 	}
@@ -304,13 +314,61 @@ func (repo *MappingCmdRepo) Delete(id valueObject.MappingId) error {
 	return repo.updateWebServerFile()
 }
 
+func (repo *MappingCmdRepo) DeleteEmpty() error {
+	mappings, err := repo.mappingQueryRepo.Read()
+	if err != nil {
+		return err
+	}
+
+	if len(mappings) == 0 {
+		return nil
+	}
+
+	nowEpoch := time.Now().Unix()
+	for _, mapping := range mappings {
+		if len(mapping.Targets) > 0 {
+			continue
+		}
+
+		isMappingTooRecent := nowEpoch-mapping.CreatedAt.Read() < 60
+		if isMappingTooRecent {
+			continue
+		}
+
+		deleteDto := dto.DeleteMapping{MappingId: mapping.Id}
+		err = repo.Delete(deleteDto)
+		if err != nil {
+			slog.Error(
+				"DeleteMappingError",
+				slog.String("mappingId", mapping.Id.String()),
+				slog.Any("error", err),
+			)
+			continue
+		}
+	}
+
+	return nil
+}
+
 func (repo *MappingCmdRepo) DeleteTarget(
-	mappingId valueObject.MappingId,
-	targetId valueObject.MappingTargetId,
+	deleteDto dto.DeleteMappingTarget,
 ) error {
 	err := repo.persistentDbSvc.Handler.Delete(
-		dbModel.MappingTarget{}, "id = ?", targetId.Uint64(),
+		dbModel.MappingTarget{}, "id = ?", deleteDto.TargetId.Uint64(),
 	).Error
+	if err != nil {
+		return err
+	}
+
+	return repo.updateWebServerFile()
+}
+
+func (repo *MappingCmdRepo) DeleteTargetsByContainerId(
+	containerId valueObject.ContainerId,
+) error {
+	err := repo.persistentDbSvc.Handler.
+		Model(dbModel.MappingTarget{}).
+		Delete("container_id = ?", containerId.String()).Error
 	if err != nil {
 		return err
 	}

@@ -16,9 +16,10 @@ type MappingController struct {
 
 func NewMappingController(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *MappingController {
 	return &MappingController{
-		mappingService: service.NewMappingService(persistentDbSvc),
+		mappingService: service.NewMappingService(persistentDbSvc, trailDbSvc),
 	}
 }
 

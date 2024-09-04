@@ -126,7 +126,9 @@ func (router *Router) licenseRoutes() {
 func (router *Router) mappingRoutes() {
 	mappingGroup := router.baseRoute.Group("/v1/mapping")
 
-	mappingController := apiController.NewMappingController(router.persistentDbSvc)
+	mappingController := apiController.NewMappingController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	mappingGroup.GET("/", mappingController.Read)
 	mappingGroup.POST("/", mappingController.Create)
 	mappingGroup.DELETE("/:mappingId/", mappingController.Delete)

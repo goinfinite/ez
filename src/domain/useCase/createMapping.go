@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -13,6 +13,7 @@ func CreateMapping(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateMapping,
 ) error {
 	wasHostnameSent := createDto.Hostname != nil
@@ -33,8 +34,8 @@ func CreateMapping(
 
 	currentMappings, err := mappingQueryRepo.Read()
 	if err != nil {
-		log.Printf("GetMappingError: %s", err)
-		return errors.New("GetMappingInfraError")
+		slog.Error("ReadMappingsInfraError", slog.Any("error", err))
+		return errors.New("ReadMappingsInfraError")
 	}
 
 	var existingMapping *entity.Mapping
@@ -68,31 +69,32 @@ func CreateMapping(
 	if existingMapping == nil {
 		mappingId, err := mappingCmdRepo.Create(createDto)
 		if err != nil {
-			log.Printf("CreateMappingError: %s", err)
+			slog.Error("CreateMappingInfraError", slog.Any("error", err))
 			return errors.New("CreateMappingInfraError")
 		}
 
-		log.Printf("Mapping for port '%s/%s' added.", publicPortStr, protocolStr)
+		NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+			CreateMapping(createDto, mappingId)
 
 		newMapping, err := mappingQueryRepo.ReadById(mappingId)
 		if err != nil {
-			log.Printf("GetMappingByIdError: %s", err)
-			return errors.New("GetMappingByIdInfraError")
+			slog.Error("ReadMappingByIdInfraError", slog.Any("error", err))
+			return errors.New("ReadMappingByIdInfraError")
 		}
 		existingMapping = &newMapping
 	}
 
 	for _, containerId := range createDto.ContainerIds {
-		createTargetDto := dto.NewCreateMappingTarget(existingMapping.Id, containerId)
+		createTargetDto := dto.NewCreateMappingTarget(
+			existingMapping.Id, containerId,
+			createDto.OperatorAccountId, createDto.OperatorIpAddress,
+		)
 		err = CreateMappingTarget(
-			mappingQueryRepo,
-			mappingCmdRepo,
-			containerQueryRepo,
-			createTargetDto,
+			mappingQueryRepo, mappingCmdRepo, containerQueryRepo,
+			activityRecordCmdRepo, createTargetDto,
 		)
 		if err != nil {
-			log.Printf("[%s] CreateMappingTargetError: %s", containerId.String(), err)
-			return errors.New("CreateMappingTargetInfraError")
+			return err
 		}
 	}
 

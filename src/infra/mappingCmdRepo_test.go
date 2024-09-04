@@ -24,6 +24,7 @@ func TestMappingCmdRepo(t *testing.T) {
 
 		createMapping := dto.NewCreateMapping(
 			accountId, &hostname, port, protocol, []valueObject.ContainerId{},
+			valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 
 		_, err := mappingCmdRepo.Create(createMapping)
@@ -48,11 +49,10 @@ func TestMappingCmdRepo(t *testing.T) {
 		containerId := containers[0].Id
 
 		createMappingTarget := dto.NewCreateMappingTarget(
-			mappingId,
-			containerId,
+			mappingId, containerId, valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 
-		err = mappingCmdRepo.CreateTarget(createMappingTarget)
+		_, err = mappingCmdRepo.CreateTarget(createMappingTarget)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
@@ -79,8 +79,12 @@ func TestMappingCmdRepo(t *testing.T) {
 
 		mappingId := mappings[0].Id
 		targetId := mappings[0].Targets[0].Id
+		deleteDto := dto.NewDeleteMappingTarget(
+			mappingId, targetId,
+			valueObject.SystemAccountId, valueObject.SystemIpAddress,
+		)
 
-		err = mappingCmdRepo.DeleteTarget(mappingId, targetId)
+		err = mappingCmdRepo.DeleteTarget(deleteDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
@@ -100,9 +104,8 @@ func TestMappingCmdRepo(t *testing.T) {
 			return
 		}
 
-		mappingId := mappings[0].Id
-
-		err = mappingCmdRepo.Delete(mappingId)
+		deleteDto := dto.DeleteMapping{MappingId: mappings[0].Id}
+		err = mappingCmdRepo.Delete(deleteDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

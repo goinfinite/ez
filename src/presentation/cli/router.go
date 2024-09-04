@@ -131,7 +131,9 @@ func (router *Router) mappingRoutes() {
 		Short: "MappingManagement",
 	}
 
-	mappingController := cliController.NewMappingController(router.persistentDbSvc)
+	mappingController := cliController.NewMappingController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	mappingCmd.AddCommand(mappingController.Read())
 	mappingCmd.AddCommand(mappingController.Create())
 	mappingCmd.AddCommand(mappingController.Delete())

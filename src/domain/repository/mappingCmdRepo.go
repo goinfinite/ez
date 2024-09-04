@@ -6,11 +6,10 @@ import (
 )
 
 type MappingCmdRepo interface {
-	Create(createDto dto.CreateMapping) (valueObject.MappingId, error)
-	CreateTarget(createDto dto.CreateMappingTarget) error
-	Delete(mappingId valueObject.MappingId) error
-	DeleteTarget(
-		mappingId valueObject.MappingId,
-		targetId valueObject.MappingTargetId,
-	) error
+	Create(dto.CreateMapping) (valueObject.MappingId, error)
+	CreateTarget(dto.CreateMappingTarget) (valueObject.MappingTargetId, error)
+	Delete(dto.DeleteMapping) error
+	DeleteEmpty() error
+	DeleteTarget(dto.DeleteMappingTarget) error
+	DeleteTargetsByContainerId(valueObject.ContainerId) error
 }

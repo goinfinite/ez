@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -12,18 +12,19 @@ func CreateMappingTarget(
 	mappingQueryRepo repository.MappingQueryRepo,
 	mappingCmdRepo repository.MappingCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateMappingTarget,
 ) error {
 	mappingEntity, err := mappingQueryRepo.ReadById(createDto.MappingId)
 	if err != nil {
-		log.Printf("GetMappingError: %s", err)
-		return errors.New("GetMappingInfraError")
+		slog.Error("ReadMappingInfraError", slog.Any("error", err))
+		return errors.New("ReadMappingInfraError")
 	}
 
 	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
 	if err != nil {
-		log.Printf("GetContainerError: %s", err)
-		return errors.New("GetContainerInfraError")
+		slog.Error("ReadContainerInfraError", slog.Any("error", err))
+		return errors.New("ReadContainerInfraError")
 	}
 
 	publicPortMatches := false
@@ -35,9 +36,10 @@ func CreateMappingTarget(
 	}
 
 	if !publicPortMatches {
-		log.Printf(
-			"ContainerId '%s' does not bind to public port '%d'.",
-			createDto.ContainerId, mappingEntity.PublicPort,
+		slog.Error(
+			"ContainerDoesNotBindToMappingPublicPort",
+			slog.String("containerId", createDto.ContainerId.String()),
+			slog.Uint64("publicPort", uint64(mappingEntity.PublicPort.Uint16())),
 		)
 		return errors.New("ContainerDoesNotBindToMappingPublicPort")
 	}
@@ -47,23 +49,22 @@ func CreateMappingTarget(
 			continue
 		}
 
-		log.Printf(
-			"Skipping CreateMappingTarget: ContainerId '%s' is already a target for MappingId '%s'.",
-			createDto.ContainerId, createDto.MappingId,
+		slog.Debug(
+			"SkipExistingMappingTarget",
+			slog.String("containerId", createDto.ContainerId.String()),
+			slog.String("mappingId", createDto.MappingId.String()),
 		)
 		return nil
 	}
 
-	err = mappingCmdRepo.CreateTarget(createDto)
+	targetId, err := mappingCmdRepo.CreateTarget(createDto)
 	if err != nil {
-		log.Printf("CreateMappingTargetError: %s", err)
+		slog.Error("CreateMappingTargetInfraError", slog.Any("error", err))
 		return errors.New("CreateMappingTargetInfraError")
 	}
 
-	log.Printf(
-		"ContainerId '%s' added as target for MappingId '%s'.",
-		createDto.ContainerId, createDto.MappingId,
-	)
+	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
+		CreateMappingTarget(createDto, targetId)
 
 	return nil
 }
