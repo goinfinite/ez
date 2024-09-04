@@ -60,7 +60,7 @@ func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
@@ -167,7 +167,7 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
@@ -201,7 +201,7 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 	accountId, err := valueObject.NewAccountId(requestBody["accountId"])

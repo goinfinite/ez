@@ -236,7 +236,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
@@ -306,7 +306,7 @@ func (controller *ContainerController) Update(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 

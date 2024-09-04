@@ -111,7 +111,7 @@ func (controller *ContainerProfileController) Create(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 

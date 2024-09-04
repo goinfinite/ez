@@ -52,7 +52,7 @@ func (controller *MappingController) Create(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
@@ -127,7 +127,7 @@ func (controller *MappingController) CreateTarget(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] != nil {
+	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
