@@ -433,7 +433,7 @@ templ ContainerProfileRegularForm(action string) {
 	>
 		if action == "update" {
 			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
-			<input type="hidden" name="id" x-bind:value="containerProfile.accountId"/>
+			<input type="hidden" name="accountId" x-bind:value="containerProfile.accountId"/>
 		}
 		<div class="my-6">
 			@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name", false)
@@ -578,7 +578,7 @@ templ ContainerProfileTextualForm(action string) {
 	>
 		if action == "update" {
 			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
-			<input type="hidden" name="id" x-bind:value="containerProfile.accountId"/>
+			<input type="hidden" name="accountId" x-bind:value="containerProfile.accountId"/>
 		}
 		<div class="bg-control-500 rounded-md p-6 text-center text-lg leading-10">
 			The
