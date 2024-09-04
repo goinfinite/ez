@@ -52,6 +52,10 @@ func (controller *MappingController) Create(c echo.Context) error {
 		return err
 	}
 
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
 	if requestBody["containerId"] != nil {
 		requestBody["containerIds"] = requestBody["containerId"]
 	}
@@ -121,6 +125,10 @@ func (controller *MappingController) CreateTarget(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
+	}
+
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
 	return apiHelper.ServiceResponseWrapper(

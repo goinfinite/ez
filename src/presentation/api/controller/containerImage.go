@@ -60,6 +60,10 @@ func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error
 		return err
 	}
 
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.containerImageService.CreateSnapshot(requestBody, true),
 	)
@@ -163,6 +167,10 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 		return err
 	}
 
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.containerImageService.CreateArchiveFile(requestBody, true),
 	)
@@ -175,7 +183,7 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 // @Accept       mpfd
 // @Produce      json
 // @Security     Bearer
-// @Param        accountId		formData	string	true	"AccountId"
+// @Param        accountId		formData	string	false	"AccountId"
 // @Param        archiveFile	formData	file	true	"ArchiveFile"
 // @Success      201 {object} valueObject.ContainerImageId "ContainerImageId"
 // @Router       /v1/container/image/archive/import/ [post]
@@ -186,13 +194,16 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 	}
 
 	requiredParams := []string{
-		"accountId", "archiveFile", "operatorAccountId", "operatorIpAddress",
+		"archiveFile", "operatorAccountId", "operatorIpAddress",
 	}
 	err = serviceHelper.RequiredParamsInspector(requestBody, requiredParams)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
 	accountId, err := valueObject.NewAccountId(requestBody["accountId"])
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())

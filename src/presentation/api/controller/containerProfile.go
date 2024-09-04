@@ -111,6 +111,10 @@ func (controller *ContainerProfileController) Create(c echo.Context) error {
 		return err
 	}
 
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
 	if requestBody["baseSpecs"] != nil {
 		baseSpecsMap, assertOk := requestBody["baseSpecs"].(map[string]interface{})
 		if !assertOk {

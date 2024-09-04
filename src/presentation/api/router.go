@@ -72,8 +72,7 @@ func (router *Router) containerRoutes() {
 	containerGroup.POST("/", containerController.Create)
 	containerGroup.PUT("/", containerController.Update)
 	containerGroup.DELETE(
-		"/:accountId/:containerId/",
-		containerController.Delete,
+		"/:accountId/:containerId/", containerController.Delete,
 	)
 
 	containerProfileGroup := containerGroup.Group("/profile")
@@ -83,7 +82,9 @@ func (router *Router) containerRoutes() {
 	containerProfileGroup.GET("/", containerProfileController.Read)
 	containerProfileGroup.POST("/", containerProfileController.Create)
 	containerProfileGroup.PUT("/", containerProfileController.Update)
-	containerProfileGroup.DELETE("/:profileId/", containerProfileController.Delete)
+	containerProfileGroup.DELETE(
+		"/:accountId/:profileId/", containerProfileController.Delete,
+	)
 
 	containerRegistryGroup := containerGroup.Group("/registry")
 	containerRegistryGroup.GET("/image/", apiController.GetContainerRegistryImagesController)
@@ -134,8 +135,7 @@ func (router *Router) mappingRoutes() {
 	mappingGroup.DELETE("/:mappingId/", mappingController.Delete)
 	mappingGroup.POST("/target/", mappingController.CreateTarget)
 	mappingGroup.DELETE(
-		"/:mappingId/target/:targetId/",
-		mappingController.DeleteTarget,
+		"/:mappingId/target/:targetId/", mappingController.DeleteTarget,
 	)
 }
 

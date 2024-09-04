@@ -236,6 +236,10 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		return err
 	}
 
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
 	if _, exists := requestBody["imageAddress"]; !exists {
 		if _, exists = requestBody["imgAddr"]; exists {
 			requestBody["imageAddress"] = requestBody["imgAddr"]
@@ -300,6 +304,10 @@ func (controller *ContainerController) Update(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
+	}
+
+	if requestBody["accountId"] != nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
 	return apiHelper.ServiceResponseWrapper(
