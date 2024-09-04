@@ -60,7 +60,7 @@ func (controller *AuthController) Login(c echo.Context) error {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	operatorIpAddress, err := valueObject.NewIpAddress(requestBody["ipAddress"])
+	operatorIpAddress, err := valueObject.NewIpAddress(requestBody["operatorIpAddress"])
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
