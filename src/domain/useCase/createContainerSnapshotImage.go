@@ -21,13 +21,12 @@ func CreateContainerSnapshotImage(
 
 	imageId, err := containerImageCmdRepo.CreateSnapshot(createDto)
 	if err != nil {
-		slog.Error(
-			"CreateContainerSnapshotImageInfraError", slog.Any("error", err),
-		)
+		slog.Error("CreateContainerSnapshotImageInfraError", slog.Any("error", err))
 		return errors.New("CreateContainerSnapshotImageInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
 		CreateContainerSnapshotImage(createDto, imageId)
+
 	return nil
 }

@@ -21,7 +21,7 @@ func ImportContainerImageArchiveFile(
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		ImportContainerImageArchiveFile(importDto)
+		ImportContainerImageArchiveFile(importDto, imageId)
 
 	return imageId, nil
 }
