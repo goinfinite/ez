@@ -168,7 +168,7 @@ const docTemplate = `{
         },
         "/v1/auth/login/": {
             "post": {
-                "description": "Generate JWT with credentials",
+                "description": "Create a new session token with the provided credentials.",
                 "consumes": [
                     "application/json"
                 ],
@@ -178,15 +178,15 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "GenerateJwtWithCredentials",
+                "summary": "CreateSessionTokenWithCredentials",
                 "parameters": [
                     {
-                        "description": "Login",
-                        "name": "loginDto",
+                        "description": "CreateSessionToken",
+                        "name": "createSessionToken",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Login"
+                            "$ref": "#/definitions/dto.CreateSessionToken"
                         }
                     }
                 ],
@@ -306,61 +306,6 @@ const docTemplate = `{
                         "description": "ContainerCreationScheduled",
                         "schema": {
                             "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/container/auto-login/{containerId}/": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Generates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "container"
-                ],
-                "summary": "ContainerAutoLogin",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ContainerId",
-                        "name": "containerId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "ShouldRedirect (default/empty is true)",
-                        "name": "shouldRedirect",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "If shouldRedirect is set to false, the updated session token is returned.",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "302": {
-                        "description": "A redirect to Speedia OS dashboard (:1618/{containerId}/).",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Container is not found, not running or isn't Speedia OS.",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 }
@@ -814,7 +759,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/container/profile/{profileId}/": {
+        "/v1/container/profile/{accountId}/{profileId}/": {
             "delete": {
                 "security": [
                     {
@@ -833,6 +778,13 @@ const docTemplate = `{
                 ],
                 "summary": "DeleteContainerProfile",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "ProfileId",
@@ -922,6 +874,68 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entity.RegistryTaggedImage"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/container/session/{accountId}/{containerId}/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Creates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container"
+                ],
+                "summary": "CreateContainerSessionToken",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ShouldRedirect (default/empty is true)",
+                        "name": "shouldRedirect",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "If shouldRedirect is set to false, the updated session token is returned.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "302": {
+                        "description": "A redirect to Speedia OS dashboard (:1618/{containerId}/).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Container is not found, not running or isn't Speedia OS.",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -1416,6 +1430,9 @@ const docTemplate = `{
         "dto.CreateContainerProfile": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "baseSpecs": {
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
                 },
@@ -1487,7 +1504,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.Login": {
+        "dto.CreateSessionToken": {
             "type": "object",
             "properties": {
                 "password": {
@@ -1535,13 +1552,13 @@ const docTemplate = `{
         "dto.UpdateContainerProfile": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "baseSpecs": {
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
                 },
                 "hostMinCapacityPercent": {
-                    "type": "integer"
-                },
-                "id": {
                     "type": "integer"
                 },
                 "maxSpecs": {
@@ -1549,6 +1566,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "profileId": {
+                    "type": "integer"
                 },
                 "scalingIntervalSecs": {
                     "type": "integer"
@@ -1567,14 +1587,14 @@ const docTemplate = `{
         "dto.UpdateScheduledTask": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "runAt": {
                     "type": "integer"
                 },
                 "status": {
                     "type": "string"
+                },
+                "taskId": {
+                    "type": "integer"
                 }
             }
         },
@@ -1744,6 +1764,9 @@ const docTemplate = `{
         "entity.ContainerProfile": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "baseSpecs": {
                     "$ref": "#/definitions/valueObject.ContainerSpecs"
                 },

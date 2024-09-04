@@ -86,6 +86,8 @@ definitions:
     type: object
   dto.CreateContainerProfile:
     properties:
+      accountId:
+        type: integer
       baseSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
@@ -132,7 +134,7 @@ definitions:
       mappingId:
         type: integer
     type: object
-  dto.Login:
+  dto.CreateSessionToken:
     properties:
       password:
         type: string
@@ -163,16 +165,18 @@ definitions:
     type: object
   dto.UpdateContainerProfile:
     properties:
+      accountId:
+        type: integer
       baseSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
-        type: integer
-      id:
         type: integer
       maxSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       name:
         type: string
+      profileId:
+        type: integer
       scalingIntervalSecs:
         type: integer
       scalingMaxDurationSecs:
@@ -184,12 +188,12 @@ definitions:
     type: object
   dto.UpdateScheduledTask:
     properties:
-      id:
-        type: integer
       runAt:
         type: integer
       status:
         type: string
+      taskId:
+        type: integer
     type: object
   entity.AccessToken:
     properties:
@@ -300,6 +304,8 @@ definitions:
     type: object
   entity.ContainerProfile:
     properties:
+      accountId:
+        type: integer
       baseSpecs:
         $ref: '#/definitions/valueObject.ContainerSpecs'
       hostMinCapacityPercent:
@@ -746,14 +752,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Generate JWT with credentials
+      description: Create a new session token with the provided credentials.
       parameters:
-      - description: Login
+      - description: CreateSessionToken
         in: body
-        name: loginDto
+        name: createSessionToken
         required: true
         schema:
-          $ref: '#/definitions/dto.Login'
+          $ref: '#/definitions/dto.CreateSessionToken'
       produces:
       - application/json
       responses:
@@ -765,7 +771,7 @@ paths:
           description: Unauthorized
           schema:
             type: string
-      summary: GenerateJwtWithCredentials
+      summary: CreateSessionTokenWithCredentials
       tags:
       - auth
   /v1/container/:
@@ -861,43 +867,6 @@ paths:
       security:
       - Bearer: []
       summary: DeleteContainer
-      tags:
-      - container
-  /v1/container/auto-login/{containerId}/:
-    get:
-      consumes:
-      - application/json
-      description: Generates a session token for the specified container and redirects
-        to Speedia OS dashboard (if shouldRedirect is not false).
-      parameters:
-      - description: ContainerId
-        in: path
-        name: containerId
-        required: true
-        type: string
-      - description: ShouldRedirect (default/empty is true)
-        in: query
-        name: shouldRedirect
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: If shouldRedirect is set to false, the updated session token
-            is returned.
-          schema:
-            type: string
-        "302":
-          description: A redirect to Speedia OS dashboard (:1618/{containerId}/).
-          schema:
-            type: string
-        "500":
-          description: Container is not found, not running or isn't Speedia OS.
-          schema:
-            type: string
-      security:
-      - Bearer: []
-      summary: ContainerAutoLogin
       tags:
       - container
   /v1/container/image/:
@@ -1185,12 +1154,17 @@ paths:
       summary: UpdateContainerProfile
       tags:
       - containerProfile
-  /v1/container/profile/{profileId}/:
+  /v1/container/profile/{accountId}/{profileId}/:
     delete:
       consumes:
       - application/json
       description: Delete a container profile.
       parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
       - description: ProfileId
         in: path
         name: profileId
@@ -1255,6 +1229,48 @@ paths:
       summary: GetContainerRegistryTaggedImage
       tags:
       - containerRegistry
+  /v1/container/session/{accountId}/{containerId}/:
+    get:
+      consumes:
+      - application/json
+      description: Creates a session token for the specified container and redirects
+        to Speedia OS dashboard (if shouldRedirect is not false).
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: ContainerId
+        in: path
+        name: containerId
+        required: true
+        type: string
+      - description: ShouldRedirect (default/empty is true)
+        in: query
+        name: shouldRedirect
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: If shouldRedirect is set to false, the updated session token
+            is returned.
+          schema:
+            type: string
+        "302":
+          description: A redirect to Speedia OS dashboard (:1618/{containerId}/).
+          schema:
+            type: string
+        "500":
+          description: Container is not found, not running or isn't Speedia OS.
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: CreateContainerSessionToken
+      tags:
+      - container
   /v1/license/:
     get:
       consumes:
