@@ -7,6 +7,8 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
+var SystemAccountId = AccountId(0)
+
 type AccountId uint64
 
 func NewAccountId(value interface{}) (AccountId, error) {

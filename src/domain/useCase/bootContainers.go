@@ -8,9 +8,6 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-var LocalOperatorAccountId, _ = valueObject.NewAccountId(0)
-var LocalOperatorIpAddress = valueObject.NewLocalhostIpAddress()
-
 func BootContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
@@ -31,7 +28,7 @@ func BootContainers(
 		newContainerStatus := true
 		updateDto := dto.NewUpdateContainer(
 			currentContainer.AccountId, currentContainer.Id, &newContainerStatus,
-			nil, LocalOperatorAccountId, LocalOperatorIpAddress,
+			nil, valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 
 		err = containerCmdRepo.Update(updateDto)

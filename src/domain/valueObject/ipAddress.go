@@ -8,6 +8,8 @@ import (
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
 
+var SystemIpAddress = NewLocalhostIpAddress()
+
 type IpAddress string
 
 func NewIpAddress(value interface{}) (IpAddress, error) {
