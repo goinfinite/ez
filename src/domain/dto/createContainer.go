@@ -10,11 +10,11 @@ type CreateContainer struct {
 	Hostname           valueObject.Fqdn                    `json:"hostname"`
 	ImageAddress       valueObject.ContainerImageAddress   `json:"imageAddress"`
 	PortBindings       []valueObject.PortBinding           `json:"portBindings"`
-	RestartPolicy      *valueObject.ContainerRestartPolicy `json:"restartPolicy"`
-	Entrypoint         *valueObject.ContainerEntrypoint    `json:"entrypoint"`
-	ProfileId          *valueObject.ContainerProfileId     `json:"profileId"`
+	RestartPolicy      *valueObject.ContainerRestartPolicy `json:"restartPolicy,omitempty"`
+	Entrypoint         *valueObject.ContainerEntrypoint    `json:"entrypoint,omitempty"`
+	ProfileId          *valueObject.ContainerProfileId     `json:"profileId,omitempty"`
 	Envs               []valueObject.ContainerEnv          `json:"envs"`
-	LaunchScript       *valueObject.LaunchScript           `json:"launchScript"`
+	LaunchScript       *valueObject.LaunchScript           `json:"launchScript,omitempty"`
 	AutoCreateMappings bool                                `json:"autoCreateMappings"`
 	OperatorAccountId  valueObject.AccountId               `json:"-"`
 	OperatorIpAddress  valueObject.IpAddress               `json:"-"`

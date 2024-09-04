@@ -6,8 +6,8 @@ type CreateScheduledTask struct {
 	Name        valueObject.ScheduledTaskName  `json:"name"`
 	Command     valueObject.UnixCommand        `json:"command"`
 	Tags        []valueObject.ScheduledTaskTag `json:"tags"`
-	TimeoutSecs *uint                          `json:"timeoutSecs"`
-	RunAt       *valueObject.UnixTime          `json:"runAt"`
+	TimeoutSecs *uint                          `json:"timeoutSecs,omitempty"`
+	RunAt       *valueObject.UnixTime          `json:"runAt,omitempty"`
 }
 
 func NewCreateScheduledTask(

@@ -5,8 +5,8 @@ import "github.com/speedianet/control/src/domain/valueObject"
 type UpdateContainer struct {
 	AccountId         valueObject.AccountId           `json:"accountId"`
 	ContainerId       valueObject.ContainerId         `json:"id"`
-	Status            *bool                           `json:"status"`
-	ProfileId         *valueObject.ContainerProfileId `json:"profileId"`
+	Status            *bool                           `json:"status,omitempty"`
+	ProfileId         *valueObject.ContainerProfileId `json:"profileId,omitempty"`
 	OperatorAccountId valueObject.AccountId           `json:"-"`
 	OperatorIpAddress valueObject.IpAddress           `json:"-"`
 }

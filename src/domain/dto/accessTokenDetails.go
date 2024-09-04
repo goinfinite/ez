@@ -5,7 +5,7 @@ import "github.com/speedianet/control/src/domain/valueObject"
 type AccessTokenDetails struct {
 	TokenType valueObject.AccessTokenType `json:"tokenType"`
 	AccountId valueObject.AccountId       `json:"accountId"`
-	IpAddress *valueObject.IpAddress      `json:"ipAddress"`
+	IpAddress *valueObject.IpAddress      `json:"ipAddress,omitempty"`
 }
 
 func NewAccessTokenDetails(

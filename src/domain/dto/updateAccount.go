@@ -4,9 +4,9 @@ import "github.com/speedianet/control/src/domain/valueObject"
 
 type UpdateAccount struct {
 	AccountId          valueObject.AccountId     `json:"accountId"`
-	Password           *valueObject.Password     `json:"password"`
-	ShouldUpdateApiKey *bool                     `json:"shouldUpdateApiKey"`
-	Quota              *valueObject.AccountQuota `json:"quota"`
+	Password           *valueObject.Password     `json:"password,omitempty"`
+	ShouldUpdateApiKey *bool                     `json:"shouldUpdateApiKey,omitempty"`
+	Quota              *valueObject.AccountQuota `json:"quota,omitempty"`
 	OperatorAccountId  valueObject.AccountId     `json:"-"`
 	OperatorIpAddress  valueObject.IpAddress     `json:"-"`
 }

@@ -4,8 +4,8 @@ import "github.com/speedianet/control/src/domain/valueObject"
 
 type UpdateScheduledTask struct {
 	TaskId valueObject.ScheduledTaskId      `json:"taskId"`
-	Status *valueObject.ScheduledTaskStatus `json:"status"`
-	RunAt  *valueObject.UnixTime            `json:"runAt"`
+	Status *valueObject.ScheduledTaskStatus `json:"status,omitempty"`
+	RunAt  *valueObject.UnixTime            `json:"runAt,omitempty"`
 }
 
 func NewUpdateScheduledTask(

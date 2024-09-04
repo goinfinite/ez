@@ -5,7 +5,7 @@ import "github.com/speedianet/control/src/domain/valueObject"
 type CreateAccount struct {
 	Username          valueObject.Username      `json:"username"`
 	Password          valueObject.Password      `json:"password"`
-	Quota             *valueObject.AccountQuota `json:"quota"`
+	Quota             *valueObject.AccountQuota `json:"quota,omitempty"`
 	OperatorAccountId valueObject.AccountId     `json:"-"`
 	OperatorIpAddress valueObject.IpAddress     `json:"-"`
 }

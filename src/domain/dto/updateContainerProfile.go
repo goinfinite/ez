@@ -5,14 +5,14 @@ import "github.com/speedianet/control/src/domain/valueObject"
 type UpdateContainerProfile struct {
 	AccountId              valueObject.AccountId             `json:"accountId"`
 	ProfileId              valueObject.ContainerProfileId    `json:"profileId"`
-	Name                   *valueObject.ContainerProfileName `json:"name"`
-	BaseSpecs              *valueObject.ContainerSpecs       `json:"baseSpecs"`
-	MaxSpecs               *valueObject.ContainerSpecs       `json:"maxSpecs"`
-	ScalingPolicy          *valueObject.ScalingPolicy        `json:"scalingPolicy"`
-	ScalingThreshold       *uint                             `json:"scalingThreshold"`
-	ScalingMaxDurationSecs *uint                             `json:"scalingMaxDurationSecs"`
-	ScalingIntervalSecs    *uint                             `json:"scalingIntervalSecs"`
-	HostMinCapacityPercent *valueObject.HostMinCapacity      `json:"hostMinCapacityPercent"`
+	Name                   *valueObject.ContainerProfileName `json:"name,omitempty"`
+	BaseSpecs              *valueObject.ContainerSpecs       `json:"baseSpecs,omitempty"`
+	MaxSpecs               *valueObject.ContainerSpecs       `json:"maxSpecs,omitempty"`
+	ScalingPolicy          *valueObject.ScalingPolicy        `json:"scalingPolicy,omitempty"`
+	ScalingThreshold       *uint                             `json:"scalingThreshold,omitempty"`
+	ScalingMaxDurationSecs *uint                             `json:"scalingMaxDurationSecs,omitempty"`
+	ScalingIntervalSecs    *uint                             `json:"scalingIntervalSecs,omitempty"`
+	HostMinCapacityPercent *valueObject.HostMinCapacity      `json:"hostMinCapacityPercent,omitempty"`
 	OperatorAccountId      valueObject.AccountId             `json:"-"`
 	OperatorIpAddress      valueObject.IpAddress             `json:"-"`
 }
