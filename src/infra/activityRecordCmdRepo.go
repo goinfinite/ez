@@ -61,6 +61,12 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 		mappingIdPtr = &mappingId
 	}
 
+	var mappingTargetIdPtr *uint64
+	if createDto.MappingTargetId != nil {
+		mappingTargetId := createDto.MappingTargetId.Uint64()
+		mappingTargetIdPtr = &mappingTargetId
+	}
+
 	var scheduledTaskIdPtr *uint64
 	if createDto.ScheduledTaskId != nil {
 		scheduledTaskId := createDto.ScheduledTaskId.Uint64()
@@ -80,8 +86,8 @@ func (repo *ActivityRecordCmdRepo) Create(createDto dto.CreateActivityRecord) er
 	activityRecordModel := dbModel.NewActivityRecord(
 		0, createDto.RecordLevel.String(), createDto.RecordCode.String(),
 		operatorAccountIdPtr, operatorIpAddressPtr, accountIdPtr, containerIdPtr,
-		containerProfileIdPtr, containerImageIdPtr, mappingIdPtr, scheduledTaskIdPtr,
-		recordDetails,
+		containerProfileIdPtr, containerImageIdPtr, mappingIdPtr, mappingTargetIdPtr,
+		scheduledTaskIdPtr, recordDetails,
 	)
 
 	return repo.trailDbSvc.Handler.Create(&activityRecordModel).Error
@@ -134,6 +140,11 @@ func (repo *ActivityRecordCmdRepo) Delete(deleteDto dto.DeleteActivityRecords) e
 	if deleteDto.MappingId != nil {
 		mappingId := deleteDto.MappingId.Uint64()
 		deleteModel.MappingId = &mappingId
+	}
+
+	if deleteDto.MappingTargetId != nil {
+		mappingTargetId := deleteDto.MappingTargetId.Uint64()
+		deleteModel.MappingTargetId = &mappingTargetId
 	}
 
 	if deleteDto.ScheduledTaskId != nil {

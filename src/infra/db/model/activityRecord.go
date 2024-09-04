@@ -18,6 +18,7 @@ type ActivityRecord struct {
 	ContainerProfileId *uint64
 	ContainerImageId   *string
 	MappingId          *uint64
+	MappingTargetId    *uint64
 	ScheduledTaskId    *uint64
 	RecordDetails      *string
 	CreatedAt          time.Time `gorm:"not null"`
@@ -36,7 +37,7 @@ func NewActivityRecord(
 	containerId *string,
 	containerProfileId *uint64,
 	containerImageId *string,
-	mappingId, scheduledTaskId *uint64,
+	mappingId, mappingTargetId, scheduledTaskId *uint64,
 	recordDetails *string,
 ) ActivityRecord {
 	model := ActivityRecord{
@@ -49,6 +50,7 @@ func NewActivityRecord(
 		ContainerProfileId: containerProfileId,
 		ContainerImageId:   containerImageId,
 		MappingId:          mappingId,
+		MappingTargetId:    mappingTargetId,
 		ScheduledTaskId:    scheduledTaskId,
 		RecordDetails:      recordDetails,
 	}
@@ -139,6 +141,15 @@ func (model ActivityRecord) ToEntity() (recordEntity entity.ActivityRecord, err 
 		mappingIdPtr = &mappingId
 	}
 
+	var mappingTargetIdPtr *valueObject.MappingTargetId
+	if model.MappingTargetId != nil {
+		mappingTargetId, err := valueObject.NewMappingTargetId(*model.MappingTargetId)
+		if err != nil {
+			return recordEntity, err
+		}
+		mappingTargetIdPtr = &mappingTargetId
+	}
+
 	var scheduledTaskIdPtr *valueObject.ScheduledTaskId
 	if model.ScheduledTaskId != nil {
 		scheduledTaskId, err := valueObject.NewScheduledTaskId(*model.ScheduledTaskId)
@@ -158,6 +169,6 @@ func (model ActivityRecord) ToEntity() (recordEntity entity.ActivityRecord, err 
 	return entity.NewActivityRecord(
 		recordId, recordLevel, recordCode, operatorAccountIdPtr, operatorIpAddressPtr,
 		accountIdPtr, containerIdPtr, containerProfileIdPtr, containerImageIdPtr,
-		mappingIdPtr, scheduledTaskIdPtr, recordDetails, createdAt,
+		mappingIdPtr, mappingTargetIdPtr, scheduledTaskIdPtr, recordDetails, createdAt,
 	)
 }

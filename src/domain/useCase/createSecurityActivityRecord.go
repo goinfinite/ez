@@ -246,7 +246,6 @@ func (uc *CreateSecurityActivityRecord) DeleteMapping(
 		RecordCode:        recordCode,
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		AccountId:         &deleteDto.AccountId,
 		MappingId:         &deleteDto.MappingId,
 	}
 
@@ -255,6 +254,7 @@ func (uc *CreateSecurityActivityRecord) DeleteMapping(
 
 func (uc *CreateSecurityActivityRecord) CreateMappingTarget(
 	createDto dto.CreateMappingTarget,
+	targetId valueObject.MappingTargetId,
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("MappingTargetCreated")
 	createRecordDto := dto.CreateActivityRecord{
@@ -262,8 +262,8 @@ func (uc *CreateSecurityActivityRecord) CreateMappingTarget(
 		RecordCode:        recordCode,
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
 		MappingId:         &createDto.MappingId,
+		MappingTargetId:   &targetId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -278,7 +278,6 @@ func (uc *CreateSecurityActivityRecord) DeleteMappingTarget(
 		RecordCode:        recordCode,
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		AccountId:         &deleteDto.AccountId,
 		MappingId:         &deleteDto.MappingId,
 	}
 

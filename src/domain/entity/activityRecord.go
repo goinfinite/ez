@@ -15,6 +15,7 @@ type ActivityRecord struct {
 	ContainerProfileId *valueObject.ContainerProfileId `json:"containerProfileId,omitempty"`
 	ContainerImageId   *valueObject.ContainerImageId   `json:"containerImageId,omitempty"`
 	MappingId          *valueObject.MappingId          `json:"mappingId,omitempty"`
+	MappingTargetId    *valueObject.MappingTargetId    `json:"mappingTargetId,omitempty"`
 	ScheduledTaskId    *valueObject.ScheduledTaskId    `json:"scheduledTaskId,omitempty"`
 	RecordDetails      interface{}                     `json:"recordDetails,omitempty"`
 	CreatedAt          valueObject.UnixTime            `json:"createdAt"`
@@ -31,6 +32,7 @@ func NewActivityRecord(
 	containerProfileId *valueObject.ContainerProfileId,
 	containerImageId *valueObject.ContainerImageId,
 	mappingId *valueObject.MappingId,
+	mappingTargetId *valueObject.MappingTargetId,
 	scheduledTaskId *valueObject.ScheduledTaskId,
 	recordDetails interface{},
 	createdAt valueObject.UnixTime,
@@ -46,6 +48,7 @@ func NewActivityRecord(
 		ContainerProfileId: containerProfileId,
 		ContainerImageId:   containerImageId,
 		MappingId:          mappingId,
+		MappingTargetId:    mappingTargetId,
 		ScheduledTaskId:    scheduledTaskId,
 		RecordDetails:      recordDetails,
 		CreatedAt:          createdAt,

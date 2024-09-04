@@ -14,6 +14,7 @@ type CreateActivityRecord struct {
 	ContainerProfileId *valueObject.ContainerProfileId `json:"containerProfileId,omitempty"`
 	ContainerImageId   *valueObject.ContainerImageId   `json:"containerImageId,omitempty"`
 	MappingId          *valueObject.MappingId          `json:"mappingId,omitempty"`
+	MappingTargetId    *valueObject.MappingTargetId    `json:"mappingTargetId,omitempty"`
 	ScheduledTaskId    *valueObject.ScheduledTaskId    `json:"scheduledTaskId,omitempty"`
 	RecordDetails      interface{}                     `json:"recordDetails,omitempty"`
 }

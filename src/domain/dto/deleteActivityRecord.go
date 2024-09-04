@@ -15,6 +15,7 @@ type DeleteActivityRecords struct {
 	ContainerProfileId *valueObject.ContainerProfileId  `json:"containerProfileId,omitempty"`
 	ContainerImageId   *valueObject.ContainerImageId    `json:"containerImageId,omitempty"`
 	MappingId          *valueObject.MappingId           `json:"mappingId,omitempty"`
+	MappingTargetId    *valueObject.MappingTargetId     `json:"mappingTargetId,omitempty"`
 	ScheduledTaskId    *valueObject.ScheduledTaskId     `json:"scheduledTaskId,omitempty"`
 	CreatedBeforeAt    *valueObject.UnixTime            `json:"createdBeforeAt,omitempty"`
 	CreatedAfterAt     *valueObject.UnixTime            `json:"createdAfterAt,omitempty"`
@@ -31,6 +32,7 @@ func NewDeleteActivityRecords(
 	containerProfileId *valueObject.ContainerProfileId,
 	containerImageId *valueObject.ContainerImageId,
 	mappingId *valueObject.MappingId,
+	mappingTargetId *valueObject.MappingTargetId,
 	scheduledTaskId *valueObject.ScheduledTaskId,
 	createdBeforeAt *valueObject.UnixTime,
 	createdAfterAt *valueObject.UnixTime,
@@ -46,6 +48,7 @@ func NewDeleteActivityRecords(
 		ContainerProfileId: containerProfileId,
 		ContainerImageId:   containerImageId,
 		MappingId:          mappingId,
+		MappingTargetId:    mappingTargetId,
 		ScheduledTaskId:    scheduledTaskId,
 		CreatedBeforeAt:    createdBeforeAt,
 		CreatedAfterAt:     createdAfterAt,
