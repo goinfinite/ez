@@ -2,6 +2,7 @@ package infra
 
 import (
 	"errors"
+	"os"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -44,6 +45,15 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	return valueObject.NewContainerImageId(rawImageId)
 }
 
+func (repo *ContainerImageCmdRepo) getAccountHomeDir(
+	accountId valueObject.AccountId,
+) (string, error) {
+	// @see https://github.com/speedianet/control-issues-tracker/issues/92
+	return infraHelper.RunCmdWithSubShell(
+		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
+	)
+}
+
 func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	importDto dto.ImportContainerImageArchiveFile,
 ) (imageId valueObject.ContainerImageId, err error) {
@@ -63,14 +73,77 @@ func (repo *ContainerImageCmdRepo) Delete(
 func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	createDto dto.CreateContainerImageArchiveFile,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	unixFilePath, _ := valueObject.NewUnixFilePath("/file.tar.gz")
-	downloadUrl, _ := valueObject.NewUrl("http://localhost" + unixFilePath.String())
-	sizeBytes, _ := valueObject.NewByte(123456789)
+	accountHomeDir, err := repo.getAccountHomeDir(createDto.AccountId)
+	if err != nil {
+		return archiveFile, err
+	}
+
+	archiveDirStr := accountHomeDir + "/archive"
+	accountIdStr := createDto.AccountId.String()
+	_, err = infraHelper.RunCmd(
+		"install", "-d", "-m", "755", "-o", accountIdStr, "-g", accountIdStr, archiveDirStr,
+	)
+	if err != nil {
+		return archiveFile, errors.New("MakeArchiveDirError: " + err.Error())
+	}
+
+	imageIdStr := createDto.ImageId.String()
+	tarFilePath := archiveDirStr + "/" + imageIdStr + ".tar"
+	_, err = infraHelper.RunCmdAsUser(
+		createDto.AccountId,
+		"podman", "save", imageIdStr, "--output", tarFilePath,
+	)
+	if err != nil {
+		return archiveFile, errors.New("PodmanSaveError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		createDto.AccountId,
+		"zstd", "--compress", "-3", "--rm", "--quiet", tarFilePath,
+	)
+	if err != nil {
+		return archiveFile, errors.New("CompressImageError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd("chown", "-R", accountIdStr, archiveDirStr)
+	if err != nil {
+		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
+	}
+
+	finalFilePath, err := valueObject.NewUnixFilePath(tarFilePath + ".zst")
+	if err != nil {
+		return archiveFile, errors.New("NewFinalFilePathError: " + err.Error())
+	}
+
+	fileInfo, err := os.Stat(finalFilePath.String())
+	if err != nil {
+		return archiveFile, errors.New("StatFinalFileError: " + err.Error())
+	}
+
+	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
+	if err != nil {
+		return archiveFile, errors.New("NewSizeBytesError: " + err.Error())
+	}
+
+	rawControlHostname, err := infraHelper.RunCmd("hostname")
+	if err != nil {
+		return archiveFile, errors.New("ReadHostnameFailed: " + err.Error())
+	}
+
+	controlHostname, err := valueObject.NewFqdn(rawControlHostname)
+	if err != nil {
+		return archiveFile, errors.New("InvalidSpeediaControlHostname: " + err.Error())
+	}
+
+	downloadUrl, _ := valueObject.NewUrl(
+		"https://" + controlHostname.String() +
+			"/v1/container/image/archive/" + accountIdStr + "/" + imageIdStr + "/",
+	)
 
 	return entity.NewContainerImageArchiveFile(
-		createDto.ImageId, createDto.AccountId, unixFilePath, downloadUrl,
+		createDto.ImageId, createDto.AccountId, finalFilePath, downloadUrl,
 		sizeBytes, valueObject.NewUnixTimeNow(),
-	), errors.New("NotImplemented")
+	), nil
 }
 
 func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
