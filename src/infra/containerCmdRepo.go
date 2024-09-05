@@ -186,6 +186,7 @@ func (repo *ContainerCmdRepo) containerSystemdUnitNameFactory(
 func (repo *ContainerCmdRepo) getAccountHomeDir(
 	accountId valueObject.AccountId,
 ) (string, error) {
+	// @see https://github.com/speedianet/control-issues-tracker/issues/92
 	return infraHelper.RunCmdWithSubShell(
 		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
 	)
