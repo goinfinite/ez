@@ -34,20 +34,15 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 		return err
 	}
 
-	rawControlHostname, err := infraHelper.RunCmd("hostname")
+	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
-		return errors.New("GetHostnameFailed: " + err.Error())
-	}
-
-	controlHostname, err := valueObject.NewFqdn(rawControlHostname)
-	if err != nil {
-		return errors.New("InvalidSpeediaControlHostname: " + err.Error())
+		return errors.New("InvalidServerHostname: " + err.Error())
 	}
 
 	//cspell:disable
 	fileTemplate := `server {
 	listen 1618 ssl;
-	server_name ` + controlHostname.String() + `;
+	server_name ` + serverHostname.String() + `;
 
 	ssl_certificate /var/speedia/pki/control.crt;
 	ssl_certificate_key /var/speedia/pki/control.key;
