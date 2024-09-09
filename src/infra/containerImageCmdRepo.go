@@ -2,7 +2,9 @@ package infra
 
 import (
 	"errors"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -45,11 +47,99 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	return valueObject.NewContainerImageId(rawImageId)
 }
 
+func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
+	accountId valueObject.AccountId,
+) (archiveFilesDir valueObject.UnixFilePath, err error) {
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(accountId)
+	if err != nil {
+		return archiveFilesDir, err
+	}
+
+	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
+	accountIdStr := accountId.String()
+	_, err = infraHelper.RunCmd(
+		"install", "-d", "-m", "755", "-o", accountIdStr, "-g", accountIdStr, archiveDirStr,
+	)
+	if err != nil {
+		return archiveFilesDir, errors.New("MakeArchiveDirError: " + err.Error())
+	}
+
+	return valueObject.NewUnixFilePath(archiveDirStr)
+}
+
 func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	importDto dto.ImportContainerImageArchiveFile,
 ) (imageId valueObject.ContainerImageId, err error) {
-	imageId, _ = valueObject.NewContainerImageId("1234567890abcdef1234567890")
-	return imageId, errors.New("NotImplemented")
+	inputFileHandler, err := importDto.ArchiveFile.Open()
+	if err != nil {
+		return imageId, errors.New("OpenArchiveFileError: " + err.Error())
+	}
+	defer inputFileHandler.Close()
+
+	archiveDir, err := repo.readArchiveFilesDirectory(importDto.AccountId)
+	if err != nil {
+		return imageId, err
+	}
+
+	rawOutputFilePath := archiveDir.String() + "/" + importDto.ArchiveFile.Filename
+	outputFilePath, err := valueObject.NewUnixFilePath(rawOutputFilePath)
+	if err != nil {
+		return imageId, errors.New("ArchiveFilePathError: " + err.Error())
+	}
+	outputFilePathStr := outputFilePath.String()
+
+	outputFileHandler, err := os.Create(outputFilePathStr)
+	if err != nil {
+		return imageId, errors.New("CreateArchiveFileError: " + err.Error())
+	}
+	defer outputFileHandler.Close()
+
+	_, err = io.Copy(outputFileHandler, inputFileHandler)
+	if err != nil {
+		return imageId, errors.New("CopyArchiveFileError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		importDto.AccountId,
+		"brotli", "--decompress", "--rm", outputFilePathStr,
+	)
+	if err != nil {
+		return imageId, errors.New("DecompressImageError: " + err.Error())
+	}
+
+	outputFilePathStr = strings.TrimSuffix(outputFilePathStr, ".br")
+
+	rawImageId, err := infraHelper.RunCmdAsUser(
+		importDto.AccountId,
+		"podman", "load", "--quiet", "--input", outputFilePathStr,
+	)
+	if err != nil {
+		return imageId, errors.New("PodmanLoadError: " + err.Error())
+	}
+
+	if len(rawImageId) == 0 {
+		return imageId, errors.New("EmptyImageId")
+	}
+	rawImageId = strings.TrimSuffix(rawImageId, "Loaded image: sha256:")
+	rawImageId = strings.TrimSpace(rawImageId)
+	if len(rawImageId) > 12 {
+		rawImageId = rawImageId[:12]
+	}
+
+	imageId, err = valueObject.NewContainerImageId(rawImageId)
+	if err != nil {
+		return imageId, errors.New("NewImageIdError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
+		importDto.AccountId, "rm", "-f", outputFilePathStr,
+	)
+	if err != nil {
+		return imageId, errors.New("RemoveArchiveFileError: " + err.Error())
+	}
+
+	return imageId, nil
 }
 
 func (repo *ContainerImageCmdRepo) Delete(
@@ -64,23 +154,15 @@ func (repo *ContainerImageCmdRepo) Delete(
 func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	createDto dto.CreateContainerImageArchiveFile,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	archiveDir, err := repo.readArchiveFilesDirectory(createDto.AccountId)
 	if err != nil {
 		return archiveFile, err
 	}
 
-	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
-	accountIdStr := createDto.AccountId.String()
-	_, err = infraHelper.RunCmd(
-		"install", "-d", "-m", "755", "-o", accountIdStr, "-g", accountIdStr, archiveDirStr,
-	)
-	if err != nil {
-		return archiveFile, errors.New("MakeArchiveDirError: " + err.Error())
-	}
-
 	imageIdStr := createDto.ImageId.String()
+	archiveDirStr := archiveDir.String()
 	tarFilePath := archiveDirStr + "/" + imageIdStr + ".tar"
+
 	_, err = infraHelper.RunCmdAsUser(
 		createDto.AccountId, "podman", "save", imageIdStr, "--output", tarFilePath,
 	)
@@ -95,6 +177,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("CompressImageError: " + err.Error())
 	}
 
+	accountIdStr := createDto.AccountId.String()
 	_, err = infraHelper.RunCmd("chown", "-R", accountIdStr, archiveDirStr)
 	if err != nil {
 		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
@@ -134,14 +217,12 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
 	deleteDto dto.DeleteContainerImageArchiveFile,
 ) error {
-	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(deleteDto.AccountId)
+	archiveDir, err := repo.readArchiveFilesDirectory(deleteDto.AccountId)
 	if err != nil {
 		return err
 	}
 
-	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
-	rawFilePath := archiveDirStr + "/" + deleteDto.ImageId.String() + ".tar.br"
+	rawFilePath := archiveDir.String() + "/" + deleteDto.ImageId.String() + ".tar.br"
 	filePath, err := valueObject.NewUnixFilePath(rawFilePath)
 	if err != nil {
 		return errors.New("ArchiveFilePathError: " + err.Error())
