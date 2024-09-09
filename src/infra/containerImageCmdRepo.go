@@ -134,5 +134,23 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
 	deleteDto dto.DeleteContainerImageArchiveFile,
 ) error {
-	return errors.New("NotImplemented")
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(deleteDto.AccountId)
+	if err != nil {
+		return err
+	}
+
+	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
+	rawFilePath := archiveDirStr + "/" + deleteDto.ImageId.String() + ".tar.br"
+	filePath, err := valueObject.NewUnixFilePath(rawFilePath)
+	if err != nil {
+		return errors.New("ArchiveFilePathError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd("rm", "-f", filePath.String())
+	if err != nil {
+		return errors.New("RemoveArchiveFileError: " + err.Error())
+	}
+
+	return nil
 }
