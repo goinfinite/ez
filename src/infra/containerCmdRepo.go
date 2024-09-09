@@ -152,22 +152,10 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	nowUnixTime := valueObject.NewUnixTimeNow()
 
 	return entity.NewContainer(
-		containerId,
-		createDto.AccountId,
-		createDto.Hostname,
-		true,
-		createDto.ImageAddress,
-		imageHash,
-		createDto.PortBindings,
-		*createDto.RestartPolicy,
-		0,
-		createDto.Entrypoint,
-		*createDto.ProfileId,
-		createDto.Envs,
-		nowUnixTime,
-		nowUnixTime,
-		&nowUnixTime,
-		nil,
+		containerId, createDto.AccountId, createDto.Hostname, true,
+		createDto.ImageAddress, imageHash, createDto.PortBindings,
+		*createDto.RestartPolicy, 0, createDto.Entrypoint, *createDto.ProfileId,
+		createDto.Envs, nowUnixTime, nowUnixTime, &nowUnixTime, nil,
 	), nil
 }
 
@@ -181,15 +169,6 @@ func (repo *ContainerCmdRepo) containerSystemdUnitNameFactory(
 	containerName string,
 ) string {
 	return containerName + ".service"
-}
-
-func (repo *ContainerCmdRepo) getAccountHomeDir(
-	accountId valueObject.AccountId,
-) (string, error) {
-	// @see https://github.com/speedianet/control-issues-tracker/issues/92
-	return infraHelper.RunCmdWithSubShell(
-		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
-	)
 }
 
 func (repo *ContainerCmdRepo) getStorageDataDevice() (string, error) {
@@ -209,6 +188,7 @@ func (repo *ContainerCmdRepo) getStorageDataDevice() (string, error) {
 
 func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 	accountId valueObject.AccountId,
+	accountHomeDirectory valueObject.UnixFilePath,
 	containerId valueObject.ContainerId,
 	containerHostname valueObject.Fqdn,
 	restartPolicy valueObject.ContainerRestartPolicy,
@@ -283,12 +263,7 @@ KillMode=mixed
 WantedBy=default.target
 `
 
-	accountHomeDir, err := repo.getAccountHomeDir(accountId)
-	if err != nil {
-		return errors.New("GetAccountHomeDirError: " + err.Error())
-	}
-
-	systemdUnitDir := accountHomeDir + "/.config/systemd/user/"
+	systemdUnitDir := accountHomeDirectory.String() + "/.config/systemd/user/"
 	_, err = infraHelper.RunCmdAsUser(accountId, "mkdir", "-p", systemdUnitDir)
 	if err != nil {
 		return errors.New("MakeSystemdUnitDirError: " + err.Error())
@@ -337,17 +312,12 @@ func (repo *ContainerCmdRepo) runContainerCmd(
 
 func (repo *ContainerCmdRepo) runLaunchScript(
 	accountId valueObject.AccountId,
+	accountHomeDirectory valueObject.UnixFilePath,
 	containerId valueObject.ContainerId,
 	launchScript *valueObject.LaunchScript,
 ) error {
-	accountIdStr := accountId.String()
-	accountHomeDir, err := repo.getAccountHomeDir(accountId)
-	if err != nil {
-		return errors.New("GetAccountHomeDirError: " + err.Error())
-	}
-
-	accountTmpDir := accountHomeDir + "/tmp"
-	err = infraHelper.MakeDir(accountTmpDir)
+	accountTmpDir := accountHomeDirectory.String() + "/tmp"
+	err := infraHelper.MakeDir(accountTmpDir)
 	if err != nil {
 		return errors.New("MakeTmpDirError: " + err.Error())
 	}
@@ -359,6 +329,7 @@ func (repo *ContainerCmdRepo) runLaunchScript(
 		return errors.New("WriteLaunchScriptError: " + err.Error())
 	}
 
+	accountIdStr := accountId.String()
 	_, err = infraHelper.RunCmd(
 		"chown", "-R", accountIdStr+":"+accountIdStr, accountTmpDir,
 	)
@@ -476,12 +447,15 @@ func (repo *ContainerCmdRepo) Create(
 	}
 	containerId = containerEntity.Id
 
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	if err != nil {
+		return containerId, err
+	}
+
 	err = repo.updateContainerSystemdUnit(
-		createDto.AccountId,
-		containerId,
-		createDto.Hostname,
-		*createDto.RestartPolicy,
-		*createDto.ProfileId,
+		createDto.AccountId, accountEntity.HomeDirectory, containerId,
+		createDto.Hostname, *createDto.RestartPolicy, *createDto.ProfileId,
 	)
 	if err != nil {
 		return containerId, errors.New("UpdateSystemdUnitError: " + err.Error())
@@ -504,7 +478,8 @@ func (repo *ContainerCmdRepo) Create(
 
 	if createDto.LaunchScript != nil {
 		err = repo.runLaunchScript(
-			createDto.AccountId, containerId, createDto.LaunchScript,
+			createDto.AccountId, accountEntity.HomeDirectory, containerId,
+			createDto.LaunchScript,
 		)
 		if err != nil {
 			return containerId, errors.New("LaunchScriptError: " + err.Error())
@@ -550,12 +525,16 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 		return nil
 	}
 
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(updateDto.AccountId)
+	if err != nil {
+		return err
+	}
+
 	err = repo.updateContainerSystemdUnit(
-		updateDto.AccountId,
-		updateDto.ContainerId,
-		containerEntity.Hostname,
-		containerEntity.RestartPolicy,
-		*updateDto.ProfileId,
+		updateDto.AccountId, accountEntity.HomeDirectory,
+		updateDto.ContainerId, containerEntity.Hostname,
+		containerEntity.RestartPolicy, *updateDto.ProfileId,
 	)
 	if err != nil {
 		return errors.New("UpdateSystemdUnitError: " + err.Error())

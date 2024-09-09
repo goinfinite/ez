@@ -45,15 +45,6 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	return valueObject.NewContainerImageId(rawImageId)
 }
 
-func (repo *ContainerImageCmdRepo) getAccountHomeDir(
-	accountId valueObject.AccountId,
-) (string, error) {
-	// @see https://github.com/speedianet/control-issues-tracker/issues/92
-	return infraHelper.RunCmdWithSubShell(
-		"awk -F: '$3 == " + accountId.String() + " {print $6}' /etc/passwd",
-	)
-}
-
 func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	importDto dto.ImportContainerImageArchiveFile,
 ) (imageId valueObject.ContainerImageId, err error) {
@@ -73,12 +64,13 @@ func (repo *ContainerImageCmdRepo) Delete(
 func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	createDto dto.CreateContainerImageArchiveFile,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	accountHomeDir, err := repo.getAccountHomeDir(createDto.AccountId)
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
 	if err != nil {
 		return archiveFile, err
 	}
 
-	archiveDirStr := accountHomeDir + "/archive"
+	archiveDirStr := accountEntity.HomeDirectory.String() + "/archive"
 	accountIdStr := createDto.AccountId.String()
 	_, err = infraHelper.RunCmd(
 		"install", "-d", "-m", "755", "-o", accountIdStr, "-g", accountIdStr, archiveDirStr,
