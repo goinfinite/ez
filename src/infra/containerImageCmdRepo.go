@@ -90,16 +90,14 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	imageIdStr := createDto.ImageId.String()
 	tarFilePath := archiveDirStr + "/" + imageIdStr + ".tar"
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId,
-		"podman", "save", imageIdStr, "--output", tarFilePath,
+		createDto.AccountId, "podman", "save", imageIdStr, "--output", tarFilePath,
 	)
 	if err != nil {
 		return archiveFile, errors.New("PodmanSaveError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId,
-		"zstd", "--compress", "-3", "--rm", "--quiet", tarFilePath,
+		createDto.AccountId, "brotli", "--quality=4", "--rm", tarFilePath,
 	)
 	if err != nil {
 		return archiveFile, errors.New("CompressImageError: " + err.Error())
@@ -110,7 +108,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
 	}
 
-	finalFilePath, err := valueObject.NewUnixFilePath(tarFilePath + ".zst")
+	finalFilePath, err := valueObject.NewUnixFilePath(tarFilePath + ".bry")
 	if err != nil {
 		return archiveFile, errors.New("NewFinalFilePathError: " + err.Error())
 	}
@@ -125,18 +123,13 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("NewSizeBytesError: " + err.Error())
 	}
 
-	rawControlHostname, err := infraHelper.RunCmd("hostname")
+	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
-		return archiveFile, errors.New("ReadHostnameFailed: " + err.Error())
-	}
-
-	controlHostname, err := valueObject.NewFqdn(rawControlHostname)
-	if err != nil {
-		return archiveFile, errors.New("InvalidSpeediaControlHostname: " + err.Error())
+		return archiveFile, errors.New("InvalidServerHostname: " + err.Error())
 	}
 
 	downloadUrl, _ := valueObject.NewUrl(
-		"https://" + controlHostname.String() +
+		"https://" + serverHostname.String() +
 			"/v1/container/image/archive/" + accountIdStr + "/" + imageIdStr + "/",
 	)
 
