@@ -95,20 +95,41 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	}
 	defer outputFileHandler.Close()
 
+	decompressionCmd := "brotli --decompress --rm"
+	outputFileExtension, err := outputFilePath.ReadFileExtension()
+	if err != nil {
+		if !strings.HasSuffix(outputFilePathStr, ".br") {
+			return imageId, errors.New("ReadFileExtensionError: " + err.Error())
+		}
+	}
+
+	outputFileExtStr := outputFileExtension.String()
+	switch outputFileExtStr {
+	case ".tar":
+		decompressionCmd = ""
+	case ".gz":
+		decompressionCmd = "gunzip"
+	case ".xz":
+		decompressionCmd = "xz --decompress"
+	default:
+		return imageId, errors.New("UnsupportedArchiveFileExtension")
+	}
+
 	_, err = io.Copy(outputFileHandler, inputFileHandler)
 	if err != nil {
 		return imageId, errors.New("CopyArchiveFileError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		importDto.AccountId,
-		"brotli", "--decompress", "--rm", outputFilePathStr,
-	)
-	if err != nil {
-		return imageId, errors.New("DecompressImageError: " + err.Error())
+	shouldDecompress := len(decompressionCmd) > 0
+	if shouldDecompress {
+		_, err = infraHelper.RunCmdAsUserWithSubShell(
+			importDto.AccountId, decompressionCmd+" "+outputFilePathStr,
+		)
+		if err != nil {
+			return imageId, errors.New("DecompressImageError: " + err.Error())
+		}
+		outputFilePathStr = strings.TrimSuffix(outputFilePathStr, outputFileExtStr)
 	}
-
-	outputFilePathStr = strings.TrimSuffix(outputFilePathStr, ".br")
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		importDto.AccountId,
@@ -119,7 +140,7 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	}
 
 	if len(rawImageId) == 0 {
-		return imageId, errors.New("EmptyImageId")
+		return imageId, errors.New("PodmanLoadEmptyImageId")
 	}
 	rawImageId = strings.TrimSuffix(rawImageId, "Loaded image: sha256:")
 	rawImageId = strings.TrimSpace(rawImageId)
@@ -129,7 +150,7 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 
 	imageId, err = valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
-		return imageId, errors.New("NewImageIdError: " + err.Error())
+		return imageId, errors.New("NewContainerImageIdError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
