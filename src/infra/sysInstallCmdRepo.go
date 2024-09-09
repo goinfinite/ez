@@ -99,7 +99,7 @@ stream {
 func (repo SysInstallCmdRepo) Install() error {
 	//cspell:disable
 	necessaryPkgs := []string{
-		"git", "wget", "curl", "cyrus-sasl", "procps", "xfsprogs",
+		"git", "wget", "curl", "cyrus-sasl", "procps", "xfsprogs", "brotli",
 		"util-linux-tty-tools", "dmidecode", "whois", "bind-utils", "jq",
 	}
 	//cspell:enable
