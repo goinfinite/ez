@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"os"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
+	infraEnvs "github.com/speedianet/control/src/infra/envs"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
@@ -244,10 +247,91 @@ func (repo *ContainerImageQueryRepo) ReadById(
 	return repo.containerImageFactory(accountId, rawContainerImageAttributes)
 }
 
+func (repo *ContainerImageQueryRepo) archiveFileFactory(
+	rawArchiveFilePath string,
+	serverHostname valueObject.Fqdn,
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	filePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFilePathParseError")
+	}
+
+	fileNameStr := filePath.ReadFileName().String()
+	fileNameStrNoExt := strings.TrimSuffix(fileNameStr, ".tar.br")
+
+	imageId, err := valueObject.NewContainerImageId(fileNameStrNoExt)
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileImageIdParseError")
+	}
+
+	fileInfo, err := os.Stat(rawArchiveFilePath)
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileStatError")
+	}
+
+	rawOwnerAccountId := fileInfo.Sys().(*syscall.Stat_t).Uid
+	accountId, err := valueObject.NewAccountId(rawOwnerAccountId)
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileOwnerAccountIdParseError")
+	}
+
+	downloadUrl, _ := valueObject.NewUrl(
+		"https://" + serverHostname.String() + "/v1/container/image/archive/" +
+			accountId.String() + "/" + imageId.String() + "/",
+	)
+
+	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileSizeBytesParseError")
+	}
+
+	rawCreatedAt := fileInfo.ModTime()
+	createdAt := valueObject.NewUnixTimeWithGoTime(rawCreatedAt)
+
+	return entity.NewContainerImageArchiveFile(
+		imageId, accountId, filePath, downloadUrl, sizeBytes, createdAt,
+	), nil
+}
+
 func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 	[]entity.ContainerImageArchiveFile, error,
 ) {
-	return []entity.ContainerImageArchiveFile{}, errors.New("NotImplemented")
+	archiveFiles := []entity.ContainerImageArchiveFile{}
+
+	findResult, err := infraHelper.RunCmd(
+		"find", infraEnvs.UserDataDirectory,
+		"-type", "f",
+		"-path", "*/archives/*",
+		"-name", "*.br",
+	)
+	if err != nil {
+		return archiveFiles, errors.New("FindArchiveFilesError: " + err.Error())
+	}
+
+	rawArchiveFilesPaths := strings.Split(findResult, "\n")
+	if len(rawArchiveFilesPaths) == 0 {
+		return archiveFiles, nil
+	}
+
+	serverHostname, err := infraHelper.ReadServerHostname()
+	if err != nil {
+		return archiveFiles, errors.New("InvalidServerHostname: " + err.Error())
+	}
+
+	for _, rawArchiveFilePath := range rawArchiveFilesPaths {
+		if rawArchiveFilePath == "" {
+			continue
+		}
+
+		archiveFile, err := repo.archiveFileFactory(rawArchiveFilePath, serverHostname)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("path", rawArchiveFilePath))
+			continue
+		}
+		archiveFiles = append(archiveFiles, archiveFile)
+	}
+
+	return archiveFiles, nil
 }
 
 func (repo *ContainerImageQueryRepo) ReadArchiveFile(
