@@ -302,7 +302,7 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 		"find", infraEnvs.UserDataDirectory,
 		"-type", "f",
 		"-path", "*/archives/*",
-		"-name", "*.br",
+		"-name", "*.tar.br",
 	)
 	if err != nil {
 		return archiveFiles, errors.New("FindArchiveFilesError: " + err.Error())
@@ -337,5 +337,19 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 func (repo *ContainerImageQueryRepo) ReadArchiveFile(
 	readDto dto.ReadContainerImageArchiveFile,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	return archiveFile, errors.New("NotImplemented")
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(readDto.AccountId)
+	if err != nil {
+		return archiveFile, err
+	}
+
+	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
+	rawFilePath := archiveDirStr + "/" + readDto.ImageId.String() + ".tar.br"
+
+	serverHostname, err := infraHelper.ReadServerHostname()
+	if err != nil {
+		return archiveFile, errors.New("InvalidServerHostname: " + err.Error())
+	}
+
+	return repo.archiveFileFactory(rawFilePath, serverHostname)
 }
