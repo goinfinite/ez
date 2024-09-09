@@ -70,7 +70,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, err
 	}
 
-	archiveDirStr := accountEntity.HomeDirectory.String() + "/archive"
+	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
 	accountIdStr := createDto.AccountId.String()
 	_, err = infraHelper.RunCmd(
 		"install", "-d", "-m", "755", "-o", accountIdStr, "-g", accountIdStr, archiveDirStr,
@@ -100,7 +100,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
 	}
 
-	finalFilePath, err := valueObject.NewUnixFilePath(tarFilePath + ".bry")
+	finalFilePath, err := valueObject.NewUnixFilePath(tarFilePath + ".br")
 	if err != nil {
 		return archiveFile, errors.New("NewFinalFilePathError: " + err.Error())
 	}
