@@ -15,6 +15,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
+	infraEnvs "github.com/speedianet/control/src/infra/envs"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -49,7 +50,7 @@ func (repo *AccountCmdRepo) updateFilesystemQuota(
 		xfsFlags = "-x -c 'limit -u bhard=0 ihard=0"
 	}
 
-	xfsFlags += " " + accountIdStr + "' /var/data"
+	xfsFlags += " " + accountIdStr + "' " + infraEnvs.UserDataDirectory
 
 	_, err := infraHelper.RunCmdWithSubShell("xfs_quota " + xfsFlags)
 	return err
@@ -66,9 +67,16 @@ func (repo *AccountCmdRepo) Create(
 	}
 
 	usernameStr := createDto.Username.String()
+	homeDirectory, err := valueObject.NewUnixFilePath(
+		infraEnvs.UserDataDirectory + "/" + usernameStr,
+	)
+	if err != nil {
+		return accountId, errors.New("DefineHomeDirectoryError: " + err.Error())
+	}
+
 	_, err = infraHelper.RunCmd(
 		"useradd", "-m",
-		"-d", "/var/data/"+usernameStr,
+		"-d", homeDirectory.String(),
 		"-s", "/usr/sbin/nologin",
 		"-p", string(passHash),
 		usernameStr,
@@ -94,7 +102,7 @@ func (repo *AccountCmdRepo) Create(
 	nowUnixTime := valueObject.NewUnixTimeNow()
 	accountEntity := entity.NewAccount(
 		accountId, gid, createDto.Username, *createDto.Quota,
-		valueObject.NewAccountQuotaWithBlankValues(),
+		valueObject.NewAccountQuotaWithBlankValues(), homeDirectory,
 		nowUnixTime, nowUnixTime,
 	)
 
@@ -294,7 +302,7 @@ func (repo *AccountCmdRepo) getStorageUsage(
 	accountId valueObject.AccountId,
 ) (quotaUsage valueObject.AccountQuota, err error) {
 	xfsReportUsage, err := infraHelper.RunCmdWithSubShell(
-		"xfs_quota -x -c 'report -nbiN' /var/data | awk '/#" +
+		"xfs_quota -x -c 'report -nbiN' " + infraEnvs.UserDataDirectory + " | awk '/#" +
 			accountId.String() + " /{print $1, $2, $7; exit;}'",
 	)
 	if err != nil {
