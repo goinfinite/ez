@@ -95,7 +95,6 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	}
 	defer outputFileHandler.Close()
 
-	decompressionCmd := "brotli --decompress --rm"
 	outputFileExtension, err := outputFilePath.ReadFileExtension()
 	if err != nil {
 		if !strings.HasSuffix(outputFilePathStr, ".br") {
@@ -103,14 +102,17 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 		}
 	}
 
+	decompressionCmd := ""
 	outputFileExtStr := outputFileExtension.String()
 	switch outputFileExtStr {
-	case ".tar":
+	case "tar":
 		decompressionCmd = ""
-	case ".gz":
+	case "br":
+		decompressionCmd = "brotli --decompress --rm"
+	case "gz":
 		decompressionCmd = "gunzip"
-	case ".xz":
-		decompressionCmd = "xz --decompress"
+	case "xz":
+		decompressionCmd = "unxz"
 	default:
 		return imageId, errors.New("UnsupportedArchiveFileExtension")
 	}
@@ -120,20 +122,36 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 		return imageId, errors.New("CopyArchiveFileError: " + err.Error())
 	}
 
+	accountIdStr := importDto.AccountId.String()
+	_, err = infraHelper.RunCmd(
+		"chown", accountIdStr+":"+accountIdStr, outputFilePathStr,
+	)
+	if err != nil {
+		return imageId, errors.New("ChownArchiveError: " + err.Error())
+	}
+
+	tarFilePathStr := outputFilePathStr
 	shouldDecompress := len(decompressionCmd) > 0
 	if shouldDecompress {
+		tarFilePathStr = strings.TrimSuffix(outputFilePathStr, "."+outputFileExtStr)
+		_, err = infraHelper.RunCmdAsUserWithSubShell(
+			importDto.AccountId, "rm -f "+tarFilePathStr,
+		)
+		if err != nil {
+			return imageId, errors.New("RemoveExistingTarFileError: " + err.Error())
+		}
+
 		_, err = infraHelper.RunCmdAsUserWithSubShell(
 			importDto.AccountId, decompressionCmd+" "+outputFilePathStr,
 		)
 		if err != nil {
 			return imageId, errors.New("DecompressImageError: " + err.Error())
 		}
-		outputFilePathStr = strings.TrimSuffix(outputFilePathStr, outputFileExtStr)
 	}
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		importDto.AccountId,
-		"podman", "load", "--quiet", "--input", outputFilePathStr,
+		"podman", "load", "--quiet", "--input", tarFilePathStr,
 	)
 	if err != nil {
 		return imageId, errors.New("PodmanLoadError: " + err.Error())
@@ -142,7 +160,7 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	if len(rawImageId) == 0 {
 		return imageId, errors.New("PodmanLoadEmptyImageId")
 	}
-	rawImageId = strings.TrimSuffix(rawImageId, "Loaded image: sha256:")
+	rawImageId = strings.TrimPrefix(rawImageId, "Loaded image: sha256:")
 	rawImageId = strings.TrimSpace(rawImageId)
 	if len(rawImageId) > 12 {
 		rawImageId = rawImageId[:12]
@@ -150,11 +168,11 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 
 	imageId, err = valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
-		return imageId, errors.New("NewContainerImageIdError: " + err.Error())
+		return imageId, err
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
-		importDto.AccountId, "rm", "-f", outputFilePathStr,
+		importDto.AccountId, "rm", "-f", tarFilePathStr,
 	)
 	if err != nil {
 		return imageId, errors.New("RemoveArchiveFileError: " + err.Error())
@@ -185,7 +203,11 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	tarFilePath := archiveDirStr + "/" + imageIdStr + ".tar"
 
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId, "podman", "save", imageIdStr, "--output", tarFilePath,
+		createDto.AccountId,
+		"podman", "save",
+		"--format", "docker-archive",
+		"--output", tarFilePath,
+		imageIdStr,
 	)
 	if err != nil {
 		return archiveFile, errors.New("PodmanSaveError: " + err.Error())
@@ -199,7 +221,9 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	}
 
 	accountIdStr := createDto.AccountId.String()
-	_, err = infraHelper.RunCmd("chown", "-R", accountIdStr, archiveDirStr)
+	_, err = infraHelper.RunCmd(
+		"chown", "-R", accountIdStr+":"+accountIdStr, archiveDirStr,
+	)
 	if err != nil {
 		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
 	}
