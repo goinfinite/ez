@@ -1,7 +1,6 @@
 package apiHelper
 
 import (
-	"mime/multipart"
 	"net/http"
 	"strings"
 
@@ -69,27 +68,25 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 			requestBody = StringDotNotationToHierarchicalMap(requestBody, keyParts, keyValue)
 		}
 	case strings.HasPrefix(contentType, "multipart/form-data"):
-		multipartFormData, err := c.MultipartForm()
+		multipartForm, err := c.MultipartForm()
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidMultipartFormData")
 		}
 
-		for k, v := range multipartFormData.Value {
-			if len(v) > 0 {
-				requestBody[k] = v[0]
+		for formKey, keyValue := range multipartForm.Value {
+			if len(keyValue) != 1 {
+				continue
 			}
+
+			requestBody[formKey] = keyValue[0]
 		}
 
-		if len(multipartFormData.File) > 0 {
-			requestBodyFiles := map[string]*multipart.FileHeader{}
-
-			for k, v := range multipartFormData.File {
-				if len(v) > 0 {
-					requestBodyFiles[k] = v[0]
-				}
+		for fileKey, fileValue := range multipartForm.File {
+			if len(fileValue) != 1 {
+				continue
 			}
 
-			requestBody["files"] = requestBodyFiles
+			requestBody[fileKey] = fileValue[0]
 		}
 	default:
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidContentType")
