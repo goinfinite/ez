@@ -108,10 +108,11 @@ func (service *ContainerImageService) CreateSnapshot(
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
+	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainerSnapshotImage(
-		containerImageCmdRepo, containerQueryRepo, service.activityRecordCmdRepo,
-		createSnapshotImageDto,
+		containerImageCmdRepo, containerQueryRepo, accountQueryRepo,
+		service.activityRecordCmdRepo, createSnapshotImageDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -250,9 +251,10 @@ func (service *ContainerImageService) CreateArchiveFile(
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
+	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 
 	archiveFile, err := useCase.CreateContainerImageArchiveFile(
-		service.containerImageQueryRepo, containerImageCmdRepo,
+		service.containerImageQueryRepo, containerImageCmdRepo, accountQueryRepo,
 		service.activityRecordCmdRepo, createDto,
 	)
 	if err != nil {

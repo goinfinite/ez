@@ -229,10 +229,11 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(controller.persistentDbSvc)
+	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
 
 	imageId, err := useCase.ImportContainerImageArchiveFile(
-		containerImageCmdRepo, activityRecordCmdRepo, importDto,
+		containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
 	)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
