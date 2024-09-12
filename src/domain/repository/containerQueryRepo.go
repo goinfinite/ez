@@ -12,4 +12,7 @@ type ContainerQueryRepo interface {
 	ReadByHostname(valueObject.Fqdn) (entity.Container, error)
 	ReadByAccountId(valueObject.AccountId) ([]entity.Container, error)
 	ReadWithMetrics() ([]dto.ContainerWithMetrics, error)
+	ReadWithMetricsById(valueObject.AccountId, valueObject.ContainerId) (
+		dto.ContainerWithMetrics, error,
+	)
 }

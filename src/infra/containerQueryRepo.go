@@ -132,11 +132,145 @@ func (repo *ContainerQueryRepo) ReadByAccountId(
 	return containers, nil
 }
 
+func (repo *ContainerQueryRepo) containerMetricFactory(
+	accountId valueObject.AccountId,
+	containerMetricsJson string,
+) (containerMetrics valueObject.ContainerMetrics, err error) {
+	metricsInfo := map[string]interface{}{}
+	err = json.Unmarshal([]byte(containerMetricsJson), &metricsInfo)
+	if err != nil {
+		return containerMetrics, err
+	}
+
+	rawContainerId, assertOk := metricsInfo["ContainerID"].(string)
+	if !assertOk {
+		return containerMetrics, errors.New("ContainerIdNotFound")
+	}
+	if len(rawContainerId) > 12 {
+		rawContainerId = rawContainerId[:12]
+	}
+	containerId, err := valueObject.NewContainerId(rawContainerId)
+	if err != nil {
+		return containerMetrics, err
+	}
+
+	cpuPercent, assertOk := metricsInfo["CPU"].(float64)
+	if !assertOk {
+		return containerMetrics, errors.New("CpuPercentNotFound")
+	}
+
+	avgCpu, assertOk := metricsInfo["AvgCPU"].(float64)
+	if !assertOk {
+		return containerMetrics, errors.New("AvgCpuNotFound")
+	}
+
+	memPercent, assertOk := metricsInfo["MemPerc"].(float64)
+	if !assertOk {
+		return containerMetrics, errors.New("MemPercentNotFound")
+	}
+
+	rawMemBytes, assertOk := metricsInfo["MemUsage"].(float64)
+	if !assertOk {
+		return containerMetrics, errors.New("MemBytesNotFound")
+	}
+	memBytes, err := valueObject.NewByte(rawMemBytes)
+	if err != nil {
+		return containerMetrics, errors.New("MemBytesParseError")
+	}
+
+	rawBlockInput, assertOk := metricsInfo["BlockInput"].(float64)
+	if !assertOk {
+		return containerMetrics, errors.New("BlockInputNotFound")
+	}
+	blockInput, err := valueObject.NewByte(rawBlockInput)
+	if err != nil {
+		return containerMetrics, errors.New("BlockInputParseError")
+	}
+
+	rawBlockOutput, assertOk := metricsInfo["BlockOutput"].(float64)
+	if !assertOk {
+		return containerMetrics, errors.New("BlockOutputNotFound")
+	}
+	blockOutput, err := valueObject.NewByte(rawBlockOutput)
+	if err != nil {
+		return containerMetrics, errors.New("BlockOutputParseError")
+	}
+
+	rawNetInputTotal := 0.0
+	rawNetOutputTotal := 0.0
+
+	rawNetworks, assertOk := metricsInfo["Network"].(map[string]interface{})
+	if !assertOk {
+		return containerMetrics, errors.New("NetworkNotFound")
+	}
+	for _, rawNetwork := range rawNetworks {
+		rawNetworkMap, assertOk := rawNetwork.(map[string]interface{})
+		if !assertOk {
+			continue
+		}
+
+		rawNetInput, assertOk := rawNetworkMap["RxBytes"].(float64)
+		if !assertOk {
+			continue
+		}
+
+		rawNetInputTotal += rawNetInput
+
+		rawNetOutput, assertOk := rawNetworkMap["TxBytes"].(float64)
+		if !assertOk {
+			continue
+		}
+
+		rawNetOutputTotal += rawNetOutput
+	}
+
+	netInput, err := valueObject.NewByte(rawNetInputTotal)
+	if err != nil {
+		return containerMetrics, errors.New("NetInputParseError")
+	}
+
+	netOutput, err := valueObject.NewByte(rawNetOutputTotal)
+	if err != nil {
+		return containerMetrics, errors.New("NetOutputParseError")
+	}
+
+	// TODO: Implement cache so that we don't have to run this command every time.
+	blockUsageStr, err := infraHelper.RunCmdAsUserWithSubShell(
+		accountId,
+		"timeout 1 podman exec -it "+containerId.String()+
+			" df --output=used,iused / | tail -n 1",
+	)
+	if err != nil {
+		blockUsageStr = "0 0"
+	}
+	blockUsageStr = strings.TrimSpace(blockUsageStr)
+	blockUsageParts := strings.Split(blockUsageStr, " ")
+	if len(blockUsageParts) != 2 {
+		blockUsageParts = []string{"0", "0"}
+	}
+
+	blockBytes, err := valueObject.NewByte(blockUsageParts[0])
+	if err != nil {
+		blockBytes, _ = valueObject.NewByte(0)
+	}
+
+	inodesCount, err := strconv.ParseUint(blockUsageParts[1], 10, 64)
+	if err != nil {
+		inodesCount = 0
+	}
+
+	return valueObject.NewContainerMetrics(
+		containerId, infraHelper.RoundFloat(cpuPercent), avgCpu, memBytes,
+		infraHelper.RoundFloat(memPercent), blockInput, blockOutput,
+		blockBytes, inodesCount, netInput, netOutput,
+	), nil
+}
+
 func (repo *ContainerQueryRepo) containerMetricsFactory(
 	accountId valueObject.AccountId,
 	containersMetricsStr string,
 ) (map[valueObject.ContainerId]valueObject.ContainerMetrics, error) {
-	var containersMetrics = map[valueObject.ContainerId]valueObject.ContainerMetrics{}
+	containersMetrics := map[valueObject.ContainerId]valueObject.ContainerMetrics{}
 	if len(containersMetricsStr) == 0 {
 		return containersMetrics, nil
 	}
@@ -146,117 +280,18 @@ func (repo *ContainerQueryRepo) containerMetricsFactory(
 		return containersMetrics, errors.New("ContainersMetricsParseError")
 	}
 
-	for _, containerMetricsJson := range containersMetricsList {
-		containerMetricsInfo := map[string]interface{}{}
-		err := json.Unmarshal([]byte(containerMetricsJson), &containerMetricsInfo)
+	for metricsIndex, metricsJson := range containersMetricsList {
+		containerMetrics, err := repo.containerMetricFactory(accountId, metricsJson)
 		if err != nil {
+			slog.Debug(
+				"ContainerMetricsParseError",
+				slog.Int("index", metricsIndex),
+				slog.Any("error", err),
+			)
 			continue
 		}
 
-		rawContainerId, assertOk := containerMetricsInfo["ContainerID"].(string)
-		if !assertOk {
-			continue
-		}
-		if len(rawContainerId) > 12 {
-			rawContainerId = rawContainerId[:12]
-		}
-		containerId, err := valueObject.NewContainerId(rawContainerId)
-		if err != nil {
-			continue
-		}
-
-		cpuPercent, assertOk := containerMetricsInfo["CPU"].(float64)
-		if !assertOk {
-			continue
-		}
-
-		avgCpu, assertOk := containerMetricsInfo["AvgCPU"].(float64)
-		if !assertOk {
-			continue
-		}
-
-		memPercent, assertOk := containerMetricsInfo["MemPerc"].(float64)
-		if !assertOk {
-			continue
-		}
-
-		rawMemBytes, assertOk := containerMetricsInfo["MemUsage"].(float64)
-		if !assertOk {
-			continue
-		}
-		memBytes, err := valueObject.NewByte(rawMemBytes)
-		if err != nil {
-			continue
-		}
-
-		rawBlockInput, assertOk := containerMetricsInfo["BlockInput"].(float64)
-		if !assertOk {
-			continue
-		}
-		blockInput, err := valueObject.NewByte(rawBlockInput)
-		if err != nil {
-			continue
-		}
-
-		rawBlockOutput, assertOk := containerMetricsInfo["BlockOutput"].(float64)
-		if !assertOk {
-			continue
-		}
-		blockOutput, err := valueObject.NewByte(rawBlockOutput)
-		if err != nil {
-			continue
-		}
-
-		rawNetInput, assertOk := containerMetricsInfo["NetInput"].(float64)
-		if !assertOk {
-			continue
-		}
-		netInput, err := valueObject.NewByte(rawNetInput)
-		if err != nil {
-			continue
-		}
-
-		rawNetOutput, assertOk := containerMetricsInfo["NetOutput"].(float64)
-		if !assertOk {
-			continue
-		}
-		netOutput, err := valueObject.NewByte(rawNetOutput)
-		if err != nil {
-			continue
-		}
-
-		blockUsageStr, err := infraHelper.RunCmdAsUser(
-			accountId,
-			"bash", "-c",
-			"timeout 1 podman exec -it "+containerId.String()+
-				" df --output=used,iused / | tail -n 1",
-		)
-		if err != nil {
-			blockUsageStr = "0 0"
-		}
-		blockUsageStr = strings.TrimSpace(blockUsageStr)
-		blockUsageParts := strings.Split(blockUsageStr, " ")
-		if len(blockUsageParts) != 2 {
-			blockUsageParts = []string{"0", "0"}
-		}
-
-		blockBytes, err := valueObject.NewByte(blockUsageParts[0])
-		if err != nil {
-			blockBytes, _ = valueObject.NewByte(0)
-		}
-
-		inodesCount, err := strconv.ParseUint(blockUsageParts[1], 10, 64)
-		if err != nil {
-			inodesCount = 0
-		}
-
-		containerMetrics := valueObject.NewContainerMetrics(
-			infraHelper.RoundFloat(cpuPercent), avgCpu, memBytes,
-			infraHelper.RoundFloat(memPercent), blockInput, blockOutput,
-			blockBytes, inodesCount, netInput, netOutput,
-		)
-
-		containersMetrics[containerId] = containerMetrics
+		containersMetrics[containerMetrics.ContainerId] = containerMetrics
 	}
 
 	return containersMetrics, nil
@@ -276,8 +311,7 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 	}
 
 	runningContainersMetrics, err := repo.containerMetricsFactory(
-		accountId,
-		containersMetricsStr,
+		accountId, containersMetricsStr,
 	)
 	if err != nil {
 		return containersWithMetrics, err
@@ -288,18 +322,17 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 		return containersWithMetrics, err
 	}
 
-	for _, container := range containerEntities {
-		containerMetrics := valueObject.NewContainerMetricsWithBlankValues()
-
-		for runningContainerId, runningContainerMetrics := range runningContainersMetrics {
-			if runningContainerId != container.Id {
-				continue
-			}
-			containerMetrics = runningContainerMetrics
+	for _, containerEntity := range containerEntities {
+		if _, exists := runningContainersMetrics[containerEntity.Id]; !exists {
+			slog.Debug(
+				"ContainerMetricsNotFound",
+				slog.String("containerId", containerEntity.Id.String()),
+			)
+			continue
 		}
 
 		containerWithMetrics := dto.NewContainerWithMetrics(
-			container, containerMetrics,
+			containerEntity, runningContainersMetrics[containerEntity.Id],
 		)
 		containersWithMetrics = append(containersWithMetrics, containerWithMetrics)
 	}
@@ -330,4 +363,42 @@ func (repo *ContainerQueryRepo) ReadWithMetrics() ([]dto.ContainerWithMetrics, e
 	}
 
 	return containersWithMetrics, nil
+}
+
+func (repo *ContainerQueryRepo) ReadWithMetricsById(
+	accountId valueObject.AccountId,
+	containerId valueObject.ContainerId,
+) (containerWithMetrics dto.ContainerWithMetrics, err error) {
+	containersMetricStr, err := infraHelper.RunCmdAsUser(
+		accountId,
+		"podman", "stats",
+		"--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
+		containerId.String(),
+	)
+	if err != nil {
+		return containerWithMetrics, errors.New("AccPodmanStatsError" + err.Error())
+	}
+
+	runningContainerMetrics, err := repo.containerMetricsFactory(
+		accountId, containersMetricStr,
+	)
+	if err != nil {
+		return containerWithMetrics, err
+	}
+	if len(runningContainerMetrics) == 0 {
+		return containerWithMetrics, errors.New("ContainerMetricsNotFound")
+	}
+
+	if _, exists := runningContainerMetrics[containerId]; !exists {
+		return containerWithMetrics, errors.New("ContainerMetricsNotFound")
+	}
+
+	containerEntity, err := repo.ReadById(containerId)
+	if err != nil {
+		return containerWithMetrics, err
+	}
+
+	return dto.NewContainerWithMetrics(
+		containerEntity, runningContainerMetrics[containerId],
+	), nil
 }
