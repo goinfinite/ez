@@ -7,6 +7,7 @@ feat: create security record for all write operations
 feat: add account id to container profile
 fix: call htmx.process() when Alpine.js changes the DOM
 fix: duplicated ssl map blocks bug
+fix: network parsing bug with newer versions of podman
 
 0.0.6 - 2024/08/03
 refactor: container profile frontend with HTMX and Alpine.js
