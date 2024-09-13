@@ -1,0 +1,55 @@
+package componentContainer
+
+import (
+	"github.com/speedianet/control/src/domain/valueObject"
+	"strconv"
+)
+
+templ PortBindingsTable(
+	portBindings []valueObject.PortBinding,
+	shouldDisplayPrivatePort bool,
+) {
+	<div x-data="{ isExpanded: false }">
+		<table
+			id="port-bindings-table"
+			class="w-full table-auto border-collapse rounded-md"
+		>
+			<thead class="bg-control-700 text-xs lowercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="p-1">Service Name</th>
+					<th scope="col" class="p-1">Public Port</th>
+					<th scope="col" class="p-1">Container Port/Protocol</th>
+					if shouldDisplayPrivatePort {
+						<th scope="col" class="p-1">Private Port</th>
+					}
+				</tr>
+			</thead>
+			<tbody>
+				for bindingIndex, portBinding := range portBindings {
+					<tr
+						x-show={ "isExpanded || " + strconv.FormatInt(int64(bindingIndex), 10) + " < 3" }
+						class="odd:bg-control-300 even:bg-control-400 border-b border-neutral-500 border-opacity-30 text-center text-xs"
+					>
+						<td class="p-2">{ portBinding.ServiceName.String() }</td>
+						<td class="p-2">{ portBinding.PublicPort.String() }</td>
+						<td class="p-2">{ portBinding.ContainerPort.String() }/{ portBinding.Protocol.String() }</td>
+						if shouldDisplayPrivatePort {
+							<td class="p-2">
+								if portBinding.PrivatePort != nil {
+									{ portBinding.PrivatePort.String() }
+								}
+							</td>
+						}
+					</tr>
+				}
+			</tbody>
+		</table>
+		if len(portBindings) > 5 {
+			<button
+				x-on:click="isExpanded = !isExpanded"
+				x-text="isExpanded ? 'show less' : 'show more'"
+				class="bg-control-500 w-full rounded-b-md py-1.5 text-center text-xs text-neutral-200"
+			></button>
+		}
+	</div>
+}

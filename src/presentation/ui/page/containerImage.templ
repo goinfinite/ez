@@ -3,6 +3,7 @@ package page
 import (
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
+	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
 	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 )
@@ -107,7 +108,7 @@ templ ContainerImageIndex(
 			<div class="mb-4 flex flex-row items-center justify-between">
 				<div class="basis-[60%]">
 					<h2 class="text-2xl">Local Images</h2>
-					<p>Images used by running containers and available for container creation.</p>
+					<p>Images used by running containers and/or available for container creation.</p>
 					<p class="text-xs">
 						Note: dangling images are automatically deleted after 30d to preserve storage space.
 					</p>
@@ -177,7 +178,9 @@ templ ContainerImagesTable(
 						<i class="text-[10px] text-neutral-50 text-opacity-70">{ imageEntity.Isa.String() } &#8214; { imageEntity.ImageHash.String() }</i>
 					</td>
 					<td class="px-6 py-4">{ imageEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i></td>
-					<td class="px-6 py-4"></td>
+					<td class="px-6 py-4">
+						@componentContainer.PortBindingsTable(imageEntity.PortBindings, false)
+					</td>
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
 						@componentStructural.CircularIconButtonWithTooltip(
