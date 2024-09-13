@@ -162,9 +162,10 @@ func (service *ContainerImageService) Delete(
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
+	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 
 	err = useCase.DeleteContainerImage(
-		service.containerImageQueryRepo, containerImageCmdRepo,
+		service.containerImageQueryRepo, containerImageCmdRepo, containerQueryRepo,
 		service.activityRecordCmdRepo, deleteDto,
 	)
 	if err != nil {

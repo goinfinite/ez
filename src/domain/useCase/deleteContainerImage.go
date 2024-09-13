@@ -11,12 +11,24 @@ import (
 func DeleteContainerImage(
 	containerImageQueryRepo repository.ContainerImageQueryRepo,
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
+	containerQueryRepo repository.ContainerQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	deleteDto dto.DeleteContainerImage,
 ) error {
 	_, err := containerImageQueryRepo.ReadById(deleteDto.AccountId, deleteDto.ImageId)
 	if err != nil {
 		return errors.New("ContainerImageNotFound")
+	}
+
+	containersUsingImage, err := containerQueryRepo.ReadByImageId(
+		deleteDto.AccountId, deleteDto.ImageId,
+	)
+	if err != nil {
+		slog.Error("ReadContainerByImageIdInfraError", slog.Any("error", err))
+		return errors.New("ReadContainerByImageIdInfraError")
+	}
+	if len(containersUsingImage) > 0 {
+		return errors.New("ContainerImageInUseCannotBeDeleted")
 	}
 
 	err = containerImageCmdRepo.Delete(deleteDto)
