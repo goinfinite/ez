@@ -51,6 +51,14 @@ script ContainerImageIndexLocalState() {
 			closeCreateModal() {
 				this.isCreateModalOpen = false;
 			},
+			archiveImage(accountId, imageId) {
+				htmx.ajax(
+					'POST',
+					'/api/v1/container/image/archive/',
+					{swap: 'none', values: {accountId: accountId, imageId: imageId}},
+				);
+				// TODO: Pop ScheduledTasks Modal Open
+			},
 			isDeleteModalOpen: false,
 			openDeleteModal(accountId, imageId) {
 				this.resetPrimaryState();
@@ -82,18 +90,11 @@ templ ContainerImageIndex(
 	@ContainerImageIndexLocalState()
 	<div class="flex flex-col" x-data="containerImage">
 		<div class="mb-6 flex flex-row items-center justify-between">
-			<div class="basis-[70%]">
-				@componentStructural.PageTitle(
-					"Container Images",
-					"Container Images enable you to manage, import and export container images to be used in your containers.",
-					"ph-blueprint",
-				)
-			</div>
-			<div class="my-4 flex space-x-5">
-				@componentForm.SubmitButton(
-					"Import Container Image", "ph-plus-square", "openCreateModal()", false,
-				)
-			</div>
+			@componentStructural.PageTitle(
+				"Container Images",
+				"Container Images enable you to manage, import and export container images to be used in your containers.",
+				"ph-blueprint",
+			)
 		</div>
 		<div id="image-archives-tables" class="card w-full">
 			<h2 class="text-2xl">Images Archives</h2>
@@ -104,11 +105,23 @@ templ ContainerImageIndex(
 			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
 		</div>
 		<div id="images-tables" class="card mt-10 w-full">
-			<h2 class="text-2xl">Local Images</h2>
-			<p>Images stored in the server, used by running containers and that can be used to create containers.</p>
-			<p class="mb-4 text-xs">
-				Dangling images are automatically deleted after 30d to preserve storage space.
-			</p>
+			<div class="mb-4 flex flex-row items-center justify-between">
+				<div class="basis-[60%]">
+					<h2 class="text-2xl">Local Images</h2>
+					<p>Images used by running containers and available for container creation.</p>
+					<p class="text-xs">
+						Note: dangling images are automatically deleted after 30d to preserve storage space.
+					</p>
+				</div>
+				<div class="my-4 flex basis-[40%] space-x-4">
+					@componentForm.SubmitButton(
+						"Import Container Image", "ph-upload", "openCreateModal()", false,
+					)
+					@componentForm.SubmitButton(
+						"Take Container Snapshot", "ph-camera", "openCreateModal()", false,
+					)
+				</div>
+			</div>
 			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
 		</div>
 	</div>
@@ -138,7 +151,7 @@ templ ContainerImagesTable(
 					<p>Image Address</p>
 					<i class="text-[10px] normal-case">ISA <span class="align-middle text-[8px]">&#8214;</span> SHA256 Hash</i>
 				</th>
-				<th scope="col" class="px-5 py-3">Size <small class="normal-case">(MiB)</small></th>
+				<th scope="col" class="px-5 py-3">Size</th>
 				<th scope="col" class="px-5 py-3">Port Bindings</th>
 				<th scope="col" class="px-5 py-3">Created At</th>
 				<th scope="col" class="px-5 py-3"></th>
@@ -156,24 +169,20 @@ templ ContainerImagesTable(
 						<p>{ imageEntity.ImageAddress.String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">{ imageEntity.Isa.String() } &#8214; { imageEntity.ImageHash.String() }</i>
 					</td>
-					<td class="px-6 py-4">{ imageEntity.SizeBytes.ToMiBString() }</td>
+					<td class="px-6 py-4">{ imageEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i></td>
 					<td class="px-6 py-4"></td>
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
-					<td class="inline-flex px-6 py-4">
-						<button
-							type="button"
-							@click={ "openUpdateModal(" + imageEntity.JsonSerialize() + ")" }
-							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
-						>
-							<i class="ph-bold ph-file-archive text-xl"></i>
-						</button>
-						<button
-							type="button"
-							@click={ "openDeleteModal(" + imageEntity.AccountId.String() + ", " + imageEntity.Id.String() + ")" }
-							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
-						>
-							<i class="ph-bold ph-trash text-xl"></i>
-						</button>
+					<td class="inline-flex space-x-2 px-6 py-4">
+						@componentStructural.CircularIconButtonWithTooltip(
+							"ph-file-zip", "control-300", "control-200",
+							"archiveImage('"+imageEntity.AccountId.String()+"', '"+imageEntity.Id.String()+"')",
+							"Archive/Compress Image", "control-300",
+						)
+						@componentStructural.CircularIconButtonWithTooltip(
+							"ph-trash", "red-900", "red-700",
+							"openDeleteModal('"+imageEntity.AccountId.String()+"', '"+imageEntity.Id.String()+"')",
+							"Delete Image", "red-700",
+						)
 					</td>
 				</tr>
 			}
@@ -206,7 +215,7 @@ templ ContainerImageArchiveFilesTable(
 					<p>Owner</p>
 					<i class="text-[10px] normal-case">(AccountId)</i>
 				</th>
-				<th scope="col" class="px-5 py-3">Size <small class="normal-case">(MiB)</small></th>
+				<th scope="col" class="px-5 py-3">Size</th>
 				<th scope="col" class="px-5 py-3">Created At</th>
 				<th scope="col" class="px-5 py-3"></th>
 			</tr>
@@ -221,23 +230,21 @@ templ ContainerImageArchiveFilesTable(
 							({ archiveFileEntity.AccountId.String() })
 						</i>
 					</td>
-					<td class="px-6 py-4">{ archiveFileEntity.SizeBytes.ToMiBString() }</td>
+					<td class="px-6 py-4">
+						{ archiveFileEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i>
+					</td>
 					<td class="px-6 py-4">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
-					<td class="inline-flex px-6 py-4">
-						<button
-							type="button"
-							@click={ "openUpdateModal(" + archiveFileEntity.JsonSerialize() + ")" }
-							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
-						>
-							<i class="ph-bold ph-download text-xl"></i>
-						</button>
-						<button
-							type="button"
-							@click={ "openDeleteModal(" + archiveFileEntity.AccountId.String() + ", " + archiveFileEntity.ImageId.String() + ")" }
-							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
-						>
-							<i class="ph-bold ph-trash text-xl"></i>
-						</button>
+					<td class="inline-flex space-x-2 px-6 py-4">
+						@componentStructural.CircularIconButtonWithTooltip(
+							"ph-download", "control-300", "control-200",
+							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
+							"Download Archive", "control-300",
+						)
+						@componentStructural.CircularIconButtonWithTooltip(
+							"ph-trash", "red-900", "red-700",
+							"openDeleteModal('"+archiveFileEntity.AccountId.String()+"', '"+archiveFileEntity.ImageId.String()+"')",
+							"Delete Archive", "red-700",
+						)
 					</td>
 				</tr>
 			}
