@@ -9,6 +9,7 @@ type Container struct {
 	AccountId     valueObject.AccountId              `json:"accountId"`
 	Hostname      valueObject.Fqdn                   `json:"hostname"`
 	Status        bool                               `json:"status"`
+	ImageId       valueObject.ContainerImageId       `json:"imageId"`
 	ImageAddress  valueObject.ContainerImageAddress  `json:"imageAddress"`
 	ImageHash     valueObject.Hash                   `json:"imageHash"`
 	PortBindings  []valueObject.PortBinding          `json:"portBindings"`
@@ -28,6 +29,7 @@ func NewContainer(
 	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
 	status bool,
+	imageId valueObject.ContainerImageId,
 	imageAddress valueObject.ContainerImageAddress,
 	imageHash valueObject.Hash,
 	portBindings []valueObject.PortBinding,
@@ -46,6 +48,7 @@ func NewContainer(
 		AccountId:     accountId,
 		Hostname:      hostname,
 		Status:        status,
+		ImageId:       imageId,
 		ImageAddress:  imageAddress,
 		ImageHash:     imageHash,
 		PortBindings:  portBindings,

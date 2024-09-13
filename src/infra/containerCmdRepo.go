@@ -138,12 +138,23 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 		return containerEntity, err
 	}
 
+	rawImageId, assertOk := containerInfo["Image"].(string)
+	if !assertOk {
+		return containerEntity, errors.New("ImageIdParseError")
+	}
+	if len(rawImageId) > 12 {
+		rawImageId = rawImageId[:12]
+	}
+	imageId, err := valueObject.NewContainerImageId(rawImageId)
+	if err != nil {
+		return containerEntity, err
+	}
+
 	rawImageHash, assertOk := containerInfo["ImageDigest"].(string)
 	if !assertOk {
 		return containerEntity, errors.New("ImageHashParseError")
 	}
 	rawImageHash = strings.TrimPrefix(rawImageHash, "sha256:")
-
 	imageHash, err := valueObject.NewHash(rawImageHash)
 	if err != nil {
 		return containerEntity, err
@@ -152,7 +163,7 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	nowUnixTime := valueObject.NewUnixTimeNow()
 
 	return entity.NewContainer(
-		containerId, createDto.AccountId, createDto.Hostname, true,
+		containerId, createDto.AccountId, createDto.Hostname, true, imageId,
 		createDto.ImageAddress, imageHash, createDto.PortBindings,
 		*createDto.RestartPolicy, 0, createDto.Entrypoint, *createDto.ProfileId,
 		createDto.Envs, nowUnixTime, nowUnixTime, &nowUnixTime, nil,
