@@ -65,6 +65,12 @@ func (router *Router) containerRoutes() {
 		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerProfileGroup.GET("/", profilePresenter.Handler)
+
+	imagePresenter := presenter.NewContainerImagePresenter(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
+	containerImageGroup := containerGroup.Group("/image")
+	containerImageGroup.GET("/", imagePresenter.Handler)
 }
 
 func (router *Router) devRoutes() {

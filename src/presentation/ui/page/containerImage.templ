@@ -1,0 +1,161 @@
+package page
+
+import (
+	"github.com/speedianet/control/src/domain/entity"
+	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
+	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
+)
+
+script ContainerImageIndexLocalState() {
+	document.addEventListener('alpine:init', () => {
+		Alpine.data('containerImage', () => ({
+			// Primary State
+			containerImage: {},
+			resetPrimaryState() {
+				this.containerImage = {
+					'id': '',
+					'accountId': '',
+					'imageAddress': '',
+					'imageHash': '',
+					'isa': '',
+					'sizeBytes': '',
+					'portBindings': '',
+					'envs': '',
+					'createdAt': '',
+				};
+			},
+			init() {
+				this.resetPrimaryState();
+			},
+
+			// Auxiliary States
+
+			// Modal States
+			isUpdateModalOpen: false,
+			openUpdateModal(containerImageData) {
+				this.resetPrimaryState();
+
+				this.containerImage = containerImageData;
+				this.isUpdateModalOpen = true;
+			},
+			closeUpdateModal() {
+				this.isUpdateModalOpen = false;
+			},
+			isCreateModalOpen: false,
+			openCreateModal() {
+				this.resetPrimaryState();
+
+				this.isCreateModalOpen = true;
+			},
+			closeCreateModal() {
+				this.isCreateModalOpen = false;
+			},
+			isDeleteModalOpen: false,
+			openDeleteModal(accountId, imageId) {
+				this.resetPrimaryState();
+
+				this.containerImage.accountId = accountId;
+				this.containerImage.id = imageId;
+				this.isDeleteModalOpen = true;
+			},
+			closeDeleteModal() {
+				this.isDeleteModalOpen = false;
+			},
+			deleteElement() {
+				htmx.ajax(
+					'DELETE',
+					'/api/v1/container/image/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
+					{swap: 'none'},
+				);
+				this.closeDeleteModal();
+			},
+		}))
+	})
+}
+
+templ ContainerImageIndex(images []entity.ContainerImage) {
+	@ContainerImageIndexLocalState()
+	<div class="flex flex-col" x-data="containerImage">
+		<div class="mb-6 flex flex-row items-center justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Container Images",
+					"Container Images enable you to manage, import and export container images to be used in your containers.",
+					"ph-blueprint",
+				)
+			</div>
+			<div class="my-4 flex space-x-5">
+				@componentForm.SubmitButton(
+					"Create Container Image", "ph-plus-square", "openCreateModal()", false,
+				)
+			</div>
+		</div>
+		<div id="images-tables" class="card w-full">
+			@ContainerImagesTable(images)
+		</div>
+	</div>
+}
+
+templ ContainerImagesTable(imagesEntities []entity.ContainerImage) {
+	<table
+		id="images-table"
+		hx-get="/container/image/"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
+		hx-select="#images-tables"
+		hx-target="#images-tables"
+		hx-swap="outerHTML transition:true"
+		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
+	>
+		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+				<th scope="col" class="px-5 py-3">Id</th>
+				<th scope="col" class="px-5 py-3">AccountId</th>
+				<th scope="col" class="px-5 py-3">Image Address</th>
+				<th scope="col" class="px-5 py-3">Isa</th>
+				<th scope="col" class="px-5 py-3">Size</th>
+				<th scope="col" class="px-5 py-3">Port Bindings</th>
+				<th scope="col" class="px-5 py-3">Envs</th>
+				<th scope="col" class="px-5 py-3">Created At</th>
+				<th scope="col" class="px-5 py-3"></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, imageEntity := range imagesEntities {
+				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+					<td class="px-6 py-4">{ imageEntity.Id.String() }</td>
+					<td class="px-6 py-4">{ imageEntity.AccountId.String() }</td>
+					<td class="px-6 py-4">
+						{ imageEntity.ImageAddress.String() }
+						{ imageEntity.ImageHash.String() }
+					</td>
+					<td class="px-6 py-4">{ imageEntity.Isa.String() }</td>
+					<td class="px-6 py-4">{ imageEntity.SizeBytes.String() }</td>
+					<td class="px-6 py-4"></td>
+					<td class="px-6 py-4"></td>
+					<td class="px-6 py-4">{ imageEntity.CreatedAt.String() }</td>
+					<td class="inline-flex px-6 py-4">
+						<button
+							type="button"
+							@click={ "openUpdateModal(" + imageEntity.JsonSerialize() + ")" }
+							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
+						>
+							<i class="ph-bold ph-pencil text-xl"></i>
+						</button>
+						<button
+							type="button"
+							@click={ "openDeleteModal(" + imageEntity.AccountId.String() + ", " + imageEntity.Id.String() + ")" }
+							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
+						>
+							<i class="ph-bold ph-trash text-xl"></i>
+						</button>
+					</td>
+				</tr>
+			}
+			if len(imagesEntities) == 0 {
+				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+					<td class="px-6 py-4" colspan="12">No images found.</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

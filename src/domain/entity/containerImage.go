@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/speedianet/control/src/domain/valueObject"
+import (
+	"encoding/json"
+
+	"github.com/speedianet/control/src/domain/valueObject"
+)
 
 type ContainerImage struct {
 	Id           valueObject.ContainerImageId           `json:"id"`
@@ -39,4 +43,9 @@ func NewContainerImage(
 		Entrypoint:   entrypoint,
 		CreatedAt:    createdAt,
 	}
+}
+
+func (entity ContainerImage) JsonSerialize() string {
+	jsonBytes, _ := json.Marshal(entity)
+	return string(jsonBytes)
 }
