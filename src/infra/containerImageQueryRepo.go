@@ -279,7 +279,7 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 	}
 
 	downloadUrl, _ := valueObject.NewUrl(
-		"https://" + serverHostname.String() + "/v1/container/image/archive/" +
+		"https://" + serverHostname.String() + "/api/v1/container/image/archive/" +
 			accountId.String() + "/" + imageId.String() + "/",
 	)
 

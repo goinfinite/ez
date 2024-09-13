@@ -9,6 +9,7 @@ import (
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	infraEnvs "github.com/speedianet/control/src/infra/envs"
+	infraHelper "github.com/speedianet/control/src/infra/helper"
 	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
 
@@ -173,13 +174,36 @@ func (service *ContainerImageService) Delete(
 	return NewServiceOutput(Success, "ContainerImageDeleted")
 }
 
-func (service *ContainerImageService) ReadArchiveFiles() ServiceOutput {
-	filesList, err := useCase.ReadContainerImageArchiveFiles(service.containerImageQueryRepo)
+func (service *ContainerImageService) ReadArchiveFiles(
+	requestHostname *string,
+) ServiceOutput {
+	archiveFilesList, err := useCase.ReadContainerImageArchiveFiles(service.containerImageQueryRepo)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, filesList)
+	if requestHostname != nil {
+		serverHostname, err := infraHelper.ReadServerHostname()
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+		serverHostnameStr := serverHostname.String()
+
+		for archiveFileIndex, archiveFile := range archiveFilesList {
+			rawUpdatedUrl := strings.Replace(
+				archiveFile.DownloadUrl.String(), serverHostnameStr, *requestHostname, 1,
+			)
+
+			updatedUrl, err := valueObject.NewUrl(rawUpdatedUrl)
+			if err != nil {
+				return NewServiceOutput(InfraError, err.Error())
+			}
+
+			archiveFilesList[archiveFileIndex].DownloadUrl = updatedUrl
+		}
+	}
+
+	return NewServiceOutput(Success, archiveFilesList)
 }
 
 func (service *ContainerImageService) CreateArchiveFile(

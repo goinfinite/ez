@@ -104,7 +104,7 @@ func (controller *ContainerImageController) Delete(c echo.Context) error {
 // @Router       /v1/container/image/archive/ [get]
 func (controller *ContainerImageController) ReadArchiveFiles(c echo.Context) error {
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.ReadArchiveFiles(),
+		c, controller.containerImageService.ReadArchiveFiles(&c.Request().Host),
 	)
 }
 

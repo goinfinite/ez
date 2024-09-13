@@ -88,7 +88,7 @@ func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
 		Short: "ReadContainerImageArchiveFiles",
 		Run: func(cmd *cobra.Command, args []string) {
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.ReadArchiveFiles(),
+				controller.containerImageService.ReadArchiveFiles(nil),
 			)
 		},
 	}

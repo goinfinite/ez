@@ -43,7 +43,7 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	readArchiveFilesServiceOutput := containerImageService.ReadArchiveFiles()
+	readArchiveFilesServiceOutput := containerImageService.ReadArchiveFiles(&c.Request().Host)
 	if readArchiveFilesServiceOutput.Status != service.Success {
 		return nil
 	}
