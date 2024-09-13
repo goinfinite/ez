@@ -32,51 +32,50 @@ script ContainerImageIndexLocalState() {
 			// Auxiliary States
 
 			// Modal States
-			isUpdateModalOpen: false,
-			openUpdateModal(containerImageData) {
-				this.resetPrimaryState();
-
-				this.containerImage = containerImageData;
-				this.isUpdateModalOpen = true;
-			},
-			closeUpdateModal() {
-				this.isUpdateModalOpen = false;
-			},
-			isCreateModalOpen: false,
-			openCreateModal() {
-				this.resetPrimaryState();
-
-				this.isCreateModalOpen = true;
-			},
-			closeCreateModal() {
-				this.isCreateModalOpen = false;
-			},
 			archiveImage(accountId, imageId) {
 				htmx.ajax(
-					'POST',
-					'/api/v1/container/image/archive/',
+					'POST', '/api/v1/container/image/archive/',
 					{swap: 'none', values: {accountId: accountId, imageId: imageId}},
 				);
 				// TODO: Pop ScheduledTasks Modal Open
 			},
-			isDeleteModalOpen: false,
-			openDeleteModal(accountId, imageId) {
+			isDeleteImageModalOpen: false,
+			openDeleteImageModal(accountId, imageId) {
 				this.resetPrimaryState();
 
 				this.containerImage.accountId = accountId;
 				this.containerImage.id = imageId;
-				this.isDeleteModalOpen = true;
+				this.isDeleteImageModalOpen = true;
 			},
-			closeDeleteModal() {
-				this.isDeleteModalOpen = false;
+			closeDeleteImageModal() {
+				this.isDeleteImageModalOpen = false;
 			},
-			deleteElement() {
+			deleteImage() {
 				htmx.ajax(
 					'DELETE',
 					'/api/v1/container/image/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
 					{swap: 'none'},
 				);
-				this.closeDeleteModal();
+				this.closeDeleteImageModal();
+			},
+			isDeleteArchiveModalOpen: false,
+			openDeleteArchiveModal(accountId, imageId) {
+				this.resetPrimaryState();
+
+				this.containerImage.accountId = accountId;
+				this.containerImage.id = imageId;
+				this.isDeleteArchiveModalOpen = true;
+			},
+			closeDeleteArchiveModal() {
+				this.isDeleteArchiveModalOpen = false;
+			},
+			deleteArchive() {
+				htmx.ajax(
+					'DELETE',
+					'/api/v1/container/image/archive/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
+					{swap: 'none'},
+				);
+				this.closeDeleteArchiveModal();
 			},
 		}))
 	})
@@ -124,6 +123,14 @@ templ ContainerImageIndex(
 			</div>
 			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
 		</div>
+		@componentStructural.DeleteModal(
+			"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
+			"delete-image", "containerImage.id", "",
+		)
+		@componentStructural.DeleteModal(
+			"isDeleteArchiveModalOpen", "closeDeleteArchiveModal()", "deleteArchive()",
+			"delete-archive", "containerImage.id", "",
+		)
 	</div>
 }
 
@@ -134,7 +141,7 @@ templ ContainerImagesTable(
 	<table
 		id="images-table"
 		hx-get="/container/image/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-image delay:500ms"
 		hx-select="#images-tables"
 		hx-target="#images-tables"
 		hx-swap="outerHTML transition:true"
@@ -175,12 +182,12 @@ templ ContainerImagesTable(
 					<td class="inline-flex space-x-2 px-6 py-4">
 						@componentStructural.CircularIconButtonWithTooltip(
 							"ph-file-zip", "control-300", "control-200",
-							"archiveImage('"+imageEntity.AccountId.String()+"', '"+imageEntity.Id.String()+"')",
+							"archiveImage('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
 							"Archive/Compress Image", "control-300",
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
 							"ph-trash", "red-900", "red-700",
-							"openDeleteModal('"+imageEntity.AccountId.String()+"', '"+imageEntity.Id.String()+"')",
+							"openDeleteImageModal('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
 							"Delete Image", "red-700",
 						)
 					</td>
@@ -201,8 +208,8 @@ templ ContainerImageArchiveFilesTable(
 ) {
 	<table
 		id="image-archive-files-table"
-		hx-get="/container/image/archive/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
+		hx-get="/container/image/"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-archive delay:500ms"
 		hx-select="#image-archives-tables"
 		hx-target="#image-archives-tables"
 		hx-swap="outerHTML transition:true"
@@ -242,7 +249,7 @@ templ ContainerImageArchiveFilesTable(
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
 							"ph-trash", "red-900", "red-700",
-							"openDeleteModal('"+archiveFileEntity.AccountId.String()+"', '"+archiveFileEntity.ImageId.String()+"')",
+							"openDeleteArchiveModal('"+archiveFileEntity.AccountId.String()+"','"+archiveFileEntity.ImageId.String()+"')",
 							"Delete Archive", "red-700",
 						)
 					</td>
