@@ -1,10 +1,7 @@
 package componentStructural
 
-import componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
-
 templ Modal(
 	title, isOpenState, closeModalFunction, elementIdStatePath string,
-	enableTextualViewToggle bool,
 ) {
 	<!-- Modal HTML -->
 	<div
@@ -26,12 +23,6 @@ templ Modal(
 					}
 				</h2>
 				<div class="inline-flex space-x-5">
-					<div class="opacity-85 hover:opacity-100 active:opacity-100">
-						@componentForm.IconToggle(
-							"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
-							"$store.main.textualViewSelector",
-						)
-					</div>
 					<button
 						@click={ closeModalFunction }
 						class="opacity-85 bg-transparent hover:opacity-100 active:opacity-100"

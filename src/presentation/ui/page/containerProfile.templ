@@ -419,7 +419,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 	</table>
 }
 
-templ ContainerProfileRegularForm(action string) {
+templ ContainerProfileForm(action string) {
 	<form
 		if action == "create" {
 			hx-post="/api/v1/container/profile/"
@@ -564,134 +564,19 @@ templ ContainerProfileRegularForm(action string) {
 	</form>
 }
 
-templ ContainerProfileTextualForm(action string) {
-	<form
-		if action == "create" {
-			hx-post="/api/v1/container/profile/"
-		}
-		if action == "update" {
-			hx-put="/api/v1/container/profile/"
-		}
-		hx-indicator="#loading-overlay"
-		hx-swap="none"
-	>
-		if action == "update" {
-			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
-			<input type="hidden" name="accountId" x-bind:value="containerProfile.accountId"/>
-		}
-		<div class="bg-control-500 rounded-md p-6 text-center text-lg leading-10">
-			The
-			<div class="mx-2 inline-flex w-64">
-				@componentForm.InputField("text", "name", "", "containerProfile.name", true)
-			</div>
-			profile allows containers to utilize
-			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "baseSpecs.cpuCores", "", "containerProfile.baseSpecs.cpuCores", true)
-			</div>
-			CPU core(s),
-			<div class="w-42 mr-2 inline-flex space-x-1">
-				<template x-if="preferedByteSuffix == 'GiB'">
-					@componentForm.InputField("number", "baseSpecs.memoryGibibytes", "", "containerProfile.baseSpecs.memoryGibibytes", true)
-				</template>
-				<template x-if="preferedByteSuffix == 'MiB'">
-					@componentForm.InputField("number", "baseSpecs.memoryMebibytes", "", "containerProfile.baseSpecs.memoryMebibytes", true)
-				</template>
-				@componentForm.SelectInput("", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
-			</div>
-			of RAM memory, and
-			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "baseSpecs.storagePerformanceUnits", "", "containerProfile.baseSpecs.storagePerformanceUnits", true)
-			</div>
-			storage performance unit(s) <small class="text-neutral-400">(equivalent to <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 5"></strong> MiB/s & <strong x-text="containerProfile.baseSpecs.storagePerformanceUnits * 250"></strong> ops/s of read and write)</small>.
-		</div>
-		<div class="bg-control-600 mt-4 rounded-md p-6 text-center text-base leading-9">
-			Optionally, containers using this profile can scale up to
-			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "maxSpecs.cpuCores", "", "containerProfile.maxSpecs.cpuCores", true)
-			</div>
-			CPU cores,
-			<div class="w-42 mr-2 inline-flex space-x-1">
-				<template x-if="preferedByteSuffix == 'GiB'">
-					@componentForm.InputField("number", "maxSpecs.memoryGibibytes", "", "containerProfile.maxSpecs.memoryGibibytes", true)
-				</template>
-				<template x-if="preferedByteSuffix == 'MiB'">
-					@componentForm.InputField("number", "maxSpecs.memoryMebibytes", "", "containerProfile.maxSpecs.memoryMebibytes", true)
-				</template>
-				@componentForm.SelectInput("", "", "preferedByteSuffix", []string{"GiB", "MiB"}, true)
-			</div>
-			of RAM, and
-			<div class="max-w-12 mx-2 inline-flex">
-				@componentForm.InputField("number", "maxSpecs.storagePerformanceUnits", "", "containerProfile.maxSpecs.storagePerformanceUnits", true)
-			</div>
-			storage performance units <small>(<strong><span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="containerProfile.maxSpecs.storagePerformanceUnits * 250"></span> ops</strong>)</small>,
-			during periods of
-			<div class="w-42 mr-2 inline-flex space-x-1">
-				<template x-if="preferedScalingMaxDurationSuffix == 'hour(s)'">
-					@componentForm.InputField("number", "scalingMaxDurationHours", "", "containerProfile.scalingMaxDurationHours", true)
-				</template>
-				<template x-if="preferedScalingMaxDurationSuffix == 'min(s)'">
-					@componentForm.InputField("number", "scalingMaxDurationMinutes", "", "containerProfile.scalingMaxDurationMinutes", true)
-				</template>
-				@componentForm.SelectInput("", "", "preferedScalingMaxDurationSuffix", []string{"hour(s)", "min(s)"}, true)
-			</div>
-			at regular intervals of
-			<div class="max-w-42 inline-flex space-x-1">
-				<template x-if="preferedScalingIntervalSuffix == 'hour(s)'">
-					@componentForm.InputField("number", "scalingIntervalHours", "", "containerProfile.scalingIntervalHours", true)
-				</template>
-				<template x-if="preferedScalingIntervalSuffix == 'min(s)'">
-					@componentForm.InputField("number", "scalingIntervalMinutes", "", "containerProfile.scalingIntervalMinutes", true)
-				</template>
-				@componentForm.SelectInput("", "", "preferedScalingIntervalSuffix", []string{"hour(s)", "min(s)"}, true)
-			</div>
-			, provided the
-			<div class="w-30 mx-2 inline-flex">
-				@componentForm.SelectInput("scalingPolicy", "", "containerProfile.scalingPolicy", valueObject.ValidScalingPolicies, true)
-			</div>
-			usage exceeds
-			<div class="max-w-16 ml-1 inline-flex">
-				@componentForm.InputField("number", "scalingThreshold", "", "containerProfile.scalingThreshold", true)
-			</div><i x-show="!isScalingPolicyConn">%</i><span x-show="isScalingPolicyConn" class="ml-1">conn(s)</span> and the host machine has at least
-			<div class="max-w-12 ml-2 inline-flex">
-				@componentForm.InputField("number", "hostMinCapacityPercent", "", "containerProfile.hostMinCapacityPercent", true)
-			</div>
-			<i>%</i> free capacity available.
-		</div>
-		<div class="mt-4">
-			switch action {
-				case "create":
-					@componentForm.SubmitButton("Create", "ph-check-fat", "closeCreateModal()", false)
-				case "update":
-					@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
-			}
-		</div>
-	</form>
-}
-
 templ CreateContainerProfileModal() {
 	@componentStructural.Modal(
-		"Create Container Profile", "isCreateModalOpen", "closeCreateModal()",
-		"", true,
+		"Create Container Profile", "isCreateModalOpen", "closeCreateModal()", "",
 	) {
-		<template x-if="!$store.main.textualViewSelector">
-			@ContainerProfileRegularForm("create")
-		</template>
-		<template x-if="$store.main.textualViewSelector">
-			@ContainerProfileTextualForm("create")
-		</template>
+		@ContainerProfileForm("create")
 	}
 }
 
 templ UpdateContainerProfileModal() {
 	@componentStructural.Modal(
 		"Update Container Profile", "isUpdateModalOpen", "closeUpdateModal()",
-		"containerProfile.id", true,
+		"containerProfile.id",
 	) {
-		<template x-if="!$store.main.textualViewSelector">
-			@ContainerProfileRegularForm("update")
-		</template>
-		<template x-if="$store.main.textualViewSelector">
-			@ContainerProfileTextualForm("update")
-		</template>
+		@ContainerProfileForm("update")
 	}
 }
