@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -117,6 +118,9 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 
 		portBindings = append(portBindings, parsedPortBindings...)
 	}
+	sort.SliceStable(portBindings, func(i, j int) bool {
+		return portBindings[i].PublicPort < portBindings[j].PublicPort
+	})
 
 	rawEnvs, assertOk := rawConfig["Env"].([]interface{})
 	if !assertOk {
