@@ -132,6 +132,37 @@ func (repo *ContainerQueryRepo) ReadByAccountId(
 	return containers, nil
 }
 
+func (repo *ContainerQueryRepo) ReadByImageId(
+	accountId valueObject.AccountId,
+	imageId valueObject.ContainerImageId,
+) ([]entity.Container, error) {
+	containers := []entity.Container{}
+
+	containerModels := []dbModel.Container{}
+	err := repo.persistentDbSvc.Handler.
+		Preload("PortBindings").
+		Where("account_id = ? AND image_id = ?", accountId.Uint64(), imageId.String()).
+		Find(&containerModels).Error
+	if err != nil {
+		return containers, err
+	}
+
+	for _, containerModel := range containerModels {
+		containerEntity, err := containerModel.ToEntity()
+		if err != nil {
+			slog.Debug(
+				"ContainerModelToEntityError",
+				slog.String("containerId", containerModel.ID),
+				slog.Any("error", err),
+			)
+			continue
+		}
+		containers = append(containers, containerEntity)
+	}
+
+	return containers, nil
+}
+
 func (repo *ContainerQueryRepo) containerMetricFactory(
 	accountId valueObject.AccountId,
 	containerMetricsJson string,
