@@ -48,6 +48,10 @@ func (vo Byte) ToMiB() int64 {
 	return vo.Int64() / 1048576
 }
 
+func (vo Byte) ToMiBString() string {
+	return strconv.FormatInt(vo.ToMiB(), 10)
+}
+
 func (vo Byte) ToGiB() int64 {
 	return vo.Int64() / 1073741824
 }
