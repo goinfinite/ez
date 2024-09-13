@@ -2,6 +2,7 @@ package page
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 )
@@ -73,7 +74,10 @@ script ContainerImageIndexLocalState() {
 	})
 }
 
-templ ContainerImageIndex(images []entity.ContainerImage) {
+templ ContainerImageIndex(
+	imagesEntities []entity.ContainerImage,
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) {
 	@ContainerImageIndexLocalState()
 	<div class="flex flex-col" x-data="containerImage">
 		<div class="mb-6 flex flex-row items-center justify-between">
@@ -91,12 +95,21 @@ templ ContainerImageIndex(images []entity.ContainerImage) {
 			</div>
 		</div>
 		<div id="images-tables" class="card w-full">
-			@ContainerImagesTable(images)
+			<h2>Local Images</h2>
+			<p>Images that are stored locally in the server and can be used to create containers.</p>
+			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
+		</div>
+		<div id="image-archives-tables" class="card mt-10 w-full">
+			<h2>Images Archives</h2>
+			<p>Compressed images files ready to be downloaded to your local machine.</p>
 		</div>
 	</div>
 }
 
-templ ContainerImagesTable(imagesEntities []entity.ContainerImage) {
+templ ContainerImagesTable(
+	imagesEntities []entity.ContainerImage,
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) {
 	<table
 		id="images-table"
 		hx-get="/container/image/"
@@ -108,13 +121,17 @@ templ ContainerImagesTable(imagesEntities []entity.ContainerImage) {
 	>
 		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
 			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-				<th scope="col" class="px-5 py-3">Id</th>
-				<th scope="col" class="px-5 py-3">AccountId</th>
-				<th scope="col" class="px-5 py-3">Image Address</th>
-				<th scope="col" class="px-5 py-3">Isa</th>
-				<th scope="col" class="px-5 py-3">Size</th>
+				<th scope="col" class="px-5 py-3">Image Id</th>
+				<th scope="col" class="px-5 py-3">
+					<p>Owner</p>
+					<i class="text-[10px] normal-case">(AccountId)</i>
+				</th>
+				<th scope="col" class="px-5 py-3">
+					<p>Image Address</p>
+					<i class="text-[10px] normal-case">ISA <span class="align-middle text-[8px]">&#8214;</span> SHA256 Hash</i>
+				</th>
+				<th scope="col" class="px-5 py-3">Size <small class="normal-case">(MiB)</small></th>
 				<th scope="col" class="px-5 py-3">Port Bindings</th>
-				<th scope="col" class="px-5 py-3">Envs</th>
 				<th scope="col" class="px-5 py-3">Created At</th>
 				<th scope="col" class="px-5 py-3"></th>
 			</tr>
@@ -123,23 +140,24 @@ templ ContainerImagesTable(imagesEntities []entity.ContainerImage) {
 			for _, imageEntity := range imagesEntities {
 				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ imageEntity.Id.String() }</td>
-					<td class="px-6 py-4">{ imageEntity.AccountId.String() }</td>
-					<td class="px-6 py-4">
-						{ imageEntity.ImageAddress.String() }
-						{ imageEntity.ImageHash.String() }
+					<td class="px-6 py-4 leading-tight">
+						<p>{ accountIdUsernameMap[imageEntity.AccountId].String() }</p>
+						<i class="text-[10px] text-neutral-50 text-opacity-70">({ imageEntity.AccountId.String() })</i>
 					</td>
-					<td class="px-6 py-4">{ imageEntity.Isa.String() }</td>
-					<td class="px-6 py-4">{ imageEntity.SizeBytes.String() }</td>
+					<td class="px-6 py-4 leading-tight">
+						<p>{ imageEntity.ImageAddress.String() }</p>
+						<i class="text-[10px] text-neutral-50 text-opacity-70">{ imageEntity.Isa.String() } &#8214; { imageEntity.ImageHash.String() }</i>
+					</td>
+					<td class="px-6 py-4">{ imageEntity.SizeBytes.ToMiBString() }</td>
 					<td class="px-6 py-4"></td>
-					<td class="px-6 py-4"></td>
-					<td class="px-6 py-4">{ imageEntity.CreatedAt.String() }</td>
+					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex px-6 py-4">
 						<button
 							type="button"
 							@click={ "openUpdateModal(" + imageEntity.JsonSerialize() + ")" }
 							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
 						>
-							<i class="ph-bold ph-pencil text-xl"></i>
+							<i class="ph-bold ph-file-archive text-xl"></i>
 						</button>
 						<button
 							type="button"

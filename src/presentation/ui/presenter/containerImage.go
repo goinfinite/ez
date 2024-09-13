@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	"github.com/speedianet/control/src/presentation/service"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
@@ -13,7 +14,8 @@ import (
 )
 
 type ContainerImagePresenter struct {
-	containerImageService *service.ContainerImageService
+	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewContainerImagePresenter(
@@ -21,23 +23,45 @@ func NewContainerImagePresenter(
 	trailDbSvc *db.TrailDatabaseService,
 ) *ContainerImagePresenter {
 	return &ContainerImagePresenter{
-		containerImageService: service.NewContainerImageService(
-			persistentDbSvc, trailDbSvc,
-		),
+		persistentDbSvc: persistentDbSvc,
+		trailDbSvc:      trailDbSvc,
 	}
 }
 
 func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
-	responseOutput := presenter.containerImageService.Read()
-	if responseOutput.Status != service.Success {
+	containerImageService := service.NewContainerImageService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readImagesServiceOutput := containerImageService.Read()
+	if readImagesServiceOutput.Status != service.Success {
 		return nil
 	}
 
-	imageEntities, assertOk := responseOutput.Body.([]entity.ContainerImage)
+	imageEntities, assertOk := readImagesServiceOutput.Body.([]entity.ContainerImage)
 	if !assertOk {
 		return nil
 	}
 
-	pageContent := page.ContainerImageIndex(imageEntities)
+	accountService := service.NewAccountService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readAccountsServiceOutput := accountService.Read()
+	if readAccountsServiceOutput.Status != service.Success {
+		return nil
+	}
+
+	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
+	if !assertOk {
+		return nil
+	}
+
+	accountIdUsernameMap := map[valueObject.AccountId]valueObject.Username{}
+	for _, accountEntity := range accountEntities {
+		accountIdUsernameMap[accountEntity.Id] = accountEntity.Username
+	}
+
+	pageContent := page.ContainerImageIndex(imageEntities, accountIdUsernameMap)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
