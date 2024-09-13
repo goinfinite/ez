@@ -65,6 +65,9 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, errors.New("InvalidContainerImageDigest")
 	}
 	rawImageDigest = strings.TrimPrefix(rawImageDigest, "sha256:")
+	if len(rawImageDigest) > 12 {
+		rawImageDigest = rawImageDigest[:12]
+	}
 	imageHash, err := valueObject.NewHash(rawImageDigest)
 	if err != nil {
 		return containerImage, err
