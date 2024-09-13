@@ -203,6 +203,13 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	tarFilePath := archiveDirStr + "/" + imageIdStr + ".tar"
 
 	_, err = infraHelper.RunCmdAsUser(
+		createDto.AccountId, "rm", "-f", tarFilePath,
+	)
+	if err != nil {
+		return archiveFile, errors.New("RemoveExistingTarFileError: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdAsUser(
 		createDto.AccountId,
 		"podman", "save",
 		"--format", "docker-archive",
