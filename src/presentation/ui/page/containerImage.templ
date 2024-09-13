@@ -76,6 +76,7 @@ script ContainerImageIndexLocalState() {
 
 templ ContainerImageIndex(
 	imagesEntities []entity.ContainerImage,
+	archiveFilesEntities []entity.ContainerImageArchiveFile,
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 ) {
 	@ContainerImageIndexLocalState()
@@ -90,18 +91,25 @@ templ ContainerImageIndex(
 			</div>
 			<div class="my-4 flex space-x-5">
 				@componentForm.SubmitButton(
-					"Create Container Image", "ph-plus-square", "openCreateModal()", false,
+					"Import Container Image", "ph-plus-square", "openCreateModal()", false,
 				)
 			</div>
 		</div>
-		<div id="images-tables" class="card w-full">
-			<h2>Local Images</h2>
-			<p>Images that are stored locally in the server and can be used to create containers.</p>
-			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
-		</div>
-		<div id="image-archives-tables" class="card mt-10 w-full">
-			<h2>Images Archives</h2>
+		<div id="image-archives-tables" class="card w-full">
+			<h2 class="text-2xl">Images Archives</h2>
 			<p>Compressed images files ready to be downloaded to your local machine.</p>
+			<p class="mb-4 text-xs">
+				Note: archive files are automatically deleted after 24h to preserve storage space.
+			</p>
+			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
+		</div>
+		<div id="images-tables" class="card mt-10 w-full">
+			<h2 class="text-2xl">Local Images</h2>
+			<p>Images stored in the server, used by running containers and that can be used to create containers.</p>
+			<p class="mb-4 text-xs">
+				Dangling images are automatically deleted after 30d to preserve storage space.
+			</p>
+			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
 		</div>
 	</div>
 }
@@ -172,6 +180,70 @@ templ ContainerImagesTable(
 			if len(imagesEntities) == 0 {
 				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 					<td class="px-6 py-4" colspan="12">No images found.</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+templ ContainerImageArchiveFilesTable(
+	archiveFilesEntities []entity.ContainerImageArchiveFile,
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) {
+	<table
+		id="image-archive-files-table"
+		hx-get="/container/image/archive/"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
+		hx-select="#image-archives-tables"
+		hx-target="#image-archives-tables"
+		hx-swap="outerHTML transition:true"
+		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
+	>
+		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+				<th scope="col" class="px-5 py-3">Image Id</th>
+				<th scope="col" class="px-5 py-3">
+					<p>Owner</p>
+					<i class="text-[10px] normal-case">(AccountId)</i>
+				</th>
+				<th scope="col" class="px-5 py-3">Size <small class="normal-case">(MiB)</small></th>
+				<th scope="col" class="px-5 py-3">Created At</th>
+				<th scope="col" class="px-5 py-3"></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, archiveFileEntity := range archiveFilesEntities {
+				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+					<td class="px-6 py-4">{ archiveFileEntity.ImageId.String() }</td>
+					<td class="px-6 py-4 leading-tight">
+						<p>{ accountIdUsernameMap[archiveFileEntity.AccountId].String() }</p>
+						<i class="text-[10px] text-neutral-50 text-opacity-70">
+							({ archiveFileEntity.AccountId.String() })
+						</i>
+					</td>
+					<td class="px-6 py-4">{ archiveFileEntity.SizeBytes.ToMiBString() }</td>
+					<td class="px-6 py-4">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="inline-flex px-6 py-4">
+						<button
+							type="button"
+							@click={ "openUpdateModal(" + archiveFileEntity.JsonSerialize() + ")" }
+							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
+						>
+							<i class="ph-bold ph-download text-xl"></i>
+						</button>
+						<button
+							type="button"
+							@click={ "openDeleteModal(" + archiveFileEntity.AccountId.String() + ", " + archiveFileEntity.ImageId.String() + ")" }
+							class="me-2 inline-flex items-center rounded-full bg-red-800 bg-opacity-60 p-3 text-center font-medium hover:bg-opacity-90"
+						>
+							<i class="ph-bold ph-trash text-xl"></i>
+						</button>
+					</td>
+				</tr>
+			}
+			if len(archiveFilesEntities) == 0 {
+				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+					<td class="px-6 py-4" colspan="12">No image archives found.</td>
 				</tr>
 			}
 		</tbody>

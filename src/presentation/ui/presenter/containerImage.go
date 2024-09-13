@@ -43,6 +43,16 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
+	readArchiveFilesServiceOutput := containerImageService.ReadArchiveFiles()
+	if readArchiveFilesServiceOutput.Status != service.Success {
+		return nil
+	}
+
+	archiveFileEntities, assertOk := readArchiveFilesServiceOutput.Body.([]entity.ContainerImageArchiveFile)
+	if !assertOk {
+		return nil
+	}
+
 	accountService := service.NewAccountService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
@@ -62,6 +72,8 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		accountIdUsernameMap[accountEntity.Id] = accountEntity.Username
 	}
 
-	pageContent := page.ContainerImageIndex(imageEntities, accountIdUsernameMap)
+	pageContent := page.ContainerImageIndex(
+		imageEntities, archiveFileEntities, accountIdUsernameMap,
+	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
