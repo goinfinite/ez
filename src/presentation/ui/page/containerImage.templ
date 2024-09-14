@@ -113,11 +113,11 @@ templ ContainerImageIndex(
 		</div>
 		<div id="image-archives-content" class="card w-full" x-data="imageArchive">
 			<h2 class="text-2xl">Images Archives</h2>
-			<p>Compressed images files ready to be downloaded to your local machine.</p>
-			<p class="mb-4 text-xs">
+			<p class="mb-4">Compressed images files ready to be downloaded to your local machine.</p>
+			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
+			<p class="mt-2 text-xs">
 				Note: archive files are automatically deleted after 24h to preserve storage space.
 			</p>
-			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
 			@componentStructural.DeleteModal(
 				"isDeleteArchiveModalOpen", "closeDeleteArchiveModal()", "deleteArchive()",
 				"delete-archive", "imageArchive.id", "",
@@ -128,9 +128,6 @@ templ ContainerImageIndex(
 				<div class="basis-[60%]">
 					<h2 class="text-2xl">Local Images</h2>
 					<p>Images used by running containers and/or available for container creation.</p>
-					<p class="text-xs">
-						Note: dangling images are automatically deleted after 30d to preserve storage space.
-					</p>
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
 					@componentForm.SubmitButton(
@@ -142,6 +139,9 @@ templ ContainerImageIndex(
 				</div>
 			</div>
 			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
+			<p class="mt-2 text-xs">
+				Note: dangling images are automatically deleted after 30d to preserve storage space.
+			</p>
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -163,33 +163,32 @@ templ ContainerImageArchiveFilesTable(
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
-			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-				<th scope="col" class="px-5 py-3">Image Id</th>
-				<th scope="col" class="px-5 py-3">
-					<p>Owner</p>
-					<i class="text-[10px] normal-case">(AccountId)</i>
-				</th>
-				<th scope="col" class="px-5 py-3">Size</th>
-				<th scope="col" class="px-5 py-3">Created At</th>
-				<th scope="col" class="px-5 py-3"></th>
+		<thead class="bg-control-800 text-left text-xs uppercase text-neutral-400">
+			<tr class="border-b border-neutral-500 border-opacity-90">
+				<th scope="col" class="w-3/6 px-3 py-2">File Path</th>
+				<th scope="col" class="px-3 py-2">Image Id</th>
+				<th scope="col" class="px-3 py-2">Owner</th>
+				<th scope="col" class="w-24 px-3 py-2">Size</th>
+				<th scope="col" class="px-3 py-2">Created At</th>
+				<th scope="col" class="px-3 py-2"></th>
 			</tr>
 		</thead>
 		<tbody>
 			for _, archiveFileEntity := range archiveFilesEntities {
-				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
-					<td class="px-6 py-4">{ archiveFileEntity.ImageId.String() }</td>
-					<td class="px-6 py-4 leading-tight">
+				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-sm">
+					<td class="w-3/6 px-3 py-2">{ archiveFileEntity.UnixFilePath.String() }</td>
+					<td class="px-3 py-2">{ archiveFileEntity.ImageId.String() }</td>
+					<td class="px-3 py-2 leading-tight">
 						<p>{ accountIdUsernameMap[archiveFileEntity.AccountId].String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">
 							({ archiveFileEntity.AccountId.String() })
 						</i>
 					</td>
-					<td class="px-6 py-4">
-						{ archiveFileEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i>
+					<td class="w-24 px-3 py-2">
+						{ archiveFileEntity.SizeBytes.StringWithSuffix() }
 					</td>
-					<td class="px-6 py-4">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
-					<td class="inline-flex space-x-2 px-6 py-4">
+					<td class="px-3 py-2">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="inline-flex space-x-2 px-4 py-2">
 						@componentStructural.CircularIconButtonWithTooltip(
 							"ph-download", "control-300", "control-200",
 							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
@@ -236,7 +235,7 @@ templ ContainerImagesTable(
 					<p>Image Address</p>
 					<i class="text-[10px] normal-case">ISA <span class="align-middle text-[8px]">&#8214;</span> SHA256 Hash</i>
 				</th>
-				<th scope="col" class="px-5 py-3">Size</th>
+				<th scope="col" class="w-28 px-5 py-3">Size</th>
 				<th scope="col" class="px-5 py-3">Port Bindings</th>
 				<th scope="col" class="px-5 py-3">Created At</th>
 				<th scope="col" class="px-5 py-3"></th>
@@ -254,7 +253,7 @@ templ ContainerImagesTable(
 						<p>{ imageEntity.ImageAddress.String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">{ imageEntity.Isa.String() } &#8214; { imageEntity.ImageHash.String() }</i>
 					</td>
-					<td class="px-6 py-4">{ imageEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i></td>
+					<td class="w-28 px-6 py-4">{ imageEntity.SizeBytes.StringWithSuffix() }</td>
 					<td class="px-6 py-4">
 						@componentContainer.PortBindingsTable(imageEntity.PortBindings, false)
 					</td>
