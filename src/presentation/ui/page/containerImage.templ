@@ -10,56 +10,6 @@ import (
 
 script ContainerImageIndexLocalState() {
 	document.addEventListener('alpine:init', () => {
-		Alpine.data('containerImage', () => ({
-			// Primary State
-			containerImage: {},
-			resetPrimaryState() {
-				this.containerImage = {
-					'id': '',
-					'accountId': '',
-					'imageAddress': '',
-					'imageHash': '',
-					'isa': '',
-					'sizeBytes': '',
-					'portBindings': '',
-					'envs': '',
-					'createdAt': '',
-				};
-			},
-			init() {
-				this.resetPrimaryState();
-			},
-
-			// Auxiliary States
-			archiveImage(accountId, imageId) {
-				htmx.ajax(
-					'POST', '/api/v1/container/image/archive/',
-					{swap: 'none', values: {accountId: accountId, imageId: imageId}},
-				);
-				// TODO: Pop ScheduledTasks Modal Open
-			},
-
-			// Modal States
-			isDeleteImageModalOpen: false,
-			openDeleteImageModal(accountId, imageId) {
-				this.resetPrimaryState();
-
-				this.containerImage.accountId = accountId;
-				this.containerImage.id = imageId;
-				this.isDeleteImageModalOpen = true;
-			},
-			closeDeleteImageModal() {
-				this.isDeleteImageModalOpen = false;
-			},
-			deleteImage() {
-				htmx.ajax(
-					'DELETE',
-					'/api/v1/container/image/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
-					{swap: 'none'},
-				);
-				this.closeDeleteImageModal();
-			},
-		}));
 		Alpine.data('imageArchive', () => ({
 			// Primary State
 			imageArchive: {},
@@ -94,6 +44,65 @@ script ContainerImageIndexLocalState() {
 				this.closeDeleteArchiveModal();
 			},
 		}));
+		Alpine.data('containerImage', () => ({
+			// Primary State
+			containerImage: {},
+			resetPrimaryState() {
+				this.containerImage = {
+					'id': '',
+					'accountId': '',
+					'imageAddress': '',
+					'imageHash': '',
+					'isa': '',
+					'sizeBytes': '',
+					'portBindings': '',
+					'envs': '',
+					'createdAt': '',
+				};
+			},
+			init() {
+				this.resetPrimaryState();
+			},
+
+			// Auxiliary States
+			archiveImage(accountId, imageId) {
+				htmx.ajax(
+					'POST', '/api/v1/container/image/archive/',
+					{swap: 'none', values: {accountId: accountId, imageId: imageId}},
+				);
+				// TODO: Pop ScheduledTasks Modal Open
+			},
+
+			// Modal States
+			isImportImageModalOpen: false,
+			openImportImageModal() {
+				this.resetPrimaryState();
+
+				this.isImportImageModalOpen = true;
+			},
+			closeImportImageModal() {
+				this.isImportImageModalOpen = false;
+			},
+			isDeleteImageModalOpen: false,
+			openDeleteImageModal(accountId, imageId) {
+				this.resetPrimaryState();
+
+				this.containerImage.accountId = accountId;
+				this.containerImage.id = imageId;
+				this.isDeleteImageModalOpen = true;
+			},
+			closeDeleteImageModal() {
+				this.isDeleteImageModalOpen = false;
+			},
+			deleteImage() {
+				htmx.ajax(
+					'DELETE',
+					'/api/v1/container/image/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
+					{swap: 'none'},
+				);
+				this.closeDeleteImageModal();
+			},
+		}));
 	})
 }
 
@@ -114,7 +123,7 @@ templ ContainerImageIndex(
 		<div id="image-archives-content" class="card w-full" x-data="imageArchive">
 			@componentStructural.PageSubHeading(
 				"Image Archives",
-				"Compressed images files ready to be downloaded to your local machine.",
+				"Compressed image files ready to be downloaded to your local machine.",
 				"ph-file-zip",
 			)
 			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
@@ -137,7 +146,7 @@ templ ContainerImageIndex(
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
 					@componentForm.SubmitButton(
-						"Import Container Image", "ph-upload", "openCreateModal()", false,
+						"Import Container Image", "ph-upload", "openImportImageModal()", false,
 					)
 					@componentForm.SubmitButton(
 						"Take Container Snapshot", "ph-camera", "openCreateModal()", false,
@@ -148,6 +157,7 @@ templ ContainerImageIndex(
 			<p class="mt-2 text-xs">
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
+			@ImportContainerImageModal()
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -285,4 +295,20 @@ templ ContainerImagesTable(
 			}
 		</tbody>
 	</table>
+}
+
+templ ImportContainerImageForm() {
+	<form
+		hx-post="/api/v1/container/image/archive/import/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+	></form>
+}
+
+templ ImportContainerImageModal() {
+	@componentStructural.Modal(
+		"Import Container Image", "isImportImageModalOpen", "closeImportImageModal()", "",
+	) {
+		@ImportContainerImageForm()
+	}
 }
