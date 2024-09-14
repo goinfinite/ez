@@ -26,16 +26,32 @@ func NewContainerImageCmdRepo(
 func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	createDto dto.CreateContainerSnapshotImage,
 ) (imageId valueObject.ContainerImageId, err error) {
-	unixTimeNow := valueObject.NewUnixTimeNow()
+	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
+	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
+	if err != nil {
+		return imageId, err
+	}
 	containerIdStr := createDto.ContainerId.String()
-	snapshotName := containerIdStr + ":" + unixTimeNow.String()
+	containerHostnameStrSimplified := strings.ReplaceAll(
+		containerEntity.Hostname.String(), ".", "-",
+	)
+	containerHostnameStrSimplified = strings.ToLower(containerHostnameStrSimplified)
+	snapshotName := containerIdStr + "-" +
+		containerHostnameStrSimplified +
+		":" + valueObject.NewUnixTimeNow().String()
+
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	if err != nil {
+		return imageId, err
+	}
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		createDto.AccountId,
 		"podman", "commit", "--quiet",
 		"--author", "control:"+createDto.OperatorAccountId.String(),
 		containerIdStr,
-		"localhost/"+createDto.AccountId.String()+"/"+snapshotName,
+		"localhost/"+accountEntity.Username.String()+"/"+snapshotName,
 	)
 	if err != nil {
 		return imageId, err
