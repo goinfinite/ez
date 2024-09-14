@@ -318,11 +318,18 @@ templ ImportContainerImageForm(
 		hx-post="/api/v1/container/image/archive/import/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
+		enctype="multipart/form-data"
 	>
-		@componentForm.SelectInputWithLabelValuePair(
-			"accountId", "Account", "containerImage.accountId",
-			transformAccountMapIntoSelectLabelValuePair(accountIdUsernameMap), false,
-		)
+		<div class="flex flex-col space-y-6">
+			@componentForm.SelectInputWithLabelValuePair(
+				"accountId", "Account", "containerImage.accountId",
+				transformAccountMapIntoSelectLabelValuePair(accountIdUsernameMap), false,
+			)
+			@componentForm.Dropzone(
+				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br",
+			)
+			@componentForm.SubmitButton("Import", "ph-check-fat", "closeImportImageModal()", false)
+		</div>
 	</form>
 }
 
