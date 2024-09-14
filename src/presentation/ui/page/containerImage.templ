@@ -31,8 +31,6 @@ script ContainerImageIndexLocalState() {
 			},
 
 			// Auxiliary States
-
-			// Modal States
 			archiveImage(accountId, imageId) {
 				htmx.ajax(
 					'POST', '/api/v1/container/image/archive/',
@@ -40,6 +38,8 @@ script ContainerImageIndexLocalState() {
 				);
 				// TODO: Pop ScheduledTasks Modal Open
 			},
+
+			// Modal States
 			isDeleteImageModalOpen: false,
 			openDeleteImageModal(accountId, imageId) {
 				this.resetPrimaryState();
@@ -59,12 +59,27 @@ script ContainerImageIndexLocalState() {
 				);
 				this.closeDeleteImageModal();
 			},
+		}));
+		Alpine.data('imageArchive', () => ({
+			// Primary State
+			imageArchive: {},
+			resetPrimaryState() {
+				this.imageArchive = {
+					'id': '',
+					'accountId': '',
+				};
+			},
+			init() {
+				this.resetPrimaryState();
+			},
+
+			// Modal States
 			isDeleteArchiveModalOpen: false,
 			openDeleteArchiveModal(accountId, imageId) {
 				this.resetPrimaryState();
 
-				this.containerImage.accountId = accountId;
-				this.containerImage.id = imageId;
+				this.imageArchive.accountId = accountId;
+				this.imageArchive.id = imageId;
 				this.isDeleteArchiveModalOpen = true;
 			},
 			closeDeleteArchiveModal() {
@@ -73,12 +88,12 @@ script ContainerImageIndexLocalState() {
 			deleteArchive() {
 				htmx.ajax(
 					'DELETE',
-					'/api/v1/container/image/archive/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
+					'/api/v1/container/image/archive/' + this.imageArchive.accountId + '/' + this.imageArchive.id + '/',
 					{swap: 'none'},
 				);
 				this.closeDeleteArchiveModal();
 			},
-		}))
+		}));
 	})
 }
 
@@ -88,7 +103,7 @@ templ ContainerImageIndex(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 ) {
 	@ContainerImageIndexLocalState()
-	<div class="flex flex-col" x-data="containerImage">
+	<div class="flex flex-col">
 		<div class="mb-6 flex flex-row items-center justify-between">
 			@componentStructural.PageTitle(
 				"Container Images",
@@ -96,15 +111,19 @@ templ ContainerImageIndex(
 				"ph-blueprint",
 			)
 		</div>
-		<div id="image-archives-tables" class="card w-full">
+		<div id="image-archives-content" class="card w-full" x-data="imageArchive">
 			<h2 class="text-2xl">Images Archives</h2>
 			<p>Compressed images files ready to be downloaded to your local machine.</p>
 			<p class="mb-4 text-xs">
 				Note: archive files are automatically deleted after 24h to preserve storage space.
 			</p>
 			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
+			@componentStructural.DeleteModal(
+				"isDeleteArchiveModalOpen", "closeDeleteArchiveModal()", "deleteArchive()",
+				"delete-archive", "imageArchive.id", "",
+			)
 		</div>
-		<div id="images-tables" class="card mt-10 w-full">
+		<div id="container-images-content" class="card mt-10 w-full" x-data="containerImage">
 			<div class="mb-4 flex flex-row items-center justify-between">
 				<div class="basis-[60%]">
 					<h2 class="text-2xl">Local Images</h2>
@@ -123,16 +142,74 @@ templ ContainerImageIndex(
 				</div>
 			</div>
 			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
+			@componentStructural.DeleteModal(
+				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
+				"delete-image", "containerImage.id", "",
+			)
 		</div>
-		@componentStructural.DeleteModal(
-			"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
-			"delete-image", "containerImage.id", "",
-		)
-		@componentStructural.DeleteModal(
-			"isDeleteArchiveModalOpen", "closeDeleteArchiveModal()", "deleteArchive()",
-			"delete-archive", "containerImage.id", "",
-		)
 	</div>
+}
+
+templ ContainerImageArchiveFilesTable(
+	archiveFilesEntities []entity.ContainerImageArchiveFile,
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) {
+	<table
+		id="image-archive-files-table"
+		hx-get="/container/image/"
+		hx-trigger="submit from:form delay:500ms, click from:button#delete-archive delay:500ms"
+		hx-select="#image-archive-files-table"
+		hx-target="#image-archive-files-table"
+		hx-swap="outerHTML transition:true"
+		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
+	>
+		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+				<th scope="col" class="px-5 py-3">Image Id</th>
+				<th scope="col" class="px-5 py-3">
+					<p>Owner</p>
+					<i class="text-[10px] normal-case">(AccountId)</i>
+				</th>
+				<th scope="col" class="px-5 py-3">Size</th>
+				<th scope="col" class="px-5 py-3">Created At</th>
+				<th scope="col" class="px-5 py-3"></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, archiveFileEntity := range archiveFilesEntities {
+				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+					<td class="px-6 py-4">{ archiveFileEntity.ImageId.String() }</td>
+					<td class="px-6 py-4 leading-tight">
+						<p>{ accountIdUsernameMap[archiveFileEntity.AccountId].String() }</p>
+						<i class="text-[10px] text-neutral-50 text-opacity-70">
+							({ archiveFileEntity.AccountId.String() })
+						</i>
+					</td>
+					<td class="px-6 py-4">
+						{ archiveFileEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i>
+					</td>
+					<td class="px-6 py-4">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="inline-flex space-x-2 px-6 py-4">
+						@componentStructural.CircularIconButtonWithTooltip(
+							"ph-download", "control-300", "control-200",
+							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
+							"Download Archive", "control-300",
+						)
+						@componentStructural.CircularIconButtonWithTooltip(
+							"ph-trash", "red-900", "red-700",
+							"openDeleteArchiveModal('"+archiveFileEntity.AccountId.String()+"','"+archiveFileEntity.ImageId.String()+"')",
+							"Delete Archive", "red-700",
+						)
+					</td>
+				</tr>
+			}
+			if len(archiveFilesEntities) == 0 {
+				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+					<td class="px-6 py-4" colspan="12">No image archives found.</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 
 templ ContainerImagesTable(
@@ -140,11 +217,11 @@ templ ContainerImagesTable(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 ) {
 	<table
-		id="images-table"
+		id="container-images"
 		hx-get="/container/image/"
 		hx-trigger="submit from:form delay:500ms, click from:button#delete-image delay:500ms"
-		hx-select="#images-tables"
-		hx-target="#images-tables"
+		hx-select="#container-images"
+		hx-target="#container-images"
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
@@ -199,68 +276,6 @@ templ ContainerImagesTable(
 			if len(imagesEntities) == 0 {
 				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 					<td class="px-6 py-4" colspan="12">No images found.</td>
-				</tr>
-			}
-		</tbody>
-	</table>
-}
-
-templ ContainerImageArchiveFilesTable(
-	archiveFilesEntities []entity.ContainerImageArchiveFile,
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
-) {
-	<table
-		id="image-archive-files-table"
-		hx-get="/container/image/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-archive delay:500ms"
-		hx-select="#image-archives-tables"
-		hx-target="#image-archives-tables"
-		hx-swap="outerHTML transition:true"
-		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
-	>
-		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
-			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-				<th scope="col" class="px-5 py-3">Image Id</th>
-				<th scope="col" class="px-5 py-3">
-					<p>Owner</p>
-					<i class="text-[10px] normal-case">(AccountId)</i>
-				</th>
-				<th scope="col" class="px-5 py-3">Size</th>
-				<th scope="col" class="px-5 py-3">Created At</th>
-				<th scope="col" class="px-5 py-3"></th>
-			</tr>
-		</thead>
-		<tbody>
-			for _, archiveFileEntity := range archiveFilesEntities {
-				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
-					<td class="px-6 py-4">{ archiveFileEntity.ImageId.String() }</td>
-					<td class="px-6 py-4 leading-tight">
-						<p>{ accountIdUsernameMap[archiveFileEntity.AccountId].String() }</p>
-						<i class="text-[10px] text-neutral-50 text-opacity-70">
-							({ archiveFileEntity.AccountId.String() })
-						</i>
-					</td>
-					<td class="px-6 py-4">
-						{ archiveFileEntity.SizeBytes.ToMiBString() } <i class="text-xs">MiB</i>
-					</td>
-					<td class="px-6 py-4">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
-					<td class="inline-flex space-x-2 px-6 py-4">
-						@componentStructural.CircularIconButtonWithTooltip(
-							"ph-download", "control-300", "control-200",
-							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
-							"Download Archive", "control-300",
-						)
-						@componentStructural.CircularIconButtonWithTooltip(
-							"ph-trash", "red-900", "red-700",
-							"openDeleteArchiveModal('"+archiveFileEntity.AccountId.String()+"','"+archiveFileEntity.ImageId.String()+"')",
-							"Delete Archive", "red-700",
-						)
-					</td>
-				</tr>
-			}
-			if len(archiveFilesEntities) == 0 {
-				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
-					<td class="px-6 py-4" colspan="12">No image archives found.</td>
 				</tr>
 			}
 		</tbody>
