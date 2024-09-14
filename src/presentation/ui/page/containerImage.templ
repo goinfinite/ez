@@ -157,7 +157,7 @@ templ ContainerImageIndex(
 			<p class="mt-2 text-xs">
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
-			@ImportContainerImageModal()
+			@ImportContainerImageModal(accountIdUsernameMap)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -297,18 +297,41 @@ templ ContainerImagesTable(
 	</table>
 }
 
-templ ImportContainerImageForm() {
+func transformAccountMapIntoSelectLabelValuePair(
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) []componentForm.SelectLabelValuePair {
+	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
+	for accountId, username := range accountIdUsernameMap {
+		selectLabelValuePair := componentForm.SelectLabelValuePair{
+			Label: username.String(),
+			Value: accountId.String(),
+		}
+		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+	}
+	return selectLabelValuePairs
+}
+
+templ ImportContainerImageForm(
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) {
 	<form
 		hx-post="/api/v1/container/image/archive/import/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-	></form>
+	>
+		@componentForm.SelectInputWithLabelValuePair(
+			"accountId", "Account", "containerImage.accountId",
+			transformAccountMapIntoSelectLabelValuePair(accountIdUsernameMap), false,
+		)
+	</form>
 }
 
-templ ImportContainerImageModal() {
+templ ImportContainerImageModal(
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+) {
 	@componentStructural.Modal(
 		"Import Container Image", "isImportImageModalOpen", "closeImportImageModal()", "",
 	) {
-		@ImportContainerImageForm()
+		@ImportContainerImageForm(accountIdUsernameMap)
 	}
 }

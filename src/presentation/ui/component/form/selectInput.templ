@@ -31,3 +31,50 @@ templ SelectInput(
 		<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
 	</div>
 }
+
+type SelectLabelValuePair struct {
+	Label string
+	Value string
+}
+
+templ SelectInputWithLabelValuePair(
+	id, label, bindValuePath string,
+	options []SelectLabelValuePair,
+	denseMode bool,
+) {
+	<!-- SelectInputWithLabelValuePair -->
+	<div class="relative w-full">
+		<select
+			id={ id }
+			name={ id }
+			if bindValuePath != "" {
+				x-model:value={ bindValuePath }
+			}
+			placeholder={ label }
+			if denseMode {
+				class="bg-control-300 hover:border-control-100 border-control-200 autofill:bg-control-300 focus:border-control-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
+			} else {
+				class="bg-control-300 hover:border-control-100 border-control-200 autofill:bg-control-300 focus:border-control-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			}
+		>
+			<option class="bg-control-500 checked:bg-speedia-500 bg-opacity-90">--</option>
+			for _, option := range options {
+				<option
+					class="bg-control-500 checked:bg-speedia-500 bg-opacity-90"
+					value={ option.Value }
+				>
+					{ option.Label }
+				</option>
+			}
+		</select>
+		if label != "" {
+			<label
+				for={ id }
+				class="from-control-300 via-control-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+			>
+				{ label }
+			</label>
+		}
+		<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
+	</div>
+}
