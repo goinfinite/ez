@@ -146,12 +146,12 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 		return imageId, errors.New("ChownArchiveError: " + err.Error())
 	}
 
-	tarFilePathStr := outputFilePathStr
+	archiveFilePathStr := outputFilePathStr
 	shouldDecompress := len(decompressionCmd) > 0
 	if shouldDecompress {
-		tarFilePathStr = strings.TrimSuffix(outputFilePathStr, "."+outputFileExtStr)
+		archiveFilePathStr = strings.TrimSuffix(outputFilePathStr, "."+outputFileExtStr)
 		_, err = infraHelper.RunCmdAsUserWithSubShell(
-			importDto.AccountId, "rm -f "+tarFilePathStr,
+			importDto.AccountId, "rm -f "+archiveFilePathStr,
 		)
 		if err != nil {
 			return imageId, errors.New("RemoveExistingTarFileError: " + err.Error())
@@ -167,7 +167,7 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		importDto.AccountId,
-		"podman", "load", "--quiet", "--input", tarFilePathStr,
+		"podman", "load", "--quiet", "--input", archiveFilePathStr,
 	)
 	if err != nil {
 		return imageId, errors.New("PodmanLoadError: " + err.Error())
@@ -188,7 +188,7 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
-		importDto.AccountId, "rm", "-f", tarFilePathStr,
+		importDto.AccountId, "rm", "-f", archiveFilePathStr,
 	)
 	if err != nil {
 		return imageId, errors.New("RemoveArchiveFileError: " + err.Error())
@@ -209,17 +209,59 @@ func (repo *ContainerImageCmdRepo) Delete(
 func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	createDto dto.CreateContainerImageArchiveFile,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	archiveDir, err := repo.readArchiveFilesDirectory(createDto.AccountId)
+	containerImageQueryRepo := NewContainerImageQueryRepo(repo.persistentDbSvc)
+	imageEntity, err := containerImageQueryRepo.ReadById(
+		createDto.AccountId, createDto.ImageId,
+	)
 	if err != nil {
 		return archiveFile, err
 	}
 
-	imageIdStr := createDto.ImageId.String()
-	archiveDirStr := archiveDir.String()
-	tarFilePath := archiveDirStr + "/" + imageIdStr + ".tar"
+	imageOrgNameStr := ""
+	imageOrgName, err := imageEntity.ImageAddress.GetOrgName()
+	if err == nil {
+		imageOrgNameStr = imageOrgName.String()
+	}
 
+	imageNameStr := ""
+	imageName, err := imageEntity.ImageAddress.GetImageName()
+	if err == nil {
+		imageNameStr = imageName.String()
+	}
+
+	imageTagStr := ""
+	imageTag, err := imageEntity.ImageAddress.GetImageTag()
+	if err == nil {
+		imageTagStr = imageTag.String()
+	}
+
+	imageIdStr := createDto.ImageId.String()
+	rawArchiveFileName := imageIdStr
+	if imageOrgNameStr != "" {
+		rawArchiveFileName += "-" + imageOrgNameStr
+	}
+	if imageNameStr != "" {
+		rawArchiveFileName += "-" + imageNameStr
+	}
+	if imageTagStr != "" {
+		rawArchiveFileName += "-" + imageTagStr
+	}
+	rawArchiveFileName += ".tar"
+
+	archiveFileName, err := valueObject.NewUnixFileName(rawArchiveFileName)
+	if err != nil {
+		return archiveFile, errors.New("NewTarFileNameError: " + err.Error())
+	}
+
+	archiveDir, err := repo.readArchiveFilesDirectory(createDto.AccountId)
+	if err != nil {
+		return archiveFile, err
+	}
+	archiveDirStr := archiveDir.String()
+
+	archiveFilePathStr := archiveDirStr + "/" + archiveFileName.String()
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId, "rm", "-f", tarFilePath,
+		createDto.AccountId, "rm", "-f", archiveFilePathStr,
 	)
 	if err != nil {
 		return archiveFile, errors.New("RemoveExistingTarFileError: " + err.Error())
@@ -229,7 +271,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		createDto.AccountId,
 		"podman", "save",
 		"--format", "docker-archive",
-		"--output", tarFilePath,
+		"--output", archiveFilePathStr,
 		imageIdStr,
 	)
 	if err != nil {
@@ -237,7 +279,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId, "brotli", "--quality=4", "--rm", tarFilePath,
+		createDto.AccountId, "brotli", "--quality=4", "--rm", archiveFilePathStr,
 	)
 	if err != nil {
 		return archiveFile, errors.New("CompressImageError: " + err.Error())
@@ -251,7 +293,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
 	}
 
-	finalFilePath, err := valueObject.NewUnixFilePath(tarFilePath + ".br")
+	finalFilePath, err := valueObject.NewUnixFilePath(archiveFilePathStr + ".br")
 	if err != nil {
 		return archiveFile, errors.New("NewFinalFilePathError: " + err.Error())
 	}
@@ -290,8 +332,8 @@ func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
 		return err
 	}
 
-	rawFilePath := archiveDir.String() + "/" + deleteDto.ImageId.String() + ".tar.br"
-	filePath, err := valueObject.NewUnixFilePath(rawFilePath)
+	rawArchiveFilePath := archiveDir.String() + "/" + deleteDto.ImageId.String() + ".tar.br"
+	filePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
 	if err != nil {
 		return errors.New("ArchiveFilePathError: " + err.Error())
 	}

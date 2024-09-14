@@ -258,20 +258,24 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 	rawArchiveFilePath string,
 	serverHostname valueObject.Fqdn,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	filePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
+	archiveFilePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
 	if err != nil {
 		return archiveFile, errors.New("ArchiveFilePathParseError")
 	}
 
-	fileNameStr := filePath.ReadFileName().String()
-	fileNameStrNoExt := strings.TrimSuffix(fileNameStr, ".tar.br")
+	archiveFileName := archiveFilePath.ReadFileName()
+	archiveFileNameParts := strings.Split(archiveFileName.String(), "-")
+	if len(archiveFileNameParts) == 0 {
+		return archiveFile, errors.New("SplitArchiveFilePartsError")
+	}
 
-	imageId, err := valueObject.NewContainerImageId(fileNameStrNoExt)
+	rawImageId := archiveFileNameParts[0]
+	imageId, err := valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
 		return archiveFile, errors.New("ArchiveFileImageIdParseError")
 	}
 
-	fileInfo, err := os.Stat(rawArchiveFilePath)
+	fileInfo, err := os.Stat(archiveFilePath.String())
 	if err != nil {
 		return archiveFile, errors.New("ArchiveFileStatError")
 	}
@@ -296,7 +300,7 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 	createdAt := valueObject.NewUnixTimeWithGoTime(rawCreatedAt)
 
 	return entity.NewContainerImageArchiveFile(
-		imageId, accountId, filePath, downloadUrl, sizeBytes, createdAt,
+		imageId, accountId, archiveFilePath, downloadUrl, sizeBytes, createdAt,
 	), nil
 }
 
@@ -351,12 +355,28 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFile(
 	}
 
 	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
-	rawFilePath := archiveDirStr + "/" + readDto.ImageId.String() + ".tar.br"
+	rawArchiveFilePath, err := infraHelper.RunCmdAsUser(
+		readDto.AccountId,
+		"find", archiveDirStr, "-type", "f", "-name", readDto.ImageId.String()+"*",
+	)
+	if err != nil {
+		return archiveFile, errors.New("FindArchiveFileError: " + err.Error())
+	}
+	if len(rawArchiveFilePath) == 0 {
+		return archiveFile, errors.New("ArchiveFileNotFound")
+	}
+
+	rawArchiveFilePathLines := strings.Split(rawArchiveFilePath, "\n")
+	if len(rawArchiveFilePathLines) == 0 {
+		return archiveFile, errors.New("ArchiveFileNotFound")
+	}
+
+	rawArchiveFilePath = rawArchiveFilePathLines[0]
 
 	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
 		return archiveFile, errors.New("InvalidServerHostname: " + err.Error())
 	}
 
-	return repo.archiveFileFactory(rawFilePath, serverHostname)
+	return repo.archiveFileFactory(rawArchiveFilePath, serverHostname)
 }
