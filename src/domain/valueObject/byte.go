@@ -48,10 +48,6 @@ func (vo Byte) ToMiB() int64 {
 	return vo.Int64() / 1048576
 }
 
-func (vo Byte) ToMiBString() string {
-	return strconv.FormatInt(vo.ToMiB(), 10)
-}
-
 func (vo Byte) ToGiB() int64 {
 	return vo.Int64() / 1073741824
 }
@@ -62,4 +58,20 @@ func (vo Byte) ToTiB() int64 {
 
 func (vo Byte) String() string {
 	return strconv.FormatInt(int64(vo), 10)
+}
+
+func (vo Byte) StringWithSuffix() string {
+	voInt64 := vo.Int64()
+	switch {
+	case voInt64 < 1048576:
+		return strconv.FormatInt(vo.ToKiB(), 10) + " KiB"
+	case voInt64 < 1073741824:
+		return strconv.FormatInt(vo.ToMiB(), 10) + " MiB"
+	case voInt64 < 1099511627776:
+		return strconv.FormatInt(vo.ToGiB(), 10) + " GiB"
+	case voInt64 < 1125899906842624:
+		return strconv.FormatInt(vo.ToTiB(), 10) + " TiB"
+	default:
+		return strconv.FormatInt(voInt64, 10) + " B"
+	}
 }
