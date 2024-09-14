@@ -112,8 +112,11 @@ templ ContainerImageIndex(
 			)
 		</div>
 		<div id="image-archives-content" class="card w-full" x-data="imageArchive">
-			<h2 class="text-2xl">Images Archives</h2>
-			<p class="mb-4">Compressed images files ready to be downloaded to your local machine.</p>
+			@componentStructural.PageSubHeading(
+				"Image Archives",
+				"Compressed images files ready to be downloaded to your local machine.",
+				"ph-file-zip",
+			)
 			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
 			<p class="mt-2 text-xs">
 				Note: archive files are automatically deleted after 24h to preserve storage space.
@@ -126,8 +129,11 @@ templ ContainerImageIndex(
 		<div id="container-images-content" class="card mt-10 w-full" x-data="containerImage">
 			<div class="mb-4 flex flex-row items-center justify-between">
 				<div class="basis-[60%]">
-					<h2 class="text-2xl">Local Images</h2>
-					<p>Images used by running containers and/or available for container creation.</p>
+					@componentStructural.PageSubHeading(
+						"Local Images",
+						"Images used by running containers and/or available for container creation.",
+						"ph-blueprint",
+					)
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
 					@componentForm.SubmitButton(
