@@ -173,7 +173,7 @@ templ ContainerImageArchiveFilesTable(
 	<table
 		id="image-archive-files-table"
 		hx-get="/container/image/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-archive delay:500ms"
+		hx-trigger="click from:button#delete-archive delay:500ms"
 		hx-select="#image-archive-files-table"
 		hx-target="#image-archive-files-table"
 		hx-swap="outerHTML transition:true"
