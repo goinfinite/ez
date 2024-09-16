@@ -77,11 +77,7 @@ func TestContainerImageCmdRepo(t *testing.T) {
 			t.Fatal("NoArchiveFilesFound")
 		}
 
-		deleteDto := dto.DeleteContainerImageArchiveFile{
-			AccountId: archiveFilesList[0].AccountId,
-			ImageId:   archiveFilesList[0].ImageId,
-		}
-		err = containerImageCmdRepo.DeleteArchiveFile(deleteDto)
+		err = containerImageCmdRepo.DeleteArchiveFile(archiveFilesList[0])
 		if err != nil {
 			t.Fatal(err)
 		}
