@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  apiController.FailedUpload:
+  apiController.FailedArchiveFileUpload:
     properties:
       failReason:
         type: string
@@ -1052,7 +1052,7 @@ paths:
           description: ContainerImageArchiveFilesPartiallyImported
           schema:
             items:
-              $ref: '#/definitions/apiController.FailedUpload'
+              $ref: '#/definitions/apiController.FailedArchiveFileUpload'
             type: array
       security:
       - Bearer: []

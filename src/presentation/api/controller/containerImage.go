@@ -177,7 +177,7 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 	)
 }
 
-type FailedUpload struct {
+type FailedArchiveFileUpload struct {
 	FileName   string `json:"fileName"`
 	FailReason string `json:"failReason"`
 }
@@ -192,7 +192,7 @@ type FailedUpload struct {
 // @Param        accountId		formData	string	false	"AccountId"
 // @Param        archiveFiles	formData	file	true	"ArchiveFiles"
 // @Success      201 string string "ContainerImageArchiveFilesImported"
-// @Success      207 {object} []FailedUpload "ContainerImageArchiveFilesPartiallyImported"
+// @Success      207 {object} []FailedArchiveFileUpload "ContainerImageArchiveFilesPartiallyImported"
 // @Router       /v1/container/image/archive/import/ [post]
 func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
@@ -240,7 +240,7 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
 
-	failedUploads := []FailedUpload{}
+	failedUploads := []FailedArchiveFileUpload{}
 	for _, archiveFile := range archiveFiles {
 		importDto := dto.NewImportContainerImageArchiveFile(
 			accountId, archiveFile, operatorAccountId, operatorIpAddress,
@@ -250,7 +250,7 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 			containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
 		)
 		if err != nil {
-			failedUpload := FailedUpload{
+			failedUpload := FailedArchiveFileUpload{
 				FileName:   archiveFile.Filename,
 				FailReason: err.Error(),
 			}

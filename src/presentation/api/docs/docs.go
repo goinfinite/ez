@@ -455,7 +455,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/apiController.FailedUpload"
+                                "$ref": "#/definitions/apiController.FailedArchiveFileUpload"
                             }
                         }
                     }
@@ -1307,7 +1307,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "apiController.FailedUpload": {
+        "apiController.FailedArchiveFileUpload": {
             "type": "object",
             "properties": {
                 "failReason": {
