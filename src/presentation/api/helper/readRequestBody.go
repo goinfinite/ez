@@ -74,19 +74,24 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 		}
 
 		for formKey, keyValue := range multipartForm.Value {
-			if len(keyValue) != 1 {
+			if len(keyValue) == 0 {
 				continue
 			}
 
-			requestBody[formKey] = keyValue[0]
+			if len(keyValue) == 1 {
+				requestBody[formKey] = keyValue[0]
+				continue
+			}
+
+			requestBody[formKey] = keyValue
 		}
 
 		for fileKey, fileValue := range multipartForm.File {
-			if len(fileValue) != 1 {
+			if len(fileValue) == 0 {
 				continue
 			}
 
-			requestBody[fileKey] = fileValue[0]
+			requestBody[fileKey] = fileValue
 		}
 	default:
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidContentType")
