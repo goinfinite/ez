@@ -255,14 +255,9 @@ func (repo *ContainerImageQueryRepo) ReadById(
 }
 
 func (repo *ContainerImageQueryRepo) archiveFileFactory(
-	rawArchiveFilePath string,
+	archiveFilePath valueObject.UnixFilePath,
 	serverHostname valueObject.Fqdn,
 ) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	archiveFilePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
-	if err != nil {
-		return archiveFile, errors.New("ArchiveFilePathParseError")
-	}
-
 	archiveFileName := archiveFilePath.ReadFileName()
 	archiveFileNameParts := strings.Split(archiveFileName.String(), "-")
 	if len(archiveFileNameParts) == 0 {
@@ -334,7 +329,13 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 			continue
 		}
 
-		archiveFile, err := repo.archiveFileFactory(rawArchiveFilePath, serverHostname)
+		archiveFilePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("path", rawArchiveFilePath))
+			continue
+		}
+
+		archiveFile, err := repo.archiveFileFactory(archiveFilePath, serverHostname)
 		if err != nil {
 			slog.Debug(err.Error(), slog.String("path", rawArchiveFilePath))
 			continue
@@ -371,12 +372,15 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFile(
 		return archiveFile, errors.New("ArchiveFileNotFound")
 	}
 
-	rawArchiveFilePath = rawArchiveFilePathLines[0]
+	archiveFilePath, err := valueObject.NewUnixFilePath(rawArchiveFilePathLines[0])
+	if err != nil {
+		return archiveFile, err
+	}
 
 	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
 		return archiveFile, errors.New("InvalidServerHostname: " + err.Error())
 	}
 
-	return repo.archiveFileFactory(rawArchiveFilePath, serverHostname)
+	return repo.archiveFileFactory(archiveFilePath, serverHostname)
 }
