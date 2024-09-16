@@ -14,13 +14,15 @@ func DeleteContainerImageArchiveFile(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	deleteDto dto.DeleteContainerImageArchiveFile,
 ) error {
-	readDto := dto.NewReadContainerImageArchiveFile(deleteDto.AccountId, deleteDto.ImageId)
-	_, err := containerImageQueryRepo.ReadArchiveFile(readDto)
+	readDto := dto.NewReadContainerImageArchiveFile(
+		deleteDto.AccountId, deleteDto.ImageId,
+	)
+	archiveFile, err := containerImageQueryRepo.ReadArchiveFile(readDto)
 	if err != nil {
 		return errors.New("ContainerImageArchiveFileNotFound")
 	}
 
-	err = containerImageCmdRepo.DeleteArchiveFile(deleteDto)
+	err = containerImageCmdRepo.DeleteArchiveFile(archiveFile)
 	if err != nil {
 		slog.Error("DeleteContainerImageArchiveFileInfraError", slog.Any("error", err))
 		return errors.New("DeleteContainerImageArchiveFileError")
