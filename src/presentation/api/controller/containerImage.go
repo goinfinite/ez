@@ -1,6 +1,7 @@
 package apiController
 
 import (
+	"mime/multipart"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -176,16 +177,22 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 	)
 }
 
-// ImportContainerImageArchiveFile	godoc
-// @Summary      ImportContainerImageArchiveFile
-// @Description  Import a container image from an archive file.
+type FailedUpload struct {
+	FileName   string `json:"fileName"`
+	FailReason string `json:"failReason"`
+}
+
+// ImportContainerImageArchiveFiles	godoc
+// @Summary      ImportContainerImageArchiveFiles
+// @Description  Import container images from archive files.
 // @Tags         containerImageArchive
 // @Accept       mpfd
 // @Produce      json
 // @Security     Bearer
 // @Param        accountId		formData	string	false	"AccountId"
-// @Param        archiveFile	formData	file	true	"ArchiveFile"
-// @Success      201 {object} valueObject.ContainerImageId "ContainerImageId"
+// @Param        archiveFiles	formData	file	true	"ArchiveFiles"
+// @Success      201 string string "ContainerImageArchiveFilesImported"
+// @Success      207 {object} []FailedUpload "ContainerImageArchiveFilesPartiallyImported"
 // @Router       /v1/container/image/archive/import/ [post]
 func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
@@ -193,9 +200,7 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 		return err
 	}
 
-	requiredParams := []string{
-		"archiveFile", "operatorAccountId", "operatorIpAddress",
-	}
+	requiredParams := []string{"operatorAccountId", "operatorIpAddress"}
 	err = serviceHelper.RequiredParamsInspector(requestBody, requiredParams)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
@@ -209,9 +214,16 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	archiveFile, err := c.FormFile("archiveFile")
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	if requestBody["archiveFiles"] == nil {
+		if requestBody["archiveFile"] == nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "ArchiveFilesRequired")
+		}
+		requestBody["archiveFiles"] = []interface{}{requestBody["archiveFile"]}
+	}
+
+	archiveFiles, assertOk := requestBody["archiveFiles"].([]*multipart.FileHeader)
+	if !assertOk {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "ArchiveFilesNotValid")
 	}
 
 	operatorAccountId, err := valueObject.NewAccountId(requestBody["operatorAccountId"])
@@ -224,22 +236,36 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	importDto := dto.NewImportContainerImageArchiveFile(
-		accountId, archiveFile, operatorAccountId, operatorIpAddress,
-	)
-
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(controller.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
 
-	imageId, err := useCase.ImportContainerImageArchiveFile(
-		containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
-	)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
+	failedUploads := []FailedUpload{}
+	for _, archiveFile := range archiveFiles {
+		importDto := dto.NewImportContainerImageArchiveFile(
+			accountId, archiveFile, operatorAccountId, operatorIpAddress,
+		)
+
+		_, err = useCase.ImportContainerImageArchiveFile(
+			containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
+		)
+		if err != nil {
+			failedUpload := FailedUpload{
+				FileName:   archiveFile.Filename,
+				FailReason: err.Error(),
+			}
+			failedUploads = append(failedUploads, failedUpload)
+			continue
+		}
 	}
 
-	return apiHelper.ResponseWrapper(c, http.StatusCreated, imageId)
+	if len(failedUploads) > 0 {
+		return apiHelper.ResponseWrapper(c, http.StatusMultiStatus, failedUploads)
+	}
+
+	return apiHelper.ResponseWrapper(
+		c, http.StatusCreated, "ContainerImageArchiveFilesImported",
+	)
 }
 
 // DeleteContainerImageArchiveFile	 godoc

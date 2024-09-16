@@ -417,7 +417,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Import a container image from an archive file.",
+                "description": "Import container images from archive files.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -427,28 +427,36 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "ImportContainerImageArchiveFile",
+                "summary": "ImportContainerImageArchiveFiles",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "AccountId",
                         "name": "accountId",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "ArchiveFile",
-                        "name": "archiveFile",
+                        "description": "ArchiveFiles",
+                        "name": "archiveFiles",
                         "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "ContainerImageId",
+                        "description": "ContainerImageArchiveFilesImported",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "207": {
+                        "description": "ContainerImageArchiveFilesPartiallyImported",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/apiController.FailedUpload"
+                            }
                         }
                     }
                 }
@@ -1299,6 +1307,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "apiController.FailedUpload": {
+            "type": "object",
+            "properties": {
+                "failReason": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ContainerWithMetrics": {
             "type": "object",
             "properties": {
@@ -1327,6 +1346,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "imageHash": {
+                    "type": "string"
+                },
+                "imageId": {
                     "type": "string"
                 },
                 "metrics": {
@@ -1621,6 +1643,9 @@ const docTemplate = `{
                 "groupId": {
                     "type": "integer"
                 },
+                "homeDirectory": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1666,6 +1691,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "imageHash": {
+                    "type": "string"
+                },
+                "imageId": {
                     "type": "string"
                 },
                 "portBindings": {

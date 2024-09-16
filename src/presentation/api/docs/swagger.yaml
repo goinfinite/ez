@@ -1,5 +1,12 @@
 basePath: /api
 definitions:
+  apiController.FailedUpload:
+    properties:
+      failReason:
+        type: string
+      fileName:
+        type: string
+    type: object
   dto.ContainerWithMetrics:
     properties:
       accountId:
@@ -19,6 +26,8 @@ definitions:
       imageAddress:
         type: string
       imageHash:
+        type: string
+      imageId:
         type: string
       metrics:
         $ref: '#/definitions/valueObject.ContainerMetrics'
@@ -210,6 +219,8 @@ definitions:
         type: integer
       groupId:
         type: integer
+      homeDirectory:
+        type: string
       id:
         type: integer
       quota:
@@ -240,6 +251,8 @@ definitions:
       imageAddress:
         type: string
       imageHash:
+        type: string
+      imageId:
         type: string
       portBindings:
         items:
@@ -1017,28 +1030,33 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Import a container image from an archive file.
+      description: Import container images from archive files.
       parameters:
       - description: AccountId
         in: formData
         name: accountId
-        required: true
         type: string
-      - description: ArchiveFile
+      - description: ArchiveFiles
         in: formData
-        name: archiveFile
+        name: archiveFiles
         required: true
         type: file
       produces:
       - application/json
       responses:
         "201":
-          description: ContainerImageId
+          description: ContainerImageArchiveFilesImported
           schema:
             type: string
+        "207":
+          description: ContainerImageArchiveFilesPartiallyImported
+          schema:
+            items:
+              $ref: '#/definitions/apiController.FailedUpload'
+            type: array
       security:
       - Bearer: []
-      summary: ImportContainerImageArchiveFile
+      summary: ImportContainerImageArchiveFiles
       tags:
       - containerImageArchive
   /v1/container/image/snapshot/:
