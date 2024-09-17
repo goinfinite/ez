@@ -83,6 +83,15 @@ script ContainerImageIndexLocalState() {
 			closeImportImageModal() {
 				this.isImportImageModalOpen = false;
 			},
+			isTakeSnapshotModalOpen: false,
+			openTakeSnapshotModal() {
+				this.resetPrimaryState();
+
+				this.isTakeSnapshotModalOpen = true;
+			},
+			closeTakeSnapshotModal() {
+				this.isTakeSnapshotModalOpen = false;
+			},
 			isDeleteImageModalOpen: false,
 			openDeleteImageModal(accountId, imageId) {
 				this.resetPrimaryState();
@@ -110,6 +119,7 @@ templ ContainerImageIndex(
 	imagesEntities []entity.ContainerImage,
 	archiveFilesEntities []entity.ContainerImageArchiveFile,
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
 ) {
 	@ContainerImageIndexLocalState()
 	<div class="flex flex-col">
@@ -149,7 +159,7 @@ templ ContainerImageIndex(
 						"Import Container Image", "ph-upload", "openImportImageModal()", false,
 					)
 					@componentForm.SubmitButton(
-						"Take Container Snapshot", "ph-camera", "openCreateModal()", false,
+						"Take Container Snapshot", "ph-camera", "openTakeSnapshotModal()", false,
 					)
 				</div>
 			</div>
@@ -158,6 +168,7 @@ templ ContainerImageIndex(
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
 			@ImportContainerImageModal(accountIdUsernameMap)
+			@TakeContainerSnapshotModal(accountIdUsernameMap, containerIdContainerEntityMap)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -374,5 +385,54 @@ templ ImportContainerImageModal(
 	) {
 		@ImportContainerImageForm(accountIdUsernameMap)
 		@ImportContainerImageFaq()
+	}
+}
+
+func transformContainerMapIntoSelectLabelValuePair(
+	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
+) []componentForm.SelectLabelValuePair {
+	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
+	for containerId, containerEntity := range containerIdContainerEntityMap {
+		selectLabelValuePair := componentForm.SelectLabelValuePair{
+			Label: containerEntity.Hostname.String(),
+			Value: containerId.String(),
+		}
+		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+	}
+	return selectLabelValuePairs
+}
+
+templ TakeContainerSnapshotForm(
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
+) {
+	<form
+		id="take-snapshot-form"
+		hx-post="/api/v1/container/image/snapshot/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+	>
+		<div class="flex flex-col space-y-6">
+			@componentForm.SelectInputWithLabelValuePair(
+				"accountId", "Account", "containerImage.accountId",
+				transformAccountMapIntoSelectLabelValuePair(accountIdUsernameMap), false,
+			)
+			@componentForm.SelectInputWithLabelValuePair(
+				"containerId", "Container", "containerImage.id",
+				transformContainerMapIntoSelectLabelValuePair(containerIdContainerEntityMap), false,
+			)
+			@componentForm.SubmitButton("Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false)
+		</div>
+	</form>
+}
+
+templ TakeContainerSnapshotModal(
+	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
+) {
+	@componentStructural.Modal(
+		"Take Container Snapshot", "isTakeSnapshotModalOpen", "closeTakeSnapshotModal()", "",
+	) {
+		@TakeContainerSnapshotForm(accountIdUsernameMap, containerIdContainerEntityMap)
 	}
 }

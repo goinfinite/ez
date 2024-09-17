@@ -72,8 +72,27 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		accountIdUsernameMap[accountEntity.Id] = accountEntity.Username
 	}
 
+	containerService := service.NewContainerService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readContainersServiceOutput := containerService.Read()
+	if readContainersServiceOutput.Status != service.Success {
+		return nil
+	}
+
+	containerEntities, assertOk := readContainersServiceOutput.Body.([]entity.Container)
+	if !assertOk {
+		return nil
+	}
+
+	containerIdContainerEntityMap := map[valueObject.ContainerId]entity.Container{}
+	for _, containerEntity := range containerEntities {
+		containerIdContainerEntityMap[containerEntity.Id] = containerEntity
+	}
+
 	pageContent := page.ContainerImageIndex(
-		imageEntities, archiveFileEntities, accountIdUsernameMap,
+		imageEntities, archiveFileEntities, accountIdUsernameMap, containerIdContainerEntityMap,
 	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
