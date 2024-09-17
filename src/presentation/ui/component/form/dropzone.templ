@@ -17,6 +17,16 @@ script DropzoneLocalState() {
 				const droppedFiles = Array.from(event.dataTransfer.files);
 				this.files = this.files.concat(droppedFiles);
 				this.updateFileInput();
+			},
+			resetState() {
+				this.files = [];
+				this.updateFileInput();
+			},
+			init() {
+				this.resetState();
+				document.addEventListener('htmx:afterRequest', () => {
+					this.resetState();
+				});
 			}
 		}));
 	});
