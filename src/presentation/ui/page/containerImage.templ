@@ -334,6 +334,38 @@ templ ImportContainerImageForm(
 	</form>
 }
 
+templ ImportContainerImageFaq() {
+	<section class="mt-4 w-full rounded-md">
+		<details class="bg-control-500 group rounded-md p-4 group-open:bg-opacity-30">
+			<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
+				<i class="ph-duotone ph-question mr-2 text-2xl"></i>
+				<span class="font-bold">How to export a container running on my local machine?</span>
+				<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
+			</summary>
+			<div class="space-y-4.5 mt-5 text-sm leading-normal">
+				<p>To export a container running on your local machine, you can use the following commands:</p>
+				<p>
+					<code class="bg-control-300 block rounded-md p-3">
+						docker commit container_id image:tag
+					</code>
+					<code class="bg-control-300 mt-1 block rounded-md p-3">
+						docker save -o /path/to/save/image.tar image:tag
+					</code>
+				</p>
+				<p>
+					Replace <code class="bg-control-300 rounded-md px-1.5">container_id</code> with the id of the container you want to export,
+					<code class="bg-control-300 rounded-md px-1.5">image:tag</code> with the name and tag of the image you want to save,
+					and <code class="bg-control-300 rounded-md px-1.5">/path/to/save/image.tar</code> with the path where you want to save the image.
+					If you using podman instead of docker, change <code class="bg-control-300 rounded-md px-1.5">docker</code> to <code class="bg-control-300 rounded-md px-1.5">podman</code>.
+				</p>
+				<p>
+					After running the command, you can upload the <code class="bg-control-300 rounded-md px-1.5">.tar</code> file using the form above.
+				</p>
+			</div>
+		</details>
+	</section>
+}
+
 templ ImportContainerImageModal(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 ) {
@@ -341,5 +373,6 @@ templ ImportContainerImageModal(
 		"Import Container Image", "isImportImageModalOpen", "closeImportImageModal()", "",
 	) {
 		@ImportContainerImageForm(accountIdUsernameMap)
+		@ImportContainerImageFaq()
 	}
 }
