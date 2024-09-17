@@ -44,12 +44,24 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
+	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageConfig")
+	}
+
 	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
 	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageNames")
+		rawCmds, assertOk := rawConfig["Cmd"].([]interface{})
+		if !assertOk {
+			return containerImage, errors.New("NamesHistoryAndCmdsNotFound")
+		}
+		if len(rawCmds) == 0 {
+			return containerImage, errors.New("EmptyCmds")
+		}
+		rawImageNames = []interface{}{rawCmds[0]}
 	}
 	if len(rawImageNames) == 0 {
-		return containerImage, errors.New("EmptyContainerImageNames")
+		return containerImage, errors.New("ReadContainerImageNamesError")
 	}
 
 	imageAddressStr, assertOk := rawImageNames[0].(string)
@@ -97,11 +109,6 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	sizeBytes, err := valueObject.NewByte(rawImageSize)
 	if err != nil {
 		return containerImage, err
-	}
-
-	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageConfig")
 	}
 
 	rawPortBindings, assertOk := rawConfig["ExposedPorts"].(map[string]interface{})
