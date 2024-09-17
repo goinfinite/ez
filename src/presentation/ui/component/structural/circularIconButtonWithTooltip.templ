@@ -1,11 +1,14 @@
 package componentStructural
 
 templ CircularIconButtonWithTooltip(
-	icon, defaultColor, hoverColor, onClick, tooltipText, tooltipColor string,
+	id, icon, defaultColor, hoverColor, onClick, tooltipText, tooltipColor string,
 ) {
 	<!-- CircularIconButtonWithTooltip -->
 	<div class="group relative">
 		<button
+			if id != "" {
+				id={ id }
+			}
 			type="button"
 			if onClick != "" {
 				@click={ onClick }

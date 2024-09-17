@@ -206,12 +206,12 @@ templ ContainerImageArchiveFilesTable(
 					<td class="px-3 py-2">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
 						@componentStructural.CircularIconButtonWithTooltip(
-							"ph-download", "control-300", "control-200",
+							"download-archive", "ph-download", "control-300", "control-200",
 							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
 							"Download Archive", "control-300",
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
-							"ph-trash", "red-900", "red-700",
+							"delete-archive", "ph-trash", "red-900", "red-700",
 							"openDeleteArchiveModal('"+archiveFileEntity.AccountId.String()+"','"+archiveFileEntity.ImageId.String()+"')",
 							"Delete Archive", "red-700",
 						)
@@ -232,11 +232,11 @@ templ ContainerImagesTable(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 ) {
 	<table
-		id="container-images"
+		id="container-images-table"
 		hx-get="/container/image/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-image delay:500ms"
-		hx-select="#container-images"
-		hx-target="#container-images"
+		hx-trigger="click from:button#delete-image delay:500ms, htmx:afterRequest from:form#import-image-form"
+		hx-select="#container-images-table"
+		hx-target="#container-images-table"
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
@@ -276,12 +276,12 @@ templ ContainerImagesTable(
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
 						@componentStructural.CircularIconButtonWithTooltip(
-							"ph-file-zip", "control-300", "control-200",
+							"archive-image", "ph-file-zip", "control-300", "control-200",
 							"archiveImage('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
 							"Archive/Compress Image", "control-300",
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
-							"ph-trash", "red-900", "red-700",
+							"delete-image", "ph-trash", "red-900", "red-700",
 							"openDeleteImageModal('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
 							"Delete Image", "red-700",
 						)
@@ -315,6 +315,7 @@ templ ImportContainerImageForm(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 ) {
 	<form
+		id="import-image-form"
 		hx-post="/api/v1/container/image/archive/import/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
