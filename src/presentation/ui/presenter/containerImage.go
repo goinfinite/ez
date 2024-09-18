@@ -86,13 +86,8 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	containerIdContainerEntityMap := map[valueObject.ContainerId]entity.Container{}
-	for _, containerEntity := range containerEntities {
-		containerIdContainerEntityMap[containerEntity.Id] = containerEntity
-	}
-
 	pageContent := page.ContainerImageIndex(
-		imageEntities, archiveFileEntities, accountIdUsernameMap, containerIdContainerEntityMap,
+		imageEntities, archiveFileEntities, accountIdUsernameMap, containerEntities,
 	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
