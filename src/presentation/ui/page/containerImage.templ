@@ -407,7 +407,7 @@ func transformContainerEntitiesIntoSearchableSelectItems(
 	for _, containerEntity := range containerEntities {
 		idStr := containerEntity.Id.String()
 		hostnameStr := containerEntity.Hostname.String()
-		htmlLabel := hostnameStr + " <small>(" + idStr + ")</small>"
+		htmlLabel := componentContainer.ContainerTaggedSummary(containerEntity)
 		searchableTextSerialized := containerEntity.JsonSerialize()
 
 		searchableSelectItem := componentForm.SearchableSelectItem{
