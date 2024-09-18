@@ -65,8 +65,6 @@ script ContainerImageIndexLocalState() {
 			},
 
 			// Auxiliary States
-			snapshotContainerAccountId: '',
-			snapshotContainerId: '',
 			archiveImage(accountId, imageId) {
 				htmx.ajax(
 					'POST', '/api/v1/container/image/archive/',
@@ -112,6 +110,18 @@ script ContainerImageIndexLocalState() {
 					{swap: 'none'},
 				);
 				this.closeDeleteImageModal();
+			},
+		}));
+		Alpine.data('containerSnapshot', () => ({
+			// Primary State
+			accountId: '',
+			containerId: '',
+			resetPrimaryState() {
+				this.accountId = '';
+				this.containerId = '';
+			},
+			init() {
+				this.resetPrimaryState();
 			},
 		}));
 	})
@@ -414,13 +424,14 @@ templ TakeContainerSnapshotForm(
 ) {
 	<form
 		id="take-snapshot-form"
+		x-data="containerSnapshot"
 		hx-post="/api/v1/container/image/snapshot/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 	>
 		<div class="flex flex-col space-y-6">
 			@componentForm.SearchableSelectInput(
-				"containerId", "Container", "snapshotContainerId",
+				"containerId", "Container", "containerId",
 				transformContainerEntitiesIntoSearchableSelectItems(containerEntities),
 			)
 			@componentForm.SubmitButton("Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false)
