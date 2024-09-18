@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"encoding/json"
+
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -64,6 +66,11 @@ func NewContainer(
 	}
 }
 
-func (container *Container) IsRunning() bool {
+func (container Container) IsRunning() bool {
 	return container.Status
+}
+
+func (entity Container) JsonSerialize() string {
+	jsonBytes, _ := json.Marshal(entity)
+	return string(jsonBytes)
 }
