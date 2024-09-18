@@ -405,11 +405,15 @@ func transformContainerEntitiesIntoSearchableSelectItems(
 ) []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
 	for _, containerEntity := range containerEntities {
+		idStr := containerEntity.Id.String()
+		hostnameStr := containerEntity.Hostname.String()
+		htmlLabel := hostnameStr + " <small>(" + idStr + ")</small>"
 		searchableTextSerialized := containerEntity.JsonSerialize()
 
 		searchableSelectItem := componentForm.SearchableSelectItem{
-			Label:          containerEntity.Hostname.String(),
-			Value:          containerEntity.Id.String(),
+			Label:          hostnameStr,
+			Value:          idStr,
+			HtmlLabel:      &htmlLabel,
 			SearchableText: &searchableTextSerialized,
 		}
 		searchableSelectItems = append(searchableSelectItems, searchableSelectItem)

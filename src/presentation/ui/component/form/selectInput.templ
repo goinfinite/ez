@@ -128,6 +128,7 @@ script SearchableSelectInputLocalState(id string) {
 type SearchableSelectItem struct {
 	Label          string
 	Value          string
+	HtmlLabel      *string
 	SearchableText *string
 }
 
@@ -171,7 +172,7 @@ templ SearchableSelectInput(
 		</div>
 		<div
 			x-show="showDropdown"
-			class="max-h-select bg-control-200 absolute top-10 z-40 w-full overflow-y-auto rounded-md"
+			class="max-h-select bg-control-700 absolute top-10 z-40 w-full overflow-y-auto rounded-md"
 		>
 			<div class="flex w-full flex-col">
 				<template x-for="(searchableItem, itemIndex) in filteredItems">
@@ -179,7 +180,8 @@ templ SearchableSelectInput(
 						class="hover:bg-control-300 cursor-pointer p-2"
 						@click={ "setSelectedItem(itemIndex); " + bindValuePath + " = searchableItem.Value" }
 					>
-						<span x-text="searchableItem.Label"></span>
+						<span x-show="searchableItem.HtmlLabel" x-html="searchableItem.HtmlLabel"></span>
+						<span x-show="!searchableItem.HtmlLabel" x-text="searchableItem.Label"></span>
 					</div>
 				</template>
 			</div>
