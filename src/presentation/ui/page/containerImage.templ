@@ -65,6 +65,8 @@ script ContainerImageIndexLocalState() {
 			},
 
 			// Auxiliary States
+			snapshotContainerAccountId: '',
+			snapshotContainerId: '',
 			archiveImage(accountId, imageId) {
 				htmx.ajax(
 					'POST', '/api/v1/container/image/archive/',
@@ -119,7 +121,7 @@ templ ContainerImageIndex(
 	imagesEntities []entity.ContainerImage,
 	archiveFilesEntities []entity.ContainerImageArchiveFile,
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
-	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
+	containerEntities []entity.Container,
 ) {
 	@ContainerImageIndexLocalState()
 	<div class="flex flex-col">
@@ -168,7 +170,7 @@ templ ContainerImageIndex(
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
 			@ImportContainerImageModal(accountIdUsernameMap)
-			@TakeContainerSnapshotModal(accountIdUsernameMap, containerIdContainerEntityMap)
+			@TakeContainerSnapshotModal(accountIdUsernameMap, containerEntities)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -388,23 +390,27 @@ templ ImportContainerImageModal(
 	}
 }
 
-func transformContainerMapIntoSelectLabelValuePair(
-	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
-) []componentForm.SelectLabelValuePair {
-	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
-	for containerId, containerEntity := range containerIdContainerEntityMap {
-		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: containerEntity.Hostname.String(),
-			Value: containerId.String(),
+func transformContainerEntitiesIntoSearchableSelectItems(
+	containerEntities []entity.Container,
+) []componentForm.SearchableSelectItem {
+	searchableSelectItems := []componentForm.SearchableSelectItem{}
+	for _, containerEntity := range containerEntities {
+		searchableTextSerialized := containerEntity.JsonSerialize()
+
+		searchableSelectItem := componentForm.SearchableSelectItem{
+			Label:          containerEntity.Hostname.String(),
+			Value:          containerEntity.Id.String(),
+			SearchableText: &searchableTextSerialized,
 		}
-		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+		searchableSelectItems = append(searchableSelectItems, searchableSelectItem)
 	}
-	return selectLabelValuePairs
+
+	return searchableSelectItems
 }
 
 templ TakeContainerSnapshotForm(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
-	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
+	containerEntities []entity.Container,
 ) {
 	<form
 		id="take-snapshot-form"
@@ -413,13 +419,9 @@ templ TakeContainerSnapshotForm(
 		hx-swap="none"
 	>
 		<div class="flex flex-col space-y-6">
-			@componentForm.SelectInputWithLabelValuePair(
-				"accountId", "Account", "containerImage.accountId",
-				transformAccountMapIntoSelectLabelValuePair(accountIdUsernameMap), false,
-			)
-			@componentForm.SelectInputWithLabelValuePair(
-				"containerId", "Container", "containerImage.id",
-				transformContainerMapIntoSelectLabelValuePair(containerIdContainerEntityMap), false,
+			@componentForm.SearchableSelectInput(
+				"containerId", "Container", "snapshotContainerId",
+				transformContainerEntitiesIntoSearchableSelectItems(containerEntities),
 			)
 			@componentForm.SubmitButton("Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false)
 		</div>
@@ -428,11 +430,11 @@ templ TakeContainerSnapshotForm(
 
 templ TakeContainerSnapshotModal(
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
-	containerIdContainerEntityMap map[valueObject.ContainerId]entity.Container,
+	containerEntities []entity.Container,
 ) {
 	@componentStructural.Modal(
 		"Take Container Snapshot", "isTakeSnapshotModalOpen", "closeTakeSnapshotModal()", "",
 	) {
-		@TakeContainerSnapshotForm(accountIdUsernameMap, containerIdContainerEntityMap)
+		@TakeContainerSnapshotForm(accountIdUsernameMap, containerEntities)
 	}
 }
