@@ -94,7 +94,7 @@ script SearchableSelectInputLocalState(id string) {
 				this.userInput = '';
 				this.selectedItemLabel = null;
 				this.selectedItemValue = null;
-				closeDropdown();
+				this.closeDropdown();
 			},
 			openDropdown() { 
 				this.showDropdown = true; 
@@ -166,7 +166,7 @@ templ SearchableSelectInput(
 			<i
 				x-show="userInput !== ''"
 				@click.prevent="resetState()"
-				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl"
+				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
 			></i>
 			<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
 		</div>
@@ -178,6 +178,7 @@ templ SearchableSelectInput(
 				<template x-for="(searchableItem, itemIndex) in filteredItems">
 					<div
 						class="hover:bg-control-300 cursor-pointer p-2"
+						:class="{ 'bg-control-400': itemIndex % 2 !== 0 }"
 						@click={ "setSelectedItem(itemIndex); " + bindValuePath + " = searchableItem.Value" }
 					>
 						<span x-show="searchableItem.HtmlLabel" x-html="searchableItem.HtmlLabel"></span>
