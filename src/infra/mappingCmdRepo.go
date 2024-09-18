@@ -366,9 +366,9 @@ func (repo *MappingCmdRepo) DeleteTarget(
 func (repo *MappingCmdRepo) DeleteTargetsByContainerId(
 	containerId valueObject.ContainerId,
 ) error {
-	err := repo.persistentDbSvc.Handler.
-		Model(dbModel.MappingTarget{}).
-		Delete("container_id = ?", containerId.String()).Error
+	err := repo.persistentDbSvc.Handler.Delete(
+		dbModel.MappingTarget{}, "container_id = ?", containerId.String(),
+	).Error
 	if err != nil {
 		return err
 	}
