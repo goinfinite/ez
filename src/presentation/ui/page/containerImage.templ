@@ -402,7 +402,7 @@ templ ImportContainerImageModal(
 	}
 }
 
-func transformContainerEntitiesIntoSearchableSelectItems(
+func transformContainerSummariesIntoSearchableSelectItems(
 	containerEntities []entity.Container,
 	profileEntities []entity.ContainerProfile,
 	accountEntities []entity.Account,
@@ -443,7 +443,7 @@ templ TakeContainerSnapshotForm(
 		<div class="flex flex-col space-y-6">
 			@componentForm.SearchableSelectInput(
 				"containerId", "Container", "containerId",
-				transformContainerEntitiesIntoSearchableSelectItems(
+				transformContainerSummariesIntoSearchableSelectItems(
 					containerEntities, profileEntities, accountEntities,
 				),
 			)
