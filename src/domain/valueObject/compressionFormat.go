@@ -25,6 +25,8 @@ func NewCompressionFormat(value interface{}) (CompressionFormat, error) {
 
 	if !slices.Contains(ValidCompressionFormats, stringValue) {
 		switch stringValue {
+		case "gz":
+			stringValue = "gzip"
 		case "tarball":
 			stringValue = "tar"
 		case "brotli":
