@@ -1,19 +1,23 @@
 package componentContainer
 
-import (
-	"github.com/speedianet/control/src/domain/entity"
-	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
-)
+import componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 
-templ ContainerTaggedSummary(containerEntity entity.Container) {
+templ ContainerTaggedSummary(containerSummary ContainerSummary) {
 	<div class="p-1.5">
 		<div>
-			<strong>{ containerEntity.Hostname.String() }</strong> <small>({ containerEntity.Id.String() })</small>
+			<strong>{ containerSummary.Hostname.String() }</strong>
+			<small>({ containerSummary.ContainerId.String() })</small>
 		</div>
-		<div class="flex flex-row justify-normal space-x-2">
-			@componentStructural.Tag("ph-link", "", containerEntity.ImageAddress.String(), "speedia-500")
-			@componentStructural.Tag("ph-user-square", "", containerEntity.AccountId.String(), "speedia-500")
-			@componentStructural.Tag("ph-intersect-square", "", containerEntity.ProfileId.String(), "speedia-500")
+		<div class="mt-1 flex flex-row justify-normal space-x-2">
+			@componentStructural.Tag(
+				"ph-link", "", containerSummary.ImageAddress.String(), "speedia-500",
+			)
+			@componentStructural.Tag(
+				"ph-user-square", "", containerSummary.AccountUsername.String(), "speedia-500",
+			)
+			@componentStructural.Tag(
+				"ph-intersect-square", "", containerSummary.ProfileName.String(), "speedia-500",
+			)
 		</div>
 	</div>
 }

@@ -132,6 +132,8 @@ templ ContainerImageIndex(
 	archiveFilesEntities []entity.ContainerImageArchiveFile,
 	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 	containerEntities []entity.Container,
+	profileEntities []entity.ContainerProfile,
+	accountEntities []entity.Account,
 ) {
 	@ContainerImageIndexLocalState()
 	<div class="flex flex-col">
@@ -180,7 +182,7 @@ templ ContainerImageIndex(
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
 			@ImportContainerImageModal(accountIdUsernameMap)
-			@TakeContainerSnapshotModal(accountIdUsernameMap, containerEntities)
+			@TakeContainerSnapshotModal(containerEntities, profileEntities, accountEntities)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -402,17 +404,21 @@ templ ImportContainerImageModal(
 
 func transformContainerEntitiesIntoSearchableSelectItems(
 	containerEntities []entity.Container,
+	profileEntities []entity.ContainerProfile,
+	accountEntities []entity.Account,
 ) []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
-	for _, containerEntity := range containerEntities {
-		idStr := containerEntity.Id.String()
-		hostnameStr := containerEntity.Hostname.String()
-		searchableTextSerialized := containerEntity.JsonSerialize()
-		htmlLabel := componentContainer.ContainerTaggedSummary(containerEntity)
+	containerSummaries := componentContainer.NewContainerSummaries(
+		containerEntities, profileEntities, accountEntities,
+	)
+
+	for _, containerSummary := range containerSummaries {
+		searchableTextSerialized := containerSummary.JsonSerialize()
+		htmlLabel := componentContainer.ContainerTaggedSummary(containerSummary)
 
 		searchableSelectItem := componentForm.SearchableSelectItem{
-			Label:          hostnameStr,
-			Value:          idStr,
+			Label:          containerSummary.Hostname.String(),
+			Value:          containerSummary.ContainerId.String(),
 			SearchableText: &searchableTextSerialized,
 			HtmlLabel:      &htmlLabel,
 		}
@@ -423,8 +429,9 @@ func transformContainerEntitiesIntoSearchableSelectItems(
 }
 
 templ TakeContainerSnapshotForm(
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 	containerEntities []entity.Container,
+	profileEntities []entity.ContainerProfile,
+	accountEntities []entity.Account,
 ) {
 	<form
 		id="take-snapshot-form"
@@ -436,7 +443,9 @@ templ TakeContainerSnapshotForm(
 		<div class="flex flex-col space-y-6">
 			@componentForm.SearchableSelectInput(
 				"containerId", "Container", "containerId",
-				transformContainerEntitiesIntoSearchableSelectItems(containerEntities),
+				transformContainerEntitiesIntoSearchableSelectItems(
+					containerEntities, profileEntities, accountEntities,
+				),
 			)
 			@componentForm.SubmitButton("Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false)
 		</div>
@@ -444,12 +453,13 @@ templ TakeContainerSnapshotForm(
 }
 
 templ TakeContainerSnapshotModal(
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
 	containerEntities []entity.Container,
+	profileEntities []entity.ContainerProfile,
+	accountEntities []entity.Account,
 ) {
 	@componentStructural.Modal(
 		"Take Container Snapshot", "isTakeSnapshotModalOpen", "closeTakeSnapshotModal()", "",
 	) {
-		@TakeContainerSnapshotForm(accountIdUsernameMap, containerEntities)
+		@TakeContainerSnapshotForm(containerEntities, profileEntities, accountEntities)
 	}
 }

@@ -86,8 +86,23 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
+	containerProfileService := service.NewContainerProfileService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readContainerProfilesServiceOutput := containerProfileService.Read()
+	if readContainerProfilesServiceOutput.Status != service.Success {
+		return nil
+	}
+
+	containerProfileEntities, assertOk := readContainerProfilesServiceOutput.Body.([]entity.ContainerProfile)
+	if !assertOk {
+		return nil
+	}
+
 	pageContent := page.ContainerImageIndex(
-		imageEntities, archiveFileEntities, accountIdUsernameMap, containerEntities,
+		imageEntities, archiveFileEntities, accountIdUsernameMap,
+		containerEntities, containerProfileEntities, accountEntities,
 	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
