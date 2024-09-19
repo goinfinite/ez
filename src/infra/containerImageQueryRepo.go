@@ -314,7 +314,7 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 		"find", infraEnvs.UserDataDirectory,
 		"-type", "f",
 		"-path", "*/archives/*",
-		"-name", "*.tar.br",
+		"-regex", `.*\.\(`+strings.Join(valueObject.ValidCompressionFormats, `\|`)+`\)$`,
 	)
 	if err != nil {
 		return archiveFiles, errors.New("FindArchiveFilesError: " + err.Error())
