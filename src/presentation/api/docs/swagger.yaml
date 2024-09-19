@@ -118,8 +118,12 @@ definitions:
     properties:
       accountId:
         type: integer
+      compressionFormat:
+        type: string
       containerId:
         type: string
+      shouldCreateArchive:
+        type: boolean
     type: object
   dto.CreateMapping:
     properties:

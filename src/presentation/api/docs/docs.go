@@ -1487,8 +1487,14 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "compressionFormat": {
+                    "type": "string"
+                },
                 "containerId": {
                     "type": "string"
+                },
+                "shouldCreateArchive": {
+                    "type": "boolean"
                 }
             }
         },

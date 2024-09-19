@@ -34,15 +34,23 @@ func (controller *ContainerImageController) Read() *cobra.Command {
 func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 	var accountIdUint uint64
 	var containerIdStr string
+	var shouldCreateArchiveBoolStr string
+	var compressionFormatStr string
 
 	cmd := &cobra.Command{
 		Use:   "create-snapshot",
 		Short: "CreateContainerSnapshotImage",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId":   accountIdUint,
-				"containerId": containerIdStr,
+				"accountId":           accountIdUint,
+				"containerId":         containerIdStr,
+				"shouldCreateArchive": shouldCreateArchiveBoolStr,
 			}
+
+			if compressionFormatStr != "" {
+				requestBody["compressionFormat"] = compressionFormatStr
+			}
+
 			cliHelper.ServiceResponseWrapper(
 				controller.containerImageService.CreateSnapshot(requestBody, false),
 			)
@@ -53,6 +61,12 @@ func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
+	cmd.Flags().StringVarP(
+		&shouldCreateArchiveBoolStr, "should-create-archive", "r", "false", "ShouldCreateArchive",
+	)
+	cmd.Flags().StringVarP(
+		&compressionFormatStr, "compression-format", "f", "", "CompressionFormat (tar|gzip|zip|xz|br)",
+	)
 	return cmd
 }
 

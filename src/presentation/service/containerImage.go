@@ -6,6 +6,7 @@ import (
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
+	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 	"github.com/speedianet/control/src/infra"
 	"github.com/speedianet/control/src/infra/db"
 	infraEnvs "github.com/speedianet/control/src/infra/envs"
@@ -60,12 +61,40 @@ func (service *ContainerImageService) CreateSnapshot(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	var shouldCreateArchivePtr *bool
+	if input["shouldCreateArchive"] != nil {
+		shouldCreateArchive, err := voHelper.InterfaceToBool(input["shouldCreateArchive"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		shouldCreateArchivePtr = &shouldCreateArchive
+	}
+
+	var compressionFormatPtr *valueObject.CompressionFormat
+	if input["compressionFormat"] != nil {
+		compressionFormat, err := valueObject.NewCompressionFormat(input["compressionFormat"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		compressionFormatPtr = &compressionFormat
+	}
+
 	if shouldSchedule {
 		cliCmd := infraEnvs.SpeediaControlBinary + " container image create-snapshot"
 		createParams := []string{
 			"--account-id", accountId.String(),
 			"--container-id", containerId.String(),
 		}
+		if shouldCreateArchivePtr != nil {
+			createParams = append(createParams, "--should-create-archive", "true")
+		}
+
+		if compressionFormatPtr != nil {
+			createParams = append(
+				createParams, "--compression-format", compressionFormatPtr.String(),
+			)
+		}
+
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
@@ -104,7 +133,8 @@ func (service *ContainerImageService) CreateSnapshot(
 	}
 
 	createSnapshotImageDto := dto.NewCreateContainerSnapshotImage(
-		accountId, containerId, operatorAccountId, operatorIpAddress,
+		accountId, containerId, shouldCreateArchivePtr, compressionFormatPtr,
+		operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
