@@ -111,23 +111,22 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
-	rawPortBindings, assertOk := rawConfig["ExposedPorts"].(map[string]interface{})
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImagePortBindings")
-	}
 	portBindings := []valueObject.PortBinding{}
-	for rawPortBinding := range rawPortBindings {
-		rawPortBinding = strings.ReplaceAll(rawPortBinding, "/tcp", "")
-		parsedPortBindings, err := valueObject.NewPortBindingFromString(rawPortBinding)
-		if err != nil {
-			return containerImage, err
-		}
+	rawPortBindings, assertOk := rawConfig["ExposedPorts"].(map[string]interface{})
+	if assertOk {
+		for rawPortBinding := range rawPortBindings {
+			rawPortBinding = strings.ReplaceAll(rawPortBinding, "/tcp", "")
+			parsedPortBindings, err := valueObject.NewPortBindingFromString(rawPortBinding)
+			if err != nil {
+				return containerImage, err
+			}
 
-		portBindings = append(portBindings, parsedPortBindings...)
+			portBindings = append(portBindings, parsedPortBindings...)
+		}
+		sort.SliceStable(portBindings, func(i, j int) bool {
+			return portBindings[i].PublicPort < portBindings[j].PublicPort
+		})
 	}
-	sort.SliceStable(portBindings, func(i, j int) bool {
-		return portBindings[i].PublicPort < portBindings[j].PublicPort
-	})
 
 	rawEnvs, assertOk := rawConfig["Env"].([]interface{})
 	if !assertOk {
