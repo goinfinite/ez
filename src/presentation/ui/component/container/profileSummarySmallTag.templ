@@ -15,12 +15,12 @@ func formatProfileSummarySmallTag(specs *valueObject.ContainerSpecs) string {
 	memoryGibiBytesStr := strconv.FormatInt(specs.MemoryGibibytes, 10)
 
 	if specs.CpuCores == 0 {
-		return "<strong>" + memoryGibiBytesStr + "</strong> GiB RAM"
+		return "<strong>" + memoryGibiBytesStr + "</strong>G RAM"
 	}
 
 	return "<strong>" + cpuCoresStr + "</strong> CPU " +
 		"<span class=\"text-[8px] align-middle\">//</span> <strong>" +
-		memoryGibiBytesStr + "</strong> GiB RAM"
+		memoryGibiBytesStr + "</strong>G RAM"
 }
 
 templ ProfileSummarySmallTag(profile entity.ContainerProfile) {
