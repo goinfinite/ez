@@ -112,6 +112,7 @@ func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
 func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
+	var compressionFormatStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -121,6 +122,11 @@ func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 				"accountId": accountIdUint,
 				"imageId":   imageIdStr,
 			}
+
+			if compressionFormatStr != "" {
+				requestBody["compressionFormat"] = compressionFormatStr
+			}
+
 			cliHelper.ServiceResponseWrapper(
 				controller.containerImageService.CreateArchiveFile(requestBody, false),
 			)
@@ -131,6 +137,9 @@ func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&imageIdStr, "image-id", "i", "", "ImageId")
 	cmd.MarkFlagRequired("image-id")
+	cmd.Flags().StringVarP(
+		&compressionFormatStr, "compression-format", "f", "", "CompressionFormat (tar|gzip|zip|xz|br)",
+	)
 	return cmd
 }
 

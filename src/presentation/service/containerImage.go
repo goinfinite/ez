@@ -142,8 +142,8 @@ func (service *ContainerImageService) CreateSnapshot(
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainerSnapshotImage(
-		containerImageCmdRepo, containerQueryRepo, accountQueryRepo,
-		service.activityRecordCmdRepo, createSnapshotImageDto,
+		service.containerImageQueryRepo, containerImageCmdRepo, containerQueryRepo,
+		accountQueryRepo, service.activityRecordCmdRepo, createSnapshotImageDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -258,12 +258,28 @@ func (service *ContainerImageService) CreateArchiveFile(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	var compressionFormatPtr *valueObject.CompressionFormat
+	if input["compressionFormat"] != nil {
+		compressionFormat, err := valueObject.NewCompressionFormat(input["compressionFormat"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		compressionFormatPtr = &compressionFormat
+	}
+
 	if shouldSchedule {
 		cliCmd := infraEnvs.SpeediaControlBinary + " container image archive create"
 		createParams := []string{
 			"--account-id", accountId.String(),
 			"--image-id", imageId.String(),
 		}
+
+		if compressionFormatPtr != nil {
+			createParams = append(
+				createParams, "--compression-format", compressionFormatPtr.String(),
+			)
+		}
+
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
@@ -302,7 +318,7 @@ func (service *ContainerImageService) CreateArchiveFile(
 	}
 
 	createDto := dto.NewCreateContainerImageArchiveFile(
-		accountId, imageId, operatorAccountId, operatorIpAddress,
+		accountId, imageId, compressionFormatPtr, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
