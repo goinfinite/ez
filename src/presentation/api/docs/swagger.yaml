@@ -90,6 +90,8 @@ definitions:
     properties:
       accountId:
         type: integer
+      compressionFormat:
+        type: string
       imageId:
         type: string
     type: object

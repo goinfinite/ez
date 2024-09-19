@@ -1444,6 +1444,9 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "compressionFormat": {
+                    "type": "string"
+                },
                 "imageId": {
                     "type": "string"
                 }
