@@ -182,7 +182,7 @@ templ SearchableSelectInput(
 			x-show="showDropdown"
 			class="max-h-select bg-control-700 absolute top-10 z-40 w-full overflow-y-auto rounded-md"
 		>
-			<div class="flex w-full flex-col">
+			<div class="[&>*:nth-child(even)]:bg-control-400 flex w-full flex-col">
 				for _, searchableItem := range searchableItems {
 					<div
 						x-show={ "filteredItems.has('" + searchableItem.Value + "')" }
