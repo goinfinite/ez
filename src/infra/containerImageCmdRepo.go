@@ -127,6 +127,8 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 		decompressionCmd = "brotli --decompress --rm"
 	case "gz":
 		decompressionCmd = "gunzip"
+	case "zip":
+		decompressionCmd = "unzip -q"
 	case "xz":
 		decompressionCmd = "unxz"
 	default:
@@ -278,11 +280,38 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("PodmanSaveError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId, "brotli", "--quality=4", "--rm", archiveFilePathStr,
-	)
-	if err != nil {
-		return archiveFile, errors.New("CompressImageError: " + err.Error())
+	compressionCmd := "brotli --quality=4 --rm"
+	compressionSuffix := ".br"
+	if createDto.CompressionFormat != nil {
+		compressionFormatStr := createDto.CompressionFormat.String()
+		switch compressionFormatStr {
+		case "tar":
+			compressionCmd = ""
+			compressionSuffix = ""
+		case "br":
+			compressionCmd = "brotli --quality=4 --rm"
+			compressionSuffix = ".br"
+		case "gzip":
+			compressionCmd = "gzip -6"
+			compressionSuffix = ".gz"
+		case "zip":
+			compressionCmd = "zip -q -6 " + archiveFilePathStr + ".zip"
+			compressionSuffix = ".zip"
+		case "xz":
+			compressionCmd = "xz -1 --memlimit=10%"
+			compressionSuffix = ".xz"
+		default:
+			return archiveFile, errors.New("UnsupportedCompressionFormat")
+		}
+	}
+
+	if compressionCmd != "" {
+		_, err = infraHelper.RunCmdAsUserWithSubShell(
+			createDto.AccountId, compressionCmd+" "+archiveFilePathStr,
+		)
+		if err != nil {
+			return archiveFile, errors.New("CompressImageError: " + err.Error())
+		}
 	}
 
 	accountIdStr := createDto.AccountId.String()
@@ -293,7 +322,9 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
 	}
 
-	finalFilePath, err := valueObject.NewUnixFilePath(archiveFilePathStr + ".br")
+	finalFilePath, err := valueObject.NewUnixFilePath(
+		archiveFilePathStr + compressionSuffix,
+	)
 	if err != nil {
 		return archiveFile, errors.New("NewFinalFilePathError: " + err.Error())
 	}
