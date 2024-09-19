@@ -9,20 +9,21 @@ import (
 )
 
 func CreateContainerSnapshotImage(
+	containerImageQueryRepo repository.ContainerImageQueryRepo,
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	containerQueryRepo repository.ContainerQueryRepo,
 	accountQueryRepo repository.AccountQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	createDto dto.CreateContainerSnapshotImage,
+	createSnapshotDto dto.CreateContainerSnapshotImage,
 ) error {
 	containerEntityWithMetrics, err := containerQueryRepo.ReadWithMetricsById(
-		createDto.AccountId, createDto.ContainerId,
+		createSnapshotDto.AccountId, createSnapshotDto.ContainerId,
 	)
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}
 
-	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadById(createSnapshotDto.AccountId)
 	if err != nil {
 		slog.Error("ReadAccountInfoInfraError", slog.Any("error", err))
 		return errors.New("ReadAccountInfoInfraError")
@@ -34,14 +35,28 @@ func CreateContainerSnapshotImage(
 		return errors.New("AccountStorageQuotaUsageExceeded")
 	}
 
-	imageId, err := containerImageCmdRepo.CreateSnapshot(createDto)
+	imageId, err := containerImageCmdRepo.CreateSnapshot(createSnapshotDto)
 	if err != nil {
 		slog.Error("CreateContainerSnapshotImageInfraError", slog.Any("error", err))
 		return errors.New("CreateContainerSnapshotImageInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		CreateContainerSnapshotImage(createDto, imageId)
+		CreateContainerSnapshotImage(createSnapshotDto, imageId)
+
+	if createSnapshotDto.ShouldCreateArchive != nil && *createSnapshotDto.ShouldCreateArchive {
+		createArchiveDto := dto.NewCreateContainerImageArchiveFile(
+			createSnapshotDto.AccountId, imageId, createSnapshotDto.CompressionFormat,
+			createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
+		)
+		_, err = CreateContainerImageArchiveFile(
+			containerImageQueryRepo, containerImageCmdRepo,
+			accountQueryRepo, activityRecordCmdRepo, createArchiveDto,
+		)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
