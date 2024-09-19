@@ -88,12 +88,10 @@ script SearchableSelectInputLocalState(id string) {
 			),
 			showDropdown: false,
 			userInput: '',
-			selectedItemLabel: null,
-			selectedItemValue: null,
+			selectedItem: null,
 			resetState() {
 				this.userInput = '';
-				this.selectedItemLabel = null;
-				this.selectedItemValue = null;
+				this.selectedItem = null;
 				this.closeDropdown();
 			},
 			openDropdown() { 
@@ -102,34 +100,44 @@ script SearchableSelectInputLocalState(id string) {
 			closeDropdown() {
 				this.showDropdown = false;
 			},
-			setSelectedItem(itemIndex) {
-				this.selectedItemLabel = this.filteredItems[itemIndex].Label;
-				this.selectedItemValue = this.filteredItems[itemIndex].Value;
-				this.userInput = this.selectedItemLabel;
+			setSelectedItem(itemValue) {
+				this.selectedItem = this.filteredItems.get(itemValue);
+				this.userInput = this.selectedItem.label;
 				this.showDropdown = false;
 			},
 			get filteredItems() {
-				return this.searchableItems.filter((item) => {
+				const filteredItemsMap = new Map();
+				this.searchableItems.forEach(item => {
 					if (this.userInput === '') {
-						return true;
+						filteredItemsMap.set(item.value, item);
+						return;
 					}
 
-					if (item.SearchableText === null) {
-						return item.Label.includes(this.userInput);
+					const searchableText = item.searchableText || item.label;
+					if (!searchableText.includes(this.userInput)) {
+						return;
 					}
-					
-					return item.SearchableText.includes(this.userInput);
+					filteredItemsMap.set(item.value, item);
 				});
+
+				return filteredItemsMap;
 			},
 		}));
 	});
 }
 
 type SearchableSelectItem struct {
-	Label          string
-	Value          string
-	HtmlLabel      *string
-	SearchableText *string
+	Label          string           `json:"label"`
+	Value          string           `json:"value"`
+	SearchableText *string          `json:"searchableText"`
+	HtmlLabel      *templ.Component `json:"-"`
+}
+
+func readSearchableSelectItemLabel(item SearchableSelectItem) templ.Component {
+	if item.HtmlLabel != nil {
+		return *item.HtmlLabel
+	}
+	return templ.Raw(item.Label)
 }
 
 templ SearchableSelectInput(
@@ -175,16 +183,15 @@ templ SearchableSelectInput(
 			class="max-h-select bg-control-700 absolute top-10 z-40 w-full overflow-y-auto rounded-md"
 		>
 			<div class="flex w-full flex-col">
-				<template x-for="(searchableItem, itemIndex) in filteredItems">
+				for _, searchableItem := range searchableItems {
 					<div
+						x-show={ "filteredItems.has('" + searchableItem.Value + "')" }
 						class="hover:bg-control-300 cursor-pointer p-2"
-						:class="{ 'bg-control-400': itemIndex % 2 !== 0 }"
-						@click={ "setSelectedItem(itemIndex); " + bindValuePath + " = searchableItem.Value" }
+						@click={ "setSelectedItem('" + searchableItem.Value + "'); " + bindValuePath + " = '" + searchableItem.Value + "'" }
 					>
-						<span x-show="searchableItem.HtmlLabel" x-html="searchableItem.HtmlLabel"></span>
-						<span x-show="!searchableItem.HtmlLabel" x-text="searchableItem.Label"></span>
+						@readSearchableSelectItemLabel(searchableItem)
 					</div>
-				</template>
+				}
 			</div>
 		</div>
 	</div>
