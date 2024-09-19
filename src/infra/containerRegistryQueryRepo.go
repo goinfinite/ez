@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"sort"
@@ -310,9 +311,7 @@ func (repo *ContainerRegistryQueryRepo) ReadImages(
 
 func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	imageAddress valueObject.ContainerImageAddress,
-) (entity.RegistryTaggedImage, error) {
-	var registryTaggedImage entity.RegistryTaggedImage
-
+) (registryTaggedImage entity.RegistryTaggedImage, err error) {
 	orgName, err := imageAddress.GetOrgName()
 	if err != nil {
 		return registryTaggedImage, err
@@ -329,12 +328,8 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	}
 
 	hubApi := "https://hub.docker.com/v2/namespaces/" +
-		orgName.String() +
-		"/repositories/" +
-		imageName.String() +
-		"/tags/" +
-		imageTag.String() +
-		"/images"
+		orgName.String() + "/repositories/" + imageName.String() +
+		"/tags/" + imageTag.String() + "/images"
 
 	apiResponse, err := repo.queryJsonApi(hubApi)
 	if err != nil {
@@ -351,11 +346,11 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		return registryTaggedImage, errors.New("ImageNotFound")
 	}
 
-	var desiredImageMap map[string]interface{}
+	desiredImageMap := map[string]interface{}{}
 	for _, image := range parsedResponse {
 		imageMap, assertOk := image.(map[string]interface{})
 		if !assertOk {
-			log.Printf("ParseDockerHubImageError: %v", image)
+			slog.Debug("ParseDockerHubImageError", slog.Any("image", image))
 			continue
 		}
 
@@ -365,6 +360,9 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		}
 
 		if rawArchitecture != "amd64" {
+			slog.Debug(
+				"SkippingUnsupportedArchitecture", slog.String("isa", rawArchitecture),
+			)
 			continue
 		}
 
@@ -411,7 +409,13 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 
 	portBindings := []valueObject.PortBinding{}
 	portBindingsRegex := `\d{1,5}(\/\w{1,4})?`
-	for _, layer := range desiredImageMap["layers"].([]interface{}) {
+
+	imageLayers, assertOk := desiredImageMap["layers"].([]interface{})
+	if !assertOk {
+		return registryTaggedImage, errors.New("ParseImageLayersError")
+	}
+
+	for _, layer := range imageLayers {
 		layerMap, assertOk := layer.(map[string]interface{})
 		if !assertOk {
 			continue
@@ -423,7 +427,6 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		}
 
 		rawInstruction = strings.TrimSpace(rawInstruction)
-
 		if !strings.HasPrefix(rawInstruction, "EXPOSE") {
 			continue
 		}
@@ -432,8 +435,8 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		if err != nil {
 			continue
 		}
-
 		rawPortBindings := bindingsRegex.FindAllString(rawInstruction, -1)
+
 		for _, rawPortBinding := range rawPortBindings {
 			rawPortBinding = strings.ReplaceAll(rawPortBinding, "/tcp", "")
 			portBinding, err := valueObject.NewPortBindingFromString(rawPortBinding)
@@ -449,16 +452,8 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	isa, _ := valueObject.NewInstructionSetArchitecture("amd64")
 
 	return entity.NewRegistryTaggedImage(
-		imageTag,
-		imageName,
-		orgName,
-		registryName,
-		imageAddress,
-		imageHash,
-		isa,
-		sizeBytes,
-		portBindings,
-		updatedAt,
+		imageTag, imageName, orgName, registryName, imageAddress, imageHash, isa,
+		sizeBytes, portBindings, updatedAt,
 	), nil
 }
 
