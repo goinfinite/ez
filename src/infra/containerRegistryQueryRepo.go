@@ -361,7 +361,10 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 
 		if rawArchitecture != "amd64" {
 			slog.Debug(
-				"SkippingUnsupportedArchitecture", slog.String("isa", rawArchitecture),
+				"SkippingUnsupportedArchitecture",
+				slog.String("isa", rawArchitecture),
+				slog.String("imageName", imageName.String()),
+				slog.String("imageTag", imageTag.String()),
 			)
 			continue
 		}
