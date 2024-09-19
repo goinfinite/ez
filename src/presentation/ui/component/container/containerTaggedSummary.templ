@@ -1,0 +1,19 @@
+package componentContainer
+
+import (
+	"github.com/speedianet/control/src/domain/entity"
+	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
+)
+
+templ ContainerTaggedSummary(containerEntity entity.Container) {
+	<div class="p-1.5">
+		<div>
+			<strong>{ containerEntity.Hostname.String() }</strong> <small>({ containerEntity.Id.String() })</small>
+		</div>
+		<div class="flex flex-row justify-normal space-x-2">
+			@componentStructural.Tag("ph-link", "", containerEntity.ImageAddress.String(), "speedia-500")
+			@componentStructural.Tag("ph-user-square", "", containerEntity.AccountId.String(), "speedia-500")
+			@componentStructural.Tag("ph-intersect-square", "", containerEntity.ProfileId.String(), "speedia-500")
+		</div>
+	</div>
+}
