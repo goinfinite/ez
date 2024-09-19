@@ -4,7 +4,7 @@ templ Tag(highlightedIcon, highlightedLabel, tagValue, tagColor string) {
 	<!-- Tag -->
 	<div class={ "flex rounded-md border-solid border-2.5 border-" + tagColor + " text-sm" }>
 		<div class={ "bg-" + tagColor + " flex items-center" }>
-			<div class="flex items-center px-1 py-0.5">
+			<div class="flex items-center px-1">
 				if highlightedIcon != "" {
 					<i class={ "ph-duotone " + highlightedIcon + " text-lg" }></i>
 				}
@@ -13,8 +13,8 @@ templ Tag(highlightedIcon, highlightedLabel, tagValue, tagColor string) {
 				}
 			</div>
 		</div>
-		<span class={ "ring-" + tagColor + " ring-offset-" + tagColor + " rounded-md px-1 py-0.5 ring-1 ring-offset-1 max-w-64 truncate" }>
-			{ tagValue }
+		<span class={ "leading-normal ring-" + tagColor + " ring-offset-" + tagColor + " rounded-md px-1 py-0.5 ring-1 ring-offset-1 max-w-64 truncate" }>
+			@templ.Raw(tagValue)
 		</span>
 	</div>
 }
