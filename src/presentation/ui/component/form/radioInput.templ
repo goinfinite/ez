@@ -1,0 +1,19 @@
+package componentForm
+
+templ RadioInput(id, label, bindModelPath string) {
+	<!-- RadioInput -->
+	<div class="inline-flex items-center">
+		<label class="relative -mr-2 flex cursor-pointer items-center rounded-full p-3">
+			<input
+				type="radio"
+				name={ id }
+				x-model:value={ bindModelPath }
+				class="border-speedia-500 checked:bg-speedia-500 peer relative h-3.5 w-3.5 cursor-pointer appearance-none rounded-full border bg-inherit transition-all checked:h-4 checked:w-4 checked:border-inherit"
+			/>
+			<span class="absolute mx-0.5 mt-0.5 text-xs text-white opacity-0 transition-opacity peer-checked:opacity-100">
+				<i class="ph-duotone ph-check-fat h-full w-full"></i>
+			</span>
+		</label>
+		<label class="ml-1 text-sm font-medium text-neutral-100">{ label }</label>
+	</div>
+}
