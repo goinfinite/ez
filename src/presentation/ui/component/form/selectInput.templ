@@ -150,12 +150,13 @@ templ SearchableSelectInput(
 		x-data="searchableSelect"
 		class="relative flex flex-col items-center"
 	>
+		<input type="hidden" id={ id } name={ id } x-model:value={ bindValuePath }/>
 		<div
 			@click.away="closeDropdown()"
 			class="bg-control-300 hover:border-control-100 border-control-200 autofill:bg-control-300 focus:border-control-50 relative flex h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 outline-none transition-all"
 		>
 			<input
-				id={ id }
+				id={ id + "SelectInput" }
 				placeholder={ label }
 				x-model="userInput"
 				@mousedown="openDropdown()"
@@ -163,7 +164,7 @@ templ SearchableSelectInput(
 			/>
 			if label != "" {
 				<label
-					for={ id }
+					for={ id + "SelectInput" }
 					class="from-control-300 via-control-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 				>
 					{ label }
