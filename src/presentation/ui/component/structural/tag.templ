@@ -9,7 +9,7 @@ templ Tag(highlightedIcon, highlightedLabel, tagValue, tagColor string) {
 					<i class={ "ph-duotone " + highlightedIcon + " text-lg" }></i>
 				}
 				if highlightedLabel != "" {
-					<span class="text-neutral-50">{ highlightedLabel }</span>
+					<span class="max-w-64 truncate">{ highlightedLabel }</span>
 				}
 			</div>
 		</div>
