@@ -142,17 +142,16 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		envs = append(envs, parsedEnv)
 	}
 
-	rawEntrypointSlice, assertOk := rawConfig["Entrypoint"].([]interface{})
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageEntrypoint")
-	}
 	rawEntrypoint := ""
-	for _, rawEntrypointItem := range rawEntrypointSlice {
-		rawEntrypointPart, assertOk := rawEntrypointItem.(string)
-		if !assertOk {
-			continue
+	rawEntrypointSlice, assertOk := rawConfig["Entrypoint"].([]interface{})
+	if assertOk {
+		for _, rawEntrypointItem := range rawEntrypointSlice {
+			rawEntrypointPart, assertOk := rawEntrypointItem.(string)
+			if !assertOk {
+				continue
+			}
+			rawEntrypoint += rawEntrypointPart + " "
 		}
-		rawEntrypoint += rawEntrypointPart + " "
 	}
 	var entrypointPtr *valueObject.ContainerEntrypoint
 	if rawEntrypoint != "" {
