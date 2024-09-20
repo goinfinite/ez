@@ -5,6 +5,7 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
 	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
+	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 	componentStructural "github.com/speedianet/control/src/presentation/ui/component/structural"
 )
 
@@ -118,11 +119,13 @@ script ContainerImageIndexLocalState() {
 			containerId: '',
 			shouldCreateArchive: false,
 			shouldDiscardImage: false,
+			archiveCompressionFormat: 'br',
 			resetPrimaryState() {
 				this.accountId = '';
 				this.containerId = '';
 				this.shouldCreateArchive = false;
 				this.shouldDiscardImage = false;
+				this.archiveCompressionFormat = 'br';
 			},
 			init() {
 				this.resetPrimaryState();
@@ -457,16 +460,30 @@ templ TakeContainerSnapshotForm(
 			)
 			@componentForm.CheckboxInputSwitchToggle(
 				"shouldCreateArchive",
-				"Create archive after snapshot is taken (useful for backups/export)",
+				"Also create an archive after the snapshot is taken.",
 				"shouldCreateArchive", "",
 			)
 			<div x-show="shouldCreateArchive">
 				@componentForm.CheckboxInputSwitchToggle(
 					"shouldDiscardImage",
-					"Discard image after snapshot archive is created (keeping only the archive)",
+					"Discard the snapshot image after the archive is created (keeping the archive).",
 					"shouldDiscardImage", "",
 				)
 			</div>
+			<section x-show="shouldCreateArchive" class="mt-4 w-full rounded-md">
+				<details class="bg-control-500 group rounded-md p-4 group-open:bg-opacity-30">
+					<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
+						<i class="ph-duotone ph-gear mr-2 text-2xl"></i>
+						<span class="font-bold">Advanced Settings</span>
+						<i class="ph-bold ph-plus absolute right-0 top-1.5 text-xs transition duration-300 group-open:rotate-45"></i>
+					</summary>
+					<div class="space-y-5.5 mt-5 py-2">
+						@componentMisc.CompressionFormatSelectInput(
+							"archiveCompressionFormat", "archiveCompressionFormat",
+						)
+					</div>
+				</details>
+			</section>
 			@componentForm.SubmitButton(
 				"Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false,
 			)
