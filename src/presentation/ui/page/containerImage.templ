@@ -116,9 +116,13 @@ script ContainerImageIndexLocalState() {
 			// Primary State
 			accountId: '',
 			containerId: '',
+			shouldCreateArchive: false,
+			shouldDiscardImage: false,
 			resetPrimaryState() {
 				this.accountId = '';
 				this.containerId = '';
+				this.shouldCreateArchive = false;
+				this.shouldDiscardImage = false;
 			},
 			init() {
 				this.resetPrimaryState();
@@ -451,7 +455,21 @@ templ TakeContainerSnapshotForm(
 					containerEntities, profileEntities, accountEntities,
 				),
 			)
-			@componentForm.SubmitButton("Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false)
+			@componentForm.CheckboxInputSwitchToggle(
+				"shouldCreateArchive",
+				"Create archive after snapshot is taken (useful for backups/export)",
+				"shouldCreateArchive", "",
+			)
+			<div x-show="shouldCreateArchive">
+				@componentForm.CheckboxInputSwitchToggle(
+					"shouldDiscardImage",
+					"Discard image after snapshot archive is created (keeping only the archive)",
+					"shouldDiscardImage", "",
+				)
+			</div>
+			@componentForm.SubmitButton(
+				"Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false,
+			)
 		</div>
 	</form>
 }
