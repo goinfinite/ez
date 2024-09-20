@@ -296,7 +296,11 @@ templ ContainerImagesTable(
 					</td>
 					<td class="w-28 px-6 py-4">{ imageEntity.SizeBytes.StringWithSuffix() }</td>
 					<td class="px-6 py-4">
-						@componentContainer.PortBindingsTable(imageEntity.PortBindings, false)
+						if len(imageEntity.PortBindings) > 0 {
+							@componentContainer.PortBindingsTable(imageEntity.PortBindings, false)
+						} else {
+							<div class="text-center text-neutral-400">---</div>
+						}
 					</td>
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
