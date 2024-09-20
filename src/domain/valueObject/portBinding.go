@@ -135,6 +135,11 @@ var KnownServiceBindings = []serviceBindingInfo{
 		PublicPortInterval: databasePublicPortInterval,
 	},
 	{
+		ServiceNames:       []string{"caddy"},
+		PortBindings:       []string{"2019"},
+		PublicPortInterval: httpPublicPortInterval,
+	},
+	{
 		ServiceNames: []string{"nfs"},
 		PortBindings: []string{"2049"},
 	},
