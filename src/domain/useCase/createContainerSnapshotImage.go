@@ -44,18 +44,42 @@ func CreateContainerSnapshotImage(
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
 		CreateContainerSnapshotImage(createSnapshotDto, imageId)
 
-	if createSnapshotDto.ShouldCreateArchive != nil && *createSnapshotDto.ShouldCreateArchive {
-		createArchiveDto := dto.NewCreateContainerImageArchiveFile(
-			createSnapshotDto.AccountId, imageId, createSnapshotDto.CompressionFormat,
-			createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
-		)
-		_, err = CreateContainerImageArchiveFile(
-			containerImageQueryRepo, containerImageCmdRepo,
-			accountQueryRepo, activityRecordCmdRepo, createArchiveDto,
-		)
-		if err != nil {
-			return err
-		}
+	if createSnapshotDto.ShouldCreateArchive == nil {
+		return nil
+	}
+
+	if !*createSnapshotDto.ShouldCreateArchive {
+		return nil
+	}
+
+	createArchiveDto := dto.NewCreateContainerImageArchiveFile(
+		createSnapshotDto.AccountId, imageId, createSnapshotDto.ArchiveCompressionFormat,
+		createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
+	)
+	_, err = CreateContainerImageArchiveFile(
+		containerImageQueryRepo, containerImageCmdRepo,
+		accountQueryRepo, activityRecordCmdRepo, createArchiveDto,
+	)
+	if err != nil {
+		return err
+	}
+
+	if createSnapshotDto.ShouldDiscardImage == nil {
+		return nil
+	}
+
+	if !*createSnapshotDto.ShouldDiscardImage {
+		return nil
+	}
+
+	deleteImageDto := dto.NewDeleteContainerImage(
+		createSnapshotDto.AccountId, imageId,
+		createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
+	)
+	err = containerImageCmdRepo.Delete(deleteImageDto)
+	if err != nil {
+		slog.Error("DeleteContainerSnapshotImageInfraError", slog.Any("error", err))
+		return errors.New("DeleteContainerSnapshotImageInfraError")
 	}
 
 	return nil

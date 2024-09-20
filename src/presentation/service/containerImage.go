@@ -70,13 +70,24 @@ func (service *ContainerImageService) CreateSnapshot(
 		shouldCreateArchivePtr = &shouldCreateArchive
 	}
 
-	var compressionFormatPtr *valueObject.CompressionFormat
-	if input["compressionFormat"] != nil {
-		compressionFormat, err := valueObject.NewCompressionFormat(input["compressionFormat"])
+	var archiveCompressionFormatPtr *valueObject.CompressionFormat
+	if input["archiveCompressionFormat"] != nil {
+		compressionFormat, err := valueObject.NewCompressionFormat(
+			input["archiveCompressionFormat"],
+		)
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
-		compressionFormatPtr = &compressionFormat
+		archiveCompressionFormatPtr = &compressionFormat
+	}
+
+	var shouldDiscardImagePtr *bool
+	if input["shouldDiscardImage"] != nil {
+		shouldDiscardImage, err := voHelper.InterfaceToBool(input["shouldDiscardImage"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		shouldDiscardImagePtr = &shouldDiscardImage
 	}
 
 	if shouldSchedule {
@@ -85,14 +96,18 @@ func (service *ContainerImageService) CreateSnapshot(
 			"--account-id", accountId.String(),
 			"--container-id", containerId.String(),
 		}
-		if shouldCreateArchivePtr != nil {
+		if shouldCreateArchivePtr != nil && *shouldCreateArchivePtr {
 			createParams = append(createParams, "--should-create-archive", "true")
 		}
 
-		if compressionFormatPtr != nil {
+		if archiveCompressionFormatPtr != nil {
 			createParams = append(
-				createParams, "--compression-format", compressionFormatPtr.String(),
+				createParams, "--archive-compression-format", archiveCompressionFormatPtr.String(),
 			)
+		}
+
+		if shouldDiscardImagePtr != nil && *shouldDiscardImagePtr {
+			createParams = append(createParams, "--should-discard-image", "true")
 		}
 
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
@@ -133,8 +148,8 @@ func (service *ContainerImageService) CreateSnapshot(
 	}
 
 	createSnapshotImageDto := dto.NewCreateContainerSnapshotImage(
-		accountId, containerId, shouldCreateArchivePtr, compressionFormatPtr,
-		operatorAccountId, operatorIpAddress,
+		accountId, containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr,
+		shouldDiscardImagePtr, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
@@ -260,7 +275,9 @@ func (service *ContainerImageService) CreateArchiveFile(
 
 	var compressionFormatPtr *valueObject.CompressionFormat
 	if input["compressionFormat"] != nil {
-		compressionFormat, err := valueObject.NewCompressionFormat(input["compressionFormat"])
+		compressionFormat, err := valueObject.NewCompressionFormat(
+			input["compressionFormat"],
+		)
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}

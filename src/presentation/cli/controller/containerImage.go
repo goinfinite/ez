@@ -33,9 +33,8 @@ func (controller *ContainerImageController) Read() *cobra.Command {
 
 func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 	var accountIdUint uint64
-	var containerIdStr string
-	var shouldCreateArchiveBoolStr string
-	var compressionFormatStr string
+	var containerIdStr, shouldCreateArchiveBoolStr, archiveCompressionFormatStr string
+	var shouldDiscardImageBoolStr string
 
 	cmd := &cobra.Command{
 		Use:   "create-snapshot",
@@ -45,10 +44,11 @@ func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 				"accountId":           accountIdUint,
 				"containerId":         containerIdStr,
 				"shouldCreateArchive": shouldCreateArchiveBoolStr,
+				"shouldDiscardImage":  shouldDiscardImageBoolStr,
 			}
 
-			if compressionFormatStr != "" {
-				requestBody["compressionFormat"] = compressionFormatStr
+			if archiveCompressionFormatStr != "" {
+				requestBody["archiveCompressionFormat"] = archiveCompressionFormatStr
 			}
 
 			cliHelper.ServiceResponseWrapper(
@@ -65,7 +65,11 @@ func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 		&shouldCreateArchiveBoolStr, "should-create-archive", "r", "false", "ShouldCreateArchive",
 	)
 	cmd.Flags().StringVarP(
-		&compressionFormatStr, "compression-format", "f", "", "CompressionFormat (tar|gzip|zip|xz|br)",
+		&archiveCompressionFormatStr, "archive-compression-format", "f", "",
+		"ArchiveCompressionFormat (tar|gzip|zip|xz|br)",
+	)
+	cmd.Flags().StringVarP(
+		&shouldDiscardImageBoolStr, "should-discard-image", "d", "false", "ShouldDiscardImage",
 	)
 	return cmd
 }
@@ -111,8 +115,7 @@ func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
 
 func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 	var accountIdUint uint64
-	var imageIdStr string
-	var compressionFormatStr string
+	var imageIdStr, compressionFormatStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -138,7 +141,8 @@ func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 	cmd.Flags().StringVarP(&imageIdStr, "image-id", "i", "", "ImageId")
 	cmd.MarkFlagRequired("image-id")
 	cmd.Flags().StringVarP(
-		&compressionFormatStr, "compression-format", "f", "", "CompressionFormat (tar|gzip|zip|xz|br)",
+		&compressionFormatStr, "compression-format", "f", "",
+		"CompressionFormat (tar|gzip|zip|xz|br)",
 	)
 	return cmd
 }

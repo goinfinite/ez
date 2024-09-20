@@ -1490,13 +1490,16 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
-                "compressionFormat": {
+                "archiveCompressionFormat": {
                     "type": "string"
                 },
                 "containerId": {
                     "type": "string"
                 },
                 "shouldCreateArchive": {
+                    "type": "boolean"
+                },
+                "shouldDiscardImage": {
                     "type": "boolean"
                 }
             }
