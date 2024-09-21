@@ -255,7 +255,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("NewTarFileNameError: " + err.Error())
 	}
 
-	archiveDir, err := repo.readArchiveFilesDirectory(createDto.AccountId)
+	archiveDir, err := repo.readArchiveFilesDirectory(imageEntity.AccountId)
 	if err != nil {
 		return archiveFile, err
 	}
@@ -263,14 +263,14 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 
 	archiveFilePathStr := archiveDirStr + "/" + archiveFileName.String()
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId, "rm", "-f", archiveFilePathStr,
+		imageEntity.AccountId, "rm", "-f", archiveFilePathStr,
 	)
 	if err != nil {
 		return archiveFile, errors.New("RemoveExistingTarFileError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
-		createDto.AccountId,
+		imageEntity.AccountId,
 		"podman", "save",
 		"--format", "docker-archive",
 		"--output", archiveFilePathStr,
@@ -295,7 +295,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 			compressionCmd = "gzip -6"
 			compressionSuffix = ".gz"
 		case "zip":
-			compressionCmd = "zip -q -6 " + archiveFilePathStr + ".zip"
+			compressionCmd = "zip -q -m -6 " + archiveFilePathStr + ".zip"
 			compressionSuffix = ".zip"
 		case "xz":
 			compressionCmd = "xz -1 --memlimit=10%"
@@ -307,14 +307,14 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 
 	if compressionCmd != "" {
 		_, err = infraHelper.RunCmdAsUserWithSubShell(
-			createDto.AccountId, compressionCmd+" "+archiveFilePathStr,
+			imageEntity.AccountId, compressionCmd+" "+archiveFilePathStr,
 		)
 		if err != nil {
 			return archiveFile, errors.New("CompressImageError: " + err.Error())
 		}
 	}
 
-	accountIdStr := createDto.AccountId.String()
+	accountIdStr := imageEntity.AccountId.String()
 	_, err = infraHelper.RunCmd(
 		"chown", "-R", accountIdStr+":"+accountIdStr, archiveDirStr,
 	)
@@ -350,7 +350,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	)
 
 	return entity.NewContainerImageArchiveFile(
-		createDto.ImageId, createDto.AccountId, finalFilePath, downloadUrl,
+		createDto.ImageId, imageEntity.AccountId, finalFilePath, downloadUrl,
 		sizeBytes, valueObject.NewUnixTimeNow(),
 	), nil
 }
