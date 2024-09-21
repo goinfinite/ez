@@ -188,7 +188,7 @@ templ ContainerImageIndex(
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
 			@ImportContainerImageModal(accountsSelectPairs)
-			@TakeContainerSnapshotModal(accountsSelectPairs, containerSummariesSearchableItems)
+			@TakeContainerSnapshotModal(containerSummariesSearchableItems)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -399,13 +399,8 @@ templ ImportContainerImageModal(
 }
 
 templ TakeContainerSnapshotForm(
-	accountsSelectPairs []componentForm.SelectLabelValuePair,
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
 ) {
-	@componentStructural.Alert(
-		componentStructural.AlertTypeInfo,
-		"This is an asynchronous operation. The snapshot image will be created in the background.",
-	)
 	<form
 		id="take-snapshot-form"
 		x-data="containerSnapshot"
@@ -413,20 +408,16 @@ templ TakeContainerSnapshotForm(
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 	>
-		<div class="flex flex-col space-y-5">
+		<div class="flex flex-col space-y-6">
 			<div>
-				@componentForm.SelectInputWithLabelValuePair(
-					"accountId", "Account", "accountId",
-					accountsSelectPairs, false,
+				@componentForm.SearchableSelectInput(
+					"containerId", "Container", "containerId",
+					containerSummariesSearchableItems,
 				)
 				<p class="mt-1 px-1.5 text-[11px] text-neutral-50 text-opacity-75">
-					Note: select an account with sufficient quota to store the snapshot image, as this account will be the owner of the image (and/or archive).
+					Note: the container's owner account must have enough quota to store the snapshot image (and/or archive).
 				</p>
 			</div>
-			@componentForm.SearchableSelectInput(
-				"containerId", "Container", "containerId",
-				containerSummariesSearchableItems,
-			)
 			@componentForm.CheckboxInputSwitchToggle(
 				"shouldCreateArchive",
 				"Also create an archive after the snapshot is taken.",
@@ -435,7 +426,7 @@ templ TakeContainerSnapshotForm(
 			<div x-show="shouldCreateArchive">
 				@componentForm.CheckboxInputSwitchToggle(
 					"shouldDiscardImage",
-					"Discard the snapshot image after the archive is created (keeping the archive).",
+					"Discard the snapshot image after the archive is created (keep the archive only).",
 					"shouldDiscardImage", "",
 				)
 			</div>
@@ -458,15 +449,20 @@ templ TakeContainerSnapshotForm(
 			)
 		</div>
 	</form>
+	<div class="mt-2">
+		@componentStructural.Alert(
+			componentStructural.AlertTypeInfo,
+			"This is an asynchronous operation. The snapshot image will be created in the background.",
+		)
+	</div>
 }
 
 templ TakeContainerSnapshotModal(
-	accountsSelectPairs []componentForm.SelectLabelValuePair,
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
 ) {
 	@componentStructural.Modal(
 		"Take Container Snapshot", "isTakeSnapshotModalOpen", "closeTakeSnapshotModal()", "",
 	) {
-		@TakeContainerSnapshotForm(accountsSelectPairs, containerSummariesSearchableItems)
+		@TakeContainerSnapshotForm(containerSummariesSearchableItems)
 	}
 }
