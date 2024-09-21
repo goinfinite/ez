@@ -402,6 +402,10 @@ templ TakeContainerSnapshotForm(
 	accountsSelectPairs []componentForm.SelectLabelValuePair,
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
 ) {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The snapshot image will be created in the background.",
+	)
 	<form
 		id="take-snapshot-form"
 		x-data="containerSnapshot"
@@ -409,11 +413,16 @@ templ TakeContainerSnapshotForm(
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 	>
-		<div class="flex flex-col space-y-6">
-			@componentForm.SelectInputWithLabelValuePair(
-				"accountId", "Account", "accountId",
-				accountsSelectPairs, false,
-			)
+		<div class="flex flex-col space-y-5">
+			<div>
+				@componentForm.SelectInputWithLabelValuePair(
+					"accountId", "Account", "accountId",
+					accountsSelectPairs, false,
+				)
+				<p class="mt-1 px-1.5 text-[11px] text-neutral-50 text-opacity-75">
+					Note: select an account with sufficient quota to store the snapshot image, as this account will be the owner of the image (and/or archive).
+				</p>
+			</div>
 			@componentForm.SearchableSelectInput(
 				"containerId", "Container", "containerId",
 				containerSummariesSearchableItems,
