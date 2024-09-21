@@ -208,17 +208,9 @@ func (repo *ContainerImageCmdRepo) Delete(
 	return err
 }
 
-func (repo *ContainerImageCmdRepo) CreateArchiveFile(
-	createDto dto.CreateContainerImageArchiveFile,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
-	containerImageQueryRepo := NewContainerImageQueryRepo(repo.persistentDbSvc)
-	imageEntity, err := containerImageQueryRepo.ReadById(
-		createDto.AccountId, createDto.ImageId,
-	)
-	if err != nil {
-		return archiveFile, err
-	}
-
+func (repo *ContainerImageCmdRepo) archiveFileNameFactory(
+	imageEntity entity.ContainerImage,
+) (archiveFileName valueObject.UnixFileName, err error) {
 	imageOrgNameStr := ""
 	imageOrgName, err := imageEntity.ImageAddress.GetOrgName()
 	if err == nil {
@@ -237,8 +229,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		imageTagStr = imageTag.String()
 	}
 
-	imageIdStr := createDto.ImageId.String()
-	rawArchiveFileName := imageIdStr
+	rawArchiveFileName := imageEntity.Id.String()
 	if imageOrgNameStr != "" {
 		rawArchiveFileName += "-" + imageOrgNameStr
 	}
@@ -250,9 +241,23 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	}
 	rawArchiveFileName += ".tar"
 
-	archiveFileName, err := valueObject.NewUnixFileName(rawArchiveFileName)
+	return valueObject.NewUnixFileName(rawArchiveFileName)
+}
+
+func (repo *ContainerImageCmdRepo) CreateArchiveFile(
+	createDto dto.CreateContainerImageArchiveFile,
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	containerImageQueryRepo := NewContainerImageQueryRepo(repo.persistentDbSvc)
+	imageEntity, err := containerImageQueryRepo.ReadById(
+		createDto.AccountId, createDto.ImageId,
+	)
 	if err != nil {
-		return archiveFile, errors.New("NewTarFileNameError: " + err.Error())
+		return archiveFile, err
+	}
+
+	archiveFileName, err := repo.archiveFileNameFactory(imageEntity)
+	if err != nil {
+		return archiveFile, errors.New("NewArchiveFileNameError: " + err.Error())
 	}
 
 	archiveDir, err := repo.readArchiveFilesDirectory(imageEntity.AccountId)
@@ -269,6 +274,7 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 		return archiveFile, errors.New("RemoveExistingTarFileError: " + err.Error())
 	}
 
+	imageIdStr := imageEntity.Id.String()
 	_, err = infraHelper.RunCmdAsUser(
 		imageEntity.AccountId,
 		"podman", "save",
