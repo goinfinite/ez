@@ -17,7 +17,7 @@ func CreateContainerSnapshotImage(
 	createSnapshotDto dto.CreateContainerSnapshotImage,
 ) error {
 	containerEntityWithMetrics, err := containerQueryRepo.ReadWithMetricsById(
-		createSnapshotDto.AccountId, createSnapshotDto.ContainerId,
+		createSnapshotDto.ContainerId,
 	)
 	if err != nil {
 		return errors.New("ContainerNotFound")

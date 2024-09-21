@@ -397,11 +397,15 @@ func (repo *ContainerQueryRepo) ReadWithMetrics() ([]dto.ContainerWithMetrics, e
 }
 
 func (repo *ContainerQueryRepo) ReadWithMetricsById(
-	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 ) (containerWithMetrics dto.ContainerWithMetrics, err error) {
+	containerEntity, err := repo.ReadById(containerId)
+	if err != nil {
+		return containerWithMetrics, err
+	}
+
 	containersMetricStr, err := infraHelper.RunCmdAsUser(
-		accountId,
+		containerEntity.AccountId,
 		"podman", "stats",
 		"--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
 		containerId.String(),
@@ -411,7 +415,7 @@ func (repo *ContainerQueryRepo) ReadWithMetricsById(
 	}
 
 	runningContainerMetrics, err := repo.containerMetricsFactory(
-		accountId, containersMetricStr,
+		containerEntity.AccountId, containersMetricStr,
 	)
 	if err != nil {
 		return containerWithMetrics, err
@@ -422,11 +426,6 @@ func (repo *ContainerQueryRepo) ReadWithMetricsById(
 
 	if _, exists := runningContainerMetrics[containerId]; !exists {
 		return containerWithMetrics, errors.New("ContainerMetricsNotFound")
-	}
-
-	containerEntity, err := repo.ReadById(containerId)
-	if err != nil {
-		return containerWithMetrics, err
 	}
 
 	return dto.NewContainerWithMetrics(
