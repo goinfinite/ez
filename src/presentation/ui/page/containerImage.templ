@@ -204,7 +204,7 @@ templ ContainerImageArchiveFilesTable(
 	<table
 		id="image-archive-files-table"
 		hx-get="/container/image/"
-		hx-trigger="click from:button#delete-archive delay:500ms"
+		hx-trigger="click from:button#delete-archive delay:1s"
 		hx-select="#image-archive-files-table"
 		hx-target="#image-archive-files-table"
 		hx-swap="outerHTML transition:true"
@@ -265,7 +265,7 @@ templ ContainerImagesTable(
 	<table
 		id="container-images-table"
 		hx-get="/container/image/"
-		hx-trigger="click from:button#delete-image delay:500ms, htmx:afterRequest from:form#import-image-form"
+		hx-trigger="click from:button#delete-image delay:1s, htmx:afterRequest from:form#import-image-form"
 		hx-select="#container-images-table"
 		hx-target="#container-images-table"
 		hx-swap="outerHTML transition:true"
