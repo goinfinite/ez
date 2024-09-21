@@ -67,9 +67,9 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	accountIdUsernameMap := map[valueObject.AccountId]valueObject.Username{}
+	accountIdEntityMap := map[valueObject.AccountId]entity.Account{}
 	for _, accountEntity := range accountEntities {
-		accountIdUsernameMap[accountEntity.Id] = accountEntity.Username
+		accountIdEntityMap[accountEntity.Id] = accountEntity
 	}
 
 	containerService := service.NewContainerService(
@@ -101,7 +101,7 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 	}
 
 	pageContent := page.ContainerImageIndex(
-		imageEntities, archiveFileEntities, accountIdUsernameMap,
+		imageEntities, archiveFileEntities, accountIdEntityMap,
 		containerEntities, containerProfileEntities, accountEntities,
 	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)

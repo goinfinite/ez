@@ -137,7 +137,7 @@ script ContainerImageIndexLocalState() {
 templ ContainerImageIndex(
 	imagesEntities []entity.ContainerImage,
 	archiveFilesEntities []entity.ContainerImageArchiveFile,
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 	containerEntities []entity.Container,
 	profileEntities []entity.ContainerProfile,
 	accountEntities []entity.Account,
@@ -157,7 +157,7 @@ templ ContainerImageIndex(
 				"Compressed image files ready to be downloaded to your local machine.",
 				"ph-file-zip",
 			)
-			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdUsernameMap)
+			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdEntityMap)
 			<p class="mt-2 text-xs">
 				Note: archive files are automatically deleted after 24h to preserve storage space.
 			</p>
@@ -184,11 +184,11 @@ templ ContainerImageIndex(
 					)
 				</div>
 			</div>
-			@ContainerImagesTable(imagesEntities, accountIdUsernameMap)
+			@ContainerImagesTable(imagesEntities, accountIdEntityMap)
 			<p class="mt-2 text-xs">
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
-			@ImportContainerImageModal(accountIdUsernameMap)
+			@ImportContainerImageModal(accountIdEntityMap)
 			@TakeContainerSnapshotModal(containerEntities, profileEntities, accountEntities)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
@@ -200,7 +200,7 @@ templ ContainerImageIndex(
 
 templ ContainerImageArchiveFilesTable(
 	archiveFilesEntities []entity.ContainerImageArchiveFile,
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	<table
 		id="image-archive-files-table"
@@ -227,7 +227,7 @@ templ ContainerImageArchiveFilesTable(
 					<td class="w-3/6 px-3 py-2">{ archiveFileEntity.UnixFilePath.String() }</td>
 					<td class="px-3 py-2">{ archiveFileEntity.ImageId.String() }</td>
 					<td class="px-3 py-2 leading-tight">
-						<p>{ accountIdUsernameMap[archiveFileEntity.AccountId].String() }</p>
+						<p>{ accountIdEntityMap[archiveFileEntity.AccountId].Username.String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">
 							({ archiveFileEntity.AccountId.String() })
 						</i>
@@ -261,7 +261,7 @@ templ ContainerImageArchiveFilesTable(
 
 templ ContainerImagesTable(
 	imagesEntities []entity.ContainerImage,
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	<table
 		id="container-images-table"
@@ -294,7 +294,7 @@ templ ContainerImagesTable(
 				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ imageEntity.Id.String() }</td>
 					<td class="px-6 py-4 leading-tight">
-						<p>{ accountIdUsernameMap[imageEntity.AccountId].String() }</p>
+						<p>{ accountIdEntityMap[imageEntity.AccountId].Username.String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">({ imageEntity.AccountId.String() })</i>
 					</td>
 					<td class="px-6 py-4 leading-tight">
@@ -334,12 +334,12 @@ templ ContainerImagesTable(
 }
 
 func transformAccountMapIntoSelectLabelValuePair(
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) []componentForm.SelectLabelValuePair {
 	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
-	for accountId, username := range accountIdUsernameMap {
+	for accountId, accountEntity := range accountIdEntityMap {
 		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: username.String(),
+			Label: accountEntity.Username.String(),
 			Value: accountId.String(),
 		}
 		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
@@ -348,7 +348,7 @@ func transformAccountMapIntoSelectLabelValuePair(
 }
 
 templ ImportContainerImageForm(
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	<form
 		id="import-image-form"
@@ -360,7 +360,7 @@ templ ImportContainerImageForm(
 		<div class="flex flex-col space-y-6">
 			@componentForm.SelectInputWithLabelValuePair(
 				"accountId", "Account", "containerImage.accountId",
-				transformAccountMapIntoSelectLabelValuePair(accountIdUsernameMap), false,
+				transformAccountMapIntoSelectLabelValuePair(accountIdEntityMap), false,
 			)
 			@componentForm.Dropzone(
 				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br",
@@ -403,12 +403,12 @@ templ ImportContainerImageFaq() {
 }
 
 templ ImportContainerImageModal(
-	accountIdUsernameMap map[valueObject.AccountId]valueObject.Username,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	@componentStructural.Modal(
 		"Import Container Image", "isImportImageModalOpen", "closeImportImageModal()", "",
 	) {
-		@ImportContainerImageForm(accountIdUsernameMap)
+		@ImportContainerImageForm(accountIdEntityMap)
 		@ImportContainerImageFaq()
 	}
 }
@@ -452,6 +452,7 @@ templ TakeContainerSnapshotForm(
 		hx-swap="none"
 	>
 		<div class="flex flex-col space-y-6">
+			<input type="hidden" name="accountId" x-model="accountId"/>
 			@componentForm.SearchableSelectInput(
 				"containerId", "Container", "containerId",
 				transformContainerSummariesIntoSearchableSelectItems(
