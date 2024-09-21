@@ -5,7 +5,6 @@ import (
 )
 
 type CreateContainerSnapshotImage struct {
-	AccountId                valueObject.AccountId          `json:"accountId"`
 	ContainerId              valueObject.ContainerId        `json:"containerId"`
 	ShouldCreateArchive      *bool                          `json:"shouldCreateArchive"`
 	ArchiveCompressionFormat *valueObject.CompressionFormat `json:"archiveCompressionFormat"`
@@ -15,7 +14,6 @@ type CreateContainerSnapshotImage struct {
 }
 
 func NewCreateContainerSnapshotImage(
-	accountId valueObject.AccountId,
 	containerId valueObject.ContainerId,
 	shouldCreateArchive *bool,
 	archiveCompressionFormat *valueObject.CompressionFormat,
@@ -24,7 +22,6 @@ func NewCreateContainerSnapshotImage(
 	operatorIpAddress valueObject.IpAddress,
 ) CreateContainerSnapshotImage {
 	return CreateContainerSnapshotImage{
-		AccountId:                accountId,
 		ContainerId:              containerId,
 		ShouldCreateArchive:      shouldCreateArchive,
 		ArchiveCompressionFormat: archiveCompressionFormat,

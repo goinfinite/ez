@@ -52,17 +52,13 @@ func (controller *ContainerImageController) Read(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createContainerSnapshotImageDto 	  body    dto.CreateContainerSnapshotImage  true  "'accountId' is optional and defaults to current user's if not provided. It's used to identify who will own the snapshot image and not the original container owner. Make sure the selected 'accountId' has enough quota to store the snapshot (and/or archive) before proceeding.<br />'shouldCreateArchive' and 'shouldDiscardImage' are optional and default to false if not provided.<br/>'shouldDiscardImage' is only effective when 'shouldCreateArchive' is true and it will delete the snapshot image after creating the archive file.<br /> 'archiveCompressionFormat' is optional and defaults to 'br' if not provided. Although it's possible to provide other values, it's recommended to use 'br' for best speed/compression ratio."
+// @Param        createContainerSnapshotImageDto 	  body    dto.CreateContainerSnapshotImage  true  "Container's owner account must have enough quota to store the snapshot image (and/or archive).<br />'shouldCreateArchive' and 'shouldDiscardImage' are optional and default to false if not provided.<br/>'shouldDiscardImage' is only effective when 'shouldCreateArchive' is true and it will delete the snapshot image after creating the archive file.<br /> 'archiveCompressionFormat' is optional and defaults to 'br' if not provided. Although it's possible to provide other values, it's recommended to use 'br' for best speed/compression ratio."
 // @Success      201 {object} object{} "ContainerSnapshotImageCreationScheduled"
 // @Router       /v1/container/image/snapshot/ [post]
 func (controller *ContainerImageController) CreateSnapshot(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
-	}
-
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
 	return apiHelper.ServiceResponseWrapper(

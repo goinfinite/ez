@@ -24,7 +24,6 @@ func TestContainerImageCmdRepo(t *testing.T) {
 		}
 
 		createDto := dto.CreateContainerSnapshotImage{
-			AccountId:   containersList[0].AccountId,
 			ContainerId: containersList[0].Id,
 		}
 		_, err = containerImageCmdRepo.CreateSnapshot(createDto)

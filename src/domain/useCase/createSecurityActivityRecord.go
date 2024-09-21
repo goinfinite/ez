@@ -286,6 +286,7 @@ func (uc *CreateSecurityActivityRecord) DeleteMappingTarget(
 
 func (uc *CreateSecurityActivityRecord) CreateContainerSnapshotImage(
 	createDto dto.CreateContainerSnapshotImage,
+	imageAccountId valueObject.AccountId,
 	imageId valueObject.ContainerImageId,
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerSnapshotImageCreated")
@@ -294,7 +295,7 @@ func (uc *CreateSecurityActivityRecord) CreateContainerSnapshotImage(
 		RecordCode:        recordCode,
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
+		AccountId:         &imageAccountId,
 		ContainerId:       &createDto.ContainerId,
 		ContainerImageId:  &imageId,
 	}

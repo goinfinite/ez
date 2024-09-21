@@ -32,7 +32,6 @@ func (controller *ContainerImageController) Read() *cobra.Command {
 }
 
 func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
-	var accountIdUint uint64
 	var containerIdStr, shouldCreateArchiveBoolStr, archiveCompressionFormatStr string
 	var shouldDiscardImageBoolStr string
 
@@ -41,7 +40,6 @@ func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 		Short: "CreateContainerSnapshotImage",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId":           accountIdUint,
 				"containerId":         containerIdStr,
 				"shouldCreateArchive": shouldCreateArchiveBoolStr,
 				"shouldDiscardImage":  shouldDiscardImageBoolStr,
@@ -57,8 +55,6 @@ func (controller *ContainerImageController) CreateSnapshot() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
-	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
 	cmd.MarkFlagRequired("container-id")
 	cmd.Flags().StringVarP(

@@ -41,13 +41,13 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 		":" + valueObject.NewUnixTimeNow().String()
 
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadById(containerEntity.AccountId)
 	if err != nil {
 		return imageId, err
 	}
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
-		createDto.AccountId,
+		containerEntity.AccountId,
 		"podman", "commit", "--quiet",
 		"--author", "control:"+createDto.OperatorAccountId.String(),
 		containerIdStr,

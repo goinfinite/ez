@@ -22,8 +22,9 @@ func CreateContainerSnapshotImage(
 	if err != nil {
 		return errors.New("ContainerNotFound")
 	}
+	containerAccountId := containerEntityWithMetrics.AccountId
 
-	accountEntity, err := accountQueryRepo.ReadById(createSnapshotDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadById(containerAccountId)
 	if err != nil {
 		slog.Error("ReadAccountInfoInfraError", slog.Any("error", err))
 		return errors.New("ReadAccountInfoInfraError")
@@ -42,7 +43,7 @@ func CreateContainerSnapshotImage(
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		CreateContainerSnapshotImage(createSnapshotDto, imageId)
+		CreateContainerSnapshotImage(createSnapshotDto, containerAccountId, imageId)
 
 	if createSnapshotDto.ShouldCreateArchive == nil {
 		return nil
@@ -53,7 +54,7 @@ func CreateContainerSnapshotImage(
 	}
 
 	createArchiveDto := dto.NewCreateContainerImageArchiveFile(
-		createSnapshotDto.AccountId, imageId, createSnapshotDto.ArchiveCompressionFormat,
+		containerAccountId, imageId, createSnapshotDto.ArchiveCompressionFormat,
 		createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
 	)
 	_, err = CreateContainerImageArchiveFile(
@@ -73,7 +74,7 @@ func CreateContainerSnapshotImage(
 	}
 
 	deleteImageDto := dto.NewDeleteContainerImage(
-		createSnapshotDto.AccountId, imageId,
+		containerAccountId, imageId,
 		createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
 	)
 	err = containerImageCmdRepo.Delete(deleteImageDto)

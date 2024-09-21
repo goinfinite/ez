@@ -44,14 +44,9 @@ func (service *ContainerImageService) CreateSnapshot(
 	input map[string]interface{},
 	shouldSchedule bool,
 ) ServiceOutput {
-	requiredParams := []string{"accountId", "containerId"}
+	requiredParams := []string{"containerId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
-	if err != nil {
-		return NewServiceOutput(UserError, err.Error())
-	}
-
-	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -93,7 +88,6 @@ func (service *ContainerImageService) CreateSnapshot(
 	if shouldSchedule {
 		cliCmd := infraEnvs.SpeediaControlBinary + " container image create-snapshot"
 		createParams := []string{
-			"--account-id", accountId.String(),
 			"--container-id", containerId.String(),
 		}
 		if shouldCreateArchivePtr != nil && *shouldCreateArchivePtr {
@@ -148,7 +142,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	}
 
 	createSnapshotImageDto := dto.NewCreateContainerSnapshotImage(
-		accountId, containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr,
+		containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr,
 		shouldDiscardImagePtr, operatorAccountId, operatorIpAddress,
 	)
 
