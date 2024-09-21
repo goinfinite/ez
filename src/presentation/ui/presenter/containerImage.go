@@ -102,7 +102,7 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 
 	pageContent := page.ContainerImageIndex(
 		imageEntities, archiveFileEntities, accountIdEntityMap,
-		containerEntities, containerProfileEntities, accountEntities,
+		containerEntities, containerProfileEntities,
 	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }

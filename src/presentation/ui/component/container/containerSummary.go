@@ -50,8 +50,6 @@ func NewContainerSummaries(
 	profileEntities []entity.ContainerProfile,
 	accountEntities []entity.Account,
 ) []ContainerSummary {
-	containerSummaries := []ContainerSummary{}
-
 	containerIdEntityMap := map[valueObject.ContainerId]entity.Container{}
 	for _, containerEntity := range containerEntities {
 		containerIdEntityMap[containerEntity.Id] = containerEntity
@@ -67,7 +65,19 @@ func NewContainerSummaries(
 		accountIdEntityMap[accountEntity.Id] = accountEntity
 	}
 
-	for _, containerEntity := range containerEntities {
+	return NewContainerSummariesWithMaps(
+		containerIdEntityMap, profileIdEntityMap, accountIdEntityMap,
+	)
+}
+
+func NewContainerSummariesWithMaps(
+	containerIdEntityMap map[valueObject.ContainerId]entity.Container,
+	profileIdEntityMap map[valueObject.ContainerProfileId]entity.ContainerProfile,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
+) []ContainerSummary {
+	containerSummaries := []ContainerSummary{}
+
+	for _, containerEntity := range containerIdEntityMap {
 		profileEntity, exists := profileIdEntityMap[containerEntity.ProfileId]
 		if !exists {
 			continue

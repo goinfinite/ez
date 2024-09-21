@@ -140,7 +140,6 @@ templ ContainerImageIndex(
 	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 	containerEntities []entity.Container,
 	profileEntities []entity.ContainerProfile,
-	accountEntities []entity.Account,
 ) {
 	@ContainerImageIndexLocalState()
 	<div class="flex flex-col">
@@ -189,7 +188,7 @@ templ ContainerImageIndex(
 				Note: dangling images are automatically deleted after 30d to preserve storage space.
 			</p>
 			@ImportContainerImageModal(accountIdEntityMap)
-			@TakeContainerSnapshotModal(containerEntities, profileEntities, accountEntities)
+			@TakeContainerSnapshotModal(containerEntities, profileEntities, accountIdEntityMap)
 			@componentStructural.DeleteModal(
 				"isDeleteImageModalOpen", "closeDeleteImageModal()", "deleteImage()",
 				"delete-image", "containerImage.id", "",
@@ -416,11 +415,22 @@ templ ImportContainerImageModal(
 func transformContainerSummariesIntoSearchableSelectItems(
 	containerEntities []entity.Container,
 	profileEntities []entity.ContainerProfile,
-	accountEntities []entity.Account,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
-	containerSummaries := componentContainer.NewContainerSummaries(
-		containerEntities, profileEntities, accountEntities,
+
+	containerIdEntityMap := map[valueObject.ContainerId]entity.Container{}
+	for _, containerEntity := range containerEntities {
+		containerIdEntityMap[containerEntity.Id] = containerEntity
+	}
+
+	profileIdEntityMap := map[valueObject.ContainerProfileId]entity.ContainerProfile{}
+	for _, profileEntity := range profileEntities {
+		profileIdEntityMap[profileEntity.Id] = profileEntity
+	}
+
+	containerSummaries := componentContainer.NewContainerSummariesWithMaps(
+		containerIdEntityMap, profileIdEntityMap, accountIdEntityMap,
 	)
 
 	for _, containerSummary := range containerSummaries {
@@ -442,7 +452,7 @@ func transformContainerSummariesIntoSearchableSelectItems(
 templ TakeContainerSnapshotForm(
 	containerEntities []entity.Container,
 	profileEntities []entity.ContainerProfile,
-	accountEntities []entity.Account,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	<form
 		id="take-snapshot-form"
@@ -452,11 +462,14 @@ templ TakeContainerSnapshotForm(
 		hx-swap="none"
 	>
 		<div class="flex flex-col space-y-6">
-			<input type="hidden" name="accountId" x-model="accountId"/>
+			@componentForm.SelectInputWithLabelValuePair(
+				"accountId", "Account", "containerImage.accountId",
+				transformAccountMapIntoSelectLabelValuePair(accountIdEntityMap), false,
+			)
 			@componentForm.SearchableSelectInput(
 				"containerId", "Container", "containerId",
 				transformContainerSummariesIntoSearchableSelectItems(
-					containerEntities, profileEntities, accountEntities,
+					containerEntities, profileEntities, accountIdEntityMap,
 				),
 			)
 			@componentForm.CheckboxInputSwitchToggle(
@@ -495,11 +508,11 @@ templ TakeContainerSnapshotForm(
 templ TakeContainerSnapshotModal(
 	containerEntities []entity.Container,
 	profileEntities []entity.ContainerProfile,
-	accountEntities []entity.Account,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	@componentStructural.Modal(
 		"Take Container Snapshot", "isTakeSnapshotModalOpen", "closeTakeSnapshotModal()", "",
 	) {
-		@TakeContainerSnapshotForm(containerEntities, profileEntities, accountEntities)
+		@TakeContainerSnapshotForm(containerEntities, profileEntities, accountIdEntityMap)
 	}
 }
