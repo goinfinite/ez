@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func InterfaceToBool(input interface{}) (output bool, err error) {
@@ -13,6 +14,11 @@ func InterfaceToBool(input interface{}) (output bool, err error) {
 		output = v
 	case string:
 		output, err = strconv.ParseBool(v)
+		if err != nil {
+			inputStr := strings.ToLower(v)
+			output = inputStr == "on" || inputStr == "yes" || inputStr == "y"
+			err = nil
+		}
 	case int, int8, int16, int32, int64:
 		intValue := reflect.ValueOf(v).Int()
 		output = intValue != 0
