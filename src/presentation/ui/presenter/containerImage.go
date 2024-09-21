@@ -9,6 +9,8 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	"github.com/speedianet/control/src/presentation/service"
+	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
+	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
 	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
 	"github.com/speedianet/control/src/presentation/ui/page"
 )
@@ -26,6 +28,57 @@ func NewContainerImagePresenter(
 		persistentDbSvc: persistentDbSvc,
 		trailDbSvc:      trailDbSvc,
 	}
+}
+
+func transformAccountMapIntoSelectLabelValuePair(
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
+) []componentForm.SelectLabelValuePair {
+	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
+	for accountId, accountEntity := range accountIdEntityMap {
+		selectLabelValuePair := componentForm.SelectLabelValuePair{
+			Label: accountEntity.Username.String(),
+			Value: accountId.String(),
+		}
+		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+	}
+	return selectLabelValuePairs
+}
+
+func transformContainerSummariesIntoSearchableSelectItems(
+	containerEntities []entity.Container,
+	profileEntities []entity.ContainerProfile,
+	accountIdEntityMap map[valueObject.AccountId]entity.Account,
+) []componentForm.SearchableSelectItem {
+	searchableSelectItems := []componentForm.SearchableSelectItem{}
+
+	containerIdEntityMap := map[valueObject.ContainerId]entity.Container{}
+	for _, containerEntity := range containerEntities {
+		containerIdEntityMap[containerEntity.Id] = containerEntity
+	}
+
+	profileIdEntityMap := map[valueObject.ContainerProfileId]entity.ContainerProfile{}
+	for _, profileEntity := range profileEntities {
+		profileIdEntityMap[profileEntity.Id] = profileEntity
+	}
+
+	containerSummaries := componentContainer.NewContainerSummariesWithMaps(
+		containerIdEntityMap, profileIdEntityMap, accountIdEntityMap,
+	)
+
+	for _, containerSummary := range containerSummaries {
+		searchableTextSerialized := containerSummary.JsonSerialize()
+		htmlLabel := componentContainer.ContainerTaggedSummary(containerSummary)
+
+		searchableSelectItem := componentForm.SearchableSelectItem{
+			Label:          containerSummary.Hostname.String(),
+			Value:          containerSummary.ContainerId.String(),
+			SearchableText: &searchableTextSerialized,
+			HtmlLabel:      &htmlLabel,
+		}
+		searchableSelectItems = append(searchableSelectItems, searchableSelectItem)
+	}
+
+	return searchableSelectItems
 }
 
 func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
@@ -100,9 +153,14 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
+	accountsSelectPairs := transformAccountMapIntoSelectLabelValuePair(accountIdEntityMap)
+	containerSummariesSearchableItems := transformContainerSummariesIntoSearchableSelectItems(
+		containerEntities, containerProfileEntities, accountIdEntityMap,
+	)
+
 	pageContent := page.ContainerImageIndex(
 		imageEntities, archiveFileEntities, accountIdEntityMap,
-		containerEntities, containerProfileEntities,
+		accountsSelectPairs, containerSummariesSearchableItems,
 	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
