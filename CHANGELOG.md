@@ -1,7 +1,7 @@
 # Changelog
 
 ```log
-0.0.7 - 2024/XX/XX
+0.0.7 - 2024/09/23
 feat: container images
 feat: create security record for all write operations
 feat: add account id to container profile
