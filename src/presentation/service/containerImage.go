@@ -65,7 +65,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	if input["shouldCreateArchive"] != nil {
 		shouldCreateArchive, err := voHelper.InterfaceToBool(input["shouldCreateArchive"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, "InvalidShouldCreateArchive")
 		}
 		shouldCreateArchivePtr = &shouldCreateArchive
 	}
@@ -85,7 +85,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	if input["shouldDiscardImage"] != nil {
 		shouldDiscardImage, err := voHelper.InterfaceToBool(input["shouldDiscardImage"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, "InvalidShouldDiscardImage")
 		}
 		shouldDiscardImagePtr = &shouldDiscardImage
 	}
