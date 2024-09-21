@@ -179,13 +179,13 @@ templ SearchableSelectInput(
 		</div>
 		<div
 			x-show="showDropdown"
-			class="max-h-select bg-control-700 absolute top-10 z-40 w-full overflow-y-auto rounded-md"
+			class="bg-control-300 absolute top-10 z-40 max-h-64 w-full overflow-y-auto rounded-b-md drop-shadow-xl"
 		>
 			<div class="[&>*:nth-child(even)]:bg-control-400 flex w-full flex-col">
 				for _, searchableItem := range searchableItems {
 					<div
 						x-show={ "filteredItems.has('" + searchableItem.Value + "')" }
-						class="hover:bg-control-300 cursor-pointer p-2"
+						class="hover:bg-control-700 cursor-pointer p-2"
 						@click={ "setSelectedItem('" + searchableItem.Value + "'); " + bindValuePath + " = '" + searchableItem.Value + "'" }
 					>
 						@readSearchableSelectItemLabel(searchableItem)
