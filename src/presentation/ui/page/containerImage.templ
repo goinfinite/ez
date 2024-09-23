@@ -42,6 +42,7 @@ script ContainerImageIndexLocalState() {
 					'/api/v1/container/image/archive/' + this.imageArchive.accountId + '/' + this.imageArchive.id + '/',
 					{swap: 'none'},
 				);
+				this.$dispatch('delete:image-archive');
 				this.closeDeleteArchiveModal();
 			},
 		}));
@@ -110,6 +111,7 @@ script ContainerImageIndexLocalState() {
 					'/api/v1/container/image/' + this.containerImage.accountId + '/' + this.containerImage.id + '/',
 					{swap: 'none'},
 				);
+				this.$dispatch('delete:container-image');
 				this.closeDeleteImageModal();
 			},
 		}));
@@ -204,7 +206,7 @@ templ ContainerImageArchiveFilesTable(
 	<table
 		id="image-archive-files-table"
 		hx-get="/container/image/"
-		hx-trigger="click from:button#delete-archive delay:1s"
+		hx-trigger="delete:image-archive from:window delay:250ms"
 		hx-select="#image-archive-files-table"
 		hx-target="#image-archive-files-table"
 		hx-swap="outerHTML transition:true"
@@ -265,7 +267,7 @@ templ ContainerImagesTable(
 	<table
 		id="container-images-table"
 		hx-get="/container/image/"
-		hx-trigger="click from:button#delete-image delay:1s, htmx:afterRequest from:form#import-image-form"
+		hx-trigger="delete:container-image from:window delay:250ms, htmx:afterRequest from:form#import-image-form delay:250ms"
 		hx-select="#container-images-table"
 		hx-target="#container-images-table"
 		hx-swap="outerHTML transition:true"
