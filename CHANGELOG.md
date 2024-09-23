@@ -1,6 +1,9 @@
 # Changelog
 
 ```log
+0.0.8 - 2024/X/X
+fix: add and use blank metrics if container not running
+
 0.0.7 - 2024/09/23
 feat: container images
 feat: create security record for all write operations
