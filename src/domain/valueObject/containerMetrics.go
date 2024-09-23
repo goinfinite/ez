@@ -37,3 +37,19 @@ func NewContainerMetrics(
 		NetOutputBytes:     netOutputBytes,
 	}
 }
+
+func NewBlankContainerMetrics(containerId ContainerId) ContainerMetrics {
+	return ContainerMetrics{
+		ContainerId:        containerId,
+		CurrentCpuPercent:  0,
+		AverageCpuPercent:  0,
+		MemoryBytes:        0,
+		MemoryPercent:      0,
+		StorageInputBytes:  0,
+		StorageOutputBytes: 0,
+		StorageSpaceBytes:  0,
+		StorageInodesCount: 0,
+		NetInputBytes:      0,
+		NetOutputBytes:     0,
+	}
+}

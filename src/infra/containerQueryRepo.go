@@ -354,16 +354,13 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 	}
 
 	for _, containerEntity := range containerEntities {
-		if _, exists := runningContainersMetrics[containerEntity.Id]; !exists {
-			slog.Debug(
-				"ContainerMetricsNotFound",
-				slog.String("containerId", containerEntity.Id.String()),
-			)
-			continue
+		containerMetrics := valueObject.NewBlankContainerMetrics(containerEntity.Id)
+		if _, exists := runningContainersMetrics[containerEntity.Id]; exists {
+			containerMetrics = runningContainersMetrics[containerEntity.Id]
 		}
 
 		containerWithMetrics := dto.NewContainerWithMetrics(
-			containerEntity, runningContainersMetrics[containerEntity.Id],
+			containerEntity, containerMetrics,
 		)
 		containersWithMetrics = append(containersWithMetrics, containerWithMetrics)
 	}
@@ -420,15 +417,11 @@ func (repo *ContainerQueryRepo) ReadWithMetricsById(
 	if err != nil {
 		return containerWithMetrics, err
 	}
-	if len(runningContainerMetrics) == 0 {
-		return containerWithMetrics, errors.New("ContainerMetricsNotFound")
+
+	containerMetrics := valueObject.NewBlankContainerMetrics(containerEntity.Id)
+	if _, exists := runningContainerMetrics[containerId]; exists {
+		containerMetrics = runningContainerMetrics[containerId]
 	}
 
-	if _, exists := runningContainerMetrics[containerId]; !exists {
-		return containerWithMetrics, errors.New("ContainerMetricsNotFound")
-	}
-
-	return dto.NewContainerWithMetrics(
-		containerEntity, runningContainerMetrics[containerId],
-	), nil
+	return dto.NewContainerWithMetrics(containerEntity, containerMetrics), nil
 }
