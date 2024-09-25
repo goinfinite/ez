@@ -8,20 +8,14 @@ import (
 )
 
 type ActivityRecord struct {
-	ID                 uint64 `gorm:"primarykey"`
-	RecordLevel        string `gorm:"not null"`
-	RecordCode         string `gorm:"not null"`
-	OperatorAccountId  *uint64
-	OperatorIpAddress  *string
-	AccountId          *uint64
-	ContainerId        *string
-	ContainerProfileId *uint64
-	ContainerImageId   *string
-	MappingId          *uint64
-	MappingTargetId    *uint64
-	ScheduledTaskId    *uint64
-	RecordDetails      *string
-	CreatedAt          time.Time `gorm:"not null"`
+	ID                uint64 `gorm:"primarykey"`
+	RecordLevel       string `gorm:"not null"`
+	RecordCode        string `gorm:"not null"`
+	AffectedResources []ActivityRecordAffectedResource
+	RecordDetails     *string
+	OperatorAccountId *uint64
+	OperatorIpAddress *string
+	CreatedAt         time.Time `gorm:"not null"`
 }
 
 func (ActivityRecord) TableName() string {
@@ -31,28 +25,18 @@ func (ActivityRecord) TableName() string {
 func NewActivityRecord(
 	recordId uint64,
 	recordLevel, recordCode string,
+	affectedResources []ActivityRecordAffectedResource,
+	recordDetails *string,
 	operatorAccountId *uint64,
 	operatorIpAddress *string,
-	accountId *uint64,
-	containerId *string,
-	containerProfileId *uint64,
-	containerImageId *string,
-	mappingId, mappingTargetId, scheduledTaskId *uint64,
-	recordDetails *string,
 ) ActivityRecord {
 	model := ActivityRecord{
-		RecordLevel:        recordLevel,
-		RecordCode:         recordCode,
-		OperatorAccountId:  operatorAccountId,
-		OperatorIpAddress:  operatorIpAddress,
-		AccountId:          accountId,
-		ContainerId:        containerId,
-		ContainerProfileId: containerProfileId,
-		ContainerImageId:   containerImageId,
-		MappingId:          mappingId,
-		MappingTargetId:    mappingTargetId,
-		ScheduledTaskId:    scheduledTaskId,
-		RecordDetails:      recordDetails,
+		RecordLevel:       recordLevel,
+		RecordCode:        recordCode,
+		AffectedResources: affectedResources,
+		RecordDetails:     recordDetails,
+		OperatorAccountId: operatorAccountId,
+		OperatorIpAddress: operatorIpAddress,
 	}
 
 	if recordId != 0 {
@@ -78,6 +62,20 @@ func (model ActivityRecord) ToEntity() (recordEntity entity.ActivityRecord, err 
 		return recordEntity, err
 	}
 
+	affectedResources := []valueObject.SystemResourceIdentifier{}
+	for _, resource := range model.AffectedResources {
+		sri, err := valueObject.NewSystemResourceIdentifier(resource.SystemResourceIdentifier)
+		if err != nil {
+			return recordEntity, err
+		}
+		affectedResources = append(affectedResources, sri)
+	}
+
+	var recordDetails interface{}
+	if model.RecordDetails != nil {
+		recordDetails = *model.RecordDetails
+	}
+
 	var operatorAccountIdPtr *valueObject.AccountId
 	if model.OperatorAccountId != nil {
 		operatorAccountId, err := valueObject.NewAccountId(*model.OperatorAccountId)
@@ -96,79 +94,10 @@ func (model ActivityRecord) ToEntity() (recordEntity entity.ActivityRecord, err 
 		operatorIpAddressPtr = &operatorIpAddress
 	}
 
-	var accountIdPtr *valueObject.AccountId
-	if model.AccountId != nil {
-		accountId, err := valueObject.NewAccountId(*model.AccountId)
-		if err != nil {
-			return recordEntity, err
-		}
-		accountIdPtr = &accountId
-	}
-
-	var containerIdPtr *valueObject.ContainerId
-	if model.ContainerId != nil {
-		containerId, err := valueObject.NewContainerId(*model.ContainerId)
-		if err != nil {
-			return recordEntity, err
-		}
-		containerIdPtr = &containerId
-	}
-
-	var containerProfileIdPtr *valueObject.ContainerProfileId
-	if model.ContainerProfileId != nil {
-		containerProfileId, err := valueObject.NewContainerProfileId(*model.ContainerProfileId)
-		if err != nil {
-			return recordEntity, err
-		}
-		containerProfileIdPtr = &containerProfileId
-	}
-
-	var containerImageIdPtr *valueObject.ContainerImageId
-	if model.ContainerImageId != nil {
-		containerImageId, err := valueObject.NewContainerImageId(*model.ContainerImageId)
-		if err != nil {
-			return recordEntity, err
-		}
-		containerImageIdPtr = &containerImageId
-	}
-
-	var mappingIdPtr *valueObject.MappingId
-	if model.MappingId != nil {
-		mappingId, err := valueObject.NewMappingId(*model.MappingId)
-		if err != nil {
-			return recordEntity, err
-		}
-		mappingIdPtr = &mappingId
-	}
-
-	var mappingTargetIdPtr *valueObject.MappingTargetId
-	if model.MappingTargetId != nil {
-		mappingTargetId, err := valueObject.NewMappingTargetId(*model.MappingTargetId)
-		if err != nil {
-			return recordEntity, err
-		}
-		mappingTargetIdPtr = &mappingTargetId
-	}
-
-	var scheduledTaskIdPtr *valueObject.ScheduledTaskId
-	if model.ScheduledTaskId != nil {
-		scheduledTaskId, err := valueObject.NewScheduledTaskId(*model.ScheduledTaskId)
-		if err != nil {
-			return recordEntity, err
-		}
-		scheduledTaskIdPtr = &scheduledTaskId
-	}
-
-	var recordDetails interface{}
-	if model.RecordDetails != nil {
-		recordDetails = *model.RecordDetails
-	}
-
 	createdAt := valueObject.NewUnixTimeWithGoTime(model.CreatedAt)
 
 	return entity.NewActivityRecord(
-		recordId, recordLevel, recordCode, operatorAccountIdPtr, operatorIpAddressPtr,
-		accountIdPtr, containerIdPtr, containerProfileIdPtr, containerImageIdPtr,
-		mappingIdPtr, mappingTargetIdPtr, scheduledTaskIdPtr, recordDetails, createdAt,
+		recordId, recordLevel, recordCode, affectedResources, recordDetails,
+		operatorAccountIdPtr, operatorIpAddressPtr, createdAt,
 	)
 }

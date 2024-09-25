@@ -25,6 +25,11 @@ func (repo *ActivityRecordQueryRepo) Read(
 	activityRecordEvents := []entity.ActivityRecord{}
 
 	readModel := dbModel.ActivityRecord{}
+	if readDto.RecordId != nil {
+		recordId := readDto.RecordId.Uint64()
+		readModel.ID = recordId
+	}
+
 	if readDto.RecordLevel != nil {
 		recordLevelStr := readDto.RecordLevel.String()
 		readModel.RecordLevel = recordLevelStr
@@ -35,6 +40,18 @@ func (repo *ActivityRecordQueryRepo) Read(
 		readModel.RecordCode = recordCodeStr
 	}
 
+	if len(readDto.AffectedResources) > 0 {
+		affectedResources := []dbModel.ActivityRecordAffectedResource{}
+		for _, affectedResourceSri := range readDto.AffectedResources {
+			affectedResourceModel := dbModel.ActivityRecordAffectedResource{
+				SystemResourceIdentifier: affectedResourceSri.String(),
+			}
+			affectedResources = append(affectedResources, affectedResourceModel)
+		}
+
+		readModel.AffectedResources = affectedResources
+	}
+
 	if readDto.OperatorAccountId != nil {
 		operatorAccountId := readDto.OperatorAccountId.Uint64()
 		readModel.OperatorAccountId = &operatorAccountId
@@ -43,36 +60,6 @@ func (repo *ActivityRecordQueryRepo) Read(
 	if readDto.OperatorIpAddress != nil {
 		operatorIpAddressStr := readDto.OperatorIpAddress.String()
 		readModel.OperatorIpAddress = &operatorIpAddressStr
-	}
-
-	if readDto.AccountId != nil {
-		accountId := readDto.AccountId.Uint64()
-		readModel.AccountId = &accountId
-	}
-
-	if readDto.ContainerId != nil {
-		containerIdStr := readDto.ContainerId.String()
-		readModel.ContainerId = &containerIdStr
-	}
-
-	if readDto.ContainerProfileId != nil {
-		containerProfileId := readDto.ContainerProfileId.Uint64()
-		readModel.ContainerProfileId = &containerProfileId
-	}
-
-	if readDto.ContainerImageId != nil {
-		containerImageId := readDto.ContainerImageId.String()
-		readModel.ContainerImageId = &containerImageId
-	}
-
-	if readDto.MappingId != nil {
-		mappingId := readDto.MappingId.Uint64()
-		readModel.MappingId = &mappingId
-	}
-
-	if readDto.ScheduledTaskId != nil {
-		scheduledTaskId := readDto.ScheduledTaskId.Uint64()
-		readModel.ScheduledTaskId = &scheduledTaskId
 	}
 
 	dbQuery := repo.trailDbSvc.Handler.Where(&readModel)

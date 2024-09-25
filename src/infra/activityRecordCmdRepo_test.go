@@ -32,8 +32,7 @@ func TestActivityRecordCmdRepo(t *testing.T) {
 	t.Run("DeleteActivityRecords", func(t *testing.T) {
 		ipAddress := valueObject.NewLocalhostIpAddress()
 		deleteDto := dto.NewDeleteActivityRecords(
-			nil, &level, &recordCode, nil, &ipAddress, nil, nil, nil,
-			nil, nil, nil, nil, nil, nil,
+			nil, &level, &recordCode, nil, nil, &ipAddress, nil, nil,
 		)
 
 		err := activityRecordCmdRepo.Delete(deleteDto)
