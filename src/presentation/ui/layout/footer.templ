@@ -1,6 +1,10 @@
 package layout
 
-import componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
+import (
+	"fmt"
+	"github.com/speedianet/control/src/domain/entity"
+	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
+)
 
 templ ResourceUsageBar(usageRate uint8, usageLabel, icon string) {
 	<div class="flex items-center">
@@ -9,12 +13,30 @@ templ ResourceUsageBar(usageRate uint8, usageLabel, icon string) {
 	</div>
 }
 
-templ Footer() {
-	<div class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm">
+templ Footer(
+	o11yOverviewEntity entity.O11yOverview,
+	scheduledTasksEntities []entity.ScheduledTask,
+) {
+	<footer
+		id="footer"
+		hx-get="/fragment/footer"
+		hx-trigger="every 20s"
+		hx-target="this"
+		hx-swap="outerHTML"
+		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
+	>
 		<div class="flex items-center space-x-3">
-			@ResourceUsageBar(20, "20%", "ph-speedometer")
-			@ResourceUsageBar(40, "40%", "ph-memory")
+			@ResourceUsageBar(
+				uint8(o11yOverviewEntity.HostResourceUsage.CpuPercent),
+				fmt.Sprintf("%.0f", o11yOverviewEntity.HostResourceUsage.CpuPercent)+"%",
+				"ph-speedometer",
+			)
+			@ResourceUsageBar(
+				uint8(o11yOverviewEntity.HostResourceUsage.MemoryPercent),
+				fmt.Sprintf("%.0f", o11yOverviewEntity.HostResourceUsage.MemoryPercent)+"%",
+				"ph-memory",
+			)
 			@ResourceUsageBar(50, "50%", "ph-hard-drives")
 		</div>
-	</div>
+	</footer>
 }
