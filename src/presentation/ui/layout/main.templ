@@ -119,6 +119,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			<div class="w-full overflow-x-hidden p-6">
 				@pageContent
 			</div>
+			@Footer()
 			@componentUtil.Toast()
 		</body>
 	</html>
