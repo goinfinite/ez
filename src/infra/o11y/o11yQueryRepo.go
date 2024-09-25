@@ -369,7 +369,7 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 		uptime = 0
 	}
 
-	publicIpAddress, err := infraHelper.ReadServerPublicIpAddress()
+	publicIpAddress, err := repo.ReadServerPublicIpAddress()
 	if err != nil {
 		publicIpAddress, _ = valueObject.NewIpAddress("0.0.0.0")
 	}
