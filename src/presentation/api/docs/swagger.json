@@ -13,7 +13,7 @@
             "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
             "url": "https://speedia.net/tos/"
         },
-        "version": "0.0.7"
+        "version": "0.0.8"
     },
     "basePath": "/api",
     "paths": {

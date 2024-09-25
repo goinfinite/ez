@@ -2,6 +2,8 @@
 
 ```log
 0.0.8 - 2024/X/X
+refactor: use sri for activity records
+feat: add system resource identifier
 fix: add and use blank metrics if container not running
 fix: listen to delete custom events on container images
 
