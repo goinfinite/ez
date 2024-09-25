@@ -119,7 +119,13 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			<div class="w-full overflow-x-hidden p-6">
 				@pageContent
 			</div>
-			@Footer()
+			<footer
+				id="footer"
+				hx-get="/fragment/footer"
+				hx-trigger="load delay:300ms"
+				hx-target="this"
+				hx-swap="outerHTML transition:true"
+			></footer>
 			@componentUtil.Toast()
 		</body>
 	</html>
