@@ -3,7 +3,10 @@
 ```log
 0.0.8 - 2024/X/X
 refactor: use sri for activity records
+feat: add footer bar with resources usage
+feat: improve host resource usage entity
 feat: add system resource identifier
+feat: use system resource identifier for activity records
 fix: add and use blank metrics if container not running
 fix: listen to delete custom events on container images
 
