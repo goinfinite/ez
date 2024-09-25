@@ -144,6 +144,8 @@ definitions:
     type: object
   dto.CreateMappingTarget:
     properties:
+      accountId:
+        type: integer
       containerId:
         type: string
       mappingId:
@@ -1359,6 +1361,57 @@ paths:
       security:
       - Bearer: []
       summary: CreateNewMapping
+      tags:
+      - mapping
+  /v1/mapping/{accountId}/{mappingId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a mapping.
+      parameters:
+      - description: MappingId
+        in: path
+        name: mappingId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MappingDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteMapping
+      tags:
+      - mapping
+  /v1/mapping/{accountId}/{mappingId}/target/{targetId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a mapping target.
+      parameters:
+      - description: MappingId
+        in: path
+        name: mappingId
+        required: true
+        type: string
+      - description: TargetId
+        in: path
+        name: targetId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: MappingTargetDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteMappingTarget
       tags:
       - mapping
   /v1/mapping/{mappingId}/:

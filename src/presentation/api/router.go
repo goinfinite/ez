@@ -133,9 +133,13 @@ func (router *Router) mappingRoutes() {
 	mappingGroup.GET("/", mappingController.Read)
 	mappingGroup.POST("/", mappingController.Create)
 	mappingGroup.DELETE("/:mappingId/", mappingController.Delete)
+	mappingGroup.DELETE("/:accountId/:mappingId/", mappingController.Delete)
 	mappingGroup.POST("/target/", mappingController.CreateTarget)
 	mappingGroup.DELETE(
 		"/:mappingId/target/:targetId/", mappingController.DeleteTarget,
+	)
+	mappingGroup.DELETE(
+		"/:accountId/:mappingId/target/:targetId/", mappingController.DeleteTarget,
 	)
 }
 

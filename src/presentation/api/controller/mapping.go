@@ -99,10 +99,18 @@ func (controller *MappingController) Create(c echo.Context) error {
 // @Param        mappingId 	  path   string  true  "MappingId"
 // @Success      200 {object} object{} "MappingDeleted"
 // @Router       /v1/mapping/{mappingId}/ [delete]
+// @Router       /v1/mapping/{accountId}/{mappingId}/ [delete]
 func (controller *MappingController) Delete(c echo.Context) error {
+	operatorAccountId := c.Get("accountId").(string)
+	accountId := c.Param("accountId")
+	if accountId == "" {
+		accountId = operatorAccountId
+	}
+
 	requestBody := map[string]interface{}{
+		"accountId":         accountId,
 		"mappingId":         c.Param("mappingId"),
-		"operatorAccountId": c.Get("accountId"),
+		"operatorAccountId": operatorAccountId,
 		"operatorIpAddress": c.RealIP(),
 	}
 
@@ -147,11 +155,19 @@ func (controller *MappingController) CreateTarget(c echo.Context) error {
 // @Param        targetId 	  path   string  true  "TargetId"
 // @Success      200 {object} object{} "MappingTargetDeleted"
 // @Router       /v1/mapping/{mappingId}/target/{targetId}/ [delete]
+// @Router       /v1/mapping/{accountId}/{mappingId}/target/{targetId}/ [delete]
 func (controller *MappingController) DeleteTarget(c echo.Context) error {
+	operatorAccountId := c.Get("accountId").(string)
+	accountId := c.Param("accountId")
+	if accountId == "" {
+		accountId = operatorAccountId
+	}
+
 	requestBody := map[string]interface{}{
+		"accountId":         accountId,
 		"mappingId":         c.Param("mappingId"),
 		"targetId":          c.Param("targetId"),
-		"operatorAccountId": c.Get("accountId"),
+		"operatorAccountId": operatorAccountId,
 		"operatorIpAddress": c.RealIP(),
 	}
 

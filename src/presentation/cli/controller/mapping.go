@@ -86,13 +86,14 @@ func (controller *MappingController) Create() *cobra.Command {
 }
 
 func (controller *MappingController) Delete() *cobra.Command {
-	var mappingIdUint uint64
+	var accountIdUint, mappingIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteMapping",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
+				"accountId": accountIdUint,
 				"mappingId": mappingIdUint,
 			}
 
@@ -102,13 +103,15 @@ func (controller *MappingController) Delete() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
 	cmd.MarkFlagRequired("mapping-id")
 	return cmd
 }
 
 func (controller *MappingController) CreateTarget() *cobra.Command {
-	var mappingIdUint uint64
+	var accountIdUint, mappingIdUint uint64
 	var containerIdStr string
 
 	cmd := &cobra.Command{
@@ -116,6 +119,7 @@ func (controller *MappingController) CreateTarget() *cobra.Command {
 		Short: "CreateMappingTarget",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
+				"accountId":   accountIdUint,
 				"mappingId":   mappingIdUint,
 				"containerId": containerIdStr,
 			}
@@ -126,6 +130,8 @@ func (controller *MappingController) CreateTarget() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
 	cmd.MarkFlagRequired("mapping-id")
 	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
@@ -134,14 +140,14 @@ func (controller *MappingController) CreateTarget() *cobra.Command {
 }
 
 func (controller *MappingController) DeleteTarget() *cobra.Command {
-	var mappingIdUint uint64
-	var targetIdUint uint64
+	var accountIdUint, mappingIdUint, targetIdUint uint64
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "DeleteMappingTarget",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
+				"accountId": accountIdUint,
 				"mappingId": mappingIdUint,
 				"targetId":  targetIdUint,
 			}
@@ -152,6 +158,8 @@ func (controller *MappingController) DeleteTarget() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
 	cmd.Flags().Uint64VarP(&mappingIdUint, "mapping-id", "m", 0, "MappingId")
 	cmd.MarkFlagRequired("mapping-id")
 	cmd.Flags().Uint64VarP(&targetIdUint, "target-id", "t", 0, "MappingTargetId")

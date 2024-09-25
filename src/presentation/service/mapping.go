@@ -118,6 +118,11 @@ func (service *MappingService) Delete(input map[string]interface{}) ServiceOutpu
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
 	mappingId, err := valueObject.NewMappingId(input["mappingId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
@@ -140,7 +145,7 @@ func (service *MappingService) Delete(input map[string]interface{}) ServiceOutpu
 	}
 
 	deleteDto := dto.NewDeleteMapping(
-		mappingId, operatorAccountId, operatorIpAddress,
+		accountId, mappingId, operatorAccountId, operatorIpAddress,
 	)
 
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
@@ -161,6 +166,11 @@ func (service *MappingService) CreateTarget(input map[string]interface{}) Servic
 	requiredParams := []string{"mappingId", "containerId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -192,7 +202,7 @@ func (service *MappingService) CreateTarget(input map[string]interface{}) Servic
 	}
 
 	createTargetDto := dto.NewCreateMappingTarget(
-		mappingId, containerId, operatorAccountId, operatorIpAddress,
+		accountId, mappingId, containerId, operatorAccountId, operatorIpAddress,
 	)
 
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)
@@ -214,6 +224,11 @@ func (service *MappingService) DeleteTarget(input map[string]interface{}) Servic
 	requiredParams := []string{"mappingId", "targetId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
@@ -245,7 +260,7 @@ func (service *MappingService) DeleteTarget(input map[string]interface{}) Servic
 	}
 
 	deleteDto := dto.NewDeleteMappingTarget(
-		mappingId, targetId, operatorAccountId, operatorIpAddress,
+		accountId, mappingId, targetId, operatorAccountId, operatorIpAddress,
 	)
 
 	mappingQueryRepo := infra.NewMappingQueryRepo(service.persistentDbSvc)

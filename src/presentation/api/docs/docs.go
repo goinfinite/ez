@@ -1128,6 +1128,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/mapping/{accountId}/{mappingId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a mapping.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "DeleteMapping",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MappingId",
+                        "name": "mappingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MappingDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/mapping/{accountId}/{mappingId}/target/{targetId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a mapping target.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mapping"
+                ],
+                "summary": "DeleteMappingTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MappingId",
+                        "name": "mappingId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "TargetId",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MappingTargetDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/mapping/{mappingId}/": {
             "delete": {
                 "security": [
@@ -1527,6 +1608,9 @@ const docTemplate = `{
         "dto.CreateMappingTarget": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "containerId": {
                     "type": "string"
                 },
