@@ -5,6 +5,7 @@ import (
 )
 
 type DeleteMappingTarget struct {
+	AccountId         valueObject.AccountId       `json:"accountId"`
 	MappingId         valueObject.MappingId       `json:"mappingId"`
 	TargetId          valueObject.MappingTargetId `json:"targetId"`
 	OperatorAccountId valueObject.AccountId       `json:"-"`
@@ -12,12 +13,14 @@ type DeleteMappingTarget struct {
 }
 
 func NewDeleteMappingTarget(
+	accountId valueObject.AccountId,
 	mappingId valueObject.MappingId,
 	targetId valueObject.MappingTargetId,
 	operatorAccountId valueObject.AccountId,
 	operatorIpAddress valueObject.IpAddress,
 ) DeleteMappingTarget {
 	return DeleteMappingTarget{
+		AccountId:         accountId,
 		MappingId:         mappingId,
 		TargetId:          targetId,
 		OperatorAccountId: operatorAccountId,

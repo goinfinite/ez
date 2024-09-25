@@ -86,7 +86,7 @@ func CreateMapping(
 
 	for _, containerId := range createDto.ContainerIds {
 		createTargetDto := dto.NewCreateMappingTarget(
-			existingMapping.Id, containerId,
+			createDto.AccountId, existingMapping.Id, containerId,
 			createDto.OperatorAccountId, createDto.OperatorIpAddress,
 		)
 		err = CreateMappingTarget(
