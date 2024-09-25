@@ -46,10 +46,12 @@ func TestMappingCmdRepo(t *testing.T) {
 			return
 		}
 
+		accountId := containers[0].AccountId
 		containerId := containers[0].Id
 
 		createMappingTarget := dto.NewCreateMappingTarget(
-			mappingId, containerId, valueObject.SystemAccountId, valueObject.SystemIpAddress,
+			accountId, mappingId, containerId,
+			valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 
 		_, err = mappingCmdRepo.CreateTarget(createMappingTarget)
@@ -77,10 +79,11 @@ func TestMappingCmdRepo(t *testing.T) {
 			return
 		}
 
+		accountId := mappings[0].AccountId
 		mappingId := mappings[0].Id
 		targetId := mappings[0].Targets[0].Id
 		deleteDto := dto.NewDeleteMappingTarget(
-			mappingId, targetId,
+			accountId, mappingId, targetId,
 			valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 

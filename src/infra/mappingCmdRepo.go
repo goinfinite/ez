@@ -281,7 +281,7 @@ func (repo *MappingCmdRepo) CreateTarget(
 	err = repo.updateWebServerFile()
 	if err != nil {
 		deleteTargetDto := dto.NewDeleteMappingTarget(
-			createDto.MappingId, targetId,
+			createDto.AccountId, createDto.MappingId, targetId,
 			createDto.OperatorAccountId, createDto.OperatorIpAddress,
 		)
 		deleteErr := repo.DeleteTarget(deleteTargetDto)
