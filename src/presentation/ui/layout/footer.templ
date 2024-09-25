@@ -1,0 +1,20 @@
+package layout
+
+import componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
+
+templ ResourceUsageBar(usageRate uint8, usageLabel, icon string) {
+	<div class="flex items-center">
+		<i class={ "ph-bold " + icon + " mr-2 align-middle text-xl" }></i>
+		@componentMisc.ProgressBar(usageRate, usageLabel)
+	</div>
+}
+
+templ Footer() {
+	<div class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm">
+		<div class="flex items-center space-x-3">
+			@ResourceUsageBar(20, "20%", "ph-speedometer")
+			@ResourceUsageBar(40, "40%", "ph-memory")
+			@ResourceUsageBar(50, "50%", "ph-hard-drives")
+		</div>
+	</div>
+}
