@@ -5,16 +5,10 @@ import (
 )
 
 type CreateActivityRecord struct {
-	RecordLevel        valueObject.ActivityRecordLevel `json:"recordLevel"`
-	RecordCode         valueObject.ActivityRecordCode  `json:"recordCode"`
-	OperatorAccountId  *valueObject.AccountId          `json:"operatorAccountId,omitempty"`
-	OperatorIpAddress  *valueObject.IpAddress          `json:"operatorIpAddress,omitempty"`
-	AccountId          *valueObject.AccountId          `json:"accountId,omitempty"`
-	ContainerId        *valueObject.ContainerId        `json:"containerId,omitempty"`
-	ContainerProfileId *valueObject.ContainerProfileId `json:"containerProfileId,omitempty"`
-	ContainerImageId   *valueObject.ContainerImageId   `json:"containerImageId,omitempty"`
-	MappingId          *valueObject.MappingId          `json:"mappingId,omitempty"`
-	MappingTargetId    *valueObject.MappingTargetId    `json:"mappingTargetId,omitempty"`
-	ScheduledTaskId    *valueObject.ScheduledTaskId    `json:"scheduledTaskId,omitempty"`
-	RecordDetails      interface{}                     `json:"recordDetails,omitempty"`
+	RecordLevel       valueObject.ActivityRecordLevel        `json:"recordLevel"`
+	RecordCode        valueObject.ActivityRecordCode         `json:"recordCode"`
+	AffectedResources []valueObject.SystemResourceIdentifier `json:"affectedResources,omitempty"`
+	RecordDetails     interface{}                            `json:"recordDetails,omitempty"`
+	OperatorAccountId *valueObject.AccountId                 `json:"operatorAccountId,omitempty"`
+	OperatorIpAddress *valueObject.IpAddress                 `json:"operatorIpAddress,omitempty"`
 }
