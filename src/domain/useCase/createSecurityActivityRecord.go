@@ -43,8 +43,8 @@ func (uc *CreateSecurityActivityRecord) CreateSessionToken(
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel:       uc.recordLevel,
 		RecordCode:        recordCode,
-		OperatorIpAddress: &createDto.OperatorIpAddress,
 		RecordDetails:     createDto.Username,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -55,12 +55,13 @@ func (uc *CreateSecurityActivityRecord) CreateContainerSessionToken(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerSessionTokenGenerated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerSri(createDto.AccountId, createDto.ContainerId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
-		ContainerId:       &createDto.ContainerId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -72,12 +73,13 @@ func (uc *CreateSecurityActivityRecord) CreateAccount(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewAccountSri(accountId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &accountId,
-		RecordDetails:     createDto.Username,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -87,11 +89,13 @@ func (uc *CreateSecurityActivityRecord) UpdateAccount(
 	updateDto dto.UpdateAccount,
 ) {
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
+		RecordLevel: uc.recordLevel,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewAccountSri(updateDto.AccountId),
+		},
+		RecordDetails:     updateDto,
 		OperatorAccountId: &updateDto.OperatorAccountId,
 		OperatorIpAddress: &updateDto.OperatorIpAddress,
-		AccountId:         &updateDto.AccountId,
-		RecordDetails:     updateDto,
 	}
 
 	codeStr := "AccountUpdated"
@@ -110,11 +114,13 @@ func (uc *CreateSecurityActivityRecord) DeleteAccount(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("AccountDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewAccountSri(deleteDto.AccountId),
+		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		AccountId:         &deleteDto.AccountId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -126,12 +132,13 @@ func (uc *CreateSecurityActivityRecord) CreateContainer(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerSri(createDto.AccountId, containerId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
-		ContainerId:       &containerId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -142,13 +149,14 @@ func (uc *CreateSecurityActivityRecord) UpdateContainer(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerUpdated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerSri(updateDto.AccountId, updateDto.ContainerId),
+		},
+		RecordDetails:     updateDto,
 		OperatorAccountId: &updateDto.OperatorAccountId,
 		OperatorIpAddress: &updateDto.OperatorIpAddress,
-		AccountId:         &updateDto.AccountId,
-		ContainerId:       &updateDto.ContainerId,
-		RecordDetails:     updateDto,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -159,12 +167,13 @@ func (uc *CreateSecurityActivityRecord) DeleteContainer(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerSri(deleteDto.AccountId, deleteDto.ContainerId),
+		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		AccountId:         &deleteDto.AccountId,
-		ContainerId:       &deleteDto.ContainerId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -176,12 +185,13 @@ func (uc *CreateSecurityActivityRecord) CreateContainerProfile(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerProfileCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:        uc.recordLevel,
-		RecordCode:         recordCode,
-		OperatorAccountId:  &createDto.OperatorAccountId,
-		OperatorIpAddress:  &createDto.OperatorIpAddress,
-		AccountId:          &createDto.AccountId,
-		ContainerProfileId: &profileId,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerProfileSri(createDto.AccountId, profileId),
+		},
+		OperatorAccountId: &createDto.OperatorAccountId,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -192,13 +202,14 @@ func (uc *CreateSecurityActivityRecord) UpdateContainerProfile(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerProfileUpdated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:        uc.recordLevel,
-		RecordCode:         recordCode,
-		OperatorAccountId:  &updateDto.OperatorAccountId,
-		OperatorIpAddress:  &updateDto.OperatorIpAddress,
-		AccountId:          &updateDto.AccountId,
-		ContainerProfileId: &updateDto.ProfileId,
-		RecordDetails:      updateDto,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerProfileSri(updateDto.AccountId, updateDto.ProfileId),
+		},
+		RecordDetails:     updateDto,
+		OperatorAccountId: &updateDto.OperatorAccountId,
+		OperatorIpAddress: &updateDto.OperatorIpAddress,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -209,12 +220,13 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerProfile(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerProfileDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:        uc.recordLevel,
-		RecordCode:         recordCode,
-		OperatorAccountId:  &deleteDto.OperatorAccountId,
-		OperatorIpAddress:  &deleteDto.OperatorIpAddress,
-		AccountId:          &deleteDto.AccountId,
-		ContainerProfileId: &deleteDto.ProfileId,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerProfileSri(deleteDto.AccountId, deleteDto.ProfileId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -226,12 +238,13 @@ func (uc *CreateSecurityActivityRecord) CreateMapping(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("MappingCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewMappingSri(createDto.AccountId, mappingId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
-		MappingId:         &mappingId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -242,11 +255,13 @@ func (uc *CreateSecurityActivityRecord) DeleteMapping(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("MappingDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewMappingSri(deleteDto.AccountId, deleteDto.MappingId),
+		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		MappingId:         &deleteDto.MappingId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -258,12 +273,14 @@ func (uc *CreateSecurityActivityRecord) CreateMappingTarget(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("MappingTargetCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewMappingSri(createDto.AccountId, createDto.MappingId),
+			valueObject.NewMappingTargetSri(createDto.AccountId, targetId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		MappingId:         &createDto.MappingId,
-		MappingTargetId:   &targetId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -274,11 +291,14 @@ func (uc *CreateSecurityActivityRecord) DeleteMappingTarget(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("MappingTargetDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewMappingSri(deleteDto.AccountId, deleteDto.MappingId),
+			valueObject.NewMappingTargetSri(deleteDto.AccountId, deleteDto.TargetId),
+		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		MappingId:         &deleteDto.MappingId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -291,13 +311,14 @@ func (uc *CreateSecurityActivityRecord) CreateContainerSnapshotImage(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerSnapshotImageCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerSri(imageAccountId, createDto.ContainerId),
+			valueObject.NewContainerImageSri(imageAccountId, imageId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &imageAccountId,
-		ContainerId:       &createDto.ContainerId,
-		ContainerImageId:  &imageId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -308,12 +329,13 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerImageSri(deleteDto.AccountId, deleteDto.ImageId),
+		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		AccountId:         &deleteDto.AccountId,
-		ContainerImageId:  &deleteDto.ImageId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -324,12 +346,13 @@ func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileCreated")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerImageSri(createDto.AccountId, createDto.ImageId),
+		},
 		OperatorAccountId: &createDto.OperatorAccountId,
 		OperatorIpAddress: &createDto.OperatorIpAddress,
-		AccountId:         &createDto.AccountId,
-		ContainerImageId:  &createDto.ImageId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -341,12 +364,13 @@ func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileImported")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerImageSri(importDto.AccountId, imageId),
+		},
 		OperatorAccountId: &importDto.OperatorAccountId,
 		OperatorIpAddress: &importDto.OperatorIpAddress,
-		AccountId:         &importDto.AccountId,
-		ContainerImageId:  &imageId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
@@ -357,12 +381,13 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileDeleted")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel:       uc.recordLevel,
-		RecordCode:        recordCode,
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewContainerImageSri(deleteDto.AccountId, deleteDto.ImageId),
+		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,
-		AccountId:         &deleteDto.AccountId,
-		ContainerImageId:  &deleteDto.ImageId,
 	}
 
 	uc.createActivityRecord(createRecordDto)
