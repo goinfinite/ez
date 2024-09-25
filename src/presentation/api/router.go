@@ -145,7 +145,9 @@ func (router *Router) mappingRoutes() {
 
 func (router *Router) o11yRoutes() {
 	o11yGroup := router.baseRoute.Group("/v1/o11y")
-	o11yGroup.GET("/overview/", apiController.O11yOverviewController)
+	o11yController := apiController.NewO11yController(router.transientDbSvc)
+
+	o11yGroup.GET("/overview/", o11yController.ReadOverview)
 }
 
 func (router *Router) scheduledTaskRoutes() {

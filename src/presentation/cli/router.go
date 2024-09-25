@@ -156,8 +156,8 @@ func (router *Router) o11yRoutes() {
 		Short: "O11yManagement",
 	}
 
-	o11yController := cliController.O11yController{}
-	o11yCmd.AddCommand(o11yController.ReadO11yOverview())
+	o11yController := cliController.NewO11yController(router.transientDbSvc)
+	o11yCmd.AddCommand(o11yController.ReadOverview())
 	rootCmd.AddCommand(o11yCmd)
 }
 
