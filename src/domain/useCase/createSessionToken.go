@@ -25,7 +25,7 @@ func getFailedLoginAttemptsCount(
 	)
 	readDto := dto.NewReadActivityRecords(
 		nil, &recordLevel, &recordCode, nil, nil, nil, &createDto.OperatorIpAddress,
-		&failedAttemptsIntervalStartsAt, nil,
+		nil, &failedAttemptsIntervalStartsAt,
 	)
 
 	failedLoginAttempts := ReadActivityRecords(activityRecordQueryRepo, readDto)
