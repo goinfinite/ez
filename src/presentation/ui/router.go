@@ -95,6 +95,15 @@ func (router *Router) devRoutes() {
 	})
 }
 
+func (router *Router) fragmentRoutes() {
+	fragmentGroup := router.baseRoute.Group("/fragment")
+
+	footerPresenter := presenter.NewFooterPresenter(
+		router.persistentDbSvc, router.transientDbSvc, router.trailDbSvc,
+	)
+	fragmentGroup.GET("/footer", footerPresenter.Handler)
+}
+
 func (router *Router) previousDashboardRoute() {
 	dashFilesFs, err := fs.Sub(previousDashFiles, "dist")
 	if err != nil {
@@ -118,6 +127,7 @@ func (router *Router) RegisterRoutes() {
 		router.devRoutes()
 	}
 
+	router.fragmentRoutes()
 	router.previousDashboardRoute()
 
 	router.baseRoute.RouteNotFound("/*", func(c echo.Context) error {
