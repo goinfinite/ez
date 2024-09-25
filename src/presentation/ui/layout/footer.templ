@@ -35,7 +35,11 @@ templ Footer(
 				o11yOverviewEntity.HostResourceUsage.MemoryPercentStr+"%",
 				"ph-memory",
 			)
-			@ResourceUsageBar(50, "50%", "ph-hard-drives")
+			@ResourceUsageBar(
+				uint8(o11yOverviewEntity.HostResourceUsage.UserDataStorageInfo.UsedPercent),
+				o11yOverviewEntity.HostResourceUsage.UserDataStorageInfo.UsedPercentStr+"%",
+				"ph-hard-drives",
+			)
 		</div>
 	</footer>
 }

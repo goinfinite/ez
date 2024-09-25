@@ -8,6 +8,7 @@ type StorageUnitInfo struct {
 	FreeBytes         Byte           `json:"freeBytes"`
 	UsedBytes         Byte           `json:"usedBytes"`
 	UsedPercent       float64        `json:"usedPercent"`
+	UsedPercentStr    string         `json:"usedPercentStr"`
 	TotalInodes       uint64         `json:"totalInodes"`
 	FreeInodes        uint64         `json:"freeInodes"`
 	UsedInodes        uint64         `json:"usedInodes"`
@@ -24,6 +25,7 @@ func NewStorageUnitInfo(
 	fileSystem UnixFileSystem,
 	totalBytes, freeBytes, usedBytes Byte,
 	usedPercent float64,
+	usedPercentStr string,
 	totalInodes, freeInodes, usedInodes uint64,
 	usedInodesPercent float64,
 	readBytes Byte,
@@ -39,6 +41,7 @@ func NewStorageUnitInfo(
 		FreeBytes:         freeBytes,
 		UsedBytes:         usedBytes,
 		UsedPercent:       usedPercent,
+		UsedPercentStr:    usedPercentStr,
 		TotalInodes:       totalInodes,
 		FreeInodes:        freeInodes,
 		UsedInodes:        usedInodes,
