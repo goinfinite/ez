@@ -1,7 +1,6 @@
 package layout
 
 import (
-	"fmt"
 	"github.com/speedianet/control/src/domain/entity"
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 )
@@ -28,12 +27,12 @@ templ Footer(
 		<div class="flex items-center space-x-3">
 			@ResourceUsageBar(
 				uint8(o11yOverviewEntity.HostResourceUsage.CpuPercent),
-				fmt.Sprintf("%.0f", o11yOverviewEntity.HostResourceUsage.CpuPercent)+"%",
+				o11yOverviewEntity.HostResourceUsage.CpuPercentStr+"%",
 				"ph-speedometer",
 			)
 			@ResourceUsageBar(
 				uint8(o11yOverviewEntity.HostResourceUsage.MemoryPercent),
-				fmt.Sprintf("%.0f", o11yOverviewEntity.HostResourceUsage.MemoryPercent)+"%",
+				o11yOverviewEntity.HostResourceUsage.MemoryPercentStr+"%",
 				"ph-memory",
 			)
 			@ResourceUsageBar(50, "50%", "ph-hard-drives")
