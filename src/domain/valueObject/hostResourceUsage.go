@@ -1,22 +1,31 @@
 package valueObject
 
 type HostResourceUsage struct {
-	CpuPercent    float64            `json:"cpuPercent"`
-	MemoryPercent float64            `json:"memoryPercent"`
-	StorageInfo   []StorageUnitInfo  `json:"storageInfo"`
-	NetInfo       []NetInterfaceInfo `json:"netInfo"`
+	CpuPercent          float64            `json:"cpuPercent"`
+	CpuPercentStr       string             `json:"cpuPercentStr"`
+	MemoryPercent       float64            `json:"memoryPercent"`
+	MemoryPercentStr    string             `json:"memoryPercentStr"`
+	UserDataStorageInfo StorageUnitInfo    `json:"userDataStorageInfo"`
+	StorageInfo         []StorageUnitInfo  `json:"storageInfo"`
+	NetInfo             []NetInterfaceInfo `json:"netInfo"`
 }
 
 func NewHostResourceUsage(
 	cpuPercent float64,
+	cpuPercentStr string,
 	memoryPercent float64,
+	memoryPercentStr string,
+	userDataStorageInfo StorageUnitInfo,
 	storageInfo []StorageUnitInfo,
 	netInfo []NetInterfaceInfo,
 ) HostResourceUsage {
 	return HostResourceUsage{
-		CpuPercent:    cpuPercent,
-		MemoryPercent: memoryPercent,
-		StorageInfo:   storageInfo,
-		NetInfo:       netInfo,
+		CpuPercent:          cpuPercent,
+		CpuPercentStr:       cpuPercentStr,
+		MemoryPercent:       memoryPercent,
+		MemoryPercentStr:    memoryPercentStr,
+		UserDataStorageInfo: userDataStorageInfo,
+		StorageInfo:         storageInfo,
+		NetInfo:             netInfo,
 	}
 }

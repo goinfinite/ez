@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"slices"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
+	infraEnvs "github.com/speedianet/control/src/infra/envs"
 	infraHelper "github.com/speedianet/control/src/infra/helper"
 )
 
@@ -279,7 +281,10 @@ type HostResourceUsageResult struct {
 	err             error
 }
 
-func (repo *O11yQueryRepo) getHostResourceUsage() (valueObject.HostResourceUsage, error) {
+func (repo *O11yQueryRepo) getHostResourceUsage() (
+	hostResourceUsage valueObject.HostResourceUsage,
+	err error,
+) {
 	cpuChan := make(chan HostResourceUsageResult)
 	memChan := make(chan HostResourceUsageResult)
 	storageChan := make(chan HostResourceUsageResult)
@@ -307,28 +312,43 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (valueObject.HostResourceUsage
 
 	cpuResult := <-cpuChan
 	if cpuResult.err != nil {
-		return valueObject.HostResourceUsage{}, cpuResult.err
+		return hostResourceUsage, errors.New("ReadCpuInfoFailed: " + cpuResult.err.Error())
 	}
 
 	memResult := <-memChan
 	if memResult.err != nil {
-		return valueObject.HostResourceUsage{}, memResult.err
+		return hostResourceUsage, errors.New("ReadMemInfoFailed: " + memResult.err.Error())
 	}
 
 	storageResult := <-storageChan
 	if storageResult.err != nil {
-		return valueObject.HostResourceUsage{}, errors.New("GetStorageInfoFailed")
+		return hostResourceUsage, errors.New("ReadStorageInfoFailed: " + storageResult.err.Error())
+	}
+	if len(storageResult.storageInfos) == 0 {
+		return hostResourceUsage, errors.New("ReadStorageInfoResultEmpty")
 	}
 
 	netResult := <-netChan
 	if netResult.err != nil {
-		return valueObject.HostResourceUsage{}, errors.New("GetNetInfoFailed")
+		return hostResourceUsage, errors.New("ReadNetInfoFailed: " + netResult.err.Error())
+	}
+
+	cpuUsagePercentStr := strconv.FormatFloat(cpuResult.cpuUsagePercent, 'f', 2, 64)
+	memUsagePercentStr := strconv.FormatFloat(memResult.memUsagePercent, 'f', 2, 64)
+	userDataStorageInfo := storageResult.storageInfos[0]
+	for _, storageInfo := range storageResult.storageInfos {
+		if storageInfo.MountPoint.String() != infraEnvs.UserDataDirectory {
+			continue
+		}
+
+		userDataStorageInfo = storageInfo
+		break
 	}
 
 	return valueObject.NewHostResourceUsage(
-		cpuResult.cpuUsagePercent,
-		memResult.memUsagePercent,
-		storageResult.storageInfos,
+		cpuResult.cpuUsagePercent, cpuUsagePercentStr,
+		memResult.memUsagePercent, memUsagePercentStr,
+		userDataStorageInfo, storageResult.storageInfos,
 		netResult.netInfos,
 	), nil
 }
@@ -356,12 +376,12 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 
 	hardwareSpecs, err := repo.getHardwareSpecs()
 	if err != nil {
-		return overview, errors.New("GetHardwareSpecsFailed: " + err.Error())
+		return overview, errors.New("ReadHardwareSpecsFailed: " + err.Error())
 	}
 
 	currentResourceUsage, err := repo.getHostResourceUsage()
 	if err != nil {
-		return overview, errors.New("GetHostResourceUsageFailed: " + err.Error())
+		return overview, errors.New("ReadHostResourceUsageFailed: " + err.Error())
 	}
 
 	return entity.NewO11yOverview(
