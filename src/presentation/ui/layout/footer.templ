@@ -5,10 +5,13 @@ import (
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 )
 
-templ ResourceUsageBar(usageRate uint8, usageLabel, icon string) {
-	<div class="flex items-center">
+templ ResourceUsageProgressBar(usageRate uint8, usageLabel, tooltipText, icon string) {
+	<div class="group relative flex items-center">
 		<i class={ "ph-bold " + icon + " mr-2 align-middle text-xl" }></i>
 		@componentMisc.ProgressBar(usageRate, usageLabel)
+		<div class={ "absolute left-1/2 transform -translate-x-1/2 opacity-0 bottom-full mb-2 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 p-1.5 bg-control-300 text-neutral-50 text-xs rounded-md shadow-md" }>
+			{ tooltipText }
+		</div>
 	</div>
 }
 
@@ -25,19 +28,22 @@ templ Footer(
 		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
 	>
 		<div class="flex items-center space-x-3">
-			@ResourceUsageBar(
+			@ResourceUsageProgressBar(
 				uint8(o11yOverviewEntity.HostResourceUsage.CpuPercent),
 				o11yOverviewEntity.HostResourceUsage.CpuPercentStr+"%",
+				"CPU",
 				"ph-speedometer",
 			)
-			@ResourceUsageBar(
+			@ResourceUsageProgressBar(
 				uint8(o11yOverviewEntity.HostResourceUsage.MemoryPercent),
 				o11yOverviewEntity.HostResourceUsage.MemoryPercentStr+"%",
+				"RAM",
 				"ph-memory",
 			)
-			@ResourceUsageBar(
+			@ResourceUsageProgressBar(
 				uint8(o11yOverviewEntity.HostResourceUsage.UserDataStorageInfo.UsedPercent),
 				o11yOverviewEntity.HostResourceUsage.UserDataStorageInfo.UsedPercentStr+"%",
+				"/var/data",
 				"ph-hard-drives",
 			)
 		</div>
