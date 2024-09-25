@@ -3,7 +3,6 @@ package o11yInfra
 import (
 	"errors"
 	"log"
-	"os"
 	"slices"
 	"strconv"
 	"syscall"
@@ -333,8 +332,8 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (
 		return hostResourceUsage, errors.New("ReadNetInfoFailed: " + netResult.err.Error())
 	}
 
-	cpuUsagePercentStr := strconv.FormatFloat(cpuResult.cpuUsagePercent, 'f', 2, 64)
-	memUsagePercentStr := strconv.FormatFloat(memResult.memUsagePercent, 'f', 2, 64)
+	cpuUsagePercentStr := strconv.FormatFloat(cpuResult.cpuUsagePercent, 'f', 0, 64)
+	memUsagePercentStr := strconv.FormatFloat(memResult.memUsagePercent, 'f', 0, 64)
 	userDataStorageInfo := storageResult.storageInfos[0]
 	for _, storageInfo := range storageResult.storageInfos {
 		if storageInfo.MountPoint.String() != infraEnvs.UserDataDirectory {
@@ -354,14 +353,9 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (
 }
 
 func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err error) {
-	hostnameStr, err := os.Hostname()
+	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
-		hostnameStr = "localhost"
-	}
-
-	hostname, err := valueObject.NewFqdn(hostnameStr)
-	if err != nil {
-		return overview, errors.New("GetHostnameFailed")
+		return overview, errors.New("ReadHostnameFailed: " + err.Error())
 	}
 
 	uptime, err := repo.getUptime()
@@ -385,6 +379,6 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 	}
 
 	return entity.NewO11yOverview(
-		hostname, uptime, publicIpAddress, hardwareSpecs, currentResourceUsage,
+		serverHostname, uptime, publicIpAddress, hardwareSpecs, currentResourceUsage,
 	), nil
 }
