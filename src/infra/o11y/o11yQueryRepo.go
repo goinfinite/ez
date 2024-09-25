@@ -3,7 +3,7 @@ package o11yInfra
 import (
 	"errors"
 	"log"
-	"slices"
+	"log/slog"
 	"strconv"
 	"syscall"
 	"time"
@@ -63,90 +63,111 @@ func (repo *O11yQueryRepo) ReadServerPublicIpAddress() (
 	return serverPublicIpAddress, nil
 }
 
-func (repo *O11yQueryRepo) getStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
+func (repo *O11yQueryRepo) storageUnitInfoFactory(
+	partition disk.PartitionStat,
+	initialStats, finalStats disk.IOCountersStat,
+) (storageUnitInfo valueObject.StorageUnitInfo, err error) {
+	usageStat, err := disk.Usage(partition.Mountpoint)
+	if err != nil {
+		return storageUnitInfo, err
+	}
+	usedPercentStr := strconv.FormatFloat(usageStat.UsedPercent, 'f', 0, 64)
+
+	deviceName, err := valueObject.NewDeviceName(partition.Device)
+	if err != nil {
+		return storageUnitInfo, err
+	}
+
+	mountPoint, err := valueObject.NewUnixFilePath(partition.Mountpoint)
+	if err != nil {
+		return storageUnitInfo, err
+	}
+
+	fileSystem, err := valueObject.NewUnixFileSystem(partition.Fstype)
+	if err != nil {
+		return storageUnitInfo, err
+	}
+
+	readBytes := finalStats.ReadBytes - initialStats.ReadBytes
+	readOpsCount := finalStats.ReadCount - initialStats.ReadCount
+	writeBytes := finalStats.WriteBytes - initialStats.WriteBytes
+	writeOpsCount := finalStats.WriteCount - initialStats.WriteCount
+
+	return valueObject.NewStorageUnitInfo(
+		deviceName,
+		mountPoint,
+		fileSystem,
+		valueObject.Byte(usageStat.Total),
+		valueObject.Byte(usageStat.Free),
+		valueObject.Byte(usageStat.Used),
+		infraHelper.RoundFloat(usageStat.UsedPercent),
+		usedPercentStr,
+		usageStat.InodesTotal,
+		usageStat.InodesFree,
+		usageStat.InodesUsed,
+		infraHelper.RoundFloat(usageStat.InodesUsedPercent),
+		valueObject.Byte(readBytes),
+		readOpsCount,
+		valueObject.Byte(writeBytes),
+		writeOpsCount,
+	), nil
+}
+
+func (repo *O11yQueryRepo) readStorageUnitInfos() ([]valueObject.StorageUnitInfo, error) {
 	storageInfos := []valueObject.StorageUnitInfo{}
 
 	initialStats, err := disk.IOCounters()
 	if err != nil {
-		log.Printf("GetInitialStorageStatsFailed: %v", err)
-		return storageInfos, errors.New("GetInitialStorageStatsFailed")
+		return storageInfos, errors.New("ReadInitialStorageStatsFailed: " + err.Error())
 	}
 
 	time.Sleep(time.Second)
 
 	finalStats, err := disk.IOCounters()
 	if err != nil {
-		log.Printf("GetFinalStorageStatsFailed: %v", err)
-		return storageInfos, errors.New("GetFinalStorageStatsFailed")
+		return storageInfos, errors.New("ReadFinalStorageStatsFailed: " + err.Error())
 	}
 
 	partitions, err := disk.Partitions(false)
 	if err != nil {
-		log.Printf("GetPartitionsFailed: %v", err)
-		return storageInfos, errors.New("GetPartitionsFailed")
+		return storageInfos, errors.New("ReadPartitionsFailed: " + err.Error())
 	}
 
-	desireableFileSystems := []string{
-		"xfs", "btrfs", "ext4", "ext3", "ext2", "zfs", "vfat", "ntfs",
+	desireableFileSystems := map[string]struct{}{
+		"xfs":   {},
+		"btrfs": {},
+		"ext4":  {},
+		"ext3":  {},
+		"ext2":  {},
+		"zfs":   {},
+		"vfat":  {},
+		"ntfs":  {},
 	}
-	scannedDevices := []string{}
+	alreadyScannedDevicesMap := map[string]struct{}{}
 	for _, partition := range partitions {
-		if !slices.Contains(desireableFileSystems, partition.Fstype) {
+		if _, exists := desireableFileSystems[partition.Fstype]; !exists {
 			continue
 		}
 
-		if slices.Contains(scannedDevices, partition.Device) {
+		if _, exists := alreadyScannedDevicesMap[partition.Device]; exists {
 			continue
 		}
 
-		usageStat, err := disk.Usage(partition.Mountpoint)
-		if err != nil {
-			continue
-		}
-
-		initialStats := initialStats[partition.Device]
-		finalStats := finalStats[partition.Device]
-
-		deviceName, err := valueObject.NewDeviceName(partition.Device)
-		if err != nil {
-			continue
-		}
-
-		mountPoint, err := valueObject.NewUnixFilePath(partition.Mountpoint)
-		if err != nil {
-			continue
-		}
-
-		fileSystem, err := valueObject.NewUnixFileSystem(partition.Fstype)
-		if err != nil {
-			continue
-		}
-
-		readBytes := finalStats.ReadBytes - initialStats.ReadBytes
-		readOpsCount := finalStats.ReadCount - initialStats.ReadCount
-		writeBytes := finalStats.WriteBytes - initialStats.WriteBytes
-		writeOpsCount := finalStats.WriteCount - initialStats.WriteCount
-
-		storageUnitInfo := valueObject.NewStorageUnitInfo(
-			deviceName,
-			mountPoint,
-			fileSystem,
-			valueObject.Byte(usageStat.Total),
-			valueObject.Byte(usageStat.Free),
-			valueObject.Byte(usageStat.Used),
-			infraHelper.RoundFloat(usageStat.UsedPercent),
-			usageStat.InodesTotal,
-			usageStat.InodesFree,
-			usageStat.InodesUsed,
-			infraHelper.RoundFloat(usageStat.InodesUsedPercent),
-			valueObject.Byte(readBytes),
-			readOpsCount,
-			valueObject.Byte(writeBytes),
-			writeOpsCount,
+		storageUnitInfo, err := repo.storageUnitInfoFactory(
+			partition, initialStats[partition.Device], finalStats[partition.Device],
 		)
+		if err != nil {
+			slog.Debug(
+				"StorageUnitInfoFactoryError",
+				slog.String("device", partition.Device),
+				slog.String("mountPoint", partition.Mountpoint),
+				slog.Any("error", err),
+			)
+			continue
+		}
 
 		storageInfos = append(storageInfos, storageUnitInfo)
-		scannedDevices = append(scannedDevices, partition.Device)
+		alreadyScannedDevicesMap[partition.Device] = struct{}{}
 	}
 
 	return storageInfos, nil
@@ -300,7 +321,7 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (
 	}()
 
 	go func() {
-		storageInfos, err := repo.getStorageUnitInfos()
+		storageInfos, err := repo.readStorageUnitInfos()
 		storageChan <- HostResourceUsageResult{storageInfos: storageInfos, err: err}
 	}()
 
