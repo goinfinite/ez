@@ -15,6 +15,23 @@ templ ResourceUsageProgressBar(usageRate uint8, usageLabel, tooltipText, icon st
 	</div>
 }
 
+templ FooterSkeleton() {
+	<footer
+		id="footer"
+		hx-get="/fragment/footer"
+		hx-trigger="load delay:500ms"
+		hx-target="this"
+		hx-swap="outerHTML transition:true"
+		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
+	>
+		<div class="flex items-center space-x-3">
+			for i := 0; i < 3; i++ {
+				<div class="bg-control-200 w-27 h-6 animate-pulse rounded-md"></div>
+			}
+		</div>
+	</footer>
+}
+
 templ Footer(
 	o11yOverviewEntity entity.O11yOverview,
 	scheduledTasksEntities []entity.ScheduledTask,
