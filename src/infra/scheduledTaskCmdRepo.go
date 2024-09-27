@@ -27,6 +27,14 @@ func (repo *ScheduledTaskCmdRepo) Create(
 ) error {
 	newTaskStatus, _ := valueObject.NewScheduledTaskStatus("pending")
 
+	taskTagsModels := []dbModel.ScheduledTaskTag{}
+	for _, taskTag := range createDto.Tags {
+		taskTagModel := dbModel.ScheduledTaskTag{
+			Tag: taskTag.String(),
+		}
+		taskTagsModels = append(taskTagsModels, taskTagModel)
+	}
+
 	var runAtPtr *time.Time
 	if createDto.RunAt != nil {
 		runAt := time.Unix(createDto.RunAt.Read(), 0)
@@ -35,7 +43,7 @@ func (repo *ScheduledTaskCmdRepo) Create(
 
 	scheduledTaskModel := dbModel.NewScheduledTask(
 		0, createDto.Name.String(), newTaskStatus.String(), createDto.Command.String(),
-		createDto.Tags, createDto.TimeoutSecs, runAtPtr, nil, nil, nil, nil, nil,
+		taskTagsModels, createDto.TimeoutSecs, runAtPtr, nil, nil, nil, nil, nil,
 	)
 
 	return repo.persistentDbSvc.Handler.Create(&scheduledTaskModel).Error
@@ -117,6 +125,7 @@ func (repo *ScheduledTaskCmdRepo) Run(
 
 	err = repo.persistentDbSvc.Handler.
 		Model(&dbModel.ScheduledTask{}).
+		Preload("Tags").
 		Where("id = ?", pendingTask.Id).
 		Updates(updateMap).Error
 	if err != nil {
@@ -128,6 +137,6 @@ func (repo *ScheduledTaskCmdRepo) Run(
 
 func (repo *ScheduledTaskCmdRepo) Delete(id valueObject.ScheduledTaskId) error {
 	return repo.persistentDbSvc.Handler.
-		Where("id = ?", id).
-		Delete(&dbModel.ScheduledTask{}).Error
+		Model(&dbModel.ScheduledTask{}).
+		Delete("id = ?", id.Uint64()).Error
 }

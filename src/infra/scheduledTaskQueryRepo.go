@@ -1,10 +1,10 @@
 package infra
 
 import (
-	"log"
+	"log/slog"
 
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
 	"github.com/speedianet/control/src/infra/db"
 	dbModel "github.com/speedianet/control/src/infra/db/model"
 )
@@ -19,63 +19,79 @@ func NewScheduledTaskQueryRepo(
 	return &ScheduledTaskQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
-func (repo *ScheduledTaskQueryRepo) Read() ([]entity.ScheduledTask, error) {
-	scheduledTasks := []entity.ScheduledTask{}
+func (repo *ScheduledTaskQueryRepo) Read(
+	readDto dto.ReadScheduledTasksRequest,
+) (responseDto dto.ReadScheduledTasksResponse, err error) {
+	scheduledTaskEntities := []entity.ScheduledTask{}
+
+	scheduledTaskModel := dbModel.ScheduledTask{}
+	if readDto.TaskId != nil {
+		scheduledTaskModel.ID = readDto.TaskId.Uint64()
+	}
+
+	if readDto.TaskStatus != nil {
+		scheduledTaskModel.Status = readDto.TaskStatus.String()
+	}
+
+	taskTagsModels := []dbModel.ScheduledTaskTag{}
+	if readDto.TaskTags != nil {
+		for _, taskTag := range readDto.TaskTags {
+			taskTagModel := dbModel.ScheduledTaskTag{
+				Tag: taskTag.String(),
+			}
+			taskTagsModels = append(taskTagsModels, taskTagModel)
+		}
+		scheduledTaskModel.Tags = taskTagsModels
+	}
+
+	dbQuery := repo.persistentDbSvc.Handler.Where(&scheduledTaskModel)
+	if readDto.StartedBeforeAt != nil {
+		dbQuery = dbQuery.Where("started_at < ?", readDto.StartedBeforeAt.GetAsGoTime())
+	}
+	if readDto.StartedAfterAt != nil {
+		dbQuery = dbQuery.Where("started_at > ?", readDto.StartedAfterAt.GetAsGoTime())
+	}
+	if readDto.FinishedBeforeAt != nil {
+		dbQuery = dbQuery.Where("finished_at < ?", readDto.FinishedBeforeAt.GetAsGoTime())
+	}
+	if readDto.FinishedAfterAt != nil {
+		dbQuery = dbQuery.Where("finished_at > ?", readDto.FinishedAfterAt.GetAsGoTime())
+	}
+	if readDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", readDto.CreatedBeforeAt.GetAsGoTime())
+	}
+	if readDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
+	}
 
 	scheduledTaskModels := []dbModel.ScheduledTask{}
-	err := repo.persistentDbSvc.Handler.
-		Find(&scheduledTaskModels).Error
-	if err != nil {
-		return scheduledTasks, err
-	}
-
-	for _, scheduledTaskModel := range scheduledTaskModels {
-		scheduledTaskEntity, err := scheduledTaskModel.ToEntity()
-		if err != nil {
-			log.Printf("[%d] %s", scheduledTaskModel.ID, err.Error())
-			continue
-		}
-		scheduledTasks = append(scheduledTasks, scheduledTaskEntity)
-	}
-
-	return scheduledTasks, nil
-}
-
-func (repo *ScheduledTaskQueryRepo) ReadById(
-	id valueObject.ScheduledTaskId,
-) (taskEntity entity.ScheduledTask, err error) {
-	var scheduledTaskModel dbModel.ScheduledTask
 	err = repo.persistentDbSvc.Handler.
-		Where("id = ?", id).
-		First(&scheduledTaskModel).Error
-	if err != nil {
-		return taskEntity, err
-	}
-
-	return scheduledTaskModel.ToEntity()
-}
-
-func (repo *ScheduledTaskQueryRepo) ReadByStatus(
-	status valueObject.ScheduledTaskStatus,
-) ([]entity.ScheduledTask, error) {
-	scheduledTasks := []entity.ScheduledTask{}
-
-	scheduledTaskModels := []dbModel.ScheduledTask{}
-	err := repo.persistentDbSvc.Handler.
-		Where("status = ?", status.String()).
+		Preload("Tags").
 		Find(&scheduledTaskModels).Error
 	if err != nil {
-		return scheduledTasks, err
+		return responseDto, err
 	}
 
 	for _, scheduledTaskModel := range scheduledTaskModels {
 		scheduledTaskEntity, err := scheduledTaskModel.ToEntity()
 		if err != nil {
-			log.Printf("[%d] ModelToEntityError: %s", scheduledTaskModel.ID, err.Error())
+			slog.Debug(
+				"ModelToEntityError",
+				slog.Uint64("id", scheduledTaskModel.ID),
+				slog.Any("error", err),
+			)
 			continue
 		}
-		scheduledTasks = append(scheduledTasks, scheduledTaskEntity)
+		scheduledTaskEntities = append(scheduledTaskEntities, scheduledTaskEntity)
 	}
 
-	return scheduledTasks, nil
+	responsePagination := dto.Pagination{
+		PageNumber:   readDto.Pagination.PageNumber,
+		ItemsPerPage: readDto.Pagination.ItemsPerPage,
+	}
+
+	return dto.ReadScheduledTasksResponse{
+		Pagination: responsePagination,
+		Tasks:      scheduledTaskEntities,
+	}, nil
 }
