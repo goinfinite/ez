@@ -5,6 +5,7 @@ import (
 
 	testHelpers "github.com/speedianet/control/src/devUtils"
 	"github.com/speedianet/control/src/domain/dto"
+	"github.com/speedianet/control/src/domain/useCase"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
@@ -19,7 +20,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 		command, _ := valueObject.NewUnixCommand("/var/speedia/control account get")
 		containerTag, _ := valueObject.NewScheduledTaskTag("account")
 		tags := []valueObject.ScheduledTaskTag{containerTag}
-		timeoutSecs := uint(60)
+		timeoutSecs := uint16(60)
 		runAt := valueObject.NewUnixTimeNow()
 
 		createDto := dto.NewCreateScheduledTask(
@@ -33,7 +34,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 	})
 
 	t.Run("UpdateScheduledTask", func(t *testing.T) {
-		scheduledTasks, err := getScheduledTasks()
+		scheduledTasks, err := readScheduledTasks()
 		if err != nil {
 			t.Error(err)
 			return
@@ -50,22 +51,43 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 
 	t.Run("RunScheduledTasks", func(t *testing.T) {
 		pendingStatus, _ := valueObject.NewScheduledTaskStatus("pending")
-		pendingTasks, err := scheduledTaskQueryRepo.ReadByStatus(pendingStatus)
+		readDto := dto.ReadScheduledTasksRequest{
+			Pagination: useCase.ScheduledTasksDefaultPagination,
+			TaskStatus: &pendingStatus,
+		}
+
+		responseDto, err := scheduledTaskQueryRepo.Read(readDto)
 		if err != nil {
 			t.Error(err)
 			return
 		}
+		if len(responseDto.Tasks) == 0 {
+			t.Error("NoPendingTasksFound")
+			return
+		}
 
-		err = scheduledTaskCmdRepo.Run(pendingTasks[0])
+		err = scheduledTaskCmdRepo.Run(responseDto.Tasks[0])
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 
-		completedTask, err := scheduledTaskQueryRepo.ReadById(pendingTasks[0].Id)
+		readDto = dto.ReadScheduledTasksRequest{
+			Pagination: useCase.ScheduledTasksDefaultPagination,
+			TaskId:     &responseDto.Tasks[0].Id,
+		}
+
+		responseDto, err = scheduledTaskQueryRepo.Read(readDto)
 		if err != nil {
 			t.Error(err)
 			return
 		}
+
+		if len(responseDto.Tasks) == 0 {
+			t.Error("NoTaskFound")
+			return
+		}
+
+		completedTask := responseDto.Tasks[0]
 
 		if completedTask.Status.String() != "completed" {
 			t.Errorf("ExpectedCompletedButGot: %v", completedTask.Status.String())

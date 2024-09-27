@@ -258,7 +258,7 @@ func (service *ContainerService) Create(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("container")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		timeoutSeconds := uint(900)
+		timeoutSeconds := uint16(900)
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &timeoutSeconds, nil,

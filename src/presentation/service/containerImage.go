@@ -111,7 +111,7 @@ func (service *ContainerImageService) CreateSnapshot(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("containerImage")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		timeoutSeconds := uint(900)
+		timeoutSeconds := uint16(1800)
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
@@ -298,7 +298,7 @@ func (service *ContainerImageService) CreateArchiveFile(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("containerImageArchive")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		timeoutSeconds := uint(900)
+		timeoutSeconds := uint16(1800)
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &timeoutSeconds, nil,

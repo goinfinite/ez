@@ -1,8 +1,6 @@
 package dbModel
 
 import (
-	"log/slog"
-	"strings"
 	"time"
 
 	"github.com/speedianet/control/src/domain/entity"
@@ -10,18 +8,18 @@ import (
 )
 
 type ScheduledTask struct {
-	ID          uint   `gorm:"primarykey"`
+	ID          uint64 `gorm:"primarykey"`
 	Name        string `gorm:"not null"`
 	Status      string `gorm:"not null"`
 	Command     string `gorm:"not null"`
-	Tags        *string
-	TimeoutSecs *uint
+	Tags        []ScheduledTaskTag
+	TimeoutSecs *uint16
 	RunAt       *time.Time
 	Output      *string
 	Error       *string
 	StartedAt   *time.Time
 	FinishedAt  *time.Time
-	ElapsedSecs *uint
+	ElapsedSecs *uint32
 	CreatedAt   time.Time `gorm:"not null"`
 	UpdatedAt   time.Time `gorm:"not null"`
 }
@@ -30,43 +28,22 @@ func (ScheduledTask) TableName() string {
 	return "scheduled_tasks"
 }
 
-func (ScheduledTask) JoinTags(tags []valueObject.ScheduledTaskTag) string {
-	tagsStr := ""
-	for _, tag := range tags {
-		tagsStr += tag.String() + ";"
-	}
-	return strings.TrimSuffix(tagsStr, ";")
-}
-
-func (ScheduledTask) SplitTags(tagsStr string) []valueObject.ScheduledTaskTag {
-	rawTagsList := strings.Split(tagsStr, ";")
-	var tags []valueObject.ScheduledTaskTag
-	for tagIndex, rawTag := range rawTagsList {
-		tag, err := valueObject.NewScheduledTaskTag(rawTag)
-		if err != nil {
-			slog.Debug(err.Error(), slog.Int("index", tagIndex))
-			continue
-		}
-		tags = append(tags, tag)
-	}
-	return tags
-}
-
 func NewScheduledTask(
-	id uint,
+	id uint64,
 	name, status, command string,
-	tags []valueObject.ScheduledTaskTag,
-	timeoutSecs *uint,
+	tags []ScheduledTaskTag,
+	timeoutSecs *uint16,
 	runAt *time.Time,
 	output, err *string,
 	startedAt, finishedAt *time.Time,
-	elapsedSecs *uint,
+	elapsedSecs *uint32,
 ) ScheduledTask {
 	model := ScheduledTask{
 		Name:        name,
 		Status:      status,
 		Command:     command,
 		TimeoutSecs: timeoutSecs,
+		Tags:        tags,
 		RunAt:       runAt,
 		Output:      output,
 		Error:       err,
@@ -77,11 +54,6 @@ func NewScheduledTask(
 
 	if id != 0 {
 		model.ID = id
-	}
-
-	if len(tags) > 0 {
-		modelTags := model.JoinTags(tags)
-		model.Tags = &modelTags
 	}
 
 	return model
@@ -109,13 +81,12 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 	}
 
 	tags := []valueObject.ScheduledTaskTag{}
-	if model.Tags != nil {
-		tags = model.SplitTags(*model.Tags)
-	}
-
-	var timeoutSecs *uint
-	if model.TimeoutSecs != nil {
-		timeoutSecs = model.TimeoutSecs
+	for _, rawTag := range model.Tags {
+		tag, err := valueObject.NewScheduledTaskTag(rawTag.Tag)
+		if err != nil {
+			return taskEntity, err
+		}
+		tags = append(tags, tag)
 	}
 
 	var runAtPtr *valueObject.UnixTime
@@ -158,7 +129,7 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewScheduledTask(
-		id, name, status, command, tags, timeoutSecs, runAtPtr, outputPtr,
+		id, name, status, command, tags, model.TimeoutSecs, runAtPtr, outputPtr,
 		taskErrorPtr, startedAtPtr, finishedAtPtr, model.ElapsedSecs, createdAt, updatedAt,
 	), nil
 }
