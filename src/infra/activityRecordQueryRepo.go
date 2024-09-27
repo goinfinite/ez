@@ -71,7 +71,9 @@ func (repo *ActivityRecordQueryRepo) Read(
 	}
 
 	activityRecordEventModels := []dbModel.ActivityRecord{}
-	err := dbQuery.Find(&activityRecordEventModels).Error
+	err := dbQuery.
+		Preload("AffectedResources").
+		Find(&activityRecordEventModels).Error
 	if err != nil {
 		return activityRecordEvents, err
 	}
