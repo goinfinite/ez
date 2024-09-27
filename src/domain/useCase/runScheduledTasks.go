@@ -3,11 +3,12 @@ package useCase
 import (
 	"log/slog"
 
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-const ScheduledTasksRunIntervalSecs uint = 120
+const ScheduledTasksRunIntervalSecs uint = 90
 
 var scheduledTasksDefaultTimeoutSecs uint = 300
 
@@ -16,17 +17,22 @@ func RunScheduledTasks(
 	scheduledTaskCmdRepo repository.ScheduledTaskCmdRepo,
 ) {
 	pendingStatus, _ := valueObject.NewScheduledTaskStatus("pending")
-	pendingTasks, err := scheduledTaskQueryRepo.ReadByStatus(pendingStatus)
+	readDto := dto.ReadScheduledTasksRequest{
+		Pagination: ScheduledTasksDefaultPagination,
+		TaskStatus: &pendingStatus,
+	}
+
+	responseDto, err := scheduledTaskQueryRepo.Read(readDto)
 	if err != nil {
 		slog.Error("ReadPendingScheduledTasksError", slog.Any("error", err))
 		return
 	}
 
-	if len(pendingTasks) == 0 {
+	if len(responseDto.Tasks) == 0 {
 		return
 	}
 
-	for _, pendingTask := range pendingTasks {
+	for _, pendingTask := range responseDto.Tasks {
 		if pendingTask.RunAt != nil {
 			nowUnixTime := valueObject.NewUnixTimeNow()
 			if nowUnixTime.Read() < pendingTask.RunAt.Read() {

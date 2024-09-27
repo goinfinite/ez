@@ -4,18 +4,24 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
 )
 
+var ScheduledTasksDefaultPagination dto.Pagination = dto.Pagination{
+	PageNumber:   0,
+	ItemsPerPage: 10,
+}
+
 func ReadScheduledTasks(
 	scheduledTaskQueryRepo repository.ScheduledTaskQueryRepo,
-) ([]entity.ScheduledTask, error) {
-	scheduledTasks, err := scheduledTaskQueryRepo.Read()
+	readDto dto.ReadScheduledTasksRequest,
+) (responseDto dto.ReadScheduledTasksResponse, err error) {
+	responseDto, err = scheduledTaskQueryRepo.Read(readDto)
 	if err != nil {
-		slog.Error("GetTasksInfraError", slog.Any("error", err))
-		return scheduledTasks, errors.New("GetTasksInfraError")
+		slog.Error("ReadTasksInfraError", slog.Any("error", err))
+		return responseDto, errors.New("ReadTasksInfraError")
 	}
 
-	return scheduledTasks, nil
+	return responseDto, nil
 }

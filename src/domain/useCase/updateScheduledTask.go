@@ -2,7 +2,7 @@ package useCase
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/repository"
@@ -13,12 +13,24 @@ func UpdateScheduledTask(
 	scheduledTaskCmdRepo repository.ScheduledTaskCmdRepo,
 	updateDto dto.UpdateScheduledTask,
 ) error {
-	taskEntity, err := scheduledTaskQueryRepo.ReadById(updateDto.TaskId)
+	readDto := dto.ReadScheduledTasksRequest{
+		Pagination: ScheduledTasksDefaultPagination,
+		TaskId:     &updateDto.TaskId,
+	}
+
+	responseDto, err := scheduledTaskQueryRepo.Read(readDto)
 	if err != nil {
+		return errors.New("ReadScheduledTaskInfraError")
+	}
+
+	if len(responseDto.Tasks) == 0 {
 		return errors.New("ScheduledTaskNotFound")
 	}
 
+	taskEntity := responseDto.Tasks[0]
+
 	if taskEntity.Status == *updateDto.Status {
+		slog.Debug("IgnoringScheduledTaskUpdateStatusNotChanged")
 		return nil
 	}
 
@@ -28,11 +40,9 @@ func UpdateScheduledTask(
 
 	err = scheduledTaskCmdRepo.Update(updateDto)
 	if err != nil {
-		log.Printf("UpdateScheduledTaskError: %s", err)
+		slog.Error("UpdateScheduledTaskInfraError", slog.Any("error", err))
 		return errors.New("UpdateScheduledTaskInfraError")
 	}
-
-	log.Printf("ScheduledTaskId '%v' updated.", updateDto.TaskId)
 
 	return nil
 }
