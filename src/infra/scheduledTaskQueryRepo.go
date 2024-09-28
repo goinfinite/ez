@@ -30,27 +30,25 @@ func (repo *ScheduledTaskQueryRepo) Read(
 	if readDto.TaskId != nil {
 		scheduledTaskModel.ID = readDto.TaskId.Uint64()
 	}
-
 	if readDto.TaskName != nil {
 		scheduledTaskModel.Name = readDto.TaskName.String()
 	}
-
 	if readDto.TaskStatus != nil {
 		scheduledTaskModel.Status = readDto.TaskStatus.String()
 	}
 
-	taskTagsModels := []dbModel.ScheduledTaskTag{}
-	if len(readDto.TaskTags) > 0 {
+	dbQuery := repo.persistentDbSvc.Handler.Where(&scheduledTaskModel)
+	if len(readDto.TaskTags) == 0 {
+		dbQuery = dbQuery.Preload("Tags")
+	} else {
+		tagsStrSlice := []string{}
 		for _, taskTag := range readDto.TaskTags {
-			taskTagModel := dbModel.ScheduledTaskTag{
-				Tag: taskTag.String(),
-			}
-			taskTagsModels = append(taskTagsModels, taskTagModel)
+			tagsStrSlice = append(tagsStrSlice, taskTag.String())
 		}
-		scheduledTaskModel.Tags = taskTagsModels
+		dbQuery = dbQuery.
+			Joins("JOIN scheduled_tasks_tags ON scheduled_tasks_tags.scheduled_task_id = scheduled_tasks.id").
+			Where("scheduled_tasks_tags.tag IN (?)", tagsStrSlice)
 	}
-
-	dbQuery := repo.persistentDbSvc.Handler.Preload("Tags").Where(&scheduledTaskModel)
 	if readDto.StartedBeforeAt != nil {
 		dbQuery = dbQuery.Where("started_at < ?", readDto.StartedBeforeAt.GetAsGoTime())
 	}
