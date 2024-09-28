@@ -51,7 +51,7 @@ func (controller *ScheduledTaskController) parseTaskTags(
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        taskOd query  string  false  "TaskId"
+// @Param        taskId query  string  false  "TaskId"
 // @Param        taskStatus query  string  false  "TaskStatus"
 // @Param        taskTags query  string  false  "TaskTags"
 // @Param        startedBeforeAt query  string  false  "StartedBeforeAt"

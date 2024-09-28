@@ -158,6 +158,32 @@ definitions:
       username:
         type: string
     type: object
+  dto.Pagination:
+    properties:
+      itemsPerPage:
+        type: integer
+      itemsTotal:
+        type: integer
+      lastSeenId:
+        type: string
+      pageNumber:
+        type: integer
+      pagesTotal:
+        type: integer
+      sortBy:
+        type: string
+      sortDirection:
+        type: string
+    type: object
+  dto.ReadScheduledTasksResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+      tasks:
+        items:
+          $ref: '#/definitions/entity.ScheduledTask'
+        type: array
+    type: object
   dto.UpdateAccount:
     properties:
       accountId:
@@ -587,8 +613,12 @@ definitions:
     properties:
       cpuPercent:
         type: number
+      cpuPercentStr:
+        type: string
       memoryPercent:
         type: number
+      memoryPercentStr:
+        type: string
       netInfo:
         items:
           $ref: '#/definitions/valueObject.NetInterfaceInfo'
@@ -597,6 +627,8 @@ definitions:
         items:
           $ref: '#/definitions/valueObject.StorageUnitInfo'
         type: array
+      userDataStorageInfo:
+        $ref: '#/definitions/valueObject.StorageUnitInfo'
     type: object
   valueObject.NetInterfaceInfo:
     properties:
@@ -660,6 +692,8 @@ definitions:
         type: number
       usedPercent:
         type: number
+      usedPercentStr:
+        type: string
       writeBytes:
         type: integer
       writeOpsCount:
@@ -1506,11 +1540,68 @@ paths:
       summary: O11yOverview
       tags:
       - o11y
-  /v1/task/:
+  /v1/scheduled-task/:
     get:
       consumes:
       - application/json
       description: List scheduled tasks.
+      parameters:
+      - description: TaskId
+        in: query
+        name: taskId
+        type: string
+      - description: TaskStatus
+        in: query
+        name: taskStatus
+        type: string
+      - description: TaskTags
+        in: query
+        name: taskTags
+        type: string
+      - description: StartedBeforeAt
+        in: query
+        name: startedBeforeAt
+        type: string
+      - description: StartedAfterAt
+        in: query
+        name: startedAfterAt
+        type: string
+      - description: FinishedBeforeAt
+        in: query
+        name: finishedBeforeAt
+        type: string
+      - description: FinishedAfterAt
+        in: query
+        name: finishedAfterAt
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
       produces:
       - application/json
       responses:
@@ -1518,7 +1609,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.ScheduledTask'
+              $ref: '#/definitions/dto.ReadScheduledTasksResponse'
             type: array
       security:
       - Bearer: []

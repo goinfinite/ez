@@ -1318,7 +1318,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/task/": {
+        "/v1/scheduled-task/": {
             "get": {
                 "security": [
                     {
@@ -1336,13 +1336,99 @@ const docTemplate = `{
                     "task"
                 ],
                 "summary": "ReadScheduledTasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "TaskId",
+                        "name": "taskId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "TaskStatus",
+                        "name": "taskStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "TaskTags",
+                        "name": "taskTags",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedBeforeAt",
+                        "name": "startedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedAfterAt",
+                        "name": "startedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FinishedBeforeAt",
+                        "name": "finishedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FinishedAfterAt",
+                        "name": "finishedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.ScheduledTask"
+                                "$ref": "#/definitions/dto.ReadScheduledTasksResponse"
                             }
                         }
                     }
@@ -1627,6 +1713,46 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.Pagination": {
+            "type": "object",
+            "properties": {
+                "itemsPerPage": {
+                    "type": "integer"
+                },
+                "itemsTotal": {
+                    "type": "integer"
+                },
+                "lastSeenId": {
+                    "type": "string"
+                },
+                "pageNumber": {
+                    "type": "integer"
+                },
+                "pagesTotal": {
+                    "type": "integer"
+                },
+                "sortBy": {
+                    "type": "string"
+                },
+                "sortDirection": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReadScheduledTasksResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.ScheduledTask"
+                    }
                 }
             }
         },
@@ -2283,8 +2409,14 @@ const docTemplate = `{
                 "cpuPercent": {
                     "type": "number"
                 },
+                "cpuPercentStr": {
+                    "type": "string"
+                },
                 "memoryPercent": {
                     "type": "number"
+                },
+                "memoryPercentStr": {
+                    "type": "string"
                 },
                 "netInfo": {
                     "type": "array",
@@ -2297,6 +2429,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/valueObject.StorageUnitInfo"
                     }
+                },
+                "userDataStorageInfo": {
+                    "$ref": "#/definitions/valueObject.StorageUnitInfo"
                 }
             }
         },
@@ -2393,6 +2528,9 @@ const docTemplate = `{
                 },
                 "usedPercent": {
                     "type": "number"
+                },
+                "usedPercentStr": {
+                    "type": "string"
                 },
                 "writeBytes": {
                     "type": "integer"
