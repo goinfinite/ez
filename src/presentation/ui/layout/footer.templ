@@ -35,7 +35,7 @@ func scheduledTaskStatusToIcon(taskStatus valueObject.ScheduledTaskStatus) strin
 	case "failed":
 		return "ph-x-circle text-red-600"
 	case "cancelled":
-		return "ph-ph-prohibit text-red-600"
+		return "ph-prohibit text-red-600"
 	case "timeout":
 		return "ph-timer text-red-600"
 	default:
@@ -97,67 +97,86 @@ templ ScheduledTasksPopover(
 										</p>
 									}
 								</div>
-								<div class="max-w-85 text-[10px]" x-show="isExpanded">
-									<table>
-										<tbody>
-											<tr>
-												<td class="max-w-80 text-wrap">
-													<p class="font-bold">Command</p>
-													<p class="max-w-80 bg-control-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
-														{ scheduledTask.Command.String() }
-													</p>
-												</td>
-											</tr>
-											<tr>
-												<td class="max-w-80 text-wrap break-words p-1">
-													<p class="font-bold">Outputs</p>
-													if scheduledTask.Output != nil {
-														<p class="max-w-80 bg-control-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
-															{ scheduledTask.Output.String() }
-														</p>
-													}
-													if scheduledTask.Error != nil {
-														<p class="max-w-80 rounded-md bg-red-500 bg-opacity-30 px-1 text-neutral-50">
-															{ scheduledTask.Error.String() }
-														</p>
-													}
-												</td>
-											</tr>
-											<tr>
-												<td class="max-w-80">
-													<p class="font-bold">Timings</p>
-													<table>
-														<tbody>
-															<thead class="bg-control-600">
-																<th class="text-left">CreatedAt</th>
-																<th class="bg-control-500 text-left">StartedAt</th>
-																<th class="text-left">FinishedAt</th>
-															</thead>
-															<tr>
-																<td class="text-wrap break-words p-1">
-																	{ scheduledTask.CreatedAt.GetRfcDate() }
-																</td>
-																<td class="bg-control-400 text-wrap break-words p-1">
-																	if scheduledTask.StartedAt != nil {
-																		{ scheduledTask.StartedAt.GetRfcDate() }
-																	} else {
-																		-
-																	}
-																</td>
-																<td class="text-wrap break-words p-1">
-																	if scheduledTask.FinishedAt != nil {
-																		{ scheduledTask.FinishedAt.GetRfcDate() }
-																	} else {
-																		-
-																	}
-																</td>
-															</tr>
-														</tbody>
-													</table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
+								<div class="max-w-85 space-y-2 text-[10px]" x-show="isExpanded">
+									<div class="max-w-80 text-wrap break-words">
+										<p class="font-bold">Command</p>
+										<p class="max-w-80 bg-control-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
+											{ scheduledTask.Command.String() }
+										</p>
+									</div>
+									<div class="max-w-80 text-wrap break-words">
+										<p class="font-bold">Outputs</p>
+										if scheduledTask.Output != nil {
+											<p class="max-w-80 bg-control-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
+												{ scheduledTask.Output.String() }
+											</p>
+										}
+										if scheduledTask.Error != nil {
+											<p class="max-w-80 rounded-md bg-red-500 bg-opacity-30 px-1 text-neutral-50">
+												{ scheduledTask.Error.String() }
+											</p>
+										}
+									</div>
+									<div class="max-w-80">
+										<p class="font-bold">Timings</p>
+										<table>
+											<tbody>
+												<thead class="bg-control-600">
+													<th class="text-left">CreatedAt</th>
+													<th class="bg-control-500 text-left">StartedAt</th>
+													<th class="text-left">FinishedAt</th>
+												</thead>
+												<tr>
+													<td class="text-wrap break-words p-1">
+														{ scheduledTask.CreatedAt.GetRfcDate() }
+													</td>
+													<td class="bg-control-400 text-wrap break-words p-1">
+														if scheduledTask.StartedAt != nil {
+															{ scheduledTask.StartedAt.GetRfcDate() }
+														} else {
+															-
+														}
+													</td>
+													<td class="text-wrap break-words p-1">
+														if scheduledTask.FinishedAt != nil {
+															{ scheduledTask.FinishedAt.GetRfcDate() }
+														} else {
+															-
+														}
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<div class="space-x-2">
+										if scheduledTask.Status.String() == "pending" {
+											<button
+												hx-put="/api/v1/scheduled-task/"
+												hx-vals={ "{\"taskId\": " + scheduledTask.Id.String() + ", \"status\": \"cancelled\"}" }
+												hx-trigger="click"
+												hx-swap="none"
+												@click="$dispatch('refresh:footer')"
+												class="rounded-md border-none bg-red-800 bg-opacity-60 px-2 py-1 text-center text-sm font-bold lowercase leading-none hover:bg-opacity-80"
+											>
+												<i class="ph-bold ph-hand-palm mr-0.5 align-middle"></i>
+												Cancel
+											</button>
+										} else {
+											if scheduledTask.Status.String() != "running" {
+												<button
+													hx-put="/api/v1/scheduled-task/"
+													hx-vals={ "{\"taskId\": " + scheduledTask.Id.String() + ", \"status\": \"pending\"}" }
+													hx-trigger="click"
+													hx-swap="none"
+													@click="$dispatch('refresh:footer')"
+													class="rounded-md border-none bg-amber-700 bg-opacity-60 px-2 py-1 text-center text-sm font-bold lowercase leading-none hover:bg-opacity-80"
+												>
+													<i class="ph-bold ph-repeat mr-0.5 align-middle"></i>
+													Run Again
+												</button>
+											}
+										}
+									</div>
 								</div>
 							</td>
 						</tr>
@@ -185,7 +204,7 @@ templ Footer(
 	<footer
 		id="footer"
 		hx-get="/fragment/footer"
-		hx-trigger="every 620s, refresh:footer from:window delay:250ms"
+		hx-trigger="every 20s, refresh:footer from:window delay:200ms"
 		hx-target="this"
 		hx-swap="outerHTML"
 		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
