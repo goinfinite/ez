@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"fmt"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/domain/valueObject"
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
@@ -26,17 +27,17 @@ templ FooterSkeleton() {
 func scheduledTaskStatusToIcon(taskStatus valueObject.ScheduledTaskStatus) string {
 	switch taskStatus.String() {
 	case "pending":
-		return "ph-clock"
+		return "ph-clock text-neutral-50"
 	case "running":
-		return "ph-arrows-clockwise animate-spin"
+		return "ph-arrows-clockwise animate-spin text-amber-500"
 	case "completed":
-		return "ph-check-circle"
+		return "ph-check-circle text-emerald-500"
 	case "failed":
-		return "ph-x-circle"
+		return "ph-x-circle text-red-600"
 	case "cancelled":
-		return "ph-ph-prohibit"
+		return "ph-ph-prohibit text-red-600"
 	case "timeout":
-		return "ph-timer"
+		return "ph-timer text-red-600"
 	default:
 		return "ph-question-circle"
 	}
@@ -50,7 +51,7 @@ templ ScheduledTasksPopover(
 		x-show="$store.main.displayScheduledTasksPopover"
 		class="bg-control-400 max-h-90 w-90 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform rounded-t-md text-sm text-neutral-50 shadow-lg transition-all duration-300 ease-in-out"
 	>
-		<div class="bg-control-200 flex items-center justify-between rounded-t-md p-2.5">
+		<div class="bg-control-300 flex items-center justify-between rounded-t-md p-2.5">
 			<div class="text-base font-bold">Scheduled Tasks</div>
 			<div class="text-base font-bold">
 				<i
@@ -59,19 +60,32 @@ templ ScheduledTasksPopover(
 				></i>
 			</div>
 		</div>
-		<div class="flex justify-center overflow-y-auto overflow-x-hidden p-2">
+		<div class="flex justify-center overflow-y-auto overflow-x-hidden px-2 pb-2 pt-1">
+			if len(scheduledTasksEntities) == 0 {
+				<div class="text-center text-neutral-50">No scheduled tasks.</div>
+			}
 			<table class="table-auto border-collapse rounded-md">
 				<tbody>
 					for _, scheduledTask := range scheduledTasksEntities {
-						<tr class="even:bg-control-400 border-b border-neutral-500 border-opacity-30">
+						<tr
+							class="even:bg-control-600 even:hover:bg-control-300 hover:bg-control-300 cursor-pointer rounded-md border-b border-neutral-500 border-opacity-30 last:border-b-0"
+						>
 							<td class="p-1.5">
 								<i class={ "text-xl ph-duotone " + scheduledTaskStatusToIcon(scheduledTask.Status) }></i>
 							</td>
-							<td class="w-75 p-1.5">
+							<td class="w-75 px-1 py-2">
 								{ scheduledTask.Name.String() }
+								if scheduledTask.ElapsedSecs != nil {
+									<small>({ fmt.Sprintf("%d", *scheduledTask.ElapsedSecs) }s)</small>
+								}
 								if scheduledTask.Output != nil {
-									<div class="max-w-75 bg-control-900 truncate bg-opacity-50 p-1 text-xs text-neutral-50">
+									<div class="max-w-75 bg-control-900 truncate bg-opacity-50 px-1 text-[10px] text-neutral-50">
 										{ scheduledTask.Output.String() }
+									</div>
+								}
+								if scheduledTask.Error != nil {
+									<div class="max-w-75 truncate bg-red-500 bg-opacity-30 px-1 text-[10px] text-neutral-50">
+										{ scheduledTask.Error.String() }
 									</div>
 								}
 							</td>
