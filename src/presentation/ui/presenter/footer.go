@@ -1,9 +1,11 @@
 package presenter
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/infra/db"
 	"github.com/speedianet/control/src/presentation/service"
@@ -33,29 +35,33 @@ func (presenter *FooterPresenter) Handler(c echo.Context) error {
 
 	o11yServiceOutput := o11yService.ReadOverview()
 	if o11yServiceOutput.Status != service.Success {
+		slog.Debug("FooterPresenterReadOverviewFailure")
 		return nil
 	}
 
 	o11yOverviewEntity, assertOk := o11yServiceOutput.Body.(entity.O11yOverview)
 	if !assertOk {
+		slog.Debug("FooterPresenterAssertOverviewFailure")
 		return nil
 	}
 
 	scheduledTaskService := service.NewScheduledTaskService(presenter.persistentDbSvc)
 
-	scheduledTaskServiceOutput := scheduledTaskService.Read()
+	scheduledTaskServiceOutput := scheduledTaskService.Read(map[string]interface{}{})
 	if scheduledTaskServiceOutput.Status != service.Success {
+		slog.Debug("FooterPresenterReadScheduledTaskFailure")
 		return nil
 	}
 
-	scheduledTaskEntities, assertOk := scheduledTaskServiceOutput.Body.([]entity.ScheduledTask)
+	tasksResponseDto, assertOk := scheduledTaskServiceOutput.Body.(dto.ReadScheduledTasksResponse)
 	if !assertOk {
+		slog.Debug("FooterPresenterAssertScheduledTaskResponseFailure")
 		return nil
 	}
 
 	c.Response().Writer.WriteHeader(http.StatusOK)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 
-	return layout.Footer(o11yOverviewEntity, scheduledTaskEntities).
+	return layout.Footer(o11yOverviewEntity, tasksResponseDto.Tasks).
 		Render(c.Request().Context(), c.Response().Writer)
 }
