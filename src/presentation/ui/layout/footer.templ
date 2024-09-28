@@ -29,7 +29,7 @@ func scheduledTaskStatusToIcon(taskStatus valueObject.ScheduledTaskStatus) strin
 	case "pending":
 		return "ph-clock text-neutral-50"
 	case "running":
-		return "ph-arrows-clockwise animate-spin text-amber-500"
+		return "ph-cooking-pot text-amber-500 animate-duration-[2s] animate-pulse"
 	case "completed":
 		return "ph-check-circle text-emerald-500"
 	case "failed":
@@ -49,7 +49,7 @@ templ ScheduledTasksPopover(
 	<div
 		x-cloak
 		x-show="$store.main.displayScheduledTasksPopover"
-		class="bg-control-400 max-h-90 w-90 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform rounded-t-md text-sm text-neutral-50 shadow-lg transition-all duration-300 ease-in-out"
+		class="bg-control-400 max-h-90 w-90 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform rounded-t-md text-sm text-neutral-50 shadow-xl transition-all duration-300 ease-in-out"
 	>
 		<div class="bg-control-300 flex items-center justify-between rounded-t-md p-2.5">
 			<div class="text-base font-bold">Scheduled Tasks</div>
@@ -114,7 +114,7 @@ templ Footer(
 	<footer
 		id="footer"
 		hx-get="/fragment/footer"
-		hx-trigger="every 20s, refresh:footer from:window delay:250ms"
+		hx-trigger="every 620s, refresh:footer from:window delay:250ms"
 		hx-target="this"
 		hx-swap="outerHTML"
 		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
