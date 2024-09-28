@@ -52,8 +52,9 @@ func (controller *ScheduledTaskController) parseTaskTags(
 // @Produce      json
 // @Security     Bearer
 // @Param        taskId query  string  false  "TaskId"
+// @Param        taskName query  string  false  "TaskName"
 // @Param        taskStatus query  string  false  "TaskStatus"
-// @Param        taskTags query  string  false  "TaskTags"
+// @Param        taskTags query  string  false  "TaskTags (semicolon separated)"
 // @Param        startedBeforeAt query  string  false  "StartedBeforeAt"
 // @Param        startedAfterAt query  string  false  "StartedAfterAt"
 // @Param        finishedBeforeAt query  string  false  "FinishedBeforeAt"
@@ -70,7 +71,7 @@ func (controller *ScheduledTaskController) parseTaskTags(
 func (controller *ScheduledTaskController) Read(c echo.Context) error {
 	requestBody := map[string]interface{}{}
 	queryParameters := []string{
-		"taskId", "taskStatus", "taskTags",
+		"taskId", "taskName", "taskStatus", "taskTags",
 		"startedBeforeAt", "startedAfterAt",
 		"finishedBeforeAt", "finishedAfterAt",
 		"createdBeforeAt", "createdAfterAt",

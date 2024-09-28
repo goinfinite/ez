@@ -1345,13 +1345,19 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "TaskName",
+                        "name": "taskName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "TaskStatus",
                         "name": "taskStatus",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "TaskTags",
+                        "description": "TaskTags (semicolon separated)",
                         "name": "taskTags",
                         "in": "query"
                     },

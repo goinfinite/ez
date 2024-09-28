@@ -31,12 +31,16 @@ func (repo *ScheduledTaskQueryRepo) Read(
 		scheduledTaskModel.ID = readDto.TaskId.Uint64()
 	}
 
+	if readDto.TaskName != nil {
+		scheduledTaskModel.Name = readDto.TaskName.String()
+	}
+
 	if readDto.TaskStatus != nil {
 		scheduledTaskModel.Status = readDto.TaskStatus.String()
 	}
 
 	taskTagsModels := []dbModel.ScheduledTaskTag{}
-	if readDto.TaskTags != nil {
+	if len(readDto.TaskTags) > 0 {
 		for _, taskTag := range readDto.TaskTags {
 			taskTagModel := dbModel.ScheduledTaskTag{
 				Tag: taskTag.String(),
@@ -66,6 +70,7 @@ func (repo *ScheduledTaskQueryRepo) Read(
 		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
 	}
 
+	dbQuery = dbQuery.Limit(int(readDto.Pagination.ItemsPerPage))
 	if readDto.Pagination.LastSeenId == nil {
 		offset := int(readDto.Pagination.PageNumber) * int(readDto.Pagination.ItemsPerPage)
 		dbQuery = dbQuery.Offset(offset)

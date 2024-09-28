@@ -1550,11 +1550,15 @@ paths:
         in: query
         name: taskId
         type: string
+      - description: TaskName
+        in: query
+        name: taskName
+        type: string
       - description: TaskStatus
         in: query
         name: taskStatus
         type: string
-      - description: TaskTags
+      - description: TaskTags (semicolon separated)
         in: query
         name: taskTags
         type: string

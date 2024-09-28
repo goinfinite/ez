@@ -23,7 +23,7 @@ func NewScheduledTaskController(
 
 func (controller *ScheduledTaskController) Read() *cobra.Command {
 	var taskIdUint uint64
-	var taskStatusStr string
+	var taskNameStr, taskStatusStr string
 	var taskTagsStrSlice []string
 	var startedBeforeAtInt64, startedAfterAtInt64 int64
 	var finishedBeforeAtInt64, finishedAfterAtInt64 int64
@@ -41,6 +41,9 @@ func (controller *ScheduledTaskController) Read() *cobra.Command {
 
 			if taskIdUint != 0 {
 				requestBody["taskId"] = taskIdUint
+			}
+			if taskNameStr != "" {
+				requestBody["taskName"] = taskNameStr
 			}
 			if taskStatusStr != "" {
 				requestBody["taskStatus"] = taskStatusStr
@@ -89,6 +92,7 @@ func (controller *ScheduledTaskController) Read() *cobra.Command {
 	}
 
 	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "i", 0, "TaskId")
+	cmd.Flags().StringVarP(&taskNameStr, "task-name", "n", "", "TaskName")
 	cmd.Flags().StringVarP(&taskStatusStr, "task-status", "s", "", "TaskStatus")
 	cmd.Flags().StringSliceVarP(&taskTagsStrSlice, "task-tags", "t", []string{}, "TaskTags")
 	cmd.Flags().Int64VarP(
