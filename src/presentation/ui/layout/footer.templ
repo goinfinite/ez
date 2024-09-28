@@ -2,18 +2,9 @@ package layout
 
 import (
 	"github.com/speedianet/control/src/domain/entity"
+	"github.com/speedianet/control/src/domain/valueObject"
 	componentMisc "github.com/speedianet/control/src/presentation/ui/component/misc"
 )
-
-templ ResourceUsageProgressBar(usageRate uint8, usageLabel, tooltipText, icon string) {
-	<div class="group relative flex items-center">
-		<i class={ "ph-bold " + icon + " mr-2 align-middle text-xl" }></i>
-		@componentMisc.ProgressBar(usageRate, usageLabel)
-		<div class={ "absolute left-1/2 transform -translate-x-1/2 opacity-0 bottom-full mb-2 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 p-1.5 bg-control-300 text-neutral-50 text-xs rounded-md shadow-md" }>
-			{ tooltipText }
-		</div>
-	</div>
-}
 
 templ FooterSkeleton() {
 	<footer
@@ -32,6 +23,66 @@ templ FooterSkeleton() {
 	</footer>
 }
 
+func scheduledTaskStatusToIcon(taskStatus valueObject.ScheduledTaskStatus) string {
+	switch taskStatus.String() {
+	case "pending":
+		return "ph-clock"
+	case "running":
+		return "ph-arrows-clockwise animate-spin"
+	case "completed":
+		return "ph-check-circle"
+	case "failed":
+		return "ph-x-circle"
+	case "cancelled":
+		return "ph-ph-prohibit"
+	case "timeout":
+		return "ph-timer"
+	default:
+		return "ph-question-circle"
+	}
+}
+
+templ ScheduledTasksPopover(
+	scheduledTasksEntities []entity.ScheduledTask,
+) {
+	<div class="bg-control-800 max-h-90 w-90 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform rounded-t-md text-sm text-neutral-50 shadow-md">
+		<div class="bg-control-200 flex items-center justify-between rounded-t-md p-3">
+			<div class="text-base font-bold">Scheduled Tasks</div>
+		</div>
+		<div class="flex justify-center overflow-y-auto overflow-x-hidden p-2">
+			<table class="table-auto border-collapse rounded-md">
+				<tbody>
+					for _, scheduledTask := range scheduledTasksEntities {
+						<tr class="even:bg-control-400 border-b border-neutral-500 border-opacity-30">
+							<td class="p-1">
+								<i class={ "text-xl ph-duotone " + scheduledTaskStatusToIcon(scheduledTask.Status) }></i>
+							</td>
+							<td class="w-75 p-1">
+								{ scheduledTask.Name.String() }
+								if scheduledTask.Output != nil {
+									<div class="max-w-75 truncate text-xs text-neutral-50">
+										{ scheduledTask.Output.String() }
+									</div>
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+templ ResourceUsageProgressBar(usageRate uint8, usageLabel, tooltipText, icon string) {
+	<div class="group relative flex items-center">
+		<i class={ "ph-bold " + icon + " mr-2 align-middle text-xl" }></i>
+		@componentMisc.ProgressBar(usageRate, usageLabel)
+		<div class={ "absolute left-1/2 transform -translate-x-1/2 opacity-0 bottom-full mb-2 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 p-1.5 bg-control-300 text-neutral-50 text-xs rounded-md shadow-md" }>
+			{ tooltipText }
+		</div>
+	</div>
+}
+
 templ Footer(
 	o11yOverviewEntity entity.O11yOverview,
 	scheduledTasksEntities []entity.ScheduledTask,
@@ -39,11 +90,15 @@ templ Footer(
 	<footer
 		id="footer"
 		hx-get="/fragment/footer"
-		hx-trigger="every 20s"
+		hx-trigger="every 620s"
 		hx-target="this"
 		hx-swap="outerHTML"
 		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
 	>
+		<div class="mr-5 flex items-center">
+			Scheduled Tasks
+			@ScheduledTasksPopover(scheduledTasksEntities)
+		</div>
 		<div class="flex items-center space-x-3">
 			@ResourceUsageProgressBar(
 				uint8(o11yOverviewEntity.HostResourceUsage.CpuPercent),
