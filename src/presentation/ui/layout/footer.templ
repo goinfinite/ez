@@ -68,7 +68,7 @@ templ ScheduledTasksPopover(
 				<tbody>
 					for _, scheduledTask := range scheduledTasksEntities {
 						<tr
-							class="even:bg-control-500 even:hover:bg-control-300 hover:bg-control-300 cursor-pointer rounded-md border-b border-neutral-500 border-opacity-30 last:border-b-0"
+							class="even:bg-control-500 even:hover:bg-control-300 hover:bg-control-300 group cursor-pointer rounded-md border-b border-neutral-500 border-opacity-30 last:border-b-0"
 							x-data="{ isExpanded: false }"
 							@click="isExpanded = !isExpanded"
 							:class="{ 'bg-control-300': isExpanded }"
@@ -81,14 +81,18 @@ templ ScheduledTasksPopover(
 								if scheduledTask.ElapsedSecs != nil {
 									<small>({ fmt.Sprintf("%d", *scheduledTask.ElapsedSecs) }s)</small>
 								}
+								<i
+									class="ph-bold text-md float-right opacity-0 transition-all duration-300 group-hover:opacity-80"
+									:class="{ 'ph-arrows-in-simple': isExpanded, 'ph-arrows-out-simple': !isExpanded }"
+								></i>
 								<div x-show="!isExpanded">
 									if scheduledTask.Output != nil {
-										<p class="max-w-85 bg-control-900 truncate rounded-md bg-opacity-50 px-1 text-[10px] text-neutral-50">
+										<p class="max-w-80 bg-control-900 truncate rounded-md bg-opacity-50 px-1 text-[10px] text-neutral-50">
 											{ scheduledTask.Output.String() }
 										</p>
 									}
 									if scheduledTask.Error != nil {
-										<p class="max-w-85 truncate rounded-md bg-red-500 bg-opacity-30 px-1 text-[10px] text-neutral-50">
+										<p class="max-w-80 truncate rounded-md bg-red-500 bg-opacity-30 px-1 text-[10px] text-neutral-50">
 											{ scheduledTask.Error.String() }
 										</p>
 									}
