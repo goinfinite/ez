@@ -47,7 +47,13 @@ func (presenter *FooterPresenter) Handler(c echo.Context) error {
 
 	scheduledTaskService := service.NewScheduledTaskService(presenter.persistentDbSvc)
 
-	scheduledTaskServiceOutput := scheduledTaskService.Read(map[string]interface{}{})
+	scheduledTaskReadRequestBody := map[string]interface{}{
+		"pageNumber":    0,
+		"itemsPerPage":  5,
+		"sortBy":        "id",
+		"sortDirection": "desc",
+	}
+	scheduledTaskServiceOutput := scheduledTaskService.Read(scheduledTaskReadRequestBody)
 	if scheduledTaskServiceOutput.Status != service.Success {
 		slog.Debug("FooterPresenterReadScheduledTaskFailure")
 		return nil
