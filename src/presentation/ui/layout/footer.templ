@@ -45,22 +45,32 @@ func scheduledTaskStatusToIcon(taskStatus valueObject.ScheduledTaskStatus) strin
 templ ScheduledTasksPopover(
 	scheduledTasksEntities []entity.ScheduledTask,
 ) {
-	<div class="bg-control-800 max-h-90 w-90 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform rounded-t-md text-sm text-neutral-50 shadow-md">
-		<div class="bg-control-200 flex items-center justify-between rounded-t-md p-3">
+	<div
+		x-cloak
+		x-show="$store.main.displayScheduledTasksPopover"
+		class="bg-control-400 max-h-90 w-90 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform rounded-t-md text-sm text-neutral-50 shadow-lg transition-all duration-300 ease-in-out"
+	>
+		<div class="bg-control-200 flex items-center justify-between rounded-t-md p-2.5">
 			<div class="text-base font-bold">Scheduled Tasks</div>
+			<div class="text-base font-bold">
+				<i
+					class="ph-bold ph-minus cursor-pointer"
+					@click="$store.main.toggleScheduledTasksPopover()"
+				></i>
+			</div>
 		</div>
 		<div class="flex justify-center overflow-y-auto overflow-x-hidden p-2">
 			<table class="table-auto border-collapse rounded-md">
 				<tbody>
 					for _, scheduledTask := range scheduledTasksEntities {
 						<tr class="even:bg-control-400 border-b border-neutral-500 border-opacity-30">
-							<td class="p-1">
+							<td class="p-1.5">
 								<i class={ "text-xl ph-duotone " + scheduledTaskStatusToIcon(scheduledTask.Status) }></i>
 							</td>
-							<td class="w-75 p-1">
+							<td class="w-75 p-1.5">
 								{ scheduledTask.Name.String() }
 								if scheduledTask.Output != nil {
-									<div class="max-w-75 truncate text-xs text-neutral-50">
+									<div class="max-w-75 bg-control-900 truncate bg-opacity-50 p-1 text-xs text-neutral-50">
 										{ scheduledTask.Output.String() }
 									</div>
 								}
@@ -90,13 +100,19 @@ templ Footer(
 	<footer
 		id="footer"
 		hx-get="/fragment/footer"
-		hx-trigger="every 620s"
+		hx-trigger="every 20s, refresh:footer from:window delay:250ms"
 		hx-target="this"
 		hx-swap="outerHTML"
 		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
 	>
-		<div class="mr-5 flex items-center">
-			Scheduled Tasks
+		<div
+			class="mr-5 flex h-full items-center"
+			:class="$store.main.displayScheduledTasksPopover ? 'bg-control-300' : 'bg-control-800'"
+		>
+			<i
+				class="ph-bold ph-list-checks cursor-pointer px-1 text-xl"
+				@click="$store.main.toggleScheduledTasksPopover()"
+			></i>
 			@ScheduledTasksPopover(scheduledTasksEntities)
 		</div>
 		<div class="flex items-center space-x-3">
