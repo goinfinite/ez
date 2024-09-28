@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"math"
 
+	"github.com/iancoleman/strcase"
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
 	"github.com/speedianet/control/src/infra/db"
@@ -77,6 +78,11 @@ func (repo *ScheduledTaskQueryRepo) Read(
 	}
 	if readDto.Pagination.SortBy != nil {
 		orderStatement := readDto.Pagination.SortBy.String()
+		orderStatement = strcase.ToSnake(orderStatement)
+		if orderStatement == "id" {
+			orderStatement = "ID"
+		}
+
 		if readDto.Pagination.SortDirection != nil {
 			orderStatement += " " + readDto.Pagination.SortDirection.String()
 		}
