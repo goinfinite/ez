@@ -8,9 +8,9 @@ import (
 	"github.com/speedianet/control/src/domain/valueObject"
 )
 
-const ScheduledTasksRunIntervalSecs uint = 90
+const ScheduledTasksRunIntervalSecs uint8 = 90
 
-var scheduledTasksDefaultTimeoutSecs uint = 300
+var scheduledTasksDefaultTimeoutSecs uint16 = 300
 
 func RunScheduledTasks(
 	scheduledTaskQueryRepo repository.ScheduledTaskQueryRepo,
