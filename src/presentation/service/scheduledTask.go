@@ -39,6 +39,15 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 		taskIdPtr = &taskId
 	}
 
+	var taskNamePtr *valueObject.ScheduledTaskName
+	if input["taskName"] != nil {
+		taskName, err := valueObject.NewScheduledTaskName(input["taskName"])
+		if err != nil {
+			return NewServiceOutput(UserError, err)
+		}
+		taskNamePtr = &taskName
+	}
+
 	var taskStatusPtr *valueObject.ScheduledTaskStatus
 	if input["taskStatus"] != nil {
 		taskStatus, err := valueObject.NewScheduledTaskStatus(input["taskStatus"])
@@ -137,6 +146,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	readDto := dto.ReadScheduledTasksRequest{
 		Pagination:       paginationDto,
 		TaskId:           taskIdPtr,
+		TaskName:         taskNamePtr,
 		TaskStatus:       taskStatusPtr,
 		TaskTags:         taskTags,
 		StartedBeforeAt:  startedBeforeAtPtr,
