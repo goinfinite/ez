@@ -3,6 +3,7 @@ package valueObject
 import (
 	"errors"
 	"slices"
+	"strings"
 
 	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
 )
@@ -18,6 +19,7 @@ func NewPaginationSortDirection(
 	if err != nil {
 		return sortDirection, errors.New("PaginationSortDirectionMustBeString")
 	}
+	stringValue = strings.ToLower(stringValue)
 
 	if !slices.Contains(ValidPaginationSortDirections, stringValue) {
 		return sortDirection, errors.New("InvalidPaginationSortDirection")
