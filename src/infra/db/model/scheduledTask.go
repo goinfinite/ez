@@ -10,7 +10,7 @@ import (
 type ScheduledTask struct {
 	ID          uint64 `gorm:"primarykey"`
 	Name        string `gorm:"not null"`
-	Status      string `gorm:"not null"`
+	Status      string `gorm:"not null,index"`
 	Command     string `gorm:"not null"`
 	Tags        []ScheduledTaskTag
 	TimeoutSecs *uint16
