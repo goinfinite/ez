@@ -1,7 +1,9 @@
 package infra
 
 import (
+	"errors"
 	"log/slog"
+	"math"
 
 	"github.com/speedianet/control/src/domain/dto"
 	"github.com/speedianet/control/src/domain/entity"
@@ -44,7 +46,7 @@ func (repo *ScheduledTaskQueryRepo) Read(
 		scheduledTaskModel.Tags = taskTagsModels
 	}
 
-	dbQuery := repo.persistentDbSvc.Handler.Where(&scheduledTaskModel)
+	dbQuery := repo.persistentDbSvc.Handler.Preload("Tags").Where(&scheduledTaskModel)
 	if readDto.StartedBeforeAt != nil {
 		dbQuery = dbQuery.Where("started_at < ?", readDto.StartedBeforeAt.GetAsGoTime())
 	}
@@ -64,12 +66,31 @@ func (repo *ScheduledTaskQueryRepo) Read(
 		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
 	}
 
+	if readDto.Pagination.LastSeenId == nil {
+		offset := int(readDto.Pagination.PageNumber) * int(readDto.Pagination.ItemsPerPage)
+		dbQuery = dbQuery.Offset(offset)
+	} else {
+		dbQuery = dbQuery.Where("id > ?", readDto.Pagination.LastSeenId.String())
+	}
+	if readDto.Pagination.SortBy != nil {
+		orderStatement := readDto.Pagination.SortBy.String()
+		if readDto.Pagination.SortDirection != nil {
+			orderStatement += " " + readDto.Pagination.SortDirection.String()
+		}
+
+		dbQuery = dbQuery.Order(orderStatement)
+	}
+
 	scheduledTaskModels := []dbModel.ScheduledTask{}
-	err = repo.persistentDbSvc.Handler.
-		Preload("Tags").
-		Find(&scheduledTaskModels).Error
+	err = dbQuery.Find(&scheduledTaskModels).Error
 	if err != nil {
-		return responseDto, err
+		return responseDto, errors.New("FindScheduledTasksError: " + err.Error())
+	}
+
+	var itemsTotal int64
+	err = dbQuery.Count(&itemsTotal).Error
+	if err != nil {
+		return responseDto, errors.New("CountItemsTotalError: " + err.Error())
 	}
 
 	for _, scheduledTaskModel := range scheduledTaskModels {
@@ -85,9 +106,17 @@ func (repo *ScheduledTaskQueryRepo) Read(
 		scheduledTaskEntities = append(scheduledTaskEntities, scheduledTaskEntity)
 	}
 
+	itemsTotalUint := uint64(itemsTotal)
+	pagesTotal := uint32(
+		math.Ceil(float64(itemsTotal) / float64(readDto.Pagination.ItemsPerPage)),
+	)
 	responsePagination := dto.Pagination{
-		PageNumber:   readDto.Pagination.PageNumber,
-		ItemsPerPage: readDto.Pagination.ItemsPerPage,
+		PageNumber:    readDto.Pagination.PageNumber,
+		ItemsPerPage:  readDto.Pagination.ItemsPerPage,
+		SortBy:        readDto.Pagination.SortBy,
+		SortDirection: readDto.Pagination.SortDirection,
+		PagesTotal:    &pagesTotal,
+		ItemsTotal:    &itemsTotalUint,
 	}
 
 	return dto.ReadScheduledTasksResponse{
