@@ -56,6 +56,12 @@ func (repo *ScheduledTaskCmdRepo) Update(
 
 	if updateDto.Status != nil {
 		updateMap["status"] = updateDto.Status.String()
+		updateMap["run_at"] = nil
+		updateMap["output"] = nil
+		updateMap["error"] = nil
+		updateMap["started_at"] = nil
+		updateMap["finished_at"] = nil
+		updateMap["elapsed_secs"] = nil
 	}
 
 	if updateDto.RunAt != nil {
