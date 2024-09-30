@@ -14,7 +14,7 @@ func PreventRootless() {
 	}
 
 	if currentUser.Username != "root" {
-		fmt.Println("Only root can run CONTROL.")
+		fmt.Println("Only root can run Ez.")
 		os.Exit(1)
 	}
 }

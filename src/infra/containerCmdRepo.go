@@ -634,7 +634,7 @@ func (repo *ContainerCmdRepo) CreateContainerSessionToken(
 		"os account update -u ez -p "+randomPassword,
 	)
 	if err != nil {
-		return tokenValue, errors.New("UpdateControlUserPasswordFailed: " + err.Error())
+		return tokenValue, errors.New("UpdateEzUserPasswordFailed: " + err.Error())
 	}
 
 	sessionIpAddressStr := createDto.SessionIpAddress.String()
@@ -643,7 +643,7 @@ func (repo *ContainerCmdRepo) CreateContainerSessionToken(
 		"os auth login -u ez -p "+randomPassword+" -i "+sessionIpAddressStr,
 	)
 	if err != nil {
-		return tokenValue, errors.New("LoginWithControlUserFailed: " + err.Error())
+		return tokenValue, errors.New("LoginWithEzUserFailed: " + err.Error())
 	}
 
 	var loginResponseMap map[string]interface{}

@@ -16,7 +16,7 @@ To run this project during development you must install [Air](https://github.com
 
 ### Unit Testing
 
-Since CONTROL relies on the operational system being openSUSE MicroOS, the entire development and testing should be done in a VM. The VM can be created with the following steps:
+Since Ez relies on the operational system being openSUSE MicroOS, the entire development and testing should be done in a VM. The VM can be created with the following steps:
 
 1. Install VMWare Player;
 
@@ -65,7 +65,7 @@ Host github.com
 
 Replace `the_github_key` with the path to your private key and remember to chmod the key to 400.
 
-9. Install a few Go packages and clone the CONTROL repository:
+9. Install a few Go packages and clone the Ez repository:
 
 ```
 go install github.com/swaggo/swag/cmd/swag@latest
@@ -137,7 +137,7 @@ For instance there you'll find a `testHelpers.go` file that is used to read the 
 
 ### Building
 
-CONTROL is likely on the marketplace of your cloud provider already, but if you want to build it yourself.
+Ez is likely on the marketplace of your cloud provider already, but if you want to build it yourself.
 
 The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
@@ -145,7 +145,7 @@ The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
 _If you are running locally, follow steps 1 to 6 of the "Unit Testing" title above._
 
-2. Get the CONTROL binary, download it to the `/var/infinite/` directory and give it execution permission:
+2. Get the Ez binary, download it to the `/var/infinite/` directory and give it execution permission:
 
 ```
 chmod +x /var/infinite/ez

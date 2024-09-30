@@ -115,7 +115,7 @@ func (repo SysInstallCmdRepo) Install() error {
 		"echo \"alias ez='" + infraEnvs.InfiniteEzMainDir + "/ez'\" >> /root/.bashrc",
 	)
 	if err != nil {
-		return errors.New("AddControlAliasFailed: " + err.Error())
+		return errors.New("AddEzAliasFailed: " + err.Error())
 	}
 
 	//cspell:disable
