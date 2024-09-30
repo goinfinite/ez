@@ -15,6 +15,10 @@ script MainLayoutState() {
 			toggleScheduledTasksPopover() {
 				this.displayScheduledTasksPopover = !this.displayScheduledTasksPopover;
 			},
+			refreshScheduledTasksPopover() {
+				window.dispatchEvent(new CustomEvent('refresh:footer'));
+				setTimeout(() => {this.displayScheduledTasksPopover = true}, 1000);
+			},
 
 			init() {
 				Alpine.watch(() => this.textualViewSelector, () => {

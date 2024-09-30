@@ -72,7 +72,7 @@ script ContainerImageIndexLocalState() {
 					'POST', '/api/v1/container/image/archive/',
 					{swap: 'none', values: {accountId: accountId, imageId: imageId}},
 				);
-				// TODO: Pop ScheduledTasks Modal Open
+				this.$store.main.refreshScheduledTasksPopover();
 			},
 
 			// Modal States
