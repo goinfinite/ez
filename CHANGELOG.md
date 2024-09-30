@@ -1,14 +1,15 @@
 # Changelog
 
 ```log
-0.0.8 - 2024/X/X
+0.0.8 - 2024/09/30
 refactor: use sri for activity records
-feat: add footer bar with resources usage
-feat: improve host resource usage entity
 feat: add system resource identifier
-feat: use system resource identifier for activity records
+feat: add footer bar with resources usage
+feat: add scheduled tasks popover
+feat: improve host resource usage entity
 fix: add and use blank metrics if container not running
 fix: listen to delete custom events on container images
+fix: refresh tasks popover on snapshot and archive
 
 0.0.7 - 2024/09/23
 feat: container images
