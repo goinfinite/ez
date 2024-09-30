@@ -409,6 +409,7 @@ templ TakeContainerSnapshotForm(
 		hx-post="/api/v1/container/image/snapshot/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
 	>
 		<div class="flex flex-col space-y-6">
 			<div>
