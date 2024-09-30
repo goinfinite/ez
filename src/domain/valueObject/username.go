@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 const usernameRegex string = `^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$`

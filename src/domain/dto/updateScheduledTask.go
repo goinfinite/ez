@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/speedianet/control/src/domain/valueObject"
+import "github.com/goinfinite/ez/src/domain/valueObject"
 
 type UpdateScheduledTask struct {
 	TaskId valueObject.ScheduledTaskId      `json:"taskId"`

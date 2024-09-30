@@ -5,14 +5,14 @@ import (
 
 	"net/http"
 
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra/db"
-	"github.com/speedianet/control/src/presentation/service"
-	componentContainer "github.com/speedianet/control/src/presentation/ui/component/container"
-	componentForm "github.com/speedianet/control/src/presentation/ui/component/form"
-	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
-	"github.com/speedianet/control/src/presentation/ui/page"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra/db"
+	"github.com/goinfinite/ez/src/presentation/service"
+	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
+	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
+	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
+	"github.com/goinfinite/ez/src/presentation/ui/page"
 )
 
 type ContainerImagePresenter struct {

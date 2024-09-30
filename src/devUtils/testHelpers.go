@@ -4,8 +4,8 @@ import (
 	"path"
 	"runtime"
 
+	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/joho/godotenv"
-	"github.com/speedianet/control/src/infra/db"
 )
 
 func LoadEnvVars() {

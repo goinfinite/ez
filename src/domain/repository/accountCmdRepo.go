@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 type AccountCmdRepo interface {

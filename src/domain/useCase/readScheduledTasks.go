@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/repository"
 )
 
 var ScheduledTasksDefaultPagination dto.Pagination = dto.Pagination{

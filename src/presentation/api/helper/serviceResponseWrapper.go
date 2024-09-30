@@ -3,8 +3,8 @@ package apiHelper
 import (
 	"net/http"
 
+	"github.com/goinfinite/ez/src/presentation/service"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/presentation/service"
 )
 
 type newFormattedResponse struct {

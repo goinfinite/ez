@@ -3,7 +3,7 @@ package entity
 import (
 	"encoding/json"
 
-	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 type ContainerProfile struct {

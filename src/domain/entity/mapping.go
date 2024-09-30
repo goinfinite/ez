@@ -1,6 +1,6 @@
 package entity
 
-import "github.com/speedianet/control/src/domain/valueObject"
+import "github.com/goinfinite/ez/src/domain/valueObject"
 
 type Mapping struct {
 	Id         valueObject.MappingId       `json:"id"`

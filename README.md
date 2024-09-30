@@ -73,7 +73,7 @@ go install github.com/cosmtrek/air@latest
 go install github.com/a-h/templ/cmd/templ@latest
 git config --global user.name "yourgithubnick"
 git config --global user.email yourgithubemail
-git clone git@github.com:speedianet/control.git
+git clone git@github.com:goinfinite/ez.git
 ```
 
 10. Build the project and run the installer:

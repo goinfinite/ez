@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 const (

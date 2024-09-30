@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	testHelpers "github.com/speedianet/control/src/devUtils"
-	"github.com/speedianet/control/src/domain/valueObject"
+	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func TestRunCmd(t *testing.T) {

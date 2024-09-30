@@ -1,13 +1,13 @@
 package service
 
 import (
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/domain/valueObject"
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
-	"github.com/speedianet/control/src/infra"
-	"github.com/speedianet/control/src/infra/db"
-	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
+	"github.com/goinfinite/ez/src/infra"
+	"github.com/goinfinite/ez/src/infra/db"
+	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 )
 
 var LocalOperatorAccountId, _ = valueObject.NewAccountId(0)

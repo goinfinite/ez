@@ -3,7 +3,7 @@ package useCase
 import (
 	"errors"
 
-	"github.com/speedianet/control/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/repository"
 )
 
 func InvalidLicenseBlocker(

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/infra/db"
-	o11yInfra "github.com/speedianet/control/src/infra/o11y"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/infra/db"
+	o11yInfra "github.com/goinfinite/ez/src/infra/o11y"
 )
 
 type O11yService struct {

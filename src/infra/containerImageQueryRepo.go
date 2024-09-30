@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra/db"
-	infraEnvs "github.com/speedianet/control/src/infra/envs"
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra/db"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type ContainerImageQueryRepo struct {

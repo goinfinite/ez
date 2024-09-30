@@ -4,15 +4,15 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/domain/valueObject"
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
-	"github.com/speedianet/control/src/infra"
-	"github.com/speedianet/control/src/infra/db"
-	infraEnvs "github.com/speedianet/control/src/infra/envs"
-	infraHelper "github.com/speedianet/control/src/infra/helper"
-	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
+	"github.com/goinfinite/ez/src/infra"
+	"github.com/goinfinite/ez/src/infra/db"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
+	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 )
 
 type ContainerService struct {

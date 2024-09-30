@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func ReadServerPublicIpAddress() (ipAddress valueObject.IpAddress, err error) {

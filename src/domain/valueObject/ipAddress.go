@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 var SystemIpAddress = NewLocalhostIpAddress()

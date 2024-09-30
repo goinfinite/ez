@@ -3,10 +3,10 @@ package cli
 import (
 	"fmt"
 
-	"github.com/speedianet/control/src/infra/db"
-	infraEnvs "github.com/speedianet/control/src/infra/envs"
-	"github.com/speedianet/control/src/presentation"
-	cliController "github.com/speedianet/control/src/presentation/cli/controller"
+	"github.com/goinfinite/ez/src/infra/db"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
+	"github.com/goinfinite/ez/src/presentation"
+	cliController "github.com/goinfinite/ez/src/presentation/cli/controller"
 	"github.com/spf13/cobra"
 )
 

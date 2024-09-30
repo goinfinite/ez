@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 
-	"github.com/speedianet/control/src/domain/valueObject"
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type ServerCmdRepo struct {

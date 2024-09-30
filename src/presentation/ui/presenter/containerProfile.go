@@ -5,11 +5,11 @@ import (
 
 	"net/http"
 
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/infra/db"
-	"github.com/speedianet/control/src/presentation/service"
-	uiHelper "github.com/speedianet/control/src/presentation/ui/helper"
-	"github.com/speedianet/control/src/presentation/ui/page"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/infra/db"
+	"github.com/goinfinite/ez/src/presentation/service"
+	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
+	"github.com/goinfinite/ez/src/presentation/ui/page"
 )
 
 type ContainerProfilePresenter struct {

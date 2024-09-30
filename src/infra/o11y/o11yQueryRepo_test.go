@@ -3,7 +3,7 @@ package o11yInfra
 import (
 	"testing"
 
-	testHelpers "github.com/speedianet/control/src/devUtils"
+	testHelpers "github.com/goinfinite/ez/src/devUtils"
 )
 
 func TestO11yQueryRepo(t *testing.T) {

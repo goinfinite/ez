@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/speedianet/control/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/entity"
 )
 
 type O11yQueryRepo interface {

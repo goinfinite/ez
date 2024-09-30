@@ -1,4 +1,4 @@
-module github.com/speedianet/control
+module github.com/goinfinite/ez
 
 go 1.22
 

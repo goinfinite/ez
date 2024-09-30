@@ -4,12 +4,12 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/infra/db"
+	"github.com/goinfinite/ez/src/presentation/service"
+	"github.com/goinfinite/ez/src/presentation/ui/layout"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/infra/db"
-	"github.com/speedianet/control/src/presentation/service"
-	"github.com/speedianet/control/src/presentation/ui/layout"
 )
 
 type FooterPresenter struct {

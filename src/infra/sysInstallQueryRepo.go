@@ -3,7 +3,7 @@ package infra
 import (
 	"os"
 
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type SysInstallQueryRepo struct {

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/repository"
-	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 const MaxFailedLoginAttemptsPerIpAddress uint = 3

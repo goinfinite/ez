@@ -4,7 +4,7 @@ import (
 	"errors"
 	"regexp"
 
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 const containerProfileNameRegex string = `^\w[\w\ \-]{1,64}\w$`

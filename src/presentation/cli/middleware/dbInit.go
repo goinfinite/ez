@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/speedianet/control/src/infra/db"
+	"github.com/goinfinite/ez/src/infra/db"
 )
 
 func PersistentDatabaseInit() *db.PersistentDatabaseService {

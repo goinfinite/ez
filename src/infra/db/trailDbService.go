@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/glebarez/sqlite"
-	dbModel "github.com/speedianet/control/src/infra/db/model"
+	dbModel "github.com/goinfinite/ez/src/infra/db/model"
 	"gorm.io/gorm"
 )
 

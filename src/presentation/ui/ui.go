@@ -1,9 +1,9 @@
 package ui
 
 import (
+	"github.com/goinfinite/ez/src/infra/db"
+	uiMiddleware "github.com/goinfinite/ez/src/presentation/ui/middleware"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/infra/db"
-	uiMiddleware "github.com/speedianet/control/src/presentation/ui/middleware"
 )
 
 func UiInit(

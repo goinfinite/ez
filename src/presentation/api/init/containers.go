@@ -1,9 +1,9 @@
 package apiInit
 
 import (
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/infra"
-	"github.com/speedianet/control/src/infra/db"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/infra"
+	"github.com/goinfinite/ez/src/infra/db"
 )
 
 func BootContainers(persistentDbSvc *db.PersistentDatabaseService) {

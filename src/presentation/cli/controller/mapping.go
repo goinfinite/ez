@@ -1,10 +1,10 @@
 package cliController
 
 import (
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra/db"
-	cliHelper "github.com/speedianet/control/src/presentation/cli/helper"
-	"github.com/speedianet/control/src/presentation/service"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra/db"
+	cliHelper "github.com/goinfinite/ez/src/presentation/cli/helper"
+	"github.com/goinfinite/ez/src/presentation/service"
 	"github.com/spf13/cobra"
 )
 

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra/db"
-	dbModel "github.com/speedianet/control/src/infra/db/model"
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra/db"
+	dbModel "github.com/goinfinite/ez/src/infra/db/model"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 const ProxyWebServerFile string = "/var/nginx/http.d/container-proxy.conf"

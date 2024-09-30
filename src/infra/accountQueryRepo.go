@@ -4,10 +4,10 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra/db"
-	dbModel "github.com/speedianet/control/src/infra/db/model"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra/db"
+	dbModel "github.com/goinfinite/ez/src/infra/db/model"
 )
 
 type AccountQueryRepo struct {

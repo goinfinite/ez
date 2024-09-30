@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/goinfinite/ez/src/infra/db"
+	"github.com/goinfinite/ez/src/presentation/api"
+	"github.com/goinfinite/ez/src/presentation/ui"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/infra/db"
-	"github.com/speedianet/control/src/presentation/api"
-	"github.com/speedianet/control/src/presentation/ui"
 )
 
 func HttpServerInit(

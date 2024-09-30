@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	testHelpers "github.com/speedianet/control/src/devUtils"
-	"github.com/speedianet/control/src/domain/entity"
+	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/domain/entity"
 )
 
 func getLastContainer(

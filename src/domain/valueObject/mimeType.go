@@ -4,7 +4,7 @@ import (
 	"errors"
 	"regexp"
 
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 const mimeTypeRegexExpression = `^[A-z0-9\-]{1,64}\/[A-z0-9\-\_\+\.\,]{2,128}$|^(directory|generic)$`

@@ -1,6 +1,6 @@
 package infraHelper
 
-import "github.com/speedianet/control/src/domain/valueObject"
+import "github.com/goinfinite/ez/src/domain/valueObject"
 
 // In order to run containers, the user must have a systemd session.
 // Since the user is not actually logged in the system, the session

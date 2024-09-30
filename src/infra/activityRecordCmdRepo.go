@@ -3,9 +3,9 @@ package infra
 import (
 	"encoding/json"
 
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/infra/db"
-	dbModel "github.com/speedianet/control/src/infra/db/model"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/infra/db"
+	dbModel "github.com/goinfinite/ez/src/infra/db/model"
 )
 
 type ActivityRecordCmdRepo struct {

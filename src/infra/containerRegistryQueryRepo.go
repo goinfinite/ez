@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
-	"github.com/speedianet/control/src/infra/db"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
+	"github.com/goinfinite/ez/src/infra/db"
 )
 
 type ContainerRegistryQueryRepo struct {

@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
+	"github.com/goinfinite/ez/src/infra"
+	"github.com/goinfinite/ez/src/infra/db"
+	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
+	"github.com/goinfinite/ez/src/presentation/service"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/domain/valueObject"
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
-	"github.com/speedianet/control/src/infra"
-	"github.com/speedianet/control/src/infra/db"
-	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
-	"github.com/speedianet/control/src/presentation/service"
 )
 
 type AccountController struct {

@@ -3,9 +3,9 @@ package useCase
 import (
 	"testing"
 
-	testHelpers "github.com/speedianet/control/src/devUtils"
-	"github.com/speedianet/control/src/infra"
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/infra"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 func TestLicenseValidation(t *testing.T) {

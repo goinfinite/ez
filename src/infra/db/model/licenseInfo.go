@@ -3,8 +3,8 @@ package dbModel
 import (
 	"time"
 
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 type LicenseInfo struct {

@@ -1,6 +1,6 @@
 package cliInit
 
-import "github.com/speedianet/control/src/infra/db"
+import "github.com/goinfinite/ez/src/infra/db"
 
 func PersistentDatabaseService() *db.PersistentDatabaseService {
 	persistentDbSvc, err := db.NewPersistentDatabaseService()

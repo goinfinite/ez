@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"github.com/speedianet/control/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 type ActivityRecord struct {

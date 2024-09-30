@@ -3,14 +3,14 @@ package apiController
 import (
 	"net/http"
 
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra"
+	"github.com/goinfinite/ez/src/infra/db"
+	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
+	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra"
-	"github.com/speedianet/control/src/infra/db"
-	apiHelper "github.com/speedianet/control/src/presentation/api/helper"
-	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
 )
 
 type AuthController struct {

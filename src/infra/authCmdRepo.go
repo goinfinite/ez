@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/golang-jwt/jwt"
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
 )
 
 type AuthCmdRepo struct {

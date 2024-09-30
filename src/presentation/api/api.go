@@ -1,10 +1,10 @@
 package api
 
 import (
+	"github.com/goinfinite/ez/src/infra/db"
+	apiInit "github.com/goinfinite/ez/src/presentation/api/init"
+	apiMiddleware "github.com/goinfinite/ez/src/presentation/api/middleware"
 	"github.com/labstack/echo/v4"
-	"github.com/speedianet/control/src/infra/db"
-	apiInit "github.com/speedianet/control/src/presentation/api/init"
-	apiMiddleware "github.com/speedianet/control/src/presentation/api/middleware"
 )
 
 const (

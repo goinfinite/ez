@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	voHelper "github.com/speedianet/control/src/domain/valueObject/helper"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 type UnixTime int64

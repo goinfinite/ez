@@ -3,10 +3,10 @@ package infra
 import (
 	"testing"
 
-	testHelpers "github.com/speedianet/control/src/devUtils"
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/domain/valueObject"
+	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func TestScheduledTaskCmdRepo(t *testing.T) {

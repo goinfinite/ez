@@ -3,8 +3,8 @@ package infra
 import (
 	"testing"
 
-	testHelpers "github.com/speedianet/control/src/devUtils"
-	"github.com/speedianet/control/src/domain/valueObject"
+	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func TestLicenseCmdRepo(t *testing.T) {

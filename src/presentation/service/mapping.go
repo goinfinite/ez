@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/useCase"
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra"
-	"github.com/speedianet/control/src/infra/db"
-	serviceHelper "github.com/speedianet/control/src/presentation/service/helper"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra"
+	"github.com/goinfinite/ez/src/infra/db"
+	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 )
 
 type MappingService struct {

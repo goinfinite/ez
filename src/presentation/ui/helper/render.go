@@ -4,7 +4,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 
-	"github.com/speedianet/control/src/presentation/ui/layout"
+	"github.com/goinfinite/ez/src/presentation/ui/layout"
 )
 
 func Render(c echo.Context, pageContent templ.Component, statusCode int) error {

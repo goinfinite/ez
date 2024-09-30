@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/speedianet/control/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/dto"
 )
 
 type ActivityRecordCmdRepo interface {

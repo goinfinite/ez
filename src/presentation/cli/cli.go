@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	cliController "github.com/speedianet/control/src/presentation/cli/controller"
-	cliInit "github.com/speedianet/control/src/presentation/cli/init"
-	cliMiddleware "github.com/speedianet/control/src/presentation/cli/middleware"
+	cliController "github.com/goinfinite/ez/src/presentation/cli/controller"
+	cliInit "github.com/goinfinite/ez/src/presentation/cli/init"
+	cliMiddleware "github.com/goinfinite/ez/src/presentation/cli/middleware"
 	"github.com/spf13/cobra"
 )
 

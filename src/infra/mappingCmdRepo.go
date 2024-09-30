@@ -8,12 +8,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/speedianet/control/src/domain/dto"
-	"github.com/speedianet/control/src/domain/entity"
-	"github.com/speedianet/control/src/domain/valueObject"
-	"github.com/speedianet/control/src/infra/db"
-	dbModel "github.com/speedianet/control/src/infra/db/model"
-	infraHelper "github.com/speedianet/control/src/infra/helper"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/infra/db"
+	dbModel "github.com/goinfinite/ez/src/infra/db/model"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 var nginxStreamConfDir string = "/var/nginx/stream.d"
