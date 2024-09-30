@@ -44,8 +44,8 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 	listen 1618 ssl;
 	server_name ` + serverHostname.String() + `;
 
-	ssl_certificate /var/speedia/pki/control.crt;
-	ssl_certificate_key /var/speedia/pki/control.key;
+	ssl_certificate /var/infinite/pki/control.crt;
+	ssl_certificate_key /var/infinite/pki/control.key;
 	{{ range . }}
 	location /{{ .ContainerId }}/ {
 		sub_filter_once off;
@@ -69,8 +69,8 @@ server {
 	listen 1618 ssl;
 	server_name {{ .ContainerHostname}} os.{{ .ContainerHostname}};
 
-	ssl_certificate /var/speedia/pki/control.crt;
-	ssl_certificate_key /var/speedia/pki/control.key;
+	ssl_certificate /var/infinite/pki/control.crt;
+	ssl_certificate_key /var/infinite/pki/control.key;
 
 	location / {
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

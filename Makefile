@@ -6,7 +6,7 @@ dev:
 
 build:
 	templ generate -path $(UI_DIR)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /var/speedia/control ./control.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /var/infinite/control ./control.go
 
 run:
-	/var/speedia/control serve
+	/var/infinite/control serve

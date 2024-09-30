@@ -30,7 +30,7 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/var/speedia
+WorkingDirectory=/var/infinite
 ExecStart=` + cmdStr + `
 Restart=always
 StandardOutput=journal
@@ -84,7 +84,7 @@ After=network.target
 [Service]
 Type=oneshot
 User=root
-WorkingDirectory=/var/speedia
+WorkingDirectory=/var/infinite
 Restart=no
 StandardOutput=journal
 StandardError=journal

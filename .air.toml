@@ -3,7 +3,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-bin = "/var/speedia/control"
+bin = "/var/infinite/control"
 cmd = "make build"
 exclude_dir = [".git", "bin", "logs", "tmp", "vendor", "src/devUtils"]
 exclude_regex = [".*_templ.go"]

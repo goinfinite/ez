@@ -80,8 +80,8 @@ git clone git@github.com:goinfinite/ez.git
 
 ```
 cd control; air # hit CTRL-C after running this
-chmod +x /var/speedia/control
-/var/speedia/control sys-install
+chmod +x /var/infinite/control
+/var/infinite/control sys-install
 ```
 
 11. **The system will reboot** and once see control running via systemd, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
@@ -123,10 +123,10 @@ You must have an `.env` file in the root of the git directory **during developme
 
 If you add a new env var that is required to run the apis, please add it to the `src/presentation/shared/checkEnvs.go` file.
 
-When running in production, the `/var/speedia/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
+When running in production, the `/var/infinite/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
 
 ```
-ENV1=XXX /var/speedia/control
+ENV1=XXX /var/infinite/control
 ```
 
 ### Dev Utils
@@ -145,16 +145,16 @@ The software itself is a single binary, but it requires openSUSE MicroOS to run.
 
 _If you are running locally, follow steps 1 to 6 of the "Unit Testing" title above._
 
-2. Get the CONTROL binary, download it to the `/var/speedia/` directory and give it execution permission:
+2. Get the CONTROL binary, download it to the `/var/infinite/` directory and give it execution permission:
 
 ```
-chmod +x /var/speedia/control
+chmod +x /var/infinite/control
 ```
 
 3. Run the installer:
 
 ```
-/var/speedia/control sys-install
+/var/infinite/control sys-install
 ```
 
 4. The system will reboot and once you see control binary running via systemd, you should be able to access the dashboard on the VM IP address on port 3141.

@@ -17,7 +17,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 
 	t.Run("CreateScheduledTask", func(t *testing.T) {
 		name, _ := valueObject.NewScheduledTaskName("test")
-		command, _ := valueObject.NewUnixCommand("/var/speedia/control account get")
+		command, _ := valueObject.NewUnixCommand("/var/infinite/control account get")
 		containerTag, _ := valueObject.NewScheduledTaskTag("account")
 		tags := []valueObject.ScheduledTaskTag{containerTag}
 		timeoutSecs := uint16(60)

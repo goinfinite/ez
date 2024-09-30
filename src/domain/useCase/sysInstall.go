@@ -44,7 +44,7 @@ func SysInstall(
 
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
-			valueObject.NewSvcCmdPanic("/var/speedia/control sys-install"),
+			valueObject.NewSvcCmdPanic("/var/infinite/control sys-install"),
 		)
 
 		serverCmdRepo.Reboot()
@@ -61,7 +61,7 @@ func SysInstall(
 	slog.Info("Adding core services...")
 	err = serverCmdRepo.AddSvc(
 		valueObject.NewServiceNamePanic("control"),
-		valueObject.NewSvcCmdPanic("/var/speedia/control serve"),
+		valueObject.NewSvcCmdPanic("/var/infinite/control serve"),
 	)
 	if err != nil {
 		slog.Error(err.Error())

@@ -24,7 +24,7 @@ func HttpServerInit(
 
 	httpServer := http.Server{Addr: ":3141", Handler: e}
 
-	pkiDir := "/var/speedia/pki"
+	pkiDir := "/var/infinite/pki"
 	certFile := pkiDir + "/control.crt"
 	keyFile := pkiDir + "/control.key"
 

@@ -14,7 +14,7 @@ type TrailDatabaseService struct {
 
 func NewTrailDatabaseService() (*TrailDatabaseService, error) {
 	ormSvc, err := gorm.Open(
-		sqlite.Open("/var/speedia/trail.db"),
+		sqlite.Open("/var/infinite/trail.db"),
 		&gorm.Config{},
 	)
 	if err != nil {

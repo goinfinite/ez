@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	PersistentDatabaseFilePath = "/var/speedia/control.db"
+	PersistentDatabaseFilePath = "/var/infinite/control.db"
 )
 
 type PersistentDatabaseService struct {

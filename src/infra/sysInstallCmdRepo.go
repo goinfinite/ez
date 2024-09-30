@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ControlMainDir = "/var/speedia"
+	ControlMainDir = "/var/infinite"
 )
 
 type SysInstallCmdRepo struct {
