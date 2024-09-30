@@ -10,6 +10,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra"
 	"github.com/goinfinite/ez/src/infra/db"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	"github.com/labstack/echo/v4"
 )
 
@@ -57,7 +58,7 @@ func Auth(apiBasePath string) echo.MiddlewareFunc {
 			}
 
 			rawAccessToken := ""
-			accessTokenCookie, err := c.Cookie("control-access-token")
+			accessTokenCookie, err := c.Cookie(infraEnvs.AccessTokenCookieKey)
 			if err == nil {
 				rawAccessToken = accessTokenCookie.Value
 			}
