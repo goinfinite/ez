@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	PersistentDatabaseFilePath = "/var/infinite/control.db"
+	PersistentDatabaseFilePath = "/var/infinite/ez.db"
 )
 
 type PersistentDatabaseService struct {

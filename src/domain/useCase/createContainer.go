@@ -49,7 +49,7 @@ func CreateContainer(
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
 		CreateContainer(createDto, containerId)
 
-	if createDto.ImageAddress.IsSpeediaOs() {
+	if createDto.ImageAddress.IsInfiniteOs() {
 		err = containerProxyCmdRepo.Create(containerId)
 		if err != nil {
 			slog.Error("CreateContainerProxyInfraError", slog.Any("error", err))

@@ -14,7 +14,7 @@ templ PortBindingsTable(
 			id="port-bindings-table"
 			class="w-full table-auto border-collapse rounded-md"
 		>
-			<thead class="bg-control-700 text-xs lowercase text-neutral-400">
+			<thead class="bg-ez-700 text-xs lowercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 					<th scope="col" class="p-1">Service Name</th>
 					<th scope="col" class="p-1">Public Port</th>
@@ -28,7 +28,7 @@ templ PortBindingsTable(
 				for bindingIndex, portBinding := range portBindings {
 					<tr
 						x-show={ "isExpanded || " + strconv.FormatInt(int64(bindingIndex), 10) + " < 3" }
-						class="odd:bg-control-300 even:bg-control-400 border-b border-neutral-500 border-opacity-30 text-center text-xs"
+						class="odd:bg-ez-300 even:bg-ez-400 border-b border-neutral-500 border-opacity-30 text-center text-xs"
 					>
 						<td class="p-2">{ portBinding.ServiceName.String() }</td>
 						<td class="p-2">{ portBinding.PublicPort.String() }</td>
@@ -48,7 +48,7 @@ templ PortBindingsTable(
 			<button
 				x-on:click="isExpanded = !isExpanded"
 				x-text="isExpanded ? 'show less' : 'show more'"
-				class="bg-control-500 w-full rounded-b-md py-1.5 text-center text-xs text-neutral-200"
+				class="bg-ez-500 w-full rounded-b-md py-1.5 text-center text-xs text-neutral-200"
 			></button>
 		}
 	</div>

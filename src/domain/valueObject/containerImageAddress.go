@@ -87,6 +87,6 @@ func (vo ContainerImageAddress) GetImageTag() (RegistryImageTag, error) {
 	return NewRegistryImageTag(imageTagStr)
 }
 
-func (vo ContainerImageAddress) IsSpeediaOs() bool {
-	return strings.Contains(vo.String(), "speedianet/os")
+func (vo ContainerImageAddress) IsInfiniteOs() bool {
+	return strings.Contains(vo.String(), "goinfinite/os")
 }

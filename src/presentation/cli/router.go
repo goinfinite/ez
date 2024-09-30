@@ -178,7 +178,7 @@ func (router *Router) systemRoutes() {
 		Use:   "version",
 		Short: "PrintVersion",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Speedia Control " + infraEnvs.SpeediaControlVersion)
+			fmt.Println("Infinite Ez " + infraEnvs.InfiniteEzVersion)
 		},
 	}
 

@@ -86,7 +86,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	}
 
 	if shouldSchedule {
-		cliCmd := infraEnvs.SpeediaControlBinary + " container image create-snapshot"
+		cliCmd := infraEnvs.InfiniteEzBinary + " container image create-snapshot"
 		createParams := []string{
 			"--container-id", containerId.String(),
 		}
@@ -279,7 +279,7 @@ func (service *ContainerImageService) CreateArchiveFile(
 	}
 
 	if shouldSchedule {
-		cliCmd := infraEnvs.SpeediaControlBinary + " container image archive create"
+		cliCmd := infraEnvs.InfiniteEzBinary + " container image archive create"
 		createParams := []string{
 			"--account-id", accountId.String(),
 			"--image-id", imageId.String(),

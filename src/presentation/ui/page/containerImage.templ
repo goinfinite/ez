@@ -212,7 +212,7 @@ templ ContainerImageArchiveFilesTable(
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-control-800 text-left text-xs uppercase text-neutral-400">
+		<thead class="bg-ez-800 text-left text-xs uppercase text-neutral-400">
 			<tr class="border-b border-neutral-500 border-opacity-90">
 				<th scope="col" class="w-3/6 px-3 py-2">File Path</th>
 				<th scope="col" class="px-3 py-2">Image Id</th>
@@ -224,7 +224,7 @@ templ ContainerImageArchiveFilesTable(
 		</thead>
 		<tbody>
 			for _, archiveFileEntity := range archiveFilesEntities {
-				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-sm">
+				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-sm">
 					<td class="w-3/6 px-3 py-2">{ archiveFileEntity.UnixFilePath.String() }</td>
 					<td class="px-3 py-2">{ archiveFileEntity.ImageId.String() }</td>
 					<td class="px-3 py-2 leading-tight">
@@ -239,9 +239,9 @@ templ ContainerImageArchiveFilesTable(
 					<td class="px-3 py-2">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
 						@componentStructural.CircularIconButtonWithTooltip(
-							"download-archive", "ph-download", "control-300", "control-200",
+							"download-archive", "ph-download", "ez-300", "ez-200",
 							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
-							"Download Archive", "control-300",
+							"Download Archive", "ez-300",
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
 							"delete-archive", "ph-trash", "red-900", "red-700",
@@ -273,7 +273,7 @@ templ ContainerImagesTable(
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+		<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 				<th scope="col" class="px-5 py-3">Image Id</th>
 				<th scope="col" class="px-5 py-3">
@@ -292,7 +292,7 @@ templ ContainerImagesTable(
 		</thead>
 		<tbody>
 			for _, imageEntity := range imagesEntities {
-				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ imageEntity.Id.String() }</td>
 					<td class="px-6 py-4 leading-tight">
 						<p>{ accountIdEntityMap[imageEntity.AccountId].Username.String() }</p>
@@ -313,9 +313,9 @@ templ ContainerImagesTable(
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
 						@componentStructural.CircularIconButtonWithTooltip(
-							"archive-image", "ph-file-zip", "control-300", "control-200",
+							"archive-image", "ph-file-zip", "ez-300", "ez-200",
 							"archiveImage('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
-							"Archive/Compress Image", "control-300",
+							"Archive/Compress Image", "ez-300",
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
 							"delete-image", "ph-trash", "red-900", "red-700",
@@ -359,7 +359,7 @@ templ ImportContainerImageForm(
 
 templ ImportContainerImageFaq() {
 	<section class="mt-4 w-full rounded-md">
-		<details class="bg-control-500 group rounded-md p-4 group-open:bg-opacity-30">
+		<details class="bg-ez-500 group rounded-md p-4 group-open:bg-opacity-30">
 			<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
 				<i class="ph-duotone ph-question mr-2 text-2xl"></i>
 				<span class="font-bold">How to export a container running on my local machine?</span>
@@ -368,21 +368,21 @@ templ ImportContainerImageFaq() {
 			<div class="space-y-4.5 mt-5 text-sm leading-normal">
 				<p>To export a container running on your local machine, you can use the following commands:</p>
 				<p>
-					<code class="bg-control-300 block rounded-md p-3">
+					<code class="bg-ez-300 block rounded-md p-3">
 						docker commit container_id image:tag
 					</code>
-					<code class="bg-control-300 mt-1 block rounded-md p-3">
+					<code class="bg-ez-300 mt-1 block rounded-md p-3">
 						docker save -o /path/to/save/image.tar image:tag
 					</code>
 				</p>
 				<p>
-					Replace <code class="bg-control-300 rounded-md px-1.5">container_id</code> with the id of the container you want to export,
-					<code class="bg-control-300 rounded-md px-1.5">image:tag</code> with the name and tag of the image you want to save,
-					and <code class="bg-control-300 rounded-md px-1.5">/path/to/save/image.tar</code> with the path where you want to save the image.
-					If you using podman instead of docker, change <code class="bg-control-300 rounded-md px-1.5">docker</code> to <code class="bg-control-300 rounded-md px-1.5">podman</code>.
+					Replace <code class="bg-ez-300 rounded-md px-1.5">container_id</code> with the id of the container you want to export,
+					<code class="bg-ez-300 rounded-md px-1.5">image:tag</code> with the name and tag of the image you want to save,
+					and <code class="bg-ez-300 rounded-md px-1.5">/path/to/save/image.tar</code> with the path where you want to save the image.
+					If you using podman instead of docker, change <code class="bg-ez-300 rounded-md px-1.5">docker</code> to <code class="bg-ez-300 rounded-md px-1.5">podman</code>.
 				</p>
 				<p>
-					After running the command, you can upload the <code class="bg-control-300 rounded-md px-1.5">.tar</code> file using the form above.
+					After running the command, you can upload the <code class="bg-ez-300 rounded-md px-1.5">.tar</code> file using the form above.
 				</p>
 			</div>
 		</details>
@@ -434,7 +434,7 @@ templ TakeContainerSnapshotForm(
 				)
 			</div>
 			<section x-show="shouldCreateArchive" class="mt-4 w-full rounded-md">
-				<details class="bg-control-500 group rounded-md p-4 group-open:bg-opacity-30">
+				<details class="bg-ez-500 group rounded-md p-4 group-open:bg-opacity-30">
 					<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
 						<i class="ph-duotone ph-gear mr-2 text-2xl"></i>
 						<span class="font-bold">Advanced Settings</span>

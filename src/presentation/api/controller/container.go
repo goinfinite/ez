@@ -59,7 +59,7 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 
 // CreateContainerSessionToken	 godoc
 // @Summary      CreateContainerSessionToken
-// @Description  Creates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).
+// @Description  Creates a session token for the specified container and redirects to Infinite OS dashboard (if shouldRedirect is not false).
 // @Tags         container
 // @Accept       json
 // @Produce      json
@@ -68,8 +68,8 @@ func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
 // @Param        containerId	path	string	true	"ContainerId"
 // @Param        shouldRedirect	query	bool	false	"ShouldRedirect (default/empty is true)"
 // @Success      200 {object} valueObject.AccessTokenValue "If shouldRedirect is set to false, the updated session token is returned."
-// @Success      302 {string} string "A redirect to Speedia OS dashboard (:1618/{containerId}/)."
-// @Failure      500 {string} string "Container is not found, not running or isn't Speedia OS."
+// @Success      302 {string} string "A redirect to Infinite OS dashboard (:1618/{containerId}/)."
+// @Failure      500 {string} string "Container is not found, not running or isn't Infinite OS."
 // @Router       /v1/container/session/{accountId}/{containerId}/ [get]
 func (controller *ContainerController) CreateContainerSessionToken(c echo.Context) error {
 	requestBody := map[string]interface{}{

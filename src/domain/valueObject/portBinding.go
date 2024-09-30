@@ -125,7 +125,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 	},
 	{
 		ServiceNames: []string{
-			"sos", "speediaos", "speedia-os", "speedia",
+			"sos", "infiniteos", "infinite-os", "infinite",
 		},
 		PortBindings: []string{"1618"},
 	},

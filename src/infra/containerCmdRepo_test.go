@@ -32,8 +32,8 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 		return err
 	}
 
-	containerHostname, _ := valueObject.NewFqdn("speedia.net")
-	containerImage, _ := valueObject.NewContainerImageAddress("https://docker.io/speedianet/os")
+	containerHostname, _ := valueObject.NewFqdn("goinfinite.org")
+	containerImage, _ := valueObject.NewContainerImageAddress("https://docker.io/goinfinite/os")
 
 	createContainer := dto.NewCreateContainer(
 		accountId, containerHostname, containerImage, portBindings, &restartPolicy,

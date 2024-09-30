@@ -3,7 +3,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-bin = "/var/infinite/control"
+bin = "/var/infinite/ez"
 cmd = "make build"
 exclude_dir = [".git", "bin", "logs", "tmp", "vendor", "src/devUtils"]
 exclude_regex = [".*_templ.go"]

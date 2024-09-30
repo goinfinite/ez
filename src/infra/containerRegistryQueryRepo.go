@@ -230,7 +230,7 @@ func (repo *ContainerRegistryQueryRepo) getDockerHubImages(
 ) ([]entity.RegistryImage, error) {
 	registryImages := []entity.RegistryImage{}
 
-	imageNameStr := "speedianet/os"
+	imageNameStr := "goinfinite/os"
 	if imageName != nil {
 		imageNameStr = imageName.String()
 	}

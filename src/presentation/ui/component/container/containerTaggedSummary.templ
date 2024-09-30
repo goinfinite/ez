@@ -10,15 +10,15 @@ templ ContainerTaggedSummary(containerSummary ContainerSummary) {
 		</div>
 		<div class="mt-1 flex flex-row justify-normal space-x-2.5">
 			@componentStructural.Tag(
-				"ph-link", "", containerSummary.ImageAddress.String(), "speedia-500",
+				"ph-link", "", containerSummary.ImageAddress.String(), "infinite-500",
 			)
 			@componentStructural.Tag(
-				"ph-user-circle", "", containerSummary.AccountUsername.String(), "speedia-500",
+				"ph-user-circle", "", containerSummary.AccountUsername.String(), "infinite-500",
 			)
 			@componentStructural.Tag(
 				"", containerSummary.ProfileName.String(),
 				"<small>"+formatProfileSummarySmallTag(&containerSummary.ProfileBaseSpecs)+"</small>",
-				"speedia-500",
+				"infinite-500",
 			)
 		</div>
 	</div>

@@ -40,7 +40,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 	<!DOCTYPE html>
 	<html>
 		<head>
-			<title>Speedia Control</title>
+			<title>Infinite Ez</title>
 			<link rel="icon" type="image/ico" href="/assets/favicon.ico"/>
 			<link
 				rel="stylesheet"
@@ -69,7 +69,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 				window.__unocss = {
 					theme: {
 						colors: {
-							'speedia': {
+							'infinite': {
 								'50': '#dea893',
 								'100': '#d89a81',
 								'200': '#d38b6f',
@@ -82,7 +82,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 								'900': '#905239',
 								'950': '#7c4631',
 							},
-							'control': {
+							'ez': {
 								'50': '#667b73',
 								'100': '#4c655c',
 								'200': '#334f45',
@@ -120,7 +120,7 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 				@DevWsHotReload()
 			}
 		</head>
-		<body class="bg-control-500 flex text-white">
+		<body class="bg-ez-500 flex text-white">
 			@MainLayoutState()
 			@componentUtil.LoadingOverlay()
 			@Sidebar(currentUrl)

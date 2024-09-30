@@ -9,15 +9,15 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://speedia.net/tos/",
+        "termsOfService": "https://goinfinite.org/tos/",
         "contact": {
-            "name": "Speedia Engineering",
-            "url": "https://speedia.net/",
-            "email": "eng+swagger@speedia.net"
+            "name": "Infinite Engineering",
+            "url": "https://goinfinite.org/",
+            "email": "eng+swagger@goinfinite.org"
         },
         "license": {
-            "name": "SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.",
-            "url": "https://speedia.net/tos/"
+            "name": "INFINITE COMPUTACAO EM NUVEM LTDA © 2024. All Rights Reserved.",
+            "url": "https://goinfinite.org/tos/"
         },
         "version": "{{.Version}}"
     },
@@ -894,7 +894,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Creates a session token for the specified container and redirects to Speedia OS dashboard (if shouldRedirect is not false).",
+                "description": "Creates a session token for the specified container and redirects to Infinite OS dashboard (if shouldRedirect is not false).",
                 "consumes": [
                     "application/json"
                 ],
@@ -935,13 +935,13 @@ const docTemplate = `{
                         }
                     },
                     "302": {
-                        "description": "A redirect to Speedia OS dashboard (:1618/{containerId}/).",
+                        "description": "A redirect to Infinite OS dashboard (:1618/{containerId}/).",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "Container is not found, not running or isn't Speedia OS.",
+                        "description": "Container is not found, not running or isn't Infinite OS.",
                         "schema": {
                             "type": "string"
                         }
@@ -2563,8 +2563,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "ControlApi",
-	Description:      "Speedia Control API",
+	Title:            "ezApi",
+	Description:      "Infinite Ez API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

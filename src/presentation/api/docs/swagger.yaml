@@ -701,15 +701,15 @@ definitions:
     type: object
 info:
   contact:
-    email: eng+swagger@speedia.net
-    name: Speedia Engineering
-    url: https://speedia.net/
-  description: Speedia Control API
+    email: eng+swagger@goinfinite.org
+    name: Infinite Engineering
+    url: https://goinfinite.org/
+  description: Infinite Ez API
   license:
-    name: SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.
-    url: https://speedia.net/tos/
-  termsOfService: https://speedia.net/tos/
-  title: ControlApi
+    name: INFINITE COMPUTACAO EM NUVEM LTDA © 2024. All Rights Reserved.
+    url: https://goinfinite.org/tos/
+  termsOfService: https://goinfinite.org/tos/
+  title: ezApi
   version: 0.0.8
 paths:
   /v1/account/:
@@ -1301,7 +1301,7 @@ paths:
       consumes:
       - application/json
       description: Creates a session token for the specified container and redirects
-        to Speedia OS dashboard (if shouldRedirect is not false).
+        to Infinite OS dashboard (if shouldRedirect is not false).
       parameters:
       - description: AccountId
         in: path
@@ -1326,11 +1326,11 @@ paths:
           schema:
             type: string
         "302":
-          description: A redirect to Speedia OS dashboard (:1618/{containerId}/).
+          description: A redirect to Infinite OS dashboard (:1618/{containerId}/).
           schema:
             type: string
         "500":
-          description: Container is not found, not running or isn't Speedia OS.
+          description: Container is not found, not running or isn't Infinite OS.
           schema:
             type: string
       security:

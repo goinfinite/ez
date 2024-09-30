@@ -145,7 +145,7 @@ func (repo *LicenseCmdRepo) updateIntegrityHash() error {
 }
 
 func (repo *LicenseCmdRepo) Refresh() error {
-	speediaApiUrl := "https://app.speedia.net/api/v1"
+	infiniteApiUrl := "https://app.speedia.net/api/v1"
 	apiEndpoint := "/store/product/license/verify/1/"
 
 	freshLicenseFingerprint, err := repo.generateFingerprint()
@@ -163,11 +163,11 @@ func (repo *LicenseCmdRepo) Refresh() error {
 		apiEndpoint += "&key=" + keyStr
 	}
 
-	httpRequest, err := http.NewRequest(http.MethodGet, speediaApiUrl+apiEndpoint, nil)
+	httpRequest, err := http.NewRequest(http.MethodGet, infiniteApiUrl+apiEndpoint, nil)
 	if err != nil {
 		return errors.New("LicenseServerRequestError: " + err.Error())
 	}
-	httpRequest.Header.Set("User-Agent", "Speedia Control/1.0")
+	httpRequest.Header.Set("User-Agent", "Infinite Ez/1.0")
 
 	httpClient := &http.Client{
 		Timeout: time.Second *

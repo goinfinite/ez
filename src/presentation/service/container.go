@@ -131,7 +131,7 @@ func (service *ContainerService) Create(
 	}
 
 	if _, exists := input["imageAddress"]; !exists {
-		input["imageAddress"] = "speedianet/os"
+		input["imageAddress"] = "goinfinite/os"
 	}
 	imgAddr, err := valueObject.NewContainerImageAddress(input["imageAddress"])
 	if err != nil {
@@ -201,7 +201,7 @@ func (service *ContainerService) Create(
 	}
 
 	if shouldSchedule {
-		cliCmd := infraEnvs.SpeediaControlBinary + " container create"
+		cliCmd := infraEnvs.InfiniteEzBinary + " container create"
 		createParams := []string{
 			"--account-id", accountId.String(),
 			"--hostname", hostname.String(),

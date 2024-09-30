@@ -24,7 +24,7 @@ func TestLicenseValidation(t *testing.T) {
 
 	t.Run("LicenseValidationWithLicenseServerUnreachable", func(t *testing.T) {
 		_, err := infraHelper.RunCmdWithSubShell(
-			"echo \"127.0.0.1 app.speedia.net\" >> /etc/hosts",
+			"echo \"127.0.0.1 app.goinfinite.org\" >> /etc/hosts",
 		)
 		if err != nil {
 			t.Errorf("UnexpectedError: %v", err)

@@ -184,7 +184,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+		<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 				<th scope="col" class="px-5 py-3">Id</th>
 				<th scope="col" class="px-5 py-3 text-left">Name</th>
@@ -198,7 +198,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 		</thead>
 		<tbody>
 			for _, profile := range profiles {
-				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
 					<td class="w-84 px-6 py-4 text-left">
 						<p>{ profile.Name.String() }</p>
@@ -252,7 +252,7 @@ templ ContainerProfilesRegularFormTable(profiles []entity.ContainerProfile) {
 						<button
 							type="button"
 							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
-							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
+							class="bg-ez-300 hover:bg-ez-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
 						>
 							<i class="ph-bold ph-pencil text-xl"></i>
 						</button>
@@ -283,7 +283,7 @@ func profileTextualDescriptionFactory(profile entity.ContainerProfile) string {
 		}
 		innerContentStr := strings.Trim(string(innerContentBytes), "\"")
 
-		return "<strong class=\"bg-control-300 rounded-md px-1.5 py-0.5\">" + innerContentStr + "</strong>"
+		return "<strong class=\"bg-ez-300 rounded-md px-1.5 py-0.5\">" + innerContentStr + "</strong>"
 	}
 
 	scalingMaxDuration := ""
@@ -378,7 +378,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 		hx-swap="outerHTML transition:true"
 		class="w-full table-auto border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
-		<thead class="bg-control-800 text-xs uppercase text-neutral-400">
+		<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 				<th scope="col" class="px-5 py-3">Id</th>
 				<th scope="col" class="px-5 py-3 text-left">Description</th>
@@ -387,7 +387,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 		</thead>
 		<tbody>
 			for _, profile := range profiles {
-				<tr class="odd:bg-control-400 even:bg-control-600 border-b border-neutral-500 border-opacity-30 text-center">
+				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 					<td class="px-6 py-4">{ profile.Id.String() }</td>
 					<td class="min-w-80 px-6 py-4 text-left text-[15px] leading-loose">
 						@templ.Raw(profileTextualDescriptionFactory(profile))
@@ -396,7 +396,7 @@ templ ContainerProfilesTextualTable(profiles []entity.ContainerProfile) {
 						<button
 							type="button"
 							@click={ "openUpdateModal(" + profile.JsonSerialize() + ")" }
-							class="bg-control-300 hover:bg-control-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
+							class="bg-ez-300 hover:bg-ez-200 me-2 inline-flex items-center rounded-full p-3 text-center font-medium"
 						>
 							<i class="ph-bold ph-pencil text-xl"></i>
 						</button>
@@ -438,7 +438,7 @@ templ ContainerProfileForm(action string) {
 			@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name", false)
 		</div>
 		<div class="flex flex-row space-x-4">
-			<div class="space-y-5.5 bg-control-500 w-1/2 rounded-md p-4">
+			<div class="space-y-5.5 bg-ez-500 w-1/2 rounded-md p-4">
 				<div>
 					<h3 class="font-bold">Base Specifications</h3>
 					<p class="text-xs">The standard allocation of resources available to the container for everyday operations.</p>
@@ -465,7 +465,7 @@ templ ContainerProfileForm(action string) {
 					</small>
 				</div>
 			</div>
-			<div class="space-y-5.5 bg-control-500 w-1/2 rounded-md p-4">
+			<div class="space-y-5.5 bg-ez-500 w-1/2 rounded-md p-4">
 				<div>
 					<h3 class="font-bold">Max Specifications</h3>
 					<p class="text-xs">The peak allocation of resources available to the container during autoscaling periods.</p>
@@ -494,7 +494,7 @@ templ ContainerProfileForm(action string) {
 			</div>
 		</div>
 		<section class="mt-4 w-full rounded-md">
-			<details class="bg-control-500 group rounded-md p-4 group-open:bg-opacity-30">
+			<details class="bg-ez-500 group rounded-md p-4 group-open:bg-opacity-30">
 				<summary class="relative flex cursor-pointer list-none items-center pr-8 text-neutral-50 text-opacity-80 focus-visible:outline-none group-open:text-opacity-100 group-hover:text-opacity-100 [&::-webkit-details-marker]:hidden">
 					<i class="ph-duotone ph-gear mr-2 text-2xl"></i>
 					<span class="font-bold">Advanced Settings</span>

@@ -2,9 +2,9 @@
 This project is under active development and is not ready for production use.
 ```
 
-# Speedia Control
+# Infinite Ez
 
-Speedia Control (CONTROL) is a proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
+Infinite Ez is a proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
 
 ## Running
 
@@ -46,11 +46,11 @@ Note: If you use Pastebin, make sure you're downloading the raw file and not the
 
 ```
 transactional-update pkg install git make
-curl -L https://go.dev/dl/go1.22.5.linux-amd64.tar.gz -o go.tar.gz
+curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
 tar -C /usr/local -xzf go.tar.gz
 rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
-echo 'alias control-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
+echo 'alias ez-swag="swag init -g src/presentation/api/api.go -o src/presentation/api/docs"' >> ~/.bashrc
 systemctl reboot
 ```
 
@@ -79,12 +79,12 @@ git clone git@github.com:goinfinite/ez.git
 10. Build the project and run the installer:
 
 ```
-cd control; air # hit CTRL-C after running this
-chmod +x /var/infinite/control
-/var/infinite/control sys-install
+cd ez; air # hit CTRL-C after running this
+chmod +x /var/infinite/ez
+/var/infinite/ez sys-install
 ```
 
-11. **The system will reboot** and once see control running via systemd, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
+11. **The system will reboot** and once see Ez running via systemd, you should be able to use the [Visual Studio Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh) to connect to the VM and manage the project.
 
 Make sure to use the SSH key to connect to the VM and not the password. The IP address of the VM can be found on the VMWare interface which you used to SSH. If you don't see it, just use `exit` to return to the login screen and the IP will be displayed there.
 
@@ -111,11 +111,11 @@ a-h.templ
 12. The install process also creates a systemd unit to run the project. Use the following commands to disable the service so you can run the project manually with Air during development:
 
 ```
-systemctl disable control
-systemctl stop control
+systemctl disable ez
+systemctl stop ez
 ```
 
-13. If you get a license error, you can run `control license refresh` to force the license to be regenerated.
+13. If you get a license error, you can run `ez license refresh` to force the license to be regenerated.
 
 ### Environment Variables
 
@@ -126,7 +126,7 @@ If you add a new env var that is required to run the apis, please add it to the 
 When running in production, the `/var/infinite/.env` file is only used if the environment variables weren't set in the system. For instance, if you want to set the `ENV1` variable, you can do it in the `.env` file or in the command line:
 
 ```
-ENV1=XXX /var/infinite/control
+ENV1=XXX /var/infinite/ez
 ```
 
 ### Dev Utils
@@ -148,16 +148,16 @@ _If you are running locally, follow steps 1 to 6 of the "Unit Testing" title abo
 2. Get the CONTROL binary, download it to the `/var/infinite/` directory and give it execution permission:
 
 ```
-chmod +x /var/infinite/control
+chmod +x /var/infinite/ez
 ```
 
 3. Run the installer:
 
 ```
-/var/infinite/control sys-install
+/var/infinite/ez sys-install
 ```
 
-4. The system will reboot and once you see control binary running via systemd, you should be able to access the dashboard on the VM IP address on port 3141.
+4. The system will reboot and once you see Ez binary running via systemd, you should be able to access the dashboard on the VM IP address on port 3141.
 
 There will be no log messages on the console for now, the installation process will be refactored soon so that the entire process happens on the Web UI.
 

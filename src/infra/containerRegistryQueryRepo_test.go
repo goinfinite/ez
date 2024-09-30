@@ -13,7 +13,7 @@ func TestContainerRegistryQueryRepo(t *testing.T) {
 	containerQueryRepo := NewContainerRegistryQueryRepo(persistentDbSvc)
 
 	t.Run("ReadRegistryImages", func(t *testing.T) {
-		imageName, _ := valueObject.NewRegistryImageName("speedianet/os")
+		imageName, _ := valueObject.NewRegistryImageName("goinfinite/os")
 
 		registryImages, err := containerQueryRepo.ReadImages(&imageName)
 		if err != nil {
@@ -26,7 +26,7 @@ func TestContainerRegistryQueryRepo(t *testing.T) {
 	})
 
 	t.Run("ReadRegistryTaggedImage", func(t *testing.T) {
-		imageAddress, _ := valueObject.NewContainerImageAddress("speedianet/os")
+		imageAddress, _ := valueObject.NewContainerImageAddress("goinfinite/os")
 
 		_, err := containerQueryRepo.ReadTaggedImage(imageAddress)
 		if err != nil {

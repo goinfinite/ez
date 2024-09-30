@@ -7,6 +7,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 )
 
 func TestScheduledTaskCmdRepo(t *testing.T) {
@@ -17,7 +18,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 
 	t.Run("CreateScheduledTask", func(t *testing.T) {
 		name, _ := valueObject.NewScheduledTaskName("test")
-		command, _ := valueObject.NewUnixCommand("/var/infinite/control account get")
+		command, _ := valueObject.NewUnixCommand(infraEnvs.InfiniteEzBinary + " account get")
 		containerTag, _ := valueObject.NewScheduledTaskTag("account")
 		tags := []valueObject.ScheduledTaskTag{containerTag}
 		timeoutSecs := uint16(60)

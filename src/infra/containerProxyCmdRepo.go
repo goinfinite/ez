@@ -44,8 +44,8 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 	listen 1618 ssl;
 	server_name ` + serverHostname.String() + `;
 
-	ssl_certificate /var/infinite/pki/control.crt;
-	ssl_certificate_key /var/infinite/pki/control.key;
+	ssl_certificate /var/infinite/pki/ez.crt;
+	ssl_certificate_key /var/infinite/pki/ez.key;
 	{{ range . }}
 	location /{{ .ContainerId }}/ {
 		sub_filter_once off;
@@ -58,7 +58,7 @@ func (repo *ContainerProxyCmdRepo) updateWebServerFile() error {
 
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
-		proxy_set_header X-Proxied-By "Speedia Control";
+		proxy_set_header X-Proxied-By "Infinite Ez";
 		proxy_set_header X-Container-Id "{{ .ContainerId }}";
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }}/;
 	}
@@ -69,13 +69,13 @@ server {
 	listen 1618 ssl;
 	server_name {{ .ContainerHostname}} os.{{ .ContainerHostname}};
 
-	ssl_certificate /var/infinite/pki/control.crt;
-	ssl_certificate_key /var/infinite/pki/control.key;
+	ssl_certificate /var/infinite/pki/ez.crt;
+	ssl_certificate_key /var/infinite/pki/ez.key;
 
 	location / {
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
-		proxy_set_header X-Proxied-By "Speedia Control";
+		proxy_set_header X-Proxied-By "Infinite Ez";
 		proxy_set_header X-Container-Id "{{ .ContainerId }}";
 		proxy_pass https://localhost:{{ .ContainerPrivatePort }};
 	}
@@ -126,7 +126,7 @@ func (repo *ContainerProxyCmdRepo) Create(containerId valueObject.ContainerId) e
 		containerPrivatePort = portBinding.PrivatePort.Uint16()
 	}
 	if containerPrivatePort == 0 {
-		return errors.New("SpeediaOsPrivatePortNotFound")
+		return errors.New("InfiniteOsPrivatePortNotFound")
 	}
 
 	proxyModel := dbModel.NewContainerProxy(

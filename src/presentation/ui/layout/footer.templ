@@ -14,12 +14,12 @@ templ FooterSkeleton() {
 		hx-trigger="load delay:500ms"
 		hx-target="this"
 		hx-swap="outerHTML transition:true"
-		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
+		class="bg-ez-800 border-ez-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
 	>
 		<div class="flex items-center space-x-3">
-			<div class="bg-control-200 h-6 w-9 animate-pulse rounded-md"></div>
+			<div class="bg-ez-200 h-6 w-9 animate-pulse rounded-md"></div>
 			for i := 0; i < 3; i++ {
-				<div class="bg-control-200 w-27 h-6 animate-pulse rounded-md"></div>
+				<div class="bg-ez-200 w-27 h-6 animate-pulse rounded-md"></div>
 			}
 		</div>
 	</footer>
@@ -50,9 +50,9 @@ templ ScheduledTasksPopover(
 	<div
 		x-cloak
 		x-show="$store.main.displayScheduledTasksPopover"
-		class="bg-control-400 w-100 max-h-100 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-y-auto rounded-t-md text-sm text-neutral-50 shadow-xl transition-all duration-300 ease-in-out"
+		class="bg-ez-400 w-100 max-h-100 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-y-auto rounded-t-md text-sm text-neutral-50 shadow-xl transition-all duration-300 ease-in-out"
 	>
-		<div class="bg-control-300 flex items-center justify-between rounded-t-md p-2.5">
+		<div class="bg-ez-300 flex items-center justify-between rounded-t-md p-2.5">
 			<div class="text-base font-bold">Scheduled Tasks</div>
 			<div class="text-base font-bold">
 				<i
@@ -69,10 +69,10 @@ templ ScheduledTasksPopover(
 				<tbody>
 					for _, scheduledTask := range scheduledTasksEntities {
 						<tr
-							class="even:bg-control-500 even:hover:bg-control-300 hover:bg-control-300 group cursor-pointer rounded-md border-b border-neutral-500 border-opacity-30 last:border-b-0"
+							class="even:bg-ez-500 even:hover:bg-ez-300 hover:bg-ez-300 group cursor-pointer rounded-md border-b border-neutral-500 border-opacity-30 last:border-b-0"
 							x-data="{ isExpanded: false }"
 							@click="isExpanded = !isExpanded"
-							:class="{ 'bg-control-300': isExpanded }"
+							:class="{ 'bg-ez-300': isExpanded }"
 						>
 							<td class="p-1.5" :class="{ 'w-0 opacity-0': isExpanded }">
 								<i class={ "text-xl ph-duotone " + scheduledTaskStatusToIcon(scheduledTask.Status) }></i>
@@ -88,7 +88,7 @@ templ ScheduledTasksPopover(
 								></i>
 								<div x-show="!isExpanded">
 									if scheduledTask.Output != nil {
-										<p class="max-w-80 bg-control-900 truncate rounded-md bg-opacity-50 px-1 text-[10px] text-neutral-50">
+										<p class="max-w-80 bg-ez-900 truncate rounded-md bg-opacity-50 px-1 text-[10px] text-neutral-50">
 											{ scheduledTask.Output.String() }
 										</p>
 									}
@@ -101,14 +101,14 @@ templ ScheduledTasksPopover(
 								<div class="max-w-85 space-y-2 text-[10px]" x-show="isExpanded">
 									<div class="max-w-80 text-wrap break-words">
 										<p class="font-bold">Command</p>
-										<p class="max-w-80 bg-control-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
+										<p class="max-w-80 bg-ez-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
 											{ scheduledTask.Command.String() }
 										</p>
 									</div>
 									<div class="max-w-80 text-wrap break-words">
 										<p class="font-bold">Outputs</p>
 										if scheduledTask.Output != nil {
-											<p class="max-w-80 bg-control-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
+											<p class="max-w-80 bg-ez-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
 												{ scheduledTask.Output.String() }
 											</p>
 										}
@@ -122,16 +122,16 @@ templ ScheduledTasksPopover(
 										<p class="font-bold">Timings</p>
 										<table>
 											<tbody>
-												<thead class="bg-control-600">
+												<thead class="bg-ez-600">
 													<th class="text-left">CreatedAt</th>
-													<th class="bg-control-500 text-left">StartedAt</th>
+													<th class="bg-ez-500 text-left">StartedAt</th>
 													<th class="text-left">FinishedAt</th>
 												</thead>
 												<tr>
 													<td class="text-wrap break-words p-1">
 														{ scheduledTask.CreatedAt.GetRfcDate() }
 													</td>
-													<td class="bg-control-400 text-wrap break-words p-1">
+													<td class="bg-ez-400 text-wrap break-words p-1">
 														if scheduledTask.StartedAt != nil {
 															{ scheduledTask.StartedAt.GetRfcDate() }
 														} else {
@@ -192,7 +192,7 @@ templ ResourceUsageProgressBar(usageRate uint8, usageLabel, tooltipText, icon st
 	<div class="group relative flex items-center">
 		<i class={ "ph-bold " + icon + " mr-2 align-middle text-xl" }></i>
 		@componentMisc.ProgressBar(usageRate, usageLabel)
-		<div class={ "absolute left-1/2 transform -translate-x-1/2 opacity-0 bottom-full mb-2 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 p-1.5 bg-control-300 text-neutral-50 text-xs rounded-md shadow-md" }>
+		<div class={ "absolute left-1/2 transform -translate-x-1/2 opacity-0 bottom-full mb-2 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 p-1.5 bg-ez-300 text-neutral-50 text-xs rounded-md shadow-md" }>
 			{ tooltipText }
 		</div>
 	</div>
@@ -208,11 +208,11 @@ templ Footer(
 		hx-trigger="every 20s, refresh:footer from:window delay:200ms"
 		hx-target="this"
 		hx-swap="outerHTML"
-		class="bg-control-800 border-control-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
+		class="bg-ez-800 border-ez-400 h-8.5 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
 	>
 		<div
 			class="mr-5 flex h-full items-center"
-			:class="$store.main.displayScheduledTasksPopover ? 'bg-control-300' : 'bg-control-800'"
+			:class="$store.main.displayScheduledTasksPopover ? 'bg-ez-300' : 'bg-ez-800'"
 		>
 			<i
 				class="ph-bold ph-list-checks cursor-pointer px-1 text-xl"

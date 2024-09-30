@@ -25,10 +25,10 @@ func HttpServerInit(
 	httpServer := http.Server{Addr: ":3141", Handler: e}
 
 	pkiDir := "/var/infinite/pki"
-	certFile := pkiDir + "/control.crt"
-	keyFile := pkiDir + "/control.key"
+	certFile := pkiDir + "/ez.crt"
+	keyFile := pkiDir + "/ez.key"
 
-	controlBanner := `
+	ezBanner := `
                                              ▒▓▓▓▒                        ▓▓▓▓▒
                                              ████▒                        ████▓
    ▓▒   ▒████▓▓▓█▒▓████▓▓████▒▓████▓▓█████ ▓█████▓▓ █████▓▓▓▓▒████▓▓█████ ████ 
@@ -42,7 +42,7 @@ ______________________________________________________________________________
 ⇨ HTTPS server started on [::]:3141 and is ready to serve! 🎉
 `
 
-	fmt.Println(controlBanner)
+	fmt.Println(ezBanner)
 
 	err := httpServer.ListenAndServeTLS(certFile, keyFile)
 	if err != http.ErrServerClosed {

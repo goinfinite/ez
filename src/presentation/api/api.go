@@ -11,22 +11,22 @@ const (
 	ApiBasePath string = "/api"
 )
 
-// @title			ControlApi
-// @version			0.0.8
-// @description		Speedia Control API
-// @termsOfService	https://speedia.net/tos/
+// @title						ezApi
+// @version					0.0.8
+// @description			Infinite Ez API
+// @termsOfService	https://goinfinite.org/tos/
 
-// @contact.name	Speedia Engineering
-// @contact.url		https://speedia.net/
-// @contact.email	eng+swagger@speedia.net
+// @contact.name	Infinite Engineering
+// @contact.url		https://goinfinite.org/
+// @contact.email	eng+swagger@goinfinite.org
 
-// @license.name  SPEEDIA WEB SERVICES, LLC © 2024. All Rights Reserved.
-// @license.url   https://speedia.net/tos/
+// @license.name  INFINITE COMPUTACAO EM NUVEM LTDA © 2024. All Rights Reserved.
+// @license.url   https://goinfinite.org/tos/
 
 // @securityDefinitions.apikey	Bearer
-// @in 							header
-// @name						Authorization
-// @description					Type "Bearer" + JWT token or API key.
+// @in													header
+// @name												Authorization
+// @description									Type "Bearer" + JWT token or API key.
 
 // @BasePath	/api
 func ApiInit(

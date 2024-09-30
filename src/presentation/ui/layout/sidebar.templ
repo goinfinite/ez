@@ -23,7 +23,7 @@ func sidebarItemsGetter(currentUrl string) []SidebarItem {
 			continue
 		}
 
-		sidebarItems[itemIndex].AdditionalClasses = " text-speedia-500"
+		sidebarItems[itemIndex].AdditionalClasses = " text-infinite-500"
 		break
 	}
 
@@ -39,7 +39,7 @@ templ Sidebar(currentUrl string) {
 	}
 	</script>
 	<!-- Sidebar HTML -->
-	<sidebar class="bg-control-900 z-10 flex h-screen w-28 flex-col items-center">
+	<sidebar class="bg-ez-900 z-10 flex h-screen w-28 flex-col items-center">
 		<div class="my-7">
 			<a
 				href="/_/#/overview"
@@ -47,15 +47,15 @@ templ Sidebar(currentUrl string) {
 			>
 				<img
 					src="/assets/control-logo-dark.svg"
-					alt="Speedia Control"
+					alt="Infinite Ez"
 				/>
 			</a>
-			<p class="text-center text-xs">v{ infraEnvs.SpeediaControlVersion }</p>
+			<p class="text-center text-xs">v{ infraEnvs.InfiniteEzVersion }</p>
 		</div>
 		<button
 			type="button"
 			onclick="clearSession()"
-			class="hover:bg-speedia-500 flex items-center justify-center rounded-md border border-neutral-500 bg-transparent px-3 py-1.5 text-center text-xs text-neutral-400 transition-all hover:border-transparent hover:text-white"
+			class="hover:bg-infinite-500 flex items-center justify-center rounded-md border border-neutral-500 bg-transparent px-3 py-1.5 text-center text-xs text-neutral-400 transition-all hover:border-transparent hover:text-white"
 		>
 			<i class="ph-bold ph-sign-out pr-1 pt-1"></i>
 			logout

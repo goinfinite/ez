@@ -7,11 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
-)
-
-const (
-	ControlMainDir = "/var/infinite"
 )
 
 type SysInstallCmdRepo struct {
@@ -113,9 +110,9 @@ func (repo SysInstallCmdRepo) Install() error {
 		return err
 	}
 
-	_ = os.MkdirAll(ControlMainDir, 0755)
+	_ = os.MkdirAll(infraEnvs.InfiniteEzMainDir, 0755)
 	_, err = infraHelper.RunCmdWithSubShell(
-		"echo \"alias control='" + ControlMainDir + "/control'\" >> /root/.bashrc",
+		"echo \"alias ez='" + infraEnvs.InfiniteEzMainDir + "/ez'\" >> /root/.bashrc",
 	)
 	if err != nil {
 		return errors.New("AddControlAliasFailed: " + err.Error())
@@ -229,8 +226,8 @@ OnCalendar=Sat *-*-* 0` + randomMorningHour + `:00:00
 		return err
 	}
 
-	_ = os.MkdirAll(ControlMainDir+"/pki", 0755)
-	err = infraHelper.GenSelfSignedSslCert(ControlMainDir+"/pki", "control")
+	_ = os.MkdirAll(infraEnvs.InfiniteEzMainDir+"/pki", 0755)
+	err = infraHelper.GenSelfSignedSslCert(infraEnvs.InfiniteEzMainDir+"/pki", "ez")
 	if err != nil {
 		return err
 	}

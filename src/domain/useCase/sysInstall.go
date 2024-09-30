@@ -25,7 +25,7 @@ func SysInstall(
 
 	if !isInstalled {
 		slog.Info("Installation started. The server will reboot a few times. " +
-			"Check /var/log/control.log for the installation progress.")
+			"Check /var/log/ez.log for the installation progress.")
 
 		err := sysInstallCmdRepo.Install()
 		if err != nil {
@@ -44,7 +44,7 @@ func SysInstall(
 
 		serverCmdRepo.AddOneTimerSvc(
 			svcInstallName,
-			valueObject.NewSvcCmdPanic("/var/infinite/control sys-install"),
+			valueObject.NewSvcCmdPanic("/var/infinite/ez sys-install"),
 		)
 
 		serverCmdRepo.Reboot()
@@ -60,8 +60,8 @@ func SysInstall(
 
 	slog.Info("Adding core services...")
 	err = serverCmdRepo.AddSvc(
-		valueObject.NewServiceNamePanic("control"),
-		valueObject.NewSvcCmdPanic("/var/infinite/control serve"),
+		valueObject.NewServiceNamePanic("ez"),
+		valueObject.NewSvcCmdPanic("/var/infinite/ez serve"),
 	)
 	if err != nil {
 		slog.Error(err.Error())

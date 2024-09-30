@@ -417,16 +417,16 @@ func (repo *ContainerCmdRepo) Create(
 		createParams = append(createParams, "--entrypoint", createDto.Entrypoint.String())
 	}
 
-	isSpeediaOs := createDto.ImageAddress.IsSpeediaOs()
-	hasSpeediaOsPortBinding := false
+	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
+	hasInfiniteOsPortBinding := false
 	for _, portBinding := range createDto.PortBindings {
 		if portBinding.ContainerPort.String() == "1618" {
-			hasSpeediaOsPortBinding = true
+			hasInfiniteOsPortBinding = true
 			break
 		}
 	}
 
-	if isSpeediaOs && !hasSpeediaOsPortBinding {
+	if isInfiniteOs && !hasInfiniteOsPortBinding {
 		portBinding, _ := valueObject.NewPortBindingFromString("sos")
 		createDto.PortBindings = append(createDto.PortBindings, portBinding[0])
 	}
@@ -626,12 +626,12 @@ func (repo *ContainerCmdRepo) CreateContainerSessionToken(
 	randomPassword := infraHelper.GenPass(16)
 	_, _ = repo.runContainerCmd(
 		containerEntity.AccountId, containerEntity.Id,
-		"os account create -u control -p "+randomPassword,
+		"os account create -u ez -p "+randomPassword,
 	)
 
 	_, err = repo.runContainerCmd(
 		containerEntity.AccountId, containerEntity.Id,
-		"os account update -u control -p "+randomPassword,
+		"os account update -u ez -p "+randomPassword,
 	)
 	if err != nil {
 		return tokenValue, errors.New("UpdateControlUserPasswordFailed: " + err.Error())
@@ -640,7 +640,7 @@ func (repo *ContainerCmdRepo) CreateContainerSessionToken(
 	sessionIpAddressStr := createDto.SessionIpAddress.String()
 	loginResponseJson, err := repo.runContainerCmd(
 		containerEntity.AccountId, containerEntity.Id,
-		"os auth login -u control -p "+randomPassword+" -i "+sessionIpAddressStr,
+		"os auth login -u ez -p "+randomPassword+" -i "+sessionIpAddressStr,
 	)
 	if err != nil {
 		return tokenValue, errors.New("LoginWithControlUserFailed: " + err.Error())

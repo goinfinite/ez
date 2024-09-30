@@ -49,7 +49,7 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		containerEntity.AccountId,
 		"podman", "commit", "--quiet",
-		"--author", "control:"+createDto.OperatorAccountId.String(),
+		"--author", "ez:"+createDto.OperatorAccountId.String(),
 		containerIdStr,
 		"localhost/"+accountEntity.Username.String()+"/"+snapshotName,
 	)

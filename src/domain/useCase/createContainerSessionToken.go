@@ -20,8 +20,8 @@ func CreateContainerSessionToken(
 		return accessToken, errors.New("ContainerNotFound")
 	}
 
-	if !containerEntity.ImageAddress.IsSpeediaOs() {
-		return accessToken, errors.New("NotSpeediaOs")
+	if !containerEntity.ImageAddress.IsInfiniteOs() {
+		return accessToken, errors.New("NotInfiniteOs")
 	}
 
 	if !containerEntity.IsRunning() {
