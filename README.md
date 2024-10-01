@@ -1,16 +1,24 @@
 ```
-This project is under active development and is not ready for production use.
+This project is still under active development (alpha stage). Expect bugs early on. Create issues so they can be fixed.
 ```
 
 # Infinite Ez
 
-Infinite Ez is a proprietary container management platform in a single file. It has a REST API, CLI and dashboard.
+Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that you don't need to be a DevOps whiz to use it - it's designed for the average chap, with a user-friendly interface that automates the tedious bits, like server maintenance, deployment, and scaling.
+
+What's more, Infinite Ez is quite lightweight, using Go under the hood, which means it only sips 100 MB of RAM on average (the binary). It runs on OpenSUSE MicroOS, an immutable operating system specifically designed for containers. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
+
+If your application isn't containerized yet, check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that makes it a breeze to containerize your apps in just a few clicks, all via a web interface - no need to get your head around Docker or Podman.
+
+Infinite Ez is fair source software, which means it's free to use, modify, and redistribute, with minimal restrictions to protect the producer's business model. The source code is publicly available, and it's published under a delayed Open Source model. You can read more about that [here](https://fair.io/about/).
+
+Lastly, if you're a hosting/infrastructure provider, we'll soon be offering a white-label add-on that lets you customize the dashboard and use it commercially. In the meantime, do get in touch if you're interested in using Infinite Ez in your hosting service - we're keen to find a fair way to work together.
 
 ## Running
 
 ## Development
 
-In this repository you'll find the REST API and CLI code plus the dashboard assets. The API and CLI uses Clean Architecture, DDD, TDD, CQRS, Object Calisthenics, etc. Understand how these concepts works before proceeding is advised.
+Infinite Ez is written using Clean Architecture, DDD, TDD, CQRS, Object Calisthenics, etc. Understand how these concepts works before proceeding is advised.
 
 To run this project during development you must install [Air](https://github.com/cosmtrek/air). Air is a tool that will watch for changes in the project and recompile it automatically.
 
@@ -115,8 +123,6 @@ systemctl disable ez
 systemctl stop ez
 ```
 
-13. If you get a license error, you can run `ez license refresh` to force the license to be regenerated.
-
 ### Environment Variables
 
 You must have an `.env` file in the root of the git directory **during development**. You can use the `.env.example` file as a template. Air will read the `.env` file and use it to run the project during development.
@@ -137,9 +143,7 @@ For instance there you'll find a `testHelpers.go` file that is used to read the 
 
 ### Building
 
-Ez is likely on the marketplace of your cloud provider already, but if you want to build it yourself.
-
-The software itself is a single binary, but it requires openSUSE MicroOS to run.
+Ez binary can be downloaded on [goinfinite.org's website](https://goinfinite.org), but if you want to build it yourself, first download openSUSE MicroOS image.
 
 1. Once you have uploaded the openSUSE MicroOS cloud-init image to your provider, attach a secondary unformatted disk and deploy the VM.
 
@@ -163,7 +167,7 @@ There will be no log messages on the console for now, the installation process w
 
 ### Web UIs
 
-This project has two web UIs, the previous Vue.js frontend and the new HTMX frontend. The Vue.js frontend is deprecated and will be removed in the future. It's available at `/_/` and the HTMX frontend is available at `/`.
+This project has two web UIs for the moment, the previous Vue.js frontend and the new HTMX frontend. The Vue.js frontend is deprecated and will be removed in the future. It's available at `/_/` and the HTMX frontend is available at `/`.
 
 The HTMX frontend has a hot reload feature that will reload the page when the assets are changed. It's based on a websocket connection that the client listens to and will reload the page when the server stops responding (which is when Air is rebuilding the binary after a file change). To enable this feature, simply put a `DEV_MODE=true` in the `.env` file.
 
