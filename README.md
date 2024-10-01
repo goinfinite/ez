@@ -1,10 +1,11 @@
 ```
-This project is still under active development (alpha stage). Expect bugs early on. Create issues so they can be fixed.
+This project is still under active development (alpha stage).
+Expect bugs early on. Create issues so they can be fixed.
 ```
 
-# Infinite Ez
+# Infinite Ez &middot; [![Roadmap](https://img.shields.io/badge/roadmap-014737)](https://github.com/orgs/goinfinite/projects/8/views/2) [![Demo](https://img.shields.io/badge/read--only_demo-233876)](https://ez.demo.goinfinite.org:3141/) [![Community](https://img.shields.io/badge/community-751A3D)](https://github.com/orgs/goinfinite/discussions) [![Report Card](https://img.shields.io/badge/go%20report-A%2B-brightgreen)](https://goreportcard.com/report/github.com/goinfinite/ez) [![License](https://img.shields.io/badge/license-FCL--1.0--ALv2-blue.svg)](https://github.com/goinfinite/ez/blob/main/LICENSE.md)
 
-Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that you don't need to be a DevOps expert to use it - it's designed for the average user, with a user-friendly interface that automates all those complex tasks, like server maintenance, deployment intricacies, and scaling policies.
+Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that **you don't need to be a DevOps expert** to use it - it's designed for the average user, with a user-friendly interface that automates all those complex tasks, like deployment intricacies, scaling policies and server maintenance.
 
 What's more, Infinite Ez is notably lightweight, thanks to Go under the hood. It consumes only about 100 MB of RAM on average (for the binary). It runs on OpenSUSE MicroOS, an immutable operating system specifically designed for containers. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
 
@@ -18,13 +19,13 @@ Lastly, if you're a hosting/infrastructure provider, we'll soon be offering an e
 
 1. Download Ez binary from [goinfinite.org's website](https://goinfinite.org);
 
-2. Download the openSUSE MicroOS cloud-init from "Base System + Container Runtime" column on [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
+2. Download the openSUSE MicroOS cloud-init image (use the link from "Base System + Container Runtime" column) from the [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
 
-3. Upload the image to your infrastructure provider and deploy a VM with a secondary unformatted disk;
+3. Upload the image to your infrastructure provider and deploy a VM with it. You must also add a secondary unformatted disk to the VM which will be used by Ez to store the users data;
 
 4. SSH into the VM and create the `/var/infinite/` directory;
 
-5. Upload the Ez binary to `/var/infinite/`, giving it execution permission just after:
+5. Upload the Ez binary to `/var/infinite/`, giving it execution permission right after:
 
 ```
 chmod +x /var/infinite/ez
@@ -36,7 +37,7 @@ chmod +x /var/infinite/ez
 /var/infinite/ez sys-install
 ```
 
-7. The system will reboot and you can check with `systemctl status ez` if the service is running. You should be able to access the dashboard on the VM IP address on port 3141.
+7. The system will reboot and you can check with `systemctl status ez` if the service is running. You should now be able to access the dashboard with your browser on the `https://vm-ip-address:3141/` address.
 
 _We are aware the installation process is not user-friendly yet. The installation process will be completely refactored soon so it happens on the Web UI and without the need of a secondary disk. An official ISO will also be made available for download so you will be able to skip all the steps above, boot the ISO on your VM provider and go straight to the Setup Wizard on the Web UI._
 
