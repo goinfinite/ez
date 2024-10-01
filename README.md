@@ -4,17 +4,65 @@ This project is still under active development (alpha stage). Expect bugs early 
 
 # Infinite Ez
 
-Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that you don't need to be a DevOps whiz to use it - it's designed for the average chap, with a user-friendly interface that automates the tedious bits, like server maintenance, deployment, and scaling.
+Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that you don't need to be a DevOps expert to use it - it's designed for the average user, with a user-friendly interface that automates all those complex tasks, like server maintenance, deployment intricacies, and scaling policies.
 
-What's more, Infinite Ez is quite lightweight, using Go under the hood, which means it only sips 100 MB of RAM on average (the binary). It runs on OpenSUSE MicroOS, an immutable operating system specifically designed for containers. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
+What's more, Infinite Ez is notably lightweight, thanks to Go under the hood. It consumes only about 100 MB of RAM on average (for the binary). It runs on OpenSUSE MicroOS, an immutable operating system specifically designed for containers. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
 
-If your application isn't containerized yet, check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that makes it a breeze to containerize your apps in just a few clicks, all via a web interface - no need to get your head around Docker or Podman.
+If your application isn't containerized yet, fret not. Check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that simplifies containerizing your apps to just a few clicks, all via a web interface - no need to grapple with complex Dockerfiles.
 
-Infinite Ez is fair source software, which means it's free to use, modify, and redistribute, with minimal restrictions to protect the producer's business model. The source code is publicly available, and it's published under a delayed Open Source model. You can read more about that [here](https://fair.io/about/).
+Now, Infinite Ez is what we call fair source software. That means it's free to use, modify, and redistribute, with minimal restrictions to protect the producer's (yours truly) business model. The source code is publicly available for review, published under a delayed Open Source model. You can read more about that [here](https://fair.io/about/) if you're interested.
 
-Lastly, if you're a hosting/infrastructure provider, we'll soon be offering a white-label add-on that lets you customize the dashboard and use it commercially. In the meantime, do get in touch if you're interested in using Infinite Ez in your hosting service - we're keen to find a fair way to work together.
+Lastly, if you're a hosting/infrastructure provider, we'll soon be offering an excellent white-label add-on that lets you customize the dashboard and use it commercially. In the meantime, [do get in touch](mailto:eng+ez@goinfinite.net) if you're interested in using Infinite Ez in your hosting service - we're eager to find a fair way to work together.
 
-## Running
+## Installation
+
+1. Download Ez binary from [goinfinite.org's website](https://goinfinite.org);
+
+2. Download the openSUSE MicroOS cloud-init from "Base System + Container Runtime" column on [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
+
+3. Upload the image to your infrastructure provider and deploy a VM with a secondary unformatted disk;
+
+4. SSH into the VM and create the `/var/infinite/` directory;
+
+5. Upload the Ez binary to `/var/infinite/`, giving it execution permission just after:
+
+```
+chmod +x /var/infinite/ez
+```
+
+6. Run the installer:
+
+```
+/var/infinite/ez sys-install
+```
+
+7. The system will reboot and you can check with `systemctl status ez` if the service is running. You should be able to access the dashboard on the VM IP address on port 3141.
+
+_We are aware the installation process is not user-friendly yet. The installation process will be completely refactored soon so it happens on the Web UI and without the need of a secondary disk. An official ISO will also be made available for download so you will be able to skip all the steps above, boot the ISO on your VM provider and go straight to the Setup Wizard on the Web UI._
+
+## REST API
+
+The REST API is exposed on port 3141 via HTTPS on the endpoint `/api/`. The API endpoint are versioned and the version is part of the URL.
+
+### Swagger // OpenAPI
+
+The API is documented using Swagger/OpenAPI 2.0 and the documentation can be found on the `/api/swagger/` endpoint.
+
+To generate the swagger documentation, you must use the following command:
+
+```
+swag init -g src/presentation/api/api.go -o src/presentation/api/docs
+```
+
+The annotations are in the controller files. The reference file can be found [here](https://github.com/swaggo/swag#attribute).
+
+### Authentication
+
+The API accepts two types of tokens and uses the standard "Authorization: Bearer \<token\>" header:
+
+- **sessionToken**: is a JWT, used for dashboard access and generated with the user login credentials. The token contains the accountId, IP address and expiration date. It expires in 3 hours and only the IP address used on the token generation is allowed to use it.
+
+- **accountApiKey**: is a token meant for M2M communication. The token is a _AES-256-CTR-Encrypted-Base64-Encoded_ string, but only the SHA3-256 hash of the key is stored in the server. The accountId is retrieved during key decoding, thus you don't need to provide it. The token never expires, but the user can update it at any time.
 
 ## Development
 
@@ -22,14 +70,11 @@ Infinite Ez is written using Clean Architecture, DDD, TDD, CQRS, Object Calisthe
 
 To run this project during development you must install [Air](https://github.com/cosmtrek/air). Air is a tool that will watch for changes in the project and recompile it automatically.
 
-### Unit Testing
-
 Since Ez relies on the operational system being openSUSE MicroOS, the entire development and testing should be done in a VM. The VM can be created with the following steps:
 
 1. Install VMWare Player;
 
-2. Download the VMware `.vmx` and `.vmdk` files from "Base System + Container Runtime" column on MicroOS download page:
-   https://en.opensuse.org/Portal:MicroOS/Downloads
+2. Download the VMware `.vmx` and `.vmdk` files from "Base System + Container Runtime" column on [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads).
 
 Note: make sure you downloaded the "Base System + Container Runtime" files and not the "Base System" files.
 
@@ -141,56 +186,8 @@ The `src/devUtils` folder is not a Clean Architecture layer, it's there to help 
 
 For instance there you'll find a `testHelpers.go` file that is used to read the `.env` during tests.
 
-### Building
-
-Ez binary can be downloaded on [goinfinite.org's website](https://goinfinite.org), but if you want to build it yourself, first download openSUSE MicroOS image.
-
-1. Once you have uploaded the openSUSE MicroOS cloud-init image to your provider, attach a secondary unformatted disk and deploy the VM.
-
-_If you are running locally, follow steps 1 to 6 of the "Unit Testing" title above._
-
-2. Get the Ez binary, download it to the `/var/infinite/` directory and give it execution permission:
-
-```
-chmod +x /var/infinite/ez
-```
-
-3. Run the installer:
-
-```
-/var/infinite/ez sys-install
-```
-
-4. The system will reboot and once you see Ez binary running via systemd, you should be able to access the dashboard on the VM IP address on port 3141.
-
-There will be no log messages on the console for now, the installation process will be refactored soon so that the entire process happens on the Web UI.
-
 ### Web UIs
 
 This project has two web UIs for the moment, the previous Vue.js frontend and the new HTMX frontend. The Vue.js frontend is deprecated and will be removed in the future. It's available at `/_/` and the HTMX frontend is available at `/`.
 
 The HTMX frontend has a hot reload feature that will reload the page when the assets are changed. It's based on a websocket connection that the client listens to and will reload the page when the server stops responding (which is when Air is rebuilding the binary after a file change). To enable this feature, simply put a `DEV_MODE=true` in the `.env` file.
-
-## REST API
-
-The REST API is exposed on port 3141 via HTTPS on the endpoint `/api/`. The API endpoint are versioned and the version is part of the URL.
-
-### Swagger // OpenAPI
-
-The API is documented using Swagger/OpenAPI 2.0 and the documentation can be found on the `/api/swagger/` endpoint.
-
-To generate the swagger documentation, you must use the following command:
-
-```
-swag init -g src/presentation/api/api.go -o src/presentation/api/docs
-```
-
-The annotations are in the controller files. The reference file can be found [here](https://github.com/swaggo/swag#attribute).
-
-### Authentication
-
-The API accepts two types of tokens and uses the standard "Authorization: Bearer \<token\>" header:
-
-- **sessionToken**: is a JWT, used for dashboard access and generated with the user login credentials. The token contains the accountId, IP address and expiration date. It expires in 3 hours and only the IP address used on the token generation is allowed to use it.
-
-- **accountApiKey**: is a token meant for M2M communication. The token is a _AES-256-CTR-Encrypted-Base64-Encoded_ string, but only the SHA3-256 hash of the key is stored in the server. The accountId is retrieved during key decoding, thus you don't need to provide it. The token never expires, but the user can update it at any time.
