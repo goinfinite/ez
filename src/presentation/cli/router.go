@@ -110,21 +110,6 @@ func (router *Router) containerRoutes() {
 	rootCmd.AddCommand(containerCmd)
 }
 
-func (router *Router) licenseRoutes() {
-	var licenseCmd = &cobra.Command{
-		Use:   "license",
-		Short: "LicenseManagement",
-	}
-
-	licenseController := cliController.NewLicenseController(
-		router.persistentDbSvc,
-		router.transientDbSvc,
-	)
-	licenseCmd.AddCommand(licenseController.ReadLicenseInfo())
-	licenseCmd.AddCommand(licenseController.RefreshLicense())
-	rootCmd.AddCommand(licenseCmd)
-}
-
 func (router *Router) mappingRoutes() {
 	var mappingCmd = &cobra.Command{
 		Use:   "mapping",
@@ -199,7 +184,6 @@ func (router *Router) systemRoutes() {
 func (router Router) RegisterRoutes() {
 	router.accountRoutes()
 	router.containerRoutes()
-	router.licenseRoutes()
 	router.mappingRoutes()
 	router.o11yRoutes()
 	router.scheduledTaskRoutes()

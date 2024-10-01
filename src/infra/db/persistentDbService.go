@@ -95,7 +95,6 @@ func (service *PersistentDatabaseService) RunMigrations() error {
 		&dbModel.ContainerProxy{},
 		&dbModel.Mapping{},
 		&dbModel.MappingTarget{},
-		&dbModel.LicenseInfo{},
 		&dbModel.ScheduledTask{},
 		&dbModel.ScheduledTaskTag{},
 	)

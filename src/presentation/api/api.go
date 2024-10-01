@@ -20,8 +20,8 @@ const (
 // @contact.url		https://goinfinite.org/
 // @contact.email	eng+swagger@goinfinite.org
 
-// @license.name  INFINITE COMPUTACAO EM NUVEM LTDA © 2024. All Rights Reserved.
-// @license.url   https://goinfinite.org/tos/
+// @license.name  FCL-1.0-ALv2
+// @license.url   https://github.com/goinfinite/ez/blob/main/LICENSE.md
 
 // @securityDefinitions.apikey	Bearer
 // @in													header

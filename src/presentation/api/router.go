@@ -115,15 +115,6 @@ func (router *Router) containerRoutes() {
 	)
 }
 
-func (router *Router) licenseRoutes() {
-	licenseGroup := router.baseRoute.Group("/v1/license")
-	licenseGroup.GET("/", apiController.ReadLicenseInfoController)
-	go apiController.AutoLicenseValidationController(
-		router.persistentDbSvc,
-		router.transientDbSvc,
-	)
-}
-
 func (router *Router) mappingRoutes() {
 	mappingGroup := router.baseRoute.Group("/v1/mapping")
 
@@ -164,7 +155,6 @@ func (router *Router) RegisterRoutes() {
 	router.authRoutes()
 	router.accountRoutes()
 	router.containerRoutes()
-	router.licenseRoutes()
 	router.mappingRoutes()
 	router.o11yRoutes()
 	router.scheduledTaskRoutes()
