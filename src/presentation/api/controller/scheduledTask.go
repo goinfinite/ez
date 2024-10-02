@@ -47,7 +47,7 @@ func (controller *ScheduledTaskController) parseTaskTags(
 // ReadScheduledTasks	 godoc
 // @Summary      ReadScheduledTasks
 // @Description  List scheduled tasks.
-// @Tags         task
+// @Tags         scheduled-task
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
@@ -66,7 +66,7 @@ func (controller *ScheduledTaskController) parseTaskTags(
 // @Param        sortBy query  string  false  "SortBy (Pagination)"
 // @Param        sortDirection query  string  false  "SortDirection (Pagination)"
 // @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
-// @Success      200 {array} dto.ReadScheduledTasksResponse
+// @Success      200 {object} dto.ReadScheduledTasksResponse
 // @Router       /v1/scheduled-task/ [get]
 func (controller *ScheduledTaskController) Read(c echo.Context) error {
 	requestBody := map[string]interface{}{}
@@ -99,7 +99,7 @@ func (controller *ScheduledTaskController) Read(c echo.Context) error {
 // UpdateScheduledTask godoc
 // @Summary      UpdateScheduledTask
 // @Description  Reschedule a task or change its status.
-// @Tags         task
+// @Tags         scheduled-task
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
