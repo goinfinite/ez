@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
@@ -379,9 +380,16 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 		return overview, errors.New("ReadHostnameFailed: " + err.Error())
 	}
 
-	uptime, err := repo.getUptime()
+	uptimeSecs, err := repo.getUptime()
 	if err != nil {
-		uptime = 0
+		uptimeSecs = 0
+	}
+
+	uptimeSecsDuration := time.Duration(uptimeSecs) * time.Second
+	humanizedUptime := humanize.Time(time.Now().Add(-uptimeSecsDuration))
+	uptimeRelative, err := valueObject.NewRelativeTime(humanizedUptime)
+	if err != nil {
+		uptimeRelative, _ = valueObject.NewRelativeTime("0 seconds ago")
 	}
 
 	publicIpAddress, err := repo.ReadServerPublicIpAddress()
@@ -400,6 +408,7 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 	}
 
 	return entity.NewO11yOverview(
-		serverHostname, uptime, publicIpAddress, hardwareSpecs, currentResourceUsage,
+		serverHostname, uptimeSecs, uptimeRelative, publicIpAddress,
+		hardwareSpecs, currentResourceUsage,
 	), nil
 }
