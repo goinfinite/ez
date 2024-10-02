@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra/db"
 	o11yInfra "github.com/goinfinite/ez/src/infra/o11y"
 	"github.com/goinfinite/ez/src/presentation/api"
@@ -30,8 +31,13 @@ func HttpServerInit(
 	o11yQueryRepo := o11yInfra.NewO11yQueryRepo(transientDbSvc)
 	o11yOverview, err := o11yQueryRepo.ReadOverview()
 	if err == nil {
+		devModeStr := ""
+		if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {
+			devModeStr = "(🚧 DevMode 🚧)"
+		}
+
 		ezBanner = `
-      INFINITE      |  🔒 HTTPS server started on [::]:3141!
+      INFINITE      |  🔒 HTTPS server started on [::]:3141! ` + devModeStr + `
    ▄▄█▀██ █▀▀▀███   |  
   ▄█▀   ██▀  ███    |  🏠 Hostname: ` + o11yOverview.Hostname.String() + `
   ██▀▀▀▀▀▀  ███     |  ⏰ Uptime: ` + o11yOverview.UptimeRelative.String() + `
