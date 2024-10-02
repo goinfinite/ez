@@ -1262,6 +1262,84 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/marketplace/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List marketplace items.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "marketplace"
+                ],
+                "summary": "ReadMarketplaceItems",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Slug",
+                        "name": "itemSlug",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name",
+                        "name": "itemName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Type",
+                        "name": "itemType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadMarketplaceItemsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/o11y/overview/": {
             "get": {
                 "security": [
@@ -1305,7 +1383,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "scheduled-task"
                 ],
                 "summary": "ReadScheduledTasks",
                 "parameters": [
@@ -1404,10 +1482,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ReadScheduledTasksResponse"
-                            }
+                            "$ref": "#/definitions/dto.ReadScheduledTasksResponse"
                         }
                     }
                 }
@@ -1426,7 +1501,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "scheduled-task"
                 ],
                 "summary": "UpdateScheduledTask",
                 "parameters": [
@@ -1717,6 +1792,20 @@ const docTemplate = `{
                 },
                 "sortDirection": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ReadMarketplaceItemsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.MarketplaceItem"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
                 }
             }
         },
@@ -2082,6 +2171,35 @@ const docTemplate = `{
                 },
                 "mappingId": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.MarketplaceItem": {
+            "type": "object",
+            "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "estimatedSizeBytes": {
+                    "type": "integer"
+                },
+                "launchScript": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "receiptVersion": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },

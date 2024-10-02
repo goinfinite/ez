@@ -134,6 +134,13 @@ func (router *Router) mappingRoutes() {
 	)
 }
 
+func (router *Router) marketplaceRoutes() {
+	marketplaceGroup := router.baseRoute.Group("/v1/marketplace")
+
+	marketplaceController := apiController.NewMarketplaceController()
+	marketplaceGroup.GET("/", marketplaceController.Read)
+}
+
 func (router *Router) o11yRoutes() {
 	o11yGroup := router.baseRoute.Group("/v1/o11y")
 	o11yController := apiController.NewO11yController(router.transientDbSvc)
@@ -156,6 +163,7 @@ func (router *Router) RegisterRoutes() {
 	router.accountRoutes()
 	router.containerRoutes()
 	router.mappingRoutes()
+	router.marketplaceRoutes()
 	router.o11yRoutes()
 	router.scheduledTaskRoutes()
 }

@@ -175,6 +175,15 @@ definitions:
       sortDirection:
         type: string
     type: object
+  dto.ReadMarketplaceItemsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/entity.MarketplaceItem'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+    type: object
   dto.ReadScheduledTasksResponse:
     properties:
       pagination:
@@ -413,6 +422,25 @@ definitions:
         type: integer
       mappingId:
         type: integer
+    type: object
+  entity.MarketplaceItem:
+    properties:
+      avatarUrl:
+        type: string
+      description:
+        type: string
+      estimatedSizeBytes:
+        type: integer
+      launchScript:
+        type: string
+      name:
+        type: string
+      receiptVersion:
+        type: string
+      slug:
+        type: string
+      type:
+        type: string
     type: object
   entity.O11yOverview:
     properties:
@@ -1493,6 +1521,56 @@ paths:
       summary: CreateMappingTarget
       tags:
       - mapping
+  /v1/marketplace/:
+    get:
+      consumes:
+      - application/json
+      description: List marketplace items.
+      parameters:
+      - description: Slug
+        in: query
+        name: itemSlug
+        type: string
+      - description: Name
+        in: query
+        name: itemName
+        type: string
+      - description: Type
+        in: query
+        name: itemType
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadMarketplaceItemsResponse'
+      security:
+      - Bearer: []
+      summary: ReadMarketplaceItems
+      tags:
+      - marketplace
   /v1/o11y/overview/:
     get:
       consumes:
@@ -1582,14 +1660,12 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.ReadScheduledTasksResponse'
-            type: array
+            $ref: '#/definitions/dto.ReadScheduledTasksResponse'
       security:
       - Bearer: []
       summary: ReadScheduledTasks
       tags:
-      - task
+      - scheduled-task
     put:
       consumes:
       - application/json
@@ -1612,7 +1688,7 @@ paths:
       - Bearer: []
       summary: UpdateScheduledTask
       tags:
-      - task
+      - scheduled-task
 securityDefinitions:
   Bearer:
     description: Type "Bearer" + JWT token or API key.
