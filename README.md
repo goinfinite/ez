@@ -3,7 +3,7 @@ This project is still under active development (alpha stage).
 Expect bugs early on. Create issues so they can be fixed.
 ```
 
-# Infinite Ez &middot; [![Roadmap](https://img.shields.io/badge/roadmap-014737)](https://github.com/orgs/goinfinite/projects/8/views/2) [![Demo](https://img.shields.io/badge/read--only_demo-233876)](https://ez.demo.goinfinite.org:3141/) [![Community](https://img.shields.io/badge/community-751A3D)](https://github.com/orgs/goinfinite/discussions) [![Report Card](https://img.shields.io/badge/go%20report-A%2B-brightgreen)](https://goreportcard.com/report/github.com/goinfinite/ez) [![License](https://img.shields.io/badge/license-FCL--1.0--ALv2-blue.svg)](https://github.com/goinfinite/ez/blob/main/LICENSE.md)
+# Infinite Ez &middot; [![Roadmap](https://img.shields.io/badge/roadmap-014737)](https://github.com/orgs/goinfinite/projects/8/views/2) [![Demo](https://img.shields.io/badge/read--only_demo-233876)](https://ez.demo.goinfinite.net:3141/) [![Community](https://img.shields.io/badge/community-751A3D)](https://github.com/orgs/goinfinite/discussions) [![Report Card](https://img.shields.io/badge/go%20report-A%2B-brightgreen)](https://goreportcard.com/report/github.com/goinfinite/ez) [![License](https://img.shields.io/badge/license-FCL--1.0--ALv2-blue.svg)](https://github.com/goinfinite/ez/blob/main/LICENSE.md)
 
 Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that **you don't need to be a DevOps expert** to use it - it's designed for the average user, with a user-friendly interface that automates all those complex tasks, like deployment intricacies, scaling policies and server maintenance.
 
@@ -17,7 +17,7 @@ Lastly, if you're a hosting/infrastructure provider, we'll soon be offering an e
 
 ## Installation
 
-1. Download Ez binary from [goinfinite.org's website](https://goinfinite.org);
+1. Download Ez binary from [goinfinite.net's website](https://goinfinite.net/softwares/ez/);
 
 2. Download the openSUSE MicroOS cloud-init image (use the link from "Base System + Container Runtime" column) from the [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
 

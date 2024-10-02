@@ -17,7 +17,7 @@ func TestMappingCmdRepo(t *testing.T) {
 
 	t.Run("CreateMapping", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
-		hostname := valueObject.NewFqdnPanic("goinfinite.org")
+		hostname := valueObject.NewFqdnPanic("goinfinite.net")
 
 		port, _ := valueObject.NewNetworkPort(80)
 		protocol, _ := valueObject.NewNetworkProtocol("http")

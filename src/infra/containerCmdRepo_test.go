@@ -32,7 +32,7 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 		return err
 	}
 
-	containerHostname, _ := valueObject.NewFqdn("goinfinite.org")
+	containerHostname, _ := valueObject.NewFqdn("goinfinite.net")
 	containerImage, _ := valueObject.NewContainerImageAddress("https://docker.io/goinfinite/os")
 
 	createContainer := dto.NewCreateContainer(

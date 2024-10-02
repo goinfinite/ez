@@ -14,11 +14,11 @@ const (
 // @title						ezApi
 // @version					0.0.8
 // @description			Infinite Ez API
-// @termsOfService	https://goinfinite.org/tos/
+// @termsOfService	https://goinfinite.net/tos/
 
 // @contact.name	Infinite Engineering
-// @contact.url		https://goinfinite.org/
-// @contact.email	eng+swagger@goinfinite.org
+// @contact.url		https://goinfinite.net/
+// @contact.email	eng+swagger@goinfinite.net
 
 // @license.name  FCL-1.0-ALv2
 // @license.url   https://github.com/goinfinite/ez/blob/main/LICENSE.md

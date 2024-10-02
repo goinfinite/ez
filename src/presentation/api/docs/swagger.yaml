@@ -380,23 +380,6 @@ definitions:
       scalingThreshold:
         type: integer
     type: object
-  entity.LicenseInfo:
-    properties:
-      errorCount:
-        type: integer
-      expiresAt:
-        type: integer
-      fingerprint:
-        type: string
-      lastCheckAt:
-        type: integer
-      method:
-        type: string
-      status:
-        type: string
-      updatedAt:
-        type: integer
-    type: object
   entity.Mapping:
     properties:
       accountId:
@@ -435,12 +418,16 @@ definitions:
     properties:
       hostname:
         type: string
+      privateIp:
+        type: string
       publicIp:
         type: string
       resourceUsage:
         $ref: '#/definitions/valueObject.HostResourceUsage'
       specs:
         $ref: '#/definitions/valueObject.HardwareSpecs'
+      uptimeRelative:
+        type: string
       uptimeSecs:
         type: integer
     type: object
@@ -701,14 +688,14 @@ definitions:
     type: object
 info:
   contact:
-    email: eng+swagger@goinfinite.org
+    email: eng+swagger@goinfinite.net
     name: Infinite Engineering
-    url: https://goinfinite.org/
+    url: https://goinfinite.net/
   description: Infinite Ez API
   license:
-    name: INFINITE COMPUTACAO EM NUVEM LTDA © 2024. All Rights Reserved.
-    url: https://goinfinite.org/tos/
-  termsOfService: https://goinfinite.org/tos/
+    name: FCL-1.0-ALv2
+    url: https://github.com/goinfinite/ez/blob/main/LICENSE.md
+  termsOfService: https://goinfinite.net/tos/
   title: ezApi
   version: 0.0.8
 paths:
@@ -1338,23 +1325,6 @@ paths:
       summary: CreateContainerSessionToken
       tags:
       - container
-  /v1/license/:
-    get:
-      consumes:
-      - application/json
-      description: Get license info.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.LicenseInfo'
-      security:
-      - Bearer: []
-      summary: ReadLicenseInfo
-      tags:
-      - license
   /v1/mapping/:
     get:
       consumes:

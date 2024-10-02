@@ -9,15 +9,15 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://goinfinite.org/tos/",
+        "termsOfService": "https://goinfinite.net/tos/",
         "contact": {
             "name": "Infinite Engineering",
-            "url": "https://goinfinite.org/",
-            "email": "eng+swagger@goinfinite.org"
+            "url": "https://goinfinite.net/",
+            "email": "eng+swagger@goinfinite.net"
         },
         "license": {
-            "name": "INFINITE COMPUTACAO EM NUVEM LTDA © 2024. All Rights Reserved.",
-            "url": "https://goinfinite.org/tos/"
+            "name": "FCL-1.0-ALv2",
+            "url": "https://github.com/goinfinite/ez/blob/main/LICENSE.md"
         },
         "version": "{{.Version}}"
     },
@@ -988,34 +988,6 @@ const docTemplate = `{
                         "description": "ContainerDeleted",
                         "schema": {
                             "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/license/": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Get license info.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "license"
-                ],
-                "summary": "ReadLicenseInfo",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.LicenseInfo"
                         }
                     }
                 }
@@ -2061,32 +2033,6 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.LicenseInfo": {
-            "type": "object",
-            "properties": {
-                "errorCount": {
-                    "type": "integer"
-                },
-                "expiresAt": {
-                    "type": "integer"
-                },
-                "fingerprint": {
-                    "type": "string"
-                },
-                "lastCheckAt": {
-                    "type": "integer"
-                },
-                "method": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "integer"
-                }
-            }
-        },
         "entity.Mapping": {
             "type": "object",
             "properties": {
@@ -2145,6 +2091,9 @@ const docTemplate = `{
                 "hostname": {
                     "type": "string"
                 },
+                "privateIp": {
+                    "type": "string"
+                },
                 "publicIp": {
                     "type": "string"
                 },
@@ -2153,6 +2102,9 @@ const docTemplate = `{
                 },
                 "specs": {
                     "$ref": "#/definitions/valueObject.HardwareSpecs"
+                },
+                "uptimeRelative": {
+                    "type": "string"
                 },
                 "uptimeSecs": {
                     "type": "integer"
