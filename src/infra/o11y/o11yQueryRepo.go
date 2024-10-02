@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"log/slog"
+	"os"
 	"strconv"
 	"syscall"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra/db"
 	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
@@ -421,9 +423,9 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 		privateIpAddress, _ = valueObject.NewIpAddress("127.0.0.1")
 	}
 
-	publicIpAddress, err := repo.ReadServerPublicIpAddress()
-	if err != nil {
-		publicIpAddress, _ = valueObject.NewIpAddress("0.0.0.0")
+	publicIpAddress, _ := valueObject.NewIpAddress("0.0.0.0")
+	if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); !isDevMode {
+		publicIpAddress, _ = repo.ReadServerPublicIpAddress()
 	}
 
 	hardwareSpecs, err := repo.getHardwareSpecs()
