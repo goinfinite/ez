@@ -20,7 +20,10 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 )
 
-const PublicIpTransientKey string = "PublicIp"
+const (
+	PrivateIpTransientKey string = "PrivateIp"
+	PublicIpTransientKey  string = "PublicIp"
+)
 
 type O11yQueryRepo struct {
 	transientDbSvc *db.TransientDatabaseService
@@ -41,6 +44,27 @@ func (repo *O11yQueryRepo) getUptime() (uint64, error) {
 	}
 
 	return uint64(sysinfo.Uptime), nil
+}
+
+func (repo *O11yQueryRepo) ReadServerPrivateIpAddress() (
+	ipAddress valueObject.IpAddress, err error,
+) {
+	cachedIpAddressStr, err := repo.transientDbSvc.Get(PrivateIpTransientKey)
+	if err == nil {
+		return valueObject.NewIpAddress(cachedIpAddressStr)
+	}
+
+	serverPrivateIpAddress, err := infraHelper.ReadServerPrivateIpAddress()
+	if err != nil {
+		return ipAddress, errors.New("ReadServerPrivateIpAddressError: " + err.Error())
+	}
+
+	err = repo.transientDbSvc.Set(PrivateIpTransientKey, serverPrivateIpAddress.String())
+	if err != nil {
+		return ipAddress, errors.New("PersistPrivateIpFailed: " + err.Error())
+	}
+
+	return serverPrivateIpAddress, nil
 }
 
 func (repo *O11yQueryRepo) ReadServerPublicIpAddress() (
@@ -392,6 +416,11 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 		uptimeRelative, _ = valueObject.NewRelativeTime("0 seconds ago")
 	}
 
+	privateIpAddress, err := repo.ReadServerPrivateIpAddress()
+	if err != nil {
+		privateIpAddress, _ = valueObject.NewIpAddress("127.0.0.1")
+	}
+
 	publicIpAddress, err := repo.ReadServerPublicIpAddress()
 	if err != nil {
 		publicIpAddress, _ = valueObject.NewIpAddress("0.0.0.0")
@@ -408,7 +437,7 @@ func (repo *O11yQueryRepo) ReadOverview() (overview entity.O11yOverview, err err
 	}
 
 	return entity.NewO11yOverview(
-		serverHostname, uptimeSecs, uptimeRelative, publicIpAddress,
+		serverHostname, uptimeSecs, uptimeRelative, privateIpAddress, publicIpAddress,
 		hardwareSpecs, currentResourceUsage,
 	), nil
 }

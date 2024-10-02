@@ -7,6 +7,20 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
+func ReadServerPrivateIpAddress() (ipAddress valueObject.IpAddress, err error) {
+	rawRecord, err := RunCmdWithSubShell("hostname -I")
+	if err != nil {
+		return ipAddress, err
+	}
+
+	rawRecord = strings.TrimSpace(rawRecord)
+	if rawRecord == "" {
+		return ipAddress, errors.New("PrivateIpAddressNotFound")
+	}
+
+	return valueObject.NewIpAddress(rawRecord)
+}
+
 func ReadServerPublicIpAddress() (ipAddress valueObject.IpAddress, err error) {
 	digCmd := "dig +short TXT"
 	rawRecord, err := RunCmdWithSubShell(
@@ -27,10 +41,5 @@ func ReadServerPublicIpAddress() (ipAddress valueObject.IpAddress, err error) {
 		return ipAddress, errors.New("PublicIpAddressNotFound")
 	}
 
-	ipAddress, err = valueObject.NewIpAddress(rawRecord)
-	if err != nil {
-		return ipAddress, err
-	}
-
-	return ipAddress, nil
+	return valueObject.NewIpAddress(rawRecord)
 }
