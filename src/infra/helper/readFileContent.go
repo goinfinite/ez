@@ -5,15 +5,15 @@ import (
 	"os"
 )
 
-func GetFileContent(filePath string) (string, error) {
+func ReadFileContent(filePath string) (string, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
-		return "", errors.New("GetFileInfoError: " + err.Error())
+		return "", errors.New("ReadFileInfoError: " + err.Error())
 	}
 
 	fileContentBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", errors.New("GetFileContentError: " + err.Error())
+		return "", errors.New("ReadFileContentError: " + err.Error())
 	}
 
 	return string(fileContentBytes), nil

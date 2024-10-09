@@ -143,7 +143,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 					cliHelper.ResponseWrapper(false, err.Error())
 				}
 
-				scriptFileContent, err := infraHelper.GetFileContent(scriptFilePath.String())
+				scriptFileContent, err := infraHelper.ReadFileContent(scriptFilePath.String())
 				if err != nil {
 					cliHelper.ResponseWrapper(false, err.Error())
 				}
