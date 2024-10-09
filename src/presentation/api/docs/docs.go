@@ -2189,14 +2189,17 @@ const docTemplate = `{
                 "launchScript": {
                     "type": "string"
                 },
+                "manifestVersion": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
-                "receiptVersion": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
+                "slugs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "type": {
                     "type": "string"

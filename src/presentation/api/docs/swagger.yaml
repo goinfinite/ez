@@ -433,12 +433,14 @@ definitions:
         type: integer
       launchScript:
         type: string
+      manifestVersion:
+        type: string
       name:
         type: string
-      receiptVersion:
-        type: string
-      slug:
-        type: string
+      slugs:
+        items:
+          type: string
+        type: array
       type:
         type: string
     type: object
