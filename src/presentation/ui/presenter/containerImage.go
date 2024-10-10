@@ -1,6 +1,8 @@
 package presenter
 
 import (
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 
 	"net/http"
@@ -13,6 +15,7 @@ import (
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
+	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 )
 
 type ContainerImagePresenter struct {
@@ -44,25 +47,11 @@ func transformAccountMapIntoSelectLabelValuePair(
 	return selectLabelValuePairs
 }
 
-func transformContainerSummariesIntoSearchableSelectItems(
-	containerEntities []entity.Container,
-	profileEntities []entity.ContainerProfile,
-	accountIdEntityMap map[valueObject.AccountId]entity.Account,
-) []componentForm.SearchableSelectItem {
+func (presenter *ContainerImagePresenter) transformContainerSummariesIntoSearchableItems() []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
 
-	containerIdEntityMap := map[valueObject.ContainerId]entity.Container{}
-	for _, containerEntity := range containerEntities {
-		containerIdEntityMap[containerEntity.Id] = containerEntity
-	}
-
-	profileIdEntityMap := map[valueObject.ContainerProfileId]entity.ContainerProfile{}
-	for _, profileEntity := range profileEntities {
-		profileIdEntityMap[profileEntity.Id] = profileEntity
-	}
-
-	containerSummaries := componentContainer.NewContainerSummariesWithMaps(
-		containerIdEntityMap, profileIdEntityMap, accountIdEntityMap,
+	containerSummaries := presenterHelper.ReadContainerSummaries(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
 	for _, containerSummary := range containerSummaries {
@@ -88,21 +77,25 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 
 	readImagesServiceOutput := containerImageService.Read()
 	if readImagesServiceOutput.Status != service.Success {
+		slog.Debug("ReadImagesFailure")
 		return nil
 	}
 
 	imageEntities, assertOk := readImagesServiceOutput.Body.([]entity.ContainerImage)
 	if !assertOk {
+		slog.Debug("AssertImagesFailure")
 		return nil
 	}
 
 	readArchiveFilesServiceOutput := containerImageService.ReadArchiveFiles(&c.Request().Host)
 	if readArchiveFilesServiceOutput.Status != service.Success {
+		slog.Debug("ReadArchiveFilesFailure")
 		return nil
 	}
 
 	archiveFileEntities, assertOk := readArchiveFilesServiceOutput.Body.([]entity.ContainerImageArchiveFile)
 	if !assertOk {
+		slog.Debug("AssertArchiveFilesFailure")
 		return nil
 	}
 
@@ -112,11 +105,13 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 
 	readAccountsServiceOutput := accountService.Read()
 	if readAccountsServiceOutput.Status != service.Success {
+		slog.Debug("ReadAccountsFailure")
 		return nil
 	}
 
 	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
 	if !assertOk {
+		slog.Debug("AssertAccountsFailure")
 		return nil
 	}
 
@@ -125,38 +120,8 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		accountIdEntityMap[accountEntity.Id] = accountEntity
 	}
 
-	containerService := service.NewContainerService(
-		presenter.persistentDbSvc, presenter.trailDbSvc,
-	)
-
-	readContainersServiceOutput := containerService.Read()
-	if readContainersServiceOutput.Status != service.Success {
-		return nil
-	}
-
-	containerEntities, assertOk := readContainersServiceOutput.Body.([]entity.Container)
-	if !assertOk {
-		return nil
-	}
-
-	containerProfileService := service.NewContainerProfileService(
-		presenter.persistentDbSvc, presenter.trailDbSvc,
-	)
-
-	readContainerProfilesServiceOutput := containerProfileService.Read()
-	if readContainerProfilesServiceOutput.Status != service.Success {
-		return nil
-	}
-
-	containerProfileEntities, assertOk := readContainerProfilesServiceOutput.Body.([]entity.ContainerProfile)
-	if !assertOk {
-		return nil
-	}
-
 	accountsSelectPairs := transformAccountMapIntoSelectLabelValuePair(accountIdEntityMap)
-	containerSummariesSearchableItems := transformContainerSummariesIntoSearchableSelectItems(
-		containerEntities, containerProfileEntities, accountIdEntityMap,
-	)
+	containerSummariesSearchableItems := presenter.transformContainerSummariesIntoSearchableItems()
 
 	pageContent := page.ContainerImageIndex(
 		imageEntities, archiveFileEntities, accountIdEntityMap,
