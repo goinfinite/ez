@@ -1,10 +1,12 @@
 package page
 
 import (
-	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
+	componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"strconv"
 )
 
 script OverviewIndexLocalState() {
@@ -25,11 +27,11 @@ script OverviewIndexLocalState() {
 }
 
 templ OverviewIndex(
-	containerEntities []entity.Container,
+	containerEntities []dto.ContainerWithMetrics,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
 ) {
 	@OverviewIndexLocalState()
-	<div class="flex flex-col" x-data="containerProfile">
+	<div class="flex flex-col" x-data="overview">
 		<div class="mb-6 flex flex-row items-center justify-between">
 			<div class="basis-[70%]">
 				@componentStructural.PageTitle(
@@ -49,7 +51,7 @@ templ OverviewIndex(
 }
 
 templ ContainersTable(
-	containerEntities []entity.Container,
+	containerEntities []dto.ContainerWithMetrics,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
 ) {
 	<table
@@ -62,8 +64,8 @@ templ ContainersTable(
 		class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
 	>
 		<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
-			<tr class="border-b border-neutral-500 border-opacity-90 text-left">
-				<th scope="col" class="w-5/12 overflow-x-hidden px-5 py-3">Container</th>
+			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+				<th scope="col" class="w-5/12 overflow-x-hidden px-5 py-3 text-left">Container</th>
 				<th scope="col" class="w-1/12 overflow-x-hidden px-5 py-3">CPU</th>
 				<th scope="col" class="w-1/12 overflow-x-hidden px-5 py-3">RAM</th>
 				<th scope="col" class="w-1/12 overflow-x-hidden px-5 py-3">Restarts</th>
@@ -74,25 +76,37 @@ templ ContainersTable(
 		<tbody>
 			for _, containerEntity := range containerEntities {
 				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
-					<td class="w-5/12 overflow-x-hidden px-6 py-4 text-left">
+					<td class="w-5/12 overflow-x-hidden px-3 py-2 text-left">
 						@componentContainer.ContainerTaggedSummary(containerIdSummariesMap[containerEntity.Id])
 					</td>
-					<td class="w-1/12 overflow-x-hidden px-6 py-4">CPU</td>
-					<td class="w-1/12 overflow-x-hidden px-6 py-4">RAM</td>
-					<td class="w-1/12 overflow-x-hidden px-6 py-4">Restarts</td>
-					<td class="w-3/12 overflow-x-hidden px-6 py-4">
+					<td class="w-1/12 overflow-x-hidden px-3 py-2">
+						@componentMisc.ProgressBar(
+							uint8(containerEntity.Metrics.CurrentCpuPercent),
+							containerEntity.Metrics.CurrentCpuPercentStr+"%",
+						)
+					</td>
+					<td class="w-1/12 overflow-x-hidden px-3 py-2">
+						@componentMisc.ProgressBar(
+							uint8(containerEntity.Metrics.MemoryPercent),
+							containerEntity.Metrics.MemoryPercentStr+"%",
+						)
+					</td>
+					<td class="w-1/12 overflow-x-hidden px-3 py-2">
+						{ strconv.FormatUint(containerEntity.RestartCount, 10) }
+					</td>
+					<td class="w-3/12 overflow-x-hidden px-3 py-2">
 						if len(containerEntity.PortBindings) > 0 {
 							@componentContainer.PortBindingsTable(containerEntity.PortBindings, false)
 						} else {
 							<div class="text-center text-neutral-400">---</div>
 						}
 					</td>
-					<td class="w-1/12 overflow-x-hidden px-6 py-4"></td>
+					<td class="w-1/12 overflow-x-hidden px-3 py-2"></td>
 				</tr>
 			}
 			if len(containerEntities) == 0 {
 				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
-					<td class="px-6 py-4" colspan="12">No containers yet.</td>
+					<td class="px-3 py-2" colspan="12">No containers yet.</td>
 				</tr>
 			}
 		</tbody>

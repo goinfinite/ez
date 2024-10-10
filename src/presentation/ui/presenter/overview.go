@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
@@ -38,13 +38,13 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
-	readContainersServiceOutput := containerService.Read()
+	readContainersServiceOutput := containerService.ReadWithMetrics()
 	if readContainersServiceOutput.Status != service.Success {
 		slog.Debug("ReadContainersFailure")
 		return nil
 	}
 
-	containerEntities, assertOk := readContainersServiceOutput.Body.([]entity.Container)
+	containerEntities, assertOk := readContainersServiceOutput.Body.([]dto.ContainerWithMetrics)
 	if !assertOk {
 		slog.Debug("AssertContainersFailure")
 		return nil
