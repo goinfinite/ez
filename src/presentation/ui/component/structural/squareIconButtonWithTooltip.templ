@@ -1,0 +1,42 @@
+package componentStructural
+
+templ SquareIconButtonWithTooltip(
+	id, icon, defaultColor, hoverColor, onClick string,
+	tooltipText, tooltipColor, tooltipPosition string,
+) {
+	<!-- SquareIconButtonWithTooltip -->
+	<div class="group relative">
+		<button
+			if id != "" {
+				id={ id }
+			}
+			type="button"
+			if onClick != "" {
+				@click={ onClick }
+			}
+			class={ "bg-" + defaultColor + " hover:bg-" + hoverColor + " h-9 w-9 leading-none rounded-sm" }
+		>
+			<i class={ "text-xl ph-bold " + icon }></i>
+		</button>
+		if tooltipText != "" {
+			switch tooltipPosition {
+				case "top":
+					<div class={ "absolute opacity-0 bottom-full mb-1 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 left-1/2 transform -translate-x-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+						{ tooltipText }
+					</div>
+				case "bottom":
+					<div class={ "absolute opacity-0 top-full mt-1 transition-all duration-300 group-hover:block group-hover:translate-y-0.5 group-hover:opacity-100 left-1/2 transform -translate-x-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+						{ tooltipText }
+					</div>
+				case "left":
+					<div class={ "absolute opacity-0 right-full mr-1 transition-all duration-300 group-hover:block group-hover:translate-x-0.5 group-hover:opacity-100 top-1/2 transform -translate-y-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+						{ tooltipText }
+					</div>
+				case "right":
+					<div class={ "absolute opacity-0 left-full ml-1 transition-all duration-300 group-hover:block group-hover:-translate-x-0.5 group-hover:opacity-100 top-1/2 transform -translate-y-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+						{ tooltipText }
+					</div>
+			}
+		}
+	</div>
+}
