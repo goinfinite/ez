@@ -16,6 +16,7 @@ type ContainerSummary struct {
 	ProfileId        valueObject.ContainerProfileId    `json:"profileId"`
 	ProfileName      valueObject.ContainerProfileName  `json:"profileName"`
 	ProfileBaseSpecs valueObject.ContainerSpecs        `json:"profileBaseSpecs"`
+	ProfileMaxSpecs  *valueObject.ContainerSpecs       `json:"profileMaxSpecs,omitempty"`
 }
 
 func NewContainerSummary(
@@ -27,6 +28,7 @@ func NewContainerSummary(
 	profileId valueObject.ContainerProfileId,
 	profileName valueObject.ContainerProfileName,
 	profileBaseSpecs valueObject.ContainerSpecs,
+	profileMaxSpecs *valueObject.ContainerSpecs,
 ) ContainerSummary {
 	return ContainerSummary{
 		ContainerId:      containerId,
@@ -37,6 +39,7 @@ func NewContainerSummary(
 		ProfileId:        profileId,
 		ProfileName:      profileName,
 		ProfileBaseSpecs: profileBaseSpecs,
+		ProfileMaxSpecs:  profileMaxSpecs,
 	}
 }
 
@@ -91,7 +94,7 @@ func NewContainerSummariesWithMaps(
 		containerSummary := NewContainerSummary(
 			containerEntity.Id, containerEntity.Hostname, containerEntity.ImageAddress,
 			containerEntity.AccountId, accountEntity.Username, containerEntity.ProfileId,
-			profileEntity.Name, profileEntity.BaseSpecs,
+			profileEntity.Name, profileEntity.BaseSpecs, profileEntity.MaxSpecs,
 		)
 
 		containerSummaries = append(containerSummaries, containerSummary)

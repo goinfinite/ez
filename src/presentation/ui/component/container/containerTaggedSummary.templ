@@ -8,18 +8,28 @@ templ ContainerTaggedSummary(containerSummary ContainerSummary) {
 			<strong>{ containerSummary.Hostname.String() }</strong>
 			<small>({ containerSummary.ContainerId.String() })</small>
 		</div>
-		<div class="mt-1 flex flex-row justify-normal space-x-2.5">
+		<div class="mt-1 flex flex-wrap justify-normal gap-2">
 			@componentStructural.Tag(
 				"ph-link", "", containerSummary.ImageAddress.String(), "infinite-500",
 			)
 			@componentStructural.Tag(
 				"ph-user-circle", "", containerSummary.AccountUsername.String(), "infinite-500",
 			)
-			@componentStructural.Tag(
-				"", containerSummary.ProfileName.String(),
-				"<small>"+formatProfileSummarySmallTag(&containerSummary.ProfileBaseSpecs)+"</small>",
-				"infinite-500",
-			)
+			if containerSummary.ProfileMaxSpecs == nil {
+				@componentStructural.Tag(
+					"", containerSummary.ProfileName.String(),
+					"<small>"+formatProfileSummarySmallTag(&containerSummary.ProfileBaseSpecs)+"</small>",
+					"infinite-500",
+				)
+			} else {
+				@componentStructural.Tag(
+					"", containerSummary.ProfileName.String(),
+					"<small>"+formatProfileSummarySmallTag(&containerSummary.ProfileBaseSpecs)+
+						"<i class='ph-bold ph-arrows-out-simple mx-1'></i>"+
+						formatProfileSummarySmallTag(containerSummary.ProfileMaxSpecs)+"</small>",
+					"infinite-500",
+				)
+			}
 		</div>
 	</div>
 }
