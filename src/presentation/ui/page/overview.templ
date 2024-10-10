@@ -70,7 +70,7 @@ templ ContainersTable(
 				<th scope="col" class="w-1/12 overflow-x-hidden px-5 py-3">RAM</th>
 				<th scope="col" class="w-1/12 overflow-x-hidden px-5 py-3">Restarts</th>
 				<th scope="col" class="w-3/12 overflow-x-hidden px-5 py-3">Port Bindings</th>
-				<th scope="col" class="w-1/12 overflow-x-hidden px-5 py-3"></th>
+				<th scope="col" class="w-1/12 px-5 py-3"></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -101,7 +101,38 @@ templ ContainersTable(
 							<div class="text-center text-neutral-400">---</div>
 						}
 					</td>
-					<td class="w-1/12 overflow-x-hidden px-3 py-2"></td>
+					<td class="px-3 py-2">
+						<div class="flex flex-wrap items-center gap-1">
+							@componentStructural.SquareIconButtonWithTooltip(
+								"restart-container", "ph-arrows-clockwise", "ez-300", "ez-200",
+								"restartContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+								"Restart", "ez-300", "top",
+							)
+							if containerEntity.Status {
+								@componentStructural.SquareIconButtonWithTooltip(
+									"toggle-container-status", "ph-lightning-slash", "yellow-900", "yellow-700",
+									"toggleContainerStatus('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+									"Power Off", "yellow-700", "top",
+								)
+							} else {
+								@componentStructural.SquareIconButtonWithTooltip(
+									"toggle-container-status", "ph-lightning", "cyan-900", "cyan-700",
+									"toggleContainerStatus('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+									"Power On", "cyan-700", "top",
+								)
+							}
+							@componentStructural.SquareIconButtonWithTooltip(
+								"update-container", "ph-gear", "ez-300", "ez-200",
+								"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+								"Update", "ez-300", "bottom",
+							)
+							@componentStructural.SquareIconButtonWithTooltip(
+								"delete-container", "ph-trash", "red-900", "red-700",
+								"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+								"Delete", "red-700", "bottom",
+							)
+						</div>
+					</td>
 				</tr>
 			}
 			if len(containerEntities) == 0 {
