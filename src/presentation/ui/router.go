@@ -73,6 +73,15 @@ func (router *Router) containerRoutes() {
 	containerImageGroup.GET("/", imagePresenter.Handler)
 }
 
+func (router *Router) overviewRoutes() {
+	overviewGroup := router.baseRoute.Group("/overview")
+
+	overviewPresenter := presenter.NewOverviewPresenter(
+		router.persistentDbSvc, router.transientDbSvc, router.trailDbSvc,
+	)
+	overviewGroup.GET("/", overviewPresenter.Handler)
+}
+
 func (router *Router) devRoutes() {
 	devGroup := router.baseRoute.Group("/dev")
 	devGroup.GET("/hot-reload", func(c echo.Context) error {
@@ -122,6 +131,7 @@ func (router *Router) previousDashboardRoute() {
 func (router *Router) RegisterRoutes() {
 	router.assetsRoute()
 	router.containerRoutes()
+	router.overviewRoutes()
 
 	if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {
 		router.devRoutes()

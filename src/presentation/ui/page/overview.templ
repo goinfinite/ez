@@ -1,0 +1,40 @@
+package page
+
+import (
+	"github.com/goinfinite/ez/src/domain/entity"
+	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+)
+
+script OverviewIndexLocalState() {
+	document.addEventListener('alpine:init', () => {
+		Alpine.data('overview', () => ({
+			// Primary State
+			resetPrimaryState() {
+			},
+			init() {
+				this.resetPrimaryState();
+			},
+
+			// Auxiliary States
+
+			// Modal States
+		}))
+	})
+}
+
+templ OverviewIndex(containerEntities []entity.Container) {
+	@OverviewIndexLocalState()
+	<div class="flex flex-col" x-data="containerProfile">
+		<div class="mb-6 flex flex-row items-center justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Overview",
+					"To be decided.",
+					"ph-speedometer",
+				)
+			</div>
+			<div class="my-4 flex space-x-5"></div>
+		</div>
+		<div id="containers-table" class="card w-full"></div>
+	</div>
+}
