@@ -1,6 +1,9 @@
 # Changelog
 
 ```log
+0.0.9 - 2024/X/X
+feat: GET /api/v1/marketplace/
+
 0.0.8 - 2024/09/30
 refactor: use sri for activity records
 feat: add system resource identifier

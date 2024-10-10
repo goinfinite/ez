@@ -13,7 +13,7 @@
             "name": "FCL-1.0-ALv2",
             "url": "https://github.com/goinfinite/ez/blob/main/LICENSE.md"
         },
-        "version": "0.0.8"
+        "version": "0.0.9"
     },
     "basePath": "/api",
     "paths": {
