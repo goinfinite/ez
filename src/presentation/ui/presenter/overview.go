@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
+	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
+	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 	"github.com/labstack/echo/v4"
 )
 
@@ -37,16 +40,25 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 
 	readContainersServiceOutput := containerService.Read()
 	if readContainersServiceOutput.Status != service.Success {
-		slog.Debug("OverviewPresenterReadContainersFailure")
+		slog.Debug("ReadContainersFailure")
 		return nil
 	}
 
 	containerEntities, assertOk := readContainersServiceOutput.Body.([]entity.Container)
 	if !assertOk {
-		slog.Debug("OverviewPresenterAssertContainersFailure")
+		slog.Debug("AssertContainersFailure")
 		return nil
 	}
 
-	pageContent := page.OverviewIndex(containerEntities)
+	containerSummaries := presenterHelper.ReadContainerSummaries(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	containerIdSummariesMap := map[valueObject.ContainerId]componentContainer.ContainerSummary{}
+	for _, containerSummary := range containerSummaries {
+		containerIdSummariesMap[containerSummary.ContainerId] = containerSummary
+	}
+
+	pageContent := page.OverviewIndex(containerEntities, containerIdSummariesMap)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
