@@ -7,19 +7,23 @@ Expect bugs early on. Create issues so they can be fixed.
 
 Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that **you don't need to be a DevOps expert** to use it - it's designed for the average user, with a user-friendly interface that automates all those complex tasks, like deployment intricacies, scaling policies and server maintenance.
 
-What's more, Infinite Ez is notably lightweight, thanks to Go under the hood. It consumes only about 100 MB of RAM on average (for the binary). It runs on OpenSUSE MicroOS, an immutable operating system specifically designed for containers. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
+What's more, Infinite Ez is notably lightweight, thanks to Go under the hood. It consumes only about 100 MB of RAM on average (for the binary). It runs on [OpenSUSE MicroOS](https://microos.opensuse.org/), an immutable operating system **specifically designed for containers**. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
 
-If your application isn't containerized yet, fret not. Check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that simplifies containerizing your apps to just a few clicks, all via a web interface - no need to grapple with complex Dockerfiles.
+If your application isn't containerized yet, fret not. Check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that simplifies containerizing your apps to just a few clicks, **all via a web interface** - no need to grapple with complex Dockerfiles.
 
-Now, Infinite Ez is what we call fair source software. That means it's free to use, modify, and redistribute, with minimal restrictions to protect the producer's (yours truly) business model. The source code is publicly available for review, published under a delayed Open Source model. You can read more about that [here](https://fair.io/about/) if you're interested.
+Now, Infinite Ez is a _fair source_ software. The FCL license is a mostly-permissive non-compete Fair Source license that eventually transitions to Open Source after 2 years. As explained on the [Fair Core website](https://fcl.dev/):
 
-Lastly, if you're a hosting/infrastructure provider, we'll soon be offering an excellent white-label add-on that lets you customize the dashboard and use it commercially. In the meantime, [do get in touch](mailto:eng+ez@goinfinite.net) if you're interested in using Infinite Ez in your hosting service - we're eager to find a fair way to work together.
+```
+The FCL is a Fair Source license that allows a user to read, use, modify, and redistribute a project, where "use" is any use case that does not compete with the business interests of the author. For the large majority of users, this will mean that the user can use the project how they see fit, since most users do not wish to compete with the author.
+```
+
+If you're a hosting/infrastructure provider, we'll soon be offering an excellent white-label add-on that lets you customize the dashboard and use it commercially. In the meantime, [do get in touch](mailto:eng+ez@goinfinite.net) if you're interested in using Infinite Ez in your hosting service - we're eager to find a **fair** way to work together.
 
 ## Installation
 
-1. Download Ez binary from [goinfinite.net's website](https://goinfinite.net/softwares/ez/);
+1. Download Ez binary from [goinfinite.net's website](https://goinfinite.net/ez/);
 
-2. Download the openSUSE MicroOS cloud-init image (use the link from "Base System + Container Runtime" column) from the [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
+2. Download the openSUSE MicroOS cloud-init image (use the "Base System + Container Runtime" version) from the [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
 
 3. Upload the image to your infrastructure provider and deploy a VM with it. You must also add a secondary unformatted disk to the VM which will be used by Ez to store the users data;
 
