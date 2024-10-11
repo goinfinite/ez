@@ -7,6 +7,8 @@ import (
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"strconv"
 )
 
@@ -27,6 +29,7 @@ script OverviewIndexLocalState() {
 			},
 
 			// Auxiliary States
+			containerSourceSelectedOption: 'App',
 
 			// Modal States
 			isCreateContainerModalOpen: false,
@@ -202,7 +205,34 @@ templ ContainersTable(
 	</table>
 }
 
+func readContainerSourceOptions() []string {
+	sourceOptions := []string{}
+	for _, itemType := range valueObject.ValidMarketplaceItemTypes {
+		upperCaser := cases.Title(language.English)
+		sourceOptions = append(sourceOptions, upperCaser.String(itemType))
+	}
+	return append(sourceOptions, []string{"URL", "Local Image", "Upload Image"}...)
+}
+
 templ CreateContainerForm() {
+	<form
+		hx-post="/api/v1/container/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		class="space-y-6"
+	>
+		@componentForm.InputField("text", "hostname", "Hostname", "container.hostname", false)
+		<div class="border-ez-200 rounded-md border p-3">
+			<div class="flex items-center space-x-3 text-sm">
+				<div>Source: </div>
+				for _, sourceOption := range readContainerSourceOptions() {
+					@componentForm.RadioInput(
+						"", sourceOption, sourceOption, "containerSourceSelectedOption",
+					)
+				}
+			</div>
+		</div>
+	</form>
 }
 
 templ CreateContainerModal() {
