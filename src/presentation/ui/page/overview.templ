@@ -96,7 +96,7 @@ templ ContainersTable(
 					</td>
 					<td class="w-3/12 overflow-x-hidden px-3 py-2">
 						if len(containerEntity.PortBindings) > 0 {
-							@componentContainer.PortBindingsTable(containerEntity.PortBindings, false)
+							@componentContainer.PortBindingsTable(containerEntity.PortBindings, true)
 						} else {
 							<div class="text-center text-neutral-400">---</div>
 						}

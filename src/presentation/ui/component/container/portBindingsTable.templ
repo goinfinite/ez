@@ -12,34 +12,32 @@ templ PortBindingsTable(
 	<div x-data="{ isExpanded: false }">
 		<table
 			id="port-bindings-table"
-			class="w-full table-auto border-collapse rounded-md"
+			class="w-full table-fixed border-collapse rounded-md"
 		>
-			<thead class="bg-ez-700 text-xs lowercase text-neutral-400">
+			<thead class="bg-ez-700 text-[10px] lowercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="p-1">Service Name</th>
-					<th scope="col" class="p-1">Public Port</th>
-					<th scope="col" class="p-1">Container Port/Protocol</th>
+					<th class="w-[30%] rounded-tl-md p-1">Service Name</th>
+					<th class="w-[20%] p-1">Public Port</th>
 					if shouldDisplayPrivatePort {
-						<th scope="col" class="p-1">Private Port</th>
+						<th class="w-[20%] p-1">Private Port</th>
 					}
+					<th class="w-[30%] rounded-tr-md p-1">Container Port/Protocol</th>
 				</tr>
 			</thead>
 			<tbody>
 				for bindingIndex, portBinding := range portBindings {
 					<tr
 						x-show={ "isExpanded || " + strconv.FormatInt(int64(bindingIndex), 10) + " < 3" }
-						class="odd:bg-ez-300 even:bg-ez-400 border-b border-neutral-500 border-opacity-30 text-center text-xs"
+						class="odd:bg-ez-300 even:bg-ez-400 border-b border-neutral-500 border-opacity-30 text-center text-xs last:border-b-0"
 					>
-						<td class="p-2">{ portBinding.ServiceName.String() }</td>
-						<td class="p-2">{ portBinding.PublicPort.String() }</td>
-						<td class="p-2">{ portBinding.ContainerPort.String() }/{ portBinding.Protocol.String() }</td>
-						if shouldDisplayPrivatePort {
-							<td class="p-2">
-								if portBinding.PrivatePort != nil {
-									{ portBinding.PrivatePort.String() }
-								}
+						<td class="w-[30%] py-1.5">{ portBinding.ServiceName.String() }</td>
+						<td class="w-[20%] py-1.5">{ portBinding.PublicPort.String() }</td>
+						if shouldDisplayPrivatePort && portBinding.PrivatePort != nil {
+							<td class="w-[20%] py-1.5">
+								{ portBinding.PrivatePort.String() }
 							</td>
 						}
+						<td class="w-[30%] py-1.5">{ portBinding.ContainerPort.String() }/{ portBinding.Protocol.String() }</td>
 					</tr>
 				}
 			</tbody>
@@ -47,9 +45,11 @@ templ PortBindingsTable(
 		if len(portBindings) > 5 {
 			<button
 				x-on:click="isExpanded = !isExpanded"
-				x-text="isExpanded ? 'show less' : 'show more'"
-				class="bg-ez-500 w-full rounded-b-md py-1.5 text-center text-xs text-neutral-200"
-			></button>
+				class="bg-ez-700 hover:bg-ez-500 flex w-full items-center justify-center rounded-b-md py-1.5 text-center text-[8px] text-neutral-200"
+			>
+				<i x-show="isExpanded" class="ph-bold ph-caret-double-up"></i>
+				<i x-show="!isExpanded" class="ph-bold ph-caret-double-down"></i>
+			</button>
 		}
 	</div>
 }
