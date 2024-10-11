@@ -4,6 +4,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
+	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 	"strconv"
@@ -11,9 +12,15 @@ import (
 
 script OverviewIndexLocalState() {
 	document.addEventListener('alpine:init', () => {
-		Alpine.data('overview', () => ({
+		Alpine.data('containers', () => ({
 			// Primary State
+			container: {},
 			resetPrimaryState() {
+				this.container = {
+					'id': '',
+					'accountId': '',
+					'hostname': '',
+				};
 			},
 			init() {
 				this.resetPrimaryState();
@@ -22,6 +29,47 @@ script OverviewIndexLocalState() {
 			// Auxiliary States
 
 			// Modal States
+			isCreateContainerModalOpen: false,
+			openCreateContainerModal() {
+				this.resetPrimaryState();
+
+				this.isCreateContainerModalOpen = true;
+			},
+			closeCreateContainerModal() {
+				this.isCreateContainerModalOpen = false;
+			},
+			isUpdateContainerModalOpen: false,
+			openUpdateContainerModal(accountId, containerId) {
+				this.resetPrimaryState();
+
+				this.container.accountId = accountId;
+				this.container.id = containerId;
+				this.isUpdateContainerModalOpen = true;
+			},
+			closeUpdateContainerModal() {
+				this.isUpdateContainerModalOpen = false;
+			},
+			isDeleteContainerModalOpen: false,
+			openDeleteContainerModal(accountId, containerId, hostname) {
+				this.resetPrimaryState();
+
+				this.container.accountId = accountId;
+				this.container.id = containerId;
+				this.container.hostname = hostname;
+				this.isDeleteContainerModalOpen = true;
+			},
+			closeDeleteContainerModal() {
+				this.isDeleteContainerModalOpen = false;
+			},
+			deleteContainer() {
+				htmx.ajax(
+					'DELETE',
+					'/api/v1/container/' + this.container.accountId + '/' + this.container.id + '/',
+					{swap: 'none'},
+				);
+				this.$dispatch('delete:container');
+				this.closeDeleteContainerModal();
+			},
 		}))
 	})
 }
@@ -31,19 +79,29 @@ templ OverviewIndex(
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
 ) {
 	@OverviewIndexLocalState()
-	<div class="flex flex-col" x-data="overview">
-		<div class="mb-6 flex flex-row items-center justify-between">
+	<div class="flex flex-col">
+		<div class="mb-6 flex flex-row justify-between">
 			<div class="basis-[70%]">
 				@componentStructural.PageTitle(
 					"Overview",
-					"To be decided.",
+					"Welcome! Take a quick peek at your platform's performance such as the containers, server resource usage and system information.",
 					"ph-speedometer",
 				)
 			</div>
-			<div class="my-4 flex space-x-5"></div>
 		</div>
-		<div id="containers" class="card w-full">
+		<div id="containers" class="card w-full" x-data="containers">
+			<div class="-mt-15 float-right mb-5 w-fit">
+				@componentForm.SubmitButton(
+					"Create Container", "ph-plus-square", "openCreateContainerModal()", false,
+				)
+			</div>
 			@ContainersTable(containerEntities, containerIdSummariesMap)
+			@CreateContainerModal()
+			@UpdateContainerModal()
+			@componentStructural.DeleteModal(
+				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
+				"delete-container", "container.hostname", "container.id",
+			)
 		</div>
 		<div id="resource-usage-graphs" class="card w-full"></div>
 		<div id="system-information" class="card w-full"></div>
@@ -128,7 +186,7 @@ templ ContainersTable(
 							)
 							@componentStructural.SquareIconButtonWithTooltip(
 								"delete-container", "ph-trash", "red-900", "red-700",
-								"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+								"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.Hostname.String()+"')",
 								"Delete", "red-700", "bottom",
 							)
 						</div>
@@ -142,4 +200,26 @@ templ ContainersTable(
 			}
 		</tbody>
 	</table>
+}
+
+templ CreateContainerForm() {
+}
+
+templ CreateContainerModal() {
+	@componentStructural.Modal(
+		"Create Container", "isCreateContainerModalOpen", "closeCreateContainerModal()", "",
+	) {
+		@CreateContainerForm()
+	}
+}
+
+templ UpdateContainerForm() {
+}
+
+templ UpdateContainerModal() {
+	@componentStructural.Modal(
+		"Update Container", "isUpdateContainerModalOpen", "closeUpdateContainerModal()", "",
+	) {
+		@UpdateContainerForm()
+	}
 }
