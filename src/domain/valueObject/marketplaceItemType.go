@@ -10,7 +10,7 @@ import (
 
 type MarketplaceItemType string
 
-var validMarketplaceItemTypes = []string{
+var ValidMarketplaceItemTypes = []string{
 	"app", "framework", "stack",
 }
 
@@ -23,7 +23,7 @@ func NewMarketplaceItemType(value interface{}) (
 	}
 	stringValue = strings.ToLower(stringValue)
 
-	if !slices.Contains(validMarketplaceItemTypes, stringValue) {
+	if !slices.Contains(ValidMarketplaceItemTypes, stringValue) {
 		return marketplaceItemType, errors.New("InvalidMarketplaceItemType")
 	}
 
