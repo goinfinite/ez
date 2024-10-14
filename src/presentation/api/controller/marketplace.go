@@ -1,16 +1,12 @@
 package apiController
 
 import (
-	"errors"
-	"net/http"
 	"time"
 
-	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
-	"github.com/goinfinite/ez/src/domain/valueObject"
-	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	marketplaceInfra "github.com/goinfinite/ez/src/infra/marketplace"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
+	"github.com/goinfinite/ez/src/presentation/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -53,89 +49,10 @@ func (controller *MarketplaceController) Read(c echo.Context) error {
 		requestBody[paramName] = paramValue
 	}
 
-	var itemSlugPtr *valueObject.MarketplaceItemSlug
-	if requestBody["itemSlug"] != nil {
-		itemSlug, err := valueObject.NewMarketplaceItemSlug(requestBody["itemSlug"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-		}
-		itemSlugPtr = &itemSlug
-	}
-
-	var itemNamePtr *valueObject.MarketplaceItemName
-	if requestBody["itemName"] != nil {
-		itemName, err := valueObject.NewMarketplaceItemName(requestBody["itemName"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-		}
-		itemNamePtr = &itemName
-	}
-
-	var itemTypePtr *valueObject.MarketplaceItemType
-	if requestBody["itemType"] != nil {
-		itemType, err := valueObject.NewMarketplaceItemType(requestBody["itemType"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
-		}
-		itemTypePtr = &itemType
-	}
-
-	paginationDto := useCase.MarketplaceDefaultPagination
-	if requestBody["pageNumber"] != nil {
-		pageNumber, err := voHelper.InterfaceToUint32(requestBody["pageNumber"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, errors.New("InvalidPageNumber"))
-		}
-		paginationDto.PageNumber = pageNumber
-	}
-
-	if requestBody["itemsPerPage"] != nil {
-		itemsPerPage, err := voHelper.InterfaceToUint16(requestBody["itemsPerPage"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, errors.New("InvalidItemsPerPage"))
-		}
-		paginationDto.ItemsPerPage = itemsPerPage
-	}
-
-	if requestBody["sortBy"] != nil {
-		sortBy, err := valueObject.NewPaginationSortBy(requestBody["sortBy"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err)
-		}
-		paginationDto.SortBy = &sortBy
-	}
-
-	if requestBody["sortDirection"] != nil {
-		sortDirection, err := valueObject.NewPaginationSortDirection(requestBody["sortDirection"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err)
-		}
-		paginationDto.SortDirection = &sortDirection
-	}
-
-	if requestBody["lastSeenId"] != nil {
-		lastSeenId, err := valueObject.NewPaginationLastSeenId(requestBody["lastSeenId"])
-		if err != nil {
-			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err)
-		}
-		paginationDto.LastSeenId = &lastSeenId
-	}
-
-	readDto := dto.ReadMarketplaceItemsRequest{
-		Pagination: paginationDto,
-		ItemSlug:   itemSlugPtr,
-		ItemName:   itemNamePtr,
-		ItemType:   itemTypePtr,
-	}
-
-	marketplaceQueryRepo := marketplaceInfra.NewMarketplaceQueryRepo()
-
-	marketplaceItemsList, err := useCase.ReadMarketplaceItems(marketplaceQueryRepo, readDto)
-	if err != nil {
-		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err)
-	}
-
-	return apiHelper.ResponseWrapper(c, http.StatusOK, marketplaceItemsList)
+	marketplaceService := service.NewMarketplaceService()
+	return apiHelper.ServiceResponseWrapper(
+		c, marketplaceService.Read(requestBody),
+	)
 }
 
 func (controller *MarketplaceController) RefreshMarketplace() {
