@@ -139,6 +139,8 @@ func (router *Router) marketplaceRoutes() {
 
 	marketplaceController := apiController.NewMarketplaceController()
 	marketplaceGroup.GET("/", marketplaceController.Read)
+
+	go marketplaceController.RefreshMarketplace()
 }
 
 func (router *Router) o11yRoutes() {

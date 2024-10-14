@@ -3,6 +3,7 @@ package apiController
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
@@ -135,4 +136,15 @@ func (controller *MarketplaceController) Read(c echo.Context) error {
 	}
 
 	return apiHelper.ResponseWrapper(c, http.StatusOK, marketplaceItemsList)
+}
+
+func (controller *MarketplaceController) RefreshMarketplace() {
+	taskInterval := time.Duration(24) * time.Hour
+	timer := time.NewTicker(taskInterval)
+	defer timer.Stop()
+
+	marketplaceCmdRepo := infra.NewMarketplaceCmdRepo()
+	for range timer.C {
+		useCase.RefreshMarketplace(marketplaceCmdRepo)
+	}
 }
