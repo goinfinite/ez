@@ -2,7 +2,7 @@ package componentMisc
 
 import "strconv"
 
-script MultiItemCarouselLocalState(displayItemsAmount, nItems int) {
+script MultiItemCarouselLocalState(displayAmount, nItems int) {
   document.addEventListener('alpine:init', () => {
     Alpine.data('multiItemCarousel', () => ({
       firstVisibleItemIndex: 0,
@@ -16,7 +16,7 @@ script MultiItemCarouselLocalState(displayItemsAmount, nItems int) {
       },
       resetPrimaryState() {
         this.firstVisibleItemIndex = 0;
-        this.lastVisibleItemIndex = displayItemsAmount - 1;
+        this.lastVisibleItemIndex = displayAmount - 1;
         this.updateVisibleItemIndexesSet();
       },
       scroll(direction) {
@@ -48,22 +48,22 @@ script MultiItemCarouselLocalState(displayItemsAmount, nItems int) {
 }
 
 templ MultiItemCarousel(
-	carouselItemsContent []templ.Component,
-	displayItemsAmount int,
+	carouselItems []templ.Component,
+	displayAmount int,
 ) {
-	@MultiItemCarouselLocalState(displayItemsAmount, len(carouselItemsContent))
+	@MultiItemCarouselLocalState(displayAmount, len(carouselItems))
 	<div class="flex-inline w-full items-center justify-center gap-4" x-data="multiItemCarousel">
 		<i
 			class="ph-duotone ph-caret-circle-left hover:text-infinite-500 cursor-pointer text-2xl text-neutral-100 transition-all duration-500"
 			@click="scroll('left')"
 		></i>
-		<div class={ "grid grid-cols-" + strconv.Itoa(displayItemsAmount) + " gap-3" }>
-			for itemIndex, itemContent := range carouselItemsContent {
+		<div class={ "grid grid-cols-" + strconv.Itoa(displayAmount) + " gap-3" }>
+			for itemIndex, carouselItem := range carouselItems {
 				<div
 					class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group cursor-pointer items-center justify-center overflow-hidden rounded-md p-2 transition-all duration-300 hover:ring-1"
 					:class={ "visibleItemIndexesSet.has(" + strconv.Itoa(itemIndex) + ") ? 'flex' : 'hidden'" }
 				>
-					@itemContent
+					@carouselItem
 				</div>
 			}
 		</div>
