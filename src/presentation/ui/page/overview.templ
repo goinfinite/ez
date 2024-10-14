@@ -214,6 +214,23 @@ func readContainerSourceOptions() []string {
 	return append(sourceOptions, []string{"URL", "Local Image", "Upload Image"}...)
 }
 
+templ carouselItem() {
+	<img
+		src="https://goinfinite.net/assets/os/marketplace/wordpress/wp-avatar.jpg"
+		alt="Avatar"
+		class="max-w-20 m-auto rounded-md transition-all duration-300 group-hover:sepia"
+	/>
+	<p class="mt-1 text-center">WordPress</p>
+}
+
+func readCarouselItems() []templ.Component {
+	items := []templ.Component{}
+	for i := 0; i < 5; i++ {
+		items = append(items, carouselItem())
+	}
+	return items
+}
+
 templ CreateContainerForm() {
 	<form
 		hx-post="/api/v1/container/"
@@ -231,6 +248,20 @@ templ CreateContainerForm() {
 					)
 				}
 			</div>
+			@componentMisc.MultiItemCarousel(readCarouselItems())
+			// Depending on the selection, show:
+			// Marketplace items, URL, local image selection OR upload image form;
+			// - Launch Script (will be pre-filled based on the selection)
+			// - Container profile
+			// => Advanced Settings
+			// - Entrypoint
+			// - Account Owner
+			// - Restart Policy
+			// - Env Vars
+			// - Port Bindings
+			// We'll have to load the marketplace items, local images and account owners
+			// into the page. That will likely slow things down. However, we can deal with
+			// that later. For now, let's just get the basic form working.
 		</div>
 	</form>
 }

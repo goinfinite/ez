@@ -1,0 +1,17 @@
+package componentMisc
+
+templ MultiItemCarousel(carouselItemsContent []templ.Component) {
+	<div class="flex-inline group/parent w-full items-center justify-center gap-4">
+		<i class="ph-duotone ph-caret-circle-left hover:text-infinite-500 cursor-pointer text-3xl opacity-0 transition-all duration-500 group-hover/parent:opacity-100"></i>
+		<div class="grid grid-cols-5 gap-3">
+			for _, itemContent := range carouselItemsContent {
+				<div
+					class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group cursor-pointer rounded-md p-3 transition-all duration-300 hover:ring-1"
+				>
+					@itemContent
+				</div>
+			}
+		</div>
+		<i class="ph-duotone ph-caret-circle-right hover:text-infinite-500 cursor-pointer text-3xl opacity-0 transition-all duration-500 group-hover/parent:opacity-100"></i>
+	</div>
+}
