@@ -2,6 +2,7 @@ package page
 
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
@@ -80,6 +81,7 @@ script OverviewIndexLocalState() {
 templ OverviewIndex(
 	containerEntities []dto.ContainerWithMetrics,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
+	marketplaceItems []entity.MarketplaceItem,
 ) {
 	@OverviewIndexLocalState()
 	<div class="flex flex-col">
@@ -99,7 +101,7 @@ templ OverviewIndex(
 				)
 			</div>
 			@ContainersTable(containerEntities, containerIdSummariesMap)
-			@CreateContainerModal()
+			@CreateContainerModal(marketplaceItems)
 			@UpdateContainerModal()
 			@componentStructural.DeleteModal(
 				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
@@ -214,26 +216,9 @@ func readContainerSourceOptions() []string {
 	return append(sourceOptions, []string{"URL", "Local Image", "Upload Image"}...)
 }
 
-templ carouselItem(itemIndex int) {
-	<div class="overflow-hidden">
-		<img
-			src="https://goinfinite.net/assets/os/marketplace/wordpress/wp-avatar.jpg"
-			alt="Avatar"
-			class="max-w-18 m-auto rounded-md transition-all duration-300 group-hover:sepia"
-		/>
-		<p class="text-wrap mt-1 break-words text-center text-xs">WordPress { strconv.Itoa(itemIndex) }</p>
-	</div>
-}
-
-func readCarouselItems() []templ.Component {
-	items := []templ.Component{}
-	for i := 0; i < 7; i++ {
-		items = append(items, carouselItem(i))
-	}
-	return items
-}
-
-templ CreateContainerForm() {
+templ CreateContainerForm(
+	appCarouselItems, frameworkCarouselItems, stackCarouselItems []templ.Component,
+) {
 	<form
 		hx-post="/api/v1/container/"
 		hx-indicator="#loading-overlay"
@@ -250,8 +235,14 @@ templ CreateContainerForm() {
 					)
 				}
 			</div>
-			<div class="my-2">
-				@componentMisc.MultiItemCarousel(readCarouselItems(), 6)
+			<div class="my-2" :class="{ 'hidden': containerSourceSelectedOption !== 'App' }">
+				@componentMisc.MultiItemCarousel(appCarouselItems, 6)
+			</div>
+			<div class="my-2" :class="{ 'hidden': containerSourceSelectedOption !== 'Framework' }">
+				@componentMisc.MultiItemCarousel(frameworkCarouselItems, 6)
+			</div>
+			<div class="my-2" :class="{ 'hidden': containerSourceSelectedOption !== 'Stack' }">
+				@componentMisc.MultiItemCarousel(stackCarouselItems, 6)
 			</div>
 			// Depending on the selection, show:
 			// Marketplace items, URL, local image selection OR upload image form;
@@ -270,11 +261,41 @@ templ CreateContainerForm() {
 	</form>
 }
 
-templ CreateContainerModal() {
+templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
+	<div class="overflow-hidden">
+		<img
+			src={ itemEntity.AvatarUrl.String() }
+			alt={ itemEntity.Name.String() + " Avatar" }
+			class="max-w-18 m-auto rounded-md transition-all duration-300 group-hover:sepia"
+		/>
+		<p class="text-wrap mt-1 break-words text-center text-xs">{ itemEntity.Name.String() }</p>
+	</div>
+}
+
+func transformMarketplaceItemsIntoCarouselItems(
+	itemEntities []entity.MarketplaceItem,
+) (appCarouselItems, frameworkCarouselItems, stackCarouselItems []templ.Component) {
+	for _, itemEntity := range itemEntities {
+		switch itemEntity.Type.String() {
+		case "app":
+			appCarouselItems = append(appCarouselItems, MarketplaceCarouselItem(itemEntity))
+		case "framework":
+			frameworkCarouselItems = append(frameworkCarouselItems, MarketplaceCarouselItem(itemEntity))
+		case "stack":
+			stackCarouselItems = append(stackCarouselItems, MarketplaceCarouselItem(itemEntity))
+		}
+	}
+
+	return appCarouselItems, frameworkCarouselItems, stackCarouselItems
+}
+
+templ CreateContainerModal(
+	marketplaceItems []entity.MarketplaceItem,
+) {
 	@componentStructural.Modal(
 		"Create Container", "isCreateContainerModalOpen", "closeCreateContainerModal()", "",
 	) {
-		@CreateContainerForm()
+		@CreateContainerForm(transformMarketplaceItemsIntoCarouselItems(marketplaceItems))
 	}
 }
 

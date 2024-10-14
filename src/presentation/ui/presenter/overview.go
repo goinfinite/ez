@@ -59,6 +59,23 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		containerIdSummariesMap[containerSummary.ContainerId] = containerSummary
 	}
 
-	pageContent := page.OverviewIndex(containerEntities, containerIdSummariesMap)
+	marketplaceRequestBody := map[string]interface{}{"itemsPerPage": 100}
+	marketplaceService := service.NewMarketplaceService()
+
+	readMarketplaceServiceOutput := marketplaceService.Read(marketplaceRequestBody)
+	if readMarketplaceServiceOutput.Status != service.Success {
+		slog.Debug("ReadMarketplaceFailure")
+		return nil
+	}
+
+	marketplaceResponseDto, assertOk := readMarketplaceServiceOutput.Body.(dto.ReadMarketplaceItemsResponse)
+	if !assertOk {
+		slog.Debug("AssertMarketplaceFailure")
+		return nil
+	}
+
+	pageContent := page.OverviewIndex(
+		containerEntities, containerIdSummariesMap, marketplaceResponseDto.Items,
+	)
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
