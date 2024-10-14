@@ -9,7 +9,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
-	"github.com/goinfinite/ez/src/infra"
+	marketplaceInfra "github.com/goinfinite/ez/src/infra/marketplace"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
 	"github.com/labstack/echo/v4"
 )
@@ -128,7 +128,7 @@ func (controller *MarketplaceController) Read(c echo.Context) error {
 		ItemType:   itemTypePtr,
 	}
 
-	marketplaceQueryRepo := infra.NewMarketplaceQueryRepo()
+	marketplaceQueryRepo := marketplaceInfra.NewMarketplaceQueryRepo()
 
 	marketplaceItemsList, err := useCase.ReadMarketplaceItems(marketplaceQueryRepo, readDto)
 	if err != nil {
@@ -143,7 +143,7 @@ func (controller *MarketplaceController) RefreshMarketplace() {
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
-	marketplaceCmdRepo := infra.NewMarketplaceCmdRepo()
+	marketplaceCmdRepo := marketplaceInfra.NewMarketplaceCmdRepo()
 	for range timer.C {
 		useCase.RefreshMarketplace(marketplaceCmdRepo)
 	}
