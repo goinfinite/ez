@@ -7,7 +7,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
@@ -71,7 +70,8 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 	}
 
 	requiredFields := []string{
-		"manifestVersion", "slugs", "name", "type", "description", "launchScript",
+		"manifestVersion", "slugs", "name", "type",
+		"description", "registryImageAddress", "launchScript",
 	}
 	missingFields := []string{}
 	for _, requiredField := range requiredFields {
@@ -123,6 +123,13 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 		return itemEntity, err
 	}
 
+	registryImageAddress, err := valueObject.NewContainerImageAddress(
+		itemMap["registryImageAddress"],
+	)
+	if err != nil {
+		return itemEntity, err
+	}
+
 	rawLaunchScriptSlice, assertOk := itemMap["launchScript"].([]interface{})
 	if !assertOk {
 		rawLaunchScriptStr, assertOk := itemMap["launchScript"].(string)
@@ -169,7 +176,7 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 	}
 
 	return entity.NewMarketplaceItem(
-		manifestVersion, itemSlugs, itemName, itemType, itemDescription,
+		manifestVersion, itemSlugs, itemName, itemType, itemDescription, registryImageAddress,
 		launchScript, estimatedSizeBytesPtr, itemAvatarUrlPtr,
 	), nil
 }
@@ -177,29 +184,12 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 func (repo *MarketplaceQueryRepo) Read(
 	readDto dto.ReadMarketplaceItemsRequest,
 ) (responseDto dto.ReadMarketplaceItemsResponse, err error) {
-	dirInfo, err := os.Stat(infraEnvs.MarketplaceDir)
+	_, err = os.Stat(infraEnvs.MarketplaceDir)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return responseDto, err
-		}
-
-		_, err = infraHelper.RunCmdWithSubShell(
-			"cd " + infraEnvs.InfiniteEzMainDir + ";" +
-				"git clone https://github.com/goinfinite/ez-marketplace.git marketplace",
-		)
+		marketplaceCmdRepo := NewMarketplaceCmdRepo()
+		err = marketplaceCmdRepo.Refresh()
 		if err != nil {
-			return responseDto, errors.New("CloneMarketplaceRepoError: " + err.Error())
-		}
-	}
-
-	repositoryNextUpdateTime := dirInfo.ModTime().Add(1 * time.Hour)
-	if time.Now().After(repositoryNextUpdateTime) {
-		_, err = infraHelper.RunCmdWithSubShell(
-			"cd " + infraEnvs.MarketplaceDir + ";" +
-				"git clean -f -d; git reset --hard HEAD; git pull",
-		)
-		if err != nil {
-			return responseDto, errors.New("PullMarketplaceRepoError: " + err.Error())
+			return responseDto, errors.New("RefreshMarketplaceError: " + err.Error())
 		}
 	}
 
