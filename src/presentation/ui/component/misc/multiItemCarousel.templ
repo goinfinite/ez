@@ -47,7 +47,7 @@ script MultiItemCarouselLocalState(displayAmount, nItems int) {
   });
 }
 
-templ MultiItemCarousel(
+templ MultiItemCarouselContent(
 	carouselItems []templ.Component,
 	displayAmount int,
 ) {
@@ -72,4 +72,15 @@ templ MultiItemCarousel(
 			@click="scroll('right')"
 		></i>
 	</div>
+}
+
+templ MultiItemCarousel(
+	carouselItems []templ.Component,
+	displayAmount int,
+) {
+	if len(carouselItems) > 0 {
+		@MultiItemCarouselContent(carouselItems, displayAmount)
+	} else {
+		<div class="m-auto text-center text-xs">No items found.</div>
+	}
 }
