@@ -213,7 +213,9 @@ func (repo *MarketplaceQueryRepo) Read(
 	}
 
 	rawFilesList, err := infraHelper.RunCmdWithSubShell(
-		"find " + infraEnvs.MarketplaceDir + " -type f -not -path '*/.*' -not -name '.*'",
+		"find " + infraEnvs.MarketplaceDir + " -type f " +
+			"\\( -name '*.json' -o -name '*.yaml' -o -name '*.yml' \\) " +
+			"-not -path '*/.*' -not -name '.*'",
 	)
 	if err != nil {
 		return responseDto, errors.New("ReadMarketplaceFilesError: " + err.Error())
