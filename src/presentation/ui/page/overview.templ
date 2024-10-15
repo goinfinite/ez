@@ -235,13 +235,13 @@ templ CreateContainerForm(
 					)
 				}
 			</div>
-			<div class="my-2" :class="{ 'hidden': containerSourceSelectedOption !== 'App' }">
+			<div class="my-3" :class="{ 'hidden': containerSourceSelectedOption !== 'App' }">
 				@componentMisc.MultiItemCarousel(appCarouselItems, 6)
 			</div>
-			<div class="my-2" :class="{ 'hidden': containerSourceSelectedOption !== 'Framework' }">
+			<div class="my-3" :class="{ 'hidden': containerSourceSelectedOption !== 'Framework' }">
 				@componentMisc.MultiItemCarousel(frameworkCarouselItems, 6)
 			</div>
-			<div class="my-2" :class="{ 'hidden': containerSourceSelectedOption !== 'Stack' }">
+			<div class="my-3" :class="{ 'hidden': containerSourceSelectedOption !== 'Stack' }">
 				@componentMisc.MultiItemCarousel(stackCarouselItems, 6)
 			</div>
 			// Depending on the selection, show:
