@@ -10,6 +10,8 @@ type MarketplaceItem struct {
 	Description          valueObject.MarketplaceItemDescription     `json:"description"`
 	RegistryImageAddress valueObject.ContainerImageAddress          `json:"registryImageAddress"`
 	LaunchScript         valueObject.LaunchScript                   `json:"launchScript"`
+	MinimumMemoryBytes   *valueObject.Byte                          `json:"minimumMemoryBytes,omitempty"`
+	MinimumCpuMillicores *valueObject.Millicores                    `json:"minimumCpuMillicores,omitempty"`
 	EstimatedSizeBytes   *valueObject.Byte                          `json:"estimatedSizeBytes,omitempty"`
 	AvatarUrl            *valueObject.Url                           `json:"avatarUrl,omitempty"`
 }
@@ -22,6 +24,8 @@ func NewMarketplaceItem(
 	description valueObject.MarketplaceItemDescription,
 	registryImageAddress valueObject.ContainerImageAddress,
 	launchScript valueObject.LaunchScript,
+	minimumMemoryBytes *valueObject.Byte,
+	minimumCpuMillicores *valueObject.Millicores,
 	estimatedSizeBytes *valueObject.Byte,
 	avatarUrl *valueObject.Url,
 ) MarketplaceItem {
@@ -33,6 +37,8 @@ func NewMarketplaceItem(
 		Description:          description,
 		RegistryImageAddress: registryImageAddress,
 		LaunchScript:         launchScript,
+		MinimumMemoryBytes:   minimumMemoryBytes,
+		MinimumCpuMillicores: minimumCpuMillicores,
 		EstimatedSizeBytes:   estimatedSizeBytes,
 		AvatarUrl:            avatarUrl,
 	}

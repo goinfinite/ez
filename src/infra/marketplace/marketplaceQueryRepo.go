@@ -157,6 +157,24 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 		return itemEntity, err
 	}
 
+	var minimumMemoryBytesPtr *valueObject.Byte
+	if itemMap["minimumMemoryBytes"] != nil {
+		minimumMemoryBytes, err := valueObject.NewByte(itemMap["minimumMemoryBytes"])
+		if err != nil {
+			return itemEntity, err
+		}
+		minimumMemoryBytesPtr = &minimumMemoryBytes
+	}
+
+	var minimumCpuMillicoresPtr *valueObject.Millicores
+	if itemMap["minimumCpuMillicores"] != nil {
+		minimumCpuMillicores, err := valueObject.NewMillicores(itemMap["minimumCpuMillicores"])
+		if err != nil {
+			return itemEntity, err
+		}
+		minimumCpuMillicoresPtr = &minimumCpuMillicores
+	}
+
 	var estimatedSizeBytesPtr *valueObject.Byte
 	if itemMap["estimatedSizeBytes"] != nil {
 		estimatedSizeBytes, err := valueObject.NewByte(itemMap["estimatedSizeBytes"])
@@ -177,7 +195,8 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 
 	return entity.NewMarketplaceItem(
 		manifestVersion, itemSlugs, itemName, itemType, itemDescription, registryImageAddress,
-		launchScript, estimatedSizeBytesPtr, itemAvatarUrlPtr,
+		launchScript, minimumMemoryBytesPtr, minimumCpuMillicoresPtr, estimatedSizeBytesPtr,
+		itemAvatarUrlPtr,
 	), nil
 }
 
