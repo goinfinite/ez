@@ -59,7 +59,10 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		containerIdSummariesMap[containerSummary.ContainerId] = containerSummary
 	}
 
-	marketplaceRequestBody := map[string]interface{}{"itemsPerPage": 100}
+	marketplaceRequestBody := map[string]interface{}{
+		"sortBy":       "name",
+		"itemsPerPage": 100,
+	}
 	marketplaceService := service.NewMarketplaceService()
 
 	readMarketplaceServiceOutput := marketplaceService.Read(marketplaceRequestBody)
