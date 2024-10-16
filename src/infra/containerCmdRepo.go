@@ -212,7 +212,7 @@ func (repo *ContainerCmdRepo) updateContainerSystemdUnit(
 		return err
 	}
 
-	cpuQuotaCores := containerProfile.BaseSpecs.Millicores.ReadAsCores()
+	cpuQuotaCores := containerProfile.BaseSpecs.Millicores.ToCores()
 	cpuQuotaCoresStr := strconv.FormatFloat(cpuQuotaCores, 'f', -1, 64)
 	cpuQuotaPercentile := cpuQuotaCores * 100
 	cpuQuotaPercentileStr := strconv.FormatFloat(cpuQuotaPercentile, 'f', -1, 64) + "%"

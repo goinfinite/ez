@@ -27,7 +27,7 @@ func NewAccountQuota(
 	storageInodes uint64,
 	storagePerformanceUnits StoragePerformanceUnits,
 ) AccountQuota {
-	cpuCores := millicores.ReadAsCores()
+	cpuCores := millicores.ToCores()
 	memoryMebibytes := memoryBytes.ToMiB()
 	memoryGibibytes := memoryBytes.ToGiB()
 	storageMebibytes := storageBytes.ToMiB()

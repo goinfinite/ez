@@ -27,7 +27,7 @@ func NewCpuCores(value interface{}) (Millicores, error) {
 	return Millicores(floatValue * 1000), nil
 }
 
-func (vo Millicores) ReadAsCores() float64 {
+func (vo Millicores) ToCores() float64 {
 	return float64(vo) / 1000
 }
 
@@ -37,4 +37,8 @@ func (vo Millicores) Uint() uint {
 
 func (vo Millicores) String() string {
 	return strconv.FormatUint(uint64(vo), 10)
+}
+
+func (vo Millicores) ToCoresString() string {
+	return strconv.FormatFloat(vo.ToCores(), 'f', -1, 64)
 }

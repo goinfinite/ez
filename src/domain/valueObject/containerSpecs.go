@@ -19,7 +19,7 @@ type ContainerSpecs struct {
 func NewContainerSpecs(
 	millicores Millicores, memoryBytes Byte, storagePerformanceUnits StoragePerformanceUnits,
 ) ContainerSpecs {
-	cpuCores := millicores.ReadAsCores()
+	cpuCores := millicores.ToCores()
 	memoryMebibytes := memoryBytes.ToMiB()
 	memoryGibibytes := memoryBytes.ToGiB()
 
