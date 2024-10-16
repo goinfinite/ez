@@ -277,6 +277,30 @@ func (repo *MarketplaceQueryRepo) Read(
 		itemsList = append(itemsList, marketplaceItem)
 	}
 
+	sortDirectionStr := "asc"
+	if readDto.Pagination.SortDirection != nil {
+		sortDirectionStr = readDto.Pagination.SortDirection.String()
+	}
+
+	if readDto.Pagination.SortBy != nil {
+		slices.SortStableFunc(itemsList, func(a, b entity.MarketplaceItem) int {
+			switch readDto.Pagination.SortBy.String() {
+			case "name":
+				if sortDirectionStr != "asc" {
+					return strings.Compare(b.Name.String(), a.Name.String())
+				}
+				return strings.Compare(a.Name.String(), b.Name.String())
+			case "type":
+				if sortDirectionStr != "asc" {
+					return strings.Compare(b.Type.String(), a.Type.String())
+				}
+				return strings.Compare(a.Type.String(), b.Type.String())
+			default:
+				return 0
+			}
+		})
+	}
+
 	itemsTotal := uint64(len(itemsList))
 	pagesTotal := uint32(itemsTotal / uint64(readDto.Pagination.ItemsPerPage))
 
