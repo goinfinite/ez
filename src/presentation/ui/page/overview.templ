@@ -23,7 +23,7 @@ script OverviewIndexLocalState() {
 					'id': '',
 					'accountId': '',
 					'hostname': '',
-					'imageAddress': '',
+					'imageAddress': 'docker.io/goinfinite/os:latest',
 					'portBindings': [],
 					'restartPolicy': '',
 					'entrypoint': '',
@@ -255,14 +255,17 @@ templ CreateContainerForm(
 					)
 				}
 			</div>
-			<div class="my-3" :class="{ 'hidden': createContainerSourceSelectedOption !== 'App' }">
+			<div class="my-3" x-show="createContainerSourceSelectedOption === 'App'">
 				@componentMisc.MultiItemCarousel("appCarousel", appCarouselItems, 6)
 			</div>
-			<div class="my-3" :class="{ 'hidden': createContainerSourceSelectedOption !== 'Framework' }">
+			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Framework'">
 				@componentMisc.MultiItemCarousel("frameworkCarousel", frameworkCarouselItems, 6)
 			</div>
-			<div class="my-3" :class="{ 'hidden': createContainerSourceSelectedOption !== 'Stack' }">
+			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Stack'">
 				@componentMisc.MultiItemCarousel("stackCarousel", stackCarouselItems, 6)
+			</div>
+			<div class="my-3" x-show="createContainerSourceSelectedOption === 'URL'">
+				@componentForm.InputField("text", "imageAddress", "Image Address", "container.imageAddress", false)
 			</div>
 			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
 		</div>
