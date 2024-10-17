@@ -245,13 +245,13 @@ templ CreateContainerForm(
 				}
 			</div>
 			<div class="my-3" :class="{ 'hidden': createContainerSourceSelectedOption !== 'App' }">
-				@componentMisc.MultiItemCarousel(appCarouselItems, 6)
+				@componentMisc.MultiItemCarousel("appCarousel", appCarouselItems, 6)
 			</div>
 			<div class="my-3" :class="{ 'hidden': createContainerSourceSelectedOption !== 'Framework' }">
-				@componentMisc.MultiItemCarousel(frameworkCarouselItems, 6)
+				@componentMisc.MultiItemCarousel("frameworkCarousel", frameworkCarouselItems, 6)
 			</div>
 			<div class="my-3" :class="{ 'hidden': createContainerSourceSelectedOption !== 'Stack' }">
-				@componentMisc.MultiItemCarousel(stackCarouselItems, 6)
+				@componentMisc.MultiItemCarousel("stackCarousel", stackCarouselItems, 6)
 			</div>
 			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
 			// Depending on the selection, show:
@@ -273,8 +273,9 @@ templ CreateContainerForm(
 
 templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 	<div
-		class="group flex flex-col"
 		@click={ "createContainerSelectedMarketplaceItemId = " + itemEntity.Id.String() }
+		class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md p-2 transition-all duration-300 hover:ring-1"
+		:class={ "{'text-infinite-500 font-bold ring-1 ring-infinite-500': createContainerSelectedMarketplaceItemId === " + itemEntity.Id.String() + "}" }
 	>
 		<img
 			src={ itemEntity.AvatarUrl.String() }
@@ -282,15 +283,12 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 			class="max-w-18 m-auto rounded-md transition-all duration-300 group-hover:sepia"
 			:class={ "{'sepia': createContainerSelectedMarketplaceItemId === " + itemEntity.Id.String() + "}" }
 		/>
-		<div
-			class="text-wrap mt-1 break-words text-center text-xs"
-			:class={ "{'font-bold text-infinite-500': createContainerSelectedMarketplaceItemId === " + itemEntity.Id.String() + "}" }
-		>
+		<div class="text-wrap mt-1 break-words text-center text-xs">
 			{ itemEntity.Name.String() }
 		</div>
 		<div class="bg-ez-300 max-w-96 absolute left-1/2 top-full mt-1 -translate-x-1/2 transform rounded-md p-3 text-xs text-white opacity-0 shadow-lg transition-all duration-300 group-hover:block group-hover:translate-y-0.5 group-hover:opacity-100">
 			<div class="flex flex-row items-center gap-3">
-				<div class="basis-3/4">
+				<div class="basis-3/4 font-normal">
 					{ itemEntity.Description.String() }
 				</div>
 				<div class="basis-1/4 space-y-1.5">
