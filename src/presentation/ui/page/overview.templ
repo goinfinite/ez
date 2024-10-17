@@ -40,6 +40,14 @@ script OverviewIndexLocalState() {
 			// Auxiliary States
 			createContainerSourceSelectedOption: 'App',
 			createContainerSelectedMarketplaceItemId: 0,
+			updateSelectedMarketplaceItem(itemId) {
+				this.createContainerSelectedMarketplaceItemId = itemId;
+				const marketplaceItemEntity = JSON.parse(
+					document.getElementById('marketplaceItemEntity_'+itemId).textContent
+				);
+				this.container.imageAddress = marketplaceItemEntity.registryImageAddress;
+				this.container.launchScript = marketplaceItemEntity.launchScript;
+			},
 
 			// Modal States
 			isCreateContainerModalOpen: false,
@@ -254,26 +262,14 @@ templ CreateContainerForm(
 				@componentMisc.MultiItemCarousel("stackCarousel", stackCarouselItems, 6)
 			</div>
 			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
-			// Depending on the selection, show:
-			// Marketplace items, URL, local image selection OR upload image form;
-			// - Launch Script (will be pre-filled based on the selection)
-			// - Container profile
-			// => Advanced Settings
-			// - Entrypoint
-			// - Account Owner
-			// - Restart Policy
-			// - Env Vars
-			// - Port Bindings
-			// We'll have to load the marketplace items, local images and account owners
-			// into the page. That will likely slow things down. However, we can deal with
-			// that later. For now, let's just get the basic form working.
 		</div>
 	</form>
 }
 
 templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
+	@templ.JSONScript("marketplaceItemEntity_"+itemEntity.Id.String(), itemEntity)
 	<div
-		@click={ "createContainerSelectedMarketplaceItemId = " + itemEntity.Id.String() }
+		@click={ "updateSelectedMarketplaceItem(" + itemEntity.Id.String() + ")" }
 		class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md p-2 transition-all duration-300 hover:ring-1"
 		:class={ "{'text-infinite-500 font-bold ring-1 ring-infinite-500': createContainerSelectedMarketplaceItemId === " + itemEntity.Id.String() + "}" }
 	>
