@@ -238,10 +238,6 @@ func (repo *MarketplaceQueryRepo) Read(
 		return responseDto, errors.New("NoMarketplaceFilesFound")
 	}
 
-	nothingToFilter := readDto.ItemSlug == nil &&
-		readDto.ItemName == nil &&
-		readDto.ItemType == nil
-
 	itemsList := []entity.MarketplaceItem{}
 	itemsIdsMap := map[uint16]struct{}{}
 	for _, rawFilePath := range rawFilesListParts {
@@ -266,16 +262,11 @@ func (repo *MarketplaceQueryRepo) Read(
 			marketplaceItem.Id, _ = valueObject.NewMarketplaceItemId(0)
 		}
 
-		if marketplaceItem.Id.Uint16() != 0 {
-			itemsIdsMap[itemIdUint16] = struct{}{}
-		}
-
 		if len(itemsList) >= int(readDto.Pagination.ItemsPerPage) {
 			break
 		}
 
-		if nothingToFilter {
-			itemsList = append(itemsList, marketplaceItem)
+		if readDto.ItemId != nil && marketplaceItem.Id != *readDto.ItemId {
 			continue
 		}
 
@@ -294,6 +285,10 @@ func (repo *MarketplaceQueryRepo) Read(
 		}
 
 		itemsList = append(itemsList, marketplaceItem)
+
+		if marketplaceItem.Id.Uint16() != 0 {
+			itemsIdsMap[itemIdUint16] = struct{}{}
+		}
 	}
 
 	itemsIdsSlice := []uint16{}
@@ -302,9 +297,13 @@ func (repo *MarketplaceQueryRepo) Read(
 	}
 	slices.Sort(itemsIdsSlice)
 
+	if len(itemsIdsSlice) == 0 {
+		itemsIdsSlice = append(itemsIdsSlice, 0)
+	}
+
 	for itemIndex, marketplaceItem := range itemsList {
 		if marketplaceItem.Id.Uint16() != 0 {
-			break
+			continue
 		}
 
 		lastIdUsed := itemsIdsSlice[len(itemsIdsSlice)-1]
