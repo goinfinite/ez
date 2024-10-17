@@ -1,0 +1,22 @@
+package componentContainer
+
+import (
+	"github.com/goinfinite/ez/src/domain/entity"
+	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+)
+
+templ ImageTaggedSummary(imageEntity entity.ContainerImage) {
+	<div class="p-1.5">
+		<div>
+			<strong>{ imageEntity.ImageAddress.String() }</strong>
+		</div>
+		<div class="mt-1 flex flex-wrap justify-normal gap-2">
+			@componentStructural.Tag(
+				"ph-link", "", imageEntity.Id.String(), "infinite-500",
+			)
+			@componentStructural.Tag(
+				"ph-hard-drives", "", imageEntity.SizeBytes.StringWithSuffix(), "infinite-500",
+			)
+		</div>
+	</div>
+}
