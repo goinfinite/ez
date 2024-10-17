@@ -10,7 +10,7 @@ templ TextArea(id, label, bindValuePath string) {
 				x-model:value={ bindValuePath }
 			}
 			placeholder={ label }
-			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-30 peer relative w-full rounded-md border px-3 pt-1.5 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-30 peer relative w-full rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 		></textarea>
 		if label != "" {
 			<label
