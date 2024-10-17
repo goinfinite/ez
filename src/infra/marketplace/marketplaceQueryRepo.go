@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"math/rand"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/goinfinite/ez/src/domain/dto"
@@ -61,6 +63,41 @@ func (repo *MarketplaceQueryRepo) readFileContentToMap(
 	return fileContentMap, nil
 }
 
+func (repo *MarketplaceQueryRepo) launchScriptFactory(
+	rawLaunchScriptSlice []interface{},
+) (launchScript valueObject.LaunchScript, err error) {
+	rawLaunchScript := ""
+	for stepIndex, rawLaunchScriptStep := range rawLaunchScriptSlice {
+		rawLaunchScriptStep, assertOk := rawLaunchScriptStep.(string)
+		if !assertOk {
+			return launchScript, errors.New(
+				"[" + strconv.Itoa(stepIndex) + "] InvalidMarketplaceItemLaunchScript",
+			)
+		}
+		rawLaunchScript += rawLaunchScriptStep + "\n"
+	}
+
+	if len(rawLaunchScript) == 0 {
+		return launchScript, errors.New("EmptyMarketplaceItemLaunchScript")
+	}
+
+	randomUsernames := []string{
+		"spock", "kirk", "mccoy", "scotty", "uhura", "sulu", "chekov",
+	}
+	randomUsername := randomUsernames[rand.Intn(len(randomUsernames))]
+	rawLaunchScript = strings.ReplaceAll(
+		rawLaunchScript, "%randomUsername%", randomUsername,
+	)
+	rawLaunchScript = strings.ReplaceAll(
+		rawLaunchScript, "%randomPassword%", infraHelper.GenPass(16),
+	)
+	rawLaunchScript = strings.ReplaceAll(
+		rawLaunchScript, "%randomMail%", randomUsername+"@ufp.gov",
+	)
+
+	return valueObject.NewLaunchScript(rawLaunchScript)
+}
+
 func (repo *MarketplaceQueryRepo) itemFactory(
 	itemFilePath valueObject.UnixFilePath,
 ) (itemEntity entity.MarketplaceItem, err error) {
@@ -70,8 +107,7 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 	}
 
 	requiredFields := []string{
-		"manifestVersion", "slugs", "name", "type",
-		"description", "registryImageAddress", "launchScript",
+		"manifestVersion", "slugs", "name", "type", "description", "registryImageAddress",
 	}
 	missingFields := []string{}
 	for _, requiredField := range requiredFields {
@@ -138,31 +174,23 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 		return itemEntity, err
 	}
 
-	rawLaunchScriptSlice, assertOk := itemMap["launchScript"].([]interface{})
-	if !assertOk {
-		rawLaunchScriptStr, assertOk := itemMap["launchScript"].(string)
+	var launchScriptPtr *valueObject.LaunchScript
+	if itemMap["launchScript"] != nil {
+		rawLaunchScriptSlice, assertOk := itemMap["launchScript"].([]interface{})
 		if !assertOk {
-			return itemEntity, errors.New("InvalidMarketplaceItemLaunchScript")
+			rawLaunchScriptStr, assertOk := itemMap["launchScript"].(string)
+			if !assertOk {
+				return itemEntity, errors.New("InvalidMarketplaceItemLaunchScript")
+			}
+			rawLaunchScriptSlice = []interface{}{rawLaunchScriptStr}
 		}
-		rawLaunchScriptSlice = []interface{}{rawLaunchScriptStr}
-	}
 
-	rawLaunchScript := ""
-	for _, rawLaunchScriptStep := range rawLaunchScriptSlice {
-		rawLaunchScriptStep, assertOk := rawLaunchScriptStep.(string)
-		if !assertOk {
-			slog.Debug(
-				"InvalidMarketplaceItemLaunchScriptStep",
-				slog.Any("rawLaunchScriptStep", rawLaunchScriptStep),
-			)
-			return itemEntity, errors.New("InvalidMarketplaceItemLaunchScript")
+		launchScript, err := repo.launchScriptFactory(rawLaunchScriptSlice)
+		if err != nil {
+			return itemEntity, err
 		}
-		rawLaunchScript += rawLaunchScriptStep + "\n"
-	}
 
-	launchScript, err := valueObject.NewLaunchScript(rawLaunchScript)
-	if err != nil {
-		return itemEntity, err
+		launchScriptPtr = &launchScript
 	}
 
 	var minimumCpuMillicoresPtr *valueObject.Millicores
@@ -203,7 +231,7 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 
 	return entity.NewMarketplaceItem(
 		manifestVersion, itemId, itemSlugs, itemName, itemType, itemDescription,
-		registryImageAddress, launchScript, minimumCpuMillicoresPtr, minimumMemoryBytesPtr,
+		registryImageAddress, launchScriptPtr, minimumCpuMillicoresPtr, minimumMemoryBytesPtr,
 		estimatedSizeBytesPtr, itemAvatarUrlPtr,
 	), nil
 }
