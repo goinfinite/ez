@@ -246,6 +246,7 @@ templ CreateContainerForm(
 		class="space-y-6"
 	>
 		@componentForm.InputField("text", "hostname", "Hostname", "container.hostname", false)
+		<!-- ContainerSource & LaunchScript -->
 		<div class="border-ez-200 rounded-md border p-3">
 			<div class="flex items-center space-x-3 text-sm">
 				<div>Source: </div>
@@ -273,7 +274,9 @@ templ CreateContainerForm(
 }
 
 templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
+	<!-- MultiItemCarouselItem JavaScript -->
 	@templ.JSONScript("marketplaceItemEntity_"+itemEntity.Id.String(), itemEntity)
+	<!-- MultiItemCarouselItem HTML -->
 	<div
 		@click={ "updateSelectedMarketplaceItem(" + itemEntity.Id.String() + ")" }
 		class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md p-2 transition-all duration-300 hover:ring-1"
