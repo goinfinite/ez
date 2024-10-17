@@ -4,6 +4,7 @@ import "github.com/goinfinite/ez/src/domain/valueObject"
 
 type MarketplaceItem struct {
 	ManifestVersion      valueObject.MarketplaceItemManifestVersion `json:"manifestVersion"`
+	Id                   valueObject.MarketplaceItemId              `json:"id"`
 	Slugs                []valueObject.MarketplaceItemSlug          `json:"slugs"`
 	Name                 valueObject.MarketplaceItemName            `json:"name"`
 	Type                 valueObject.MarketplaceItemType            `json:"type"`
@@ -18,6 +19,7 @@ type MarketplaceItem struct {
 
 func NewMarketplaceItem(
 	manifestVersion valueObject.MarketplaceItemManifestVersion,
+	id valueObject.MarketplaceItemId,
 	slugs []valueObject.MarketplaceItemSlug,
 	name valueObject.MarketplaceItemName,
 	itemType valueObject.MarketplaceItemType,
@@ -31,6 +33,7 @@ func NewMarketplaceItem(
 ) MarketplaceItem {
 	return MarketplaceItem{
 		ManifestVersion:      manifestVersion,
+		Id:                   id,
 		Slugs:                slugs,
 		Name:                 name,
 		Type:                 itemType,

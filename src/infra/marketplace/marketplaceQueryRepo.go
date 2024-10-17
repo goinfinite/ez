@@ -90,6 +90,14 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 		return itemEntity, err
 	}
 
+	itemId, _ := valueObject.NewMarketplaceItemId(0)
+	if itemMap["id"] != nil {
+		itemId, err = valueObject.NewMarketplaceItemId(itemMap["id"])
+		if err != nil {
+			return itemEntity, err
+		}
+	}
+
 	itemSlugs := []valueObject.MarketplaceItemSlug{}
 	if itemMap["slugs"] != nil {
 		rawItemSlugs, assertOk := itemMap["slugs"].([]interface{})
@@ -194,9 +202,9 @@ func (repo *MarketplaceQueryRepo) itemFactory(
 	}
 
 	return entity.NewMarketplaceItem(
-		manifestVersion, itemSlugs, itemName, itemType, itemDescription, registryImageAddress,
-		launchScript, minimumCpuMillicoresPtr, minimumMemoryBytesPtr, estimatedSizeBytesPtr,
-		itemAvatarUrlPtr,
+		manifestVersion, itemId, itemSlugs, itemName, itemType, itemDescription,
+		registryImageAddress, launchScript, minimumCpuMillicoresPtr, minimumMemoryBytesPtr,
+		estimatedSizeBytesPtr, itemAvatarUrlPtr,
 	), nil
 }
 
@@ -235,6 +243,7 @@ func (repo *MarketplaceQueryRepo) Read(
 		readDto.ItemType == nil
 
 	itemsList := []entity.MarketplaceItem{}
+	itemsIdsMap := map[uint16]struct{}{}
 	for _, rawFilePath := range rawFilesListParts {
 		itemFilePath, err := valueObject.NewUnixFilePath(rawFilePath)
 		if err != nil {
@@ -249,6 +258,16 @@ func (repo *MarketplaceQueryRepo) Read(
 				slog.String("filePath", itemFilePath.String()), slog.Any("err", err),
 			)
 			continue
+		}
+
+		itemIdUint16 := marketplaceItem.Id.Uint16()
+		_, idAlreadyUsed := itemsIdsMap[itemIdUint16]
+		if idAlreadyUsed {
+			marketplaceItem.Id, _ = valueObject.NewMarketplaceItemId(0)
+		}
+
+		if marketplaceItem.Id.Uint16() != 0 {
+			itemsIdsMap[itemIdUint16] = struct{}{}
 		}
 
 		if len(itemsList) >= int(readDto.Pagination.ItemsPerPage) {
@@ -277,6 +296,32 @@ func (repo *MarketplaceQueryRepo) Read(
 		itemsList = append(itemsList, marketplaceItem)
 	}
 
+	itemsIdsSlice := []uint16{}
+	for itemId := range itemsIdsMap {
+		itemsIdsSlice = append(itemsIdsSlice, itemId)
+	}
+	slices.Sort(itemsIdsSlice)
+
+	for itemIndex, marketplaceItem := range itemsList {
+		if marketplaceItem.Id.Uint16() != 0 {
+			break
+		}
+
+		lastIdUsed := itemsIdsSlice[len(itemsIdsSlice)-1]
+		nextAvailableId, err := valueObject.NewMarketplaceItemId(lastIdUsed + 1)
+		if err != nil {
+			slog.Error(
+				"CreateNewMarketplaceItemIdError",
+				slog.String("itemName", marketplaceItem.Name.String()),
+				slog.Any("err", err),
+			)
+			continue
+		}
+
+		itemsList[itemIndex].Id = nextAvailableId
+		itemsIdsSlice = append(itemsIdsSlice, nextAvailableId.Uint16())
+	}
+
 	sortDirectionStr := "asc"
 	if readDto.Pagination.SortDirection != nil {
 		sortDirectionStr = readDto.Pagination.SortDirection.String()
@@ -284,17 +329,26 @@ func (repo *MarketplaceQueryRepo) Read(
 
 	if readDto.Pagination.SortBy != nil {
 		slices.SortStableFunc(itemsList, func(a, b entity.MarketplaceItem) int {
+			firstElement := a
+			secondElement := b
+			if sortDirectionStr != "asc" {
+				firstElement = b
+				secondElement = a
+			}
+
 			switch readDto.Pagination.SortBy.String() {
+			case "id":
+				if firstElement.Id.Uint16() < secondElement.Id.Uint16() {
+					return -1
+				}
+				if firstElement.Id.Uint16() > secondElement.Id.Uint16() {
+					return 1
+				}
+				return 0
 			case "name":
-				if sortDirectionStr != "asc" {
-					return strings.Compare(b.Name.String(), a.Name.String())
-				}
-				return strings.Compare(a.Name.String(), b.Name.String())
+				return strings.Compare(firstElement.Name.String(), secondElement.Name.String())
 			case "type":
-				if sortDirectionStr != "asc" {
-					return strings.Compare(b.Type.String(), a.Type.String())
-				}
-				return strings.Compare(a.Type.String(), b.Type.String())
+				return strings.Compare(firstElement.Type.String(), secondElement.Type.String())
 			default:
 				return 0
 			}

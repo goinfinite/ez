@@ -16,7 +16,7 @@ func TestMarketplaceQueryRepo(t *testing.T) {
 		itemType, _ := valueObject.NewMarketplaceItemType("app")
 
 		paginationDto := useCase.MarketplaceDefaultPagination
-		sortBy, _ := valueObject.NewPaginationSortBy("name")
+		sortBy, _ := valueObject.NewPaginationSortBy("id")
 		sortDirection, _ := valueObject.NewPaginationSortDirection("desc")
 		paginationDto.SortBy = &sortBy
 		paginationDto.SortDirection = &sortDirection
@@ -28,7 +28,6 @@ func TestMarketplaceQueryRepo(t *testing.T) {
 
 		marketplaceQueryRepo := NewMarketplaceQueryRepo()
 		responseDto, err := marketplaceQueryRepo.Read(readDto)
-
 		if err != nil {
 			t.Errorf("ReadMarketplaceItemsError: %v", err)
 			return
