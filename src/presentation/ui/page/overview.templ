@@ -46,7 +46,10 @@ script OverviewIndexLocalState() {
 					document.getElementById('marketplaceItemEntity_'+itemId).textContent
 				);
 				this.container.imageAddress = marketplaceItemEntity.registryImageAddress;
-				this.container.launchScript = marketplaceItemEntity.launchScript;
+				this.container.launchScript = '';
+				if (marketplaceItemEntity.hasOwnProperty('launchScript')) {
+					this.container.launchScript = marketplaceItemEntity.launchScript;
+				}
 			},
 
 			// Modal States
