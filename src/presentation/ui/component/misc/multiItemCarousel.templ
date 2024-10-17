@@ -53,12 +53,14 @@ script MultiItemCarouselLocalState(
   });
 }
 
-templ MultiItemCarouselContent(
+templ MultiItemCarouselBody(
 	id string,
 	carouselItems []templ.Component,
 	displayAmount int,
 ) {
+	<!-- MultiItemCarousel JavaScript -->
 	@MultiItemCarouselLocalState(id, displayAmount, len(carouselItems))
+	<!-- MultiItemCarousel HTML -->
 	<div
 		class="flex-inline w-full items-center justify-center gap-4"
 		x-data={ id + "MultiItemCarousel" }
@@ -93,7 +95,7 @@ templ MultiItemCarousel(
 	displayAmount int,
 ) {
 	if len(carouselItems) > 0 {
-		@MultiItemCarouselContent(id, carouselItems, displayAmount)
+		@MultiItemCarouselBody(id, carouselItems, displayAmount)
 	} else {
 		<div class="m-auto text-center text-xs">No items found.</div>
 	}
