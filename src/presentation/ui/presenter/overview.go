@@ -60,7 +60,7 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 	}
 
 	marketplaceRequestBody := map[string]interface{}{
-		"sortBy":       "name",
+		"sortBy":       "id",
 		"itemsPerPage": 100,
 	}
 	marketplaceService := service.NewMarketplaceService()
