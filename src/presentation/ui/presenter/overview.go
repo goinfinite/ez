@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
+	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
@@ -31,6 +33,41 @@ func NewOverviewPresenter(
 		transientDbSvc:  transientDbSvc,
 		trailDbSvc:      trailDbSvc,
 	}
+}
+
+func (presenter *OverviewPresenter) transformContainerImagesIntoSearchableItems() []componentForm.SearchableSelectItem {
+	searchableSelectItems := []componentForm.SearchableSelectItem{}
+
+	containerImageService := service.NewContainerImageService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readImagesServiceOutput := containerImageService.Read()
+	if readImagesServiceOutput.Status != service.Success {
+		slog.Debug("ReadImagesFailure")
+		return nil
+	}
+
+	containerImageEntities, assertOk := readImagesServiceOutput.Body.([]entity.ContainerImage)
+	if !assertOk {
+		slog.Debug("AssertImagesFailure")
+		return nil
+	}
+
+	for _, imageEntity := range containerImageEntities {
+		searchableTextSerialized := imageEntity.JsonSerialize()
+		htmlLabel := componentContainer.ImageTaggedSummary(imageEntity)
+
+		searchableSelectItem := componentForm.SearchableSelectItem{
+			Label:          imageEntity.ImageAddress.String(),
+			Value:          imageEntity.ImageAddress.String(),
+			SearchableText: &searchableTextSerialized,
+			HtmlLabel:      &htmlLabel,
+		}
+		searchableSelectItems = append(searchableSelectItems, searchableSelectItem)
+	}
+
+	return searchableSelectItems
 }
 
 func (presenter *OverviewPresenter) Handler(c echo.Context) error {
@@ -77,8 +114,14 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
+	unprocessedCreateContainerModalDto := page.CreateContainerModalUnprocessedDto{
+		MarketplaceItems:              marketplaceResponseDto.Items,
+		ContainerImageSearchableItems: presenter.transformContainerImagesIntoSearchableItems(),
+	}
+
 	pageContent := page.OverviewIndex(
-		containerEntities, containerIdSummariesMap, marketplaceResponseDto.Items,
+		containerEntities, containerIdSummariesMap, unprocessedCreateContainerModalDto,
 	)
+
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }
