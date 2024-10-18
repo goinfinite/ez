@@ -33,11 +33,11 @@ script OverviewIndexLocalState() {
 					'accountId': '',
 					'hostname': '',
 					'imageAddress': 'docker.io/goinfinite/os:latest',
-					'portBindings': [],
+					'portBindings': '',
 					'restartPolicy': 'unless-stopped',
 					'entrypoint': '',
 					'profileId': 0,
-					'envs': [],
+					'envs': '',
 					'launchScript': '',
 					'autoCreateMappings': true,
 				};
@@ -304,13 +304,25 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				@componentForm.InputField(
 					"text", "entrypoint", "Entrypoint", "container.entrypoint", false,
 				)
-				@componentForm.SelectInputWithLabelValuePair(
-					"accountId", "Account", "container.accountId",
-					createDto.AccountSelectLabelValuePairs, true,
-				)
-				@componentForm.SelectInput(
-					"restartPolicy", "Restart Policy", "container.restartPolicy",
-					valueObject.ValidContainerRestartPolicies, false,
+				<div class="flex flex-row items-center gap-6">
+					<div class="basis-1/2">
+						@componentForm.SelectInputWithLabelValuePair(
+							"accountId", "Account", "container.accountId",
+							createDto.AccountSelectLabelValuePairs, true,
+						)
+					</div>
+					<div class="basis-1/2">
+						@componentForm.SelectInput(
+							"restartPolicy", "Restart Policy", "container.restartPolicy",
+							valueObject.ValidContainerRestartPolicies, false,
+						)
+					</div>
+				</div>
+				@componentForm.MultiColumnRepeatableFieldset(
+					"envs", "Environment Variables", "", "container.envs", []componentForm.RepeatableField{
+						{InputType: "text", Id: "key", Label: "Key"},
+						{InputType: "text", Id: "value", Label: "Value"},
+					},
 				)
 			</div>
 		}

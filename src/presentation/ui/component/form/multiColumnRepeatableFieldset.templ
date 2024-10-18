@@ -1,0 +1,103 @@
+package componentForm
+
+type RepeatableField struct {
+	InputType string
+	Id        string
+	Label     string
+	Options   []string
+}
+
+script MultiColumnRepeatableFieldsetLocalState(id string) {
+	document.addEventListener('alpine:init', () => {
+		Alpine.data(id+'MultiColumnRepeatableFieldset', () => ({
+      newFieldset: {},
+      registeredFieldsets: [],
+      createFieldset() {
+        this.registeredFieldsets.push({
+          id: this.registeredFieldsets.length,
+          fieldset: this.newFieldset,
+        });
+        this.newFieldset = {};
+      },
+      removeRegisteredFieldset(id) {
+        this.registeredFieldsets = this.registeredFieldsets.filter(
+          (item) => item.id !== id
+        );
+      },
+    }));
+  });
+}
+
+templ MultiColumnRepeatableFieldset(
+	id, title, description, bindValuePath string,
+	repeatableFields []RepeatableField,
+) {
+	<!-- MultiColumnRepeatableFieldset JavaScript -->
+	@MultiColumnRepeatableFieldsetLocalState(id)
+	<!-- MultiColumnRepeatableFieldset HTML -->
+	<div
+		class="bg-ez-400 flex flex-col gap-6 rounded-md p-4"
+		x-data={ id + "MultiColumnRepeatableFieldset" }
+	>
+		<div>
+			<p class="text-md font-bold">{ title }</p>
+			if description != "" {
+				<p class="mt-1 text-sm">{ description }</p>
+			}
+		</div>
+		<div
+			x-show="registeredFieldsets.length > 0"
+			class="flex w-full flex-col gap-3 opacity-70"
+		>
+			<template x-for="registeredFieldset in registeredFieldsets">
+				<div class="flex flex-row items-center gap-3 px-2">
+					<template x-for="(fieldValue, fieldLabel) in registeredFieldset.fieldset">
+						<div class="relative w-full">
+							<input
+								type="text"
+								x-model:value="fieldValue"
+								:placeholder="fieldLabel"
+								readonly
+								class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full cursor-not-allowed rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+							/>
+							<label
+								x-text="fieldLabel"
+								class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-50% to-transparent to-50% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+							></label>
+						</div>
+					</template>
+					<button
+						type="button"
+						@click="removeRegisteredFieldset(registeredFieldset.id)"
+						class="min-w-9 h-9 rounded-sm bg-red-900 leading-none hover:bg-red-700"
+					>
+						<i class="ph-bold ph-trash text-xl"></i>
+					</button>
+				</div>
+			</template>
+		</div>
+		<div class="flex flex-row items-center gap-3">
+			for _, repeatableField := range repeatableFields {
+				switch repeatableField.InputType {
+					case "select":
+						@SelectInput(
+							repeatableField.Id, repeatableField.Label, "newFieldset['"+repeatableField.Id+"']",
+							repeatableField.Options, false,
+						)
+					case "text":
+						@InputField(
+							repeatableField.InputType, repeatableField.Id, repeatableField.Label,
+							"newFieldset['"+repeatableField.Id+"']", false,
+						)
+				}
+			}
+			<button
+				type="button"
+				@click="createFieldset()"
+				class="bg-infinite-500 hover:bg-infinite-300 min-w-9 h-9 rounded-sm leading-none"
+			>
+				<i class="ph-bold ph-plus text-xl"></i>
+			</button>
+		</div>
+	</div>
+}
