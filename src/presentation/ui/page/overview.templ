@@ -294,6 +294,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			</div>
 			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
 		</div>
+		@componentForm.SearchableSelectInput(
+			"profileId", "Profile", "container.profileId",
+			createDto.ContainerProfileSearchableItems,
+		)
 	</form>
 }
 
