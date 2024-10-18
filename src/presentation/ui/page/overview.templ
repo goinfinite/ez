@@ -298,6 +298,9 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			"profileId", "Profile", "container.profileId",
 			createDto.ContainerProfileSearchableItems,
 		)
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			@componentForm.InputField("text", "entrypoint", "Entrypoint", "container.entrypoint", false)
+		}
 	</form>
 }
 
