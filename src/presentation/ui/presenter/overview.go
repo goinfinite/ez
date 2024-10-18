@@ -36,7 +36,7 @@ func NewOverviewPresenter(
 	}
 }
 
-func (presenter *OverviewPresenter) transformContainerImagesIntoSearchableItems() []componentForm.SearchableSelectItem {
+func (presenter *OverviewPresenter) readContainerImageSearchableItems() []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
 
 	containerImageService := service.NewContainerImageService(
@@ -71,7 +71,7 @@ func (presenter *OverviewPresenter) transformContainerImagesIntoSearchableItems(
 	return searchableSelectItems
 }
 
-func (presenter *OverviewPresenter) transformContainerProfilesIntoIntoSearchableItems() []componentForm.SearchableSelectItem {
+func (presenter *OverviewPresenter) readContainerProfileSearchableItems() []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
 
 	containerProfileService := service.NewContainerProfileService(
@@ -106,6 +106,85 @@ func (presenter *OverviewPresenter) transformContainerProfilesIntoIntoSearchable
 	return searchableSelectItems
 }
 
+func (presenter *OverviewPresenter) readAccountSelectLabelValuePairs() []componentForm.SelectLabelValuePair {
+	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
+
+	accountService := service.NewAccountService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readAccountsServiceOutput := accountService.Read()
+	if readAccountsServiceOutput.Status != service.Success {
+		slog.Debug("ReadAccountsFailure")
+		return nil
+	}
+
+	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
+	if !assertOk {
+		slog.Debug("AssertAccountsFailure")
+		return nil
+	}
+
+	for _, accountEntity := range accountEntities {
+		selectLabelValuePair := componentForm.SelectLabelValuePair{
+			Label: accountEntity.Username.String(),
+			Value: accountEntity.Id.String(),
+		}
+		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+	}
+
+	return selectLabelValuePairs
+}
+
+func (presenter *OverviewPresenter) ReadCreateContainerModalDto() (
+	createDto page.CreateContainerModalDto,
+) {
+	marketplaceRequestBody := map[string]interface{}{
+		"sortBy":       "id",
+		"itemsPerPage": 100,
+	}
+	marketplaceService := service.NewMarketplaceService()
+
+	readMarketplaceServiceOutput := marketplaceService.Read(marketplaceRequestBody)
+	if readMarketplaceServiceOutput.Status != service.Success {
+		slog.Debug("ReadMarketplaceFailure")
+		return createDto
+	}
+
+	marketplaceResponseDto, assertOk := readMarketplaceServiceOutput.Body.(dto.ReadMarketplaceItemsResponse)
+	if !assertOk {
+		slog.Debug("AssertMarketplaceFailure")
+		return createDto
+	}
+
+	var appCarouselItems, frameworkCarouselItems, stackCarouselItems []templ.Component
+	for _, itemEntity := range marketplaceResponseDto.Items {
+		switch itemEntity.Type.String() {
+		case "app":
+			appCarouselItems = append(
+				appCarouselItems, page.MarketplaceCarouselItem(itemEntity),
+			)
+		case "framework":
+			frameworkCarouselItems = append(
+				frameworkCarouselItems, page.MarketplaceCarouselItem(itemEntity),
+			)
+		case "stack":
+			stackCarouselItems = append(
+				stackCarouselItems, page.MarketplaceCarouselItem(itemEntity),
+			)
+		}
+	}
+
+	return page.CreateContainerModalDto{
+		AppMarketplaceCarouselItems:       appCarouselItems,
+		FrameworkMarketplaceCarouselItems: frameworkCarouselItems,
+		StackMarketplaceCarouselItems:     stackCarouselItems,
+		ContainerImageSearchableItems:     presenter.readContainerImageSearchableItems(),
+		ContainerProfileSearchableItems:   presenter.readContainerProfileSearchableItems(),
+		AccountSelectLabelValuePairs:      presenter.readAccountSelectLabelValuePairs(),
+	}
+}
+
 func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 	containerService := service.NewContainerService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
@@ -132,49 +211,7 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		containerIdSummariesMap[containerSummary.ContainerId] = containerSummary
 	}
 
-	marketplaceRequestBody := map[string]interface{}{
-		"sortBy":       "id",
-		"itemsPerPage": 100,
-	}
-	marketplaceService := service.NewMarketplaceService()
-
-	readMarketplaceServiceOutput := marketplaceService.Read(marketplaceRequestBody)
-	if readMarketplaceServiceOutput.Status != service.Success {
-		slog.Debug("ReadMarketplaceFailure")
-		return nil
-	}
-
-	marketplaceResponseDto, assertOk := readMarketplaceServiceOutput.Body.(dto.ReadMarketplaceItemsResponse)
-	if !assertOk {
-		slog.Debug("AssertMarketplaceFailure")
-		return nil
-	}
-
-	var appCarouselItems, frameworkCarouselItems, stackCarouselItems []templ.Component
-	for _, itemEntity := range marketplaceResponseDto.Items {
-		switch itemEntity.Type.String() {
-		case "app":
-			appCarouselItems = append(
-				appCarouselItems, page.MarketplaceCarouselItem(itemEntity),
-			)
-		case "framework":
-			frameworkCarouselItems = append(
-				frameworkCarouselItems, page.MarketplaceCarouselItem(itemEntity),
-			)
-		case "stack":
-			stackCarouselItems = append(
-				stackCarouselItems, page.MarketplaceCarouselItem(itemEntity),
-			)
-		}
-	}
-
-	createContainerModalDto := page.CreateContainerModalDto{
-		AppMarketplaceCarouselItems:       appCarouselItems,
-		FrameworkMarketplaceCarouselItems: frameworkCarouselItems,
-		StackMarketplaceCarouselItems:     stackCarouselItems,
-		ContainerImageSearchableItems:     presenter.transformContainerImagesIntoSearchableItems(),
-		ContainerProfileSearchableItems:   presenter.transformContainerProfilesIntoIntoSearchableItems(),
-	}
+	createContainerModalDto := presenter.ReadCreateContainerModalDto()
 
 	pageContent := page.OverviewIndex(
 		containerEntities, containerIdSummariesMap, createContainerModalDto,

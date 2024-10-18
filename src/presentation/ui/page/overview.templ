@@ -19,6 +19,7 @@ type CreateContainerModalDto struct {
 	StackMarketplaceCarouselItems     []templ.Component                    `json:"stackCarouselItems"`
 	ContainerImageSearchableItems     []componentForm.SearchableSelectItem `json:"imageSearchableItems"`
 	ContainerProfileSearchableItems   []componentForm.SearchableSelectItem `json:"profileSearchableItems"`
+	AccountSelectLabelValuePairs      []componentForm.SelectLabelValuePair `json:"accountSelectLabelValuePairs"`
 }
 
 script OverviewIndexLocalState() {
@@ -249,7 +250,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		hx-post="/api/v1/container/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		class="space-y-6"
+		class="space-y-4"
 	>
 		@componentForm.InputField("text", "hostname", "Hostname", "container.hostname", false)
 		<!-- ContainerSource & LaunchScript -->
@@ -299,7 +300,15 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			createDto.ContainerProfileSearchableItems,
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			@componentForm.InputField("text", "entrypoint", "Entrypoint", "container.entrypoint", false)
+			<div class="flex w-full flex-col gap-6">
+				@componentForm.InputField(
+					"text", "entrypoint", "Entrypoint", "container.entrypoint", false,
+				)
+				@componentForm.SelectInputWithLabelValuePair(
+					"accountId", "Account", "container.accountId",
+					createDto.AccountSelectLabelValuePairs, true,
+				)
+			</div>
 		}
 	</form>
 }
