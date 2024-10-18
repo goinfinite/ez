@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
@@ -114,13 +115,33 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	unprocessedCreateContainerModalDto := page.CreateContainerModalUnprocessedDto{
-		MarketplaceItems:              marketplaceResponseDto.Items,
-		ContainerImageSearchableItems: presenter.transformContainerImagesIntoSearchableItems(),
+	var appCarouselItems, frameworkCarouselItems, stackCarouselItems []templ.Component
+	for _, itemEntity := range marketplaceResponseDto.Items {
+		switch itemEntity.Type.String() {
+		case "app":
+			appCarouselItems = append(
+				appCarouselItems, page.MarketplaceCarouselItem(itemEntity),
+			)
+		case "framework":
+			frameworkCarouselItems = append(
+				frameworkCarouselItems, page.MarketplaceCarouselItem(itemEntity),
+			)
+		case "stack":
+			stackCarouselItems = append(
+				stackCarouselItems, page.MarketplaceCarouselItem(itemEntity),
+			)
+		}
+	}
+
+	createContainerModalDto := page.CreateContainerModalDto{
+		AppMarketplaceCarouselItems:       appCarouselItems,
+		FrameworkMarketplaceCarouselItems: frameworkCarouselItems,
+		StackMarketplaceCarouselItems:     stackCarouselItems,
+		ContainerImageSearchableItems:     presenter.transformContainerImagesIntoSearchableItems(),
 	}
 
 	pageContent := page.OverviewIndex(
-		containerEntities, containerIdSummariesMap, unprocessedCreateContainerModalDto,
+		containerEntities, containerIdSummariesMap, createContainerModalDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)

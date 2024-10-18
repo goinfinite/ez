@@ -13,12 +13,7 @@ import (
 	"strconv"
 )
 
-type CreateContainerModalUnprocessedDto struct {
-	MarketplaceItems              []entity.MarketplaceItem             `json:"marketplaceItems"`
-	ContainerImageSearchableItems []componentForm.SearchableSelectItem `json:"searchableImages"`
-}
-
-type CreateContainerModalProcessedDto struct {
+type CreateContainerModalDto struct {
 	AppMarketplaceCarouselItems       []templ.Component                    `json:"appCarouselItems"`
 	FrameworkMarketplaceCarouselItems []templ.Component                    `json:"frameworkCarouselItems"`
 	StackMarketplaceCarouselItems     []templ.Component                    `json:"stackCarouselItems"`
@@ -113,7 +108,7 @@ script OverviewIndexLocalState() {
 templ OverviewIndex(
 	containerEntities []dto.ContainerWithMetrics,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
-	unprocessedCreateContainerDto CreateContainerModalUnprocessedDto,
+	createContainerDto CreateContainerModalDto,
 ) {
 	@OverviewIndexLocalState()
 	<div class="flex flex-col">
@@ -133,7 +128,7 @@ templ OverviewIndex(
 				)
 			</div>
 			@ContainersTable(containerEntities, containerIdSummariesMap)
-			@CreateContainerModal(unprocessedCreateContainerDto)
+			@CreateContainerModal(createContainerDto)
 			@UpdateContainerModal()
 			@componentStructural.DeleteModal(
 				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
@@ -248,7 +243,7 @@ func readContainerSourceOptions() []string {
 	return append(sourceOptions, []string{"URL", "Local Image", "Upload Image"}...)
 }
 
-templ CreateContainerForm(processedDto CreateContainerModalProcessedDto) {
+templ CreateContainerForm(createDto CreateContainerModalDto) {
 	<form
 		hx-post="/api/v1/container/"
 		hx-indicator="#loading-overlay"
@@ -268,17 +263,17 @@ templ CreateContainerForm(processedDto CreateContainerModalProcessedDto) {
 			</div>
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'App'">
 				@componentMisc.MultiItemCarousel(
-					"appCarousel", processedDto.AppMarketplaceCarouselItems, 6,
+					"appCarousel", createDto.AppMarketplaceCarouselItems, 6,
 				)
 			</div>
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Framework'">
 				@componentMisc.MultiItemCarousel(
-					"frameworkCarousel", processedDto.FrameworkMarketplaceCarouselItems, 6,
+					"frameworkCarousel", createDto.FrameworkMarketplaceCarouselItems, 6,
 				)
 			</div>
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Stack'">
 				@componentMisc.MultiItemCarousel(
-					"stackCarousel", processedDto.StackMarketplaceCarouselItems, 6,
+					"stackCarousel", createDto.StackMarketplaceCarouselItems, 6,
 				)
 			</div>
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'URL'">
@@ -287,7 +282,7 @@ templ CreateContainerForm(processedDto CreateContainerModalProcessedDto) {
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Local Image'">
 				@componentForm.SearchableSelectInput(
 					"imageAddress", "Container Image", "container.imageAddress",
-					processedDto.ContainerImageSearchableItems,
+					createDto.ContainerImageSearchableItems,
 				)
 			</div>
 			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
@@ -341,36 +336,11 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 	</div>
 }
 
-func processCreateContainerUnprocessedDto(
-	unprocessedDto CreateContainerModalUnprocessedDto,
-) (processedDto CreateContainerModalProcessedDto) {
-	for _, itemEntity := range unprocessedDto.MarketplaceItems {
-		switch itemEntity.Type.String() {
-		case "app":
-			processedDto.AppMarketplaceCarouselItems = append(
-				processedDto.AppMarketplaceCarouselItems, MarketplaceCarouselItem(itemEntity),
-			)
-		case "framework":
-			processedDto.FrameworkMarketplaceCarouselItems = append(
-				processedDto.FrameworkMarketplaceCarouselItems, MarketplaceCarouselItem(itemEntity),
-			)
-		case "stack":
-			processedDto.StackMarketplaceCarouselItems = append(
-				processedDto.StackMarketplaceCarouselItems, MarketplaceCarouselItem(itemEntity),
-			)
-		}
-	}
-
-	processedDto.ContainerImageSearchableItems = unprocessedDto.ContainerImageSearchableItems
-
-	return processedDto
-}
-
-templ CreateContainerModal(unprocessedDto CreateContainerModalUnprocessedDto) {
+templ CreateContainerModal(createDto CreateContainerModalDto) {
 	@componentStructural.Modal(
 		"Create Container", "isCreateContainerModalOpen", "closeCreateContainerModal()", "",
 	) {
-		@CreateContainerForm(processCreateContainerUnprocessedDto(unprocessedDto))
+		@CreateContainerForm(createDto)
 	}
 }
 
