@@ -18,15 +18,15 @@ templ ContainerTaggedSummary(containerSummary ContainerSummary) {
 			if containerSummary.ProfileMaxSpecs == nil {
 				@componentStructural.Tag(
 					"", containerSummary.ProfileName.String(),
-					"<small>"+formatProfileSummarySmallTag(&containerSummary.ProfileBaseSpecs)+"</small>",
+					"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+"</small>",
 					"infinite-500",
 				)
 			} else {
 				@componentStructural.Tag(
 					"", containerSummary.ProfileName.String(),
-					"<small>"+formatProfileSummarySmallTag(&containerSummary.ProfileBaseSpecs)+
+					"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+
 						"<i class='ph-bold ph-arrows-out-simple mx-1'></i>"+
-						formatProfileSummarySmallTag(containerSummary.ProfileMaxSpecs)+"</small>",
+						formatProfileTaggedSmallSummary(containerSummary.ProfileMaxSpecs)+"</small>",
 					"infinite-500",
 				)
 			}

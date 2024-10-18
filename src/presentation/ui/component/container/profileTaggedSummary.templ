@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func formatProfileSummarySmallTag(specs *valueObject.ContainerSpecs) string {
+func formatProfileTaggedSmallSummary(specs *valueObject.ContainerSpecs) string {
 	if specs == nil {
 		return ""
 	}
@@ -23,12 +23,20 @@ func formatProfileSummarySmallTag(specs *valueObject.ContainerSpecs) string {
 		memoryGibiBytesStr + "</strong>G RAM"
 }
 
-templ ProfileSummarySmallTag(profile entity.ContainerProfile) {
+templ ProfileTaggedSmallSummary(profile entity.ContainerProfile) {
 	<small class="border-infinite-500 rounded border p-1 align-middle text-xs">
-		@templ.Raw(formatProfileSummarySmallTag(&profile.BaseSpecs))
+		@templ.Raw(formatProfileTaggedSmallSummary(&profile.BaseSpecs))
 		if profile.MaxSpecs != nil {
 			<i class="ph-bold ph-arrows-out-simple mx-1"></i>
-			@templ.Raw(formatProfileSummarySmallTag(profile.MaxSpecs))
+			@templ.Raw(formatProfileTaggedSmallSummary(profile.MaxSpecs))
 		}
 	</small>
+}
+
+templ ProfileTaggedSummary(profile entity.ContainerProfile) {
+	@templ.Raw(formatProfileTaggedSmallSummary(&profile.BaseSpecs))
+	if profile.MaxSpecs != nil {
+		<i class="ph-bold ph-arrows-out-simple mx-1"></i>
+		@templ.Raw(formatProfileTaggedSmallSummary(profile.MaxSpecs))
+	}
 }
