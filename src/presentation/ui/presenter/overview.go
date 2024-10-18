@@ -74,7 +74,7 @@ func (presenter *OverviewPresenter) transformContainerImagesIntoSearchableItems(
 func (presenter *OverviewPresenter) transformContainerProfilesIntoIntoSearchableItems() []componentForm.SearchableSelectItem {
 	searchableSelectItems := []componentForm.SearchableSelectItem{}
 
-	containerProfileService := service.NewContainerService(
+	containerProfileService := service.NewContainerProfileService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
