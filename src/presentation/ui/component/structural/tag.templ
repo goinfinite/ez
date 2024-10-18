@@ -25,7 +25,7 @@ templ TinyTag(highlightedIcon, highlightedLabel, tagValue, tagColor string) {
 		<div class={ "bg-" + tagColor + " flex items-center rounded-l-md" }>
 			<div class="flex items-center px-1 leading-normal">
 				if highlightedIcon != "" {
-					<i class={ "ph-duotone " + highlightedIcon + " text-md" }></i>
+					<i class={ "ph-bold " + highlightedIcon + " text-base" }></i>
 				}
 				if highlightedLabel != "" {
 					<span class="max-w-64 truncate">{ highlightedLabel }</span>
