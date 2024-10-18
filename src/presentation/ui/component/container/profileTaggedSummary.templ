@@ -3,7 +3,7 @@ package componentContainer
 import (
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
-	"strconv"
+	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 )
 
 func formatProfileTaggedSmallSummary(specs *valueObject.ContainerSpecs) string {
@@ -11,16 +11,13 @@ func formatProfileTaggedSmallSummary(specs *valueObject.ContainerSpecs) string {
 		return ""
 	}
 
-	cpuCoresStr := strconv.FormatFloat(specs.CpuCores, 'f', 1, 64)
-	memoryGibiBytesStr := strconv.FormatInt(specs.MemoryGibibytes, 10)
-
 	if specs.CpuCores == 0 {
-		return "<strong>" + memoryGibiBytesStr + "</strong>G RAM"
+		return "<strong>" + specs.MemoryBytes.StringWithSuffix() + "</strong> RAM"
 	}
 
-	return "<strong>" + cpuCoresStr + "</strong> CPU " +
+	return "<strong>" + specs.Millicores.ToCoresString() + "</strong> CPU " +
 		"<span class=\"text-[8px] align-middle\">//</span> <strong>" +
-		memoryGibiBytesStr + "</strong>G RAM"
+		specs.MemoryBytes.StringWithSuffix() + "</strong> RAM"
 }
 
 templ ProfileTaggedSmallSummary(profile entity.ContainerProfile) {
@@ -33,10 +30,19 @@ templ ProfileTaggedSmallSummary(profile entity.ContainerProfile) {
 	</small>
 }
 
-templ ProfileTaggedSummary(profile entity.ContainerProfile) {
-	@templ.Raw(formatProfileTaggedSmallSummary(&profile.BaseSpecs))
-	if profile.MaxSpecs != nil {
-		<i class="ph-bold ph-arrows-out-simple mx-1"></i>
-		@templ.Raw(formatProfileTaggedSmallSummary(profile.MaxSpecs))
-	}
+templ ProfileTaggedSummary(profileEntity entity.ContainerProfile) {
+	<div class="flex flex-col p-1">
+		{ profileEntity.Name.String() }
+		<div class="mt-1 flex flex-row items-center gap-1.5">
+			@componentStructural.TinyTag(
+				"ph-airplane-tilt", "", formatProfileTaggedSmallSummary(&profileEntity.BaseSpecs), "infinite-500",
+			)
+			if profileEntity.MaxSpecs != nil {
+				<i class="ph-bold ph-arrows-out-simple"></i>
+				@componentStructural.TinyTag(
+					"ph-rocket-launch", "", formatProfileTaggedSmallSummary(profileEntity.MaxSpecs), "infinite-500",
+				)
+			}
+		</div>
+	</div>
 }
