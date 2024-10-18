@@ -24,6 +24,10 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
           (item) => item.id !== id
         );
       },
+      init() {
+        this.newFieldSet = {};
+        this.registeredFieldsets = [];
+      },
     }));
   });
 }
@@ -68,7 +72,7 @@ templ MultiColumnRepeatableFieldset(
 					</template>
 					<button
 						type="button"
-						@click="removeRegisteredFieldset(registeredFieldset.id)"
+						@click={ "removeRegisteredFieldset(registeredFieldset.id); " + bindValuePath + " = registeredFieldsets" }
 						class="min-w-9 h-9 rounded-sm bg-red-900 leading-none hover:bg-red-700"
 					>
 						<i class="ph-bold ph-trash text-xl"></i>
@@ -93,7 +97,7 @@ templ MultiColumnRepeatableFieldset(
 			}
 			<button
 				type="button"
-				@click="createFieldset()"
+				@click={ "createFieldset(); " + bindValuePath + " = registeredFieldsets" }
 				class="bg-infinite-500 hover:bg-infinite-300 min-w-9 h-9 rounded-sm leading-none"
 			>
 				<i class="ph-bold ph-plus text-xl"></i>
