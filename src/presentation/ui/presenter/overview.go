@@ -71,6 +71,41 @@ func (presenter *OverviewPresenter) transformContainerImagesIntoSearchableItems(
 	return searchableSelectItems
 }
 
+func (presenter *OverviewPresenter) transformContainerProfilesIntoIntoSearchableItems() []componentForm.SearchableSelectItem {
+	searchableSelectItems := []componentForm.SearchableSelectItem{}
+
+	containerProfileService := service.NewContainerService(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	readProfilesServiceOutput := containerProfileService.Read()
+	if readProfilesServiceOutput.Status != service.Success {
+		slog.Debug("ReadContainerProfileFailure")
+		return nil
+	}
+
+	profileEntities, assertOk := readProfilesServiceOutput.Body.([]entity.ContainerProfile)
+	if !assertOk {
+		slog.Debug("AssertContainerProfileFailure")
+		return nil
+	}
+
+	for _, profileEntity := range profileEntities {
+		searchableTextSerialized := profileEntity.JsonSerialize()
+		htmlLabel := componentContainer.ProfileTaggedSummary(profileEntity)
+
+		searchableSelectItem := componentForm.SearchableSelectItem{
+			Label:          profileEntity.Name.String(),
+			Value:          profileEntity.Id.String(),
+			SearchableText: &searchableTextSerialized,
+			HtmlLabel:      &htmlLabel,
+		}
+		searchableSelectItems = append(searchableSelectItems, searchableSelectItem)
+	}
+
+	return searchableSelectItems
+}
+
 func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 	containerService := service.NewContainerService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
@@ -138,6 +173,7 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		FrameworkMarketplaceCarouselItems: frameworkCarouselItems,
 		StackMarketplaceCarouselItems:     stackCarouselItems,
 		ContainerImageSearchableItems:     presenter.transformContainerImagesIntoSearchableItems(),
+		ContainerProfileSearchableItems:   presenter.transformContainerProfilesIntoIntoSearchableItems(),
 	}
 
 	pageContent := page.OverviewIndex(
