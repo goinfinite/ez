@@ -80,7 +80,7 @@ templ SelectInputWithLabelValuePair(
 
 script SearchableSelectInputLocalState(id string) {
 	document.addEventListener('alpine:init', () => {
-		Alpine.data('searchableSelect', () => ({
+		Alpine.data(id+'SearchableSelect', () => ({
 			searchableItems: JSON.parse(
 				document.getElementById(id + 'SearchableItems').textContent
 			),
@@ -147,7 +147,7 @@ templ SearchableSelectInput(
 	@SearchableSelectInputLocalState(id)
 	<!-- SearchableSelectInput HTML -->
 	<div
-		x-data="searchableSelect"
+		x-data={ id + "SearchableSelect" }
 		class="relative flex flex-col items-center"
 	>
 		<input type="hidden" id={ id } name={ id } x-model:value={ bindValuePath }/>
