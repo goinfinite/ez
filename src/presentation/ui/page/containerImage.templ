@@ -350,7 +350,7 @@ templ ImportContainerImageForm(
 				accountsSelectPairs, false,
 			)
 			@componentForm.Dropzone(
-				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br",
+				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br", true,
 			)
 			@componentForm.SubmitButton("Import", "ph-check-fat", "closeImportImageModal()", false)
 		</div>

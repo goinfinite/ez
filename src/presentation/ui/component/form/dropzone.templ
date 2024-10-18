@@ -34,6 +34,7 @@ script DropzoneLocalState() {
 
 templ Dropzone(
 	id, description, acceptAttr string,
+	allowMultipleFiles bool,
 ) {
 	@DropzoneLocalState()
 	<div
@@ -73,7 +74,9 @@ templ Dropzone(
 				name={ id }
 				id={ id }
 				type="file"
-				multiple
+				if allowMultipleFiles {
+					multiple
+				}
 				hidden
 				if acceptAttr != "" {
 					accept={ acceptAttr }
