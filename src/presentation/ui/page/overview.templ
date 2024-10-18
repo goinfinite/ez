@@ -285,6 +285,12 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					createDto.ContainerImageSearchableItems,
 				)
 			</div>
+			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Upload Image'">
+				@componentForm.Dropzone(
+					"imageArchiveFile", ".tar, .gzip, .zip, .xz or .br",
+					".tar,.gzip,.zip,.xz,.br", false,
+				)
+			</div>
 			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
 		</div>
 	</form>
