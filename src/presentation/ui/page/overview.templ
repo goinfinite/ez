@@ -34,7 +34,7 @@ script OverviewIndexLocalState() {
 					'hostname': '',
 					'imageAddress': 'docker.io/goinfinite/os:latest',
 					'portBindings': [],
-					'restartPolicy': '',
+					'restartPolicy': 'unless-stopped',
 					'entrypoint': '',
 					'profileId': 0,
 					'envs': [],
@@ -307,6 +307,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				@componentForm.SelectInputWithLabelValuePair(
 					"accountId", "Account", "container.accountId",
 					createDto.AccountSelectLabelValuePairs, true,
+				)
+				@componentForm.SelectInput(
+					"restartPolicy", "Restart Policy", "container.restartPolicy",
+					valueObject.ValidContainerRestartPolicies, false,
 				)
 			</div>
 		}
