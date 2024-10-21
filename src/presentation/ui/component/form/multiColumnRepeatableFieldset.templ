@@ -80,6 +80,7 @@ templ MultiColumnRepeatableFieldset(
 								type="text"
 								x-model:value="fieldValue"
 								:placeholder="fieldLabel"
+								formnovalidate
 								readonly
 								class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full cursor-not-allowed rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 							/>
@@ -108,10 +109,10 @@ templ MultiColumnRepeatableFieldset(
 							repeatableField.Options, false, false,
 						)
 					case "text":
-						@InputField(
-							repeatableField.InputType, repeatableField.Id, repeatableField.Label,
-							"newFieldset['"+repeatableField.Id+"']", false, false,
-						)
+						@InputField(InputFieldDto{
+							InputType: repeatableField.InputType, Label: repeatableField.Label,
+							BindValuePath: "newFieldset['" + repeatableField.Id + "']",
+						})
 				}
 			}
 			<button

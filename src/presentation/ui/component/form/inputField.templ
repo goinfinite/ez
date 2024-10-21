@@ -1,34 +1,46 @@
 package componentForm
 
-templ InputField(
-	inputType, id, label, bindValuePath string,
-	isRequired, denseMode bool,
-) {
+type InputFieldDto struct {
+	InputType     string
+	Id            string
+	Label         string
+	BindValuePath string
+	IsRequired    bool
+	DenseMode     bool
+}
+
+templ InputField(inputDto InputFieldDto) {
 	<!-- InputField -->
 	<div class="relative w-full">
 		<input
-			type={ inputType }
-			id={ id }
-			name={ id }
-			x-model:value={ bindValuePath }
+			type={ inputDto.InputType }
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+			}
+			x-model:value={ inputDto.BindValuePath }
 			autocomplete="off"
-			placeholder={ label }
-			if isRequired {
+			if inputDto.Label != "" {
+				placeholder={ inputDto.Label }
+			}
+			if inputDto.IsRequired {
 				required
 			}
-			if denseMode {
+			if inputDto.DenseMode {
 				class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full rounded-md border px-1.5 text-[13px] text-neutral-100 placeholder-transparent outline-none transition-all"
 			} else {
 				class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 			}
 		/>
-		if label != "" {
+		if inputDto.Label != "" {
 			<label
-				for={ id }
+				if inputDto.Id != "" {
+					for={ inputDto.Id }
+				}
 				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-50% to-transparent to-50% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 			>
-				{ label }
-				if isRequired {
+				{ inputDto.Label }
+				if inputDto.IsRequired {
 					<span class="text-red-700">*</span>
 				}
 			</label>

@@ -435,9 +435,10 @@ templ ContainerProfileForm(action string) {
 			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 			<input type="hidden" name="accountId" x-bind:value="containerProfile.accountId"/>
 		}
-		@componentForm.InputField(
-			"text", "name", "Profile Name", "containerProfile.name", true, false,
-		)
+		@componentForm.InputField(componentForm.InputFieldDto{
+			InputType: "text", Id: "name", Label: "Profile Name",
+			BindValuePath: "containerProfile.name", IsRequired: true,
+		})
 		<div class="flex flex-row gap-4">
 			<div class="space-y-5.5 bg-ez-500 w-1/2 rounded-md p-4">
 				<div>

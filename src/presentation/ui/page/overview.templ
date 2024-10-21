@@ -253,9 +253,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		class="space-y-4"
 		@submit="closeCreateContainerModal()"
 	>
-		@componentForm.InputField(
-			"text", "hostname", "Hostname", "container.hostname", true, false,
-		)
+		@componentForm.InputField(componentForm.InputFieldDto{
+			InputType: "text", Id: "hostname", Label: "Hostname",
+			BindValuePath: "container.hostname", IsRequired: true,
+		})
 		<!-- ContainerSource & LaunchScript -->
 		<div class="border-ez-200 rounded-md border p-3">
 			<div class="flex items-center space-x-3 text-sm">
@@ -282,9 +283,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				)
 			</div>
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'URL'">
-				@componentForm.InputField(
-					"text", "imageAddress", "Image Address", "container.imageAddress", true, false,
-				)
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType: "text", Id: "imageAddress", Label: "Image Address",
+					BindValuePath: "container.imageAddress", IsRequired: true,
+				})
 			</div>
 			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Local Image'">
 				@componentForm.SearchableSelectInput(
@@ -306,9 +308,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			<div class="flex w-full flex-col gap-6">
-				@componentForm.InputField(
-					"text", "entrypoint", "Entrypoint", "container.entrypoint", false, false,
-				)
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType: "text", Id: "entrypoint", Label: "Entrypoint",
+					BindValuePath: "container.entrypoint",
+				})
 				<div class="flex flex-row items-center gap-6">
 					<div class="basis-1/2">
 						@componentForm.SelectInputWithLabelValuePair(
