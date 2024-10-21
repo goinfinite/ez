@@ -690,3 +690,12 @@ func (portBinding PortBinding) GetPublicPortInterval() (
 
 	return NewNetworkPortInterval(minPublicPort, maxPublicPort)
 }
+
+func ReadPortBindingsServiceNames() []string {
+	serviceNames := []string{}
+	for _, serviceBinding := range KnownServiceBindings {
+		serviceNames = append(serviceNames, serviceBinding.ServiceNames...)
+	}
+
+	return serviceNames
+}
