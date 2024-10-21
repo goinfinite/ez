@@ -104,10 +104,10 @@ templ MultiColumnRepeatableFieldset(
 			for _, repeatableField := range repeatableFields {
 				switch repeatableField.InputType {
 					case "select":
-						@SelectInput(
-							repeatableField.Id, repeatableField.Label, "newFieldset['"+repeatableField.Id+"']",
-							repeatableField.Options, false, false,
-						)
+						@SelectInput(SelectInputDto{
+							Label: repeatableField.Label, BindValuePath: "newFieldset['" + repeatableField.Id + "']",
+							Options: repeatableField.Options,
+						})
 					case "text":
 						@InputField(InputFieldDto{
 							InputType: repeatableField.InputType, Label: repeatableField.Label,

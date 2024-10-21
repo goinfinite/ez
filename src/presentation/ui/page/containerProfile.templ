@@ -497,10 +497,11 @@ templ ContainerProfileForm(action string) {
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			<div class="space-y-5.5">
-				@componentForm.SelectInput(
-					"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
-					valueObject.ValidScalingPolicies, false, false,
-				)
+				@componentForm.SelectInput(componentForm.SelectInputDto{
+					Id: "scalingPolicy", Label: "Scaling Policy",
+					BindValuePath: "containerProfile.scalingPolicy",
+					Options:       valueObject.ValidScalingPolicies,
+				})
 				<div class="flex flex-row space-x-6">
 					<div class="basis-1/2">
 						<template x-if="isScalingPolicyConn">

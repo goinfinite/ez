@@ -320,10 +320,11 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 						)
 					</div>
 					<div class="basis-1/2">
-						@componentForm.SelectInput(
-							"restartPolicy", "Restart Policy", "container.restartPolicy",
-							valueObject.ValidContainerRestartPolicies, false, false,
-						)
+						@componentForm.SelectInput(componentForm.SelectInputDto{
+							Id: "restartPolicy", Label: "Restart Policy",
+							BindValuePath: "container.restartPolicy",
+							Options:       valueObject.ValidContainerRestartPolicies,
+						})
 					</div>
 				</div>
 				@componentForm.MultiColumnRepeatableFieldset(
