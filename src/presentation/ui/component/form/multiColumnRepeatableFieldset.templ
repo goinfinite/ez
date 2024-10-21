@@ -28,6 +28,21 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
         this.newFieldSet = {};
         this.registeredFieldsets = [];
       },
+
+			transformFieldsetsIntoApiPayload() {
+				let payloadStr = "";
+				
+				this.registeredFieldsets.forEach((registeredFieldset) => {
+					let fieldsetStr = "";
+					for (const [key, value] of Object.entries(registeredFieldset.fieldset)) {
+						fieldsetStr += value + "|";
+					}
+					fieldsetStrWithoutLastPipe = fieldsetStr.slice(0, -1);
+					payloadStr += fieldsetStrWithoutLastPipe + ";";
+				});
+
+				return payloadStr;
+			},
     }));
   });
 }
@@ -72,7 +87,7 @@ templ MultiColumnRepeatableFieldset(
 					</template>
 					<button
 						type="button"
-						@click={ "removeRegisteredFieldset(registeredFieldset.id); " + bindValuePath + " = registeredFieldsets" }
+						@click={ "removeRegisteredFieldset(registeredFieldset.id); " + bindValuePath + " = transformFieldsetsIntoApiPayload()" }
 						class="min-w-9 h-9 rounded-sm bg-red-900 leading-none hover:bg-red-700"
 					>
 						<i class="ph-bold ph-trash text-xl"></i>
@@ -97,7 +112,7 @@ templ MultiColumnRepeatableFieldset(
 			}
 			<button
 				type="button"
-				@click={ "createFieldset(); " + bindValuePath + " = registeredFieldsets" }
+				@click={ "createFieldset(); " + bindValuePath + " = transformFieldsetsIntoApiPayload()" }
 				class="bg-infinite-500 hover:bg-infinite-300 min-w-9 h-9 rounded-sm leading-none"
 			>
 				<i class="ph-bold ph-plus text-xl"></i>
