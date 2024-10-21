@@ -45,6 +45,11 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 					payloadStr += fieldsetStrWithoutLastPipe + ";";
 				});
 
+				if (payloadStr.length > 0) {
+					payloadStrWithoutLastSemicolon = payloadStr.slice(0, -1);
+					payloadStr = payloadStrWithoutLastSemicolon;
+				}
+
 				return payloadStr;
 			},
     }));
@@ -62,6 +67,9 @@ templ MultiColumnRepeatableFieldset(
 		class="bg-ez-400 flex flex-col gap-6 rounded-md p-4"
 		x-data={ id + "MultiColumnRepeatableFieldset" }
 	>
+		<template x-if={ bindValuePath + ".length > 0" }>
+			<input type="hidden" id={ id } name={ id } x-model={ bindValuePath }/>
+		</template>
 		<div>
 			<p class="text-md font-bold">{ title }</p>
 			if description != "" {
