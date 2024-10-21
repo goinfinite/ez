@@ -5,7 +5,9 @@ templ SubmitButton(
 ) {
 	<button
 		type="submit"
-		@click={ onClick }
+		if onClick != "" {
+			@click={ onClick }
+		}
 		if denseMode {
 			class="bg-infinite-500 hover:bg-infinite-300 rounded-md border-none px-2 py-1 text-center text-sm font-bold lowercase text-white"
 		} else {
