@@ -435,7 +435,9 @@ templ ContainerProfileForm(action string) {
 			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 			<input type="hidden" name="accountId" x-bind:value="containerProfile.accountId"/>
 		}
-		@componentForm.InputField("text", "name", "Profile Name", "containerProfile.name", false)
+		@componentForm.InputField(
+			"text", "name", "Profile Name", "containerProfile.name", true, false,
+		)
 		<div class="flex flex-row gap-4">
 			<div class="space-y-5.5 bg-ez-500 w-1/2 rounded-md p-4">
 				<div>
@@ -496,7 +498,7 @@ templ ContainerProfileForm(action string) {
 			<div class="space-y-5.5">
 				@componentForm.SelectInput(
 					"scalingPolicy", "Scaling Policy", "containerProfile.scalingPolicy",
-					valueObject.ValidScalingPolicies, false,
+					valueObject.ValidScalingPolicies, false, false,
 				)
 				<div class="flex flex-row space-x-6">
 					<div class="basis-1/2">

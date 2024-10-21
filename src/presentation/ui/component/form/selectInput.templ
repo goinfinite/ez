@@ -1,7 +1,8 @@
 package componentForm
 
 templ SelectInput(
-	id, label, bindValuePath string, options []string, denseMode bool,
+	id, label, bindValuePath string, options []string,
+	isRequired, denseMode bool,
 ) {
 	<!-- SelectInput -->
 	<div class="relative w-full">
@@ -10,6 +11,9 @@ templ SelectInput(
 			name={ id }
 			x-model:value={ bindValuePath }
 			placeholder={ label }
+			if isRequired {
+				required
+			}
 			if denseMode {
 				class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
 			} else {
@@ -27,6 +31,9 @@ templ SelectInput(
 				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 			>
 				{ label }
+				if isRequired {
+					<span class="text-red-700">*</span>
+				}
 			</label>
 		}
 		<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
