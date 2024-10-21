@@ -1,11 +1,10 @@
 package componentForm
 
 type RepeatableField struct {
-	InputType  string
-	Id         string
-	Label      string
-	IsRequired bool
-	Options    []string
+	InputType string
+	Id        string
+	Label     string
+	Options   []string
 }
 
 script MultiColumnRepeatableFieldsetLocalState(id string) {
@@ -106,12 +105,12 @@ templ MultiColumnRepeatableFieldset(
 					case "select":
 						@SelectInput(
 							repeatableField.Id, repeatableField.Label, "newFieldset['"+repeatableField.Id+"']",
-							repeatableField.Options, repeatableField.IsRequired, false,
+							repeatableField.Options, false, false,
 						)
 					case "text":
 						@InputField(
 							repeatableField.InputType, repeatableField.Id, repeatableField.Label,
-							"newFieldset['"+repeatableField.Id+"']", repeatableField.IsRequired, false,
+							"newFieldset['"+repeatableField.Id+"']", false, false,
 						)
 				}
 			}
