@@ -8,8 +8,6 @@ import (
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"strconv"
 )
 
@@ -47,7 +45,8 @@ script OverviewIndexLocalState() {
 			},
 
 			// Auxiliary States
-			createContainerSourceSelectedOption: 'App',
+			createContainerSourceSelectedOption: 'Marketplace',
+			createContainerSelectedMarketplaceType: 'App',
 			createContainerSelectedMarketplaceItemId: 0,
 			updateSelectedMarketplaceItem(itemId) {
 				this.createContainerSelectedMarketplaceItemId = itemId;
@@ -236,15 +235,6 @@ templ ContainersTable(
 	</table>
 }
 
-func readContainerSourceOptions() []string {
-	sourceOptions := []string{}
-	for _, itemType := range valueObject.ValidMarketplaceItemTypes {
-		upperCaser := cases.Title(language.English)
-		sourceOptions = append(sourceOptions, upperCaser.String(itemType))
-	}
-	return append(sourceOptions, []string{"URL", "Local Image", "Upload Image"}...)
-}
-
 templ CreateContainerForm(createDto CreateContainerModalDto) {
 	<form
 		hx-post="/api/v1/container/"
@@ -258,43 +248,62 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			BindValuePath: "container.hostname", IsRequired: true,
 		})
 		<!-- ContainerSource & LaunchScript -->
-		<div class="border-ez-200 rounded-md border p-3">
+		<div class="border-ez-200 flex flex-col gap-4 rounded-md border p-3">
 			<div class="flex items-center space-x-3 text-sm">
 				<div>Source: </div>
-				for _, sourceOption := range readContainerSourceOptions() {
+				for _, sourceOption := range []string{
+					"Marketplace", "URL", "Existing Container", "Local Image", "Upload Image",
+				} {
 					@componentForm.RadioInput(
 						"", sourceOption, sourceOption, "createContainerSourceSelectedOption",
 					)
 				}
 			</div>
-			<div class="my-3" x-show="createContainerSourceSelectedOption === 'App'">
-				@componentMisc.MultiItemCarousel(
-					"appCarousel", createDto.AppMarketplaceCarouselItems, 6,
-				)
+			<div
+				class="flex flex-row justify-center"
+				x-show="createContainerSourceSelectedOption === 'Marketplace'"
+			>
+				<div>
+					@componentStructural.VerticalTabHeader(
+						[]componentStructural.TabHeaderItem{
+							{Label: "App", Value: "App", Icon: "ph-browsers"},
+							{Label: "Framework", Value: "Framework", Icon: "ph-cube"},
+							{Label: "Stack", Value: "Stack", Icon: "ph-books"},
+						},
+						"createContainerSelectedMarketplaceType",
+					)
+				</div>
+				<div class="border-3 border-ez-500 flex items-center rounded-md p-2">
+					<div x-show="createContainerSelectedMarketplaceType === 'App'">
+						@componentMisc.MultiItemCarousel(
+							"appCarousel", createDto.AppMarketplaceCarouselItems, 5,
+						)
+					</div>
+					<div x-show="createContainerSelectedMarketplaceType === 'Framework'">
+						@componentMisc.MultiItemCarousel(
+							"frameworkCarousel", createDto.FrameworkMarketplaceCarouselItems, 5,
+						)
+					</div>
+					<div x-show="createContainerSelectedMarketplaceType === 'Stack'">
+						@componentMisc.MultiItemCarousel(
+							"stackCarousel", createDto.StackMarketplaceCarouselItems, 5,
+						)
+					</div>
+				</div>
 			</div>
-			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Framework'">
-				@componentMisc.MultiItemCarousel(
-					"frameworkCarousel", createDto.FrameworkMarketplaceCarouselItems, 6,
-				)
-			</div>
-			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Stack'">
-				@componentMisc.MultiItemCarousel(
-					"stackCarousel", createDto.StackMarketplaceCarouselItems, 6,
-				)
-			</div>
-			<div class="my-3" x-show="createContainerSourceSelectedOption === 'URL'">
+			<div x-show="createContainerSourceSelectedOption === 'URL'">
 				@componentForm.InputField(componentForm.InputFieldDto{
 					InputType: "text", Id: "imageAddress", Label: "Image Address",
 					BindValuePath: "container.imageAddress", IsRequired: true,
 				})
 			</div>
-			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Local Image'">
+			<div x-show="createContainerSourceSelectedOption === 'Local Image'">
 				@componentForm.SearchableSelectInput(
 					"imageAddress", "Container Image", "container.imageAddress",
 					createDto.ContainerImageSearchableItems,
 				)
 			</div>
-			<div class="my-3" x-show="createContainerSourceSelectedOption === 'Upload Image'">
+			<div x-show="createContainerSourceSelectedOption === 'Upload Image'">
 				@componentForm.Dropzone(
 					"imageArchiveFile", ".tar, .gzip, .zip, .xz or .br",
 					".tar,.gzip,.zip,.xz,.br", false,
