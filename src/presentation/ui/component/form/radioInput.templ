@@ -3,7 +3,7 @@ package componentForm
 templ RadioInput(id, label, bindValue, bindModelPath string) {
 	<!-- RadioInput -->
 	<div
-		class="inline-flex items-center"
+		class="hover:text-infinite-500 inline-flex items-center text-neutral-100"
 		@click={ bindModelPath + ` = "` + bindValue + `"` }
 	>
 		<label class="relative flex cursor-pointer items-center rounded-full p-1">
@@ -16,13 +16,18 @@ templ RadioInput(id, label, bindValue, bindModelPath string) {
 			/>
 			<i
 				x-show={ bindModelPath + ` !== "` + bindValue + `"` }
-				class="ph-duotone ph-circle text-xl text-neutral-100"
+				class="ph-duotone ph-circle text-xl"
 			></i>
 			<i
 				x-show={ bindModelPath + ` === "` + bindValue + `"` }
 				class="ph-duotone ph-check-circle text-infinite-500 text-xl"
 			></i>
 		</label>
-		<label class="cursor-pointer text-sm font-medium text-neutral-100">{ label }</label>
+		<label
+			class="cursor-pointer text-sm"
+			:class={ bindModelPath + " === '" + bindValue + "' && 'text-infinite-500 font-bold'" }
+		>
+			{ label }
+		</label>
 	</div>
 }
