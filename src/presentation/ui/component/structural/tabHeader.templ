@@ -1,0 +1,49 @@
+package componentStructural
+
+type TabHeaderItem struct {
+	Label string
+	Value string
+	Icon  string
+}
+
+templ VerticalTabHeader(
+	tabHeaderItems []TabHeaderItem,
+	bindValuePath string,
+) {
+	<!-- VerticalTabHeader -->
+	<ul class="flex w-full flex-col gap-1 py-3 text-sm">
+		for _, item := range tabHeaderItems {
+			<li
+				class="bg-ez-400 min-w-20 border-ez-500 border-3 hover:bg-ez-500 flex w-fit cursor-pointer flex-row items-center justify-center gap-1.5 self-end rounded-l-md border-r-0 p-2.5 transition-all"
+				:class={ bindValuePath + " === '" + item.Value + "' && 'font-bold text-infinite-500 bg-ez-500'" }
+				@click={ bindValuePath + " = '" + item.Value + "'" }
+			>
+				if item.Icon != "" {
+					<i class={ "ph-duotone " + item.Icon + " align-middle text-lg" }></i>
+				}
+				{ item.Label }
+			</li>
+		}
+	</ul>
+}
+
+templ HorizontalTabHeader(
+	tabHeaderItems []TabHeaderItem,
+	bindValuePath string,
+) {
+	<!-- HorizontalTabHeader -->
+	<ul class="flex w-full gap-1 text-sm">
+		for _, item := range tabHeaderItems {
+			<li
+				class="bg-ez-400 flex flex-row rounded-t-md p-2.5 transition-all"
+				:class={ bindValuePath + " === '" + item.Value + "' && 'font-bold text-infinite-500 bg-ez-500'" }
+				@click={ bindValuePath + " = '" + item.Value + "'" }
+			>
+				if item.Icon != "" {
+					<i class={ "ph-duotone " + item.Icon + " mr-3 align-middle text-lg" }></i>
+				}
+				{ item.Label }
+			</li>
+		}
+	</ul>
+}
