@@ -251,6 +251,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="space-y-4"
+		@submit="closeCreateContainerModal()"
 	>
 		@componentForm.InputField(
 			"text", "hostname", "Hostname", "container.hostname", true, false,
@@ -332,11 +333,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					"portBindings", "Port Bindings", "Configure which ports are exposed to the outside world. You may select just the 'Service Name' to use the standard ports. Be aware that once deployed, you cannot change the port arrangements.",
 					"container.portBindings", []componentForm.RepeatableField{
 						{
-							InputType:  "select",
-							Id:         "serviceName",
-							Label:      "Service Name",
-							IsRequired: true,
-							Options:    valueObject.ReadPortBindingsServiceNames(),
+							InputType: "select",
+							Id:        "serviceName",
+							Label:     "Service Name",
+							Options:   valueObject.ReadPortBindingsServiceNames(),
 						},
 						{InputType: "text", Id: "publicPort", Label: "Public Port"},
 						{InputType: "text", Id: "containerPort", Label: "Container Port"},
@@ -350,6 +350,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				)
 			</div>
 		}
+		@componentForm.SubmitButton("Create", "ph-check-fat", "", false)
 	</form>
 }
 
