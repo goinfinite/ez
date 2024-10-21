@@ -251,9 +251,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		<div class="border-ez-200 flex flex-col gap-4 rounded-md border p-3">
 			<div class="flex items-center space-x-3 text-sm">
 				<div>Source: </div>
-				for _, sourceOption := range []string{
-					"Marketplace", "URL", "Existing Container", "Local Image", "Upload Image",
-				} {
+				for _, sourceOption := range []string{"Marketplace", "URL", "Existing Container", "Local Image", "Upload Image"} {
 					@componentForm.RadioInput(
 						"", sourceOption, sourceOption, "createContainerSourceSelectedOption",
 					)
@@ -373,7 +371,7 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 	<!-- MultiItemCarouselItem HTML -->
 	<div
 		@click={ "updateSelectedMarketplaceItem(" + itemEntity.Id.String() + ")" }
-		class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md p-2 transition-all duration-300 hover:ring-1"
+		class="bg-ez-500 hover:ring-infinite-500 hover:text-infinite-500 group relative flex cursor-pointer flex-col items-center justify-center rounded-md p-2 transition-all duration-300 hover:ring-1"
 		:class={ "{'text-infinite-500 font-bold ring-1 ring-infinite-500': createContainerSelectedMarketplaceItemId === " + itemEntity.Id.String() + "}" }
 	>
 		<img
@@ -385,7 +383,7 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 		<div class="text-wrap mt-1 break-words text-center text-xs">
 			{ itemEntity.Name.String() }
 		</div>
-		<div class="bg-ez-300 max-w-96 absolute left-1/2 top-full mt-1 -translate-x-1/2 transform rounded-md p-3 text-xs text-white opacity-0 shadow-lg transition-all duration-300 group-hover:block group-hover:translate-y-0.5 group-hover:opacity-100">
+		<div class="bg-ez-600 min-w-100 absolute left-1/2 top-full z-10 mt-1 hidden -translate-x-1/2 transform rounded-md p-3 text-xs text-neutral-50 shadow-lg transition-all duration-500 group-hover:block group-hover:translate-y-0.5">
 			<div class="flex flex-row items-center gap-3">
 				<div class="basis-3/4 font-normal">
 					{ itemEntity.Description.String() }
@@ -394,17 +392,17 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 					<p class="text-xs font-bold">Requirements</p>
 					if itemEntity.MinimumCpuMillicores != nil {
 						@componentStructural.TinyTag(
-							"ph-speedometer", "", itemEntity.MinimumCpuMillicores.ToCoresString(), "ez-500",
+							"ph-speedometer", "", itemEntity.MinimumCpuMillicores.ToCoresString(), "infinite-500",
 						)
 					}
 					if itemEntity.MinimumMemoryBytes != nil {
 						@componentStructural.TinyTag(
-							"ph-memory", "", itemEntity.MinimumMemoryBytes.StringWithSuffix(), "ez-500",
+							"ph-memory", "", itemEntity.MinimumMemoryBytes.StringWithSuffix(), "infinite-500",
 						)
 					}
 					if itemEntity.EstimatedSizeBytes != nil {
 						@componentStructural.TinyTag(
-							"ph-hard-drives", "", itemEntity.EstimatedSizeBytes.StringWithSuffix(), "ez-500",
+							"ph-hard-drives", "", itemEntity.EstimatedSizeBytes.StringWithSuffix(), "infinite-500",
 						)
 					}
 				</div>
