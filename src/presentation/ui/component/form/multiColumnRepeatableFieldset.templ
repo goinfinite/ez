@@ -28,10 +28,16 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
           (item) => item.id !== id
         );
       },
-      init() {
+			resetState() {
         this.newFieldSet = {};
         this.registeredFieldsets = [];
       },
+			init() {
+				this.resetState();
+				document.addEventListener('clear:component-state', () => {
+					this.resetState();
+				});
+			},
 
 			transformFieldsetsIntoApiPayload() {
 				let payloadStr = "";

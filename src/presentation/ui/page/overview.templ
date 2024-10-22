@@ -71,6 +71,7 @@ script OverviewIndexLocalState() {
 			},
 			closeCreateContainerModal() {
 				this.isCreateContainerModalOpen = false;
+				this.$dispatch('clear:component-state');
 			},
 			isUpdateContainerModalOpen: false,
 			openUpdateContainerModal(accountId, containerId) {
