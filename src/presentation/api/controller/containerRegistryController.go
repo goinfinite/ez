@@ -24,10 +24,13 @@ import (
 func GetContainerRegistryImagesController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 
-	imageNameStr := c.QueryParam("name")
+	rawImageName := c.QueryParam("name")
 	var imageNamePtr *valueObject.RegistryImageName
-	if imageNameStr != "" {
-		imageName := valueObject.NewRegistryImageNamePanic(imageNameStr)
+	if rawImageName != "" {
+		imageName, err := valueObject.NewRegistryImageName(rawImageName)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
 		imageNamePtr = &imageName
 	}
 

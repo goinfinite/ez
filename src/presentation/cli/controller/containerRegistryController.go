@@ -30,7 +30,10 @@ func (controller *ContainerRegistryController) ReadRegistryImages() *cobra.Comma
 
 			var imageNamePtr *valueObject.RegistryImageName
 			if imageNameStr != "" {
-				imageName := valueObject.NewRegistryImageNamePanic(imageNameStr)
+				imageName, err := valueObject.NewRegistryImageName(imageNameStr)
+				if err != nil {
+					cliHelper.ResponseWrapper(false, err.Error())
+				}
 				imageNamePtr = &imageName
 			}
 
