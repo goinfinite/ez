@@ -258,7 +258,13 @@ script RemoteSearchableSelectInputLocalState(id, remoteApiUrl, searchableQuery s
         		"Content-Type": "application/json",
       		},
     		})
-					.then((rawResponse) => rawResponse.json())
+					.then((apiResponse) => {
+						if (!apiResponse.ok) {
+							throw new Error('BadHttpResponseCode: ' + apiResponse.status);
+						}
+
+						return apiResponse.json();
+					})
 					.then((jsonResponse) => {
 						return jsonResponse.body;
 					})
@@ -282,15 +288,16 @@ templ RemoteSearchableSelectInput(
 		x-data={ id + "RemoteSearchableSelect" }
 		class="relative flex flex-col items-center"
 	>
-		<input type="hidden" id={ id } name={ id } x-model:value={ bindValuePath }/>
 		<div
 			@click.away="closeDropdown()"
 			class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 relative flex h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 outline-none transition-all"
 		>
 			<input
+				id={ id }
+				name={ id }
 				placeholder={ label }
-				x-model="userInput"
-				@input.debounce.500ms="updateSearchableItems()"
+				x-model:value={ bindValuePath }
+				@input.debounce.300ms={ "userInput = " + bindValuePath + "; updateSearchableItems()" }
 				@mousedown="openDropdown()"
 				class="peer w-full appearance-none bg-transparent placeholder-transparent outline-none"
 			/>
@@ -302,7 +309,7 @@ templ RemoteSearchableSelectInput(
 				</label>
 			}
 			<i
-				x-show="userInput.length > 0"
+				x-show={ bindValuePath + ".length > 0" }
 				@click.prevent={ "resetState(); " + bindValuePath + " = ''" }
 				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
 			></i>
