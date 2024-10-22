@@ -19,6 +19,21 @@ templ Tag(highlightedIcon, highlightedLabel, tagValue, tagColor string) {
 	</div>
 }
 
+templ TagClientSideValue(highlightedLabel, valueValuePath, tagColor string) {
+	<!-- TagClientSideValue -->
+	<div class={ "flex rounded-md border-solid border-2.5 border-" + tagColor + " text-sm" }>
+		<div class={ "bg-" + tagColor + " flex items-center" }>
+			<div class="flex items-center px-1">
+				<span class="max-w-64 truncate">{ highlightedLabel }</span>
+			</div>
+		</div>
+		<span
+			class={ "leading-normal ring-" + tagColor + " ring-offset-" + tagColor + " rounded-md px-1 py-0.5 ring-1 ring-offset-1 max-w-64 truncate" }
+			x-text={ valueValuePath }
+		></span>
+	</div>
+}
+
 templ TinyTag(highlightedIcon, highlightedLabel, tagValue, tagColor string) {
 	<!-- TinyTag -->
 	<div class={ "flex w-fit rounded-md ring-1.5 text-xs ring-" + tagColor }>

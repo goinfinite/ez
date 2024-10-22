@@ -296,6 +296,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				@componentForm.RemoteSearchableSelectInput(
 					"imageAddress", "Image Address", "container.imageAddress",
 					"/api/v1/container/registry/image/", "name", "imageAddress",
+					[]string{"pullCount", "starCount", "updatedAtRelative"},
 				)
 			</div>
 			<div x-show="createContainerSourceSelectedOption === 'Existing Container'">

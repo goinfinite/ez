@@ -1,5 +1,7 @@
 package componentForm
 
+import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+
 type SelectInputDto struct {
 	Id            string
 	Label         string
@@ -271,6 +273,7 @@ script RemoteSearchableSelectInputLocalState(id, remoteApiUrl, searchableQuery s
 
 templ RemoteSearchableSelectInput(
 	id, label, bindValuePath, remoteApiUrl, searchableQuery, selectableKey string,
+	tagKeys []string,
 ) {
 	<!-- RemoteSearchableSelectInput JavaScript -->
 	@RemoteSearchableSelectInputLocalState(id, remoteApiUrl, searchableQuery)
@@ -299,7 +302,7 @@ templ RemoteSearchableSelectInput(
 				</label>
 			}
 			<i
-				x-show={ bindValuePath + " !== ''" }
+				x-show="userInput.length > 0"
 				@click.prevent={ "resetState(); " + bindValuePath + " = ''" }
 				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
 			></i>
@@ -312,10 +315,21 @@ templ RemoteSearchableSelectInput(
 			<div class="[&>*:nth-child(even)]:bg-ez-400 flex w-full flex-col">
 				<template x-for="selectableItem in searchableItems">
 					<div
-						class="hover:bg-ez-700 cursor-pointer p-2"
+						class="hover:bg-ez-700 flex cursor-pointer flex-col gap-2 p-3.5"
 						@click={ "selectableKeyValue = selectableItem['" + selectableKey + "']; setSelectedItem(selectableKeyValue); " + bindValuePath + " = selectableKeyValue" }
 					>
-						<span x-text={ "selectableItem['" + selectableKey + "']" }></span>
+						<div>
+							<strong x-text={ "selectableItem['" + selectableKey + "']" }></strong>
+						</div>
+						if len(tagKeys) > 0 {
+							<div class="flex flex-wrap justify-normal gap-2">
+								for _, tagKey := range tagKeys {
+									@componentStructural.TagClientSideValue(
+										tagKey, "selectableItem['"+tagKey+"']", "infinite-500",
+									)
+								}
+							</div>
+						}
 					</div>
 				</template>
 			</div>
