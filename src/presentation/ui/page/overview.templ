@@ -44,6 +44,46 @@ script OverviewIndexLocalState() {
 			},
 			init() {
 				this.resetPrimaryState();
+				Alpine.watch(() => this.container.imageAddress, debounce((oldValue, newValue) => {
+					this.autoUpdatePortBindings(oldValue, newValue);
+				}, 500));
+			},
+			autoUpdatePortBindings(prevImageAddress, newImageAddress) {
+				const isSameImage = prevImageAddress === newImageAddress;
+				const isPortBindingsEmpty = this.container.portBindings.length === 0;
+				if (isSameImage && !isPortBindingsEmpty) {
+					return;
+				}
+
+				const isImageAddressTooShort = newImageAddress.length < 3;
+				const isImageNotAddressYet = !newImageAddress.includes('/');
+				if (isImageAddressTooShort || isImageNotAddressYet) {
+					this.container.portBindings = '';
+					return;
+				}
+
+				const remoteApiUrl = '/api/v1/container/registry/image/tagged/?address=' + this.container.imageAddress;
+				this.container.portBindings = fetch(remoteApiUrl, {
+      		method: "GET",
+      		headers: {
+        		Accept: "application/json",
+        		"Content-Type": "application/json",
+      		},
+    		})
+					.then((apiResponse) => {
+						if (!apiResponse.ok) {
+							throw new Error('BadHttpResponseCode: ' + apiResponse.status);
+						}
+
+						return apiResponse.json();
+					})
+					.then((jsonResponse) => {
+						return jsonResponse.body.portBindings;
+					})
+					.catch((error) => {
+						console.error('AutoUpdatePortBindingsError: ', error);
+						return [];
+					});
 			},
 
 			// Auxiliary States
