@@ -12,12 +12,13 @@ import (
 )
 
 type CreateContainerModalDto struct {
-	AppMarketplaceCarouselItems       []templ.Component                    `json:"appCarouselItems"`
-	FrameworkMarketplaceCarouselItems []templ.Component                    `json:"frameworkCarouselItems"`
-	StackMarketplaceCarouselItems     []templ.Component                    `json:"stackCarouselItems"`
-	ContainerImageSearchableItems     []componentForm.SearchableSelectItem `json:"imageSearchableItems"`
-	ContainerProfileSearchableItems   []componentForm.SearchableSelectItem `json:"profileSearchableItems"`
-	AccountSelectLabelValuePairs      []componentForm.SelectLabelValuePair `json:"accountSelectLabelValuePairs"`
+	AppMarketplaceCarouselItems       []templ.Component
+	FrameworkMarketplaceCarouselItems []templ.Component
+	StackMarketplaceCarouselItems     []templ.Component
+	ContainerImageSearchableItems     []componentForm.SearchableSelectItem
+	ContainerProfileSearchableItems   []componentForm.SearchableSelectItem
+	AccountSelectLabelValuePairs      []componentForm.SelectLabelValuePair
+	ContainerSummarySearchableItems   []componentForm.SearchableSelectItem
 }
 
 script OverviewIndexLocalState() {
@@ -38,6 +39,7 @@ script OverviewIndexLocalState() {
 					'envs': '',
 					'launchScript': '',
 					'autoCreateMappings': true,
+					'existingContainerId': '',
 				};
 			},
 			init() {
@@ -294,6 +296,12 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					InputType: "text", Id: "imageAddress", Label: "Image Address",
 					BindValuePath: "container.imageAddress", IsRequired: true,
 				})
+			</div>
+			<div x-show="createContainerSourceSelectedOption === 'Existing Container'">
+				@componentForm.SearchableSelectInput(
+					"existingContainerId", "Existing Container", "container.existingContainerId",
+					createDto.ContainerSummarySearchableItems,
+				)
 			</div>
 			<div x-show="createContainerSourceSelectedOption === 'Local Image'">
 				@componentForm.SearchableSelectInput(

@@ -136,9 +136,30 @@ func (presenter *OverviewPresenter) readAccountSelectLabelValuePairs() []compone
 	return selectLabelValuePairs
 }
 
-func (presenter *OverviewPresenter) ReadCreateContainerModalDto() (
-	createDto page.CreateContainerModalDto,
-) {
+func (presenter *OverviewPresenter) transformContainerSummariesIntoSearchableItems(
+	containerSummaries []componentContainer.ContainerSummary,
+) []componentForm.SearchableSelectItem {
+	searchableSelectItems := []componentForm.SearchableSelectItem{}
+
+	for _, containerSummary := range containerSummaries {
+		searchableTextSerialized := containerSummary.JsonSerialize()
+		htmlLabel := componentContainer.ContainerTaggedSummary(containerSummary)
+
+		searchableSelectItem := componentForm.SearchableSelectItem{
+			Label:          containerSummary.Hostname.String(),
+			Value:          containerSummary.ContainerId.String(),
+			SearchableText: &searchableTextSerialized,
+			HtmlLabel:      &htmlLabel,
+		}
+		searchableSelectItems = append(searchableSelectItems, searchableSelectItem)
+	}
+
+	return searchableSelectItems
+}
+
+func (presenter *OverviewPresenter) ReadCreateContainerModalDto(
+	containerSummaries []componentContainer.ContainerSummary,
+) (createDto page.CreateContainerModalDto) {
 	marketplaceRequestBody := map[string]interface{}{
 		"sortBy":       "id",
 		"itemsPerPage": 100,
@@ -182,6 +203,9 @@ func (presenter *OverviewPresenter) ReadCreateContainerModalDto() (
 		ContainerImageSearchableItems:     presenter.readContainerImageSearchableItems(),
 		ContainerProfileSearchableItems:   presenter.readContainerProfileSearchableItems(),
 		AccountSelectLabelValuePairs:      presenter.readAccountSelectLabelValuePairs(),
+		ContainerSummarySearchableItems: presenter.transformContainerSummariesIntoSearchableItems(
+			containerSummaries,
+		),
 	}
 }
 
@@ -211,7 +235,9 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		containerIdSummariesMap[containerSummary.ContainerId] = containerSummary
 	}
 
-	createContainerModalDto := presenter.ReadCreateContainerModalDto()
+	createContainerModalDto := presenter.ReadCreateContainerModalDto(
+		containerSummaries,
+	)
 
 	pageContent := page.OverviewIndex(
 		containerEntities, containerIdSummariesMap, createContainerModalDto,
