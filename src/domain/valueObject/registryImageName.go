@@ -3,33 +3,35 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+	"strings"
+
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 const registryImageNameRegex string = `^[\w\_\-]{1,128}/?[\w\.\_\-]{0,128}$`
 
 type RegistryImageName string
 
-func NewRegistryImageName(value string) (RegistryImageName, error) {
-	imgName := RegistryImageName(value)
-	if !imgName.isValid() {
-		return "", errors.New("InvalidRegistryImageName")
-	}
-	return imgName, nil
-}
-
-func NewRegistryImageNamePanic(value string) RegistryImageName {
-	imgName, err := NewRegistryImageName(value)
+func NewRegistryImageName(value interface{}) (
+	imageName RegistryImageName, err error,
+) {
+	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
-		panic(err)
+		return imageName, errors.New("RegistryImageNameMustBeString")
 	}
-	return imgName
-}
 
-func (imgName RegistryImageName) isValid() bool {
+	stringValue = strings.TrimPrefix(stringValue, "localhost/")
+	stringValue = strings.TrimPrefix(stringValue, "docker.io/")
+	stringValue = strings.TrimSuffix(stringValue, ":latest")
+
 	re := regexp.MustCompile(registryImageNameRegex)
-	return re.MatchString(string(imgName))
+	if !re.MatchString(stringValue) {
+		return imageName, errors.New("InvalidRegistryImageName")
+	}
+
+	return RegistryImageName(stringValue), nil
 }
 
-func (imgName RegistryImageName) String() string {
-	return string(imgName)
+func (vo RegistryImageName) String() string {
+	return string(vo)
 }
