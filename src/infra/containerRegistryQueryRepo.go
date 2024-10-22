@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
@@ -174,6 +175,7 @@ func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 	}
 
 	var updatedAtPtr *valueObject.UnixTime
+	var updatedAtRelativePtr *valueObject.RelativeTime
 	rawUpdatedAt, assertOk := imageMap["updated_at"].(string)
 	if !assertOk {
 		return registryImage, errors.New("ParseUpdatedAtError")
@@ -185,20 +187,17 @@ func (repo *ContainerRegistryQueryRepo) dockerHubImageFactory(
 		}
 		updatedAt := valueObject.NewUnixTimeWithGoTime(updatedAtUnix)
 		updatedAtPtr = &updatedAt
+
+		humanizedUpdatedAt := humanize.Time(updatedAtUnix)
+		updatedAtRelative, err := valueObject.NewRelativeTime(humanizedUpdatedAt)
+		if err == nil {
+			updatedAtRelativePtr = &updatedAtRelative
+		}
 	}
 
 	return entity.NewRegistryImage(
-		imageName,
-		publisherName,
-		registryName,
-		imageAddress,
-		descriptionPtr,
-		isas,
-		pullCount,
-		&starCount,
-		logoUrlPtr,
-		createdAtPtr,
-		updatedAtPtr,
+		imageName, publisherName, registryName, imageAddress, descriptionPtr,
+		isas, pullCount, &starCount, logoUrlPtr, createdAtPtr, updatedAtPtr, updatedAtRelativePtr,
 	), nil
 }
 
