@@ -193,7 +193,7 @@ templ SearchableSelectInput(
 			}
 			<i
 				x-show="userInput !== ''"
-				@click.prevent="resetState()"
+				@click.prevent={ "resetState(); " + bindValuePath + " = ''" }
 				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
 			></i>
 			<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
