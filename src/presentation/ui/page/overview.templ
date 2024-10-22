@@ -293,10 +293,9 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				</div>
 			</div>
 			<div x-show="createContainerSourceSelectedOption === 'URL'">
-				@componentForm.InputField(componentForm.InputFieldDto{
-					InputType: "text", Id: "imageAddress", Label: "Image Address",
-					BindValuePath: "container.imageAddress", IsRequired: true,
-				})
+				@componentForm.RemoteSearchableSelectInput(
+					"imageAddress", "Image Address", "container.imageAddress", "imageAddress",
+				)
 			</div>
 			<div x-show="createContainerSourceSelectedOption === 'Existing Container'">
 				@componentForm.SearchableSelectInput(

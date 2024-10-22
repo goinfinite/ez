@@ -216,3 +216,114 @@ templ SearchableSelectInput(
 		</div>
 	</div>
 }
+
+script RemoteSearchableSelectInputLocalState(id string) {
+	document.addEventListener('alpine:init', () => {
+		Alpine.data(id+'RemoteSearchableSelect', () => ({
+			searchableItems: [
+				{
+            "name": "nginx/nginx-ingress",
+            "publisherName": "nginx",
+            "registryName": "DockerHub",
+            "imageAddress": "docker.io/nginx/nginx-ingress",
+            "description": "NGINX and  NGINX Plus Ingress Controllers for Kubernetes",
+            "isas": [
+                "amd64"
+            ],
+            "pullCount": 1000000000,
+            "starCount": 95,
+            "logoUrl": "https://www.gravatar.com/avatar/6a6c67f4815a0379d3b697174b4f6805?s=80\u0026r=g\u0026d=mm",
+            "createdAt": 1523630120,
+            "updatedAt": 1729593537
+        },
+        {
+            "name": "bitnami/nginx",
+            "publisherName": "VMware",
+            "registryName": "DockerHub",
+            "imageAddress": "docker.io/bitnami/nginx",
+            "description": "Bitnami container image for NGINX",
+            "isas": [
+                "amd64"
+            ],
+            "pullCount": 100000000,
+            "starCount": 193,
+            "logoUrl": "https://www.gravatar.com/avatar/85bcf547a6bf62b855df2c682af81a4e?s=80\u0026r=g\u0026d=mm",
+            "createdAt": 1434415221,
+            "updatedAt": 1729509516
+        },
+			],
+			showDropdown: false,
+			resetState() {
+				//this.searchableItems = [];
+				this.showDropDown = false;
+				this.closeDropdown();
+			},
+			init() {
+				this.resetState();
+			},
+
+			openDropdown() { 
+				this.showDropdown = true; 
+			},
+			closeDropdown() {
+				this.showDropdown = false;
+			},
+			setSelectedItem() {
+				this.showDropdown = false;
+			},
+		}));
+	});
+}
+
+templ RemoteSearchableSelectInput(
+	id, label, bindValuePath, selectableKey string,
+) {
+	<!-- RemoteSearchableSelectInput JavaScript -->
+	@RemoteSearchableSelectInputLocalState(id)
+	<!-- RemoteSearchableSelectInput HTML -->
+	<div
+		x-data={ id + "RemoteSearchableSelect" }
+		class="relative flex flex-col items-center"
+	>
+		<input type="hidden" id={ id } name={ id } x-model:value={ bindValuePath }/>
+		<div
+			@click.away="closeDropdown()"
+			class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 relative flex h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 outline-none transition-all"
+		>
+			<input
+				placeholder={ label }
+				x-model={ bindValuePath }
+				@mousedown="openDropdown()"
+				class="peer w-full appearance-none bg-transparent placeholder-transparent outline-none"
+			/>
+			if label != "" {
+				<label
+					class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+				>
+					{ label }
+				</label>
+			}
+			<i
+				x-show={ bindValuePath + " !== ''" }
+				@click.prevent={ "resetState(); " + bindValuePath + " = ''" }
+				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
+			></i>
+			<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
+		</div>
+		<div
+			x-show="showDropdown"
+			class="bg-ez-300 absolute top-10 z-40 max-h-64 w-full overflow-y-auto rounded-b-md drop-shadow-xl"
+		>
+			<div class="[&>*:nth-child(even)]:bg-ez-400 flex w-full flex-col">
+				<template x-for="selectableItem in searchableItems">
+					<div
+						class="hover:bg-ez-700 cursor-pointer p-2"
+						@click={ "showDropdown = false; " + bindValuePath + " = selectableItem['" + selectableKey + "']" }
+					>
+						<span x-text={ "selectableItem['" + selectableKey + "']" }></span>
+					</div>
+				</template>
+			</div>
+		</div>
+	</div>
+}
