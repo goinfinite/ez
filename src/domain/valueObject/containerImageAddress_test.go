@@ -28,10 +28,10 @@ func TestNewContainerImageAddress(t *testing.T) {
 			"localhost/1000/535a6943b88a:1724884472",
 		}
 
-		for _, path := range validContainerImageAddresses {
-			_, err := NewContainerImageAddress(path)
+		for _, addr := range validContainerImageAddresses {
+			_, err := NewContainerImageAddress(addr)
 			if err != nil {
-				t.Errorf("ExpectingNoErrorButGot: %s [%s]", err.Error(), path)
+				t.Errorf("ExpectingNoErrorButGot: %s [%s]", err.Error(), addr)
 			}
 		}
 	})
@@ -40,15 +40,15 @@ func TestNewContainerImageAddress(t *testing.T) {
 		invalidContainerImageAddresses := []string{
 			"",
 			"UNION SELECT * FROM USERS",
-			"/path\n/path",
+			"/addr\n/addr",
 			"?param=value",
-			"/path/'; DROP TABLE users; --",
+			"/addr/'; DROP TABLE users; --",
 		}
 
-		for _, path := range invalidContainerImageAddresses {
-			_, err := NewContainerImageAddress(path)
+		for _, addr := range invalidContainerImageAddresses {
+			_, err := NewContainerImageAddress(addr)
 			if err == nil {
-				t.Errorf("ExpectingErrorButDidNotGetFor: %v", path)
+				t.Errorf("ExpectingErrorButDidNotGetFor: %v", addr)
 			}
 		}
 	})
