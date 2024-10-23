@@ -327,8 +327,13 @@ func (controller *ContainerController) Create(c echo.Context) error {
 	}
 
 	if _, exists := requestBody["imageAddress"]; !exists {
-		if _, exists = requestBody["imgAddr"]; exists {
-			requestBody["imageAddress"] = requestBody["imgAddr"]
+		possibleKeys := []string{"imgAddr", "imageAddr", "imgAddress"}
+		for _, possibleKey := range possibleKeys {
+			if _, exists = requestBody[possibleKey]; !exists {
+				continue
+			}
+
+			requestBody["imageAddress"] = requestBody[possibleKey]
 		}
 	}
 
