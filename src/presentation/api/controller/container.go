@@ -1,9 +1,11 @@
 package apiController
 
 import (
-	"log"
+	"errors"
+	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/goinfinite/ez/src/domain/valueObject"
@@ -128,76 +130,136 @@ func (controller *ContainerController) CreateContainerSessionToken(c echo.Contex
 	return c.Redirect(http.StatusFound, redirectUrl)
 }
 
+func (controller *ContainerController) transformPortBindingStringIntoMap(
+	rawPortBindings string,
+) []map[string]interface{} {
+	portBindingMaps := []map[string]interface{}{}
+
+	rawPortBindingsParts := strings.Split(rawPortBindings, ";")
+	if len(rawPortBindingsParts) == 0 {
+		rawPortBindingsParts = append(rawPortBindingsParts, rawPortBindings)
+	}
+
+	for _, rawPortBinding := range rawPortBindingsParts {
+		portBindingMap := map[string]interface{}{}
+		rawPortBindingParts := strings.Split(rawPortBinding, "|")
+
+		possibleFieldKeys := []string{
+			"serviceName", "publicPort", "containerPort", "protocol", "privatePort",
+		}
+		for partIndex, fieldValue := range rawPortBindingParts {
+			if partIndex >= len(possibleFieldKeys) {
+				break
+			}
+
+			portBindingMap[possibleFieldKeys[partIndex]] = fieldValue
+		}
+
+		portBindingMaps = append(portBindingMaps, portBindingMap)
+	}
+
+	return portBindingMaps
+}
+
+func (controller *ContainerController) parsePortBindingMap(
+	rawPortBindingMap map[string]interface{},
+) (portBindings []valueObject.PortBinding, err error) {
+	portBindingStr := ""
+	rawServiceName, assertOk := rawPortBindingMap["serviceName"].(string)
+	if assertOk {
+		// ServiceName won't be validated here cause it may actually be publicPort.
+		// Don't worry as it will be validated later on.
+		portBindingStr += rawServiceName
+	}
+
+	rawPublicPort, rawPublicPortExists := rawPortBindingMap["publicPort"]
+	if rawPublicPortExists {
+		publicPort, err := valueObject.NewNetworkPort(rawPublicPort)
+		if err != nil {
+			return portBindings, errors.New("InvalidPublicPort")
+		}
+
+		if len(portBindingStr) > 0 {
+			portBindingStr += ":"
+		}
+		portBindingStr += publicPort.String()
+	}
+
+	rawContainerPort, rawContainerPortExists := rawPortBindingMap["containerPort"]
+	if rawContainerPortExists {
+		containerPort, err := valueObject.NewNetworkPort(rawContainerPort)
+		if err != nil {
+			return portBindings, errors.New("InvalidContainerPort")
+		}
+
+		if len(portBindingStr) > 0 {
+			portBindingStr += ":"
+		}
+		portBindingStr += containerPort.String()
+	}
+
+	rawProtocol, rawProtocolExists := rawPortBindingMap["protocol"]
+	if rawProtocolExists && (rawPublicPortExists || rawContainerPortExists) {
+		protocol, err := valueObject.NewNetworkProtocol(rawProtocol)
+		if err != nil {
+			return portBindings, errors.New("InvalidProtocol")
+		}
+
+		portBindingStr += "/" + protocol.String()
+	}
+
+	rawPrivatePort, rawPrivatePortExists := rawPortBindingMap["privatePort"]
+	if rawPrivatePortExists {
+		privatePort, err := valueObject.NewNetworkPort(rawPrivatePort)
+		if err != nil {
+			return portBindings, errors.New("InvalidPrivatePort")
+		}
+
+		if len(portBindingStr) > 0 {
+			portBindingStr += ":"
+		}
+		portBindingStr += privatePort.String()
+	}
+
+	return valueObject.NewPortBindingFromString(portBindingStr)
+}
+
+// PortBindings has multiple possible structures which this parser can handle:
+// "serviceName" (string) OR "publicPort" (string, but actually an uint)
+// "serviceName|publicPort" (string, pipe separated values)
+// "serviceName|publicPort;serviceName|publicPort" (string slice, semicolon separated items)
+// { "serviceName": "serviceName", "publicPort": "publicPort"} (map[string]interface{})
+// [{ "serviceName": "serviceName", "publicPort": "publicPort"}] (map[string]interface{} slice)
+// Besides the mentioned fields, it can also have "containerPort", "protocol" and "privatePort".
 func (controller *ContainerController) parsePortBindings(
-	rawPortBindings []interface{},
+	rawPortBindings any,
 ) (portBindings []valueObject.PortBinding) {
-	for bindingIndex, rawPortBinding := range rawPortBindings {
+	rawPortBindingsSlice := []interface{}{}
+
+	switch rawPortBindingsValue := rawPortBindings.(type) {
+	case map[string]interface{}:
+		rawPortBindingsSlice = []interface{}{rawPortBindings}
+	case string:
+		portBindingsMaps := controller.transformPortBindingStringIntoMap(rawPortBindingsValue)
+		for _, portBindingMap := range portBindingsMaps {
+			rawPortBindingsSlice = append(rawPortBindingsSlice, portBindingMap)
+		}
+	case []interface{}:
+		rawPortBindingsSlice = rawPortBindingsValue
+	}
+
+	for _, rawPortBinding := range rawPortBindingsSlice {
 		rawPortBindingMap, assertOk := rawPortBinding.(map[string]interface{})
 		if !assertOk {
-			log.Printf("[%d] InvalidPortBindingStructure", bindingIndex)
+			slog.Debug(
+				"InvalidPortBindingStructure", slog.Any("rawPortBinding", rawPortBinding),
+			)
 			continue
 		}
 
-		portBindingStr := ""
-
-		rawServiceName, assertOk := rawPortBindingMap["serviceName"].(string)
-		if assertOk {
-			portBindingStr += rawServiceName
-		}
-
-		rawPublicPort, rawPublicPortExists := rawPortBindingMap["publicPort"]
-		if rawPublicPortExists {
-			publicPort, err := valueObject.NewNetworkPort(rawPublicPort)
-			if err != nil {
-				log.Printf("[%d] %s", bindingIndex, err.Error())
-				continue
-			}
-			if len(portBindingStr) > 0 {
-				portBindingStr += ":"
-			}
-			portBindingStr += publicPort.String()
-		}
-
-		rawContainerPort, rawContainerPortExists := rawPortBindingMap["containerPort"]
-		if rawContainerPortExists {
-			containerPort, err := valueObject.NewNetworkPort(rawContainerPort)
-			if err != nil {
-				log.Printf("[%d] %s", bindingIndex, err.Error())
-				continue
-			}
-			if len(portBindingStr) > 0 {
-				portBindingStr += ":"
-			}
-			portBindingStr += containerPort.String()
-		}
-
-		rawProtocol, assertOk := rawPortBindingMap["protocol"].(string)
-		if assertOk && (rawPublicPortExists || rawContainerPortExists) {
-			protocol, err := valueObject.NewNetworkProtocol(rawProtocol)
-			if err != nil {
-				log.Printf("[%d] %s", bindingIndex, err.Error())
-				continue
-			}
-			portBindingStr += "/" + protocol.String()
-		}
-
-		rawPrivatePort, exists := rawPortBindingMap["privatePort"]
-		if exists {
-			privatePort, err := valueObject.NewNetworkPort(rawPrivatePort)
-			if err != nil {
-				log.Printf("[%d] %s", bindingIndex, err.Error())
-				continue
-			}
-			if len(portBindingStr) > 0 {
-				portBindingStr += ":"
-			}
-			portBindingStr += privatePort.String()
-		}
-
-		portBinding, err := valueObject.NewPortBindingFromString(portBindingStr)
+		portBinding, err := controller.parsePortBindingMap(rawPortBindingMap)
 		if err != nil {
-			log.Printf("[%d] %s", bindingIndex, err.Error())
-			continue
+			slog.Debug(err.Error(), slog.Any("rawPortBinding", rawPortBinding))
 		}
 
 		portBindings = append(portBindings, portBinding...)
@@ -247,20 +309,9 @@ func (controller *ContainerController) Create(c echo.Context) error {
 	}
 
 	if requestBody["portBindings"] != nil {
-		_, isMapStringInterface := requestBody["portBindings"].(map[string]interface{})
-		if isMapStringInterface {
-			requestBody["portBindings"] = []interface{}{requestBody["portBindings"]}
-		}
-
-		portBindingsSlice, assertOk := requestBody["portBindings"].([]interface{})
-		if !assertOk {
-			return apiHelper.ResponseWrapper(
-				c, http.StatusBadRequest, "PortBindingsMustBeArray",
-			)
-		}
-
-		portBindings := controller.parsePortBindings(portBindingsSlice)
-		requestBody["portBindings"] = portBindings
+		requestBody["portBindings"] = controller.parsePortBindings(
+			requestBody["portBindings"],
+		)
 	}
 
 	if requestBody["envs"] != nil {
