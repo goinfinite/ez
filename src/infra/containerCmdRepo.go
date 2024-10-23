@@ -427,7 +427,7 @@ func (repo *ContainerCmdRepo) Create(
 	}
 
 	if isInfiniteOs && !hasInfiniteOsPortBinding {
-		portBinding, _ := valueObject.NewPortBindingFromString("sos")
+		portBinding, _ := valueObject.NewPortBindingFromString("infinite-os")
 		createDto.PortBindings = append(createDto.PortBindings, portBinding[0])
 	}
 
