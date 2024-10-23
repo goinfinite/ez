@@ -12,7 +12,7 @@ type PortBinding struct {
 	PublicPort    NetworkPort     `json:"publicPort"`
 	ContainerPort NetworkPort     `json:"containerPort"`
 	Protocol      NetworkProtocol `json:"protocol"`
-	PrivatePort   *NetworkPort    `json:"privatePort"`
+	PrivatePort   *NetworkPort    `json:"privatePort,omitempty"`
 }
 
 type serviceBindingInfo struct {
