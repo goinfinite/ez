@@ -268,15 +268,39 @@ func (controller *ContainerController) parsePortBindings(
 	return portBindings
 }
 
+// Envs may come in the following structures:
+// "key=value" OR "key|value" (string) OR "key=value;key=value" (string, semicolon separated items)
+// ["key=value", "key=value"] (string slice)
 func (controller *ContainerController) parseContainerEnvs(
-	envs []interface{},
+	envs any,
 ) (containerEnvs []valueObject.ContainerEnv) {
-	for _, env := range envs {
-		newEnv, err := valueObject.NewContainerEnv(env.(string))
+	rawEnvsSlice := []string{}
+
+	switch envsValue := envs.(type) {
+	case string:
+		rawEnvsSlice = strings.Split(envsValue, ";")
+	case []interface{}:
+		for _, env := range envsValue {
+			rawEnv, assertOk := env.(string)
+			if !assertOk {
+				slog.Debug("InvalidEnvStructure", slog.Any("env", env))
+				continue
+			}
+
+			rawEnvsSlice = append(rawEnvsSlice, rawEnv)
+		}
+	}
+
+	for _, rawEnv := range rawEnvsSlice {
+		rawEnv = strings.ReplaceAll(rawEnv, "|", "=")
+
+		containerEnv, err := valueObject.NewContainerEnv(rawEnv)
 		if err != nil {
+			slog.Debug(err.Error(), slog.Any("rawEnv", rawEnv))
 			continue
 		}
-		containerEnvs = append(containerEnvs, newEnv)
+
+		containerEnvs = append(containerEnvs, containerEnv)
 	}
 
 	return containerEnvs
@@ -315,8 +339,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 	}
 
 	if requestBody["envs"] != nil {
-		envs := controller.parseContainerEnvs(requestBody["envs"].([]interface{}))
-		requestBody["envs"] = envs
+		requestBody["envs"] = controller.parseContainerEnvs(requestBody["envs"])
 	}
 
 	if requestBody["launchScript"] != nil {
