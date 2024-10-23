@@ -51,14 +51,15 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 
 	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
 	if !assertOk {
-		rawCmds, assertOk := rawConfig["Cmd"].([]interface{})
-		if !assertOk {
-			return containerImage, errors.New("NamesHistoryAndCmdsNotFound")
+		accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+		accountEntity, err := accountQueryRepo.ReadById(accountId)
+		if err != nil {
+			return containerImage, errors.New("ReadOwnerAccountError")
 		}
-		if len(rawCmds) == 0 {
-			return containerImage, errors.New("EmptyCmds")
+
+		rawImageNames = []interface{}{
+			"localhost/" + accountEntity.Username.String() + "/" + imageId.String(),
 		}
-		rawImageNames = []interface{}{rawCmds[0]}
 	}
 	if len(rawImageNames) == 0 {
 		return containerImage, errors.New("ReadContainerImageNamesError")
