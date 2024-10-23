@@ -3,13 +3,17 @@ package apiController
 import (
 	"errors"
 	"log/slog"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
+	"github.com/goinfinite/ez/src/infra"
 	"github.com/goinfinite/ez/src/infra/db"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
 	"github.com/goinfinite/ez/src/presentation/service"
@@ -18,6 +22,8 @@ import (
 
 type ContainerController struct {
 	containerService *service.ContainerService
+	persistentDbSvc  *db.PersistentDatabaseService
+	trailDbSvc       *db.TrailDatabaseService
 }
 
 func NewContainerController(
@@ -28,6 +34,8 @@ func NewContainerController(
 		containerService: service.NewContainerService(
 			persistentDbSvc, trailDbSvc,
 		),
+		persistentDbSvc: persistentDbSvc,
+		trailDbSvc:      trailDbSvc,
 	}
 }
 
@@ -314,6 +322,7 @@ func (controller *ContainerController) parseContainerEnvs(
 // @Produce      json
 // @Security     Bearer
 // @Param        createContainerDto 	  body    dto.CreateContainer  true  "Only accountId, hostname and imageAddress are required.<br />When specifying portBindings, only 'publicPort' OR 'serviceName' is required.<br />'launchScript' must be base64 encoded (if any)."
+// @Param        archiveImageFile	formData	file	false	"ArchiveImageFile (For importing container image file, if any.)"
 // @Success      201 {object} object{} "ContainerCreationScheduled"
 // @Router       /v1/container/ [post]
 func (controller *ContainerController) Create(c echo.Context) error {
@@ -361,6 +370,50 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		}
 
 		requestBody["launchScript"] = launchScript
+	}
+
+	if requestBody["archiveImageFile"] != nil {
+		archiveImageFiles, assertOk := requestBody["archiveImageFile"].([]*multipart.FileHeader)
+		if !assertOk {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "InvalidArchiveImageFile")
+		}
+		if len(archiveImageFiles) == 0 {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "EmptyArchiveImageFile")
+		}
+		archiveImageFile := archiveImageFiles[0]
+
+		operatorAccountId, err := valueObject.NewAccountId(requestBody["operatorAccountId"])
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "InvalidOperatorAccountId")
+		}
+
+		operatorIpAddress, err := valueObject.NewIpAddress(requestBody["operatorIpAddress"])
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+		}
+
+		accountId, err := valueObject.NewAccountId(requestBody["accountId"])
+		if err != nil {
+			requestBody["accountId"] = operatorAccountId.Uint64()
+			accountId = operatorAccountId
+		}
+
+		importDto := dto.NewImportContainerImageArchiveFile(
+			accountId, archiveImageFile, operatorAccountId, operatorIpAddress,
+		)
+
+		containerImageCmdRepo := infra.NewContainerImageCmdRepo(controller.persistentDbSvc)
+		accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
+		activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
+
+		importedImageId, err := useCase.ImportContainerImageArchiveFile(
+			containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
+		)
+		if err != nil {
+			return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
+		}
+
+		requestBody["imageId"] = importedImageId.String()
 	}
 
 	return apiHelper.ServiceResponseWrapper(
