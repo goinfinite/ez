@@ -45,28 +45,20 @@ func NewContainerImageAddress(value interface{}) (ContainerImageAddress, error) 
 	return ContainerImageAddress(stringValue), nil
 }
 
-func NewContainerImageAddressPanic(value string) ContainerImageAddress {
-	imageAddress, err := NewContainerImageAddress(value)
-	if err != nil {
-		panic(err)
-	}
-	return imageAddress
-}
-
 func (vo ContainerImageAddress) String() string {
 	return string(vo)
 }
 
-func (vo ContainerImageAddress) getParts() map[string]string {
+func (vo ContainerImageAddress) readParts() map[string]string {
 	return voHelper.FindNamedGroupsMatches(containerImageAddressRegex, string(vo))
 }
 
-func (vo ContainerImageAddress) GetFqdn() (Fqdn, error) {
-	return NewFqdn(vo.getParts()["hostname"])
+func (vo ContainerImageAddress) ReadFqdn() (Fqdn, error) {
+	return NewFqdn(vo.readParts()["hostname"])
 }
 
-func (vo ContainerImageAddress) GetOrgName() (RegistryPublisherName, error) {
-	orgNameStr, exists := vo.getParts()["orgName"]
+func (vo ContainerImageAddress) ReadOrgName() (RegistryPublisherName, error) {
+	orgNameStr, exists := vo.readParts()["orgName"]
 	if !exists || orgNameStr == "" || orgNameStr == "_" {
 		orgNameStr = "library"
 	}
@@ -74,12 +66,12 @@ func (vo ContainerImageAddress) GetOrgName() (RegistryPublisherName, error) {
 	return NewRegistryPublisherName(orgNameStr)
 }
 
-func (vo ContainerImageAddress) GetImageName() (RegistryImageName, error) {
-	return NewRegistryImageName(vo.getParts()["imageName"])
+func (vo ContainerImageAddress) ReadImageName() (RegistryImageName, error) {
+	return NewRegistryImageName(vo.readParts()["imageName"])
 }
 
-func (vo ContainerImageAddress) GetImageTag() (RegistryImageTag, error) {
-	imageTagStr, exists := vo.getParts()["imageTag"]
+func (vo ContainerImageAddress) ReadImageTag() (RegistryImageTag, error) {
+	imageTagStr, exists := vo.readParts()["imageTag"]
 	if !exists || imageTagStr == "" {
 		imageTagStr = "latest"
 	}

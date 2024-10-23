@@ -62,7 +62,10 @@ func (controller *ContainerRegistryController) ReadRegistryTaggedImage() *cobra.
 		Run: func(cmd *cobra.Command, args []string) {
 			containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(controller.persistentDbSvc)
 
-			imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
+			imageAddress, err := valueObject.NewContainerImageAddress(imageAddressStr)
+			if err != nil {
+				cliHelper.ResponseWrapper(false, err.Error())
+			}
 
 			image, err := useCase.ReadRegistryTaggedImage(
 				containerRegistryQueryRepo,

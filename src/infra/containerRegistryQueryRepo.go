@@ -311,17 +311,17 @@ func (repo *ContainerRegistryQueryRepo) ReadImages(
 func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	imageAddress valueObject.ContainerImageAddress,
 ) (registryTaggedImage entity.RegistryTaggedImage, err error) {
-	orgName, err := imageAddress.GetOrgName()
+	orgName, err := imageAddress.ReadOrgName()
 	if err != nil {
 		return registryTaggedImage, err
 	}
 
-	imageName, err := imageAddress.GetImageName()
+	imageName, err := imageAddress.ReadImageName()
 	if err != nil {
 		return registryTaggedImage, err
 	}
 
-	imageTag, err := imageAddress.GetImageTag()
+	imageTag, err := imageAddress.ReadImageTag()
 	if err != nil {
 		return registryTaggedImage, err
 	}
@@ -462,7 +462,7 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 func (repo *ContainerRegistryQueryRepo) ReadTaggedImage(
 	imageAddress valueObject.ContainerImageAddress,
 ) (taggedImage entity.RegistryTaggedImage, err error) {
-	registryName, err := imageAddress.GetFqdn()
+	registryName, err := imageAddress.ReadFqdn()
 	if err != nil {
 		return taggedImage, err
 	}

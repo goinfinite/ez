@@ -60,7 +60,10 @@ func GetContainerRegistryTaggedImageController(c echo.Context) error {
 	persistentDbSvc := c.Get("persistentDbSvc").(*db.PersistentDatabaseService)
 
 	imageAddressStr := c.QueryParam("address")
-	imageAddress := valueObject.NewContainerImageAddressPanic(imageAddressStr)
+	imageAddress, err := valueObject.NewContainerImageAddress(imageAddressStr)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
 
 	containerRegistryQueryRepo := infra.NewContainerRegistryQueryRepo(persistentDbSvc)
 	taggedImage, err := useCase.ReadRegistryTaggedImage(

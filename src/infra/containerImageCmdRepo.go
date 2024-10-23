@@ -212,19 +212,19 @@ func (repo *ContainerImageCmdRepo) archiveFileNameFactory(
 	imageEntity entity.ContainerImage,
 ) (archiveFileName valueObject.UnixFileName, err error) {
 	imageOrgNameStr := ""
-	imageOrgName, err := imageEntity.ImageAddress.GetOrgName()
+	imageOrgName, err := imageEntity.ImageAddress.ReadOrgName()
 	if err == nil {
 		imageOrgNameStr = imageOrgName.String()
 	}
 
 	imageNameStr := ""
-	imageName, err := imageEntity.ImageAddress.GetImageName()
+	imageName, err := imageEntity.ImageAddress.ReadImageName()
 	if err == nil {
 		imageNameStr = imageName.String()
 	}
 
 	imageTagStr := ""
-	imageTag, err := imageEntity.ImageAddress.GetImageTag()
+	imageTag, err := imageEntity.ImageAddress.ReadImageTag()
 	if err == nil {
 		imageTagStr = imageTag.String()
 	}
