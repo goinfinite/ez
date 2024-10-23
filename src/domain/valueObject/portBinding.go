@@ -125,7 +125,7 @@ var KnownServiceBindings = []serviceBindingInfo{
 	},
 	{
 		ServiceNames: []string{
-			"sos", "infiniteos", "infinite-os", "infinite",
+			"infinite-os", "8os", "infiniteos", "sos",
 		},
 		PortBindings: []string{"1618"},
 	},
