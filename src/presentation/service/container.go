@@ -311,6 +311,8 @@ func (service *ContainerService) Create(
 	)
 
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
+	containerImageQueryRepo := infra.NewContainerImageQueryRepo(service.persistentDbSvc)
+	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
 	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(service.persistentDbSvc)
@@ -319,7 +321,8 @@ func (service *ContainerService) Create(
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainer(
-		service.containerQueryRepo, containerCmdRepo, accountQueryRepo, accountCmdRepo,
+		service.containerQueryRepo, containerCmdRepo, containerImageQueryRepo,
+		containerImageCmdRepo, accountQueryRepo, accountCmdRepo,
 		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
 		containerProxyCmdRepo, service.activityRecordCmdRepo, createContainerDto,
 	)

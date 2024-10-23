@@ -12,6 +12,8 @@ import (
 func CreateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
+	containerImageQueryRepo repository.ContainerImageQueryRepo,
+	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 	containerProfileQueryRepo repository.ContainerProfileQueryRepo,
@@ -34,6 +36,37 @@ func CreateContainer(
 		return errors.New("ContainerHostnameAlreadyExists")
 	}
 
+	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
+	if createDto.ExistingContainerId != nil {
+		existingContainerEntity, err := containerQueryRepo.ReadById(
+			*createDto.ExistingContainerId,
+		)
+		if err != nil {
+			return errors.New("ExistingContainerNotFound")
+		}
+
+		isInfiniteOs = existingContainerEntity.ImageAddress.IsInfiniteOs()
+
+		createSnapshotDto := dto.NewCreateContainerSnapshotImage(
+			*createDto.ExistingContainerId, nil, nil, nil, createDto.OperatorAccountId,
+			createDto.OperatorIpAddress,
+		)
+
+		imageId, err := containerImageCmdRepo.CreateSnapshot(createSnapshotDto)
+		if err != nil {
+			slog.Error("CreateContainerSnapshotImageInfraError", slog.Any("error", err))
+			return errors.New("CreateContainerSnapshotImageInfraError")
+		}
+
+		imageEntity, err := containerImageQueryRepo.ReadById(createDto.AccountId, imageId)
+		if err != nil {
+			slog.Error("ContainerSnapshotImageNotFound", slog.Any("error", err))
+			return errors.New("ContainerSnapshotImageNotFound")
+		}
+
+		createDto.ImageAddress = imageEntity.ImageAddress
+	}
+
 	containerId, err := containerCmdRepo.Create(createDto)
 	if err != nil {
 		slog.Error("CreateContainerInfraError", slog.Any("error", err))
@@ -49,7 +82,7 @@ func CreateContainer(
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
 		CreateContainer(createDto, containerId)
 
-	if createDto.ImageAddress.IsInfiniteOs() {
+	if isInfiniteOs {
 		err = containerProxyCmdRepo.Create(containerId)
 		if err != nil {
 			slog.Error("CreateContainerProxyInfraError", slog.Any("error", err))
