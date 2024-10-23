@@ -200,6 +200,15 @@ func (service *ContainerService) Create(
 		}
 	}
 
+	var existingContainerIdPtr *valueObject.ContainerId
+	if input["existingContainerId"] != nil {
+		existingContainerId, err := valueObject.NewContainerId(input["existingContainerId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		existingContainerIdPtr = &existingContainerId
+	}
+
 	if shouldSchedule {
 		cliCmd := infraEnvs.InfiniteEzBinary + " container create"
 		createParams := []string{
@@ -251,6 +260,14 @@ func (service *ContainerService) Create(
 			createParams = append(createParams, "false")
 		}
 
+		timeoutSeconds := uint16(600)
+
+		if existingContainerIdPtr != nil {
+			createParams = append(createParams, "--existing-container-id")
+			createParams = append(createParams, existingContainerIdPtr.String())
+			timeoutSeconds = uint16(1800)
+		}
+
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
@@ -258,7 +275,6 @@ func (service *ContainerService) Create(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("container")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		timeoutSeconds := uint16(900)
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
@@ -290,7 +306,7 @@ func (service *ContainerService) Create(
 
 	createContainerDto := dto.NewCreateContainer(
 		accountId, hostname, imgAddr, portBindings, restartPolicyPtr, entrypointPtr,
-		profileIdPtr, envs, launchScriptPtr, autoCreateMappings,
+		profileIdPtr, envs, launchScriptPtr, autoCreateMappings, existingContainerIdPtr,
 		operatorAccountId, operatorIpAddress,
 	)
 

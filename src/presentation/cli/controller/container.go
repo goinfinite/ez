@@ -100,6 +100,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 	var profileId uint64
 	var envsSlice []string
 	var launchScriptFilePathStr, autoCreateMappingsBoolStr string
+	var existingContainerIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -161,6 +162,10 @@ func (controller *ContainerController) Create() *cobra.Command {
 				requestBody["launchScript"] = launchScript
 			}
 
+			if existingContainerIdStr != "" {
+				requestBody["existingContainerId"] = existingContainerIdStr
+			}
+
 			cliHelper.ServiceResponseWrapper(
 				controller.containerService.Create(requestBody, false),
 			)
@@ -185,6 +190,9 @@ func (controller *ContainerController) Create() *cobra.Command {
 	)
 	cmd.Flags().StringVarP(
 		&autoCreateMappingsBoolStr, "auto-create-mappings", "m", "true", "AutoCreateMappings",
+	)
+	cmd.Flags().StringVarP(
+		&existingContainerIdStr, "existing-container-id", "x", "", "ExistingContainerId",
 	)
 	return cmd
 }
