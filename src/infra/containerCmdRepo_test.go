@@ -33,10 +33,10 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 	}
 
 	containerHostname, _ := valueObject.NewFqdn("goinfinite.net")
-	containerImage, _ := valueObject.NewContainerImageAddress("https://docker.io/goinfinite/os")
+	imageAddress, _ := valueObject.NewContainerImageAddress("https://docker.io/goinfinite/os")
 
 	createContainer := dto.NewCreateContainer(
-		accountId, containerHostname, containerImage, portBindings, &restartPolicy,
+		accountId, containerHostname, imageAddress, nil, portBindings, &restartPolicy,
 		nil, &profileId, envs, &launchScript, false, nil,
 		LocalOperatorAccountId, LocalOperatorIpAddress,
 	)

@@ -442,7 +442,11 @@ func (repo *ContainerCmdRepo) Create(
 		createParams = append(createParams, portBindingsParams...)
 	}
 
-	createParams = append(createParams, createDto.ImageAddress.String())
+	imageAddrStr := createDto.ImageAddress.String()
+	if createDto.ImageId != nil {
+		imageAddrStr = createDto.ImageId.String()
+	}
+	createParams = append(createParams, imageAddrStr)
 
 	_, err = infraHelper.RunCmdAsUser(
 		createDto.AccountId,

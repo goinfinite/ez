@@ -138,6 +138,15 @@ func (service *ContainerService) Create(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
+	var imageIdPtr *valueObject.ContainerImageId
+	if input["imageId"] != nil {
+		imageId, err := valueObject.NewContainerImageId(input["imageId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		imageIdPtr = &imageId
+	}
+
 	portBindings := []valueObject.PortBinding{}
 	if input["portBindings"] != nil {
 		var assertOk bool
@@ -216,6 +225,11 @@ func (service *ContainerService) Create(
 			"--hostname", hostname.String(),
 			"--image-address", imgAddr.String(),
 		}
+		if imageIdPtr != nil {
+			createParams = append(createParams, "--image-id")
+			createParams = append(createParams, imageIdPtr.String())
+		}
+
 		if len(portBindings) > 0 {
 			for _, portBinding := range portBindings {
 				createParams = append(createParams, "--port-bindings")
@@ -305,13 +319,12 @@ func (service *ContainerService) Create(
 	}
 
 	createContainerDto := dto.NewCreateContainer(
-		accountId, hostname, imgAddr, portBindings, restartPolicyPtr, entrypointPtr,
+		accountId, hostname, imgAddr, imageIdPtr, portBindings, restartPolicyPtr, entrypointPtr,
 		profileIdPtr, envs, launchScriptPtr, autoCreateMappings, existingContainerIdPtr,
 		operatorAccountId, operatorIpAddress,
 	)
 
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
-	containerImageQueryRepo := infra.NewContainerImageQueryRepo(service.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
@@ -321,10 +334,10 @@ func (service *ContainerService) Create(
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainer(
-		service.containerQueryRepo, containerCmdRepo, containerImageQueryRepo,
-		containerImageCmdRepo, accountQueryRepo, accountCmdRepo,
-		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
-		containerProxyCmdRepo, service.activityRecordCmdRepo, createContainerDto,
+		service.containerQueryRepo, containerCmdRepo, containerImageCmdRepo,
+		accountQueryRepo, accountCmdRepo, containerProfileQueryRepo, mappingQueryRepo,
+		mappingCmdRepo, containerProxyCmdRepo, service.activityRecordCmdRepo,
+		createContainerDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

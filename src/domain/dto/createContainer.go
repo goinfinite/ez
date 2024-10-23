@@ -9,6 +9,7 @@ type CreateContainer struct {
 	AccountId           valueObject.AccountId               `json:"accountId"`
 	Hostname            valueObject.Fqdn                    `json:"hostname"`
 	ImageAddress        valueObject.ContainerImageAddress   `json:"imageAddress"`
+	ImageId             *valueObject.ContainerImageId       `json:"imageId,omitempty"`
 	PortBindings        []valueObject.PortBinding           `json:"portBindings"`
 	RestartPolicy       *valueObject.ContainerRestartPolicy `json:"restartPolicy,omitempty"`
 	Entrypoint          *valueObject.ContainerEntrypoint    `json:"entrypoint,omitempty"`
@@ -25,6 +26,7 @@ func NewCreateContainer(
 	accountId valueObject.AccountId,
 	hostname valueObject.Fqdn,
 	imageAddress valueObject.ContainerImageAddress,
+	imageId *valueObject.ContainerImageId,
 	portBindings []valueObject.PortBinding,
 	restartPolicyPtr *valueObject.ContainerRestartPolicy,
 	entrypoint *valueObject.ContainerEntrypoint,
@@ -50,6 +52,7 @@ func NewCreateContainer(
 		AccountId:           accountId,
 		Hostname:            hostname,
 		ImageAddress:        imageAddress,
+		ImageId:             imageId,
 		PortBindings:        portBindings,
 		RestartPolicy:       restartPolicyPtr,
 		Entrypoint:          entrypoint,
@@ -57,8 +60,8 @@ func NewCreateContainer(
 		Envs:                envs,
 		LaunchScript:        launchScript,
 		AutoCreateMappings:  autoCreateMappings,
+		ExistingContainerId: existingContainerId,
 		OperatorAccountId:   operatorAccountId,
 		OperatorIpAddress:   operatorIpAddress,
-		ExistingContainerId: existingContainerId,
 	}
 }

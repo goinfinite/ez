@@ -94,7 +94,7 @@ func (controller *ContainerController) parseContainerEnvs(
 
 func (controller *ContainerController) Create() *cobra.Command {
 	var accountIdUint uint64
-	var hostnameStr, containerImageAddressStr string
+	var hostnameStr, containerImageAddressStr, containerImageIdStr string
 	var portBindingsSlice []string
 	var restartPolicyStr, entrypointStr string
 	var profileId uint64
@@ -114,6 +114,10 @@ func (controller *ContainerController) Create() *cobra.Command {
 
 			if containerImageAddressStr != "" {
 				requestBody["imageAddress"] = containerImageAddressStr
+			}
+
+			if containerImageIdStr != "" {
+				requestBody["imageId"] = containerImageIdStr
 			}
 
 			if len(portBindingsSlice) > 0 {
@@ -177,6 +181,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 	cmd.Flags().StringVarP(&hostnameStr, "hostname", "n", "", "Hostname")
 	cmd.MarkFlagRequired("hostname")
 	cmd.Flags().StringVarP(&containerImageAddressStr, "image-address", "i", "", "ImageAddress")
+	cmd.Flags().StringVarP(&containerImageIdStr, "image-id", "d", "", "ImageId")
 	cmd.Flags().StringSliceVarP(
 		&portBindingsSlice, "port-bindings", "b", []string{},
 		"PortBindings (serviceName[:publicPort][:containerPort][/protocol][:privatePort])",
