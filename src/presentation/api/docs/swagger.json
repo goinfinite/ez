@@ -292,6 +292,12 @@
                         "schema": {
                             "$ref": "#/definitions/dto.CreateContainer"
                         }
+                    },
+                    {
+                        "type": "file",
+                        "description": "ArchiveImageFile (For importing container image file, if any.)",
+                        "name": "archiveImageFile",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1628,10 +1634,16 @@
                         "type": "string"
                     }
                 },
+                "existingContainerId": {
+                    "type": "string"
+                },
                 "hostname": {
                     "type": "string"
                 },
                 "imageAddress": {
+                    "type": "string"
+                },
+                "imageId": {
                     "type": "string"
                 },
                 "launchScript": {
@@ -2179,13 +2191,25 @@
                 "estimatedSizeBytes": {
                     "type": "integer"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "launchScript": {
                     "type": "string"
                 },
                 "manifestVersion": {
                     "type": "string"
                 },
+                "minimumCpuMillicores": {
+                    "type": "integer"
+                },
+                "minimumMemoryBytes": {
+                    "type": "integer"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "registryImageAddress": {
                     "type": "string"
                 },
                 "slugs": {
@@ -2263,6 +2287,9 @@
                 },
                 "updatedAt": {
                     "type": "integer"
+                },
+                "updatedAtRelative": {
+                    "type": "string"
                 }
             }
         },
@@ -2409,11 +2436,17 @@
                 "currentCpuPercent": {
                     "type": "number"
                 },
+                "currentCpuPercentStr": {
+                    "type": "string"
+                },
                 "memoryBytes": {
                     "type": "integer"
                 },
                 "memoryPercent": {
                     "type": "number"
+                },
+                "memoryPercentStr": {
+                    "type": "string"
                 },
                 "netInputBytes": {
                     "type": "integer"

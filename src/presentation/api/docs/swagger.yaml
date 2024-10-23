@@ -71,9 +71,13 @@ definitions:
         items:
           type: string
         type: array
+      existingContainerId:
+        type: string
       hostname:
         type: string
       imageAddress:
+        type: string
+      imageId:
         type: string
       launchScript:
         type: string
@@ -431,11 +435,19 @@ definitions:
         type: string
       estimatedSizeBytes:
         type: integer
+      id:
+        type: integer
       launchScript:
         type: string
       manifestVersion:
         type: string
+      minimumCpuMillicores:
+        type: integer
+      minimumMemoryBytes:
+        type: integer
       name:
+        type: string
+      registryImageAddress:
         type: string
       slugs:
         items:
@@ -487,6 +499,8 @@ definitions:
         type: integer
       updatedAt:
         type: integer
+      updatedAtRelative:
+        type: string
     type: object
   entity.RegistryTaggedImage:
     properties:
@@ -583,10 +597,14 @@ definitions:
         type: number
       currentCpuPercent:
         type: number
+      currentCpuPercentStr:
+        type: string
       memoryBytes:
         type: integer
       memoryPercent:
         type: number
+      memoryPercentStr:
+        type: string
       netInputBytes:
         type: integer
       netOutputBytes:
@@ -878,6 +896,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.CreateContainer'
+      - description: ArchiveImageFile (For importing container image file, if any.)
+        in: formData
+        name: archiveImageFile
+        type: file
       produces:
       - application/json
       responses:

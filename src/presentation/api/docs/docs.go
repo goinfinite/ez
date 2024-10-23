@@ -299,6 +299,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.CreateContainer"
                         }
+                    },
+                    {
+                        "type": "file",
+                        "description": "ArchiveImageFile (For importing container image file, if any.)",
+                        "name": "archiveImageFile",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1635,10 +1641,16 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "existingContainerId": {
+                    "type": "string"
+                },
                 "hostname": {
                     "type": "string"
                 },
                 "imageAddress": {
+                    "type": "string"
+                },
+                "imageId": {
                     "type": "string"
                 },
                 "launchScript": {
@@ -2186,13 +2198,25 @@ const docTemplate = `{
                 "estimatedSizeBytes": {
                     "type": "integer"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "launchScript": {
                     "type": "string"
                 },
                 "manifestVersion": {
                     "type": "string"
                 },
+                "minimumCpuMillicores": {
+                    "type": "integer"
+                },
+                "minimumMemoryBytes": {
+                    "type": "integer"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "registryImageAddress": {
                     "type": "string"
                 },
                 "slugs": {
@@ -2270,6 +2294,9 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "integer"
+                },
+                "updatedAtRelative": {
+                    "type": "string"
                 }
             }
         },
@@ -2416,11 +2443,17 @@ const docTemplate = `{
                 "currentCpuPercent": {
                     "type": "number"
                 },
+                "currentCpuPercentStr": {
+                    "type": "string"
+                },
                 "memoryBytes": {
                     "type": "integer"
                 },
                 "memoryPercent": {
                     "type": "number"
+                },
+                "memoryPercentStr": {
+                    "type": "string"
                 },
                 "netInputBytes": {
                     "type": "integer"
