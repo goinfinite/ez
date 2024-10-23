@@ -12,7 +12,6 @@ import (
 func CreateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
-	containerImageQueryRepo repository.ContainerImageQueryRepo,
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
@@ -58,13 +57,7 @@ func CreateContainer(
 			return errors.New("CreateContainerSnapshotImageInfraError")
 		}
 
-		imageEntity, err := containerImageQueryRepo.ReadById(createDto.AccountId, imageId)
-		if err != nil {
-			slog.Error("ContainerSnapshotImageNotFound", slog.Any("error", err))
-			return errors.New("ContainerSnapshotImageNotFound")
-		}
-
-		createDto.ImageAddress = imageEntity.ImageAddress
+		createDto.ImageId = &imageId
 	}
 
 	containerId, err := containerCmdRepo.Create(createDto)
