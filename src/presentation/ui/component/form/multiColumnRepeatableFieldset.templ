@@ -10,8 +10,8 @@ type RepeatableField struct {
 script MultiColumnRepeatableFieldsetLocalState(id string) {
 	document.addEventListener('alpine:init', () => {
 		Alpine.data(id+'MultiColumnRepeatableFieldset', () => ({
-      newFieldset: {},
-      registeredFieldsets: [],
+			newFieldset: {},
+			registeredFieldsets: [],
 			get registeredFieldsetsFlattened() {
 				let fieldsetsStr = "";
 
@@ -33,29 +33,29 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 
 				return fieldsetsStr;
 			},
-      createFieldset() {
+			createFieldset() {
 				if (Object.keys(this.newFieldset).length === 0) {
 					return;
 				}
 
-        this.registeredFieldsets.push(this.newFieldset);
-        this.newFieldset = {};
-      },
-      removeRegisteredFieldset(id) {
-        this.registeredFieldsets.splice(id, 1);
-      },
+				this.registeredFieldsets.push(this.newFieldset);
+				this.newFieldset = {};
+			},
+			removeRegisteredFieldset(id) {
+				this.registeredFieldsets.splice(id, 1);
+			},
 			resetState() {
-        this.newFieldSet = {};
-        this.registeredFieldsets = [];
-      },
+				this.newFieldSet = {};
+				this.registeredFieldsets = [];
+			},
 			init() {
 				this.resetState();
 				document.addEventListener('clear:component-state', () => {
 					this.resetState();
 				});
 			},
-    }));
-  });
+		}));
+	});
 }
 
 templ MultiColumnRepeatableFieldset(
