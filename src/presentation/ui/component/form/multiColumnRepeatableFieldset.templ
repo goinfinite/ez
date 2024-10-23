@@ -12,21 +12,37 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 		Alpine.data(id+'MultiColumnRepeatableFieldset', () => ({
       newFieldset: {},
       registeredFieldsets: [],
+			get registeredFieldsetsFlattened() {
+				let fieldsetsStr = "";
+
+				this.registeredFieldsets.forEach((registeredFieldset) => {
+					let fieldsetStr = "";
+
+					for (const [key, value] of Object.entries(registeredFieldset)) {
+						fieldsetStr += value + "|";
+					}
+
+					fieldsetStrWithoutLastPipe = fieldsetStr.slice(0, -1);
+					fieldsetsStr += fieldsetStrWithoutLastPipe + ";";
+				});
+
+				if (fieldsetsStr.length > 0) {
+					fieldsetsStrWithoutLastSemicolon = fieldsetsStr.slice(0, -1);
+					fieldsetsStr = fieldsetsStrWithoutLastSemicolon;
+				}
+
+				return fieldsetsStr;
+			},
       createFieldset() {
 				if (Object.keys(this.newFieldset).length === 0) {
 					return;
 				}
 
-        this.registeredFieldsets.push({
-          id: this.registeredFieldsets.length,
-          fieldset: this.newFieldset,
-        });
+        this.registeredFieldsets.push(this.newFieldset);
         this.newFieldset = {};
       },
       removeRegisteredFieldset(id) {
-        this.registeredFieldsets = this.registeredFieldsets.filter(
-          (item) => item.id !== id
-        );
+        this.registeredFieldsets.splice(id, 1);
       },
 			resetState() {
         this.newFieldSet = {};
@@ -37,26 +53,6 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 				document.addEventListener('clear:component-state', () => {
 					this.resetState();
 				});
-			},
-
-			transformFieldsetsIntoApiPayload() {
-				let payloadStr = "";
-				
-				this.registeredFieldsets.forEach((registeredFieldset) => {
-					let fieldsetStr = "";
-					for (const [key, value] of Object.entries(registeredFieldset.fieldset)) {
-						fieldsetStr += value + "|";
-					}
-					fieldsetStrWithoutLastPipe = fieldsetStr.slice(0, -1);
-					payloadStr += fieldsetStrWithoutLastPipe + ";";
-				});
-
-				if (payloadStr.length > 0) {
-					payloadStrWithoutLastSemicolon = payloadStr.slice(0, -1);
-					payloadStr = payloadStrWithoutLastSemicolon;
-				}
-
-				return payloadStr;
 			},
     }));
   });
@@ -72,23 +68,24 @@ templ MultiColumnRepeatableFieldset(
 	<div
 		class="bg-ez-400 flex flex-col gap-6 rounded-md p-4"
 		x-data={ id + "MultiColumnRepeatableFieldset" }
+		x-init={ "$watch('" + bindValuePath + "', value => registeredFieldsets = value)" }
 	>
-		<template x-if={ bindValuePath + ".length > 0" }>
-			<input type="hidden" id={ id } name={ id } x-model={ bindValuePath }/>
-		</template>
 		<div>
 			<p class="text-md font-bold">{ title }</p>
 			if description != "" {
 				<p class="mt-1 text-sm">{ description }</p>
 			}
 		</div>
+		<template x-if="registeredFieldsets.length > 0">
+			<input type="hidden" id={ id } name={ id } x-model="registeredFieldsetsFlattened"/>
+		</template>
 		<div
 			x-show="registeredFieldsets.length > 0"
 			class="flex w-full flex-col gap-3 opacity-70"
 		>
-			<template x-for="registeredFieldset in registeredFieldsets">
+			<template x-for="(registeredFieldset, fieldsetIndex) in registeredFieldsets">
 				<div class="flex flex-row items-center gap-3 px-2">
-					<template x-for="(fieldValue, fieldLabel) in registeredFieldset.fieldset">
+					<template x-for="(fieldValue, fieldLabel) in registeredFieldset">
 						<div class="relative w-full">
 							<input
 								type="text"
@@ -106,7 +103,7 @@ templ MultiColumnRepeatableFieldset(
 					</template>
 					<button
 						type="button"
-						@click={ "removeRegisteredFieldset(registeredFieldset.id); " + bindValuePath + " = transformFieldsetsIntoApiPayload()" }
+						@click={ "removeRegisteredFieldset(fieldsetIndex); " + bindValuePath + " = registeredFieldsets" }
 						class="min-w-9 h-9 rounded-sm bg-red-900 leading-none hover:bg-red-700"
 					>
 						<i class="ph-bold ph-trash text-xl"></i>
@@ -131,7 +128,7 @@ templ MultiColumnRepeatableFieldset(
 			}
 			<button
 				type="button"
-				@click={ "createFieldset(); " + bindValuePath + " = transformFieldsetsIntoApiPayload()" }
+				@click={ "createFieldset(); " + bindValuePath + " = registeredFieldsets" }
 				class="bg-infinite-500 hover:bg-infinite-300 min-w-9 h-9 rounded-sm leading-none"
 			>
 				<i class="ph-bold ph-plus text-xl"></i>
