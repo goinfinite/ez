@@ -29,6 +29,40 @@ func StringDotNotationToHierarchicalMap(
 	return hierarchicalMap
 }
 
+func parseFormKeyValues(formData map[string][]string) map[string]interface{} {
+	formKeyValues := map[string]interface{}{}
+
+	for formKey, keyValues := range formData {
+		keyValue := ""
+		for _, value := range keyValues {
+			if value == "" {
+				continue
+			}
+
+			keyValue = value
+			break
+		}
+		if keyValue == "" {
+			continue
+		}
+
+		isNestedKey := strings.Contains(formKey, ".")
+		if !isNestedKey {
+			formKeyValues[formKey] = keyValue
+			continue
+		}
+
+		keyParts := strings.Split(formKey, ".")
+		if len(keyParts) < 2 {
+			continue
+		}
+
+		formKeyValues = StringDotNotationToHierarchicalMap(formKeyValues, keyParts, keyValue)
+	}
+
+	return formKeyValues
+}
+
 func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 	requestBody := map[string]interface{}{}
 
@@ -45,51 +79,14 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidFormData")
 		}
 
-		for formKey, keyValues := range formData {
-			keyValue := ""
-			for _, value := range keyValues {
-				if value == "" {
-					continue
-				}
-
-				keyValue = value
-				break
-			}
-			if keyValue == "" {
-				continue
-			}
-
-			isNestedKey := strings.Contains(formKey, ".")
-			if !isNestedKey {
-				requestBody[formKey] = keyValue
-				continue
-			}
-
-			keyParts := strings.Split(formKey, ".")
-			if len(keyParts) < 2 {
-				continue
-			}
-
-			requestBody = StringDotNotationToHierarchicalMap(requestBody, keyParts, keyValue)
-		}
+		requestBody = parseFormKeyValues(formData)
 	case strings.HasPrefix(contentType, "multipart/form-data"):
 		multipartForm, err := c.MultipartForm()
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "InvalidMultipartFormData")
 		}
 
-		for formKey, keyValue := range multipartForm.Value {
-			if len(keyValue) == 0 {
-				continue
-			}
-
-			if len(keyValue) == 1 {
-				requestBody[formKey] = keyValue[0]
-				continue
-			}
-
-			requestBody[formKey] = keyValue
-		}
+		requestBody = parseFormKeyValues(multipartForm.Value)
 
 		for fileKey, fileValue := range multipartForm.File {
 			if len(fileValue) == 0 {
