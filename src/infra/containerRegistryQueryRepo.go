@@ -17,6 +17,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra/db"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type ContainerRegistryQueryRepo struct {
@@ -308,7 +309,7 @@ func (repo *ContainerRegistryQueryRepo) ReadImages(
 	return registryImages, nil
 }
 
-func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
+func (repo *ContainerRegistryQueryRepo) readTaggedImageFromDockerHub(
 	imageAddress valueObject.ContainerImageAddress,
 ) (registryTaggedImage entity.RegistryTaggedImage, err error) {
 	orgName, err := imageAddress.ReadOrgName()
@@ -375,13 +376,12 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 		return registryTaggedImage, errors.New("ImageNotFound")
 	}
 
-	rawImageSize, assertOk := desiredImageMap["size"].(float64)
-	if !assertOk {
-		return registryTaggedImage, errors.New("ParseImageSizeError")
-	}
-	sizeBytes, err := valueObject.NewByte(rawImageSize)
-	if err != nil {
-		return registryTaggedImage, err
+	sizeBytes, _ := valueObject.NewByte(0)
+	if desiredImageMap["size"] != nil {
+		sizeBytes, err = valueObject.NewByte(desiredImageMap["size"])
+		if err != nil {
+			return registryTaggedImage, err
+		}
 	}
 
 	rawImageHash, assertOk := desiredImageMap["digest"].(string)
@@ -459,6 +459,120 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 	), nil
 }
 
+func (repo *ContainerRegistryQueryRepo) readTaggedImageFromLocalhost(
+	imageAddress valueObject.ContainerImageAddress,
+) (taggedImage entity.RegistryTaggedImage, err error) {
+	imageTag, err := imageAddress.ReadImageTag()
+	if err != nil {
+		return taggedImage, err
+	}
+
+	imageName, err := imageAddress.ReadImageName()
+	if err != nil {
+		return taggedImage, err
+	}
+
+	publisherName, err := imageAddress.ReadOrgName()
+	if err != nil {
+		return taggedImage, err
+	}
+
+	ownerUsername, err := valueObject.NewUsername(publisherName.String())
+	if err != nil {
+		return taggedImage, errors.New("ParseOwnerUsernameError: " + err.Error())
+	}
+
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	ownerEntity, err := accountQueryRepo.ReadByUsername(ownerUsername)
+	if err != nil {
+		return taggedImage, errors.New("FindOwnerError: " + err.Error())
+	}
+
+	rawImageId, err := infraHelper.RunCmdAsUserWithSubShell(
+		ownerEntity.Id, "podman image list | awk '/"+imageName.String()+"/{print $3}'",
+	)
+	if err != nil {
+		return taggedImage, errors.New("FindImageIdError: " + err.Error())
+	}
+	imageId, err := valueObject.NewContainerImageId(rawImageId)
+	if err != nil {
+		return taggedImage, err
+	}
+
+	registryName, _ := valueObject.NewRegistryName("localhost")
+
+	rawImageInspect, err := infraHelper.RunCmdAsUserWithSubShell(
+		ownerEntity.Id, "podman image inspect "+imageId.String(),
+	)
+	if err != nil {
+		return taggedImage, errors.New("ImageInspectError: " + err.Error())
+	}
+
+	var unmarshalledImageInspect []interface{}
+	err = json.Unmarshal([]byte(rawImageInspect), &unmarshalledImageInspect)
+	if err != nil {
+		return taggedImage, errors.New("UnmarshalImageInspectError: " + err.Error())
+	}
+	if len(unmarshalledImageInspect) == 0 {
+		return taggedImage, errors.New("ImageInspectEmpty")
+	}
+
+	rawImageDetails, assertOk := unmarshalledImageInspect[0].(map[string]interface{})
+	if !assertOk {
+		return taggedImage, errors.New("ParseImageDetailsError")
+	}
+
+	rawImageHash, assertOk := rawImageDetails["Id"].(string)
+	if !assertOk {
+		return taggedImage, errors.New("ParseImageHashError")
+	}
+	imageHash, err := valueObject.NewHash(rawImageHash)
+	if err != nil {
+		return taggedImage, err
+	}
+
+	isa, _ := valueObject.NewInstructionSetArchitecture("amd64")
+
+	sizeBytes, _ := valueObject.NewByte(0)
+	if rawImageDetails["Size"] != nil {
+		sizeBytes, err = valueObject.NewByte(rawImageDetails["Size"])
+		if err != nil {
+			return taggedImage, err
+		}
+	}
+
+	portBindings := []valueObject.PortBinding{}
+	if rawImageDetails["Config"] != nil {
+		rawConfig, assertOk := rawImageDetails["Config"].(map[string]interface{})
+		if !assertOk {
+			return taggedImage, errors.New("ParseImageDetailsConfigError")
+		}
+
+		rawExposedPorts, assertOk := rawConfig["ExposedPorts"].(map[string]interface{})
+		if !assertOk {
+			return taggedImage, errors.New("ParseExposedPortsError")
+		}
+
+		for rawPortBinding := range rawExposedPorts {
+			rawPortBinding = strings.ReplaceAll(rawPortBinding, "/tcp", "")
+			portBinding, err := valueObject.NewPortBindingFromString(rawPortBinding)
+			if err != nil {
+				slog.Debug(err.Error(), slog.String("rawPortBinding", rawPortBinding))
+				continue
+			}
+
+			portBindings = append(portBindings, portBinding...)
+		}
+	}
+
+	updateAt := valueObject.NewUnixTimeNow()
+
+	return entity.NewRegistryTaggedImage(
+		imageTag, imageName, publisherName, registryName, imageAddress, imageHash, isa,
+		sizeBytes, portBindings, updateAt,
+	), nil
+}
+
 func (repo *ContainerRegistryQueryRepo) ReadTaggedImage(
 	imageAddress valueObject.ContainerImageAddress,
 ) (taggedImage entity.RegistryTaggedImage, err error) {
@@ -469,7 +583,9 @@ func (repo *ContainerRegistryQueryRepo) ReadTaggedImage(
 
 	switch registryName.String() {
 	case "docker.io", "registry-1.docker.io":
-		return repo.getTaggedImageFromDockerHub(imageAddress)
+		return repo.readTaggedImageFromDockerHub(imageAddress)
+	case "localhost":
+		return repo.readTaggedImageFromLocalhost(imageAddress)
 	default:
 		return taggedImage, errors.New("UnknownRegistry")
 	}
