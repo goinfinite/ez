@@ -32,11 +32,11 @@ script OverviewIndexLocalState() {
 					'accountId': '',
 					'hostname': '',
 					'imageAddress': 'docker.io/goinfinite/os:latest',
-					'portBindings': '',
+					'portBindings': [],
 					'restartPolicy': 'unless-stopped',
 					'entrypoint': '',
 					'profileId': 0,
-					'envs': '',
+					'envs': [],
 					'launchScript': '',
 					'autoCreateMappings': true,
 					'existingContainerId': '',
@@ -48,7 +48,7 @@ script OverviewIndexLocalState() {
 					this.autoUpdatePortBindings(oldValue, newValue);
 				}, 500));
 			},
-			autoUpdatePortBindings(prevImageAddress, newImageAddress) {
+			async autoUpdatePortBindings(prevImageAddress, newImageAddress) {
 				const isSameImage = prevImageAddress === newImageAddress;
 				const isPortBindingsEmpty = this.container.portBindings.length === 0;
 				if (isSameImage && !isPortBindingsEmpty) {
@@ -58,12 +58,12 @@ script OverviewIndexLocalState() {
 				const isImageAddressTooShort = newImageAddress.length < 3;
 				const isImageNotAddressYet = !newImageAddress.includes('/');
 				if (isImageAddressTooShort || isImageNotAddressYet) {
-					this.container.portBindings = '';
+					this.container.portBindings = [];
 					return;
 				}
 
 				const remoteApiUrl = '/api/v1/container/registry/image/tagged/?address=' + this.container.imageAddress;
-				this.container.portBindings = fetch(remoteApiUrl, {
+				this.container.portBindings = await fetch(remoteApiUrl, {
       		method: "GET",
       		headers: {
         		Accept: "application/json",
