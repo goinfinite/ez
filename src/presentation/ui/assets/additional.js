@@ -46,18 +46,3 @@ window.__unocss = {
     },
   },
 };
-
-// Auxiliary Functions
-
-// Debounce
-// @see https://www.freecodecamp.org/news/javascript-debounce-example/
-function debounce(originalFunction, timeout = 300) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      originalFunction.apply(this, args);
-    }, timeout);
-  };
-}
-window.debounce = debounce;

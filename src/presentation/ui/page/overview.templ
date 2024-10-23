@@ -44,9 +44,6 @@ script OverviewIndexLocalState() {
 			},
 			init() {
 				this.resetPrimaryState();
-				Alpine.watch(() => this.container.imageAddress, debounce((oldValue, newValue) => {
-					this.autoUpdatePortBindings(oldValue, newValue);
-				}, 500));
 			},
 			async autoUpdatePortBindings(prevImageAddress, newImageAddress) {
 				const isSameImage = prevImageAddress === newImageAddress;
@@ -332,7 +329,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					</div>
 				</div>
 			</div>
-			<div x-show="createContainerSourceSelectedOption === 'URL'">
+			<div
+				x-show="createContainerSourceSelectedOption === 'URL'"
+				x-init.debounce.500ms="$watch('container.imageAddress', (newValue, oldValue) => autoUpdatePortBindings(oldValue, newValue))"
+			>
 				@componentForm.RemoteSearchableSelectInput(
 					"imageAddress", "Image Address", "container.imageAddress",
 					"/api/v1/container/registry/image/", "name", "imageAddress",
