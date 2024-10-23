@@ -53,8 +53,8 @@ func (vo ContainerImageAddress) readParts() map[string]string {
 	return voHelper.FindNamedGroupsMatches(containerImageAddressRegex, string(vo))
 }
 
-func (vo ContainerImageAddress) ReadFqdn() (Fqdn, error) {
-	return NewFqdn(vo.readParts()["hostname"])
+func (vo ContainerImageAddress) ReadHostname() (UnixHostname, error) {
+	return NewUnixHostname(vo.readParts()["hostname"])
 }
 
 func (vo ContainerImageAddress) ReadOrgName() (RegistryPublisherName, error) {

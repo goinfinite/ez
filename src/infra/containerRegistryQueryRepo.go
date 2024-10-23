@@ -462,7 +462,7 @@ func (repo *ContainerRegistryQueryRepo) getTaggedImageFromDockerHub(
 func (repo *ContainerRegistryQueryRepo) ReadTaggedImage(
 	imageAddress valueObject.ContainerImageAddress,
 ) (taggedImage entity.RegistryTaggedImage, err error) {
-	registryName, err := imageAddress.ReadFqdn()
+	registryName, err := imageAddress.ReadHostname()
 	if err != nil {
 		return taggedImage, err
 	}
