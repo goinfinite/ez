@@ -444,8 +444,18 @@ func (repo *ContainerCmdRepo) Create(
 
 	imageAddrStr := createDto.ImageAddress.String()
 	if createDto.ImageId != nil {
+		containerImageQueryRepo := NewContainerImageQueryRepo(repo.persistentDbSvc)
+		imageEntity, err := containerImageQueryRepo.ReadById(
+			createDto.AccountId, *createDto.ImageId,
+		)
+		if err != nil {
+			return containerId, err
+		}
+
+		createDto.ImageAddress = imageEntity.ImageAddress
 		imageAddrStr = createDto.ImageId.String()
 	}
+
 	createParams = append(createParams, imageAddrStr)
 
 	_, err = infraHelper.RunCmdAsUser(
