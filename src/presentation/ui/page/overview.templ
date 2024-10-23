@@ -282,6 +282,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		hx-swap="none"
 		class="space-y-4"
 		@submit="closeCreateContainerModal()"
+		enctype="multipart/form-data"
 	>
 		@componentForm.InputField(componentForm.InputFieldDto{
 			InputType: "text", Id: "hostname", Label: "Hostname",
@@ -353,7 +354,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			</div>
 			<div x-show="createContainerSourceSelectedOption === 'Upload Image'">
 				@componentForm.Dropzone(
-					"imageArchiveFile", ".tar, .gzip, .zip, .xz or .br",
+					"archiveImageFile", ".tar, .gzip, .zip, .xz or .br",
 					".tar,.gzip,.zip,.xz,.br", false,
 				)
 			</div>
