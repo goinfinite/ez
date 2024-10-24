@@ -99,7 +99,7 @@ func (controller *ContainerController) Create() *cobra.Command {
 	var restartPolicyStr, entrypointStr string
 	var profileId uint64
 	var envsSlice []string
-	var launchScriptFilePathStr, autoCreateMappingsBoolStr string
+	var launchScriptFilePathStr, autoCreateMappingsBoolStr, useImageExposedPortsBoolStr string
 	var existingContainerIdStr string
 
 	cmd := &cobra.Command{
@@ -107,9 +107,10 @@ func (controller *ContainerController) Create() *cobra.Command {
 		Short: "CreateNewContainer",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"accountId":          accountIdUint,
-				"hostname":           hostnameStr,
-				"autoCreateMappings": autoCreateMappingsBoolStr,
+				"accountId":            accountIdUint,
+				"hostname":             hostnameStr,
+				"autoCreateMappings":   autoCreateMappingsBoolStr,
+				"useImageExposedPorts": useImageExposedPortsBoolStr,
 			}
 
 			if containerImageAddressStr != "" {
@@ -195,6 +196,10 @@ func (controller *ContainerController) Create() *cobra.Command {
 	)
 	cmd.Flags().StringVarP(
 		&autoCreateMappingsBoolStr, "auto-create-mappings", "m", "true", "AutoCreateMappings",
+	)
+	cmd.Flags().StringVarP(
+		&useImageExposedPortsBoolStr, "use-image-exposed-ports", "u", "false",
+		"UseImageExposedPorts (valid when imageId is provided)",
 	)
 	cmd.Flags().StringVarP(
 		&existingContainerIdStr, "existing-container-id", "x", "", "ExistingContainerId",

@@ -205,7 +205,15 @@ func (service *ContainerService) Create(
 	if input["autoCreateMappings"] != nil {
 		autoCreateMappings, err = voHelper.InterfaceToBool(input["autoCreateMappings"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, "InvalidAutoCreateMappings")
+		}
+	}
+
+	useImageExposedPorts := false
+	if input["useImageExposedPorts"] != nil {
+		useImageExposedPorts, err = voHelper.InterfaceToBool(input["useImageExposedPorts"])
+		if err != nil {
+			return NewServiceOutput(UserError, "InvalidUseImageExposedPorts")
 		}
 	}
 
@@ -223,9 +231,11 @@ func (service *ContainerService) Create(
 		createParams := []string{
 			"--account-id", accountId.String(),
 			"--hostname", hostname.String(),
-			"--image-address", imgAddr.String(),
 		}
-		if imageIdPtr != nil {
+		if imageIdPtr == nil {
+			createParams = append(createParams, "--image-address")
+			createParams = append(createParams, imgAddr.String())
+		} else {
 			createParams = append(createParams, "--image-id")
 			createParams = append(createParams, imageIdPtr.String())
 		}
@@ -274,6 +284,11 @@ func (service *ContainerService) Create(
 			createParams = append(createParams, "false")
 		}
 
+		if useImageExposedPorts {
+			createParams = append(createParams, "--use-image-exposed-ports")
+			createParams = append(createParams, "true")
+		}
+
 		timeoutSeconds := uint16(600)
 
 		if existingContainerIdPtr != nil {
@@ -320,11 +335,12 @@ func (service *ContainerService) Create(
 
 	createContainerDto := dto.NewCreateContainer(
 		accountId, hostname, imgAddr, imageIdPtr, portBindings, restartPolicyPtr, entrypointPtr,
-		profileIdPtr, envs, launchScriptPtr, autoCreateMappings, existingContainerIdPtr,
-		operatorAccountId, operatorIpAddress,
+		profileIdPtr, envs, launchScriptPtr, autoCreateMappings, useImageExposedPorts,
+		existingContainerIdPtr, operatorAccountId, operatorIpAddress,
 	)
 
 	containerCmdRepo := infra.NewContainerCmdRepo(service.persistentDbSvc)
+	containerImageQueryRepo := infra.NewContainerImageQueryRepo(service.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(service.persistentDbSvc)
@@ -334,10 +350,10 @@ func (service *ContainerService) Create(
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
 	err = useCase.CreateContainer(
-		service.containerQueryRepo, containerCmdRepo, containerImageCmdRepo,
-		accountQueryRepo, accountCmdRepo, containerProfileQueryRepo, mappingQueryRepo,
-		mappingCmdRepo, containerProxyCmdRepo, service.activityRecordCmdRepo,
-		createContainerDto,
+		service.containerQueryRepo, containerCmdRepo, containerImageQueryRepo,
+		containerImageCmdRepo, accountQueryRepo, accountCmdRepo,
+		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
+		containerProxyCmdRepo, service.activityRecordCmdRepo, createContainerDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

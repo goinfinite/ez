@@ -37,7 +37,7 @@ func createDummyContainer(containerCmdRepo *ContainerCmdRepo) error {
 
 	createContainer := dto.NewCreateContainer(
 		accountId, containerHostname, imageAddress, nil, portBindings, &restartPolicy,
-		nil, &profileId, envs, &launchScript, false, nil,
+		nil, &profileId, envs, &launchScript, false, false, nil,
 		LocalOperatorAccountId, LocalOperatorIpAddress,
 	)
 

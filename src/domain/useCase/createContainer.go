@@ -12,6 +12,7 @@ import (
 func CreateContainer(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
+	containerImageQueryRepo repository.ContainerImageQueryRepo,
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
@@ -58,6 +59,20 @@ func CreateContainer(
 		}
 
 		createDto.ImageId = &imageId
+	}
+
+	if createDto.ImageId != nil {
+		imageEntity, err := containerImageQueryRepo.ReadById(
+			createDto.AccountId, *createDto.ImageId,
+		)
+		if err != nil {
+			return errors.New("ContainerImageNotFound")
+		}
+
+		createDto.ImageAddress = imageEntity.ImageAddress
+		isInfiniteOs = imageEntity.ImageAddress.IsInfiniteOs()
+
+		createDto.PortBindings = imageEntity.PortBindings
 	}
 
 	containerId, err := containerCmdRepo.Create(createDto)
