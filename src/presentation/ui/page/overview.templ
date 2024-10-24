@@ -45,7 +45,7 @@ script OverviewIndexLocalState() {
 			init() {
 				this.resetPrimaryState();
 			},
-			async autoUpdatePortBindings(prevImageAddress, newImageAddress) {
+			async autoPortBindingsRetriever(prevImageAddress, newImageAddress) {
 				const isSameImage = prevImageAddress === newImageAddress;
 				const isPortBindingsEmpty = this.container.portBindings.length === 0;
 				if (isSameImage && !isPortBindingsEmpty) {
@@ -81,6 +81,23 @@ script OverviewIndexLocalState() {
 						console.error('AutoUpdatePortBindingsError: ', error);
 						return [];
 					});
+			},
+			syncExistingContainerPortBindings(prevId, newId) {
+				const isSameContainer = prevId === newId;
+				const isPortBindingsEmpty = this.container.portBindings.length === 0;
+				if (isSameContainer && !isPortBindingsEmpty) {
+					return;
+				}
+
+				if (newId.length < 12) {
+					this.container.portBindings = [];
+					return;
+				}
+
+				const containerEntity = JSON.parse(
+					document.getElementById('containerEntity_'+newId).textContent
+				);
+				this.container.portBindings = containerEntity.portBindings;
 			},
 
 			// Auxiliary States
@@ -207,6 +224,7 @@ templ ContainersTable(
 		<tbody>
 			for _, containerEntity := range containerEntities {
 				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+					@templ.JSONScript("containerEntity_"+containerEntity.Id.String(), containerEntity)
 					<td class="w-[40%] overflow-x-hidden px-3 py-2 text-left">
 						@componentContainer.ContainerTaggedSummary(containerIdSummariesMap[containerEntity.Id])
 					</td>
@@ -332,7 +350,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			</div>
 			<div
 				x-show="createContainerSourceSelectedOption === 'URL'"
-				x-init.debounce.500ms="$watch('container.imageAddress', (newValue, oldValue) => autoUpdatePortBindings(oldValue, newValue))"
+				x-init.debounce.500ms="$watch('container.imageAddress', (newAddr, prevAddr) => autoPortBindingsRetriever(prevAddr, newAddr))"
 			>
 				@componentForm.RemoteSearchableSelectInput(
 					"imageAddress", "Image Address", "container.imageAddress",
@@ -340,7 +358,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					[]string{"pullCount", "starCount", "updatedAtRelative"},
 				)
 			</div>
-			<div x-show="createContainerSourceSelectedOption === 'Existing Container'">
+			<div
+				x-show="createContainerSourceSelectedOption === 'Existing Container'"
+				x-init.debounce.500ms="$watch('container.existingContainerId', (newId, prevId) => syncExistingContainerPortBindings(prevId, newId))"
+			>
 				@componentForm.SearchableSelectInput(
 					"existingContainerId", "Existing Container", "container.existingContainerId",
 					createDto.ContainerSummarySearchableItems,
