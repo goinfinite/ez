@@ -364,7 +364,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			</div>
 			<div
 				x-show="createContainerSourceSelectedOption === 'URL'"
-				x-init.debounce.500ms="$watch('container.imageAddress', (newAddr, prevAddr) => autoPortBindingsRetriever(prevAddr, newAddr))"
+				x-init="$watch('container.imageAddress', (newAddr, prevAddr) => autoPortBindingsRetriever(prevAddr, newAddr))"
 			>
 				@componentForm.RemoteSearchableSelectInput(
 					"imageAddress", "Image Address", "container.imageAddress",
@@ -374,7 +374,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			</div>
 			<div
 				x-show="createContainerSourceSelectedOption === 'Existing Container'"
-				x-init.debounce.500ms="$watch('container.existingContainerId', (newId, prevId) => syncExistingContainerPortBindings(prevId, newId))"
+				x-init="$watch('container.existingContainerId', (newId, prevId) => syncExistingContainerPortBindings(prevId, newId))"
 			>
 				@componentForm.SearchableSelectInput(
 					"existingContainerId", "Existing Container", "container.existingContainerId",

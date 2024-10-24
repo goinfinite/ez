@@ -181,7 +181,7 @@ templ SearchableSelectInput(
 			<input
 				id={ id + "SelectInput" }
 				placeholder={ label }
-				x-model="userInput"
+				x-model.debounce.300ms="userInput"
 				@mousedown="openDropdown()"
 				class="peer w-full appearance-none bg-transparent placeholder-transparent outline-none"
 			/>
@@ -296,7 +296,7 @@ templ RemoteSearchableSelectInput(
 				id={ id }
 				name={ id }
 				placeholder={ label }
-				x-model:value={ bindValuePath }
+				x-model:value.debounce.300ms={ bindValuePath }
 				@input.debounce.300ms={ "userInput = " + bindValuePath + "; updateSearchableItems()" }
 				@mousedown="openDropdown()"
 				class="peer w-full appearance-none bg-transparent placeholder-transparent outline-none"
