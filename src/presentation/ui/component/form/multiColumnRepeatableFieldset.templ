@@ -12,7 +12,8 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 		Alpine.data(id+'MultiColumnRepeatableFieldset', () => ({
 			newFieldset: {},
 			registeredFieldsets: [],
-			get registeredFieldsetsFlattened() {
+			registeredFieldsetsFlattened: '',
+			flattenRegisteredFieldsets() {
 				let fieldsetsStr = "";
 
 				this.registeredFieldsets.forEach((registeredFieldset) => {
@@ -31,7 +32,7 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 					fieldsetsStr = fieldsetsStrWithoutLastSemicolon;
 				}
 
-				return fieldsetsStr;
+				this.registeredFieldsetsFlattened = fieldsetsStr;
 			},
 			createFieldset() {
 				if (Object.keys(this.newFieldset).length === 0) {
@@ -68,17 +69,15 @@ templ MultiColumnRepeatableFieldset(
 	<div
 		class="bg-ez-400 flex flex-col gap-6 rounded-md p-4"
 		x-data={ id + "MultiColumnRepeatableFieldset" }
-		x-init={ "$watch('" + bindValuePath + "', value => registeredFieldsets = value)" }
+		x-init={ "$watch('" + bindValuePath + "', value => {registeredFieldsets = value; flattenRegisteredFieldsets()})" }
 	>
+		<input type="hidden" id={ id } name={ id } x-model:value="registeredFieldsetsFlattened"/>
 		<div>
 			<p class="text-md font-bold">{ title }</p>
 			if description != "" {
 				<p class="mt-1 text-sm">{ description }</p>
 			}
 		</div>
-		<template x-if="registeredFieldsets.length > 0">
-			<input type="hidden" id={ id } name={ id } x-model="registeredFieldsetsFlattened"/>
-		</template>
 		<div
 			x-show="registeredFieldsets.length > 0"
 			class="flex w-full flex-col gap-3 opacity-70"
