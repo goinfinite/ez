@@ -40,6 +40,7 @@ script OverviewIndexLocalState() {
 					'launchScript': '',
 					'autoCreateMappings': true,
 					'existingContainerId': '',
+					'useImageFileExposedPortsAsPortBindings': false,
 				};
 			},
 			init() {
@@ -202,6 +203,7 @@ templ ContainersTable(
 	containerEntities []dto.ContainerWithMetrics,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
 ) {
+	<!-- Containers Table -->
 	<table
 		id="containers-table"
 		hx-get="/overview/"
@@ -223,6 +225,7 @@ templ ContainersTable(
 		</thead>
 		<tbody>
 			for _, containerEntity := range containerEntities {
+				<!-- Container Table Entry -->
 				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 					@templ.JSONScript("containerEntity_"+containerEntity.Id.String(), containerEntity)
 					<td class="w-[40%] overflow-x-hidden px-3 py-2 text-left">
@@ -373,13 +376,26 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					createDto.ContainerImageSearchableItems,
 				)
 			</div>
-			<div x-show="createContainerSourceSelectedOption === 'Upload Image'">
+			<div
+				x-show="createContainerSourceSelectedOption === 'Upload Image'"
+				class="flex flex-col gap-4"
+			>
 				@componentForm.Dropzone(
 					"archiveImageFile", ".tar, .gzip, .zip, .xz or .br",
 					".tar,.gzip,.zip,.xz,.br", false,
 				)
+				@componentForm.CheckboxInputSwitchToggle(
+					"useImageFileExposedPortsAsPortBindings",
+					"Use the exposed ports from image file (if any) as \"Port Bindings\".",
+					"container.useImageFileExposedPortsAsPortBindings", "",
+				)
 			</div>
-			@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
+			<div>
+				@componentForm.TextArea("launch-script", "Launch Script", "container.launchScript")
+				<p class="-mt-0.5 px-1.5 text-[11px] text-neutral-50 text-opacity-50">
+					Optional; one command per line. Executed only on initial container deployment, useful to install dependencies and configure the environment.
+				</p>
+			</div>
 		</div>
 		@componentForm.SearchableSelectInput(
 			"profileId", "Profile", "container.profileId",
