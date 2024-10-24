@@ -10,7 +10,7 @@ templ TextArea(id, label, bindValuePath string) {
 				x-model:value={ bindValuePath }
 			}
 			placeholder={ label }
-			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-30 peer relative w-full rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 min-h-24 peer relative w-full rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 		></textarea>
 		if label != "" {
 			<label
@@ -20,5 +20,15 @@ templ TextArea(id, label, bindValuePath string) {
 				{ label }
 			</label>
 		}
+		<div class="text-md absolute right-1.5 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
+			<i
+				class="ph-bold ph-clipboard-text bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ "navigator.clipboard.writeText(" + bindValuePath + ")" }
+			></i>
+			<i
+				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ bindValuePath + " = ''" }
+			></i>
+		</div>
 	</div>
 }
