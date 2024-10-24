@@ -40,7 +40,7 @@ script OverviewIndexLocalState() {
 					'launchScript': '',
 					'autoCreateMappings': true,
 					'existingContainerId': '',
-					'useImageFileExposedPortsAsPortBindings': false,
+					'useImageExposedPorts': false,
 				};
 			},
 			init() {
@@ -385,9 +385,9 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					".tar,.gzip,.zip,.xz,.br", false,
 				)
 				@componentForm.CheckboxInputSwitchToggle(
-					"useImageFileExposedPortsAsPortBindings",
-					"Use the exposed ports from image file (if any) as \"Port Bindings\".",
-					"container.useImageFileExposedPortsAsPortBindings", "",
+					"useImageExposedPorts",
+					"Map the image's exposed ports (if any) as \"Port Bindings\".",
+					"container.useImageExposedPorts", "",
 				)
 			</div>
 			<div>
