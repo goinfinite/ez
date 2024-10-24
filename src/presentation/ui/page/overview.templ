@@ -98,7 +98,18 @@ script OverviewIndexLocalState() {
 				const containerEntity = JSON.parse(
 					document.getElementById('containerEntity_'+newId).textContent
 				);
-				this.container.portBindings = containerEntity.portBindings;
+				portBindingsWithoutPrivatePorts = containerEntity.portBindings.map(
+					originalPortBinding => {
+						adjustedPortBinding = Object.assign({}, originalPortBinding);
+
+						adjustedPortBinding.publicPort = adjustedPortBinding.containerPort;
+						delete adjustedPortBinding.privatePort;
+						
+						return adjustedPortBinding;
+					},
+				);
+
+				this.container.portBindings = portBindingsWithoutPrivatePorts;
 			},
 
 			// Auxiliary States
@@ -301,9 +312,9 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		hx-post="/api/v1/container/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		class="space-y-4"
-		@submit="closeCreateContainerModal()"
+		@submit="closeCreateContainerModal(); $store.main.refreshScheduledTasksPopover()"
 		enctype="multipart/form-data"
+		class="space-y-4"
 	>
 		@componentForm.InputField(componentForm.InputFieldDto{
 			InputType: "text", Id: "hostname", Label: "Hostname",
