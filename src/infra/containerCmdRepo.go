@@ -420,10 +420,12 @@ func (repo *ContainerCmdRepo) Create(
 	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
 	hasInfiniteOsPortBinding := false
 	for _, portBinding := range createDto.PortBindings {
-		if portBinding.ContainerPort.String() == "1618" {
-			hasInfiniteOsPortBinding = true
-			break
+		if portBinding.ContainerPort.String() != "1618" {
+			continue
 		}
+
+		hasInfiniteOsPortBinding = true
+		break
 	}
 
 	if isInfiniteOs && !hasInfiniteOsPortBinding {
@@ -444,15 +446,6 @@ func (repo *ContainerCmdRepo) Create(
 
 	imageAddrStr := createDto.ImageAddress.String()
 	if createDto.ImageId != nil {
-		containerImageQueryRepo := NewContainerImageQueryRepo(repo.persistentDbSvc)
-		imageEntity, err := containerImageQueryRepo.ReadById(
-			createDto.AccountId, *createDto.ImageId,
-		)
-		if err != nil {
-			return containerId, err
-		}
-
-		createDto.ImageAddress = imageEntity.ImageAddress
 		imageAddrStr = createDto.ImageId.String()
 	}
 
