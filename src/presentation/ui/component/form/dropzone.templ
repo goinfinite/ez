@@ -24,7 +24,7 @@ script DropzoneLocalState() {
 			},
 			init() {
 				this.resetState();
-				document.addEventListener('htmx:afterRequest', () => {
+				document.addEventListener('clear:component-state', () => {
 					this.resetState();
 				});
 			}
@@ -36,7 +36,9 @@ templ Dropzone(
 	id, description, acceptAttr string,
 	allowMultipleFiles bool,
 ) {
+	<!-- Dropzone JavaScript -->
 	@DropzoneLocalState()
+	<!-- Dropzone HTML -->
 	<div
 		x-data="dropzone"
 		x-init="updateFileInput"
@@ -48,7 +50,7 @@ templ Dropzone(
 	>
 		<label
 			for={ id }
-			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 min-h-48 group/label relative flex w-full cursor-pointer flex-col items-center justify-center rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 group/label relative flex w-full cursor-pointer flex-col items-center justify-center rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 		>
 			<div class="flex flex-col items-center justify-center py-2 text-neutral-50 text-opacity-80 group-hover/label:text-opacity-90" x-show="files.length === 0">
 				<i class="ph-duotone ph-tray-arrow-up text-4xl"></i>
@@ -57,9 +59,9 @@ templ Dropzone(
 				</p>
 				<p class="text-xs">{ description }</p>
 			</div>
-			<div class="flex flex-row flex-wrap items-center justify-evenly py-2" x-show="files.length > 0">
+			<div class="flex flex-row flex-wrap items-center justify-center gap-4 py-2" x-show="files.length > 0">
 				<template x-for="(file, index) in files" :key="file.name">
-					<div class="bg-ez-200 group/files relative m-2 flex h-24 w-24 rounded-md p-2">
+					<div class="bg-ez-200 group/files max-w-36 min-h-28 relative flex rounded-md p-2">
 						<p x-text="file.name" class="text-pretty truncate text-xs"></p>
 						<button
 							@click.prevent="removeFile(index)"
