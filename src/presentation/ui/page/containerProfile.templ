@@ -559,7 +559,7 @@ templ ContainerProfileForm(action string) {
 }
 
 templ CreateContainerProfileModal() {
-	@componentStructural.Modal(
+	@componentStructural.RegularModal(
 		"Create Container Profile", "isCreateModalOpen", "closeCreateModal()", "",
 	) {
 		@ContainerProfileForm("create")
@@ -567,7 +567,7 @@ templ CreateContainerProfileModal() {
 }
 
 templ UpdateContainerProfileModal() {
-	@componentStructural.Modal(
+	@componentStructural.RegularModal(
 		"Update Container Profile", "isUpdateModalOpen", "closeUpdateModal()",
 		"containerProfile.id",
 	) {

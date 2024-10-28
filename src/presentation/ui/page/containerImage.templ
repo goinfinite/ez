@@ -385,7 +385,7 @@ templ ImportContainerImageFaq() {
 templ ImportContainerImageModal(
 	accountsSelectPairs []componentForm.SelectLabelValuePair,
 ) {
-	@componentStructural.Modal(
+	@componentStructural.RegularModal(
 		"Import Container Image", "isImportImageModalOpen", "closeImportImageModal()", "",
 	) {
 		@ImportContainerImageForm(accountsSelectPairs)
@@ -453,7 +453,7 @@ templ TakeContainerSnapshotForm(
 templ TakeContainerSnapshotModal(
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
 ) {
-	@componentStructural.Modal(
+	@componentStructural.RegularModal(
 		"Take Container Snapshot", "isTakeSnapshotModalOpen", "closeTakeSnapshotModal()", "",
 	) {
 		@TakeContainerSnapshotForm(containerSummariesSearchableItems)

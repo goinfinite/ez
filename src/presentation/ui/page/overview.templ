@@ -520,7 +520,7 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 }
 
 templ CreateContainerModal(createDto CreateContainerModalDto) {
-	@componentStructural.Modal(
+	@componentStructural.RegularModal(
 		"Create Container", "isCreateContainerModalOpen", "closeCreateContainerModal()", "",
 	) {
 		@CreateContainerForm(createDto)
@@ -549,7 +549,7 @@ templ UpdateContainerForm(
 templ UpdateContainerModal(
 	containerProfileSearchableItems []componentForm.SearchableSelectItem,
 ) {
-	@componentStructural.Modal(
+	@componentStructural.RegularModal(
 		"Update Container", "isUpdateContainerModalOpen",
 		"closeUpdateContainerModal()", "container.id",
 	) {
