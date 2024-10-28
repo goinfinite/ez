@@ -21,19 +21,19 @@ templ SquareIconButtonWithTooltip(
 		if tooltipText != "" {
 			switch tooltipPosition {
 				case "top":
-					<div class={ "absolute opacity-0 bottom-full mb-1 transition-all duration-300 group-hover:block group-hover:-translate-y-0.5 group-hover:opacity-100 left-1/2 transform -translate-x-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+					<div class={ "absolute w-fit hidden bottom-full mb-1 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:flex left-1/2 transform -translate-x-1/2 p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
 						{ tooltipText }
 					</div>
 				case "bottom":
-					<div class={ "absolute opacity-0 top-full mt-1 transition-all duration-300 group-hover:block group-hover:translate-y-0.5 group-hover:opacity-100 left-1/2 transform -translate-x-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+					<div class={ "absolute hidden top-full mt-1 transition-all duration-300 group-hover:translate-y-0.5 group-hover:flex left-1/2 transform -translate-x-1/2 w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
 						{ tooltipText }
 					</div>
 				case "left":
-					<div class={ "absolute opacity-0 right-full mr-1 transition-all duration-300 group-hover:block group-hover:translate-x-0.5 group-hover:opacity-100 top-1/2 transform -translate-y-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+					<div class={ "absolute hidden right-full mr-1 transition-all duration-300 group-hover:translate-x-0.5 group-hover:flex top-1/2 transform -translate-y-1/2 w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
 						{ tooltipText }
 					</div>
 				case "right":
-					<div class={ "absolute opacity-0 left-full ml-1 transition-all duration-300 group-hover:block group-hover:-translate-x-0.5 group-hover:opacity-100 top-1/2 transform -translate-y-1/2 w-max p-2 bg-" + tooltipColor + " text-white text-xs rounded-md shadow-lg" }>
+					<div class={ "absolute hidden left-full ml-1 transition-all duration-300 group-hover:-translate-x-0.5 group-hover:flex top-1/2 transform -translate-y-1/2 w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
 						{ tooltipText }
 					</div>
 			}
