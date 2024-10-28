@@ -77,7 +77,9 @@ templ DeleteModal(
 				}
 				?
 			</h3>
-			<p class="mb-6 text-center">This process cannot be undone. This will permanently delete the element.</p>
+			<p class="mb-6 text-center">
+				This process cannot be undone. This will permanently delete the element.
+			</p>
 			<div class="flex flex-row space-x-4">
 				<button
 					@click={ closeFunction }
@@ -97,6 +99,68 @@ templ DeleteModal(
 				>
 					<i class={ "ph-duotone ph-trash mr-1 align-middle text-xl" }></i>Yes, Delete!
 				</button>
+			</div>
+		</div>
+	</div>
+}
+
+const (
+	ConfirmationTypeInfo     = "info"
+	ConfirmationTypeWarning  = "warning"
+	ConfirmationTypeDanger   = "danger"
+	ConfirmationTypeCritical = "critical"
+)
+
+templ ConfirmationModal(
+	title, titleIcon, description, isOpenState, confirmFunction, confirmationType string,
+) {
+	<!-- ConfirmationModal HTML -->
+	<div
+		x-show={ isOpenState }
+		x-transition:enter="transition ease-out duration-500"
+		x-transition:enter-start="opacity-0"
+		x-transition:enter-end="opacity-100"
+		x-transition:leave="transition ease-in duration-150"
+		x-transition:leave-start="opacity-100"
+		x-transition:leave-end="opacity-0"
+		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
+	>
+		<div class="relative mx-auto mt-[5%] max-w-2xl rounded-md drop-shadow-xl">
+			<div
+				if confirmationType == ConfirmationTypeInfo {
+					class="flex flex-col rounded-md bg-sky-900 p-8"
+				} else {
+					class="flex flex-col rounded-md bg-yellow-900 p-8"
+				}
+			>
+				<i
+					@click={ isOpenState + " = false" }
+					class="ph-bold ph-x-square opacity-85 right-7.5 top-7.5 absolute cursor-pointer text-3xl hover:opacity-100 active:opacity-100"
+				></i>
+				<h3 class="my-3 flex flex-row items-center justify-center gap-2 leading-relaxed">
+					<i class={ "ph-duotone " + titleIcon + " text-4xl text-neutral-100" }></i>
+					<span class="text-2xl font-bold">
+						@templ.Raw(title)
+					</span>
+				</h3>
+				<p class="mb-6 text-center">
+					@templ.Raw(description)
+				</p>
+				<div class="flex flex-row gap-4">
+					<button
+						@click={ isOpenState + " = false" }
+						class="w-full rounded-md bg-transparent p-3 text-center text-base lowercase leading-none text-neutral-50 ring-1 ring-neutral-50 transition-all hover:bg-neutral-50 hover:text-neutral-950"
+					>
+						No, do not proceed.
+					</button>
+					<button
+						type="submit"
+						@click={ confirmFunction }
+						class="w-full rounded-md border-none bg-neutral-950 bg-opacity-50 p-3 text-center text-base font-bold lowercase leading-none text-neutral-50 transition-all hover:bg-opacity-75"
+					>
+						Yes, Proceed!
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>

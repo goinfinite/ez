@@ -31,6 +31,7 @@ script OverviewIndexLocalState() {
 					'id': '',
 					'accountId': '',
 					'hostname': '',
+					'status': true,
 					'imageAddress': 'docker.io/goinfinite/os:latest',
 					'portBindings': [],
 					'restartPolicy': 'unless-stopped',
@@ -159,6 +160,37 @@ script OverviewIndexLocalState() {
 			closeUpdateContainerModal() {
 				this.isUpdateContainerModalOpen = false;
 			},
+			isShutdownContainerModalOpen: false,
+			openShutdownContainerModal(accountId, containerId) {
+				this.resetPrimaryState();
+
+				this.container.accountId = accountId;
+				this.container.id = containerId;
+				this.isShutdownContainerModalOpen = true;
+			},
+			updateContainerStatus(newStatus) {
+				htmx.ajax(
+					'PUT', '/api/v1/container/',
+					{
+						swap: 'none',
+						values: {
+							accountId: this.container.accountId,
+							containerId: this.container.id,
+							status: newStatus,
+						}
+					},
+				).then(() => {
+					this.$dispatch('update:container');
+				});
+				this.isShutdownContainerModalOpen = false;
+			},
+			powerOnContainer(accountId, containerId) {
+				this.resetPrimaryState();
+
+				this.container.accountId = accountId;
+				this.container.id = containerId;
+				this.updateContainerStatus(true);
+			},
 			isDeleteContainerModalOpen: false,
 			openDeleteContainerModal(accountId, containerId, hostname) {
 				this.resetPrimaryState();
@@ -176,8 +208,9 @@ script OverviewIndexLocalState() {
 					'DELETE',
 					'/api/v1/container/' + this.container.accountId + '/' + this.container.id + '/',
 					{swap: 'none'},
-				);
-				this.$dispatch('delete:container');
+				).then(() => {
+					this.$dispatch('delete:container');
+				});
 				this.closeDeleteContainerModal();
 			},
 		}))
@@ -209,6 +242,12 @@ templ OverviewIndex(
 			@ContainersTable(containerEntities, containerIdSummariesMap)
 			@CreateContainerModal(createContainerDto)
 			@UpdateContainerModal(createContainerDto.ContainerProfileSearchableItems)
+			@componentStructural.ConfirmationModal(
+				"Power Off Container", "ph-lightning-slash",
+				"Are you sure you want to power off this container?<br />The container won't be accessible until powered back on.",
+				"isShutdownContainerModalOpen", "updateContainerStatus(false)",
+				componentStructural.ConfirmationTypeWarning,
+			)
 			@componentStructural.DeleteModal(
 				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
 				"delete-container", "container.hostname", "container.id",
@@ -227,7 +266,7 @@ templ ContainersTable(
 	<table
 		id="containers-table"
 		hx-get="/overview/"
-		hx-trigger="submit from:form delay:500ms, click from:button#delete-element delay:500ms"
+		hx-trigger="submit from:form delay:500ms, update:container from:window delay:300ms, delete:container from:window delay:300ms"
 		hx-select="#containers-table"
 		hx-target="#containers-table"
 		hx-swap="outerHTML transition:true"
@@ -283,13 +322,13 @@ templ ContainersTable(
 							if containerEntity.Status {
 								@componentStructural.SquareIconButtonWithTooltip(
 									"toggle-container-status", "ph-lightning-slash", "yellow-900", "yellow-700",
-									"toggleContainerStatus('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+									"openShutdownContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
 									"Power Off", "yellow-700", "top",
 								)
 							} else {
 								@componentStructural.SquareIconButtonWithTooltip(
 									"toggle-container-status", "ph-lightning", "cyan-900", "cyan-700",
-									"toggleContainerStatus('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+									"powerOnContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
 									"Power On", "cyan-700", "top",
 								)
 							}
