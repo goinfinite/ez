@@ -438,6 +438,12 @@ func (controller *ContainerController) Update(c echo.Context) error {
 		return err
 	}
 
+	if requestBody["containerId"] == nil {
+		if _, exists := requestBody["id"]; exists {
+			requestBody["containerId"] = requestBody["id"]
+		}
+	}
+
 	if requestBody["accountId"] == nil {
 		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
