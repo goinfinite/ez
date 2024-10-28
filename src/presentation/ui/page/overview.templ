@@ -35,7 +35,7 @@ script OverviewIndexLocalState() {
 					'portBindings': [],
 					'restartPolicy': 'unless-stopped',
 					'entrypoint': '',
-					'profileId': 0,
+					'profileId': "1",
 					'envs': [],
 					'launchScript': '',
 					'autoCreateMappings': true,
@@ -47,6 +47,10 @@ script OverviewIndexLocalState() {
 				this.resetPrimaryState();
 			},
 			async autoPortBindingsRetriever(prevImageAddress, newImageAddress) {
+				if (!this.isCreateContainerModalOpen) {
+					return;
+				}
+
 				const isSameImage = prevImageAddress === newImageAddress;
 				const isPortBindingsEmpty = this.container.portBindings.length === 0;
 				if (isSameImage && !isPortBindingsEmpty) {
@@ -84,6 +88,10 @@ script OverviewIndexLocalState() {
 					});
 			},
 			syncExistingContainerPortBindings(prevId, newId) {
+				if (!this.isCreateContainerModalOpen) {
+					return;
+				}
+
 				const isSameContainer = prevId === newId;
 				const isPortBindingsEmpty = this.container.portBindings.length === 0;
 				if (isSameContainer && !isPortBindingsEmpty) {
@@ -140,11 +148,12 @@ script OverviewIndexLocalState() {
 				this.$dispatch('clear:component-state');
 			},
 			isUpdateContainerModalOpen: false,
-			openUpdateContainerModal(accountId, containerId) {
+			openUpdateContainerModal(accountId, containerId, profileId) {
 				this.resetPrimaryState();
 
 				this.container.accountId = accountId;
 				this.container.id = containerId;
+				this.container.profileId = profileId;
 				this.isUpdateContainerModalOpen = true;
 			},
 			closeUpdateContainerModal() {
@@ -199,7 +208,7 @@ templ OverviewIndex(
 			</div>
 			@ContainersTable(containerEntities, containerIdSummariesMap)
 			@CreateContainerModal(createContainerDto)
-			@UpdateContainerModal()
+			@UpdateContainerModal(createContainerDto.ContainerProfileSearchableItems)
 			@componentStructural.DeleteModal(
 				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
 				"delete-container", "container.hostname", "container.id",
@@ -286,7 +295,7 @@ templ ContainersTable(
 							}
 							@componentStructural.SquareIconButtonWithTooltip(
 								"update-container", "ph-gear", "ez-300", "ez-200",
-								"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+								"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.ProfileId.String()+"')",
 								"Update", "ez-300", "bottom",
 							)
 							@componentStructural.SquareIconButtonWithTooltip(
@@ -518,13 +527,32 @@ templ CreateContainerModal(createDto CreateContainerModalDto) {
 	}
 }
 
-templ UpdateContainerForm() {
+templ UpdateContainerForm(
+	containerProfileSearchableItems []componentForm.SearchableSelectItem,
+) {
+	<form
+		hx-put="/api/v1/container/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		class="space-y-4"
+	>
+		<input type="hidden" name="containerId" x-bind:value="container.id"/>
+		<input type="hidden" name="accountId" x-bind:value="container.accountId"/>
+		@componentForm.SearchableSelectInput(
+			"profileId", "Profile", "container.profileId",
+			containerProfileSearchableItems,
+		)
+		@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateContainerModal()", false)
+	</form>
 }
 
-templ UpdateContainerModal() {
+templ UpdateContainerModal(
+	containerProfileSearchableItems []componentForm.SearchableSelectItem,
+) {
 	@componentStructural.Modal(
-		"Update Container", "isUpdateContainerModalOpen", "closeUpdateContainerModal()", "",
+		"Update Container", "isUpdateContainerModalOpen",
+		"closeUpdateContainerModal()", "container.id",
 	) {
-		@UpdateContainerForm()
+		@UpdateContainerForm(containerProfileSearchableItems)
 	}
 }
