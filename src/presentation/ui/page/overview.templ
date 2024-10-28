@@ -169,7 +169,7 @@ script OverviewIndexLocalState() {
 				this.isShutdownContainerModalOpen = true;
 			},
 			updateContainerStatus(newStatus) {
-				htmx.ajax(
+				return htmx.ajax(
 					'PUT', '/api/v1/container/',
 					{
 						swap: 'none',
@@ -179,7 +179,10 @@ script OverviewIndexLocalState() {
 							status: newStatus,
 						}
 					},
-				).then(() => {
+				);
+			},
+			shutdownContainer() {
+				this.updateContainerStatus(false).then(() => {
 					this.$dispatch('update:container');
 				});
 				this.isShutdownContainerModalOpen = false;
@@ -189,7 +192,25 @@ script OverviewIndexLocalState() {
 
 				this.container.accountId = accountId;
 				this.container.id = containerId;
-				this.updateContainerStatus(true);
+				this.updateContainerStatus(true).then(() => {
+					this.$dispatch('update:container');
+				});
+			},
+			isRestartContainerModalOpen: false,
+			openRestartContainerModal(accountId, containerId) {
+				this.resetPrimaryState();
+
+				this.container.accountId = accountId;
+				this.container.id = containerId;
+				this.isRestartContainerModalOpen = true;
+			},
+			restartContainer() {
+				this.updateContainerStatus(false).then(() => {
+					this.updateContainerStatus(true).then(() => {
+						this.$dispatch('update:container');
+					});
+				});
+				this.isRestartContainerModalOpen = false;
 			},
 			isDeleteContainerModalOpen: false,
 			openDeleteContainerModal(accountId, containerId, hostname) {
@@ -245,7 +266,13 @@ templ OverviewIndex(
 			@componentStructural.ConfirmationModal(
 				"Power Off Container", "ph-lightning-slash",
 				"Are you sure you want to power off this container?<br />The container won't be accessible until powered back on.",
-				"isShutdownContainerModalOpen", "updateContainerStatus(false)",
+				"isShutdownContainerModalOpen", "shutdownContainer()",
+				componentStructural.ConfirmationTypeWarning,
+			)
+			@componentStructural.ConfirmationModal(
+				"Restart Container", "ph-arrows-clockwise",
+				"Are you sure you want to restart this container?<br />The container will be stopped and started again.",
+				"isRestartContainerModalOpen", "restartContainer()",
 				componentStructural.ConfirmationTypeWarning,
 			)
 			@componentStructural.DeleteModal(
@@ -316,7 +343,7 @@ templ ContainersTable(
 						<div class="flex flex-wrap items-center gap-1">
 							@componentStructural.SquareIconButtonWithTooltip(
 								"restart-container", "ph-arrows-clockwise", "ez-300", "ez-200",
-								"restartContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+								"openRestartContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
 								"Restart", "ez-300", "top",
 							)
 							if containerEntity.Status {
