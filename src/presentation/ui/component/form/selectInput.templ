@@ -122,6 +122,20 @@ script SearchableSelectInputLocalState(id string) {
 				this.showDropdown = false;
 			},
 			setSelectedItem(itemValue) {
+				if (itemValue === '' || itemValue === 0 || itemValue === "0" || itemValue === null) {
+					return;
+				}
+
+				if (this.selectedItem && this.selectedItem.value === itemValue) {
+					return;
+				}
+
+				this.resetState();
+
+				if (!this.filteredItems.has(itemValue)) {
+					return;
+				}
+
 				this.selectedItem = this.filteredItems.get(itemValue);
 				this.userInput = this.selectedItem.label;
 				this.showDropdown = false;
@@ -172,6 +186,7 @@ templ SearchableSelectInput(
 	<div
 		x-data={ id + "SearchableSelect" }
 		class="relative flex flex-col items-center"
+		x-init.debounce.300ms={ "$watch('" + bindValuePath + "', (newValue, prevValue) => { if (newValue !== prevValue) { setSelectedItem(newValue); } })" }
 	>
 		<input type="hidden" id={ id } name={ id } x-model:value={ bindValuePath }/>
 		<div
