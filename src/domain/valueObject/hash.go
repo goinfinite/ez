@@ -3,33 +3,28 @@ package valueObject
 import (
 	"errors"
 	"regexp"
+
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
 const hashRegex string = `^\w{6,256}$`
 
 type Hash string
 
-func NewHash(value string) (Hash, error) {
-	user := Hash(value)
-	if !user.isValid() {
-		return "", errors.New("InvalidHash")
-	}
-	return user, nil
-}
-
-func NewHashPanic(value string) Hash {
-	user, err := NewHash(value)
+func NewHash(value interface{}) (hash Hash, err error) {
+	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
-		panic(err)
+		return hash, errors.New("HashMustBeString")
 	}
-	return user
-}
 
-func (user Hash) isValid() bool {
 	re := regexp.MustCompile(hashRegex)
-	return re.MatchString(string(user))
+	if !re.MatchString(stringValue) {
+		return hash, errors.New("InvalidHash")
+	}
+
+	return Hash(stringValue), nil
 }
 
-func (user Hash) String() string {
-	return string(user)
+func (vo Hash) String() string {
+	return string(vo)
 }
