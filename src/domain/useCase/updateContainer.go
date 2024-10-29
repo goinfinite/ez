@@ -17,10 +17,16 @@ func UpdateContainer(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	updateDto dto.UpdateContainer,
 ) error {
-	containerEntity, err := containerQueryRepo.ReadById(updateDto.ContainerId)
-	if err != nil {
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:  ContainersDefaultPagination,
+		ContainerId: &updateDto.ContainerId,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil || len(responseDto.Containers) == 0 {
 		return errors.New("ContainerNotFound")
 	}
+	containerEntity := responseDto.Containers[0]
 
 	shouldUpdateQuota := updateDto.ProfileId != nil
 	if shouldUpdateQuota {

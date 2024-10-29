@@ -17,8 +17,13 @@ func DeleteContainer(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	deleteDto dto.DeleteContainer,
 ) error {
-	_, err := containerQueryRepo.ReadById(deleteDto.ContainerId)
-	if err != nil {
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:  ContainersDefaultPagination,
+		ContainerId: &deleteDto.ContainerId,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil || len(responseDto.Containers) == 0 {
 		return errors.New("ContainerNotFound")
 	}
 

@@ -20,14 +20,18 @@ func DeleteAccount(
 		return errors.New("AccountNotFound")
 	}
 
-	containers, err := containerQueryRepo.ReadByAccountId(deleteDto.AccountId)
-	if err != nil {
-		slog.Error("ReadContainersByAccountIdInfraError", slog.Any("error", err))
-		return errors.New("ReadContainersByAccountIdInfraError")
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:         ContainersDefaultPagination,
+		ContainerAccountId: &deleteDto.AccountId,
 	}
 
-	if len(containers) > 0 {
-		return errors.New("AccountHasContainers")
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil {
+		return errors.New("ReadContainersInfraError")
+	}
+
+	if len(responseDto.Containers) > 0 {
+		return errors.New("AccountStillHasContainers")
 	}
 
 	err = accountCmdRepo.Delete(deleteDto.AccountId)

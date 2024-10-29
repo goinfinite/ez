@@ -15,10 +15,16 @@ func CreateContainerSessionToken(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateContainerSessionToken,
 ) (accessToken valueObject.AccessTokenValue, err error) {
-	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
-	if err != nil {
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:  ContainersDefaultPagination,
+		ContainerId: &createDto.ContainerId,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil || len(responseDto.Containers) == 0 {
 		return accessToken, errors.New("ContainerNotFound")
 	}
+	containerEntity := responseDto.Containers[0]
 
 	if !containerEntity.ImageAddress.IsInfiniteOs() {
 		return accessToken, errors.New("NotInfiniteOs")

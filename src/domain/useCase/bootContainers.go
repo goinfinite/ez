@@ -12,19 +12,24 @@ func BootContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) {
-	containers, err := containerQueryRepo.Read()
+	paginationDto := dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1000,
+	}
+
+	restartPolicy, _ := valueObject.NewContainerRestartPolicy("always")
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:             paginationDto,
+		ContainerRestartPolicy: &restartPolicy,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
 	if err != nil {
-		slog.Error("ReadContainersInfraError", slog.Any("error", err))
+		slog.Debug("ReadContainersDuringBootError", slog.Any("error", err))
 		return
 	}
 
-	for _, currentContainer := range containers {
-		restartPolicyStr := currentContainer.RestartPolicy.String()
-		shouldBoot := restartPolicyStr == "always" || restartPolicyStr == "on-failure"
-		if !shouldBoot {
-			continue
-		}
-
+	for _, currentContainer := range responseDto.Containers {
 		newContainerStatus := true
 		updateDto := dto.NewUpdateContainer(
 			currentContainer.AccountId, currentContainer.Id, &newContainerStatus,
@@ -33,8 +38,8 @@ func BootContainers(
 
 		err = containerCmdRepo.Update(updateDto)
 		if err != nil {
-			slog.Error(
-				"UpdateContainerInfraError",
+			slog.Debug(
+				"StartContainerDuringBootInfraError",
 				slog.String("containerId", currentContainer.Id.String()),
 				slog.Any("error", err),
 			)

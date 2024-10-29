@@ -4,18 +4,24 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
 )
 
+var ContainersDefaultPagination dto.Pagination = dto.Pagination{
+	PageNumber:   0,
+	ItemsPerPage: 10,
+}
+
 func ReadContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
-) ([]entity.Container, error) {
-	containersList, err := containerQueryRepo.Read()
+	readDto dto.ReadContainersRequest,
+) (responseDto dto.ReadContainersResponse, err error) {
+	responseDto, err = containerQueryRepo.Read(readDto)
 	if err != nil {
 		slog.Error("ReadContainersInfraError", slog.Any("error", err))
-		return containersList, errors.New("ReadContainersInfraError")
+		return responseDto, errors.New("ReadContainersInfraError")
 	}
 
-	return containersList, nil
+	return responseDto, nil
 }

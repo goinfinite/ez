@@ -13,17 +13,17 @@ func updateContainersAfterProfileUpdate(
 	containerCmdRepo repository.ContainerCmdRepo,
 	updateDto dto.UpdateContainerProfile,
 ) error {
-	containers, err := containerQueryRepo.Read()
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:         ContainersDefaultPagination,
+		ContainerProfileId: &updateDto.ProfileId,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
 	if err != nil {
-		slog.Error("ReadContainersInfraError", slog.Any("error", err))
 		return errors.New("ReadContainersInfraError")
 	}
 
-	for _, container := range containers {
-		if container.ProfileId != updateDto.ProfileId {
-			continue
-		}
-
+	for _, container := range responseDto.Containers {
 		updateContainerDto := dto.NewUpdateContainer(
 			container.AccountId, container.Id, &container.Status,
 			&updateDto.ProfileId, updateDto.OperatorAccountId,

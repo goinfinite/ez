@@ -31,19 +31,28 @@ func CreateContainer(
 		return err
 	}
 
-	_, err = containerQueryRepo.ReadByHostname(createDto.Hostname)
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:        ContainersDefaultPagination,
+		ContainerHostname: &createDto.Hostname,
+	}
+
+	_, err = ReadContainers(containerQueryRepo, readContainersDto)
 	if err == nil {
 		return errors.New("ContainerHostnameAlreadyExists")
 	}
 
 	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
 	if createDto.ExistingContainerId != nil {
-		existingContainerEntity, err := containerQueryRepo.ReadById(
-			*createDto.ExistingContainerId,
-		)
-		if err != nil {
+		readContainersDto = dto.ReadContainersRequest{
+			Pagination:  ContainersDefaultPagination,
+			ContainerId: createDto.ExistingContainerId,
+		}
+
+		responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+		if err != nil || len(responseDto.Containers) == 0 {
 			return errors.New("ExistingContainerNotFound")
 		}
+		existingContainerEntity := responseDto.Containers[0]
 
 		isInfiniteOs = existingContainerEntity.ImageAddress.IsInfiniteOs()
 
@@ -102,10 +111,16 @@ func CreateContainer(
 		return nil
 	}
 
-	containerEntity, err := containerQueryRepo.ReadById(containerId)
-	if err != nil {
+	readContainersDto = dto.ReadContainersRequest{
+		Pagination:  ContainersDefaultPagination,
+		ContainerId: &containerId,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil || len(responseDto.Containers) == 0 {
 		return errors.New("ContainerNotFound")
 	}
+	containerEntity := responseDto.Containers[0]
 
 	for _, portBinding := range containerEntity.PortBindings {
 		createMappingDto := dto.NewCreateMapping(

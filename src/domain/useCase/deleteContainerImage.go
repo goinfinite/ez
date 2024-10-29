@@ -20,15 +20,18 @@ func DeleteContainerImage(
 		return errors.New("ContainerImageNotFound")
 	}
 
-	containersUsingImage, err := containerQueryRepo.ReadByImageId(
-		deleteDto.AccountId, deleteDto.ImageId,
-	)
-	if err != nil {
-		slog.Error("ReadContainerByImageIdInfraError", slog.Any("error", err))
-		return errors.New("ReadContainerByImageIdInfraError")
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:       ContainersDefaultPagination,
+		ContainerImageId: &deleteDto.ImageId,
 	}
-	if len(containersUsingImage) > 0 {
-		return errors.New("ContainerImageInUseCannotBeDeleted")
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil {
+		return errors.New("ReadContainersInfraError")
+	}
+
+	if len(responseDto.Containers) > 0 {
+		return errors.New("CannotDeleteContainerImageInUse")
 	}
 
 	err = containerImageCmdRepo.Delete(deleteDto)

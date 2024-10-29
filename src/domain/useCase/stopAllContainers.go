@@ -13,12 +13,23 @@ func StopAllContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) error {
-	containers, err := containerQueryRepo.Read()
-	if err != nil {
-		return errors.New("ReadContainersError: " + err.Error())
+	paginationDto := dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1000,
 	}
 
-	for _, currentContainer := range containers {
+	isRunning := true
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:      paginationDto,
+		ContainerStatus: &isRunning,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil {
+		return errors.New("ReadContainersInfraError")
+	}
+
+	for _, currentContainer := range responseDto.Containers {
 		newContainerStatus := false
 		updateDto := dto.NewUpdateContainer(
 			currentContainer.AccountId, currentContainer.Id, &newContainerStatus,

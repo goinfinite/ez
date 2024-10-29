@@ -21,11 +21,16 @@ func CreateMappingTarget(
 		return errors.New("ReadMappingInfraError")
 	}
 
-	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
-	if err != nil {
-		slog.Error("ReadContainerInfraError", slog.Any("error", err))
-		return errors.New("ReadContainerInfraError")
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:  ContainersDefaultPagination,
+		ContainerId: &createDto.ContainerId,
 	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil || len(responseDto.Containers) == 0 {
+		return errors.New("ContainerNotFound")
+	}
+	containerEntity := responseDto.Containers[0]
 
 	publicPortMatches := false
 	for _, portBinding := range containerEntity.PortBindings {
@@ -39,7 +44,7 @@ func CreateMappingTarget(
 		slog.Error(
 			"ContainerDoesNotBindToMappingPublicPort",
 			slog.String("containerId", createDto.ContainerId.String()),
-			slog.Uint64("publicPort", uint64(mappingEntity.PublicPort.Uint16())),
+			slog.String("publicPort", mappingEntity.PublicPort.String()),
 		)
 		return errors.New("ContainerDoesNotBindToMappingPublicPort")
 	}

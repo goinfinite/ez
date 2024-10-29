@@ -14,18 +14,18 @@ func resetContainersProfile(
 	containerCmdRepo repository.ContainerCmdRepo,
 	deleteDto dto.DeleteContainerProfile,
 ) error {
-	containers, err := containerQueryRepo.Read()
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:         ContainersDefaultPagination,
+		ContainerProfileId: &deleteDto.ProfileId,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
 	if err != nil {
-		slog.Error("ReadContainersInfraError", slog.Any("error", err))
 		return errors.New("ReadContainersInfraError")
 	}
 
 	defaultContainerProfile := entity.DefaultContainerProfile()
-	for _, container := range containers {
-		if container.ProfileId != deleteDto.ProfileId {
-			continue
-		}
-
+	for _, container := range responseDto.Containers {
 		updateContainerDto := dto.NewUpdateContainer(
 			container.AccountId, container.Id, &container.Status,
 			&defaultContainerProfile.Id, deleteDto.OperatorAccountId,

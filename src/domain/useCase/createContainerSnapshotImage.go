@@ -16,12 +16,18 @@ func CreateContainerSnapshotImage(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createSnapshotDto dto.CreateContainerSnapshotImage,
 ) error {
-	containerEntityWithMetrics, err := containerQueryRepo.ReadWithMetricsById(
-		createSnapshotDto.ContainerId,
-	)
-	if err != nil {
+	withMetrics := true
+	readContainersDto := dto.ReadContainersRequest{
+		Pagination:  ContainersDefaultPagination,
+		ContainerId: &createSnapshotDto.ContainerId,
+		WithMetrics: &withMetrics,
+	}
+
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	if err != nil || len(responseDto.ContainersWithMetrics) == 0 {
 		return errors.New("ContainerNotFound")
 	}
+	containerEntityWithMetrics := responseDto.ContainersWithMetrics[0]
 	containerAccountId := containerEntityWithMetrics.AccountId
 
 	accountEntity, err := accountQueryRepo.ReadById(containerAccountId)
