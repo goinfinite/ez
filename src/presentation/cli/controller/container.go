@@ -35,9 +35,6 @@ func (controller *ContainerController) Read() *cobra.Command {
 	var restartPolicyStr string
 	var profileIdUint uint64
 	var envsSlice []string
-	var createdBeforeAtInt64, createdAfterAtInt64 int64
-	var startedBeforeAtInt64, startedAfterAtInt64 int64
-	var stoppedBeforeAtInt64, stoppedAfterAtInt64 int64
 	var withMetricsBoolStr string
 	var paginationPageNumberUint32 uint32
 	var paginationItemsPerPageUint16 uint16
@@ -85,24 +82,6 @@ func (controller *ContainerController) Read() *cobra.Command {
 				envs := controller.parseContainerEnvs(envsSlice)
 				requestBody["containerEnv"] = envs
 			}
-			if createdBeforeAtInt64 != 0 {
-				requestBody["createdBeforeAt"] = createdBeforeAtInt64
-			}
-			if createdAfterAtInt64 != 0 {
-				requestBody["createdAfterAt"] = createdAfterAtInt64
-			}
-			if startedBeforeAtInt64 != 0 {
-				requestBody["startedBeforeAt"] = startedBeforeAtInt64
-			}
-			if startedAfterAtInt64 != 0 {
-				requestBody["startedAfterAt"] = startedAfterAtInt64
-			}
-			if stoppedBeforeAtInt64 != 0 {
-				requestBody["stoppedBeforeAt"] = stoppedBeforeAtInt64
-			}
-			if stoppedAfterAtInt64 != 0 {
-				requestBody["stoppedAfterAt"] = stoppedAfterAtInt64
-			}
 			if withMetricsBoolStr != "" {
 				requestBody["withMetrics"] = withMetricsBoolStr
 			}
@@ -136,10 +115,8 @@ func (controller *ContainerController) Read() *cobra.Command {
 		&containerHostnameStr, "hostname", "n", "", "ContainerHostname",
 	)
 	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "ContainerStatus")
-	cmd.Flags().StringVarP(&containerImageIdStr, "image-id", "i", "", "ContainerImageId")
-	cmd.Flags().StringVarP(
-		&containerImageAddressStr, "image-address", "d", "", "ContainerImageAddress",
-	)
+	cmd.Flags().StringVarP(&containerImageAddressStr, "image-address", "i", "", "ImageAddress")
+	cmd.Flags().StringVarP(&containerImageIdStr, "image-id", "d", "", "ImageId")
 	cmd.Flags().StringVarP(&containerImageHashStr, "image-hash", "h", "", "ContainerImageHash")
 	cmd.Flags().StringSliceVarP(
 		&portBindingsSlice, "port-bindings", "b", []string{},
@@ -148,36 +125,18 @@ func (controller *ContainerController) Read() *cobra.Command {
 	cmd.Flags().StringVarP(&restartPolicyStr, "restart-policy", "r", "", "ContainerRestartPolicy")
 	cmd.Flags().Uint64VarP(&profileIdUint, "profile-id", "p", 0, "ContainerProfileId")
 	cmd.Flags().StringSliceVarP(&envsSlice, "envs", "v", []string{}, "ContainerEnvs (key=value)")
-	cmd.Flags().Int64VarP(
-		&createdBeforeAtInt64, "created-before-at", "e", 0, "CreatedBeforeAt",
-	)
-	cmd.Flags().Int64VarP(
-		&createdAfterAtInt64, "created-after-at", "d", 0, "CreatedAfterAt",
-	)
-	cmd.Flags().Int64VarP(
-		&startedBeforeAtInt64, "started-before-at", "b", 0, "StartedBeforeAt",
-	)
-	cmd.Flags().Int64VarP(
-		&startedAfterAtInt64, "started-after-at", "a", 0, "StartedAfterAt",
-	)
-	cmd.Flags().Int64VarP(
-		&stoppedBeforeAtInt64, "stopped-before-at", "t", 0, "StoppedBeforeAt",
-	)
-	cmd.Flags().Int64VarP(
-		&stoppedAfterAtInt64, "stopped-after-at", "o", 0, "StoppedAfterAt",
-	)
 	cmd.Flags().StringVarP(&withMetricsBoolStr, "with-metrics", "w", "", "WithMetrics")
 	cmd.Flags().Uint32VarP(
-		&paginationPageNumberUint32, "page-number", "p", 0, "PageNumber (Pagination)",
+		&paginationPageNumberUint32, "page-number", "o", 0, "PageNumber (Pagination)",
 	)
 	cmd.Flags().Uint16VarP(
-		&paginationItemsPerPageUint16, "items-per-page", "m", 0, "ItemsPerPage (Pagination)",
+		&paginationItemsPerPageUint16, "items-per-page", "j", 0, "ItemsPerPage (Pagination)",
 	)
 	cmd.Flags().StringVarP(
 		&paginationSortByStr, "sort-by", "y", "", "SortBy (Pagination)",
 	)
 	cmd.Flags().StringVarP(
-		&paginationSortDirectionStr, "sort-direction", "r", "", "SortDirection (Pagination)",
+		&paginationSortDirectionStr, "sort-direction", "x", "", "SortDirection (Pagination)",
 	)
 	cmd.Flags().StringVarP(
 		&paginationLastSeenIdStr, "last-seen-id", "l", "", "LastSeenId (Pagination)",
