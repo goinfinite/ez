@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"math"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/goinfinite/ez/src/infra/db"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
+	"github.com/iancoleman/strcase"
 )
 
 type ContainerQueryRepo struct {
@@ -23,144 +25,6 @@ func NewContainerQueryRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *ContainerQueryRepo {
 	return &ContainerQueryRepo{persistentDbSvc: persistentDbSvc}
-}
-
-func (repo *ContainerQueryRepo) Read() ([]entity.Container, error) {
-	containers := []entity.Container{}
-
-	containerModels := []dbModel.Container{}
-	err := repo.persistentDbSvc.Handler.
-		Preload("PortBindings").
-		Find(&containerModels).Error
-	if err != nil {
-		return containers, err
-	}
-
-	for _, containerModel := range containerModels {
-		containerEntity, err := containerModel.ToEntity()
-		if err != nil {
-			slog.Debug(
-				"ContainerModelToEntityError",
-				slog.String("containerId", containerModel.ID),
-				slog.Any("error", err),
-			)
-			continue
-		}
-		containers = append(containers, containerEntity)
-	}
-
-	return containers, nil
-}
-
-func (repo *ContainerQueryRepo) ReadById(
-	containerId valueObject.ContainerId,
-) (containerEntity entity.Container, err error) {
-	var containerModel dbModel.Container
-	queryResult := repo.persistentDbSvc.Handler.
-		Preload("PortBindings").
-		Where("id = ?", containerId.String()).
-		Limit(1).
-		Find(&containerModel)
-	if queryResult.Error != nil {
-		return containerEntity, queryResult.Error
-	}
-
-	if queryResult.RowsAffected == 0 {
-		return containerEntity, errors.New("ContainerNotFound")
-	}
-
-	containerEntity, err = containerModel.ToEntity()
-	if err != nil {
-		return containerEntity, err
-	}
-
-	return containerEntity, nil
-}
-
-func (repo *ContainerQueryRepo) ReadByHostname(
-	hostname valueObject.Fqdn,
-) (containerEntity entity.Container, err error) {
-	var containerModel dbModel.Container
-	queryResult := repo.persistentDbSvc.Handler.
-		Preload("PortBindings").
-		Where("hostname = ?", hostname.String()).
-		Limit(1).
-		Find(&containerModel)
-	if queryResult.Error != nil {
-		return containerEntity, queryResult.Error
-	}
-
-	if queryResult.RowsAffected == 0 {
-		return containerEntity, errors.New("ContainerNotFound")
-	}
-
-	containerEntity, err = containerModel.ToEntity()
-	if err != nil {
-		return containerEntity, err
-	}
-
-	return containerEntity, nil
-}
-
-func (repo *ContainerQueryRepo) ReadByAccountId(
-	accountId valueObject.AccountId,
-) ([]entity.Container, error) {
-	containers := []entity.Container{}
-
-	containerModels := []dbModel.Container{}
-	err := repo.persistentDbSvc.Handler.
-		Preload("PortBindings").
-		Where("account_id = ?", accountId.Uint64()).
-		Find(&containerModels).Error
-	if err != nil {
-		return containers, err
-	}
-
-	for _, containerModel := range containerModels {
-		containerEntity, err := containerModel.ToEntity()
-		if err != nil {
-			slog.Debug(
-				"ContainerModelToEntityError",
-				slog.String("containerId", containerModel.ID),
-				slog.Any("error", err),
-			)
-			continue
-		}
-		containers = append(containers, containerEntity)
-	}
-
-	return containers, nil
-}
-
-func (repo *ContainerQueryRepo) ReadByImageId(
-	accountId valueObject.AccountId,
-	imageId valueObject.ContainerImageId,
-) ([]entity.Container, error) {
-	containers := []entity.Container{}
-
-	containerModels := []dbModel.Container{}
-	err := repo.persistentDbSvc.Handler.
-		Preload("PortBindings").
-		Where("account_id = ? AND image_id = ?", accountId.Uint64(), imageId.String()).
-		Find(&containerModels).Error
-	if err != nil {
-		return containers, err
-	}
-
-	for _, containerModel := range containerModels {
-		containerEntity, err := containerModel.ToEntity()
-		if err != nil {
-			slog.Debug(
-				"ContainerModelToEntityError",
-				slog.String("containerId", containerModel.ID),
-				slog.Any("error", err),
-			)
-			continue
-		}
-		containers = append(containers, containerEntity)
-	}
-
-	return containers, nil
 }
 
 func (repo *ContainerQueryRepo) containerMetricFactory(
@@ -299,19 +163,19 @@ func (repo *ContainerQueryRepo) containerMetricFactory(
 
 func (repo *ContainerQueryRepo) containerMetricsFactory(
 	accountId valueObject.AccountId,
-	containersMetricsStr string,
-) (map[valueObject.ContainerId]valueObject.ContainerMetrics, error) {
-	containersMetrics := map[valueObject.ContainerId]valueObject.ContainerMetrics{}
-	if len(containersMetricsStr) == 0 {
+	rawContainersMetrics string,
+) ([]valueObject.ContainerMetrics, error) {
+	containersMetrics := []valueObject.ContainerMetrics{}
+	if len(rawContainersMetrics) == 0 {
 		return containersMetrics, nil
 	}
 
-	containersMetricsList := strings.Split(containersMetricsStr, "\n")
-	if len(containersMetricsList) == 0 {
-		return containersMetrics, errors.New("ContainersMetricsParseError")
+	rawContainersMetricsEntries := strings.Split(rawContainersMetrics, "\n")
+	if len(rawContainersMetricsEntries) == 0 {
+		return containersMetrics, errors.New("ContainersMetricsEntriesNotFound")
 	}
 
-	for metricsIndex, metricsJson := range containersMetricsList {
+	for metricsIndex, metricsJson := range rawContainersMetricsEntries {
 		containerMetrics, err := repo.containerMetricFactory(accountId, metricsJson)
 		if err != nil {
 			slog.Debug(
@@ -322,41 +186,66 @@ func (repo *ContainerQueryRepo) containerMetricsFactory(
 			continue
 		}
 
-		containersMetrics[containerMetrics.ContainerId] = containerMetrics
+		containersMetrics = append(containersMetrics, containerMetrics)
 	}
 
 	return containersMetrics, nil
 }
 
-func (repo *ContainerQueryRepo) getWithMetricsByAccId(
-	accountId valueObject.AccountId,
+func (repo *ContainerQueryRepo) containersWithMetricsFactory(
+	containerEntities []entity.Container,
 ) ([]dto.ContainerWithMetrics, error) {
 	containersWithMetrics := []dto.ContainerWithMetrics{}
 
-	containersMetricsStr, err := infraHelper.RunCmdAsUser(
-		accountId,
-		"podman", "stats", "--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
-	)
-	if err != nil {
-		return containersWithMetrics, errors.New("AccPodmanStatsError" + err.Error())
+	uniqueAccountIdsMap := map[valueObject.AccountId]struct{}{}
+	for _, containerEntity := range containerEntities {
+		if _, exists := uniqueAccountIdsMap[containerEntity.AccountId]; exists {
+			continue
+		}
+
+		uniqueAccountIdsMap[containerEntity.AccountId] = struct{}{}
 	}
 
-	runningContainersMetrics, err := repo.containerMetricsFactory(
-		accountId, containersMetricsStr,
-	)
-	if err != nil {
-		return containersWithMetrics, err
+	// TODO: Add coroutine for parallel execution.
+	runningContainersMetrics := []valueObject.ContainerMetrics{}
+	for accountId := range uniqueAccountIdsMap {
+		containersMetricsStr, err := infraHelper.RunCmdAsUser(
+			accountId,
+			"podman", "stats", "--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
+		)
+		if err != nil {
+			slog.Debug(
+				"AccountPodmanStatsError",
+				slog.Uint64("accountId", accountId.Uint64()),
+				slog.Any("error", err),
+			)
+			continue
+		}
+
+		accountContainersMetrics, err := repo.containerMetricsFactory(
+			accountId, containersMetricsStr,
+		)
+		if err != nil {
+			slog.Debug(
+				"AccountContainersMetricsParseError",
+				slog.Uint64("accountId", accountId.Uint64()),
+				slog.Any("error", err),
+			)
+			continue
+		}
+
+		runningContainersMetrics = append(runningContainersMetrics, accountContainersMetrics...)
 	}
 
-	containerEntities, err := repo.ReadByAccountId(accountId)
-	if err != nil {
-		return containersWithMetrics, err
+	containerIdMetricsMap := map[valueObject.ContainerId]valueObject.ContainerMetrics{}
+	for _, containerMetrics := range runningContainersMetrics {
+		containerIdMetricsMap[containerMetrics.ContainerId] = containerMetrics
 	}
 
 	for _, containerEntity := range containerEntities {
 		containerMetrics := valueObject.NewBlankContainerMetrics(containerEntity.Id)
-		if _, exists := runningContainersMetrics[containerEntity.Id]; exists {
-			containerMetrics = runningContainersMetrics[containerEntity.Id]
+		if _, exists := containerIdMetricsMap[containerEntity.Id]; exists {
+			containerMetrics = containerIdMetricsMap[containerEntity.Id]
 		}
 
 		containerWithMetrics := dto.NewContainerWithMetrics(
@@ -368,60 +257,150 @@ func (repo *ContainerQueryRepo) getWithMetricsByAccId(
 	return containersWithMetrics, nil
 }
 
-func (repo *ContainerQueryRepo) ReadWithMetrics() ([]dto.ContainerWithMetrics, error) {
-	containersWithMetrics := []dto.ContainerWithMetrics{}
+func (repo *ContainerQueryRepo) Read(
+	requestDto dto.ReadContainersRequest,
+) (responseDto dto.ReadContainersResponse, err error) {
+	containerModel := dbModel.Container{}
+	if requestDto.ContainerId != nil {
+		containerModel.ID = requestDto.ContainerId.String()
+	}
+	if requestDto.ContainerAccountId != nil {
+		containerModel.AccountID = requestDto.ContainerAccountId.Uint64()
+	}
+	if requestDto.ContainerHostname != nil {
+		containerModel.Hostname = requestDto.ContainerHostname.String()
+	}
+	if requestDto.ContainerStatus != nil {
+		containerModel.Status = *requestDto.ContainerStatus
+	}
+	if requestDto.ContainerImageId != nil {
+		containerModel.ImageId = requestDto.ContainerImageId.String()
+	}
+	if requestDto.ContainerImageAddress != nil {
+		containerModel.ImageAddress = requestDto.ContainerImageAddress.String()
+	}
+	if requestDto.ContainerImageHash != nil {
+		containerModel.ImageHash = requestDto.ContainerImageHash.String()
+	}
+	for _, portBinding := range requestDto.ContainerPortBindings {
+		portBindingModel := dbModel.ContainerPortBinding{
+			ServiceName:   portBinding.ServiceName.String(),
+			PublicPort:    portBinding.PublicPort.Uint16(),
+			ContainerPort: portBinding.ContainerPort.Uint16(),
+			Protocol:      portBinding.Protocol.String(),
+		}
+		if portBinding.PrivatePort != nil {
+			portBindingModel.PrivatePort = portBinding.PrivatePort.Uint16()
+		}
 
-	accountsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Read()
-	if err != nil {
-		return containersWithMetrics, err
+		containerModel.PortBindings = append(containerModel.PortBindings, portBindingModel)
+	}
+	if requestDto.ContainerRestartPolicy != nil {
+		containerModel.RestartPolicy = requestDto.ContainerRestartPolicy.String()
+	}
+	if requestDto.ContainerProfileId != nil {
+		containerModel.ProfileID = requestDto.ContainerProfileId.Uint64()
+	}
+	if len(requestDto.ContainerEnv) > 0 {
+		envs := dbModel.Container{}.JoinEnvs(requestDto.ContainerEnv)
+		containerModel.Envs = &envs
 	}
 
-	for _, account := range accountsList {
-		accContainersWithMetrics, err := repo.getWithMetricsByAccId(account.Id)
+	dbQuery := repo.persistentDbSvc.Handler.Where(&containerModel).Preload("PortBindings")
+
+	if requestDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())
+	}
+	if requestDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
+	}
+	if requestDto.StartedBeforeAt != nil {
+		dbQuery = dbQuery.Where("started_at < ?", requestDto.StartedBeforeAt.GetAsGoTime())
+	}
+	if requestDto.StartedAfterAt != nil {
+		dbQuery = dbQuery.Where("started_at > ?", requestDto.StartedAfterAt.GetAsGoTime())
+	}
+	if requestDto.StoppedBeforeAt != nil {
+		dbQuery = dbQuery.Where("stopped_at < ?", requestDto.StoppedBeforeAt.GetAsGoTime())
+	}
+	if requestDto.StoppedAfterAt != nil {
+		dbQuery = dbQuery.Where("stopped_at > ?", requestDto.StoppedAfterAt.GetAsGoTime())
+	}
+
+	dbQuery = dbQuery.Limit(int(requestDto.Pagination.ItemsPerPage))
+	if requestDto.Pagination.LastSeenId == nil {
+		offset := int(requestDto.Pagination.PageNumber) * int(requestDto.Pagination.ItemsPerPage)
+		dbQuery = dbQuery.Offset(offset)
+	} else {
+		dbQuery = dbQuery.Where("id > ?", requestDto.Pagination.LastSeenId.String())
+	}
+	if requestDto.Pagination.SortBy != nil {
+		orderStatement := requestDto.Pagination.SortBy.String()
+		orderStatement = strcase.ToSnake(orderStatement)
+		if orderStatement == "id" {
+			orderStatement = "ID"
+		}
+
+		if requestDto.Pagination.SortDirection != nil {
+			orderStatement += " " + requestDto.Pagination.SortDirection.String()
+		}
+
+		dbQuery = dbQuery.Order(orderStatement)
+	}
+
+	containerModels := []dbModel.Container{}
+	err = repo.persistentDbSvc.Handler.Find(&containerModels).Error
+	if err != nil {
+		return responseDto, err
+	}
+
+	var itemsTotal int64
+	err = dbQuery.Count(&itemsTotal).Error
+	if err != nil {
+		return responseDto, errors.New("CountItemsTotalError: " + err.Error())
+	}
+
+	containerEntities := []entity.Container{}
+	for _, containerModel := range containerModels {
+		containerEntity, err := containerModel.ToEntity()
 		if err != nil {
 			slog.Debug(
-				"ReadAccountContainersWithMetricsError",
-				slog.String("accountId", account.Id.String()),
+				"ContainerModelToEntityError",
+				slog.String("containerId", containerModel.ID),
 				slog.Any("error", err),
 			)
 			continue
 		}
-
-		containersWithMetrics = append(containersWithMetrics, accContainersWithMetrics...)
+		containerEntities = append(containerEntities, containerEntity)
 	}
 
-	return containersWithMetrics, nil
-}
-
-func (repo *ContainerQueryRepo) ReadWithMetricsById(
-	containerId valueObject.ContainerId,
-) (containerWithMetrics dto.ContainerWithMetrics, err error) {
-	containerEntity, err := repo.ReadById(containerId)
-	if err != nil {
-		return containerWithMetrics, err
-	}
-
-	containersMetricStr, err := infraHelper.RunCmdAsUser(
-		containerEntity.AccountId,
-		"podman", "stats",
-		"--no-stream", "--no-reset", "--format", "{{json .ContainerStats}}",
-		containerId.String(),
+	itemsTotalUint := uint64(itemsTotal)
+	pagesTotal := uint32(
+		math.Ceil(float64(itemsTotal) / float64(requestDto.Pagination.ItemsPerPage)),
 	)
-	if err != nil {
-		return containerWithMetrics, errors.New("AccPodmanStatsError" + err.Error())
+	responsePagination := dto.Pagination{
+		PageNumber:    requestDto.Pagination.PageNumber,
+		ItemsPerPage:  requestDto.Pagination.ItemsPerPage,
+		SortBy:        requestDto.Pagination.SortBy,
+		SortDirection: requestDto.Pagination.SortDirection,
+		PagesTotal:    &pagesTotal,
+		ItemsTotal:    &itemsTotalUint,
 	}
 
-	runningContainerMetrics, err := repo.containerMetricsFactory(
-		containerEntity.AccountId, containersMetricStr,
-	)
-	if err != nil {
-		return containerWithMetrics, err
+	responseDto = dto.ReadContainersResponse{
+		Pagination: responsePagination,
 	}
 
-	containerMetrics := valueObject.NewBlankContainerMetrics(containerEntity.Id)
-	if _, exists := runningContainerMetrics[containerId]; exists {
-		containerMetrics = runningContainerMetrics[containerId]
+	if requestDto.WithMetrics != nil && *requestDto.WithMetrics {
+		containersWithMetrics, err := repo.containersWithMetricsFactory(containerEntities)
+		if err != nil {
+			return responseDto, err
+		}
+
+		responseDto.ContainersWithMetrics = containersWithMetrics
+		return responseDto, nil
 	}
 
-	return dto.NewContainerWithMetrics(containerEntity, containerMetrics), nil
+	responseDto.Containers = containerEntities
+	return responseDto, nil
 }
