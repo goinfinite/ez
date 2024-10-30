@@ -217,14 +217,151 @@
                     "container"
                 ],
                 "summary": "ReadContainers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ContainerAccountId",
+                        "name": "containerAccountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerHostname",
+                        "name": "containerHostname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ContainerStatus",
+                        "name": "containerStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerImageId",
+                        "name": "containerImageId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerImageAddress",
+                        "name": "containerImageAddress",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerImageHash",
+                        "name": "containerImageHash",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerPortBindings",
+                        "name": "containerPortBindings",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerRestartPolicy",
+                        "name": "containerRestartPolicy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ContainerProfileId",
+                        "name": "containerProfileId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerEnv",
+                        "name": "containerEnv",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedBeforeAt",
+                        "name": "startedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedAfterAt",
+                        "name": "startedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StoppedBeforeAt",
+                        "name": "stoppedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StoppedAfterAt",
+                        "name": "stoppedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "WithMetrics",
+                        "name": "withMetrics",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Container"
-                            }
+                            "$ref": "#/definitions/dto.ReadContainersResponse"
                         }
                     }
                 }
@@ -637,7 +774,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "List containers with metrics.",
+                "description": "List containers.",
                 "consumes": [
                     "application/json"
                 ],
@@ -647,15 +784,152 @@
                 "tags": [
                     "container"
                 ],
-                "summary": "ReadContainersWithMetrics",
+                "summary": "ReadContainers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ContainerAccountId",
+                        "name": "containerAccountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerHostname",
+                        "name": "containerHostname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "ContainerStatus",
+                        "name": "containerStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerImageId",
+                        "name": "containerImageId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerImageAddress",
+                        "name": "containerImageAddress",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerImageHash",
+                        "name": "containerImageHash",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerPortBindings",
+                        "name": "containerPortBindings",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerRestartPolicy",
+                        "name": "containerRestartPolicy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ContainerProfileId",
+                        "name": "containerProfileId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerEnv",
+                        "name": "containerEnv",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedBeforeAt",
+                        "name": "startedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedAfterAt",
+                        "name": "startedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StoppedBeforeAt",
+                        "name": "stoppedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StoppedAfterAt",
+                        "name": "stoppedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "WithMetrics",
+                        "name": "withMetrics",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ContainerWithMetrics"
-                            }
+                            "$ref": "#/definitions/dto.ReadContainersResponse"
                         }
                     }
                 }
@@ -1660,6 +1934,9 @@
                 },
                 "restartPolicy": {
                     "type": "string"
+                },
+                "useImageExposedPorts": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1797,6 +2074,26 @@
                 },
                 "sortDirection": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ReadContainersResponse": {
+            "type": "object",
+            "properties": {
+                "containers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Container"
+                    }
+                },
+                "containersWithMetrics": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ContainerWithMetrics"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
                 }
             }
         },

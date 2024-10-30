@@ -13,6 +13,8 @@ import (
 	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type ContainerService struct {
@@ -32,22 +34,224 @@ func NewContainerService(
 	}
 }
 
-func (service *ContainerService) Read() ServiceOutput {
-	containersList, err := useCase.ReadContainers(service.containerQueryRepo)
+func (service *ContainerService) Read(input map[string]interface{}) ServiceOutput {
+	var containerIdPtr *valueObject.ContainerId
+	if input["containerId"] != nil {
+		containerId, err := valueObject.NewContainerId(input["containerId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerIdPtr = &containerId
+	}
+
+	var containerAccountIdPtr *valueObject.AccountId
+	if input["containerAccountId"] != nil {
+		containerAccountId, err := valueObject.NewAccountId(input["containerAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerAccountIdPtr = &containerAccountId
+	}
+
+	var containerHostnamePtr *valueObject.Fqdn
+	if input["containerHostname"] != nil {
+		containerHostname, err := valueObject.NewFqdn(input["containerHostname"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerHostnamePtr = &containerHostname
+	}
+
+	var containerStatusPtr *bool
+	if input["containerStatus"] != nil {
+		containerStatus, err := voHelper.InterfaceToBool(input["containerStatus"])
+		if err != nil {
+			return NewServiceOutput(UserError, "InvalidContainerStatus")
+		}
+		containerStatusPtr = &containerStatus
+	}
+
+	var containerImageIdPtr *valueObject.ContainerImageId
+	if input["containerImageId"] != nil {
+		containerImageId, err := valueObject.NewContainerImageId(input["containerImageId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerImageIdPtr = &containerImageId
+	}
+
+	var containerImageAddressPtr *valueObject.ContainerImageAddress
+	if input["containerImageAddress"] != nil {
+		containerImageAddress, err := valueObject.NewContainerImageAddress(
+			input["containerImageAddress"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerImageAddressPtr = &containerImageAddress
+	}
+
+	var containerImageHashPtr *valueObject.Hash
+	if input["containerImageHash"] != nil {
+		containerImageHash, err := valueObject.NewHash(input["containerImageHash"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerImageHashPtr = &containerImageHash
+	}
+
+	containerPortBindings := []valueObject.PortBinding{}
+	if input["containerPortBindings"] != nil {
+		var assertOk bool
+		containerPortBindings, assertOk = input["containerPortBindings"].([]valueObject.PortBinding)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidContainerPortBindings")
+		}
+	}
+
+	var containerRestartPolicyPtr *valueObject.ContainerRestartPolicy
+	if input["containerRestartPolicy"] != nil {
+		containerRestartPolicy, err := valueObject.NewContainerRestartPolicy(
+			input["containerRestartPolicy"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerRestartPolicyPtr = &containerRestartPolicy
+	}
+
+	var containerProfileIdPtr *valueObject.ContainerProfileId
+	if input["containerProfileId"] != nil {
+		containerProfileId, err := valueObject.NewContainerProfileId(input["containerProfileId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerProfileIdPtr = &containerProfileId
+	}
+
+	containerEnv := []valueObject.ContainerEnv{}
+	if input["containerEnv"] != nil {
+		var assertOk bool
+		containerEnv, assertOk = input["containerEnv"].([]valueObject.ContainerEnv)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidContainerEnv")
+		}
+	}
+
+	var createdBeforeAtPtr, createdAfterAtPtr *valueObject.UnixTime
+	var startedBeforeAtPtr, startedAfterAtPtr *valueObject.UnixTime
+	var stoppedBeforeAtPtr, stoppedAfterAtPtr *valueObject.UnixTime
+
+	timeParamNames := []string{
+		"createdBeforeAt", "createdAfterAt",
+		"startedBeforeAt", "startedAfterAt",
+		"stoppedBeforeAt", "stoppedAfterAt",
+	}
+	for _, timeParamName := range timeParamNames {
+		if input[timeParamName] == nil {
+			continue
+		}
+
+		timeParam, err := valueObject.NewUnixTime(input[timeParamName])
+		if err != nil {
+			capitalParamName := cases.Title(language.English).String(timeParamName)
+			return NewServiceOutput(UserError, errors.New("Invalid"+capitalParamName))
+		}
+
+		switch timeParamName {
+		case "createdBeforeAt":
+			createdBeforeAtPtr = &timeParam
+		case "createdAfterAt":
+			createdAfterAtPtr = &timeParam
+		case "startedBeforeAt":
+			startedBeforeAtPtr = &timeParam
+		case "startedAfterAt":
+			startedAfterAtPtr = &timeParam
+		case "stoppedBeforeAt":
+			stoppedBeforeAtPtr = &timeParam
+		case "stoppedAfterAt":
+			stoppedAfterAtPtr = &timeParam
+		}
+	}
+
+	var withMetricsPtr *bool
+	if input["withMetrics"] != nil {
+		withMetrics, err := voHelper.InterfaceToBool(input["withMetrics"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidWithMetrics"))
+		}
+		withMetricsPtr = &withMetrics
+	}
+
+	paginationDto := useCase.ContainersDefaultPagination
+	if input["pageNumber"] != nil {
+		pageNumber, err := voHelper.InterfaceToUint32(input["pageNumber"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidPageNumber"))
+		}
+		paginationDto.PageNumber = pageNumber
+	}
+
+	if input["itemsPerPage"] != nil {
+		itemsPerPage, err := voHelper.InterfaceToUint16(input["itemsPerPage"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidItemsPerPage"))
+		}
+		paginationDto.ItemsPerPage = itemsPerPage
+	}
+
+	if input["sortBy"] != nil {
+		sortBy, err := valueObject.NewPaginationSortBy(input["sortBy"])
+		if err != nil {
+			return NewServiceOutput(UserError, err)
+		}
+		paginationDto.SortBy = &sortBy
+	}
+
+	if input["sortDirection"] != nil {
+		sortDirection, err := valueObject.NewPaginationSortDirection(input["sortDirection"])
+		if err != nil {
+			return NewServiceOutput(UserError, err)
+		}
+		paginationDto.SortDirection = &sortDirection
+	}
+
+	if input["lastSeenId"] != nil {
+		lastSeenId, err := valueObject.NewPaginationLastSeenId(input["lastSeenId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err)
+		}
+		paginationDto.LastSeenId = &lastSeenId
+	}
+
+	readDto := dto.ReadContainersRequest{
+		Pagination:             paginationDto,
+		ContainerId:            containerIdPtr,
+		ContainerAccountId:     containerAccountIdPtr,
+		ContainerHostname:      containerHostnamePtr,
+		ContainerStatus:        containerStatusPtr,
+		ContainerImageId:       containerImageIdPtr,
+		ContainerImageAddress:  containerImageAddressPtr,
+		ContainerImageHash:     containerImageHashPtr,
+		ContainerPortBindings:  containerPortBindings,
+		ContainerRestartPolicy: containerRestartPolicyPtr,
+		ContainerProfileId:     containerProfileIdPtr,
+		ContainerEnv:           containerEnv,
+		CreatedBeforeAt:        createdBeforeAtPtr,
+		CreatedAfterAt:         createdAfterAtPtr,
+		StartedBeforeAt:        startedBeforeAtPtr,
+		StartedAfterAt:         startedAfterAtPtr,
+		StoppedBeforeAt:        stoppedBeforeAtPtr,
+		StoppedAfterAt:         stoppedAfterAtPtr,
+		WithMetrics:            withMetricsPtr,
+	}
+
+	responseDto, err := useCase.ReadContainers(service.containerQueryRepo, readDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, containersList)
-}
-
-func (service *ContainerService) ReadWithMetrics() ServiceOutput {
-	containersList, err := useCase.ReadContainersWithMetrics(service.containerQueryRepo)
-	if err != nil {
-		return NewServiceOutput(InfraError, err.Error())
-	}
-
-	return NewServiceOutput(Success, containersList)
+	return NewServiceOutput(Success, responseDto)
 }
 
 func (service *ContainerService) CreateContainerSessionToken(

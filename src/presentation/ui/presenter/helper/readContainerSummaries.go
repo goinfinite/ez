@@ -15,7 +15,7 @@ func ReadContainerSummaries(
 ) []componentContainer.ContainerSummary {
 	containerService := service.NewContainerService(persistentDbSvc, trailDbSvc)
 
-	readContainersServiceOutput := containerService.Read()
+	readContainersServiceOutput := containerService.Read(map[string]interface{}{})
 	if readContainersServiceOutput.Status != service.Success {
 		slog.Debug("ReadContainersFailure")
 		return nil

@@ -89,6 +89,8 @@ definitions:
         type: integer
       restartPolicy:
         type: string
+      useImageExposedPorts:
+        type: boolean
     type: object
   dto.CreateContainerImageArchiveFile:
     properties:
@@ -178,6 +180,19 @@ definitions:
         type: string
       sortDirection:
         type: string
+    type: object
+  dto.ReadContainersResponse:
+    properties:
+      containers:
+        items:
+          $ref: '#/definitions/entity.Container'
+        type: array
+      containersWithMetrics:
+        items:
+          $ref: '#/definitions/dto.ContainerWithMetrics'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
     type: object
   dto.ReadMarketplaceItemsResponse:
     properties:
@@ -869,15 +884,106 @@ paths:
       consumes:
       - application/json
       description: List containers.
+      parameters:
+      - description: ContainerId
+        in: query
+        name: containerId
+        type: string
+      - description: ContainerAccountId
+        in: query
+        name: containerAccountId
+        type: integer
+      - description: ContainerHostname
+        in: query
+        name: containerHostname
+        type: string
+      - description: ContainerStatus
+        in: query
+        name: containerStatus
+        type: boolean
+      - description: ContainerImageId
+        in: query
+        name: containerImageId
+        type: string
+      - description: ContainerImageAddress
+        in: query
+        name: containerImageAddress
+        type: string
+      - description: ContainerImageHash
+        in: query
+        name: containerImageHash
+        type: string
+      - description: ContainerPortBindings
+        in: query
+        name: containerPortBindings
+        type: string
+      - description: ContainerRestartPolicy
+        in: query
+        name: containerRestartPolicy
+        type: string
+      - description: ContainerProfileId
+        in: query
+        name: containerProfileId
+        type: integer
+      - description: ContainerEnv
+        in: query
+        name: containerEnv
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: StartedBeforeAt
+        in: query
+        name: startedBeforeAt
+        type: string
+      - description: StartedAfterAt
+        in: query
+        name: startedAfterAt
+        type: string
+      - description: StoppedBeforeAt
+        in: query
+        name: stoppedBeforeAt
+        type: string
+      - description: StoppedAfterAt
+        in: query
+        name: stoppedAfterAt
+        type: string
+      - description: WithMetrics
+        in: query
+        name: withMetrics
+        type: boolean
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.Container'
-            type: array
+            $ref: '#/definitions/dto.ReadContainersResponse'
       security:
       - Bearer: []
       summary: ReadContainers
@@ -1176,19 +1282,110 @@ paths:
     get:
       consumes:
       - application/json
-      description: List containers with metrics.
+      description: List containers.
+      parameters:
+      - description: ContainerId
+        in: query
+        name: containerId
+        type: string
+      - description: ContainerAccountId
+        in: query
+        name: containerAccountId
+        type: integer
+      - description: ContainerHostname
+        in: query
+        name: containerHostname
+        type: string
+      - description: ContainerStatus
+        in: query
+        name: containerStatus
+        type: boolean
+      - description: ContainerImageId
+        in: query
+        name: containerImageId
+        type: string
+      - description: ContainerImageAddress
+        in: query
+        name: containerImageAddress
+        type: string
+      - description: ContainerImageHash
+        in: query
+        name: containerImageHash
+        type: string
+      - description: ContainerPortBindings
+        in: query
+        name: containerPortBindings
+        type: string
+      - description: ContainerRestartPolicy
+        in: query
+        name: containerRestartPolicy
+        type: string
+      - description: ContainerProfileId
+        in: query
+        name: containerProfileId
+        type: integer
+      - description: ContainerEnv
+        in: query
+        name: containerEnv
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: StartedBeforeAt
+        in: query
+        name: startedBeforeAt
+        type: string
+      - description: StartedAfterAt
+        in: query
+        name: startedAfterAt
+        type: string
+      - description: StoppedBeforeAt
+        in: query
+        name: stoppedBeforeAt
+        type: string
+      - description: StoppedAfterAt
+        in: query
+        name: stoppedAfterAt
+        type: string
+      - description: WithMetrics
+        in: query
+        name: withMetrics
+        type: boolean
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.ContainerWithMetrics'
-            type: array
+            $ref: '#/definitions/dto.ReadContainersResponse'
       security:
       - Bearer: []
-      summary: ReadContainersWithMetrics
+      summary: ReadContainers
       tags:
       - container
   /v1/container/profile/:

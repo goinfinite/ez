@@ -65,7 +65,7 @@ func (router *Router) containerRoutes() {
 		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerGroup.GET("/", containerController.Read)
-	containerGroup.GET("/metrics/", containerController.ReadWithMetrics)
+	containerGroup.GET("/metrics/", containerController.Read)
 	containerGroup.GET(
 		"/session/:accountId/:containerId/", containerController.CreateContainerSessionToken,
 	)

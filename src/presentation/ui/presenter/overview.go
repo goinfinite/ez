@@ -214,7 +214,11 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
-	readContainersServiceOutput := containerService.ReadWithMetrics()
+	readContainersRequestBody := map[string]interface{}{
+		"withMetrics": true,
+	}
+
+	readContainersServiceOutput := containerService.Read(readContainersRequestBody)
 	if readContainersServiceOutput.Status != service.Success {
 		slog.Debug("ReadContainersFailure")
 		return nil

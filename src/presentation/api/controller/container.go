@@ -46,24 +46,67 @@ func NewContainerController(
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Success      200 {array} entity.Container
+// @Param        containerId query  string  false  "ContainerId"
+// @Param        containerAccountId query  uint  false  "ContainerAccountId"
+// @Param        containerHostname query  string  false  "ContainerHostname"
+// @Param        containerStatus query  bool  false  "ContainerStatus"
+// @Param        containerImageId query  string  false  "ContainerImageId"
+// @Param        containerImageAddress query  string  false  "ContainerImageAddress"
+// @Param        containerImageHash query  string  false  "ContainerImageHash"
+// @Param        containerPortBindings query  string  false  "ContainerPortBindings"
+// @Param        containerRestartPolicy query  string  false  "ContainerRestartPolicy"
+// @Param        containerProfileId query  uint  false  "ContainerProfileId"
+// @Param        containerEnv query  string  false  "ContainerEnv"
+// @Param        createdBeforeAt query  string  false  "CreatedBeforeAt"
+// @Param        createdAfterAt query  string  false  "CreatedAfterAt"
+// @Param        startedBeforeAt query  string  false  "StartedBeforeAt"
+// @Param        startedAfterAt query  string  false  "StartedAfterAt"
+// @Param        stoppedBeforeAt query  string  false  "StoppedBeforeAt"
+// @Param        stoppedAfterAt query  string  false  "StoppedAfterAt"
+// @Param        withMetrics query  bool  false  "WithMetrics"
+// @Param        pageNumber query  uint  false  "PageNumber (Pagination)"
+// @Param        itemsPerPage query  uint  false  "ItemsPerPage (Pagination)"
+// @Param        sortBy query  string  false  "SortBy (Pagination)"
+// @Param        sortDirection query  string  false  "SortDirection (Pagination)"
+// @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
+// @Success      200 {object} dto.ReadContainersResponse
 // @Router       /v1/container/ [get]
-func (controller *ContainerController) Read(c echo.Context) error {
-	return apiHelper.ServiceResponseWrapper(c, controller.containerService.Read())
-}
-
-// ReadContainersWithMetrics	 godoc
-// @Summary      ReadContainersWithMetrics
-// @Description  List containers with metrics.
-// @Tags         container
-// @Accept       json
-// @Produce      json
-// @Security     Bearer
-// @Success      200 {array} dto.ContainerWithMetrics
 // @Router       /v1/container/metrics/ [get]
-func (controller *ContainerController) ReadWithMetrics(c echo.Context) error {
+func (controller *ContainerController) Read(c echo.Context) error {
+	requestBody := map[string]interface{}{}
+	queryParameters := []string{
+		"containerId", "containerAccountId", "containerHostname", "containerStatus",
+		"containerImageId", "containerImageAddress", "containerImageHash",
+		"containerPortBindings", "containerRestartPolicy", "containerProfileId",
+		"containerEnv", "createdBeforeAt", "createdAfterAt",
+		"startedBeforeAt", "startedAfterAt", "stoppedBeforeAt", "stoppedAfterAt",
+		"pageNumber", "itemsPerPage", "sortBy", "sortDirection", "lastSeenId",
+	}
+	for _, paramName := range queryParameters {
+		paramValue := c.QueryParam(paramName)
+		if paramValue == "" {
+			continue
+		}
+
+		if paramName == "containerPortBindings" {
+			requestBody[paramName] = controller.parsePortBindings(paramValue)
+			continue
+		}
+
+		if paramName == "containerEnv" {
+			requestBody[paramName] = controller.parseContainerEnvs(paramValue)
+			continue
+		}
+
+		requestBody[paramName] = paramValue
+	}
+
+	if c.Request().URL.Path == "/v1/container/metrics/" {
+		requestBody["withMetrics"] = true
+	}
+
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerService.ReadWithMetrics(),
+		c, controller.containerService.Read(requestBody),
 	)
 }
 
@@ -277,7 +320,7 @@ func (controller *ContainerController) parsePortBindings(
 }
 
 // Envs may come in the following structures:
-// "key=value" OR "key|value" (string) OR "key=value;key=value" (string, semicolon separated items)
+// "key=value" OR "key|value" (string) OR "key=value;key=value" OR "key|value;key|value" (string, semicolon separated items)
 // ["key=value", "key=value"] (string slice)
 func (controller *ContainerController) parseContainerEnvs(
 	envs any,

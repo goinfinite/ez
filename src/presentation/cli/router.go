@@ -54,7 +54,6 @@ func (router *Router) containerRoutes() {
 		router.persistentDbSvc, router.trailDbSvc,
 	)
 	containerCmd.AddCommand(containerController.Read())
-	containerCmd.AddCommand(containerController.ReadWithMetrics())
 	containerCmd.AddCommand(containerController.Create())
 	containerCmd.AddCommand(containerController.Update())
 	containerCmd.AddCommand(containerController.Delete())
