@@ -224,9 +224,9 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	containerEntities, assertOk := readContainersServiceOutput.Body.([]dto.ContainerWithMetrics)
+	containersResponseDto, assertOk := readContainersServiceOutput.Body.(dto.ReadContainersResponse)
 	if !assertOk {
-		slog.Debug("AssertContainersFailure")
+		slog.Debug("AssertContainersResponseFailure")
 		return nil
 	}
 
@@ -244,7 +244,8 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 	)
 
 	pageContent := page.OverviewIndex(
-		containerEntities, containerIdSummariesMap, createContainerModalDto,
+		containersResponseDto.ContainersWithMetrics, containerIdSummariesMap,
+		createContainerModalDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)

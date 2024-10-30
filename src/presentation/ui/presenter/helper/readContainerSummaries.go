@@ -3,6 +3,7 @@ package presenterHelper
 import (
 	"log/slog"
 
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
@@ -21,9 +22,9 @@ func ReadContainerSummaries(
 		return nil
 	}
 
-	containerEntities, assertOk := readContainersServiceOutput.Body.([]entity.Container)
+	containersResponseDto, assertOk := readContainersServiceOutput.Body.(dto.ReadContainersResponse)
 	if !assertOk {
-		slog.Debug("AssertContainersFailure")
+		slog.Debug("AssertContainersResponseFailure")
 		return nil
 	}
 
@@ -56,6 +57,6 @@ func ReadContainerSummaries(
 	}
 
 	return componentContainer.NewContainerSummaries(
-		containerEntities, profileEntities, accountEntities,
+		containersResponseDto.Containers, profileEntities, accountEntities,
 	)
 }
