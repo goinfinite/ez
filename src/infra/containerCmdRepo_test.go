@@ -6,6 +6,7 @@ import (
 
 	testHelpers "github.com/goinfinite/ez/src/devUtils"
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
@@ -49,17 +50,18 @@ func deleteDummyContainer(
 	containerQueryRepo *ContainerQueryRepo,
 	containerCmdRepo *ContainerCmdRepo,
 ) error {
-	containers, err := containerQueryRepo.Read()
-	if err != nil {
+	requestDto := dto.ReadContainersRequest{
+		Pagination: useCase.ContainersDefaultPagination,
+	}
+
+	responseDto, err := containerQueryRepo.Read(requestDto)
+	if err != nil || len(responseDto.Containers) == 0 {
 		return err
 	}
-
-	if len(containers) == 0 {
-		return nil
-	}
+	containerEntity := responseDto.Containers[0]
 
 	deleteDto := dto.NewDeleteContainer(
-		containers[0].AccountId, containers[0].Id,
+		containerEntity.AccountId, containerEntity.Id,
 		LocalOperatorAccountId, LocalOperatorIpAddress,
 	)
 
@@ -82,17 +84,19 @@ func TestContainerCmdRepo(t *testing.T) {
 
 	t.Run("UpdateContainer", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
-		containers, err := containerQueryRepo.ReadByAccountId(accountId)
-		if err != nil {
-			t.Errorf("ReadContainersFailed: %v", err)
+		readContainersRequestDto := dto.ReadContainersRequest{
+			Pagination:         useCase.ContainersDefaultPagination,
+			ContainerAccountId: &accountId,
 		}
 
-		if len(containers) == 0 {
-			t.Error("NoContainersFound")
+		responseDto, err := containerQueryRepo.Read(readContainersRequestDto)
+		if err != nil || len(responseDto.Containers) == 0 {
+			t.Fatal(err)
 		}
+		containerEntity := responseDto.Containers[0]
 
 		updateContainer := dto.NewUpdateContainer(
-			accountId, containers[0].Id, nil, nil,
+			containerEntity.AccountId, containerEntity.Id, nil, nil,
 			LocalOperatorAccountId, LocalOperatorIpAddress,
 		)
 

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
@@ -112,10 +114,16 @@ server {
 }
 
 func (repo *ContainerProxyCmdRepo) Create(containerId valueObject.ContainerId) error {
-	containerEntity, err := repo.containerQueryRepo.ReadById(containerId)
-	if err != nil {
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:  useCase.ContainersDefaultPagination,
+		ContainerId: &containerId,
+	}
+
+	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
 		return err
 	}
+	containerEntity := readContainersResponseDto.Containers[0]
 
 	containerPrivatePort := uint16(0)
 	for _, portBinding := range containerEntity.PortBindings {

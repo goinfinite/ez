@@ -306,7 +306,10 @@ func (repo *ContainerQueryRepo) Read(
 		containerModel.Envs = &envs
 	}
 
-	dbQuery := repo.persistentDbSvc.Handler.Where(&containerModel).Preload("PortBindings")
+	dbQuery := repo.persistentDbSvc.Handler.
+		Model(&containerModel).
+		Where(&containerModel).
+		Preload("PortBindings")
 
 	if requestDto.CreatedBeforeAt != nil {
 		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())

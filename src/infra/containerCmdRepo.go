@@ -8,6 +8,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
@@ -508,10 +509,16 @@ func (repo *ContainerCmdRepo) Create(
 }
 
 func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
-	containerEntity, err := repo.containerQueryRepo.ReadById(updateDto.ContainerId)
-	if err != nil {
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:  useCase.ContainersDefaultPagination,
+		ContainerId: &updateDto.ContainerId,
+	}
+
+	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
 		return err
 	}
+	containerEntity := readContainersResponseDto.Containers[0]
 
 	containerName := repo.containerNameFactory(containerEntity.Hostname)
 	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
@@ -564,10 +571,16 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 }
 
 func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
-	containerEntity, err := repo.containerQueryRepo.ReadById(deleteDto.ContainerId)
-	if err != nil {
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:  useCase.ContainersDefaultPagination,
+		ContainerId: &deleteDto.ContainerId,
+	}
+
+	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
 		return err
 	}
+	containerEntity := readContainersResponseDto.Containers[0]
 
 	containerName := repo.containerNameFactory(containerEntity.Hostname)
 	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
@@ -625,10 +638,16 @@ func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
 func (repo *ContainerCmdRepo) CreateContainerSessionToken(
 	createDto dto.CreateContainerSessionToken,
 ) (tokenValue valueObject.AccessTokenValue, err error) {
-	containerEntity, err := repo.containerQueryRepo.ReadById(createDto.ContainerId)
-	if err != nil {
-		return tokenValue, errors.New("ContainerNotFound")
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:  useCase.ContainersDefaultPagination,
+		ContainerId: &createDto.ContainerId,
 	}
+
+	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
+		return tokenValue, err
+	}
+	containerEntity := readContainersResponseDto.Containers[0]
 
 	randomPassword := infraHelper.GenPass(16)
 	_, _ = repo.runContainerCmd(

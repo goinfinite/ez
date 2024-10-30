@@ -356,14 +356,24 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	}
 
 	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
-	containers, err := containerQueryRepo.ReadByAccountId(accountId)
+
+	readContainersPaginationDto := dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1000,
+	}
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:         readContainersPaginationDto,
+		ContainerAccountId: &accountId,
+	}
+
+	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)
 	if err != nil {
 		return err
 	}
 
 	profileQueryRepo := NewContainerProfileQueryRepo(repo.persistentDbSvc)
 	profileIdProfileEntityMap := map[valueObject.ContainerProfileId]entity.ContainerProfile{}
-	for _, container := range containers {
+	for _, container := range readContainersResponseDto.Containers {
 		if _, exists := profileIdProfileEntityMap[container.ProfileId]; exists {
 			continue
 		}
@@ -385,7 +395,7 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	memoryBytesUsage := int64(0)
 	storagePerformanceUnitsUsage := uint(0)
 
-	for _, container := range containers {
+	for _, container := range readContainersResponseDto.Containers {
 		profileEntity, exists := profileIdProfileEntityMap[container.ProfileId]
 		if !exists {
 			slog.Debug(

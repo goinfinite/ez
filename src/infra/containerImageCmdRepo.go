@@ -8,6 +8,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
@@ -27,10 +28,17 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	createDto dto.CreateContainerSnapshotImage,
 ) (imageId valueObject.ContainerImageId, err error) {
 	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
-	containerEntity, err := containerQueryRepo.ReadById(createDto.ContainerId)
-	if err != nil {
-		return imageId, err
+
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:  useCase.ContainersDefaultPagination,
+		ContainerId: &createDto.ContainerId,
 	}
+
+	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
+		return imageId, errors.New("ContainerNotFound")
+	}
+	containerEntity := readContainersResponseDto.Containers[0]
 	containerIdStr := createDto.ContainerId.String()
 	containerHostnameStrSimplified := strings.ReplaceAll(
 		containerEntity.Hostname.String(), ".", "-",

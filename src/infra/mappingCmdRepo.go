@@ -10,6 +10,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
@@ -226,10 +227,16 @@ server {
 func (repo *MappingCmdRepo) CreateTarget(
 	createDto dto.CreateMappingTarget,
 ) (targetId valueObject.MappingTargetId, err error) {
-	containerEntity, err := repo.containerQueryRepo.ReadById(createDto.ContainerId)
-	if err != nil {
-		return targetId, err
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination:  useCase.ContainersDefaultPagination,
+		ContainerId: &createDto.ContainerId,
 	}
+
+	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
+		return targetId, errors.New("ContainerNotFound")
+	}
+	containerEntity := readContainersResponseDto.Containers[0]
 
 	mappingEntity, err := repo.mappingQueryRepo.ReadById(createDto.MappingId)
 	if err != nil {

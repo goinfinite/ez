@@ -5,6 +5,7 @@ import (
 
 	testHelpers "github.com/goinfinite/ez/src/devUtils"
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
 )
 
 func TestContainerImageCmdRepo(t *testing.T) {
@@ -15,16 +16,19 @@ func TestContainerImageCmdRepo(t *testing.T) {
 
 	t.Run("CreateSnapshot", func(t *testing.T) {
 		containerQueryRepo := NewContainerQueryRepo(persistentDbSvc)
-		containersList, err := containerQueryRepo.Read()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(containersList) == 0 {
-			t.Fatal("NoContainersFound")
+
+		readContainersRequestDto := dto.ReadContainersRequest{
+			Pagination: useCase.ContainersDefaultPagination,
 		}
 
+		readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)
+		if err != nil || len(readContainersResponseDto.Containers) == 0 {
+			t.Fatal(err)
+		}
+		containerEntity := readContainersResponseDto.Containers[0]
+
 		createDto := dto.CreateContainerSnapshotImage{
-			ContainerId: containersList[0].Id,
+			ContainerId: containerEntity.Id,
 		}
 		_, err = containerImageCmdRepo.CreateSnapshot(createDto)
 		if err != nil {

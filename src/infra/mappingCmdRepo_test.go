@@ -35,22 +35,14 @@ func TestMappingCmdRepo(t *testing.T) {
 
 	t.Run("CreateTargets", func(t *testing.T) {
 		mappingId, _ := valueObject.NewMappingId(1)
-		containers, err := containerQueryRepo.Read()
+		lastContainerEntity, err := getLastContainer(containerQueryRepo)
 		if err != nil {
 			t.Errorf("ReadContainersFailed: %v", err)
 			return
 		}
 
-		if len(containers) == 0 {
-			t.Errorf("NoContainerRunning")
-			return
-		}
-
-		accountId := containers[0].AccountId
-		containerId := containers[0].Id
-
 		createMappingTarget := dto.NewCreateMappingTarget(
-			accountId, mappingId, containerId,
+			lastContainerEntity.AccountId, mappingId, lastContainerEntity.Id,
 			valueObject.SystemAccountId, valueObject.SystemIpAddress,
 		)
 

@@ -1,26 +1,26 @@
 package infra
 
 import (
-	"errors"
 	"testing"
 
 	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/useCase"
 )
 
 func getLastContainer(
 	containerQueryRepo *ContainerQueryRepo,
 ) (containerEntity entity.Container, err error) {
-	containers, err := containerQueryRepo.Read()
-	if err != nil {
+	readContainersRequestDto := dto.ReadContainersRequest{
+		Pagination: useCase.ContainersDefaultPagination,
+	}
+
+	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)
+	if err != nil || len(readContainersResponseDto.Containers) == 0 {
 		return containerEntity, err
 	}
-
-	if len(containers) == 0 {
-		return containerEntity, errors.New("NoContainersFound")
-	}
-
-	return containers[0], nil
+	return readContainersResponseDto.Containers[0], nil
 }
 
 func TestContainerProxyCmdRepo(t *testing.T) {
