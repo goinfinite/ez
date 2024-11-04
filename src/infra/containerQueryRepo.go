@@ -330,6 +330,12 @@ func (repo *ContainerQueryRepo) Read(
 		dbQuery = dbQuery.Where("stopped_at > ?", requestDto.StoppedAfterAt.GetAsGoTime())
 	}
 
+	var itemsTotal int64
+	err = dbQuery.Count(&itemsTotal).Error
+	if err != nil {
+		return responseDto, errors.New("CountItemsTotalError: " + err.Error())
+	}
+
 	dbQuery = dbQuery.Limit(int(requestDto.Pagination.ItemsPerPage))
 	if requestDto.Pagination.LastSeenId == nil {
 		offset := int(requestDto.Pagination.PageNumber) * int(requestDto.Pagination.ItemsPerPage)
@@ -355,12 +361,6 @@ func (repo *ContainerQueryRepo) Read(
 	err = dbQuery.Find(&containerModels).Error
 	if err != nil {
 		return responseDto, err
-	}
-
-	var itemsTotal int64
-	err = dbQuery.Count(&itemsTotal).Error
-	if err != nil {
-		return responseDto, errors.New("CountItemsTotalError: " + err.Error())
 	}
 
 	containerEntities := []entity.Container{}
@@ -391,7 +391,9 @@ func (repo *ContainerQueryRepo) Read(
 	}
 
 	responseDto = dto.ReadContainersResponse{
-		Pagination: responsePagination,
+		Pagination:            responsePagination,
+		Containers:            []entity.Container{},
+		ContainersWithMetrics: []dto.ContainerWithMetrics{},
 	}
 
 	if requestDto.WithMetrics != nil && *requestDto.WithMetrics {
