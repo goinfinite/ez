@@ -8,6 +8,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
@@ -209,13 +210,53 @@ func (presenter *OverviewPresenter) ReadCreateContainerModalDto(
 	}
 }
 
-func (presenter *OverviewPresenter) Handler(c echo.Context) error {
+func (presenter *OverviewPresenter) ReadContainersWithMetrics(c echo.Context) (
+	containersWithMetrics []dto.ContainerWithMetrics,
+) {
+	containersPageNumber := uint16(0)
+	if c.QueryParam("containersPageNumber") != "" {
+		containersPageNumber, _ = voHelper.InterfaceToUint16(
+			c.QueryParam("containersPageNumber"),
+		)
+	}
+
+	containersItemsPerPage := uint16(5)
+	if c.QueryParam("containersItemsPerPage") != "" {
+		containersItemsPerPage, _ = voHelper.InterfaceToUint16(
+			c.QueryParam("containersItemsPerPage"),
+		)
+	}
+
+	containersSortByStr := "hostname"
+	if c.QueryParam("containersSortBy") != "" {
+		containersSortBy, err := valueObject.NewPaginationSortBy(
+			c.QueryParam("containersSortBy"),
+		)
+		if err == nil {
+			containersSortByStr = containersSortBy.String()
+		}
+	}
+
+	containersSortDirectionStr := "asc"
+	if c.QueryParam("containersSortDirection") != "" {
+		containersSortDirection, err := valueObject.NewPaginationSortDirection(
+			c.QueryParam("containersSortDirection"),
+		)
+		if err == nil {
+			containersSortDirectionStr = containersSortDirection.String()
+		}
+	}
+
 	containerService := service.NewContainerService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
 	readContainersRequestBody := map[string]interface{}{
-		"withMetrics": true,
+		"pageNumber":    containersPageNumber,
+		"itemsPerPage":  containersItemsPerPage,
+		"sortBy":        containersSortByStr,
+		"sortDirection": containersSortDirectionStr,
+		"withMetrics":   true,
 	}
 
 	readContainersServiceOutput := containerService.Read(readContainersRequestBody)
@@ -229,6 +270,12 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 		slog.Debug("AssertContainersResponseFailure")
 		return nil
 	}
+
+	return containersResponseDto.ContainersWithMetrics
+}
+
+func (presenter *OverviewPresenter) Handler(c echo.Context) (err error) {
+	containersWithMetrics := presenter.ReadContainersWithMetrics(c)
 
 	containerSummaries := presenterHelper.ReadContainerSummaries(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
@@ -244,8 +291,7 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) error {
 	)
 
 	pageContent := page.OverviewIndex(
-		containersResponseDto.ContainersWithMetrics, containerIdSummariesMap,
-		createContainerModalDto,
+		containersWithMetrics, containerIdSummariesMap, createContainerModalDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)
