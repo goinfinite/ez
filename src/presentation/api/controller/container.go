@@ -98,7 +98,7 @@ func (controller *ContainerController) Read(c echo.Context) error {
 			continue
 		}
 
-		requestBody[paramName] = paramValue
+		requestBody[paramName] = strings.Trim(paramValue, "\"")
 	}
 
 	if c.Request().URL.Path == "/v1/container/metrics/" {
