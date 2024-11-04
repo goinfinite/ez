@@ -352,7 +352,7 @@ func (repo *ContainerQueryRepo) Read(
 	}
 
 	containerModels := []dbModel.Container{}
-	err = repo.persistentDbSvc.Handler.Find(&containerModels).Error
+	err = dbQuery.Find(&containerModels).Error
 	if err != nil {
 		return responseDto, err
 	}
