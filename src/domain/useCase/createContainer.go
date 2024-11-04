@@ -31,24 +31,30 @@ func CreateContainer(
 		return err
 	}
 
-	readContainersDto := dto.ReadContainersRequest{
+	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:        ContainersDefaultPagination,
 		ContainerHostname: &createDto.Hostname,
 	}
 
-	_, err = ReadContainers(containerQueryRepo, readContainersDto)
-	if err == nil {
-		return errors.New("ContainerHostnameAlreadyExists")
+	readContainersResponseDto, err := ReadContainers(
+		containerQueryRepo, readContainersRequestDto,
+	)
+	if err != nil {
+		return errors.New("ReadContainersInfraError")
+	}
+
+	if len(readContainersResponseDto.Containers) > 0 {
+		return errors.New("ContainerHostnameAlreadyInUse")
 	}
 
 	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
 	if createDto.ExistingContainerId != nil {
-		readContainersDto = dto.ReadContainersRequest{
+		readContainersRequestDto = dto.ReadContainersRequest{
 			Pagination:  ContainersDefaultPagination,
 			ContainerId: createDto.ExistingContainerId,
 		}
 
-		responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+		responseDto, err := ReadContainers(containerQueryRepo, readContainersRequestDto)
 		if err != nil || len(responseDto.Containers) == 0 {
 			return errors.New("ExistingContainerNotFound")
 		}
@@ -111,12 +117,12 @@ func CreateContainer(
 		return nil
 	}
 
-	readContainersDto = dto.ReadContainersRequest{
+	readContainersRequestDto = dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
 		ContainerId: &containerId,
 	}
 
-	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)
+	responseDto, err := ReadContainers(containerQueryRepo, readContainersRequestDto)
 	if err != nil || len(responseDto.Containers) == 0 {
 		return errors.New("ContainerNotFound")
 	}
