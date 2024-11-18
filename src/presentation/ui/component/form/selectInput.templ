@@ -3,12 +3,13 @@ package componentForm
 import componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 
 type SelectInputDto struct {
-	Id            string
-	Label         string
-	BindValuePath string
-	Options       []string
-	IsRequired    bool
-	DenseMode     bool
+	Id                       string
+	Label                    string
+	BindValuePath            string
+	Options                  []string
+	IsRequired               bool
+	DenseMode                bool
+	ShouldIncludeBlankOption bool
 }
 
 templ SelectInput(inputDto SelectInputDto) {
@@ -34,7 +35,9 @@ templ SelectInput(inputDto SelectInputDto) {
 				class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 			}
 		>
-			<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value></option>
+			if inputDto.ShouldIncludeBlankOption {
+				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value></option>
+			}
 			for _, option := range inputDto.Options {
 				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value={ option }>{ option }</option>
 			}
@@ -52,7 +55,13 @@ templ SelectInput(inputDto SelectInputDto) {
 				}
 			</label>
 		}
-		<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
+		<i
+			if inputDto.DenseMode {
+				class="ph-bold ph-caret-down pointer-events-none absolute right-2 top-3 text-xs"
+			} else {
+				class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"
+			}
+		></i>
 	</div>
 }
 
