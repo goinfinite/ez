@@ -1,0 +1,85 @@
+package componentStructural
+
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
+	"strconv"
+)
+
+func readPaginationPageNumbers(paginationDto dto.Pagination) []int {
+	currentPageNumber := int(paginationDto.PageNumber)
+	sidePageCount := 2
+	countStart := currentPageNumber - sidePageCount
+	countEnd := currentPageNumber + sidePageCount
+	if countStart < 0 {
+		countStart = 0
+		countEnd = countStart + sidePageCount*2
+	}
+
+	pagesTotal := int(*paginationDto.PagesTotal)
+	if countEnd >= pagesTotal {
+		countEnd = pagesTotal - 1
+		countStart = countEnd - sidePageCount*2
+	}
+
+	if countStart < 0 {
+		countStart = 0
+	}
+
+	pageNumbers := []int{}
+	for i := countStart; i <= countEnd; i++ {
+		pageNumbers = append(pageNumbers, i)
+	}
+
+	return pageNumbers
+}
+
+templ Pagination(
+	paginationDto dto.Pagination,
+	selectedPageNumberBindValuePath, selectediTemsPerPageBindValuePath string,
+) {
+	<!-- Pagination -->
+	<div class="my-4 flex flex-row items-center justify-items-stretch">
+		<div class="flex grow flex-row items-center gap-0.5">
+			if paginationDto.PageNumber > 0 {
+				<a
+					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px]"
+					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)-1) }
+				>
+					<i class="ph-bold ph-caret-double-left"></i>
+				</a>
+			}
+			for pageNumber := range readPaginationPageNumbers(paginationDto) {
+				<a
+					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(pageNumber) }
+					if pageNumber == int(paginationDto.PageNumber) {
+						class="bg-ez-300 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs"
+					} else {
+						class="bg-ez-400 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs"
+					}
+				>
+					{ strconv.Itoa(pageNumber) }
+				</a>
+			}
+			if paginationDto.PageNumber < *paginationDto.PagesTotal-1 {
+				<a
+					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px]"
+					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)+1) }
+				>
+					<i class="ph-bold ph-caret-double-right"></i>
+				</a>
+			}
+		</div>
+		<div class="w-32">
+			@componentForm.SelectInput(
+				componentForm.SelectInputDto{
+					Id:            "itemsPerPage",
+					Label:         "items per page",
+					BindValuePath: selectediTemsPerPageBindValuePath,
+					Options:       []string{"5", "10", "30", "50"},
+					DenseMode:     true,
+				},
+			)
+		</div>
+	</div>
+}
