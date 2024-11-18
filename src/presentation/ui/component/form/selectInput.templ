@@ -1,6 +1,6 @@
 package componentForm
 
-import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+import componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 
 type SelectInputDto struct {
 	Id            string
@@ -346,7 +346,7 @@ templ RemoteSearchableSelectInput(
 						if len(tagKeys) > 0 {
 							<div class="flex flex-wrap justify-normal gap-2">
 								for _, tagKey := range tagKeys {
-									@componentStructural.TagClientSideValue(
+									@componentMisc.TagClientSideValue(
 										tagKey, "selectableItem['"+tagKey+"']", "infinite-500",
 									)
 								}

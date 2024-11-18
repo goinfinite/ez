@@ -3,7 +3,7 @@ package componentContainer
 import (
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
-	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 )
 
 func formatProfileTaggedSmallSummary(specs *valueObject.ContainerSpecs) string {
@@ -34,12 +34,12 @@ templ ProfileTaggedSummary(profileEntity entity.ContainerProfile) {
 	<div class="flex flex-col p-1">
 		{ profileEntity.Name.String() }
 		<div class="mt-1 flex flex-row items-center gap-1.5">
-			@componentStructural.TinyTag(
+			@componentMisc.TinyTag(
 				"ph-airplane-tilt", "", formatProfileTaggedSmallSummary(&profileEntity.BaseSpecs), "infinite-500",
 			)
 			if profileEntity.MaxSpecs != nil {
 				<i class="ph-bold ph-arrows-out-simple"></i>
-				@componentStructural.TinyTag(
+				@componentMisc.TinyTag(
 					"ph-rocket-launch", "", formatProfileTaggedSmallSummary(profileEntity.MaxSpecs), "infinite-500",
 				)
 			}

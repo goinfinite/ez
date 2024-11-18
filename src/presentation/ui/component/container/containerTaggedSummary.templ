@@ -1,6 +1,6 @@
 package componentContainer
 
-import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+import componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 
 templ ContainerTaggedSummary(containerSummary ContainerSummary) {
 	<div class="p-1.5">
@@ -9,20 +9,20 @@ templ ContainerTaggedSummary(containerSummary ContainerSummary) {
 			<small>({ containerSummary.ContainerId.String() })</small>
 		</div>
 		<div class="mt-1 flex flex-wrap justify-normal gap-2">
-			@componentStructural.Tag(
+			@componentMisc.Tag(
 				"ph-link", "", containerSummary.ImageAddress.String(), "infinite-500",
 			)
-			@componentStructural.Tag(
+			@componentMisc.Tag(
 				"ph-user-circle", "", containerSummary.AccountUsername.String(), "infinite-500",
 			)
 			if containerSummary.ProfileMaxSpecs == nil {
-				@componentStructural.Tag(
+				@componentMisc.Tag(
 					"", containerSummary.ProfileName.String(),
 					"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+"</small>",
 					"infinite-500",
 				)
 			} else {
-				@componentStructural.Tag(
+				@componentMisc.Tag(
 					"", containerSummary.ProfileName.String(),
 					"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+
 						"<i class='ph-bold ph-arrows-out-simple mx-1'></i>"+
