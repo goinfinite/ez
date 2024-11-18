@@ -210,8 +210,8 @@ func (presenter *OverviewPresenter) ReadCreateContainerModalDto(
 	}
 }
 
-func (presenter *OverviewPresenter) ReadContainersWithMetrics(c echo.Context) (
-	containersWithMetrics []dto.ContainerWithMetrics,
+func (presenter *OverviewPresenter) ReadContainers(c echo.Context) (
+	responseDto dto.ReadContainersResponse,
 ) {
 	containersPageNumber := uint16(0)
 	if c.QueryParam("containersPageNumber") != "" {
@@ -262,20 +262,20 @@ func (presenter *OverviewPresenter) ReadContainersWithMetrics(c echo.Context) (
 	readContainersServiceOutput := containerService.Read(readContainersRequestBody)
 	if readContainersServiceOutput.Status != service.Success {
 		slog.Debug("ReadContainersFailure")
-		return nil
+		return responseDto
 	}
 
 	containersResponseDto, assertOk := readContainersServiceOutput.Body.(dto.ReadContainersResponse)
 	if !assertOk {
 		slog.Debug("AssertContainersResponseFailure")
-		return nil
+		return responseDto
 	}
 
-	return containersResponseDto.ContainersWithMetrics
+	return containersResponseDto
 }
 
 func (presenter *OverviewPresenter) Handler(c echo.Context) (err error) {
-	containersWithMetrics := presenter.ReadContainersWithMetrics(c)
+	containersResponseDto := presenter.ReadContainers(c)
 
 	containerSummaries := presenterHelper.ReadContainerSummaries(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
@@ -291,7 +291,7 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) (err error) {
 	)
 
 	pageContent := page.OverviewIndex(
-		containersWithMetrics, containerIdSummariesMap, createContainerModalDto,
+		containersResponseDto, containerIdSummariesMap, createContainerModalDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)
