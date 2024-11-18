@@ -21,7 +21,7 @@ type CreateContainerModalDto struct {
 	ContainerSummarySearchableItems   []componentForm.SearchableSelectItem
 }
 
-script OverviewIndexLocalState() {
+script OverviewIndexLocalState(containersCurrentPageNumber int) {
 	document.addEventListener('alpine:init', () => {
 		Alpine.data('containers', () => ({
 			// Primary State
@@ -136,6 +136,23 @@ script OverviewIndexLocalState() {
 					this.container.launchScript = marketplaceItemEntity.launchScript;
 				}
 			},
+			containersPagination: {
+				pageNumber: containersCurrentPageNumber,
+				itemsPerPage: 5,
+			},
+			reloadContainersTable() {
+				htmx.ajax(
+					'GET',
+					'/overview/?containersPageNumber=' + this.containersPagination.pageNumber +
+					'&containersItemsPerPage=' + this.containersPagination.itemsPerPage,
+					{
+						select: '#containers-table',
+						target: '#containers-table',
+						indicator: '#loading-overlay',
+						swap: 'outerHTML transition:true'
+					},
+				);
+			},
 
 			// Modal States
 			isCreateContainerModalOpen: false,
@@ -239,11 +256,11 @@ script OverviewIndexLocalState() {
 }
 
 templ OverviewIndex(
-	containerEntities []dto.ContainerWithMetrics,
+	containersResponseDto dto.ReadContainersResponse,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
 	createContainerDto CreateContainerModalDto,
 ) {
-	@OverviewIndexLocalState()
+	@OverviewIndexLocalState(int(containersResponseDto.Pagination.PageNumber))
 	<div class="flex flex-col">
 		<div class="mb-6 flex flex-row justify-between">
 			<div class="basis-[70%]">
@@ -260,7 +277,7 @@ templ OverviewIndex(
 					"Create Container", "ph-plus-square", "openCreateContainerModal()", false,
 				)
 			</div>
-			@ContainersTable(containerEntities, containerIdSummariesMap)
+			@ContainersTable(containersResponseDto, containerIdSummariesMap)
 			@CreateContainerModal(createContainerDto)
 			@UpdateContainerModal(createContainerDto.ContainerProfileSearchableItems)
 			@componentStructural.ConfirmationModal(
@@ -286,100 +303,110 @@ templ OverviewIndex(
 }
 
 templ ContainersTable(
-	containerEntities []dto.ContainerWithMetrics,
+	containersResponseDto dto.ReadContainersResponse,
 	containerIdSummariesMap map[valueObject.ContainerId]componentContainer.ContainerSummary,
 ) {
 	<!-- Containers Table -->
-	<table
+	<div
 		id="containers-table"
 		hx-get="/overview/"
 		hx-trigger="submit from:form delay:500ms, update:container from:window delay:300ms, delete:container from:window delay:300ms"
 		hx-select="#containers-table"
 		hx-target="#containers-table"
 		hx-swap="outerHTML transition:true"
-		class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		x-init.debounce.500ms="$watch('containersPagination', value => reloadContainersTable())"
 	>
-		<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
-			<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-				<th scope="col" class="w-[40%] overflow-x-hidden px-3 py-3 text-left">Container</th>
-				<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
-				<th scope="col" class="w-[10%] overflow-x-hidden py-3">RAM</th>
-				<th scope="col" class="w-[5%] overflow-x-hidden py-3">Restarts</th>
-				<th scope="col" class="w-[25%] overflow-x-hidden py-3">Port Bindings</th>
-				<th scope="col" class="w-[10%] py-3"></th>
-			</tr>
-		</thead>
-		<tbody>
-			for _, containerEntity := range containerEntities {
-				<!-- Container Table Entry -->
-				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
-					@templ.JSONScript("containerEntity_"+containerEntity.Id.String(), containerEntity)
-					<td class="w-[40%] overflow-x-hidden px-3 py-2 text-left">
-						@componentContainer.ContainerTaggedSummary(containerIdSummariesMap[containerEntity.Id])
-					</td>
-					<td class="w-[10%] overflow-x-hidden px-3 py-2">
-						@componentMisc.ProgressBar(
-							uint8(containerEntity.Metrics.CurrentCpuPercent),
-							containerEntity.Metrics.CurrentCpuPercentStr+"%",
-						)
-					</td>
-					<td class="w-[10%] overflow-x-hidden px-3 py-2">
-						@componentMisc.ProgressBar(
-							uint8(containerEntity.Metrics.MemoryPercent),
-							containerEntity.Metrics.MemoryPercentStr+"%",
-						)
-					</td>
-					<td class="w-[5%] overflow-x-hidden px-3 py-2">
-						{ strconv.FormatUint(containerEntity.RestartCount, 10) }
-					</td>
-					<td class="w-[25%] overflow-x-hidden px-3 py-2">
-						if len(containerEntity.PortBindings) > 0 {
-							@componentContainer.PortBindingsTable(containerEntity.PortBindings, true)
-						} else {
-							<div class="text-center text-neutral-400">---</div>
-						}
-					</td>
-					<td class="w-[10%] px-3 py-2">
-						<div class="flex flex-wrap items-center gap-1">
-							@componentStructural.SquareIconButtonWithTooltip(
-								"restart-container", "ph-arrows-clockwise", "ez-300", "ez-200",
-								"openRestartContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
-								"Restart", "ez-300", "top",
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[40%] overflow-x-hidden px-3 py-3 text-left">Container</th>
+					<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
+					<th scope="col" class="w-[10%] overflow-x-hidden py-3">RAM</th>
+					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Restarts</th>
+					<th scope="col" class="w-[25%] overflow-x-hidden py-3">Port Bindings</th>
+					<th scope="col" class="w-[10%] py-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, containerEntity := range containersResponseDto.ContainersWithMetrics {
+					<!-- Container Table Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						@templ.JSONScript("containerEntity_"+containerEntity.Id.String(), containerEntity)
+						<td class="w-[40%] overflow-x-hidden px-3 py-2 text-left">
+							@componentContainer.ContainerTaggedSummary(containerIdSummariesMap[containerEntity.Id])
+						</td>
+						<td class="w-[10%] overflow-x-hidden px-3 py-2">
+							@componentMisc.ProgressBar(
+								uint8(containerEntity.Metrics.CurrentCpuPercent),
+								containerEntity.Metrics.CurrentCpuPercentStr+"%",
 							)
-							if containerEntity.Status {
-								@componentStructural.SquareIconButtonWithTooltip(
-									"toggle-container-status", "ph-lightning-slash", "yellow-900", "yellow-700",
-									"openShutdownContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
-									"Power Off", "yellow-700", "top",
-								)
+						</td>
+						<td class="w-[10%] overflow-x-hidden px-3 py-2">
+							@componentMisc.ProgressBar(
+								uint8(containerEntity.Metrics.MemoryPercent),
+								containerEntity.Metrics.MemoryPercentStr+"%",
+							)
+						</td>
+						<td class="w-[5%] overflow-x-hidden px-3 py-2">
+							{ strconv.FormatUint(containerEntity.RestartCount, 10) }
+						</td>
+						<td class="w-[25%] overflow-x-hidden px-3 py-2">
+							if len(containerEntity.PortBindings) > 0 {
+								@componentContainer.PortBindingsTable(containerEntity.PortBindings, true)
 							} else {
-								@componentStructural.SquareIconButtonWithTooltip(
-									"toggle-container-status", "ph-lightning", "cyan-900", "cyan-700",
-									"powerOnContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
-									"Power On", "cyan-700", "top",
-								)
+								<div class="text-center text-neutral-400">---</div>
 							}
-							@componentStructural.SquareIconButtonWithTooltip(
-								"update-container", "ph-gear", "ez-300", "ez-200",
-								"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.ProfileId.String()+"')",
-								"Update", "ez-300", "bottom",
-							)
-							@componentStructural.SquareIconButtonWithTooltip(
-								"delete-container", "ph-trash", "red-900", "red-700",
-								"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.Hostname.String()+"')",
-								"Delete", "red-700", "bottom",
-							)
-						</div>
-					</td>
-				</tr>
-			}
-			if len(containerEntities) == 0 {
-				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
-					<td class="px-3 py-2" colspan="12">No containers yet.</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+						</td>
+						<td class="w-[10%] px-3 py-2">
+							<div class="flex flex-wrap items-center gap-1">
+								@componentStructural.SquareIconButtonWithTooltip(
+									"restart-container", "ph-arrows-clockwise", "ez-300", "ez-200",
+									"openRestartContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+									"Restart", "ez-300", "top",
+								)
+								if containerEntity.Status {
+									@componentStructural.SquareIconButtonWithTooltip(
+										"toggle-container-status", "ph-lightning-slash", "yellow-900", "yellow-700",
+										"openShutdownContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+										"Power Off", "yellow-700", "top",
+									)
+								} else {
+									@componentStructural.SquareIconButtonWithTooltip(
+										"toggle-container-status", "ph-lightning", "cyan-900", "cyan-700",
+										"powerOnContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
+										"Power On", "cyan-700", "top",
+									)
+								}
+								@componentStructural.SquareIconButtonWithTooltip(
+									"update-container", "ph-gear", "ez-300", "ez-200",
+									"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.ProfileId.String()+"')",
+									"Update", "ez-300", "bottom",
+								)
+								@componentStructural.SquareIconButtonWithTooltip(
+									"delete-container", "ph-trash", "red-900", "red-700",
+									"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.Hostname.String()+"')",
+									"Delete", "red-700", "bottom",
+								)
+							</div>
+						</td>
+					</tr>
+				}
+				if len(containersResponseDto.ContainersWithMetrics) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No containers yet.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<div>
+			@componentStructural.Pagination(
+				containersResponseDto.Pagination, "containersPagination.pageNumber",
+				"containersPagination.itemsPerPage",
+			)
+		</div>
+	</div>
 }
 
 templ CreateContainerForm(createDto CreateContainerModalDto) {
@@ -565,17 +592,17 @@ templ MarketplaceCarouselItem(itemEntity entity.MarketplaceItem) {
 				<div class="basis-1/4 space-y-1.5">
 					<p class="text-xs font-bold">Requirements</p>
 					if itemEntity.MinimumCpuMillicores != nil {
-						@componentStructural.TinyTag(
+						@componentMisc.TinyTag(
 							"ph-speedometer", "", itemEntity.MinimumCpuMillicores.ToCoresString(), "infinite-500",
 						)
 					}
 					if itemEntity.MinimumMemoryBytes != nil {
-						@componentStructural.TinyTag(
+						@componentMisc.TinyTag(
 							"ph-memory", "", itemEntity.MinimumMemoryBytes.StringWithSuffix(), "infinite-500",
 						)
 					}
 					if itemEntity.EstimatedSizeBytes != nil {
-						@componentStructural.TinyTag(
+						@componentMisc.TinyTag(
 							"ph-hard-drives", "", itemEntity.EstimatedSizeBytes.StringWithSuffix(), "infinite-500",
 						)
 					}
