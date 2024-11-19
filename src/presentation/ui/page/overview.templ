@@ -321,7 +321,7 @@ templ ContainersTable(
 		>
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[40%] overflow-x-hidden px-3 py-3 text-left">Container</th>
+					<th scope="col" class="w-[40%] overflow-x-hidden p-3 text-left">Container</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">RAM</th>
 					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Restarts</th>
@@ -400,7 +400,7 @@ templ ContainersTable(
 				}
 			</tbody>
 		</table>
-		<div>
+		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
 			@componentStructural.Pagination(
 				containersResponseDto.Pagination, "containersPagination.pageNumber",
 				"containersPagination.itemsPerPage",
