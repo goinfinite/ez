@@ -43,7 +43,7 @@ templ Pagination(
 		<div class="flex grow flex-row items-center gap-0.5">
 			if paginationDto.PageNumber > 0 {
 				<a
-					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px]"
+					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px] leading-tight"
 					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)-1) }
 				>
 					<i class="ph-bold ph-caret-double-left"></i>
@@ -53,9 +53,9 @@ templ Pagination(
 				<a
 					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(pageNumber) }
 					if pageNumber == int(paginationDto.PageNumber) {
-						class="bg-ez-300 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs"
+						class="border-1 border-ez-400 bg-ez-400 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs font-bold"
 					} else {
-						class="bg-ez-400 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs"
+						class="border-1 border-ez-400 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs"
 					}
 				>
 					{ strconv.Itoa(pageNumber) }
@@ -63,7 +63,7 @@ templ Pagination(
 			}
 			if paginationDto.PageNumber < *paginationDto.PagesTotal-1 {
 				<a
-					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px]"
+					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px] leading-tight"
 					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)+1) }
 				>
 					<i class="ph-bold ph-caret-double-right"></i>
