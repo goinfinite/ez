@@ -339,20 +339,7 @@ templ ContainersTable(
 		@update:containers-record-filters="reloadContainersTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			@componentStructural.RecordFilters(
-				"containers",
-				[]componentStructural.RecordFilterDto{
-					{Id: "containerId", Label: "ContainerId", BindValuePath: "containersFilters.containerId"},
-					{Id: "accountId", Label: "AccountId", BindValuePath: "containersFilters.accountId"},
-					{Id: "hostname", Label: "Hostname", BindValuePath: "containersFilters.hostname"},
-					{Id: "status", Label: "Status", BindValuePath: "containersFilters.status"},
-					{Id: "imageId", Label: "ImageId", BindValuePath: "containersFilters.imageId"},
-					{Id: "imageAddress", Label: "ImageAddress", BindValuePath: "containersFilters.imageAddress"},
-					{Id: "imageHash", Label: "ImageHash", BindValuePath: "containersFilters.imageHash"},
-					{Id: "restartPolicy", Label: "RestartPolicy", BindValuePath: "containersFilters.restartPolicy"},
-					{Id: "profileId", Label: "ProfileId", BindValuePath: "containersFilters.profileId"},
-				},
-			)
+			@componentStructural.RecordFilters("containers", "containersFilters")
 		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
