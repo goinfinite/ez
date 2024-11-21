@@ -137,8 +137,15 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 				}
 			},
 			containersFilters: {
-				accountId: '',
 				containerId: '',
+				accountId: '',
+				hostname: '',
+				status: '',
+				imageId: '',
+				imageAddress: '',
+				imageHash: '',
+				restartPolicy: '',
+				profileId: '',
 			},
 			containersPagination: {
 				pageNumber: containersCurrentPageNumber,
@@ -153,7 +160,8 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 					if (filterValue === '') {
 						continue;
 					}
-					queryParams.set(filterKey, filterValue);
+					const filterKeyCapitalized = filterKey.charAt(0).toUpperCase() + filterKey.slice(1);
+					queryParams.set('containers'+filterKeyCapitalized, filterValue);
 				}
 
 				htmx.ajax(
@@ -327,14 +335,22 @@ templ ContainersTable(
 		hx-select="#containers-table"
 		hx-target="#containers-table"
 		hx-swap="outerHTML transition:true"
-		x-init.debounce.500ms="$watch('containersPagination', value => reloadContainersTable())"
+		@update:containers-pagination="reloadContainersTable()"
+		@update:containers-record-filters="reloadContainersTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.RecordFilters(
-				"containersFilters",
+				"containers",
 				[]componentStructural.RecordFilterDto{
 					{Id: "containerId", Label: "ContainerId", BindValuePath: "containersFilters.containerId"},
 					{Id: "accountId", Label: "AccountId", BindValuePath: "containersFilters.accountId"},
+					{Id: "hostname", Label: "Hostname", BindValuePath: "containersFilters.hostname"},
+					{Id: "status", Label: "Status", BindValuePath: "containersFilters.status"},
+					{Id: "imageId", Label: "ImageId", BindValuePath: "containersFilters.imageId"},
+					{Id: "imageAddress", Label: "ImageAddress", BindValuePath: "containersFilters.imageAddress"},
+					{Id: "imageHash", Label: "ImageHash", BindValuePath: "containersFilters.imageHash"},
+					{Id: "restartPolicy", Label: "RestartPolicy", BindValuePath: "containersFilters.restartPolicy"},
+					{Id: "profileId", Label: "ProfileId", BindValuePath: "containersFilters.profileId"},
 				},
 			)
 		</div>
@@ -424,6 +440,7 @@ templ ContainersTable(
 		</table>
 		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
 			@componentStructural.Pagination(
+				"containers",
 				containersResponseDto.Pagination, "containersPagination.pageNumber",
 				"containersPagination.itemsPerPage",
 			)

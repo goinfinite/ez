@@ -259,6 +259,42 @@ func (presenter *OverviewPresenter) ReadContainers(c echo.Context) (
 		"withMetrics":   true,
 	}
 
+	if c.QueryParam("containersContainerId") != "" {
+		readContainersRequestBody["containerId"] = c.QueryParam("containersContainerId")
+	}
+
+	if c.QueryParam("containersAccountId") != "" {
+		readContainersRequestBody["containerAccountId"] = c.QueryParam("containersAccountId")
+	}
+
+	if c.QueryParam("containersHostname") != "" {
+		readContainersRequestBody["containerHostname"] = c.QueryParam("containersHostname")
+	}
+
+	if c.QueryParam("containersStatus") != "" {
+		readContainersRequestBody["containerStatus"] = c.QueryParam("containersStatus")
+	}
+
+	if c.QueryParam("containersImageId") != "" {
+		readContainersRequestBody["containerImageId"] = c.QueryParam("containersImageId")
+	}
+
+	if c.QueryParam("containersImageAddress") != "" {
+		readContainersRequestBody["containerImageAddress"] = c.QueryParam("containersImageAddress")
+	}
+
+	if c.QueryParam("containersImageHash") != "" {
+		readContainersRequestBody["containerImageHash"] = c.QueryParam("containersImageHash")
+	}
+
+	if c.QueryParam("containersRestartPolicy") != "" {
+		readContainersRequestBody["containerRestartPolicy"] = c.QueryParam("containersRestartPolicy")
+	}
+
+	if c.QueryParam("containersProfileId") != "" {
+		readContainersRequestBody["containerProfileId"] = c.QueryParam("containersProfileId")
+	}
+
 	readContainersServiceOutput := containerService.Read(readContainersRequestBody)
 	if readContainersServiceOutput.Status != service.Success {
 		slog.Debug("ReadContainersFailure")
