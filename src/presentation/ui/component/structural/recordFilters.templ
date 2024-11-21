@@ -1,0 +1,121 @@
+package componentStructural
+
+script RecordFiltersLocalState(componentId string, filterIds []string) {
+	document.addEventListener('alpine:init', () => {
+		Alpine.data(componentId+'RecordFilters', () => ({
+			filterIds: filterIds,
+			selectedFilters: [],
+      get remainingFilters() {
+        return this.filterIds.filter(
+          filterId => !this.selectedFilters.includes(filterId),
+          );
+      },
+			resetState() {
+				this.selectedFilters = [];
+			},
+      createFilterField() {
+        if (this.remainingFilters.length === 0) {
+          return;
+        }
+        this.selectedFilters.push(this.remainingFilters[0]);
+      },
+      removeFilterField(filterId) {
+        this.selectedFilters = this.selectedFilters.filter(
+          selectedFilter => selectedFilter !== filterId,
+        );
+      },
+			init() {
+				this.resetState();
+				if (this.filterIds.length === 0) {
+					return;
+				}
+				this.selectedFilters.push(this.filterIds[0]);
+			},
+		}));
+	});
+}
+
+type RecordFilterDto struct {
+	Id            string `json:"id"`
+	Label         string `json:"-"`
+	BindValuePath string `json:"-"`
+}
+
+func extractFilterIds(inputDtos []RecordFilterDto) []string {
+	var filterIds []string
+	for _, inputDto := range inputDtos {
+		filterIds = append(filterIds, inputDto.Id)
+	}
+	return filterIds
+}
+
+templ RecordFilters(componentId string, inputDtos []RecordFilterDto) {
+	<!-- RecordFilters JavaScript -->
+	@RecordFiltersLocalState(componentId, extractFilterIds(inputDtos))
+	<div class="relative w-full" x-data={ componentId + "RecordFilters" }>
+		<!-- RecordFilters HTML -->
+		<div class="flex flex-row items-center gap-2 p-1">
+			<template x-for="selectedFilter in selectedFilters">
+				<!-- FilterField HTML -->
+				<div class="bg-ez-400 flex w-1/3 flex-row items-center gap-1.5 rounded-xl p-2">
+					<div class="relative w-full">
+						<select
+							x-model="selectedFilter"
+							placeholder="filter"
+							class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
+						>
+							for _, inputDto := range inputDtos {
+								<option
+									class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90"
+									value={ inputDto.Id }
+								>
+									{ inputDto.Label }
+								</option>
+							}
+						</select>
+						<label
+							class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+						>
+							filter
+						</label>
+						<i class="ph-bold ph-caret-down pointer-events-none absolute right-2 top-3 text-xs"></i>
+					</div>
+					for _, inputDto := range inputDtos {
+						<template x-if={ "selectedFilter === '" + inputDto.Id + "'" }>
+							<div class="flex w-full flex-row items-center gap-1.5">
+								<div class="relative w-full">
+									<input
+										type="text"
+										x-model:value={ inputDto.BindValuePath }
+										class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full rounded-md border px-1.5 text-[13px] text-neutral-100 placeholder-transparent outline-none transition-all"
+									/>
+									<i
+										x-show={ inputDto.BindValuePath + " !== ''" }
+										@click.prevent={ inputDto.BindValuePath + " = ''" }
+										class="ph-bold ph-x-circle text-md absolute right-1.5 top-2 cursor-pointer text-neutral-300 hover:text-neutral-50"
+									></i>
+								</div>
+								<button
+									type="button"
+									class="bg-ez-500 hover:bg-ez-300 flex h-6 items-center rounded-lg p-1.5 leading-none"
+									x-show="selectedFilters.length > 1"
+									@click.prevent={ "removeFilterField(selectedFilter); " + inputDto.BindValuePath + " = ''" }
+								>
+									<i class="ph-bold ph-x text-[10px]"></i>
+								</button>
+							</div>
+						</template>
+					}
+				</div>
+			</template>
+			<button
+				type="button"
+				class="bg-infinite-500 hover:bg-infinite-700 h-5 w-5 rounded-sm leading-none"
+				x-show="remainingFilters.length > 0"
+				@click="createFilterField()"
+			>
+				<i class="ph-bold ph-plus text-sm"></i>
+			</button>
+		</div>
+	</div>
+}
