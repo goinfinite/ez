@@ -136,15 +136,28 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 					this.container.launchScript = marketplaceItemEntity.launchScript;
 				}
 			},
+			containersFilters: {
+				accountId: '',
+				containerId: '',
+			},
 			containersPagination: {
 				pageNumber: containersCurrentPageNumber,
 				itemsPerPage: 5,
 			},
 			reloadContainersTable() {
+				queryParams = new URLSearchParams();
+				queryParams.set('containersPageNumber', this.containersPagination.pageNumber);
+				queryParams.set('containersItemsPerPage', this.containersPagination.itemsPerPage);
+
+				for (const [filterKey, filterValue] of Object.entries(this.containersFilters)) {
+					if (filterValue === '') {
+						continue;
+					}
+					queryParams.set(filterKey, filterValue);
+				}
+
 				htmx.ajax(
-					'GET',
-					'/overview/?containersPageNumber=' + this.containersPagination.pageNumber +
-					'&containersItemsPerPage=' + this.containersPagination.itemsPerPage,
+					'GET', '/overview/?' + queryParams.toString(),
 					{
 						select: '#containers-table',
 						target: '#containers-table',
@@ -316,6 +329,15 @@ templ ContainersTable(
 		hx-swap="outerHTML transition:true"
 		x-init.debounce.500ms="$watch('containersPagination', value => reloadContainersTable())"
 	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.RecordFilters(
+				"containersFilters",
+				[]componentStructural.RecordFilterDto{
+					{Id: "containerId", Label: "ContainerId", BindValuePath: "containersFilters.containerId"},
+					{Id: "accountId", Label: "AccountId", BindValuePath: "containersFilters.accountId"},
+				},
+			)
+		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
 		>
