@@ -16,6 +16,10 @@ func readPaginationPageNumbers(paginationDto dto.Pagination) []int {
 		countEnd = countStart + sidePageCount*2
 	}
 
+	if paginationDto.PagesTotal == nil {
+		return []int{0}
+	}
+
 	pagesTotal := int(*paginationDto.PagesTotal)
 	if countEnd >= pagesTotal {
 		countEnd = pagesTotal - 1
@@ -62,7 +66,7 @@ templ Pagination(
 					{ strconv.Itoa(pageNumber) }
 				</a>
 			}
-			if paginationDto.PageNumber < *paginationDto.PagesTotal-1 {
+			if paginationDto.PagesTotal != nil && paginationDto.PageNumber < *paginationDto.PagesTotal-1 {
 				<a
 					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px] leading-tight"
 					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)+1) + "; $dispatch('update:" + componentId + "-pagination')" }
