@@ -274,6 +274,96 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 				this.closeDeleteContainerModal();
 			},
 		}))
+
+		Alpine.data('resourceUsage', () => ({
+			networkChartTabSelected: 'io',
+			storageChartTabSelected: 'io',
+			cpuMemoryChartData: {},
+			networkIoChartData: {},
+			networkPacketsChartData: {},
+			networkErrorsChartData: {},
+			storageIoChartData: {},
+			storageIopsChartData: {},
+			storageSpaceChartData: {},
+			storageInodesChartData: {},
+			resetState() {
+				this.cpuMemoryChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'CPU', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Memory', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.networkIoChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Received', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Transmitted', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.networkPacketsChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Received', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Transmitted', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.networkErrorsChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Received', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Transmitted', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.storageIoChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Read', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Write', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.storageIopsChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Read', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Write', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.storageSpaceChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Used', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Free', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+				this.storageInodesChartData = {
+					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
+					datasets: [
+						{'label': 'Used', 'data': [0.1, 0.2, 0.1]},
+						{'label': 'Free', 'data': [0.2, 0.1, 0.2]},
+					],
+				};
+			},
+			init() {
+				this.resetState();
+				const cpuMemoryChartRef = this.$refs.cpuMemoryChart;
+				new Chart(cpuMemoryChartRef, {type: 'line', data: this.cpuMemoryChartData});
+				const networkIoChartRef = this.$refs.networkIoChart;
+				new Chart(networkIoChartRef, {type: 'line', data: this.networkIoChartData});
+				const networkPacketsChartRef = this.$refs.networkPacketsChart;
+				new Chart(networkPacketsChartRef, {type: 'line', data: this.networkPacketsChartData});
+				const networkErrorsChartRef = this.$refs.networkErrorsChart;
+				new Chart(networkErrorsChartRef, {type: 'line', data: this.networkErrorsChartData});
+				const storageIoChartRef = this.$refs.storageIoChart;
+				new Chart(storageIoChartRef, {type: 'line', data: this.storageIoChartData});
+				const storageIopsChartRef = this.$refs.storageIopsChart;
+				new Chart(storageIopsChartRef, {type: 'line', data: this.storageIopsChartData});
+				const storageSpaceChartRef = this.$refs.storageSpaceChart;
+				new Chart(storageSpaceChartRef, {type: 'line', data: this.storageSpaceChartData});
+				const storageInodesChartRef = this.$refs.storageInodesChart;
+				new Chart(storageInodesChartRef, {type: 'line', data: this.storageInodesChartData});
+			}
+		}))
 	})
 }
 
@@ -319,7 +409,9 @@ templ OverviewIndex(
 				"delete-container", "container.hostname", "container.id",
 			)
 		</div>
-		<div id="resource-usage-graphs" class="card w-full"></div>
+		<div id="resource-usage-charts" class="card w-full" x-data="resourceUsage">
+			@ResourceUsageCharts()
+		</div>
 		<div id="system-information" class="card w-full"></div>
 	</div>
 }
@@ -677,4 +769,61 @@ templ UpdateContainerModal(
 	) {
 		@UpdateContainerForm(containerProfileSearchableItems)
 	}
+}
+
+templ ResourceUsageCharts() {
+	<div class="bg-ez-800 mt-4 rounded-md p-4">
+		@componentStructural.PageSubHeading("Resource Usage", "", "ph-chart-line")
+		<div class="flex flex-row flex-wrap items-center justify-between gap-2">
+			<div class="max-w-[32%]">
+				<canvas x-ref="cpuMemoryChart" class="max-w-90 max-h-64"></canvas>
+			</div>
+			<div class="max-w-[32%]">
+				@componentStructural.HorizontalTabHeader(
+					[]componentStructural.TabHeaderItem{
+						{Label: "Network IO", Value: "io"},
+						{Label: "Packets", Value: "packets"},
+						{Label: "Errors", Value: "errors"},
+					},
+					"networkChartTabSelected",
+				)
+				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-2">
+					<div x-show="networkChartTabSelected === 'io'">
+						<canvas x-ref="networkIoChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+					<div x-show="networkChartTabSelected === 'packets'">
+						<canvas x-ref="networkPacketsChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+					<div x-show="networkChartTabSelected === 'errors'">
+						<canvas x-ref="networkErrorsChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+				</div>
+			</div>
+			<div class="max-w-[32%]">
+				@componentStructural.HorizontalTabHeader(
+					[]componentStructural.TabHeaderItem{
+						{Label: "Storage IO", Value: "io"},
+						{Label: "IOPS", Value: "iops"},
+						{Label: "Space", Value: "space"},
+						{Label: "Inodes", Value: "inodes"},
+					},
+					"storageChartTabSelected",
+				)
+				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-2">
+					<div x-show="storageChartTabSelected === 'io'">
+						<canvas x-ref="storageIoChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+					<div x-show="storageChartTabSelected === 'iops'">
+						<canvas x-ref="storageIopsChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+					<div x-show="storageChartTabSelected === 'space'">
+						<canvas x-ref="storageSpaceChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+					<div x-show="storageChartTabSelected === 'inodes'">
+						<canvas x-ref="storageInodesChart" class="max-w-90 max-h-64"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 }
