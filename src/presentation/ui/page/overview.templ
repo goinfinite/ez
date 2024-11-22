@@ -156,7 +156,8 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 				queryParams.set('containersPageNumber', this.containersPagination.pageNumber);
 				queryParams.set('containersItemsPerPage', this.containersPagination.itemsPerPage);
 
-				for (const [filterKey, filterValue] of Object.entries(this.containersFilters)) {
+				for (let [filterKey, filterValue] of Object.entries(this.containersFilters)) {
+					filterValue = filterValue.trim();
 					if (filterValue === '') {
 						continue;
 					}
