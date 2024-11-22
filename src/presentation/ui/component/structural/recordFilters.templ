@@ -1,52 +1,29 @@
 package componentStructural
 
-script RecordFiltersLocalState(componentId string) {
-	document.addEventListener('alpine:init', () => {
-		Alpine.data(componentId+'RecordFilters', () => ({
-			visibleFilterIndexes: [],
-			resetState() {
-				this.visibleFilterIndexes = [];
-			},
-      createFilterField() {
-				this.visibleFilterIndexes.push(this.visibleFilterIndexes.length);
-      },
-      removeFilterField(filterIndex) {
-				this.visibleFilterIndexes = this.visibleFilterIndexes.filter(
-					(index) => index !== filterIndex,
-				);
-      },
-			init() {
-				this.resetState();
-			},
-		}));
-	});
-}
-
 templ RecordFilters(componentId, filtersBindPath string) {
-	<!-- RecordFilters JavaScript -->
-	@RecordFiltersLocalState(componentId)
-	<!-- RecordFilters HTML -->
-	<div class="flex flex-row items-center justify-start" x-data={ componentId + "RecordFilters" }>
+	<!-- RecordFilters -->
+	<div class="flex flex-row items-center justify-start gap-1.5">
 		<div class="flex flex-row flex-wrap items-center gap-2">
 			<template x-for={ "(filterKey, filterIndex) in Object.keys(" + filtersBindPath + ")" }>
-				<!-- FilterField HTML -->
+				<!-- FilterField -->
 				<div
 					class="bg-ez-400 flex flex-row items-center gap-1.5 rounded-xl p-2"
 					x-data="{selectedFilterKey: filterKey}"
-					x-show={ "visibleFilterIndexes.includes(filterIndex) || " + filtersBindPath + "[selectedFilterKey] !== ''" }
+					x-show={ filtersBindPath + "[filterKey] !== ''" }
 				>
 					<div class="relative w-full">
 						<select
 							x-model="selectedFilterKey"
+							x-init={ "$watch('selectedFilterKey', (newFilterKey, oldFilterKey) => { if (newFilterKey !== oldFilterKey) { " + filtersBindPath + "[oldFilterKey] = '';" + filtersBindPath + "[newFilterKey] = ' '} })" }
 							placeholder="filter"
 							class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
 						>
-							<template x-for={ "optionsFilterKey in Object.keys(" + filtersBindPath + ")" }>
+							<template x-for={ "remainingFilterKey in Object.keys(" + filtersBindPath + ")" }>
 								<option
 									class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90"
-									:value="optionsFilterKey"
-									x-text="optionsFilterKey"
-									:selected="selectedFilterKey === optionsFilterKey"
+									:value="remainingFilterKey"
+									x-text="remainingFilterKey"
+									:selected={ "remainingFilterKey === selectedFilterKey" }
 								></option>
 							</template>
 						</select>
@@ -56,22 +33,15 @@ templ RecordFilters(componentId, filtersBindPath string) {
 						<i class="ph-bold ph-caret-down pointer-events-none absolute right-2 top-3 text-xs"></i>
 					</div>
 					<div class="flex w-full flex-row items-center gap-1.5">
-						<div class="relative w-full">
-							<input
-								type="text"
-								x-model:value={ filtersBindPath + "[selectedFilterKey]" }
-								class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-7.5 min-w-38 peer relative w-full rounded-md border px-1.5 text-[13px] text-neutral-100 placeholder-transparent outline-none transition-all"
-							/>
-							<i
-								x-show={ filtersBindPath + "[selectedFilterKey] !== ''" }
-								@click.prevent={ filtersBindPath + "[selectedFilterKey] = ''" }
-								class="ph-bold ph-x-circle text-md absolute right-1.5 top-2 cursor-pointer text-neutral-300 hover:text-neutral-50"
-							></i>
-						</div>
+						<input
+							type="text"
+							x-model:value={ filtersBindPath + "[selectedFilterKey]" }
+							class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-7.5 min-w-38 peer relative w-full rounded-md border px-1.5 text-[13px] text-neutral-100 placeholder-transparent outline-none transition-all"
+						/>
 						<button
 							type="button"
 							class="bg-ez-500 hover:bg-ez-300 flex h-6 items-center rounded-lg p-1.5 leading-none"
-							@click={ filtersBindPath + "[selectedFilterKey] = ''; removeFilterField(filterIndex)" }
+							@click={ filtersBindPath + "[selectedFilterKey] = ''" }
 						>
 							<i class="ph-bold ph-x text-[10px]"></i>
 						</button>
@@ -81,21 +51,30 @@ templ RecordFilters(componentId, filtersBindPath string) {
 		</div>
 		<button
 			type="button"
-			class="bg-ez-400 hover:bg-ez-300 h-6.5 ml-1 flex items-center rounded-lg p-1.5 leading-none"
-			x-show={ "visibleFilterIndexes.length < Object.keys(" + filtersBindPath + ").length" }
-			@click="createFilterField()"
+			class="bg-ez-400 hover:bg-ez-300 h-6.5 flex items-center rounded-lg p-1.5 leading-none"
+			x-show={ "!Object.values(" + filtersBindPath + ").every((value) => value !== '')" }
+			@click={ "Object.keys(" + filtersBindPath + ").some((filterKey) => { if (" + filtersBindPath + "[filterKey] === '') { " + filtersBindPath + "[filterKey] = ' '; return true; } })" }
 		>
-			<i class="ph-bold ph-funnel text-xs" x-show={ "visibleFilterIndexes.length === 0 && Object.values(" + filtersBindPath + ").some((value) => value === '')" }></i>
-			<i class="ph-bold ph-plus text-xs" x-show={ "visibleFilterIndexes.length > 0 || Object.values(" + filtersBindPath + ").some((value) => value !== '')" }></i>
+			<i class="ph-bold ph-plus text-xs" x-show={ "Object.values(" + filtersBindPath + ").some((value) => value !== '')" }></i>
+			<i class="ph-bold ph-funnel text-xs" x-show={ "Object.values(" + filtersBindPath + ").every((value) => value === '')" }></i>
 		</button>
 		<button
 			type="button"
-			class="bg-ez-400 hover:bg-ez-200 ml-1 flex h-7 flex-row items-center rounded-md px-2 text-sm leading-none"
+			class="flex h-7 flex-row items-center rounded-md bg-cyan-900 px-2 text-sm leading-none hover:bg-cyan-700"
 			@click={ "$dispatch('update:" + componentId + "-record-filters')" }
-			x-show={ "visibleFilterIndexes.length > 0 || Object.values(" + filtersBindPath + ").some((value) => value !== '')" }
+			x-show={ "Object.values(" + filtersBindPath + ").some((value) => value !== '')" }
 		>
 			<i class="ph-duotone ph-funnel text-md mr-1 align-middle"></i>
 			apply
+		</button>
+		<button
+			type="button"
+			class="flex h-7 flex-row items-center rounded-md bg-yellow-900 px-2 text-sm leading-none hover:bg-yellow-700"
+			@click={ "Object.keys(" + filtersBindPath + ").forEach((filterKey) => { " + filtersBindPath + "[filterKey] = '' }); $dispatch('update:" + componentId + "-record-filters')" }
+			x-show={ "Object.values(" + filtersBindPath + ").some((value) => value !== '')" }
+		>
+			<i class="ph-duotone ph-broom text-md mr-1 align-middle"></i>
+			clear all
 		</button>
 	</div>
 }
