@@ -2,33 +2,65 @@ package componentContainer
 
 import componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 
-templ ContainerTaggedSummary(containerSummary ContainerSummary) {
+templ ContainerTaggedSummary(containerSummary ContainerSummary, filtersBindPath string) {
 	<div class="p-1.5">
 		<div>
 			<strong>{ containerSummary.Hostname.String() }</strong>
 			<small>({ containerSummary.ContainerId.String() })</small>
 		</div>
 		<div class="mt-1 flex flex-wrap justify-normal gap-2">
-			@componentMisc.Tag(
-				"ph-link", "", containerSummary.ImageAddress.String(), "infinite-500",
-			)
-			@componentMisc.Tag(
-				"ph-user-circle", "", containerSummary.AccountUsername.String(), "infinite-500",
-			)
-			if containerSummary.ProfileMaxSpecs == nil {
+			if filtersBindPath == "" {
 				@componentMisc.Tag(
-					"", containerSummary.ProfileName.String(),
-					"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+"</small>",
-					"infinite-500",
+					"ph-link", "", containerSummary.ImageAddress.String(), "infinite-500",
 				)
 			} else {
-				@componentMisc.Tag(
-					"", containerSummary.ProfileName.String(),
-					"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+
-						"<i class='ph-bold ph-arrows-out-simple mx-1'></i>"+
-						formatProfileTaggedSmallSummary(containerSummary.ProfileMaxSpecs)+"</small>",
-					"infinite-500",
+				@componentMisc.TagWithFilter(
+					"ph-link", "", containerSummary.ImageAddress.String(),
+					containerSummary.ImageAddress.String(), filtersBindPath+"['imageAddress']", "infinite-500",
 				)
+			}
+			if filtersBindPath == "" {
+				@componentMisc.Tag(
+					"ph-user-circle", "", containerSummary.AccountUsername.String(), "infinite-500",
+				)
+			} else {
+				@componentMisc.TagWithFilter(
+					"ph-user-circle", "", containerSummary.AccountUsername.String(),
+					containerSummary.AccountId.String(), filtersBindPath+"['accountId']", "infinite-500",
+				)
+			}
+			if containerSummary.ProfileMaxSpecs == nil {
+				if filtersBindPath == "" {
+					@componentMisc.Tag(
+						"", containerSummary.ProfileName.String(),
+						"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+"</small>",
+						"infinite-500",
+					)
+				} else {
+					@componentMisc.TagWithFilter(
+						"", containerSummary.ProfileName.String(),
+						"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+"</small>",
+						containerSummary.ProfileId.String(), filtersBindPath+"['profileId']", "infinite-500",
+					)
+				}
+			} else {
+				if filtersBindPath == "" {
+					@componentMisc.Tag(
+						"", containerSummary.ProfileName.String(),
+						"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+
+							"<i class='ph-bold ph-arrows-out-simple mx-1'></i>"+
+							formatProfileTaggedSmallSummary(containerSummary.ProfileMaxSpecs)+"</small>",
+						"infinite-500",
+					)
+				} else {
+					@componentMisc.TagWithFilter(
+						"", containerSummary.ProfileName.String(),
+						"<small>"+formatProfileTaggedSmallSummary(&containerSummary.ProfileBaseSpecs)+
+							"<i class='ph-bold ph-arrows-out-simple mx-1'></i>"+
+							formatProfileTaggedSmallSummary(containerSummary.ProfileMaxSpecs)+"</small>",
+						containerSummary.ProfileId.String(), filtersBindPath+"['profileId']", "infinite-500",
+					)
+				}
 			}
 		</div>
 	</div>
