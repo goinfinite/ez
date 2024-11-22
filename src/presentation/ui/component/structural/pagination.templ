@@ -78,11 +78,12 @@ templ Pagination(
 		<div class="w-32">
 			@componentForm.SelectInput(
 				componentForm.SelectInputDto{
-					Id:            "itemsPerPage",
-					Label:         "items per page",
-					BindValuePath: selectedItemsPerPageBindValuePath,
-					Options:       []string{"5", "10", "30", "50"},
-					DenseMode:     true,
+					Id:                "itemsPerPage",
+					Label:             "items per page",
+					BindValuePath:     selectedItemsPerPageBindValuePath,
+					Options:           []string{"5", "10", "30", "50"},
+					DenseMode:         true,
+					DispatchEventName: "update:" + componentId + "-pagination",
 				},
 			)
 		</div>

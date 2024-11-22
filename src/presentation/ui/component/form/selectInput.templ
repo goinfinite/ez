@@ -10,6 +10,7 @@ type SelectInputDto struct {
 	IsRequired               bool
 	DenseMode                bool
 	ShouldIncludeBlankOption bool
+	DispatchEventName        string
 }
 
 templ SelectInput(inputDto SelectInputDto) {
@@ -33,6 +34,9 @@ templ SelectInput(inputDto SelectInputDto) {
 				class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
 			} else {
 				class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			}
+			if inputDto.DispatchEventName != "" {
+				@change={ "$dispatch('" + inputDto.DispatchEventName + "')" }
 			}
 		>
 			if inputDto.ShouldIncludeBlankOption {
