@@ -56,7 +56,7 @@ func (presenter *ContainerImagePresenter) transformContainerSummariesIntoSearcha
 
 	for _, containerSummary := range containerSummaries {
 		searchableTextSerialized := containerSummary.JsonSerialize()
-		htmlLabel := componentContainer.ContainerTaggedSummary(containerSummary)
+		htmlLabel := componentContainer.ContainerTaggedSummary(containerSummary, "")
 
 		searchableSelectItem := componentForm.SearchableSelectItem{
 			Label:          containerSummary.Hostname.String(),

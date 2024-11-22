@@ -361,7 +361,9 @@ templ ContainersTable(
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("containerEntity_"+containerEntity.Id.String(), containerEntity)
 						<td class="w-[40%] overflow-x-hidden px-3 py-2 text-left">
-							@componentContainer.ContainerTaggedSummary(containerIdSummariesMap[containerEntity.Id])
+							@componentContainer.ContainerTaggedSummary(
+								containerIdSummariesMap[containerEntity.Id], "containersFilters",
+							)
 						</td>
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
 							@componentMisc.ProgressBar(
