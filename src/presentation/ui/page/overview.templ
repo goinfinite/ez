@@ -276,92 +276,183 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 		}))
 
 		Alpine.data('resourceUsage', () => ({
+			// Primary State
 			networkChartTabSelected: 'io',
 			storageChartTabSelected: 'io',
-			cpuMemoryChartData: {},
-			networkIoChartData: {},
-			networkPacketsChartData: {},
-			networkErrorsChartData: {},
-			storageIoChartData: {},
-			storageIopsChartData: {},
-			storageSpaceChartData: {},
-			storageInodesChartData: {},
-			resetState() {
-				this.cpuMemoryChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'CPU', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Memory', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.networkIoChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Received', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Transmitted', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.networkPacketsChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Received', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Transmitted', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.networkErrorsChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Received', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Transmitted', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.storageIoChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Read', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Write', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.storageIopsChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Read', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Write', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.storageSpaceChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Used', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Free', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
-				this.storageInodesChartData = {
-					labels: ["2024-11-22-15:00:00", "2024-11-22-15:50:00", "2024-11-22-15:10:00"],
-					datasets: [
-						{'label': 'Used', 'data': [0.1, 0.2, 0.1]},
-						{'label': 'Free', 'data': [0.2, 0.1, 0.2]},
-					],
-				};
+			cpuMemoryChart: {
+				chartObject: null,
+				seriesNames: ['cpu', 'memory'],
+				seriesObjects: {},
 			},
+			networkIoChart: {
+				chartObject: null,
+				seriesNames: ['rx', 'tx'],
+				seriesObjects: {},
+			},
+			networkPacketsChart: {
+				chartObject: null,
+				seriesNames: ['vrx', 'vtx', 'drx', 'dtx'],
+				seriesObjects: {},
+			},
+			networkErrorsChart: {
+				chartObject: null,
+				seriesNames: ['rx', 'tx'],
+				seriesObjects: {},
+			},
+			storageIoChart: {
+				chartObject: null,
+				seriesNames: ['read', 'write'],
+				seriesObjects: {},
+			},
+			storageIopsChart: {
+				chartObject: null,
+				seriesNames: ['read', 'write'],
+				seriesObjects: {},
+			},
+			storageSpaceChart: {
+				chartObject: null,
+				seriesNames: ['used'],
+				seriesObjects: {},
+			},
+			storageInodesChart: {
+				chartObject: null,
+				seriesNames: ['used', 'free'],
+				seriesObjects: {},
+			},
+
+			// Auxiliary State
+			chartOptions: {
+				layout: {
+					textColor: 'white',
+					background: { type: 'solid', color: 'transparent' },
+					fontFamily: "Lato, sans-serif",
+					attributionLogo: false,
+				},
+				width: 350,
+				height: 250,
+				autoSize: false,
+				timeScale: { timeVisible: true },
+				grid: { vertLines: { color: '#ffffff1a' }, horzLines: { color: '#ffffff1a' } },
+			},
+			chartSeriesOptions: {
+				0: { lineColor: '#6628d9', topColor: '#6628d9', bottomColor: 'rgb(46 16 101 / 30%)' },
+				1: { lineColor: '#b31d3f', topColor: '#b31d3f', bottomColor: 'rgb(72 9 26 / 30%)' },
+				2: { lineColor: '#a16207', topColor: '#a16207', bottomColor: 'rgb(66 32 6 / 30%)' },
+				3: { lineColor: '#1d4ed8', topColor: '#1d4ed8', bottomColor: 'rgb(23 37 84 / 30%)' },
+			},
+			async readO11yOverview() {
+				const o11yOverview = await fetch("/api/v1/o11y/overview/", {
+					method: "GET",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+					},
+				})
+					.then((apiResponse) => {
+						if (!apiResponse.ok) {
+							throw new Error('BadHttpResponseCode: ' + apiResponse.status);
+						}
+
+						return apiResponse.json();
+					})
+					.then((jsonResponse) => {
+						return jsonResponse.body;
+					})
+					.catch((error) => {
+						console.error(id+'ReadO11yOverviewError: ', error);
+						return [];
+					});
+
+				const nowUnixTime = Date.now() / 1000;
+				this.cpuMemoryChart.seriesObjects.cpu.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.cpuPercent },
+				)
+				this.cpuMemoryChart.seriesObjects.memory.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.memoryPercent },
+				)
+				let rxMebibytes = o11yOverview.resourceUsage.netInfoAggregated.recvBytes / 1024 / 1024;
+				if (rxMebibytes < 1) {
+					rxMebibytes = 0;
+				}
+				this.networkIoChart.seriesObjects.rx.update(
+					{ time: nowUnixTime, value: rxMebibytes },
+				)
+				let txMebibytes = o11yOverview.resourceUsage.netInfoAggregated.sentBytes / 1024 / 1024;
+				if (txMebibytes < 1) {
+					txMebibytes = 0;
+				}
+				this.networkIoChart.seriesObjects.tx.update(
+					{ time: nowUnixTime, value: txMebibytes },
+				)
+				this.networkPacketsChart.seriesObjects.vrx.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.netInfoAggregated.recvPackets },
+				)
+				this.networkPacketsChart.seriesObjects.vtx.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.netInfoAggregated.sentPackets },
+				)
+				this.networkPacketsChart.seriesObjects.drx.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.netInfoAggregated.recvDropPackets },
+				)
+				this.networkPacketsChart.seriesObjects.dtx.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.netInfoAggregated.sentDropPackets },
+				)
+				this.networkErrorsChart.seriesObjects.rx.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.netInfoAggregated.recvErrs },
+				)
+				this.networkErrorsChart.seriesObjects.tx.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.netInfoAggregated.sentErrs },
+				)
+				let readMebibytes = o11yOverview.resourceUsage.userDataStorageInfo.readBytes / 1024 / 1024;
+				if (readMebibytes < 1) {
+					readMebibytes = 0;
+				}
+				this.storageIoChart.seriesObjects.read.update(
+					{ time: nowUnixTime, value: readMebibytes },
+				)
+				let writeMebibytes = o11yOverview.resourceUsage.userDataStorageInfo.writeBytes / 1024 / 1024;
+				if (writeMebibytes < 1) {
+					writeMebibytes = 0;
+				}
+				this.storageIoChart.seriesObjects.write.update(
+					{ time: nowUnixTime, value: writeMebibytes },
+				)
+				this.storageIopsChart.seriesObjects.read.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.userDataStorageInfo.readOpsCount },
+				)
+				this.storageIopsChart.seriesObjects.write.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.userDataStorageInfo.writeOpsCount },
+				)
+				this.storageSpaceChart.seriesObjects.used.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.userDataStorageInfo.usedPercent },
+				)
+				this.storageInodesChart.seriesObjects.used.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.userDataStorageInfo.usedInodes },
+				)
+				this.storageInodesChart.seriesObjects.free.update(
+					{ time: nowUnixTime, value: o11yOverview.resourceUsage.userDataStorageInfo.freeInodes },
+				)
+			},
+
 			init() {
-				this.resetState();
-				const cpuMemoryChartRef = this.$refs.cpuMemoryChart;
-				new Chart(cpuMemoryChartRef, {type: 'line', data: this.cpuMemoryChartData});
-				const networkIoChartRef = this.$refs.networkIoChart;
-				new Chart(networkIoChartRef, {type: 'line', data: this.networkIoChartData});
-				const networkPacketsChartRef = this.$refs.networkPacketsChart;
-				new Chart(networkPacketsChartRef, {type: 'line', data: this.networkPacketsChartData});
-				const networkErrorsChartRef = this.$refs.networkErrorsChart;
-				new Chart(networkErrorsChartRef, {type: 'line', data: this.networkErrorsChartData});
-				const storageIoChartRef = this.$refs.storageIoChart;
-				new Chart(storageIoChartRef, {type: 'line', data: this.storageIoChartData});
-				const storageIopsChartRef = this.$refs.storageIopsChart;
-				new Chart(storageIopsChartRef, {type: 'line', data: this.storageIopsChartData});
-				const storageSpaceChartRef = this.$refs.storageSpaceChart;
-				new Chart(storageSpaceChartRef, {type: 'line', data: this.storageSpaceChartData});
-				const storageInodesChartRef = this.$refs.storageInodesChart;
-				new Chart(storageInodesChartRef, {type: 'line', data: this.storageInodesChartData});
+				const chartNames = [
+					'cpuMemoryChart', 'networkIoChart', 'networkPacketsChart',
+					'networkErrorsChart', 'storageIoChart', 'storageIopsChart',
+					'storageSpaceChart', 'storageInodesChart',
+				];
+				for (const chartName of chartNames) {
+					const domRef = this.$refs[chartName];
+					if (domRef === undefined) {
+						continue;
+					}
+
+					this[chartName].chartObject = LightweightCharts.createChart(domRef, this.chartOptions);
+					for (const [seriesIndex, seriesName] of this[chartName].seriesNames.entries()) {
+						this[chartName].seriesObjects[seriesName] = this[chartName].chartObject.addAreaSeries(
+							this.chartSeriesOptions[seriesIndex],
+						);
+					}
+					this[chartName].chartObject.timeScale().fitContent();
+				}
 			}
 		}))
 	})
@@ -409,7 +500,11 @@ templ OverviewIndex(
 				"delete-container", "container.hostname", "container.id",
 			)
 		</div>
-		<div id="resource-usage-charts" class="card w-full" x-data="resourceUsage">
+		<div
+			id="resource-usage-charts"
+			class="card w-full"
+			x-data="resourceUsage"
+		>
 			@ResourceUsageCharts()
 		</div>
 		<div id="system-information" class="card w-full"></div>
@@ -771,14 +866,42 @@ templ UpdateContainerModal(
 	}
 }
 
-templ ResourceUsageCharts() {
-	<div class="bg-ez-800 mt-4 rounded-md p-4">
-		@componentStructural.PageSubHeading("Resource Usage", "", "ph-chart-line")
-		<div class="flex flex-row flex-wrap items-center justify-between gap-2">
-			<div class="max-w-[32%]">
-				<canvas x-ref="cpuMemoryChart" class="max-w-90 max-h-64"></canvas>
+templ ChartLegend(firstSeriesName, secondSeriesName, thirdSeriesName, fourthSeriesName string) {
+	<div class="my-2 flex cursor-not-allowed flex-row items-center gap-2 text-[11px] text-neutral-300">
+		<div class="flex flex-row items-center gap-1">
+			<span class="h-4 w-4 rounded-full border-2 border-purple-700 bg-purple-950"></span>
+			{ firstSeriesName }
+		</div>
+		if secondSeriesName != "" {
+			<div class="flex flex-row items-center gap-1">
+				<span class="h-4 w-4 rounded-full border-2 border-pink-700 bg-pink-950"></span>
+				{ secondSeriesName }
 			</div>
-			<div class="max-w-[32%]">
+		}
+		if thirdSeriesName != "" {
+			<div class="flex flex-row items-center gap-1">
+				<span class="h-4 w-4 rounded-full border-2 border-yellow-700 bg-yellow-950"></span>
+				{ thirdSeriesName }
+			</div>
+		}
+		if fourthSeriesName != "" {
+			<div class="flex flex-row items-center gap-1">
+				<span class="h-4 w-4 rounded-full border-2 border-blue-700 bg-blue-950"></span>
+				{ fourthSeriesName }
+			</div>
+		}
+	</div>
+}
+
+templ ResourceUsageCharts() {
+	<div class="bg-ez-800 mt-4 rounded-md p-4" x-init="readO11yOverview()">
+		@componentStructural.PageSubHeading("Resource Usage", "", "ph-chart-line")
+		<div class="grid grid-cols-3 items-center justify-center gap-2">
+			<div>
+				@ChartLegend("CPU (%)", "Memory (%)", "", "")
+				<div x-ref="cpuMemoryChart" class="flex justify-center"></div>
+			</div>
+			<div>
 				@componentStructural.HorizontalTabHeader(
 					[]componentStructural.TabHeaderItem{
 						{Label: "Network IO", Value: "io"},
@@ -787,19 +910,25 @@ templ ResourceUsageCharts() {
 					},
 					"networkChartTabSelected",
 				)
-				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-2">
+				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-3">
 					<div x-show="networkChartTabSelected === 'io'">
-						<canvas x-ref="networkIoChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend("Received (MiB/s)", "Transmitted (MiB/s)", "", "")
+						<div x-ref="networkIoChart" class="flex justify-center"></div>
 					</div>
 					<div x-show="networkChartTabSelected === 'packets'">
-						<canvas x-ref="networkPacketsChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend(
+							"Successfully Received", "Successfully Transmitted",
+							"Dropped Received", "Dropped Transmitted",
+						)
+						<div x-ref="networkPacketsChart" class="flex justify-center"></div>
 					</div>
 					<div x-show="networkChartTabSelected === 'errors'">
-						<canvas x-ref="networkErrorsChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend("Received", "Transmitted", "", "")
+						<div x-ref="networkErrorsChart" class="flex justify-center"></div>
 					</div>
 				</div>
 			</div>
-			<div class="max-w-[32%]">
+			<div>
 				@componentStructural.HorizontalTabHeader(
 					[]componentStructural.TabHeaderItem{
 						{Label: "Storage IO", Value: "io"},
@@ -809,21 +938,28 @@ templ ResourceUsageCharts() {
 					},
 					"storageChartTabSelected",
 				)
-				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-2">
+				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-3">
 					<div x-show="storageChartTabSelected === 'io'">
-						<canvas x-ref="storageIoChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend("Read (MiB/s)", "Write (MiB/s)", "", "")
+						<div x-ref="storageIoChart" class="flex justify-center"></div>
 					</div>
 					<div x-show="storageChartTabSelected === 'iops'">
-						<canvas x-ref="storageIopsChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend("Read (Op/s)", "Write (Op/s)", "", "")
+						<div x-ref="storageIopsChart" class="flex justify-center"></div>
 					</div>
 					<div x-show="storageChartTabSelected === 'space'">
-						<canvas x-ref="storageSpaceChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend("Used Space (%)", "", "", "")
+						<div x-ref="storageSpaceChart" class="flex justify-center"></div>
 					</div>
 					<div x-show="storageChartTabSelected === 'inodes'">
-						<canvas x-ref="storageInodesChart" class="max-w-90 max-h-64"></canvas>
+						@ChartLegend("Used Inodes", "Free Inodes", "", "")
+						<div x-ref="storageInodesChart" class="flex justify-center"></div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<p class="mt-2 text-right text-[10px] italic text-neutral-500">
+			Charts by <a href="https://www.tradingview.com/" class="hover:underline">TradingView Lightweight Charts™</a>.
+		</p>
 	</div>
 }
