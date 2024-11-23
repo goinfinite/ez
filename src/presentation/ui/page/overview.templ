@@ -320,6 +320,14 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 
 			// Auxiliary State
 			refreshIntervalSecs: 20,
+			sysInfo: {
+				serverHostname: '',
+				cpuModel: '',
+				memoryRamGibibytes: 0,
+				publicIpAddress: '',
+				privateIpAddress: '',
+				uptimeRelative: '',
+			},
 			networkChartTabSelected: 'io',
 			storageChartTabSelected: 'io',
 			chartOptions: {
@@ -432,6 +440,17 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 				this.storageInodesChart.seriesObjects.free.update(
 					{ time: nowUnixTime, value: o11yOverview.resourceUsage.userDataStorageInfo.freeInodes },
 				)
+
+				if (this.sysInfo.serverHostname != "") {
+					return;
+				}
+				this.sysInfo.serverHostname = o11yOverview.hostname;
+				this.sysInfo.cpuModel = o11yOverview.specs.cpuModelName + " // " + o11yOverview.specs.cpuCoresCount + " @ " + o11yOverview.specs.cpuFrequency;
+				const memoryRamGibibytes = o11yOverview.specs.memoryTotalBytes / 1024 / 1024 / 1024;
+				this.sysInfo.memoryRamGibibytes = memoryRamGibibytes.toFixed(1) + " GiB";
+				this.sysInfo.publicIpAddress = o11yOverview.publicIp;
+				this.sysInfo.privateIpAddress = o11yOverview.privateIp;
+				this.sysInfo.uptimeRelative = o11yOverview.uptimeRelative;
 			},
 
 			init() {
@@ -519,14 +538,17 @@ templ OverviewIndex(
 				"delete-container", "container.hostname", "container.id",
 			)
 		</div>
-		<div
-			id="resource-usage-charts"
-			class="card w-full"
-			x-data="resourceUsage"
-		>
-			@ResourceUsageCharts()
+		<div x-data="resourceUsage">
+			<div
+				id="resource-usage-charts"
+				class="card w-full"
+			>
+				@ResourceUsageCharts()
+			</div>
+			<div id="system-information" class="card w-full">
+				@SystemInformation()
+			</div>
 		</div>
-		<div id="system-information" class="card w-full"></div>
 	</div>
 }
 
@@ -914,7 +936,12 @@ templ ChartLegend(firstSeriesName, secondSeriesName, thirdSeriesName, fourthSeri
 
 templ ResourceUsageCharts() {
 	<div class="bg-ez-800 mt-4 rounded-md p-4" x-init.debounce.1s="$nextTick(() => {updateResourceUsageCharts()})">
-		@componentStructural.PageSubHeading("Resource Usage", "", "ph-chart-line")
+		<div class="flex flex-row items-center justify-between">
+			@componentStructural.PageSubHeading("Resource Usage", "", "ph-chart-line")
+			<p class="text-right text-[9px] italic text-neutral-500">
+				charts by <a href="https://www.tradingview.com/" class="hover:underline">TradingView Lightweight Charts™</a>
+			</p>
+		</div>
 		<div class="grid grid-cols-3 items-center justify-center gap-6">
 			<div class="flex flex-col items-center justify-center gap-4">
 				@ChartLegend("CPU (%)", "Memory (%)", "", "")
@@ -998,8 +1025,28 @@ templ ResourceUsageCharts() {
 				</div>
 			</div>
 		</div>
-		<p class="mt-2 text-right text-[9px] italic text-neutral-500">
-			charts by <a href="https://www.tradingview.com/" class="hover:underline">TradingView Lightweight Charts™</a>
-		</p>
+	</div>
+}
+
+templ SystemInformation() {
+	<div class="bg-ez-800 mt-4 grid grid-cols-3 gap-4 rounded-md p-4">
+		@componentForm.InputFieldReadOnly(
+			"text", "hostname", "Server Hostname", "sysInfo.serverHostname",
+		)
+		@componentForm.InputFieldReadOnly(
+			"text", "cpuModel", "CPU", "sysInfo.cpuModel",
+		)
+		@componentForm.InputFieldReadOnly(
+			"text", "memoryRamGibibytes", "Memory (RAM)", "sysInfo.memoryRamGibibytes",
+		)
+		@componentForm.InputFieldReadOnly(
+			"text", "publicIpAddress", "Public IP Address", "sysInfo.publicIpAddress",
+		)
+		@componentForm.InputFieldReadOnly(
+			"text", "privateIpAddress", "Private IP Address", "sysInfo.privateIpAddress",
+		)
+		@componentForm.InputFieldReadOnly(
+			"text", "uptimeRelativeStr", "Server Uptime", "sysInfo.uptimeRelative",
+		)
 	</div>
 }
