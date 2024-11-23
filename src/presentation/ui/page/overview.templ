@@ -277,8 +277,6 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 
 		Alpine.data('resourceUsage', () => ({
 			// Primary State
-			networkChartTabSelected: 'io',
-			storageChartTabSelected: 'io',
 			cpuMemoryChart: {
 				chartObject: null,
 				seriesNames: ['cpu', 'memory'],
@@ -321,6 +319,9 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 			},
 
 			// Auxiliary State
+			refreshIntervalSecs: 20,
+			networkChartTabSelected: 'io',
+			storageChartTabSelected: 'io',
 			chartOptions: {
 				layout: {
 					textColor: 'white',
@@ -331,7 +332,7 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 				width: 350,
 				height: 250,
 				autoSize: false,
-				timeScale: { timeVisible: true },
+				timeScale: { timeVisible: true, barSpacing: 20 },
 				grid: { vertLines: { color: '#ffffff1a' }, horzLines: { color: '#ffffff1a' } },
 			},
 			chartSeriesOptions: {
@@ -340,7 +341,7 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 				2: { lineColor: '#a16207', topColor: '#a16207', bottomColor: 'rgb(66 32 6 / 30%)' },
 				3: { lineColor: '#1d4ed8', topColor: '#1d4ed8', bottomColor: 'rgb(23 37 84 / 30%)' },
 			},
-			async readO11yOverview() {
+			async updateResourceUsageCharts() {
 				const o11yOverview = await fetch("/api/v1/o11y/overview/", {
 					method: "GET",
 					headers: {
@@ -447,12 +448,30 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 
 					this[chartName].chartObject = LightweightCharts.createChart(domRef, this.chartOptions);
 					for (const [seriesIndex, seriesName] of this[chartName].seriesNames.entries()) {
+						let seriesOptions = this.chartSeriesOptions[seriesIndex];
+						if (chartName === 'cpuMemoryChart' || chartName === 'storageSpaceChart') {
+							seriesOptions = Object.assign({}, seriesOptions);
+							seriesOptions.priceFormat = {
+								type: 'percent',
+								precision: 1,
+							};
+							seriesOptions.autoscaleInfoProvider = () => ({
+								priceRange: {
+									minValue: 0,
+									maxValue: 80,
+								},
+							});
+						}
+
 						this[chartName].seriesObjects[seriesName] = this[chartName].chartObject.addAreaSeries(
-							this.chartSeriesOptions[seriesIndex],
+							seriesOptions,
 						);
 					}
-					this[chartName].chartObject.timeScale().fitContent();
 				}
+
+				setInterval(() => {
+					this.updateResourceUsageCharts();
+				}, parseInt(this.refreshIntervalSecs) * 1000);
 			}
 		}))
 	})
@@ -867,7 +886,7 @@ templ UpdateContainerModal(
 }
 
 templ ChartLegend(firstSeriesName, secondSeriesName, thirdSeriesName, fourthSeriesName string) {
-	<div class="my-2 flex cursor-not-allowed flex-row items-center gap-2 text-[11px] text-neutral-300">
+	<div class="flex cursor-not-allowed flex-row items-center gap-2 text-[11px] text-neutral-300">
 		<div class="flex flex-row items-center gap-1">
 			<span class="h-4 w-4 rounded-full border-2 border-purple-700 bg-purple-950"></span>
 			{ firstSeriesName }
@@ -894,10 +913,10 @@ templ ChartLegend(firstSeriesName, secondSeriesName, thirdSeriesName, fourthSeri
 }
 
 templ ResourceUsageCharts() {
-	<div class="bg-ez-800 mt-4 rounded-md p-4" x-init="readO11yOverview()">
+	<div class="bg-ez-800 mt-4 rounded-md p-4" x-init.debounce.1s="$nextTick(() => {updateResourceUsageCharts()})">
 		@componentStructural.PageSubHeading("Resource Usage", "", "ph-chart-line")
-		<div class="grid grid-cols-3 items-center justify-center gap-2">
-			<div>
+		<div class="grid grid-cols-3 items-center justify-center gap-6">
+			<div class="flex flex-col items-center justify-center gap-4">
 				@ChartLegend("CPU (%)", "Memory (%)", "", "")
 				<div x-ref="cpuMemoryChart" class="flex justify-center"></div>
 			</div>
@@ -910,21 +929,30 @@ templ ResourceUsageCharts() {
 					},
 					"networkChartTabSelected",
 				)
-				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-3">
-					<div x-show="networkChartTabSelected === 'io'">
+				<div class="bg-ez-500 rounded-lb-md rounded-r-md px-2 py-4">
+					<div
+						x-show="networkChartTabSelected === 'io'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend("Received (MiB/s)", "Transmitted (MiB/s)", "", "")
-						<div x-ref="networkIoChart" class="flex justify-center"></div>
+						<div x-ref="networkIoChart"></div>
 					</div>
-					<div x-show="networkChartTabSelected === 'packets'">
+					<div
+						x-show="networkChartTabSelected === 'packets'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend(
 							"Successfully Received", "Successfully Transmitted",
 							"Dropped Received", "Dropped Transmitted",
 						)
-						<div x-ref="networkPacketsChart" class="flex justify-center"></div>
+						<div x-ref="networkPacketsChart"></div>
 					</div>
-					<div x-show="networkChartTabSelected === 'errors'">
+					<div
+						x-show="networkChartTabSelected === 'errors'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend("Received", "Transmitted", "", "")
-						<div x-ref="networkErrorsChart" class="flex justify-center"></div>
+						<div x-ref="networkErrorsChart"></div>
 					</div>
 				</div>
 			</div>
@@ -938,28 +966,40 @@ templ ResourceUsageCharts() {
 					},
 					"storageChartTabSelected",
 				)
-				<div class="bg-ez-500 rounded-lb-md rounded-r-md p-3">
-					<div x-show="storageChartTabSelected === 'io'">
+				<div class="bg-ez-500 rounded-lb-md rounded-r-md px-2 py-4">
+					<div
+						x-show="storageChartTabSelected === 'io'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend("Read (MiB/s)", "Write (MiB/s)", "", "")
-						<div x-ref="storageIoChart" class="flex justify-center"></div>
+						<div x-ref="storageIoChart"></div>
 					</div>
-					<div x-show="storageChartTabSelected === 'iops'">
+					<div
+						x-show="storageChartTabSelected === 'iops'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend("Read (Op/s)", "Write (Op/s)", "", "")
-						<div x-ref="storageIopsChart" class="flex justify-center"></div>
+						<div x-ref="storageIopsChart"></div>
 					</div>
-					<div x-show="storageChartTabSelected === 'space'">
+					<div
+						x-show="storageChartTabSelected === 'space'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend("Used Space (%)", "", "", "")
-						<div x-ref="storageSpaceChart" class="flex justify-center"></div>
+						<div x-ref="storageSpaceChart"></div>
 					</div>
-					<div x-show="storageChartTabSelected === 'inodes'">
+					<div
+						x-show="storageChartTabSelected === 'inodes'"
+						class="flex flex-col items-center justify-center gap-4"
+					>
 						@ChartLegend("Used Inodes", "Free Inodes", "", "")
-						<div x-ref="storageInodesChart" class="flex justify-center"></div>
+						<div x-ref="storageInodesChart"></div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<p class="mt-2 text-right text-[10px] italic text-neutral-500">
-			Charts by <a href="https://www.tradingview.com/" class="hover:underline">TradingView Lightweight Charts™</a>.
+		<p class="mt-2 text-right text-[9px] italic text-neutral-500">
+			charts by <a href="https://www.tradingview.com/" class="hover:underline">TradingView Lightweight Charts™</a>
 		</p>
 	</div>
 }
