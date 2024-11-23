@@ -380,6 +380,22 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (
 		return hostResourceUsage, errors.New("ReadNetInfoFailed: " + netResult.err.Error())
 	}
 
+	aggregatedDeviceName, _ := valueObject.NewDeviceName("aggregated")
+	netInfoAggregated := valueObject.NewNetInterfaceInfo(
+		aggregatedDeviceName, valueObject.Byte(0), 0, 0, 0, valueObject.Byte(0), 0, 0, 0,
+	)
+
+	for _, netInfo := range netResult.netInfos {
+		netInfoAggregated.RecvBytes += netInfo.RecvBytes
+		netInfoAggregated.RecvPackets += netInfo.RecvPackets
+		netInfoAggregated.RecvDropPackets += netInfo.RecvDropPackets
+		netInfoAggregated.RecvErrs += netInfo.RecvErrs
+		netInfoAggregated.SentBytes += netInfo.SentBytes
+		netInfoAggregated.SentPackets += netInfo.SentPackets
+		netInfoAggregated.SentDropPackets += netInfo.SentDropPackets
+		netInfoAggregated.SentErrs += netInfo.SentErrs
+	}
+
 	cpuUsagePercentStr := strconv.FormatFloat(cpuResult.cpuUsagePercent, 'f', 0, 64)
 	memUsagePercentStr := strconv.FormatFloat(memResult.memUsagePercent, 'f', 0, 64)
 	userDataStorageInfo := storageResult.storageInfos[0]
@@ -396,7 +412,7 @@ func (repo *O11yQueryRepo) getHostResourceUsage() (
 		cpuResult.cpuUsagePercent, cpuUsagePercentStr,
 		memResult.memUsagePercent, memUsagePercentStr,
 		userDataStorageInfo, storageResult.storageInfos,
-		netResult.netInfos,
+		netResult.netInfos, netInfoAggregated,
 	), nil
 }
 

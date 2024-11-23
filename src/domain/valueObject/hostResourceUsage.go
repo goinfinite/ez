@@ -8,6 +8,7 @@ type HostResourceUsage struct {
 	UserDataStorageInfo StorageUnitInfo    `json:"userDataStorageInfo"`
 	StorageInfo         []StorageUnitInfo  `json:"storageInfo"`
 	NetInfo             []NetInterfaceInfo `json:"netInfo"`
+	NetInfoAggregated   NetInterfaceInfo   `json:"netInfoAggregated"`
 }
 
 func NewHostResourceUsage(
@@ -18,6 +19,7 @@ func NewHostResourceUsage(
 	userDataStorageInfo StorageUnitInfo,
 	storageInfo []StorageUnitInfo,
 	netInfo []NetInterfaceInfo,
+	netInfoAggregated NetInterfaceInfo,
 ) HostResourceUsage {
 	return HostResourceUsage{
 		CpuPercent:          cpuPercent,
@@ -27,5 +29,6 @@ func NewHostResourceUsage(
 		UserDataStorageInfo: userDataStorageInfo,
 		StorageInfo:         storageInfo,
 		NetInfo:             netInfo,
+		NetInfoAggregated:   netInfoAggregated,
 	}
 }
