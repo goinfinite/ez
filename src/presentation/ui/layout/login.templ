@@ -1,0 +1,90 @@
+package layout
+
+import (
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
+	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
+	componentUtil "github.com/goinfinite/ez/src/presentation/ui/component/util"
+)
+
+script LoginLocalState() {
+	document.addEventListener('alpine:init', () => {
+		Alpine.data('login', () => ({
+			accessTokenKey: 'control-access-token',
+			username: '',
+			password: '',
+			async createSessionToken() {
+				const authResponse = await fetch("/api/v1/auth/login/", {
+					method: "POST",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						username: this.username,
+						password: this.password,
+					}),
+				})
+					.then((apiResponse) => {
+						return apiResponse.json();
+					})
+					.catch((error) => {
+						console.error('LoginError: ', error);
+						return {};
+					});
+
+					if (authResponse.status !== 200) {
+						Alpine.store("toast").displayToast(authResponse.body, "danger");
+						return;
+					}
+
+					Alpine.store("toast").displayToast("LoginSuccessful", "success");
+					document.cookie = this.accessTokenKey + "=" + authResponse.body.tokenStr + "; path=/";
+					window.location.href = "/overview/";
+			},
+			init() {
+				document.cookie = this.accessTokenKey + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+			},
+		}));
+	});
+}
+
+templ Login() {
+	<!DOCTYPE html>
+	<html>
+		@HeadTag()
+		<body
+			class="bg-ez-500 h-vh flex flex-col items-center justify-center bg-[url('/assets/infinite-ez-bg.jpg')] bg-cover bg-no-repeat text-neutral-50"
+		>
+			@LoginLocalState()
+			<div>
+				<a
+					href="https://goinfinite.net/ez/"
+					target="_blank"
+					class="mb-4 flex w-[120px] gap-2 hover:opacity-90"
+				>
+					<img src="/assets/ez-logo.svg" alt="Infinite Ez" class="fill-white"/>
+					<p class="text-[8px] text-neutral-500">v{ infraEnvs.InfiniteEzVersion }</p>
+				</a>
+				<form
+					x-data="login"
+					onsubmit="event.preventDefault()"
+					class="bg-ez-400 min-w-110 flex flex-col items-center justify-center gap-4 rounded-lg p-8"
+				>
+					<div class="mb-2 w-full">
+						<h1 class="text-2xl">Hello Again!</h1>
+						<p class="text-sm">Please enter your credentials to continue:</p>
+					</div>
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "username",
+						Label:         "Username",
+						BindValuePath: "username",
+					})
+					@componentForm.PasswordInput("password", "Password", "password", false, false)
+					@componentForm.SubmitButton("Login", "ph-sign-in", "createSessionToken()", false)
+				</form>
+			</div>
+			@componentUtil.Toast()
+		</body>
+	</html>
+}

@@ -73,6 +73,13 @@ func (router *Router) containerRoutes() {
 	containerImageGroup.GET("/", imagePresenter.Handler)
 }
 
+func (router *Router) loginRoutes() {
+	loginGroup := router.baseRoute.Group("/login")
+
+	loginPresenter := presenter.NewLoginPresenter()
+	loginGroup.GET("/", loginPresenter.Handler)
+}
+
 func (router *Router) overviewRoutes() {
 	overviewGroup := router.baseRoute.Group("/overview")
 
@@ -131,6 +138,7 @@ func (router *Router) previousDashboardRoute() {
 func (router *Router) RegisterRoutes() {
 	router.assetsRoute()
 	router.containerRoutes()
+	router.loginRoutes()
 	router.overviewRoutes()
 
 	if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {
