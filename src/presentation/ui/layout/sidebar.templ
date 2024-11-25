@@ -34,8 +34,8 @@ templ Sidebar(currentUrl string) {
 	<!-- Sidebar JavaScript -->
 	<script defer type="text/javascript">
 	function clearSession() {
-		document.cookie = infraEnvs.AccessTokenCookieKey + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-		window.location.href = "/_/#/login";
+		document.cookie = "control-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+		window.location.href = "/login/";
 	}
 	</script>
 	<!-- Sidebar HTML -->
