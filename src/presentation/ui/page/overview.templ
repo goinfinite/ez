@@ -180,6 +180,7 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 			isCreateContainerModalOpen: false,
 			openCreateContainerModal() {
 				this.resetPrimaryState();
+				this.createContainerSelectedMarketplaceItemId = 0;
 
 				this.isCreateContainerModalOpen = true;
 			},
