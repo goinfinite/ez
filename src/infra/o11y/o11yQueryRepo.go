@@ -226,7 +226,7 @@ func (repo *O11yQueryRepo) getHardwareSpecs() (
 		return hardwareSpecs, errors.New("GetCpuModelNameFailed")
 	}
 
-	cpuFrequency := infraHelper.RoundFloat(cpuInfo[0].Mhz)
+	cpuFrequency := infraHelper.RoundFloat(cpuInfo[0].Mhz / 1000)
 
 	cpuCoresCount := float64(len(cpuInfo))
 
