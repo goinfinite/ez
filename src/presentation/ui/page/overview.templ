@@ -446,7 +446,8 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 					return;
 				}
 				this.sysInfo.serverHostname = o11yOverview.hostname;
-				this.sysInfo.cpuModel = o11yOverview.specs.cpuModelName + " // " + o11yOverview.specs.cpuCoresCount + " @ " + o11yOverview.specs.cpuFrequency;
+				this.sysInfo.cpuModel = o11yOverview.specs.cpuModelName + " // " +
+					o11yOverview.specs.cpuCoresCount + " @ " + o11yOverview.specs.cpuFrequency + " Ghz";
 				const memoryRamGibibytes = o11yOverview.specs.memoryTotalBytes / 1024 / 1024 / 1024;
 				this.sysInfo.memoryRamGibibytes = memoryRamGibibytes.toFixed(1) + " GiB";
 				this.sysInfo.publicIpAddress = o11yOverview.publicIp;
