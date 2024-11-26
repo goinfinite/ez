@@ -73,11 +73,11 @@ templ Login() {
 				<form
 					x-data="login"
 					onsubmit="event.preventDefault()"
-					class="bg-ez-400 min-w-110 flex flex-col items-center justify-center gap-4 rounded-lg p-8"
+					class="bg-ez-400 min-w-110 flex flex-col items-center justify-center gap-4 rounded-lg p-8 drop-shadow-md"
 				>
-					<div class="mb-2 w-full">
+					<div class="mb-1 w-full">
 						<h1 class="text-2xl">Hello Again!</h1>
-						<p class="text-sm">Please enter your credentials to continue:</p>
+						<p class="mt-1 text-sm">Please enter your credentials to continue.</p>
 					</div>
 					@componentForm.InputField(componentForm.InputFieldDto{
 						InputType:     "text",
