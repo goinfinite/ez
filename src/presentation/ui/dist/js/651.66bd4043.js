@@ -1,1 +1,0 @@
-"use strict";(globalThis["webpackChunkcontrol"]=globalThis["webpackChunkcontrol"]||[]).push([[651],{3651:(n,o,e)=>{e.r(o),e.d(o,{default:()=>g});var r=e(9835);function t(n,o){const e=(0,r.up)("q-page");return(0,r.wg)(),(0,r.j4)(e)}var a=e(1639),c=e(9885),s=e(9984),u=e.n(s);const l={},p=(0,a.Z)(l,[["render",t]]),g=p;u()(l,"components",{QPage:c.Z})}}]);
