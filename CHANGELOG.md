@@ -1,8 +1,10 @@
 # Changelog
 
 ```log
-0.0.9 - 2024/X/X
+0.0.9 - 2024/11/27
 feat: GET /api/v1/marketplace/
+refactor: overview frontend
+refactor: login frontend
 
 0.0.8 - 2024/09/30
 refactor: use sri for activity records
