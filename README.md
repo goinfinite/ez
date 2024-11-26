@@ -7,6 +7,8 @@ Expect bugs early on. Create issues so they can be fixed.
 
 Infinite Ez is yet another self-hosted container management platform that transforms any server or VPS into a platform as a service (PaaS), à la Heroku, Render or Vercel. The beauty of it is that **you don't need to be a DevOps expert** to use it - it's designed for the average user, with a user-friendly interface that automates all those complex tasks, like deployment intricacies, scaling policies and server maintenance.
 
+Besides handling deployment, Infinite Ez also provides account management with granular hardware resources allocations, advanced container autoscaling, basic server monitoring, container images with import, export and snapshots & automatic port bindings mapping based on the container image you select. It's a one-stop solution for all your container management needs.
+
 What's more, Infinite Ez is notably lightweight, thanks to Go under the hood. It consumes only about 100 MB of RAM on average (for the binary). It runs on [OpenSUSE MicroOS](https://microos.opensuse.org/), an immutable operating system **specifically designed for containers**. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
 
 If your application isn't containerized yet, fret not. Check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that simplifies containerizing your apps to just a few clicks, **all via a web interface** - no need to grapple with complex Dockerfiles.
@@ -43,7 +45,7 @@ chmod +x /var/infinite/ez
 
 7. The system will reboot and you can check with `systemctl status ez` if the service is running. You should now be able to access the dashboard with your browser on the `https://vm-ip-address:3141/` address.
 
-_We are aware the installation process is not user-friendly yet. The installation process will be completely refactored soon so it happens on the Web UI and without the need of a secondary disk. An official ISO will also be made available for download so you will be able to skip all the steps above, boot the ISO on your VM provider and go straight to the Setup Wizard on the Web UI._
+_We are aware the installation process is not user-friendly yet. The installation process will be completely [refactored soon](https://github.com/goinfinite/ez/issues/140) so it happens on the Web UI and without the need of a secondary disk. An [official ISO](https://github.com/goinfinite/ez/issues/77) will also be made available for download so you will be able to skip all the steps above, boot the ISO on your VM provider and go straight to the Setup Wizard on the Web UI._
 
 ## REST API
 
@@ -104,7 +106,7 @@ Note: If you use Pastebin, make sure you're downloading the raw file and not the
 
 ```
 transactional-update pkg install git make
-curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
+curl -L https://go.dev/dl/go1.23.3.linux-amd64.tar.gz -o go.tar.gz
 tar -C /usr/local -xzf go.tar.gz
 rm -f go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.bashrc
@@ -127,7 +129,7 @@ Replace `the_github_key` with the path to your private key and remember to chmod
 
 ```
 go install github.com/swaggo/swag/cmd/swag@latest
-go install github.com/cosmtrek/air@latest
+go install github.com/air-verse/air@latest
 go install github.com/a-h/templ/cmd/templ@latest
 git config --global user.name "yourgithubnick"
 git config --global user.email yourgithubemail
