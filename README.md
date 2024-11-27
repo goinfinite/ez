@@ -9,6 +9,8 @@ Infinite Ez is yet another self-hosted container management platform that transf
 
 Besides handling deployment, Infinite Ez also provides account management with granular hardware resources allocations, advanced container autoscaling, basic server monitoring, container images with import, export and snapshots & automatic port bindings mapping based on the container image you select. It's a one-stop solution for all your container management needs.
 
+![Infinite Ez Overview](docs/ez-screenshots.webp)
+
 What's more, Infinite Ez is notably lightweight, thanks to Go under the hood. It consumes only about 100 MB of RAM on average (for the binary). It runs on [OpenSUSE MicroOS](https://microos.opensuse.org/), an immutable operating system **specifically designed for containers**. This setup ensures the system is secure, reliable, and easy to maintain, with automatic updates and rollback capabilities.
 
 If your application isn't containerized yet, fret not. Check out the [Infinite OS](https://github.com/goinfinite/os) project. It's an open-source container-first operating system that simplifies containerizing your apps to just a few clicks, **all via a web interface** - no need to grapple with complex Dockerfiles.
@@ -23,7 +25,7 @@ If you're a hosting/infrastructure provider, we'll soon be offering an excellent
 
 ## Installation
 
-1. Download Ez binary from [goinfinite.net's website](https://goinfinite.net/ez/);
+1. Download Ez binary from [releases page](https://github.com/goinfinite/ez/releases) (the .zip on Assets section);
 
 2. Download the openSUSE MicroOS cloud-init image (use the "Base System + Container Runtime" version) from the [MicroOS download page](https://en.opensuse.org/Portal:MicroOS/Downloads);
 
@@ -31,7 +33,7 @@ If you're a hosting/infrastructure provider, we'll soon be offering an excellent
 
 4. SSH into the VM and create the `/var/infinite/` directory;
 
-5. Upload the Ez binary to `/var/infinite/`, giving it execution permission right after:
+5. Upload (and extract) the Ez binary to `/var/infinite/`, giving it execution permission right after:
 
 ```
 chmod +x /var/infinite/ez
