@@ -6,6 +6,7 @@ refactor: overview frontend
 refactor: login frontend
 feat: GET /api/v1/marketplace/
 feat: add account quota refresh to cli
+fix: account resource usage bug when no containers
 fix: improve sys-install verbosity
 fix: broken unocss css reset
 
