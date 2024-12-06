@@ -24,9 +24,13 @@ func SysInstall(
 	}
 
 	if !isInstalled {
-		slog.Info("Installation started. The server will reboot a few times. " +
-			"Check /var/log/ez.log for the installation progress.")
+		slog.Info(
+			`Installation started. After the server has rebooted, the installation will continue automatically.` +
+				`Wait a few minutes after the reboot and then check with "systemctl status ez" if Ez is running.` +
+				`This installation process will be refactored soon, we're sorry for the inconvenience.`,
+		)
 
+		slog.Info("Installing basic packages...")
 		err := sysInstallCmdRepo.Install()
 		if err != nil {
 			slog.Error(err.Error())
