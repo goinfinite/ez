@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"log/slog"
+	"math"
 	"os"
 	"strconv"
 	"syscall"
@@ -127,12 +128,12 @@ func (repo *O11yQueryRepo) storageUnitInfoFactory(
 		valueObject.Byte(usageStat.Total),
 		valueObject.Byte(usageStat.Free),
 		valueObject.Byte(usageStat.Used),
-		infraHelper.RoundFloat(usageStat.UsedPercent),
+		math.Round(usageStat.UsedPercent),
 		usedPercentStr,
 		usageStat.InodesTotal,
 		usageStat.InodesFree,
 		usageStat.InodesUsed,
-		infraHelper.RoundFloat(usageStat.InodesUsedPercent),
+		math.Round(usageStat.InodesUsedPercent),
 		valueObject.Byte(readBytes),
 		readOpsCount,
 		valueObject.Byte(writeBytes),
@@ -226,7 +227,7 @@ func (repo *O11yQueryRepo) getHardwareSpecs() (
 		return hardwareSpecs, errors.New("GetCpuModelNameFailed")
 	}
 
-	cpuFrequency := infraHelper.RoundFloat(cpuInfo[0].Mhz / 1000)
+	cpuFrequency := math.Round(cpuInfo[0].Mhz / 1000)
 
 	cpuCoresCount := float64(len(cpuInfo))
 
@@ -249,7 +250,7 @@ func (repo *O11yQueryRepo) getCpuUsagePercent() (float64, error) {
 		return 0, errors.New("GetCpuUsageFailed")
 	}
 
-	return infraHelper.RoundFloat(cpuPercent[0]), nil
+	return math.Round(cpuPercent[0]), nil
 }
 
 func (repo *O11yQueryRepo) getMemUsagePercent() (float64, error) {
@@ -258,7 +259,7 @@ func (repo *O11yQueryRepo) getMemUsagePercent() (float64, error) {
 		return 0, errors.New("GetMemInfoFailed")
 	}
 
-	return infraHelper.RoundFloat(memInfo.UsedPercent), nil
+	return math.Round(memInfo.UsedPercent), nil
 }
 
 func (repo *O11yQueryRepo) getNetInfos() ([]valueObject.NetInterfaceInfo, error) {

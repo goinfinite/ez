@@ -155,8 +155,8 @@ func (repo *ContainerQueryRepo) containerMetricFactory(
 	}
 
 	return valueObject.NewContainerMetrics(
-		containerId, infraHelper.RoundFloat(cpuPercent), avgCpu, memBytes,
-		infraHelper.RoundFloat(memPercent), blockInput, blockOutput,
+		containerId, math.Round(cpuPercent), avgCpu, memBytes,
+		math.Round(memPercent), blockInput, blockOutput,
 		blockBytes, inodesCount, netInput, netOutput,
 	), nil
 }
