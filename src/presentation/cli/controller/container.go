@@ -117,7 +117,7 @@ func (controller *ContainerController) Read() *cobra.Command {
 	cmd.Flags().StringVarP(&containerStatusStr, "status", "s", "", "ContainerStatus")
 	cmd.Flags().StringVarP(&containerImageAddressStr, "image-address", "i", "", "ImageAddress")
 	cmd.Flags().StringVarP(&containerImageIdStr, "image-id", "d", "", "ImageId")
-	cmd.Flags().StringVarP(&containerImageHashStr, "image-hash", "h", "", "ContainerImageHash")
+	cmd.Flags().StringVarP(&containerImageHashStr, "image-hash", "z", "", "ContainerImageHash")
 	cmd.Flags().StringSliceVarP(
 		&portBindingsSlice, "port-bindings", "b", []string{},
 		"ContainerPortBindings (serviceName[:publicPort][:containerPort][/protocol][:privatePort])",
