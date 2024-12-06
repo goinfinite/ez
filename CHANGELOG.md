@@ -2,9 +2,12 @@
 
 ```log
 0.0.9 - 2024/11/27
-feat: GET /api/v1/marketplace/
 refactor: overview frontend
 refactor: login frontend
+feat: GET /api/v1/marketplace/
+feat: add account quota refresh to cli
+fix: improve sys-install verbosity
+fix: broken unocss css reset
 
 0.0.8 - 2024/09/30
 refactor: use sri for activity records
