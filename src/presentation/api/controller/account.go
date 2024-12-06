@@ -203,14 +203,14 @@ func (controller *AccountController) Delete(c echo.Context) error {
 	)
 }
 
-func (controller *AccountController) AutoUpdateAccountsQuotaUsage() {
-	taskInterval := time.Duration(15) * time.Minute
+func (controller *AccountController) AutoRefreshAccountQuotas() {
+	taskInterval := time.Duration(useCase.AutoRefreshAccountQuotasTimeIntervalSecs) * time.Second
 	timer := time.NewTicker(taskInterval)
 	defer timer.Stop()
 
 	accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(controller.persistentDbSvc)
 	for range timer.C {
-		useCase.AutoUpdateAccountsQuotaUsage(accountQueryRepo, accountCmdRepo)
+		_ = useCase.RefreshAccountQuotas(accountQueryRepo, accountCmdRepo)
 	}
 }

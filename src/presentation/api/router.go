@@ -56,7 +56,7 @@ func (router *Router) accountRoutes() {
 	accountGroup.POST("/", accountController.Create)
 	accountGroup.PUT("/", accountController.Update)
 	accountGroup.DELETE("/:accountId/", accountController.Delete)
-	go accountController.AutoUpdateAccountsQuotaUsage()
+	go accountController.AutoRefreshAccountQuotas()
 }
 
 func (router *Router) containerRoutes() {
