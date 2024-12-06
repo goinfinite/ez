@@ -33,12 +33,17 @@ func CliInit() {
 	cliMiddleware.PreventRootless()
 
 	cliMiddleware.CheckEnvs()
-	cliMiddleware.LogHandler()
+	logHandler := cliMiddleware.LogHandler{}
 
 	isSystemInstall := false
 	if len(os.Args) > 1 {
 		isSystemInstall = os.Args[1] == "sys-install"
 	}
+
+	if isSystemInstall {
+		logHandler.SetLevel("INFO")
+	}
+	logHandler.Init()
 
 	if isSystemInstall {
 		sysInstallController := cliController.SysInstallController{}

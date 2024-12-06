@@ -11,13 +11,24 @@ import (
 	"golang.org/x/term"
 )
 
-func LogHandler() {
+type LogHandler struct {
+}
+
+func (LogHandler) ReadLevel() string {
+	return os.Getenv("LOG_LEVEL")
+}
+
+func (LogHandler) SetLevel(logLevel string) {
+	os.Setenv("LOG_LEVEL", logLevel)
+}
+
+func (logHandler LogHandler) Init() {
 	var logWriter io.Writer = os.Stdout
 	logLevel := zerolog.WarnLevel
 
-	logLevelEnvVar := os.Getenv("LOG_LEVEL")
-	if logLevelEnvVar != "" {
-		switch logLevelEnvVar {
+	configuredLevel := logHandler.ReadLevel()
+	if configuredLevel != "" {
+		switch configuredLevel {
 		case "DEBUG", "debug":
 			stdoutFileDescriptor := int(os.Stdout.Fd())
 			isInteractiveSession := term.IsTerminal(stdoutFileDescriptor)
