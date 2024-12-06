@@ -25,9 +25,9 @@ func SysInstall(
 
 	if !isInstalled {
 		slog.Info(
-			`Installation started. After the server has rebooted, the installation will continue automatically.` +
-				`Wait a few minutes after the reboot and then check with "systemctl status ez" if Ez is running.` +
-				`This installation process will be refactored soon, we're sorry for the inconvenience.`,
+			`Installation started! This procedure is quick and will continue automatically after the reboots. ` +
+				`Wait a few minutes and then check if Ez is running with 'systemctl status ez'. ` +
+				`The installation process will be refactored soon, we're sorry for the inconvenience.`,
 		)
 
 		slog.Info("Installing basic packages...")
