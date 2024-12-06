@@ -250,22 +250,26 @@ func (repo *AccountCmdRepo) UpdateApiKey(
 	return apiKey, nil
 }
 
-func (repo *AccountCmdRepo) updateQuotaTable(
-	tableName string,
+func (repo *AccountCmdRepo) UpdateQuota(
 	accountId valueObject.AccountId,
 	quota valueObject.AccountQuota,
 ) error {
+	err := repo.updateFilesystemQuota(accountId, quota)
+	if err != nil {
+		return err
+	}
+
 	updateMap := map[string]interface{}{}
 
 	if quota.Millicores.Uint() > 0 {
 		updateMap["millicores"] = quota.Millicores.Uint()
 	}
 
-	if quota.MemoryBytes.Int64() >= 0 {
+	if quota.MemoryBytes.Int64() > 0 {
 		updateMap["memory_bytes"] = uint64(quota.MemoryBytes.Int64())
 	}
 
-	if quota.StorageBytes.Int64() >= 0 {
+	if quota.StorageBytes.Int64() > 0 {
 		updateMap["storage_bytes"] = uint64(quota.StorageBytes.Int64())
 	}
 
@@ -278,24 +282,9 @@ func (repo *AccountCmdRepo) updateQuotaTable(
 	}
 
 	return repo.persistentDbSvc.Handler.
-		Table(tableName).
+		Model(&dbModel.AccountQuota{}).
 		Where("account_id = ?", accountId.Uint64()).
 		Updates(updateMap).Error
-}
-
-func (repo *AccountCmdRepo) UpdateQuota(
-	accountId valueObject.AccountId,
-	quota valueObject.AccountQuota,
-) error {
-	err := repo.updateFilesystemQuota(accountId, quota)
-	if err != nil {
-		return err
-	}
-
-	return repo.updateQuotaTable(
-		dbModel.AccountQuota{}.TableName(),
-		accountId, quota,
-	)
 }
 
 func (repo *AccountCmdRepo) getStorageUsage(
@@ -428,12 +417,16 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 		storagePerformanceUnitsUsage,
 	)
 
-	quota := valueObject.NewAccountQuota(
-		millicores, memoryBytes, storageUsage.StorageBytes,
-		storageUsage.StorageInodes, storagePerformanceUnits,
-	)
+	updateMap := map[string]interface{}{
+		"millicores":                millicores.Uint(),
+		"memory_bytes":              uint64(memoryBytes.Int64()),
+		"storage_bytes":             uint64(storageUsage.StorageBytes.Int64()),
+		"storage_inodes":            storageUsage.StorageInodes,
+		"storage_performance_units": storagePerformanceUnits.Uint(),
+	}
 
-	return repo.updateQuotaTable(
-		dbModel.AccountQuotaUsage{}.TableName(), accountId, quota,
-	)
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.AccountQuotaUsage{}).
+		Where("account_id = ?", accountId.Uint64()).
+		Updates(updateMap).Error
 }
