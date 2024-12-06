@@ -2,7 +2,7 @@ package infraHelper
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 )
 
 func InstallPkgs(packages []string) error {
@@ -19,7 +19,7 @@ func InstallPkgs(packages []string) error {
 			break
 		}
 
-		log.Printf("InstallPkgError: %s", err.Error())
+		slog.Error("InstallPkgError", slog.Any("error", err))
 
 		if i == nAttempts-1 {
 			installErr = errors.New("InstallAttemptsFailed")
