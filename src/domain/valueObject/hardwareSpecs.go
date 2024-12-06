@@ -34,11 +34,9 @@ func (vo HardwareSpecs) String() string {
 	}
 	cpuModelNameStr = strings.Join(cpuModelNameParts, " ")
 
-	cpuFrequencyGhz := vo.CpuFrequency / 1000
-
 	return fmt.Sprintf(
 		"%s (%.0fc@%.1f GHz) ‖ %s RAM",
 		cpuModelNameStr, vo.CpuCoresCount,
-		cpuFrequencyGhz, vo.MemoryTotalBytes.StringWithSuffix(),
+		vo.CpuFrequency, vo.MemoryTotalBytes.StringWithSuffix(),
 	)
 }
