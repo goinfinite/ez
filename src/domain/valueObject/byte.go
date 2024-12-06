@@ -2,7 +2,8 @@ package valueObject
 
 import (
 	"errors"
-	"strconv"
+	"fmt"
+	"math"
 
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
@@ -40,38 +41,42 @@ func (vo Byte) Int64() int64 {
 	return int64(vo)
 }
 
+func (vo Byte) Float64() float64 {
+	return float64(vo)
+}
+
 func (vo Byte) ToKiB() int64 {
-	return vo.Int64() / 1024
+	return int64(math.Round(vo.Float64() / 1024))
 }
 
 func (vo Byte) ToMiB() int64 {
-	return vo.Int64() / 1048576
+	return int64(math.Round(vo.Float64() / 1048576))
 }
 
 func (vo Byte) ToGiB() int64 {
-	return vo.Int64() / 1073741824
+	return int64(math.Round(vo.Float64() / 1073741824))
 }
 
 func (vo Byte) ToTiB() int64 {
-	return vo.Int64() / 1099511627776
+	return int64(math.Round(vo.Float64() / 1099511627776))
 }
 
 func (vo Byte) String() string {
-	return strconv.FormatInt(int64(vo), 10)
+	return fmt.Sprintf("%d", vo.Int64())
 }
 
 func (vo Byte) StringWithSuffix() string {
 	voInt64 := vo.Int64()
 	switch {
 	case voInt64 < 1048576:
-		return strconv.FormatInt(vo.ToKiB(), 10) + " KiB"
+		return fmt.Sprintf("%d KiB", vo.ToKiB())
 	case voInt64 < 1073741824:
-		return strconv.FormatInt(vo.ToMiB(), 10) + " MiB"
+		return fmt.Sprintf("%d MiB", vo.ToMiB())
 	case voInt64 < 1099511627776:
-		return strconv.FormatInt(vo.ToGiB(), 10) + " GiB"
+		return fmt.Sprintf("%d GiB", vo.ToGiB())
 	case voInt64 < 1125899906842624:
-		return strconv.FormatInt(vo.ToTiB(), 10) + " TiB"
+		return fmt.Sprintf("%d TiB", vo.ToTiB())
 	default:
-		return strconv.FormatInt(voInt64, 10) + " B"
+		return fmt.Sprintf("%d B", voInt64)
 	}
 }
