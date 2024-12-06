@@ -115,6 +115,20 @@ func (controller *AccountController) Update() *cobra.Command {
 	return cmd
 }
 
+func (controller *AccountController) RefreshQuotas() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "refresh-quotas",
+		Short: "RefreshAccountQuotas",
+		Run: func(cmd *cobra.Command, args []string) {
+			cliHelper.ServiceResponseWrapper(
+				controller.accountService.RefreshQuotas(),
+			)
+		},
+	}
+
+	return cmd
+}
+
 func (controller *AccountController) Delete() *cobra.Command {
 	var accountIdStr string
 

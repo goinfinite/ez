@@ -40,6 +40,7 @@ func (router *Router) accountRoutes() {
 	accountCmd.AddCommand(accountController.Read())
 	accountCmd.AddCommand(accountController.Create())
 	accountCmd.AddCommand(accountController.Update())
+	accountCmd.AddCommand(accountController.RefreshQuotas())
 	accountCmd.AddCommand(accountController.Delete())
 	rootCmd.AddCommand(accountCmd)
 }

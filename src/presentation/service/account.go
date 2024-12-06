@@ -184,6 +184,17 @@ func (service *AccountService) Update(input map[string]interface{}) ServiceOutpu
 	return NewServiceOutput(Success, "AccountUpdated")
 }
 
+func (service *AccountService) RefreshQuotas() ServiceOutput {
+	err := useCase.RefreshAccountQuotas(
+		service.accountQueryRepo, service.accountCmdRepo,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "AccountQuotasRefreshed")
+}
+
 func (service *AccountService) Delete(input map[string]interface{}) ServiceOutput {
 	requiredParams := []string{"accountId"}
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
