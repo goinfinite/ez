@@ -48,7 +48,7 @@ func (repo *AccountQueryRepo) Read() ([]entity.Account, error) {
 }
 
 func (repo *AccountQueryRepo) ReadByUsername(
-	username valueObject.Username,
+	username valueObject.UnixUsername,
 ) (accountEntity entity.Account, err error) {
 	accountEntities, err := repo.Read()
 	if err != nil {

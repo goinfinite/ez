@@ -57,7 +57,7 @@ func (model Account) ToEntity() (accountEntity entity.Account, err error) {
 		return accountEntity, err
 	}
 
-	username, err := valueObject.NewUsername(model.Username)
+	username, err := valueObject.NewUnixUsername(model.Username)
 	if err != nil {
 		return accountEntity, err
 	}

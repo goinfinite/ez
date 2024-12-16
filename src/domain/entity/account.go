@@ -9,7 +9,7 @@ import (
 type Account struct {
 	Id            valueObject.AccountId    `json:"id"`
 	GroupId       valueObject.UnixGroupId  `json:"groupId"`
-	Username      valueObject.Username     `json:"username"`
+	Username      valueObject.UnixUsername `json:"username"`
 	Quota         valueObject.AccountQuota `json:"quota"`
 	QuotaUsage    valueObject.AccountQuota `json:"quotaUsage"`
 	HomeDirectory valueObject.UnixFilePath `json:"homeDirectory"`
@@ -20,7 +20,7 @@ type Account struct {
 func NewAccount(
 	id valueObject.AccountId,
 	groupId valueObject.UnixGroupId,
-	username valueObject.Username,
+	username valueObject.UnixUsername,
 	quota, quotaUsage valueObject.AccountQuota,
 	homeDirectory valueObject.UnixFilePath,
 	createdAt, updatedAt valueObject.UnixTime,

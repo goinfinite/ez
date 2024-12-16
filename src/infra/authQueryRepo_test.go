@@ -18,7 +18,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	localIpAddress := valueObject.NewLocalhostIpAddress()
 
 	t.Run("ValidLoginCredentials", func(t *testing.T) {
-		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
+		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 
 		createDto := dto.NewCreateSessionToken(username, password, localIpAddress)
@@ -29,7 +29,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	})
 
 	t.Run("InvalidLoginCredentials", func(t *testing.T) {
-		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
+		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword("wrongPassword")
 
 		createDto := dto.NewCreateSessionToken(username, password, localIpAddress)

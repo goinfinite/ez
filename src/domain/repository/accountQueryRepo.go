@@ -7,6 +7,6 @@ import (
 
 type AccountQueryRepo interface {
 	Read() ([]entity.Account, error)
-	ReadByUsername(username valueObject.Username) (entity.Account, error)
+	ReadByUsername(username valueObject.UnixUsername) (entity.Account, error)
 	ReadById(accountId valueObject.AccountId) (entity.Account, error)
 }

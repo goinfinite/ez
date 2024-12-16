@@ -477,7 +477,7 @@ func (repo *ContainerRegistryQueryRepo) readTaggedImageFromLocalhost(
 		return taggedImage, err
 	}
 
-	ownerUsername, err := valueObject.NewUsername(publisherName.String())
+	ownerUsername, err := valueObject.NewUnixUsername(publisherName.String())
 	if err != nil {
 		return taggedImage, errors.New("ParseOwnerUsernameError: " + err.Error())
 	}

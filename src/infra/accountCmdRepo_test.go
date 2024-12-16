@@ -11,7 +11,7 @@ import (
 )
 
 func addDummyUser() error {
-	username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
+	username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 	password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 	quota := valueObject.NewAccountQuotaWithDefaultValues()
 	ipAddress := valueObject.NewLocalhostIpAddress()
@@ -61,7 +61,7 @@ func TestAccountCmdRepo(t *testing.T) {
 	})
 
 	t.Run("AddInvalidAccount", func(t *testing.T) {
-		username, _ := valueObject.NewUsername("root")
+		username, _ := valueObject.NewUnixUsername("root")
 		password, _ := valueObject.NewPassword("invalid")
 		quota := valueObject.NewAccountQuotaWithDefaultValues()
 		ipAddress := valueObject.NewLocalhostIpAddress()
