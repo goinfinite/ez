@@ -13,7 +13,7 @@
             "name": "FCL-1.0-ALv2",
             "url": "https://github.com/goinfinite/ez/blob/main/LICENSE.md"
         },
-        "version": "0.0.9"
+        "version": "0.1.0"
     },
     "basePath": "/api",
     "paths": {
@@ -2825,6 +2825,9 @@
                     "items": {
                         "$ref": "#/definitions/valueObject.NetInterfaceInfo"
                     }
+                },
+                "netInfoAggregated": {
+                    "$ref": "#/definitions/valueObject.NetInterfaceInfo"
                 },
                 "storageInfo": {
                     "type": "array",

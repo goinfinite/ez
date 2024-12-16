@@ -1,6 +1,9 @@
 # Changelog
 
 ```log
+0.1.0 - 2025/X/X
+feat: backups
+
 0.0.9 - 2024/11/27
 refactor: overview frontend
 refactor: login frontend

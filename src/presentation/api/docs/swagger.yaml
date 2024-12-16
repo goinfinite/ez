@@ -673,6 +673,8 @@ definitions:
         items:
           $ref: '#/definitions/valueObject.NetInterfaceInfo'
         type: array
+      netInfoAggregated:
+        $ref: '#/definitions/valueObject.NetInterfaceInfo'
       storageInfo:
         items:
           $ref: '#/definitions/valueObject.StorageUnitInfo'
@@ -760,7 +762,7 @@ info:
     url: https://github.com/goinfinite/ez/blob/main/LICENSE.md
   termsOfService: https://goinfinite.net/tos/
   title: ezApi
-  version: 0.0.9
+  version: 0.1.0
 paths:
   /v1/account/:
     get:
