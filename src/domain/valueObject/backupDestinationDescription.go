@@ -13,21 +13,15 @@ func NewBackupDestinationDescription(value interface{}) (
 ) {
 	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
-		return description, errors.New(
-			"BackupDestinationDescriptionMustBeString",
-		)
+		return description, errors.New("BackupDestinationDescriptionMustBeString")
 	}
 
 	if len(stringValue) < 2 {
-		return description, errors.New(
-			"BackupDestinationDescriptionTooSmall",
-		)
+		return description, errors.New("BackupDestinationDescriptionTooSmall")
 	}
 
 	if len(stringValue) > 2048 {
-		return description, errors.New(
-			"BackupDestinationDescriptionTooBig",
-		)
+		return description, errors.New("BackupDestinationDescriptionTooBig")
 	}
 
 	return BackupDestinationDescription(stringValue), nil
