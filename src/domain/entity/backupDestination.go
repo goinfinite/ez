@@ -37,22 +37,21 @@ type BackupDestinationLocal struct {
 type BackupDestinationObjectStorage struct {
 	BackupDestinationRemoteBase
 	ObjectStorageProvider                *valueObject.ObjectStorageProvider                `json:"objectStorageProvider,omitempty"`
-	ObjectStorageProfile                 *valueObject.ObjectStorageProfile                 `json:"objectStorageProfile,omitempty"`
-	ObjectStorageEndpointUrl             *valueObject.Url                                  `json:"objectStorageEndpointUrl,omitempty"`
-	ObjectStorageBucketName              *valueObject.ObjectStorageBucketName              `json:"objectStorageBucketName,omitempty"`
-	ObjectStorageBucketRegion            *valueObject.ObjectStorageBucketRegion            `json:"objectStorageBucketRegion,omitempty"`
+	ObjectStorageProviderRegion          *valueObject.ObjectStorageProviderRegion          `json:"objectStorageProviderRegion,omitempty"`
 	ObjectStorageProviderAccessKeyId     *valueObject.ObjectStorageProviderAccessKeyId     `json:"objectStorageProviderAccessKeyId,omitempty"`
 	ObjectStorageProviderSecretAccessKey *valueObject.ObjectStorageProviderSecretAccessKey `json:"objectStorageProviderSecretAccessKey,omitempty"`
+	ObjectStorageEndpointUrl             *valueObject.Url                                  `json:"objectStorageEndpointUrl,omitempty"`
+	ObjectStorageBucketName              *valueObject.ObjectStorageBucketName              `json:"objectStorageBucketName,omitempty"`
 }
 
 type BackupDestinationRemoteHost struct {
 	BackupDestinationRemoteBase
-	RemoteHostType                  *valueObject.RemoteHostType `json:"remoteHostType,omitempty"`
-	RemoteHostname                  *valueObject.Fqdn           `json:"remoteHostname,omitempty"`
-	RemoteHostNetworkPort           *valueObject.NetworkPort    `json:"remoteHostNetworkPort,omitempty"`
-	RemoteHostUsername              *valueObject.UnixUsername   `json:"remoteHostUsername,omitempty"`
-	RemoteHostPassword              *valueObject.Password       `json:"remoteHostPassword,omitempty"`
-	RemoteHostPrivateKeyFilePath    *valueObject.UnixFilePath   `json:"remoteHostPrivateKeyFilePath,omitempty"`
-	RemoteHostConnectionTimeoutSecs *uint16                     `json:"remoteHostConnectionTimeoutSecs,omitempty"`
-	RemoteHostConnectionRetrySecs   *uint16                     `json:"remoteHostConnectionRetrySecs,omitempty"`
+	RemoteHostType                  *valueObject.BackupDestinationRemoteHostType `json:"remoteHostType,omitempty"`
+	RemoteHostname                  *valueObject.Fqdn                            `json:"remoteHostname,omitempty"`
+	RemoteHostNetworkPort           *valueObject.NetworkPort                     `json:"remoteHostNetworkPort,omitempty"`
+	RemoteHostUsername              *valueObject.UnixUsername                    `json:"remoteHostUsername,omitempty"`
+	RemoteHostPassword              *valueObject.Password                        `json:"remoteHostPassword,omitempty"`
+	RemoteHostPrivateKeyFilePath    *valueObject.UnixFilePath                    `json:"remoteHostPrivateKeyFilePath,omitempty"`
+	RemoteHostConnectionTimeoutSecs *uint16                                      `json:"remoteHostConnectionTimeoutSecs,omitempty"`
+	RemoteHostConnectionRetrySecs   *uint16                                      `json:"remoteHostConnectionRetrySecs,omitempty"`
 }
