@@ -45,6 +45,26 @@ func (router *Router) accountRoutes() {
 	rootCmd.AddCommand(accountCmd)
 }
 
+func (router *Router) backupRoutes() {
+	var backupCmd = &cobra.Command{
+		Use:   "backup",
+		Short: "BackupManagement",
+	}
+
+	backupController := cliController.NewBackupController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
+
+	var backupDestinationCmd = &cobra.Command{
+		Use:   "destination",
+		Short: "BackupDestinationManagement",
+	}
+
+	backupDestinationCmd.AddCommand(backupController.ReadDestination())
+	backupCmd.AddCommand(backupDestinationCmd)
+	rootCmd.AddCommand(backupCmd)
+}
+
 func (router *Router) containerRoutes() {
 	var containerCmd = &cobra.Command{
 		Use:   "container",
@@ -183,6 +203,7 @@ func (router *Router) systemRoutes() {
 
 func (router Router) RegisterRoutes() {
 	router.accountRoutes()
+	router.backupRoutes()
 	router.containerRoutes()
 	router.mappingRoutes()
 	router.o11yRoutes()
