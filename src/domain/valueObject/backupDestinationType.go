@@ -10,6 +10,7 @@ import (
 type BackupDestinationType string
 
 const (
+	BackupDestinationTypeLocal         BackupDestinationType = "local"
 	BackupDestinationTypeRemoteHost    BackupDestinationType = "remote-host"
 	BackupDestinationTypeObjectStorage BackupDestinationType = "object-storage"
 )
@@ -25,7 +26,8 @@ func NewBackupDestinationType(value interface{}) (
 
 	stringValueVo := BackupDestinationType(stringValue)
 	switch stringValueVo {
-	case BackupDestinationTypeRemoteHost, BackupDestinationTypeObjectStorage:
+	case BackupDestinationTypeLocal, BackupDestinationTypeRemoteHost,
+		BackupDestinationTypeObjectStorage:
 		return stringValueVo, nil
 	default:
 		return destinationType, errors.New("InvalidBackupDestinationType")
