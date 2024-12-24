@@ -8,18 +8,18 @@ type IBackupDestination interface {
 }
 
 type BackupDestinationBase struct {
-	DestinationId                     valueObject.BackupDestinationId          `json:"destinationId"`
-	AccountId                         valueObject.AccountId                    `json:"accountId"`
-	DestinationName                   valueObject.BackupDestinationName        `json:"destinationName"`
-	DestinationDescription            valueObject.BackupDestinationDescription `json:"destinationDescription"`
-	DestinationType                   valueObject.BackupDestinationType        `json:"destinationType"`
-	DestinationPath                   valueObject.UnixFilePath                 `json:"destinationPath"`
-	MinLocalStorageFreePercent        *uint8                                   `json:"minLocalStorageFreePercent,omitempty"`
-	MaxDestinationStorageUsagePercent *uint8                                   `json:"maxDestinationStorageUsagePercent,omitempty"`
-	TotalSpaceUsageBytes              valueObject.Byte                         `json:"totalSpaceUsageBytes"`
-	TotalSpaceUsagePercent            *uint8                                   `json:"totalSpaceUsagePercent,omitempty"`
-	CreatedAt                         valueObject.UnixTime                     `json:"createdAt"`
-	UpdatedAt                         valueObject.UnixTime                     `json:"updatedAt"`
+	DestinationId                     valueObject.BackupDestinationId           `json:"destinationId"`
+	AccountId                         valueObject.AccountId                     `json:"accountId"`
+	DestinationName                   valueObject.BackupDestinationName         `json:"destinationName"`
+	DestinationDescription            *valueObject.BackupDestinationDescription `json:"destinationDescription"`
+	DestinationType                   valueObject.BackupDestinationType         `json:"destinationType"`
+	DestinationPath                   valueObject.UnixFilePath                  `json:"destinationPath"`
+	MinLocalStorageFreePercent        *uint8                                    `json:"minLocalStorageFreePercent,omitempty"`
+	MaxDestinationStorageUsagePercent *uint8                                    `json:"maxDestinationStorageUsagePercent,omitempty"`
+	TotalSpaceUsageBytes              *valueObject.Byte                         `json:"totalSpaceUsageBytes"`
+	TotalSpaceUsagePercent            *uint8                                    `json:"totalSpaceUsagePercent,omitempty"`
+	CreatedAt                         valueObject.UnixTime                      `json:"createdAt"`
+	UpdatedAt                         valueObject.UnixTime                      `json:"updatedAt"`
 }
 
 type BackupDestinationRemoteBase struct {
