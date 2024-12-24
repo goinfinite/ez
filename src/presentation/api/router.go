@@ -59,6 +59,15 @@ func (router *Router) accountRoutes() {
 	go accountController.AutoRefreshAccountQuotas()
 }
 
+func (router *Router) backupRoutes() {
+	backupGroup := router.baseRoute.Group("/v1/backup")
+
+	backupController := apiController.NewBackupController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
+	backupGroup.GET("/destination/", backupController.ReadDestination)
+}
+
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/v1/container")
 	containerController := apiController.NewContainerController(
@@ -163,6 +172,7 @@ func (router *Router) RegisterRoutes() {
 	router.swaggerRoute()
 	router.authRoutes()
 	router.accountRoutes()
+	router.backupRoutes()
 	router.containerRoutes()
 	router.mappingRoutes()
 	router.marketplaceRoutes()

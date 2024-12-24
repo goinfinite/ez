@@ -206,6 +206,120 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/destination/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backups destinations.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupsDestinations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationName",
+                        "name": "destinationName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationType",
+                        "name": "destinationType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ObjectStorageProvider",
+                        "name": "objectStorageProvider",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RemoteHostType",
+                        "name": "remoteHostType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RemoteHostname",
+                        "name": "remoteHostname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupDestinationsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/": {
             "get": {
                 "security": [
@@ -1954,7 +2068,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "compressionFormat": {
-                    "type": "string"
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
                 },
                 "imageId": {
                     "type": "string"
@@ -1997,7 +2111,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "archiveCompressionFormat": {
-                    "type": "string"
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
                 },
                 "containerId": {
                     "type": "string"
@@ -2081,6 +2195,18 @@ const docTemplate = `{
                 },
                 "sortDirection": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ReadBackupDestinationsResponse": {
+            "type": "object",
+            "properties": {
+                "destinations": {
+                    "type": "array",
+                    "items": {}
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
                 }
             }
         },
@@ -2730,6 +2856,23 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "valueObject.CompressionFormat": {
+            "type": "string",
+            "enum": [
+                "tar",
+                "gzip",
+                "zip",
+                "xz",
+                "br"
+            ],
+            "x-enum-varnames": [
+                "CompressionFormatTarball",
+                "CompressionFormatGzip",
+                "CompressionFormatZip",
+                "CompressionFormatXz",
+                "CompressionFormatBrotli"
+            ]
         },
         "valueObject.ContainerMetrics": {
             "type": "object",

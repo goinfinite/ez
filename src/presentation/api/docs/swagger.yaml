@@ -97,7 +97,7 @@ definitions:
       accountId:
         type: integer
       compressionFormat:
-        type: string
+        $ref: '#/definitions/valueObject.CompressionFormat'
       imageId:
         type: string
     type: object
@@ -125,7 +125,7 @@ definitions:
   dto.CreateContainerSnapshotImage:
     properties:
       archiveCompressionFormat:
-        type: string
+        $ref: '#/definitions/valueObject.CompressionFormat'
       containerId:
         type: string
       shouldCreateArchive:
@@ -180,6 +180,14 @@ definitions:
         type: string
       sortDirection:
         type: string
+    type: object
+  dto.ReadBackupDestinationsResponse:
+    properties:
+      destinations:
+        items: {}
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
     type: object
   dto.ReadContainersResponse:
     properties:
@@ -606,6 +614,20 @@ definitions:
       storagePerformanceUnits:
         type: integer
     type: object
+  valueObject.CompressionFormat:
+    enum:
+    - tar
+    - gzip
+    - zip
+    - xz
+    - br
+    type: string
+    x-enum-varnames:
+    - CompressionFormatTarball
+    - CompressionFormatGzip
+    - CompressionFormatZip
+    - CompressionFormatXz
+    - CompressionFormatBrotli
   valueObject.ContainerMetrics:
     properties:
       avgCpuPercent:
@@ -881,6 +903,80 @@ paths:
       summary: CreateSessionTokenWithCredentials
       tags:
       - auth
+  /v1/backup/destination/:
+    get:
+      consumes:
+      - application/json
+      description: List backups destinations.
+      parameters:
+      - description: BackupDestinationId
+        in: query
+        name: destinationId
+        type: string
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupDestinationName
+        in: query
+        name: destinationName
+        type: string
+      - description: BackupDestinationType
+        in: query
+        name: destinationType
+        type: string
+      - description: ObjectStorageProvider
+        in: query
+        name: objectStorageProvider
+        type: string
+      - description: RemoteHostType
+        in: query
+        name: remoteHostType
+        type: string
+      - description: RemoteHostname
+        in: query
+        name: remoteHostname
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupDestinationsResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupsDestinations
+      tags:
+      - backup
   /v1/container/:
     get:
       consumes:
