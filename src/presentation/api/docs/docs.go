@@ -320,6 +320,144 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/job/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backup jobs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupJobs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "BackupJobStatus",
+                        "name": "jobStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupType",
+                        "name": "backupType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ArchiveCompressionFormat",
+                        "name": "archiveCompressionFormat",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastRunStatus",
+                        "name": "lastRunStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastRunBeforeAt",
+                        "name": "lastRunBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastRunAfterAt",
+                        "name": "lastRunAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "NextRunBeforeAt",
+                        "name": "nextRunBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "NextRunAfterAt",
+                        "name": "nextRunAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupJobsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/": {
             "get": {
                 "security": [
@@ -2210,6 +2348,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ReadBackupJobsResponse": {
+            "type": "object",
+            "properties": {
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.BackupJob"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                }
+            }
+        },
         "dto.ReadContainersResponse": {
             "type": "object",
             "properties": {
@@ -2381,6 +2533,95 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.BackupJob": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "archiveCompressionFormat": {
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "backupType": {
+                    "$ref": "#/definitions/valueObject.BackupJobType"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "destinationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ignoreContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ignoreContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "jobDescription": {
+                    "type": "string"
+                },
+                "jobId": {
+                    "type": "integer"
+                },
+                "jobsStatus": {
+                    "type": "boolean"
+                },
+                "lastRunAt": {
+                    "type": "integer"
+                },
+                "lastRunStatus": {
+                    "$ref": "#/definitions/valueObject.BackupTaskStatus"
+                },
+                "maxConcurrentCpuCores": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionCount": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionDays": {
+                    "type": "integer"
+                },
+                "nextRunAt": {
+                    "type": "integer"
+                },
+                "tasksCount": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                },
+                "totalSpaceUsageBytes": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
                 }
             }
         },
@@ -2856,6 +3097,32 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "valueObject.BackupJobType": {
+            "type": "string",
+            "enum": [
+                "full",
+                "incremental"
+            ],
+            "x-enum-varnames": [
+                "BackupJobTypeFull",
+                "BackupJobTypeIncremental"
+            ]
+        },
+        "valueObject.BackupTaskStatus": {
+            "type": "string",
+            "enum": [
+                "completed",
+                "failed",
+                "executing",
+                "partial"
+            ],
+            "x-enum-varnames": [
+                "BackupTaskStatusCompleted",
+                "BackupTaskStatusFailed",
+                "BackupTaskStatusExecuting",
+                "BackupTaskStatusPartial"
+            ]
         },
         "valueObject.CompressionFormat": {
             "type": "string",

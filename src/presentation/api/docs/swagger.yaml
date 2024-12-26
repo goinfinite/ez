@@ -189,6 +189,15 @@ definitions:
       pagination:
         $ref: '#/definitions/dto.Pagination'
     type: object
+  dto.ReadBackupJobsResponse:
+    properties:
+      jobs:
+        items:
+          $ref: '#/definitions/entity.BackupJob'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+    type: object
   dto.ReadContainersResponse:
     properties:
       containers:
@@ -301,6 +310,65 @@ definitions:
         type: integer
       username:
         type: string
+    type: object
+  entity.BackupJob:
+    properties:
+      accountId:
+        type: integer
+      archiveCompressionFormat:
+        $ref: '#/definitions/valueObject.CompressionFormat'
+      backupSchedule:
+        type: string
+      backupType:
+        $ref: '#/definitions/valueObject.BackupJobType'
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: integer
+      destinationIds:
+        items:
+          type: integer
+        type: array
+      ignoreContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      ignoreContainerIds:
+        items:
+          type: string
+        type: array
+      jobDescription:
+        type: string
+      jobId:
+        type: integer
+      jobsStatus:
+        type: boolean
+      lastRunAt:
+        type: integer
+      lastRunStatus:
+        $ref: '#/definitions/valueObject.BackupTaskStatus'
+      maxConcurrentCpuCores:
+        type: integer
+      maxTaskRetentionCount:
+        type: integer
+      maxTaskRetentionDays:
+        type: integer
+      nextRunAt:
+        type: integer
+      tasksCount:
+        type: integer
+      timeoutSecs:
+        type: integer
+      totalSpaceUsageBytes:
+        type: integer
+      updatedAt:
+        type: integer
     type: object
   entity.Container:
     properties:
@@ -614,6 +682,26 @@ definitions:
       storagePerformanceUnits:
         type: integer
     type: object
+  valueObject.BackupJobType:
+    enum:
+    - full
+    - incremental
+    type: string
+    x-enum-varnames:
+    - BackupJobTypeFull
+    - BackupJobTypeIncremental
+  valueObject.BackupTaskStatus:
+    enum:
+    - completed
+    - failed
+    - executing
+    - partial
+    type: string
+    x-enum-varnames:
+    - BackupTaskStatusCompleted
+    - BackupTaskStatusFailed
+    - BackupTaskStatusExecuting
+    - BackupTaskStatusPartial
   valueObject.CompressionFormat:
     enum:
     - tar
@@ -975,6 +1063,96 @@ paths:
       security:
       - Bearer: []
       summary: ReadBackupsDestinations
+      tags:
+      - backup
+  /v1/backup/job/:
+    get:
+      consumes:
+      - application/json
+      description: List backup jobs.
+      parameters:
+      - description: BackupJobId
+        in: query
+        name: jobId
+        type: string
+      - description: BackupJobStatus
+        in: query
+        name: jobStatus
+        type: boolean
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupDestinationId
+        in: query
+        name: destinationId
+        type: string
+      - description: BackupType
+        in: query
+        name: backupType
+        type: string
+      - description: ArchiveCompressionFormat
+        in: query
+        name: archiveCompressionFormat
+        type: string
+      - description: LastRunStatus
+        in: query
+        name: lastRunStatus
+        type: string
+      - description: LastRunBeforeAt
+        in: query
+        name: lastRunBeforeAt
+        type: string
+      - description: LastRunAfterAt
+        in: query
+        name: lastRunAfterAt
+        type: string
+      - description: NextRunBeforeAt
+        in: query
+        name: nextRunBeforeAt
+        type: string
+      - description: NextRunAfterAt
+        in: query
+        name: nextRunAfterAt
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupJobsResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupJobs
       tags:
       - backup
   /v1/container/:
