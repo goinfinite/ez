@@ -206,3 +206,93 @@ func (controller *BackupController) ReadJob() *cobra.Command {
 
 	return cmd
 }
+
+func (controller *BackupController) ReadTask() *cobra.Command {
+	var taskIdUint, accountIdUint, jobIdUint, destinationIdUint uint64
+	var taskStatusStr, retentionStrategyStr, containerIdStr string
+	var paginationPageNumberUint32 uint32
+	var paginationItemsPerPageUint16 uint16
+	var paginationSortByStr, paginationSortDirectionStr string
+	var paginationLastSeenIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "ReadBackupTasks",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{}
+
+			if taskIdUint != 0 {
+				requestBody["taskId"] = taskIdUint
+			}
+
+			if accountIdUint != 0 {
+				requestBody["accountId"] = accountIdUint
+			}
+
+			if jobIdUint != 0 {
+				requestBody["jobId"] = jobIdUint
+			}
+
+			if destinationIdUint != 0 {
+				requestBody["destinationId"] = destinationIdUint
+			}
+
+			if taskStatusStr != "" {
+				requestBody["taskStatus"] = taskStatusStr
+			}
+
+			if retentionStrategyStr != "" {
+				requestBody["retentionStrategy"] = retentionStrategyStr
+			}
+
+			if containerIdStr != "" {
+				requestBody["containerId"] = containerIdStr
+			}
+
+			if paginationPageNumberUint32 != 0 {
+				requestBody["pageNumber"] = paginationPageNumberUint32
+			}
+			if paginationItemsPerPageUint16 != 0 {
+				requestBody["itemsPerPage"] = paginationItemsPerPageUint16
+			}
+			if paginationSortByStr != "" {
+				requestBody["sortBy"] = paginationSortByStr
+			}
+			if paginationSortDirectionStr != "" {
+				requestBody["sortDirection"] = paginationSortDirectionStr
+			}
+			if paginationLastSeenIdStr != "" {
+				requestBody["lastSeenId"] = paginationLastSeenIdStr
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.ReadTask(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "t", 0, "BackupTaskId")
+	cmd.Flags().Uint64VarP(&jobIdUint, "job-id", "j", 0, "BackupJobId")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "BackupAccountId")
+	cmd.Flags().Uint64VarP(&destinationIdUint, "destination-id", "d", 0, "BackupDestinationId")
+	cmd.Flags().StringVarP(&taskStatusStr, "task-status", "s", "", "BackupTaskStatus")
+	cmd.Flags().StringVarP(&retentionStrategyStr, "retention-strategy", "r", "", "RetentionStrategy")
+	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
+	cmd.Flags().Uint32VarP(
+		&paginationPageNumberUint32, "page-number", "o", 0, "PageNumber (Pagination)",
+	)
+	cmd.Flags().Uint16VarP(
+		&paginationItemsPerPageUint16, "items-per-page", "I", 0, "ItemsPerPage (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortByStr, "sort-by", "y", "", "SortBy (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortDirectionStr, "sort-direction", "x", "", "SortDirection (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationLastSeenIdStr, "last-seen-id", "L", "", "LastSeenId (Pagination)",
+	)
+
+	return cmd
+}

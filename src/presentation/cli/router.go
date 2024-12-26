@@ -69,6 +69,13 @@ func (router *Router) backupRoutes() {
 	backupJobCmd.AddCommand(backupController.ReadJob())
 	backupCmd.AddCommand(backupJobCmd)
 
+	var backupTaskCmd = &cobra.Command{
+		Use:   "task",
+		Short: "BackupTaskManagement",
+	}
+	backupTaskCmd.AddCommand(backupController.ReadTask())
+	backupCmd.AddCommand(backupTaskCmd)
+
 	rootCmd.AddCommand(backupCmd)
 }
 
