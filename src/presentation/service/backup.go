@@ -226,3 +226,105 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 
 	return NewServiceOutput(Success, responseDto)
 }
+
+func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {
+	var taskIdPtr *valueObject.BackupTaskId
+	if input["taskId"] != nil {
+		taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		taskIdPtr = &taskId
+	}
+
+	var accountIdPtr *valueObject.AccountId
+	if input["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(input["accountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		accountIdPtr = &accountId
+	}
+
+	var jobIdPtr *valueObject.BackupJobId
+	if input["jobId"] != nil {
+		jobId, err := valueObject.NewBackupJobId(input["jobId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		jobIdPtr = &jobId
+	}
+
+	var destinationIdPtr *valueObject.BackupDestinationId
+	if input["destinationId"] != nil {
+		destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		destinationIdPtr = &destinationId
+	}
+
+	var taskStatusPtr *valueObject.BackupTaskStatus
+	if input["taskStatus"] != nil {
+		taskStatus, err := valueObject.NewBackupTaskStatus(input["taskStatus"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		taskStatusPtr = &taskStatus
+	}
+
+	var retentionStrategyPtr *valueObject.BackupRetentionStrategy
+	if input["retentionStrategy"] != nil {
+		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(input["retentionStrategy"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		retentionStrategyPtr = &retentionStrategy
+	}
+
+	var containerIdPtr *valueObject.ContainerId
+	if input["containerId"] != nil {
+		containerId, err := valueObject.NewContainerId(input["containerId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		containerIdPtr = &containerId
+	}
+
+	timeParamNames := []string{
+		"startedBeforeAt", "startedAfterAt", "finishedBeforeAt", "finishedAfterAt",
+		"createdBeforeAt", "createdAfterAt",
+	}
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+
+	requestPagination, err := serviceHelper.PaginationParser(
+		input, useCase.BackupTasksDefaultPagination,
+	)
+	if err != nil {
+		return NewServiceOutput(UserError, err)
+	}
+
+	readDto := dto.ReadBackupTasksRequest{
+		Pagination:        requestPagination,
+		TaskId:            taskIdPtr,
+		AccountId:         accountIdPtr,
+		JobId:             jobIdPtr,
+		DestinationId:     destinationIdPtr,
+		TaskStatus:        taskStatusPtr,
+		RetentionStrategy: retentionStrategyPtr,
+		ContainerId:       containerIdPtr,
+		StartedBeforeAt:   timeParamPtrs["startedBeforeAt"],
+		StartedAfterAt:    timeParamPtrs["startedAfterAt"],
+		FinishedBeforeAt:  timeParamPtrs["finishedBeforeAt"],
+		FinishedAfterAt:   timeParamPtrs["finishedAfterAt"],
+		CreatedBeforeAt:   timeParamPtrs["createdBeforeAt"],
+		CreatedAfterAt:    timeParamPtrs["createdAfterAt"],
+	}
+
+	responseDto, err := useCase.ReadBackupTasks(service.backupQueryRepo, readDto)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, responseDto)
+}
