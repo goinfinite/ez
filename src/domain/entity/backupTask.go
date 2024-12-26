@@ -12,7 +12,7 @@ type BackupTask struct {
 	TaskStatus        valueObject.BackupTaskStatus           `json:"taskStatus"`
 	RetentionStrategy valueObject.BackupRetentionStrategy    `json:"retentionStrategy"`
 	BackupSchedule    valueObject.CronSchedule               `json:"backupSchedule"`
-	TimeoutSecs       *uint64                                `json:"timeoutSecs"`
+	TimeoutSecs       uint64                                 `json:"timeoutSecs"`
 	ContainerIds      []valueObject.ContainerId              `json:"containerIds"`
 	ExecutionOutput   *valueObject.BackupTaskExecutionOutput `json:"executionOutput"`
 	StartedAt         *valueObject.UnixTime                  `json:"startedAt"`
@@ -29,11 +29,10 @@ func NewBackupTask(
 	taskStatus valueObject.BackupTaskStatus,
 	retentionStrategy valueObject.BackupRetentionStrategy,
 	backupSchedule valueObject.CronSchedule,
-	timeoutSecs *uint64,
+	timeoutSecs uint64,
 	containerIds []valueObject.ContainerId,
 	executionOutput *valueObject.BackupTaskExecutionOutput,
-	startedAt *valueObject.UnixTime,
-	finishedAt *valueObject.UnixTime,
+	startedAt, finishedAt *valueObject.UnixTime,
 	elapsedSecs *uint64,
 	createdAt valueObject.UnixTime,
 ) BackupTask {
