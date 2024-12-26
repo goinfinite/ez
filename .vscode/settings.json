@@ -74,6 +74,7 @@
     "primarykey",
     "privs",
     "Procs",
+    "Ptrs",
     "quadlet",
     "responsetype",
     "russian",
