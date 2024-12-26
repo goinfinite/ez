@@ -6,4 +6,5 @@ import (
 
 type BackupQueryRepo interface {
 	ReadDestination(dto.ReadBackupDestinationsRequest) (dto.ReadBackupDestinationsResponse, error)
+	ReadJob(dto.ReadBackupJobsRequest) (dto.ReadBackupJobsResponse, error)
 }
