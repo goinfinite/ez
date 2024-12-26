@@ -10,8 +10,7 @@ import (
 	"github.com/goinfinite/ez/src/infra"
 	backupInfra "github.com/goinfinite/ez/src/infra/backup"
 	"github.com/goinfinite/ez/src/infra/db"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 )
 
 type BackupService struct {
@@ -95,70 +94,18 @@ func (service *BackupService) ReadDestination(input map[string]interface{}) Serv
 		remoteHostTypePtr = &remoteHostType
 	}
 
-	var createdBeforeAtPtr, createdAfterAtPtr *valueObject.UnixTime
 	timeParamNames := []string{"createdBeforeAt", "createdAfterAt"}
-	for _, timeParamName := range timeParamNames {
-		if input[timeParamName] == nil {
-			continue
-		}
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
 
-		timeParam, err := valueObject.NewUnixTime(input[timeParamName])
-		if err != nil {
-			capitalParamName := cases.Title(language.English).String(timeParamName)
-			return NewServiceOutput(UserError, errors.New("Invalid"+capitalParamName))
-		}
-
-		switch timeParamName {
-		case "createdBeforeAt":
-			createdBeforeAtPtr = &timeParam
-		case "createdAfterAt":
-			createdAfterAtPtr = &timeParam
-		}
-	}
-
-	paginationDto := useCase.BackupDestinationsDefaultPagination
-	if input["pageNumber"] != nil {
-		pageNumber, err := voHelper.InterfaceToUint32(input["pageNumber"])
-		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidPageNumber"))
-		}
-		paginationDto.PageNumber = pageNumber
-	}
-
-	if input["itemsPerPage"] != nil {
-		itemsPerPage, err := voHelper.InterfaceToUint16(input["itemsPerPage"])
-		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidItemsPerPage"))
-		}
-		paginationDto.ItemsPerPage = itemsPerPage
-	}
-
-	if input["sortBy"] != nil {
-		sortBy, err := valueObject.NewPaginationSortBy(input["sortBy"])
-		if err != nil {
-			return NewServiceOutput(UserError, err)
-		}
-		paginationDto.SortBy = &sortBy
-	}
-
-	if input["sortDirection"] != nil {
-		sortDirection, err := valueObject.NewPaginationSortDirection(input["sortDirection"])
-		if err != nil {
-			return NewServiceOutput(UserError, err)
-		}
-		paginationDto.SortDirection = &sortDirection
-	}
-
-	if input["lastSeenId"] != nil {
-		lastSeenId, err := valueObject.NewPaginationLastSeenId(input["lastSeenId"])
-		if err != nil {
-			return NewServiceOutput(UserError, err)
-		}
-		paginationDto.LastSeenId = &lastSeenId
+	requestPagination, err := serviceHelper.PaginationParser(
+		input, useCase.BackupDestinationsDefaultPagination,
+	)
+	if err != nil {
+		return NewServiceOutput(UserError, err)
 	}
 
 	readDto := dto.ReadBackupDestinationsRequest{
-		Pagination:            paginationDto,
+		Pagination:            requestPagination,
 		DestinationId:         destinationIdPtr,
 		AccountId:             accountIdPtr,
 		DestinationName:       destinationNamePtr,
@@ -166,11 +113,113 @@ func (service *BackupService) ReadDestination(input map[string]interface{}) Serv
 		ObjectStorageProvider: objectStorageProviderPtr,
 		RemoteHostType:        remoteHostTypePtr,
 		RemoteHostname:        remoteHostnamePtr,
-		CreatedBeforeAt:       createdBeforeAtPtr,
-		CreatedAfterAt:        createdAfterAtPtr,
+		CreatedBeforeAt:       timeParamPtrs["createdBeforeAt"],
+		CreatedAfterAt:        timeParamPtrs["createdAfterAt"],
 	}
 
 	responseDto, err := useCase.ReadBackupDestinations(service.backupQueryRepo, readDto)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, responseDto)
+}
+
+func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutput {
+	var jobIdPtr *valueObject.BackupJobId
+	if input["jobId"] != nil {
+		jobId, err := valueObject.NewBackupJobId(input["jobId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		jobIdPtr = &jobId
+	}
+
+	var jobStatusPtr *bool
+	if input["jobStatus"] != nil {
+		jobStatus, err := voHelper.InterfaceToBool(input["jobStatus"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidJobStatus"))
+		}
+		jobStatusPtr = &jobStatus
+	}
+
+	var accountIdPtr *valueObject.AccountId
+	if input["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(input["accountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		accountIdPtr = &accountId
+	}
+
+	var destinationIdPtr *valueObject.BackupDestinationId
+	if input["destinationId"] != nil {
+		destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		destinationIdPtr = &destinationId
+	}
+
+	var backupTypePtr *valueObject.BackupJobType
+	if input["backupType"] != nil {
+		backupType, err := valueObject.NewBackupJobType(input["backupType"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		backupTypePtr = &backupType
+	}
+
+	var archiveCompressionFormatPtr *valueObject.CompressionFormat
+	if input["archiveCompressionFormat"] != nil {
+		archiveCompressionFormat, err := valueObject.NewCompressionFormat(input["archiveCompressionFormat"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		archiveCompressionFormatPtr = &archiveCompressionFormat
+	}
+
+	var lastRunStatusPtr *valueObject.BackupTaskStatus
+	if input["lastRunStatus"] != nil {
+		lastRunStatus, err := valueObject.NewBackupTaskStatus(input["lastRunStatus"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		lastRunStatusPtr = &lastRunStatus
+	}
+
+	timeParamNames := []string{
+		"lastRunBeforeAt", "lastRunAfterAt", "nextRunBeforeAt", "nextRunAfterAt",
+		"createdBeforeAt", "createdAfterAt",
+	}
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+
+	requestPagination, err := serviceHelper.PaginationParser(
+		input, useCase.BackupJobsDefaultPagination,
+	)
+	if err != nil {
+		return NewServiceOutput(UserError, err)
+	}
+
+	readDto := dto.ReadBackupJobsRequest{
+		Pagination:               requestPagination,
+		JobId:                    jobIdPtr,
+		JobStatus:                jobStatusPtr,
+		AccountId:                accountIdPtr,
+		DestinationId:            destinationIdPtr,
+		BackupType:               backupTypePtr,
+		ArchiveCompressionFormat: archiveCompressionFormatPtr,
+		LastRunStatus:            lastRunStatusPtr,
+		LastRunBeforeAt:          timeParamPtrs["lastRunBeforeAt"],
+		LastRunAfterAt:           timeParamPtrs["lastRunAfterAt"],
+		NextRunBeforeAt:          timeParamPtrs["nextRunBeforeAt"],
+		NextRunAfterAt:           timeParamPtrs["nextRunAfterAt"],
+		CreatedBeforeAt:          timeParamPtrs["createdBeforeAt"],
+		CreatedAfterAt:           timeParamPtrs["createdAfterAt"],
+	}
+
+	responseDto, err := useCase.ReadBackupJobs(service.backupQueryRepo, readDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
