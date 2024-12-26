@@ -91,6 +91,7 @@ func (service *PersistentDatabaseService) RunMigrations() error {
 		&dbModel.AccountQuotaUsage{},
 		&dbModel.BackupDestination{},
 		&dbModel.BackupJob{},
+		&dbModel.BackupTask{},
 		&dbModel.Container{},
 		&dbModel.ContainerPortBinding{},
 		&dbModel.ContainerProfile{},
