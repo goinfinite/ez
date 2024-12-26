@@ -16,7 +16,7 @@ type BackupTask struct {
 	RetentionStrategy string   `gorm:"not null"`
 	BackupSchedule    string   `gorm:"not null"`
 	TimeoutSecs       uint64   `gorm:"not null"`
-	ContainerIds      []uint64 `gorm:"serializer:json"`
+	ContainerIds      []string `gorm:"serializer:json"`
 	ExecutionOutput   *string
 	StartedAt         *time.Time
 	FinishedAt        *time.Time
