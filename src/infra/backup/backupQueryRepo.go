@@ -3,13 +3,12 @@ package backupInfra
 import (
 	"errors"
 	"log/slog"
-	"math"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/infra/db"
+	dbHelper "github.com/goinfinite/ez/src/infra/db/helper"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
-	"github.com/iancoleman/strcase"
 )
 
 type BackupQueryRepo struct {
@@ -58,35 +57,15 @@ func (repo *BackupQueryRepo) ReadDestination(
 		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
 	}
 
-	var itemsTotal int64
-	err = dbQuery.Count(&itemsTotal).Error
+	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
+		dbQuery, readDto.Pagination,
+	)
 	if err != nil {
-		return responseDto, errors.New("CountItemsTotalError: " + err.Error())
-	}
-
-	dbQuery = dbQuery.Limit(int(readDto.Pagination.ItemsPerPage))
-	if readDto.Pagination.LastSeenId == nil {
-		offset := int(readDto.Pagination.PageNumber) * int(readDto.Pagination.ItemsPerPage)
-		dbQuery = dbQuery.Offset(offset)
-	} else {
-		dbQuery = dbQuery.Where("id > ?", readDto.Pagination.LastSeenId.String())
-	}
-	if readDto.Pagination.SortBy != nil {
-		orderStatement := readDto.Pagination.SortBy.String()
-		orderStatement = strcase.ToSnake(orderStatement)
-		if orderStatement == "id" {
-			orderStatement = "ID"
-		}
-
-		if readDto.Pagination.SortDirection != nil {
-			orderStatement += " " + readDto.Pagination.SortDirection.String()
-		}
-
-		dbQuery = dbQuery.Order(orderStatement)
+		return responseDto, errors.New("PaginationQueryBuilderError: " + err.Error())
 	}
 
 	backupDestinationModels := []dbModel.BackupDestination{}
-	err = dbQuery.Find(&backupDestinationModels).Error
+	err = paginatedDbQuery.Find(&backupDestinationModels).Error
 	if err != nil {
 		return responseDto, errors.New("FindBackupDestinationsError: " + err.Error())
 	}
@@ -102,19 +81,6 @@ func (repo *BackupQueryRepo) ReadDestination(
 			continue
 		}
 		backupDestinationEntities = append(backupDestinationEntities, backupDestinationEntity)
-	}
-
-	itemsTotalUint := uint64(itemsTotal)
-	pagesTotal := uint32(
-		math.Ceil(float64(itemsTotal) / float64(readDto.Pagination.ItemsPerPage)),
-	)
-	responsePagination := dto.Pagination{
-		PageNumber:    readDto.Pagination.PageNumber,
-		ItemsPerPage:  readDto.Pagination.ItemsPerPage,
-		SortBy:        readDto.Pagination.SortBy,
-		SortDirection: readDto.Pagination.SortDirection,
-		PagesTotal:    &pagesTotal,
-		ItemsTotal:    &itemsTotalUint,
 	}
 
 	return dto.ReadBackupDestinationsResponse{
