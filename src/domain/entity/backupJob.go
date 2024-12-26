@@ -14,8 +14,8 @@ type BackupJob struct {
 	DestinationIds            []valueObject.BackupDestinationId `json:"destinationIds"`
 	BackupType                valueObject.BackupJobType         `json:"backupType"`
 	BackupSchedule            valueObject.CronSchedule          `json:"backupSchedule"`
-	ArchiveCompressionFormat  *valueObject.CompressionFormat    `json:"archiveCompressionFormat"`
-	TimeoutSecs               *uint64                           `json:"timeoutSecs"`
+	ArchiveCompressionFormat  valueObject.CompressionFormat     `json:"archiveCompressionFormat"`
+	TimeoutSecs               uint64                            `json:"timeoutSecs"`
 	MaxTaskRetentionCount     *uint16                           `json:"maxTaskRetentionCount"`
 	MaxTaskRetentionDays      *uint16                           `json:"maxTaskRetentionDays"`
 	MaxConcurrentCpuCores     *uint16                           `json:"maxConcurrentCpuCores"`
@@ -62,14 +62,14 @@ func NewBackupJob(
 		return backupJob, errors.New("IncrementalBackupJobNotSupportedYet")
 	}
 
-	if archiveCompressionFormatPtr == nil {
-		archiveCompressionFormat := valueObject.CompressionFormatBrotli
-		archiveCompressionFormatPtr = &archiveCompressionFormat
+	archiveCompressionFormat := valueObject.CompressionFormatBrotli
+	if archiveCompressionFormatPtr != nil {
+		archiveCompressionFormat = *archiveCompressionFormatPtr
 	}
 
-	if timeoutSecsPtr == nil {
-		timeoutSecs := uint64(8 * 60 * 60)
-		timeoutSecsPtr = &timeoutSecs
+	timeoutSecs := uint64(8 * 60 * 60)
+	if timeoutSecsPtr != nil {
+		timeoutSecs = *timeoutSecsPtr
 	}
 
 	return BackupJob{
@@ -80,8 +80,8 @@ func NewBackupJob(
 		DestinationIds:            destinationIds,
 		BackupType:                backupType,
 		BackupSchedule:            backupSchedule,
-		ArchiveCompressionFormat:  archiveCompressionFormatPtr,
-		TimeoutSecs:               timeoutSecsPtr,
+		ArchiveCompressionFormat:  archiveCompressionFormat,
+		TimeoutSecs:               timeoutSecs,
 		MaxTaskRetentionCount:     maxTaskRetentionCount,
 		MaxTaskRetentionDays:      maxTaskRetentionDays,
 		MaxConcurrentCpuCores:     maxConcurrentCpuCores,
