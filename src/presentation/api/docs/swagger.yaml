@@ -198,6 +198,15 @@ definitions:
       pagination:
         $ref: '#/definitions/dto.Pagination'
     type: object
+  dto.ReadBackupTasksResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+      tasks:
+        items:
+          $ref: '#/definitions/entity.BackupTask'
+        type: array
+    type: object
   dto.ReadContainersResponse:
     properties:
       containers:
@@ -368,6 +377,39 @@ definitions:
       totalSpaceUsageBytes:
         type: integer
       updatedAt:
+        type: integer
+    type: object
+  entity.BackupTask:
+    properties:
+      accountId:
+        type: integer
+      backupSchedule:
+        type: string
+      containerIds:
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: integer
+      destinationId:
+        type: integer
+      elapsedSecs:
+        type: integer
+      executionOutput:
+        type: string
+      finishedAt:
+        type: integer
+      jobId:
+        type: integer
+      retentionStrategy:
+        $ref: '#/definitions/valueObject.BackupRetentionStrategy'
+      startedAt:
+        type: integer
+      taskId:
+        type: integer
+      taskStatus:
+        $ref: '#/definitions/valueObject.BackupTaskStatus'
+      timeoutSecs:
         type: integer
     type: object
   entity.Container:
@@ -1153,6 +1195,96 @@ paths:
       security:
       - Bearer: []
       summary: ReadBackupJobs
+      tags:
+      - backup
+  /v1/backup/task/:
+    get:
+      consumes:
+      - application/json
+      description: List backup tasks.
+      parameters:
+      - description: BackupTaskId
+        in: query
+        name: taskId
+        type: string
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupJobId
+        in: query
+        name: jobId
+        type: string
+      - description: BackupDestinationId
+        in: query
+        name: destinationId
+        type: string
+      - description: BackupTaskStatus
+        in: query
+        name: taskStatus
+        type: string
+      - description: RetentionStrategy
+        in: query
+        name: retentionStrategy
+        type: string
+      - description: ContainerId
+        in: query
+        name: containerId
+        type: string
+      - description: StartedBeforeAt
+        in: query
+        name: startedBeforeAt
+        type: string
+      - description: StartedAfterAt
+        in: query
+        name: startedAfterAt
+        type: string
+      - description: FinishedBeforeAt
+        in: query
+        name: finishedBeforeAt
+        type: string
+      - description: FinishedAfterAt
+        in: query
+        name: finishedAfterAt
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupTasksResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupTasks
       tags:
       - backup
   /v1/container/:

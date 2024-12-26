@@ -451,6 +451,144 @@
                 }
             }
         },
+        "/v1/backup/task/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backup tasks.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupTasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskId",
+                        "name": "taskId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupTaskStatus",
+                        "name": "taskStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RetentionStrategy",
+                        "name": "retentionStrategy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedBeforeAt",
+                        "name": "startedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedAfterAt",
+                        "name": "startedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FinishedBeforeAt",
+                        "name": "finishedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FinishedAfterAt",
+                        "name": "finishedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupTasksResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/": {
             "get": {
                 "security": [
@@ -2355,6 +2493,20 @@
                 }
             }
         },
+        "dto.ReadBackupTasksResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.BackupTask"
+                    }
+                }
+            }
+        },
         "dto.ReadContainersResponse": {
             "type": "object",
             "properties": {
@@ -2614,6 +2766,56 @@
                     "type": "integer"
                 },
                 "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.BackupTask": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "destinationId": {
+                    "type": "integer"
+                },
+                "elapsedSecs": {
+                    "type": "integer"
+                },
+                "executionOutput": {
+                    "type": "string"
+                },
+                "finishedAt": {
+                    "type": "integer"
+                },
+                "jobId": {
+                    "type": "integer"
+                },
+                "retentionStrategy": {
+                    "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
+                },
+                "startedAt": {
+                    "type": "integer"
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "taskStatus": {
+                    "$ref": "#/definitions/valueObject.BackupTaskStatus"
+                },
+                "timeoutSecs": {
                     "type": "integer"
                 }
             }

@@ -122,3 +122,52 @@ func (controller *BackupController) ReadJob(c echo.Context) error {
 		c, controller.backupService.ReadJob(requestBody),
 	)
 }
+
+// ReadBackupTasks	 godoc
+// @Summary      ReadBackupTasks
+// @Description  List backup tasks.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        taskId query  string  false  "BackupTaskId"
+// @Param        accountId query  uint  false  "BackupAccountId"
+// @Param        jobId query  string  false  "BackupJobId"
+// @Param        destinationId query  string  false  "BackupDestinationId"
+// @Param        taskStatus query  string  false  "BackupTaskStatus"
+// @Param        retentionStrategy query  string  false  "RetentionStrategy"
+// @Param        containerId query  string  false  "ContainerId"
+// @Param        startedBeforeAt query  string  false  "StartedBeforeAt"
+// @Param        startedAfterAt query  string  false  "StartedAfterAt"
+// @Param        finishedBeforeAt query  string  false  "FinishedBeforeAt"
+// @Param        finishedAfterAt query  string  false  "FinishedAfterAt"
+// @Param        createdBeforeAt query  string  false  "CreatedBeforeAt"
+// @Param        createdAfterAt query  string  false  "CreatedAfterAt"
+// @Param        pageNumber query  uint  false  "PageNumber (Pagination)"
+// @Param        itemsPerPage query  uint  false  "ItemsPerPage (Pagination)"
+// @Param        sortBy query  string  false  "SortBy (Pagination)"
+// @Param        sortDirection query  string  false  "SortDirection (Pagination)"
+// @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
+// @Success      200 {object} dto.ReadBackupTasksResponse
+// @Router       /v1/backup/task/ [get]
+func (controller *BackupController) ReadTask(c echo.Context) error {
+	requestBody := map[string]interface{}{}
+	queryParameters := []string{
+		"taskId", "accountId", "jobId", "destinationId", "taskStatus",
+		"retentionStrategy", "containerId", "startedBeforeAt", "startedAfterAt",
+		"finishedBeforeAt", "finishedAfterAt", "createdBeforeAt", "createdAfterAt",
+		"pageNumber", "itemsPerPage", "sortBy", "sortDirection", "lastSeenId",
+	}
+	for _, paramName := range queryParameters {
+		paramValue := c.QueryParam(paramName)
+		if paramValue == "" {
+			continue
+		}
+
+		requestBody[paramName] = strings.Trim(paramValue, "\"")
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.ReadTask(requestBody),
+	)
+}
