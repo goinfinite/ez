@@ -365,8 +365,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "BackupType",
-                        "name": "backupType",
+                        "description": "RetentionStrategy",
+                        "name": "retentionStrategy",
                         "in": "query"
                     },
                     {
@@ -2548,9 +2548,6 @@ const docTemplate = `{
                 "backupSchedule": {
                     "type": "string"
                 },
-                "backupType": {
-                    "$ref": "#/definitions/valueObject.BackupJobType"
-                },
                 "containerAccountIds": {
                     "type": "array",
                     "items": {
@@ -2610,6 +2607,9 @@ const docTemplate = `{
                 },
                 "nextRunAt": {
                     "type": "integer"
+                },
+                "retentionStrategy": {
+                    "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
                 },
                 "tasksCount": {
                     "type": "integer"
@@ -3098,15 +3098,15 @@ const docTemplate = `{
                 }
             }
         },
-        "valueObject.BackupJobType": {
+        "valueObject.BackupRetentionStrategy": {
             "type": "string",
             "enum": [
                 "full",
                 "incremental"
             ],
             "x-enum-varnames": [
-                "BackupJobTypeFull",
-                "BackupJobTypeIncremental"
+                "BackupRetentionStrategyFull",
+                "BackupRetentionStrategyIncremental"
             ]
         },
         "valueObject.BackupTaskStatus": {

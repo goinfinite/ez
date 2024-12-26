@@ -117,7 +117,7 @@ func (controller *BackupController) ReadDestination() *cobra.Command {
 
 func (controller *BackupController) ReadJob() *cobra.Command {
 	var jobIdUint, accountIdUint, destinationIdUint uint64
-	var backupTypeStr, jobStatusStr, archiveCompressionFormatStr, lastRunStatusStr string
+	var retentionStrategyStr, jobStatusStr, archiveCompressionFormatStr, lastRunStatusStr string
 	var paginationPageNumberUint32 uint32
 	var paginationItemsPerPageUint16 uint16
 	var paginationSortByStr, paginationSortDirectionStr string
@@ -145,8 +145,8 @@ func (controller *BackupController) ReadJob() *cobra.Command {
 				requestBody["destinationId"] = destinationIdUint
 			}
 
-			if backupTypeStr != "" {
-				requestBody["backupType"] = backupTypeStr
+			if retentionStrategyStr != "" {
+				requestBody["retentionStrategy"] = retentionStrategyStr
 			}
 
 			if archiveCompressionFormatStr != "" {
@@ -183,7 +183,7 @@ func (controller *BackupController) ReadJob() *cobra.Command {
 	cmd.Flags().StringVarP(&jobStatusStr, "job-status", "s", "", "BackupJobStatus")
 	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "BackupAccountId")
 	cmd.Flags().Uint64VarP(&destinationIdUint, "destination-id", "d", 0, "BackupDestinationId")
-	cmd.Flags().StringVarP(&backupTypeStr, "backup-type", "b", "", "BackupType")
+	cmd.Flags().StringVarP(&retentionStrategyStr, "retention-strategy", "r", "", "RetentionStrategy")
 	cmd.Flags().StringVarP(
 		&archiveCompressionFormatStr, "archive-compression-format", "c", "", "ArchiveCompressionFormat",
 	)

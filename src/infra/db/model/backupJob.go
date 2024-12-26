@@ -13,7 +13,7 @@ type BackupJob struct {
 	JobStatus                 bool   `gorm:"not null"`
 	JobDescription            *string
 	DestinationIds            []uint64 `gorm:"serializer:json"`
-	BackupType                string   `gorm:"not null"`
+	RetentionStrategy         string   `gorm:"not null"`
 	BackupSchedule            string   `gorm:"not null"`
 	ArchiveCompressionFormat  string   `gorm:"not null"`
 	TimeoutSecs               uint64   `gorm:"not null"`
@@ -66,7 +66,7 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 		destinationIds = append(destinationIds, destinationId)
 	}
 
-	backupType, err := valueObject.NewBackupJobType(model.BackupType)
+	retentionStrategy, err := valueObject.NewBackupRetentionStrategy(model.RetentionStrategy)
 	if err != nil {
 		return jobEntity, err
 	}
@@ -149,7 +149,7 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 
 	return entity.NewBackupJob(
 		jobId, accountId, model.JobStatus, jobDescriptionPtr, destinationIds,
-		backupType, backupSchedule, &archiveCompressionFormat, &model.TimeoutSecs,
+		retentionStrategy, backupSchedule, &archiveCompressionFormat, &model.TimeoutSecs,
 		model.MaxTaskRetentionCount, model.MaxTaskRetentionDays,
 		model.MaxConcurrentCpuCores, containerAccountIds, containerIds,
 		ignoreContainerAccountIds, ignoreContainerIds, model.TasksCount,

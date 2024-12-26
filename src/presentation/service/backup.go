@@ -162,13 +162,13 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 		destinationIdPtr = &destinationId
 	}
 
-	var backupTypePtr *valueObject.BackupJobType
-	if input["backupType"] != nil {
-		backupType, err := valueObject.NewBackupJobType(input["backupType"])
+	var retentionStrategyPtr *valueObject.BackupRetentionStrategy
+	if input["retentionStrategy"] != nil {
+		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(input["retentionStrategy"])
 		if err != nil {
 			return NewServiceOutput(UserError, err.Error())
 		}
-		backupTypePtr = &backupType
+		retentionStrategyPtr = &retentionStrategy
 	}
 
 	var archiveCompressionFormatPtr *valueObject.CompressionFormat
@@ -208,7 +208,7 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 		JobStatus:                jobStatusPtr,
 		AccountId:                accountIdPtr,
 		DestinationId:            destinationIdPtr,
-		BackupType:               backupTypePtr,
+		RetentionStrategy:        retentionStrategyPtr,
 		ArchiveCompressionFormat: archiveCompressionFormatPtr,
 		LastRunStatus:            lastRunStatusPtr,
 		LastRunBeforeAt:          timeParamPtrs["lastRunBeforeAt"],

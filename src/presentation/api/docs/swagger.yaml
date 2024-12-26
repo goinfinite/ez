@@ -319,8 +319,6 @@ definitions:
         $ref: '#/definitions/valueObject.CompressionFormat'
       backupSchedule:
         type: string
-      backupType:
-        $ref: '#/definitions/valueObject.BackupJobType'
       containerAccountIds:
         items:
           type: integer
@@ -361,6 +359,8 @@ definitions:
         type: integer
       nextRunAt:
         type: integer
+      retentionStrategy:
+        $ref: '#/definitions/valueObject.BackupRetentionStrategy'
       tasksCount:
         type: integer
       timeoutSecs:
@@ -682,14 +682,14 @@ definitions:
       storagePerformanceUnits:
         type: integer
     type: object
-  valueObject.BackupJobType:
+  valueObject.BackupRetentionStrategy:
     enum:
     - full
     - incremental
     type: string
     x-enum-varnames:
-    - BackupJobTypeFull
-    - BackupJobTypeIncremental
+    - BackupRetentionStrategyFull
+    - BackupRetentionStrategyIncremental
   valueObject.BackupTaskStatus:
     enum:
     - completed
@@ -1087,9 +1087,9 @@ paths:
         in: query
         name: destinationId
         type: string
-      - description: BackupType
+      - description: RetentionStrategy
         in: query
-        name: backupType
+        name: retentionStrategy
         type: string
       - description: ArchiveCompressionFormat
         in: query

@@ -7,29 +7,29 @@ import (
 )
 
 type BackupJob struct {
-	JobId                     valueObject.BackupJobId           `json:"jobId"`
-	AccountId                 valueObject.AccountId             `json:"accountId"`
-	JobStatus                 bool                              `json:"jobsStatus"`
-	JobDescription            *valueObject.BackupJobDescription `json:"jobDescription"`
-	DestinationIds            []valueObject.BackupDestinationId `json:"destinationIds"`
-	BackupType                valueObject.BackupJobType         `json:"backupType"`
-	BackupSchedule            valueObject.CronSchedule          `json:"backupSchedule"`
-	ArchiveCompressionFormat  valueObject.CompressionFormat     `json:"archiveCompressionFormat"`
-	TimeoutSecs               uint64                            `json:"timeoutSecs"`
-	MaxTaskRetentionCount     *uint16                           `json:"maxTaskRetentionCount"`
-	MaxTaskRetentionDays      *uint16                           `json:"maxTaskRetentionDays"`
-	MaxConcurrentCpuCores     *uint16                           `json:"maxConcurrentCpuCores"`
-	ContainerAccountIds       []valueObject.AccountId           `json:"containerAccountIds"`
-	ContainerIds              []valueObject.ContainerId         `json:"containerIds"`
-	IgnoreContainerAccountIds []valueObject.AccountId           `json:"ignoreContainerAccountIds"`
-	IgnoreContainerIds        []valueObject.ContainerId         `json:"ignoreContainerIds"`
-	TasksCount                *uint16                           `json:"tasksCount"`
-	TotalSpaceUsageBytes      *valueObject.Byte                 `json:"totalSpaceUsageBytes"`
-	LastRunAt                 *valueObject.UnixTime             `json:"lastRunAt"`
-	LastRunStatus             *valueObject.BackupTaskStatus     `json:"lastRunStatus"`
-	NextRunAt                 *valueObject.UnixTime             `json:"nextRunAt"`
-	CreatedAt                 valueObject.UnixTime              `json:"createdAt"`
-	UpdatedAt                 valueObject.UnixTime              `json:"updatedAt"`
+	JobId                     valueObject.BackupJobId             `json:"jobId"`
+	AccountId                 valueObject.AccountId               `json:"accountId"`
+	JobStatus                 bool                                `json:"jobsStatus"`
+	JobDescription            *valueObject.BackupJobDescription   `json:"jobDescription"`
+	DestinationIds            []valueObject.BackupDestinationId   `json:"destinationIds"`
+	RetentionStrategy         valueObject.BackupRetentionStrategy `json:"retentionStrategy"`
+	BackupSchedule            valueObject.CronSchedule            `json:"backupSchedule"`
+	ArchiveCompressionFormat  valueObject.CompressionFormat       `json:"archiveCompressionFormat"`
+	TimeoutSecs               uint64                              `json:"timeoutSecs"`
+	MaxTaskRetentionCount     *uint16                             `json:"maxTaskRetentionCount"`
+	MaxTaskRetentionDays      *uint16                             `json:"maxTaskRetentionDays"`
+	MaxConcurrentCpuCores     *uint16                             `json:"maxConcurrentCpuCores"`
+	ContainerAccountIds       []valueObject.AccountId             `json:"containerAccountIds"`
+	ContainerIds              []valueObject.ContainerId           `json:"containerIds"`
+	IgnoreContainerAccountIds []valueObject.AccountId             `json:"ignoreContainerAccountIds"`
+	IgnoreContainerIds        []valueObject.ContainerId           `json:"ignoreContainerIds"`
+	TasksCount                *uint16                             `json:"tasksCount"`
+	TotalSpaceUsageBytes      *valueObject.Byte                   `json:"totalSpaceUsageBytes"`
+	LastRunAt                 *valueObject.UnixTime               `json:"lastRunAt"`
+	LastRunStatus             *valueObject.BackupTaskStatus       `json:"lastRunStatus"`
+	NextRunAt                 *valueObject.UnixTime               `json:"nextRunAt"`
+	CreatedAt                 valueObject.UnixTime                `json:"createdAt"`
+	UpdatedAt                 valueObject.UnixTime                `json:"updatedAt"`
 }
 
 func NewBackupJob(
@@ -38,7 +38,7 @@ func NewBackupJob(
 	jobStatus bool,
 	jobDescription *valueObject.BackupJobDescription,
 	destinationIds []valueObject.BackupDestinationId,
-	backupType valueObject.BackupJobType,
+	retentionStrategy valueObject.BackupRetentionStrategy,
 	backupSchedule valueObject.CronSchedule,
 	archiveCompressionFormatPtr *valueObject.CompressionFormat,
 	timeoutSecsPtr *uint64,
@@ -58,7 +58,7 @@ func NewBackupJob(
 		return backupJob, errors.New("BackupJobMustHaveAtLeastOneDestination")
 	}
 
-	if backupType == valueObject.BackupJobTypeIncremental {
+	if retentionStrategy == valueObject.BackupRetentionStrategyIncremental {
 		return backupJob, errors.New("IncrementalBackupJobNotSupportedYet")
 	}
 
@@ -78,7 +78,7 @@ func NewBackupJob(
 		JobStatus:                 jobStatus,
 		JobDescription:            jobDescription,
 		DestinationIds:            destinationIds,
-		BackupType:                backupType,
+		RetentionStrategy:         retentionStrategy,
 		BackupSchedule:            backupSchedule,
 		ArchiveCompressionFormat:  archiveCompressionFormat,
 		TimeoutSecs:               timeoutSecs,

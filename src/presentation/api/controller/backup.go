@@ -84,7 +84,7 @@ func (controller *BackupController) ReadDestination(c echo.Context) error {
 // @Param        jobStatus query  bool  false  "BackupJobStatus"
 // @Param        accountId query  uint  false  "BackupAccountId"
 // @Param        destinationId query  string  false  "BackupDestinationId"
-// @Param        backupType query  string  false  "BackupType"
+// @Param        retentionStrategy query  string  false  "RetentionStrategy"
 // @Param        archiveCompressionFormat query  string  false  "ArchiveCompressionFormat"
 // @Param        lastRunStatus query  string  false  "LastRunStatus"
 // @Param        lastRunBeforeAt query  string  false  "LastRunBeforeAt"
@@ -103,7 +103,7 @@ func (controller *BackupController) ReadDestination(c echo.Context) error {
 func (controller *BackupController) ReadJob(c echo.Context) error {
 	requestBody := map[string]interface{}{}
 	queryParameters := []string{
-		"jobId", "jobStatus", "accountId", "destinationId", "backupType",
+		"jobId", "jobStatus", "accountId", "destinationId", "retentionStrategy",
 		"archiveCompressionFormat", "lastRunStatus", "lastRunBeforeAt",
 		"lastRunAfterAt", "nextRunBeforeAt", "nextRunAfterAt",
 		"createdBeforeAt", "createdAfterAt", "pageNumber", "itemsPerPage",

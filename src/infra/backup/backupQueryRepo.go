@@ -107,9 +107,9 @@ func (repo *BackupQueryRepo) ReadJob(
 	if readDto.DestinationId != nil {
 		backupJobModel.DestinationIds = []uint64{readDto.DestinationId.Uint64()}
 	}
-	if readDto.BackupType != nil {
-		backupTypeStr := readDto.BackupType.String()
-		backupJobModel.BackupType = backupTypeStr
+	if readDto.RetentionStrategy != nil {
+		retentionStrategyStr := readDto.RetentionStrategy.String()
+		backupJobModel.RetentionStrategy = retentionStrategyStr
 	}
 	if readDto.ArchiveCompressionFormat != nil {
 		archiveCompressionFormatStr := readDto.ArchiveCompressionFormat.String()
