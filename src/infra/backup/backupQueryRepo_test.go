@@ -44,4 +44,20 @@ func TestBackupQueryRepo(t *testing.T) {
 			t.Errorf("NoItemsFound")
 		}
 	})
+
+	t.Run("ReadTask", func(t *testing.T) {
+		readDto := dto.ReadBackupTasksRequest{
+			Pagination: useCase.BackupTasksDefaultPagination,
+		}
+
+		responseDto, err := backupQueryRepo.ReadTask(readDto)
+		if err != nil {
+			t.Errorf("ReadTaskError: %v", err)
+			return
+		}
+
+		if len(responseDto.Tasks) == 0 {
+			t.Errorf("NoItemsFound")
+		}
+	})
 }

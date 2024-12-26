@@ -24,8 +24,6 @@ func NewBackupQueryRepo(
 func (repo *BackupQueryRepo) ReadDestination(
 	readDto dto.ReadBackupDestinationsRequest,
 ) (responseDto dto.ReadBackupDestinationsResponse, err error) {
-	backupDestinationEntities := []entity.IBackupDestination{}
-
 	backupDestinationModel := dbModel.BackupDestination{}
 	if readDto.DestinationId != nil {
 		backupDestinationModel.ID = readDto.DestinationId.Uint64()
@@ -70,6 +68,7 @@ func (repo *BackupQueryRepo) ReadDestination(
 		return responseDto, errors.New("FindBackupDestinationsError: " + err.Error())
 	}
 
+	backupDestinationEntities := []entity.IBackupDestination{}
 	for _, backupDestinationModel := range backupDestinationModels {
 		backupDestinationEntity, err := backupDestinationModel.ToEntity()
 		if err != nil {
@@ -92,8 +91,6 @@ func (repo *BackupQueryRepo) ReadDestination(
 func (repo *BackupQueryRepo) ReadJob(
 	readDto dto.ReadBackupJobsRequest,
 ) (responseDto dto.ReadBackupJobsResponse, err error) {
-	backupJobEntities := []entity.BackupJob{}
-
 	backupJobModel := dbModel.BackupJob{}
 	if readDto.JobId != nil {
 		backupJobModel.ID = readDto.JobId.Uint64()
@@ -153,6 +150,7 @@ func (repo *BackupQueryRepo) ReadJob(
 		return responseDto, errors.New("FindBackupJobsError: " + err.Error())
 	}
 
+	backupJobEntities := []entity.BackupJob{}
 	for _, backupJobModel := range backupJobModels {
 		backupJobEntity, err := backupJobModel.ToEntity()
 		if err != nil {
@@ -169,5 +167,86 @@ func (repo *BackupQueryRepo) ReadJob(
 	return dto.ReadBackupJobsResponse{
 		Pagination: responsePagination,
 		Jobs:       backupJobEntities,
+	}, nil
+}
+
+func (repo *BackupQueryRepo) ReadTask(
+	readDto dto.ReadBackupTasksRequest,
+) (responseDto dto.ReadBackupTasksResponse, err error) {
+	backupTaskModel := dbModel.BackupTask{}
+	if readDto.TaskId != nil {
+		backupTaskModel.ID = readDto.TaskId.Uint64()
+	}
+	if readDto.AccountId != nil {
+		backupTaskModel.AccountID = readDto.AccountId.Uint64()
+	}
+	if readDto.JobId != nil {
+		backupTaskModel.JobID = readDto.JobId.Uint64()
+	}
+	if readDto.DestinationId != nil {
+		backupTaskModel.DestinationID = readDto.DestinationId.Uint64()
+	}
+	if readDto.TaskStatus != nil {
+		taskStatusStr := readDto.TaskStatus.String()
+		backupTaskModel.TaskStatus = taskStatusStr
+	}
+	if readDto.RetentionStrategy != nil {
+		retentionStrategyStr := readDto.RetentionStrategy.String()
+		backupTaskModel.RetentionStrategy = retentionStrategyStr
+	}
+	if readDto.ContainerId != nil {
+		backupTaskModel.ContainerIds = []string{readDto.ContainerId.String()}
+	}
+
+	dbQuery := repo.persistentDbSvc.Handler.Model(backupTaskModel).Where(&backupTaskModel)
+	if readDto.StartedBeforeAt != nil {
+		dbQuery = dbQuery.Where("started_at < ?", readDto.StartedBeforeAt.GetAsGoTime())
+	}
+	if readDto.StartedAfterAt != nil {
+		dbQuery = dbQuery.Where("started_at > ?", readDto.StartedAfterAt.GetAsGoTime())
+	}
+	if readDto.FinishedBeforeAt != nil {
+		dbQuery = dbQuery.Where("finished_at < ?", readDto.FinishedBeforeAt.GetAsGoTime())
+	}
+	if readDto.FinishedAfterAt != nil {
+		dbQuery = dbQuery.Where("finished_at > ?", readDto.FinishedAfterAt.GetAsGoTime())
+	}
+	if readDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", readDto.CreatedBeforeAt.GetAsGoTime())
+	}
+	if readDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
+	}
+
+	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
+		dbQuery, readDto.Pagination,
+	)
+	if err != nil {
+		return responseDto, errors.New("PaginationQueryBuilderError: " + err.Error())
+	}
+
+	backupTaskModels := []dbModel.BackupTask{}
+	err = paginatedDbQuery.Find(&backupTaskModels).Error
+	if err != nil {
+		return responseDto, errors.New("FindBackupTasksError: " + err.Error())
+	}
+
+	backupTaskEntities := []entity.BackupTask{}
+	for _, backupTaskModel := range backupTaskModels {
+		backupTaskEntity, err := backupTaskModel.ToEntity()
+		if err != nil {
+			slog.Debug(
+				"ModelToEntityError",
+				slog.Uint64("id", backupTaskModel.ID),
+				slog.Any("error", err),
+			)
+			continue
+		}
+		backupTaskEntities = append(backupTaskEntities, backupTaskEntity)
+	}
+
+	return dto.ReadBackupTasksResponse{
+		Pagination: responsePagination,
+		Tasks:      backupTaskEntities,
 	}, nil
 }
