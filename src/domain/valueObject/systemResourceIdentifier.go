@@ -87,6 +87,15 @@ func NewMappingTargetSri(
 	)
 }
 
+func NewBackupDestinationSri(
+	accountId AccountId,
+	backupDestinationId BackupDestinationId,
+) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupDestination/" + backupDestinationId.String(),
+	)
+}
+
 func (vo SystemResourceIdentifier) String() string {
 	return string(vo)
 }

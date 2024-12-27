@@ -392,3 +392,21 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
 
 	uc.createActivityRecord(createRecordDto)
 }
+
+func (uc *CreateSecurityActivityRecord) CreateBackupDestination(
+	createDto dto.CreateBackupDestination,
+	destinationId valueObject.BackupDestinationId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupDestinationCreated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupDestinationSri(createDto.AccountId, destinationId),
+		},
+		OperatorAccountId: &createDto.OperatorAccountId,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
