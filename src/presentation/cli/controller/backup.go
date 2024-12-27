@@ -115,6 +115,210 @@ func (controller *BackupController) ReadDestination() *cobra.Command {
 	return cmd
 }
 
+func (controller *BackupController) CreateDestination() *cobra.Command {
+	var accountIdUint uint64
+	var minLocalStorageFreePercentUint8, maxDestinationStorageUsagePercentUint8 uint8
+	var maxConcurrentConnectionsUint16 uint16
+	var downloadBytesSecRateLimitUint64, uploadBytesSecRateLimitUint64 uint64
+	var destinationNameStr, destinationDescriptionStr, destinationTypeStr, destinationPathStr string
+	var skipCertificateVerificationBoolStr string
+	var objectStorageProviderStr, objectStorageProviderRegionStr, objectStorageProviderAccessKeyIdStr string
+	var objectStorageProviderSecretAccessKeyStr, objectStorageEndpointUrlStr, objectStorageBucketNameStr string
+	var remoteHostTypeStr, remoteHostnameStr, remoteHostUsernameStr string
+	var remoteHostPasswordStr, remoteHostPrivateKeyFilePathStr string
+	var remoteHostNetworkPortUint16, remoteHostConnectionTimeoutSecsUint16 uint16
+	var remoteHostConnectionRetrySecsUint16 uint16
+
+	cmd := &cobra.Command{
+		Use:   "create",
+		Short: "CreateBackupDestination",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"accountId":                   accountIdUint,
+				"destinationName":             destinationNameStr,
+				"destinationType":             destinationTypeStr,
+				"skipCertificateVerification": skipCertificateVerificationBoolStr,
+			}
+
+			if destinationDescriptionStr != "" {
+				requestBody["destinationDescription"] = destinationDescriptionStr
+			}
+
+			if destinationPathStr != "" {
+				requestBody["destinationPath"] = destinationPathStr
+			}
+
+			if minLocalStorageFreePercentUint8 != 0 {
+				requestBody["minLocalStorageFreePercent"] = minLocalStorageFreePercentUint8
+			}
+
+			if maxDestinationStorageUsagePercentUint8 != 0 {
+				requestBody["maxDestinationStorageUsagePercent"] = maxDestinationStorageUsagePercentUint8
+			}
+
+			if maxConcurrentConnectionsUint16 != 0 {
+				requestBody["maxConcurrentConnections"] = maxConcurrentConnectionsUint16
+			}
+
+			if downloadBytesSecRateLimitUint64 != 0 {
+				requestBody["downloadBytesSecRateLimit"] = downloadBytesSecRateLimitUint64
+			}
+
+			if uploadBytesSecRateLimitUint64 != 0 {
+				requestBody["uploadBytesSecRateLimit"] = uploadBytesSecRateLimitUint64
+			}
+
+			if objectStorageProviderStr != "" {
+				requestBody["objectStorageProvider"] = objectStorageProviderStr
+			}
+
+			if objectStorageProviderRegionStr != "" {
+				requestBody["objectStorageProviderRegion"] = objectStorageProviderRegionStr
+			}
+
+			if objectStorageProviderAccessKeyIdStr != "" {
+				requestBody["objectStorageProviderAccessKeyId"] = objectStorageProviderAccessKeyIdStr
+			}
+
+			if objectStorageProviderSecretAccessKeyStr != "" {
+				requestBody["objectStorageProviderSecretAccessKey"] = objectStorageProviderSecretAccessKeyStr
+			}
+
+			if objectStorageEndpointUrlStr != "" {
+				requestBody["objectStorageEndpointUrl"] = objectStorageEndpointUrlStr
+			}
+
+			if objectStorageBucketNameStr != "" {
+				requestBody["objectStorageBucketName"] = objectStorageBucketNameStr
+			}
+
+			if remoteHostTypeStr != "" {
+				requestBody["remoteHostType"] = remoteHostTypeStr
+			}
+
+			if remoteHostnameStr != "" {
+				requestBody["remoteHostname"] = remoteHostnameStr
+			}
+
+			if remoteHostNetworkPortUint16 != 0 {
+				requestBody["remoteHostNetworkPort"] = remoteHostNetworkPortUint16
+			}
+
+			if remoteHostUsernameStr != "" {
+				requestBody["remoteHostUsername"] = remoteHostUsernameStr
+			}
+
+			if remoteHostPasswordStr != "" {
+				requestBody["remoteHostPassword"] = remoteHostPasswordStr
+			}
+
+			if remoteHostPrivateKeyFilePathStr != "" {
+				requestBody["remoteHostPrivateKeyFilePath"] = remoteHostPrivateKeyFilePathStr
+			}
+
+			if remoteHostConnectionTimeoutSecsUint16 != 0 {
+				requestBody["remoteHostConnectionTimeoutSecs"] = remoteHostConnectionTimeoutSecsUint16
+			}
+
+			if remoteHostConnectionRetrySecsUint16 != 0 {
+				requestBody["remoteHostConnectionRetrySecs"] = remoteHostConnectionRetrySecsUint16
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.CreateDestination(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(
+		&destinationNameStr, "destination-name", "n", "", "BackupDestinationName",
+	)
+	cmd.MarkFlagRequired("destination-name")
+	cmd.Flags().StringVarP(
+		&destinationDescriptionStr, "destination-description", "D", "", "BackupDestinationDescription",
+	)
+	cmd.Flags().StringVarP(
+		&destinationTypeStr, "destination-type", "t", "", "BackupDestinationType",
+	)
+	cmd.MarkFlagRequired("destination-type")
+	cmd.Flags().StringVarP(
+		&destinationPathStr, "destination-path", "p", "", "BackupDestinationPath",
+	)
+	cmd.Flags().Uint8VarP(
+		&minLocalStorageFreePercentUint8, "min-local-storage-free-percent", "m", 0,
+		"MinLocalStorageFreePercent",
+	)
+	cmd.Flags().Uint8VarP(
+		&maxDestinationStorageUsagePercentUint8, "max-destination-storage-usage-percent",
+		"M", 0, "MaxDestinationStorageUsagePercent",
+	)
+	cmd.Flags().Uint16VarP(
+		&maxConcurrentConnectionsUint16, "max-concurrent-connections", "c", 0,
+		"MaxConcurrentConnections",
+	)
+	cmd.Flags().Uint64VarP(
+		&downloadBytesSecRateLimitUint64, "download-bytes-sec-rate-limit", "d", 0,
+		"DownloadBytesSecRateLimit",
+	)
+	cmd.Flags().Uint64VarP(
+		&uploadBytesSecRateLimitUint64, "upload-bytes-sec-rate-limit", "u", 0,
+		"UploadBytesSecRateLimit",
+	)
+	cmd.Flags().StringVarP(
+		&skipCertificateVerificationBoolStr, "skip-certificate-verification", "s",
+		"false", "SkipCertificateVerification",
+	)
+	cmd.Flags().StringVarP(
+		&objectStorageProviderStr, "object-storage-provider", "o", "", "ObjectStorageProvider",
+	)
+	cmd.Flags().StringVarP(
+		&objectStorageProviderRegionStr, "object-storage-provider-region", "r",
+		"", "ObjectStorageProviderRegion",
+	)
+	cmd.Flags().StringVarP(
+		&objectStorageProviderAccessKeyIdStr, "object-storage-provider-access-key-id", "k",
+		"", "ObjectStorageProviderAccessKeyId",
+	)
+	cmd.Flags().StringVarP(
+		&objectStorageProviderSecretAccessKeyStr, "object-storage-provider-secret-access-key",
+		"K", "", "ObjectStorageProviderSecretAccessKey",
+	)
+	cmd.Flags().StringVarP(
+		&objectStorageEndpointUrlStr, "object-storage-endpoint-url", "e", "", "ObjectStorageEndpointUrl",
+	)
+	cmd.Flags().StringVarP(
+		&objectStorageBucketNameStr, "object-storage-bucket-name", "b", "", "ObjectStorageBucketName",
+	)
+	cmd.Flags().StringVarP(
+		&remoteHostTypeStr, "remote-host-type", "R", "", "RemoteHostType",
+	)
+	cmd.Flags().StringVarP(
+		&remoteHostnameStr, "remote-hostname", "H", "", "RemoteHostname",
+	)
+	cmd.Flags().Uint16VarP(
+		&remoteHostNetworkPortUint16, "remote-host-network-port", "N", 0, "RemoteHostNetworkPort",
+	)
+	cmd.Flags().StringVarP(
+		&remoteHostUsernameStr, "remote-host-username", "U", "", "RemoteHostUsername",
+	)
+	cmd.Flags().StringVarP(
+		&remoteHostPasswordStr, "remote-host-password", "P", "", "RemoteHostPassword",
+	)
+	cmd.Flags().StringVarP(
+		&remoteHostPrivateKeyFilePathStr, "remote-host-private-key-file-path", "f", "", "RemoteHostPrivateKeyFilePath",
+	)
+	cmd.Flags().Uint16VarP(
+		&remoteHostConnectionTimeoutSecsUint16, "remote-host-connection-timeout-secs", "T", 0, "RemoteHostConnectionTimeoutSecs",
+	)
+	cmd.Flags().Uint16VarP(
+		&remoteHostConnectionRetrySecsUint16, "remote-host-connection-retry-secs", "y", 0, "RemoteHostConnectionRetrySecs",
+	)
+
+	return cmd
+}
+
 func (controller *BackupController) ReadJob() *cobra.Command {
 	var jobIdUint, accountIdUint, destinationIdUint uint64
 	var retentionStrategyStr, jobStatusStr, archiveCompressionFormatStr, lastRunStatusStr string
