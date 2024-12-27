@@ -45,6 +45,56 @@ func (model BackupDestination) TableName() string {
 	return "backup_destinations"
 }
 
+func NewBackupDestination(
+	id, accountId uint64,
+	name string,
+	description *string,
+	destinationType, path string,
+	minLocalStorageFreePercent, maxDestinationStorageUsagePercent *uint8,
+	maxConcurrentConnections *uint16,
+	downloadBytesSecRateLimit, uploadBytesSecRateLimit *uint64,
+	skipCertificateVerification *bool,
+	objectStorageProvider, objectStorageProviderRegion, objectStorageProviderAccessKeyId,
+	objectStorageProviderSecretAccessKey, objectStorageEndpointUrl, objectStorageBucketName,
+	remoteHostType, remoteHostname, remoteHostUsername, remoteHostPassword, remoteHostPrivateKeyFilePath *string,
+	remoteHostNetworkPort, remoteHostConnectionTimeoutSecs, remoteHostConnectionRetrySecs *uint16,
+) BackupDestination {
+	destinationModel := BackupDestination{
+		ID:                                   id,
+		AccountID:                            accountId,
+		Name:                                 name,
+		Description:                          description,
+		Type:                                 destinationType,
+		Path:                                 path,
+		MinLocalStorageFreePercent:           minLocalStorageFreePercent,
+		MaxDestinationStorageUsagePercent:    maxDestinationStorageUsagePercent,
+		MaxConcurrentConnections:             maxConcurrentConnections,
+		DownloadBytesSecRateLimit:            downloadBytesSecRateLimit,
+		UploadBytesSecRateLimit:              uploadBytesSecRateLimit,
+		SkipCertificateVerification:          skipCertificateVerification,
+		ObjectStorageProvider:                objectStorageProvider,
+		ObjectStorageProviderRegion:          objectStorageProviderRegion,
+		ObjectStorageProviderAccessKeyId:     objectStorageProviderAccessKeyId,
+		ObjectStorageProviderSecretAccessKey: objectStorageProviderSecretAccessKey,
+		ObjectStorageEndpointUrl:             objectStorageEndpointUrl,
+		ObjectStorageBucketName:              objectStorageBucketName,
+		RemoteHostType:                       remoteHostType,
+		RemoteHostname:                       remoteHostname,
+		RemoteHostNetworkPort:                remoteHostNetworkPort,
+		RemoteHostUsername:                   remoteHostUsername,
+		RemoteHostPassword:                   remoteHostPassword,
+		RemoteHostPrivateKeyFilePath:         remoteHostPrivateKeyFilePath,
+		RemoteHostConnectionTimeoutSecs:      remoteHostConnectionTimeoutSecs,
+		RemoteHostConnectionRetrySecs:        remoteHostConnectionRetrySecs,
+	}
+
+	if id != 0 {
+		destinationModel.ID = id
+	}
+
+	return destinationModel
+}
+
 func (model BackupDestination) ToEntity() (
 	destinationEntity entity.IBackupDestination, err error,
 ) {
