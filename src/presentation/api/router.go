@@ -61,11 +61,13 @@ func (router *Router) accountRoutes() {
 
 func (router *Router) backupRoutes() {
 	backupGroup := router.baseRoute.Group("/v1/backup")
-
 	backupController := apiController.NewBackupController(
 		router.persistentDbSvc, router.trailDbSvc,
 	)
-	backupGroup.GET("/destination/", backupController.ReadDestination)
+
+	destinationGroup := backupGroup.Group("/destination")
+	destinationGroup.GET("/", backupController.ReadDestination)
+	destinationGroup.POST("/", backupController.CreateDestination)
 }
 
 func (router *Router) containerRoutes() {

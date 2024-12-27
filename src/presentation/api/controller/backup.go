@@ -73,6 +73,31 @@ func (controller *BackupController) ReadDestination(c echo.Context) error {
 	)
 }
 
+// CreateBackupDestination	 godoc
+// @Summary      CreateBackupDestination
+// @Description  Create a backup destination.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createBackupDestinationDto 	  body    dto.CreateBackupDestination  true  "CreateBackupDestination"
+// @Success      201 {object} object{} "BackupDestinationCreated"
+// @Router       /v1/backup/destination/ [post]
+func (controller *BackupController) CreateDestination(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	if requestBody["accountId"] == nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.CreateDestination(requestBody),
+	)
+}
+
 // ReadBackupJobs	 godoc
 // @Summary      ReadBackupJobs
 // @Description  List backup jobs.

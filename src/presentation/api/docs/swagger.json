@@ -311,6 +311,43 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "CreateBackupDestination",
+                "parameters": [
+                    {
+                        "description": "CreateBackupDestination",
+                        "name": "createBackupDestinationDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupDestination"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupDestinationCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
             }
         },
         "/v1/backup/job/": {
@@ -2280,6 +2317,86 @@
                 }
             }
         },
+        "dto.CreateBackupDestination": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "destinationDescription": {
+                    "type": "string"
+                },
+                "destinationName": {
+                    "type": "string"
+                },
+                "destinationPath": {
+                    "type": "string"
+                },
+                "destinationType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationType"
+                },
+                "downloadBytesSecRateLimit": {
+                    "type": "integer"
+                },
+                "maxConcurrentConnections": {
+                    "type": "integer"
+                },
+                "maxDestinationStorageUsagePercent": {
+                    "type": "integer"
+                },
+                "minLocalStorageFreePercent": {
+                    "type": "integer"
+                },
+                "objectStorageBucketName": {
+                    "type": "string"
+                },
+                "objectStorageEndpointUrl": {
+                    "type": "string"
+                },
+                "objectStorageProvider": {
+                    "$ref": "#/definitions/valueObject.ObjectStorageProvider"
+                },
+                "objectStorageProviderAccessKeyId": {
+                    "type": "string"
+                },
+                "objectStorageProviderRegion": {
+                    "type": "string"
+                },
+                "objectStorageProviderSecretAccessKey": {
+                    "type": "string"
+                },
+                "remoteHostConnectionRetrySecs": {
+                    "type": "integer"
+                },
+                "remoteHostConnectionTimeoutSecs": {
+                    "type": "integer"
+                },
+                "remoteHostNetworkPort": {
+                    "type": "integer"
+                },
+                "remoteHostPassword": {
+                    "type": "string"
+                },
+                "remoteHostPrivateKeyFilePath": {
+                    "type": "string"
+                },
+                "remoteHostType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationRemoteHostType"
+                },
+                "remoteHostUsername": {
+                    "type": "string"
+                },
+                "remoteHostname": {
+                    "type": "string"
+                },
+                "skipCertificateVerification": {
+                    "type": "boolean"
+                },
+                "uploadBytesSecRateLimit": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.CreateContainer": {
             "type": "object",
             "properties": {
@@ -3293,6 +3410,30 @@
                 }
             }
         },
+        "valueObject.BackupDestinationRemoteHostType": {
+            "type": "string",
+            "enum": [
+                "sftp",
+                "rest"
+            ],
+            "x-enum-varnames": [
+                "BackupDestinationRemoteHostTypeSftp",
+                "BackupDestinationRemoteHostTypeRest"
+            ]
+        },
+        "valueObject.BackupDestinationType": {
+            "type": "string",
+            "enum": [
+                "local",
+                "remote-host",
+                "object-storage"
+            ],
+            "x-enum-varnames": [
+                "BackupDestinationTypeLocal",
+                "BackupDestinationTypeRemoteHost",
+                "BackupDestinationTypeObjectStorage"
+            ]
+        },
         "valueObject.BackupRetentionStrategy": {
             "type": "string",
             "enum": [
@@ -3483,6 +3624,35 @@
                     "type": "integer"
                 }
             }
+        },
+        "valueObject.ObjectStorageProvider": {
+            "type": "string",
+            "enum": [
+                "akamai",
+                "aws",
+                "azure",
+                "backblaze",
+                "cloudflare",
+                "digitalocean",
+                "google-cloud",
+                "linode",
+                "magalu",
+                "wasabi",
+                "custom"
+            ],
+            "x-enum-varnames": [
+                "ObjectStorageProviderAkamai",
+                "ObjectStorageProviderAws",
+                "ObjectStorageProviderAzure",
+                "ObjectStorageProviderBackblaze",
+                "ObjectStorageProviderCloudFlare",
+                "ObjectStorageProviderDigitalOcean",
+                "ObjectStorageProviderGoogleCloud",
+                "ObjectStorageProviderLinode",
+                "ObjectStorageProviderMagalu",
+                "ObjectStorageProviderWasabi",
+                "ObjectStorageProviderCustom"
+            ]
         },
         "valueObject.PortBinding": {
             "type": "object",

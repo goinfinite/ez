@@ -59,6 +59,59 @@ definitions:
       username:
         type: string
     type: object
+  dto.CreateBackupDestination:
+    properties:
+      accountId:
+        type: integer
+      destinationDescription:
+        type: string
+      destinationName:
+        type: string
+      destinationPath:
+        type: string
+      destinationType:
+        $ref: '#/definitions/valueObject.BackupDestinationType'
+      downloadBytesSecRateLimit:
+        type: integer
+      maxConcurrentConnections:
+        type: integer
+      maxDestinationStorageUsagePercent:
+        type: integer
+      minLocalStorageFreePercent:
+        type: integer
+      objectStorageBucketName:
+        type: string
+      objectStorageEndpointUrl:
+        type: string
+      objectStorageProvider:
+        $ref: '#/definitions/valueObject.ObjectStorageProvider'
+      objectStorageProviderAccessKeyId:
+        type: string
+      objectStorageProviderRegion:
+        type: string
+      objectStorageProviderSecretAccessKey:
+        type: string
+      remoteHostConnectionRetrySecs:
+        type: integer
+      remoteHostConnectionTimeoutSecs:
+        type: integer
+      remoteHostNetworkPort:
+        type: integer
+      remoteHostPassword:
+        type: string
+      remoteHostPrivateKeyFilePath:
+        type: string
+      remoteHostType:
+        $ref: '#/definitions/valueObject.BackupDestinationRemoteHostType'
+      remoteHostUsername:
+        type: string
+      remoteHostname:
+        type: string
+      skipCertificateVerification:
+        type: boolean
+      uploadBytesSecRateLimit:
+        type: integer
+    type: object
   dto.CreateContainer:
     properties:
       accountId:
@@ -724,6 +777,24 @@ definitions:
       storagePerformanceUnits:
         type: integer
     type: object
+  valueObject.BackupDestinationRemoteHostType:
+    enum:
+    - sftp
+    - rest
+    type: string
+    x-enum-varnames:
+    - BackupDestinationRemoteHostTypeSftp
+    - BackupDestinationRemoteHostTypeRest
+  valueObject.BackupDestinationType:
+    enum:
+    - local
+    - remote-host
+    - object-storage
+    type: string
+    x-enum-varnames:
+    - BackupDestinationTypeLocal
+    - BackupDestinationTypeRemoteHost
+    - BackupDestinationTypeObjectStorage
   valueObject.BackupRetentionStrategy:
     enum:
     - full
@@ -855,6 +926,32 @@ definitions:
       sentPackets:
         type: integer
     type: object
+  valueObject.ObjectStorageProvider:
+    enum:
+    - akamai
+    - aws
+    - azure
+    - backblaze
+    - cloudflare
+    - digitalocean
+    - google-cloud
+    - linode
+    - magalu
+    - wasabi
+    - custom
+    type: string
+    x-enum-varnames:
+    - ObjectStorageProviderAkamai
+    - ObjectStorageProviderAws
+    - ObjectStorageProviderAzure
+    - ObjectStorageProviderBackblaze
+    - ObjectStorageProviderCloudFlare
+    - ObjectStorageProviderDigitalOcean
+    - ObjectStorageProviderGoogleCloud
+    - ObjectStorageProviderLinode
+    - ObjectStorageProviderMagalu
+    - ObjectStorageProviderWasabi
+    - ObjectStorageProviderCustom
   valueObject.PortBinding:
     properties:
       containerPort:
@@ -1105,6 +1202,29 @@ paths:
       security:
       - Bearer: []
       summary: ReadBackupsDestinations
+      tags:
+      - backup
+    post:
+      consumes:
+      - application/json
+      description: Create a backup destination.
+      parameters:
+      - description: CreateBackupDestination
+        in: body
+        name: createBackupDestinationDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBackupDestination'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupDestinationCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateBackupDestination
       tags:
       - backup
   /v1/backup/job/:
