@@ -5,7 +5,10 @@ import (
 )
 
 type BackupQueryRepo interface {
-	ReadDestination(dto.ReadBackupDestinationsRequest) (dto.ReadBackupDestinationsResponse, error)
+	ReadDestination(
+		requestDto dto.ReadBackupDestinationsRequest,
+		withSecrets bool,
+	) (dto.ReadBackupDestinationsResponse, error)
 	ReadJob(dto.ReadBackupJobsRequest) (dto.ReadBackupJobsResponse, error)
 	ReadTask(dto.ReadBackupTasksRequest) (dto.ReadBackupTasksResponse, error)
 }

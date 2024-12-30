@@ -17,7 +17,7 @@ func ReadBackupDestinations(
 	backupQueryRepo repository.BackupQueryRepo,
 	readDto dto.ReadBackupDestinationsRequest,
 ) (responseDto dto.ReadBackupDestinationsResponse, err error) {
-	responseDto, err = backupQueryRepo.ReadDestination(readDto)
+	responseDto, err = backupQueryRepo.ReadDestination(readDto, false)
 	if err != nil {
 		slog.Error("ReadBackupDestinationsInfraError", slog.Any("error", err))
 		return responseDto, errors.New("ReadBackupDestinationsInfraError")
