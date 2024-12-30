@@ -18,7 +18,7 @@ func TestBackupQueryRepo(t *testing.T) {
 			Pagination: useCase.BackupDestinationsDefaultPagination,
 		}
 
-		responseDto, err := backupQueryRepo.ReadDestination(readDto)
+		responseDto, err := backupQueryRepo.ReadDestination(readDto, true)
 		if err != nil {
 			t.Errorf("ReadDestinationError: %v", err)
 			return

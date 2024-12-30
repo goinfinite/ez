@@ -23,6 +23,7 @@ func NewBackupQueryRepo(
 
 func (repo *BackupQueryRepo) ReadDestination(
 	requestDto dto.ReadBackupDestinationsRequest,
+	withSecrets bool,
 ) (responseDto dto.ReadBackupDestinationsResponse, err error) {
 	backupDestinationModel := dbModel.BackupDestination{}
 	if requestDto.DestinationId != nil {
@@ -70,7 +71,7 @@ func (repo *BackupQueryRepo) ReadDestination(
 
 	backupDestinationEntities := []entity.IBackupDestination{}
 	for _, backupDestinationModel := range backupDestinationModels {
-		backupDestinationEntity, err := backupDestinationModel.ToEntity()
+		backupDestinationEntity, err := backupDestinationModel.ToEntity(withSecrets)
 		if err != nil {
 			slog.Debug(
 				"ModelToEntityError",

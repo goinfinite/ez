@@ -2,10 +2,12 @@ package dbModel
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type BackupDestination struct {
@@ -95,7 +97,7 @@ func NewBackupDestination(
 	return destinationModel
 }
 
-func (model BackupDestination) ToEntity() (
+func (model BackupDestination) ToEntity(withSecrets bool) (
 	destinationEntity entity.IBackupDestination, err error,
 ) {
 	destinationId, err := valueObject.NewBackupDestinationId(model.ID)
@@ -162,6 +164,11 @@ func (model BackupDestination) ToEntity() (
 		SkipCertificateVerification: model.SkipCertificateVerification,
 	}
 
+	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
+	if encryptSecretKey == "" {
+		return destinationId, errors.New("BackupKeysSecretMissing")
+	}
+
 	switch destinationType {
 	case valueObject.BackupDestinationTypeLocal:
 		return entity.BackupDestinationLocal{
@@ -193,6 +200,23 @@ func (model BackupDestination) ToEntity() (
 			return destinationEntity, err
 		}
 
+		var objectStorageProviderSecretAccessKeyPtr *valueObject.ObjectStorageProviderSecretAccessKey
+		if model.ObjectStorageProviderSecretAccessKey != nil {
+			decryptedSecretAccessKey, err := infraHelper.DecryptStr(
+				encryptSecretKey, *model.ObjectStorageProviderSecretAccessKey,
+			)
+			if err != nil {
+				return destinationEntity, errors.New("DecryptProviderSecretAccessKeyFailed: " + err.Error())
+			}
+			objectStorageProviderSecretAccessKey, err := valueObject.NewObjectStorageProviderSecretAccessKey(
+				decryptedSecretAccessKey,
+			)
+			if err != nil {
+				return destinationEntity, err
+			}
+			objectStorageProviderSecretAccessKeyPtr = &objectStorageProviderSecretAccessKey
+		}
+
 		objectStorageEndpointUrl, err := valueObject.NewUrl(*model.ObjectStorageEndpointUrl)
 		if err != nil {
 			return destinationEntity, err
@@ -206,12 +230,13 @@ func (model BackupDestination) ToEntity() (
 		}
 
 		return entity.BackupDestinationObjectStorage{
-			BackupDestinationRemoteBase:      backupDestinationRemoteBase,
-			ObjectStorageProvider:            &objectStorageProvider,
-			ObjectStorageProviderRegion:      objectStorageProviderRegionPtr,
-			ObjectStorageProviderAccessKeyId: &objectStorageProviderAccessKeyId,
-			ObjectStorageEndpointUrl:         &objectStorageEndpointUrl,
-			ObjectStorageBucketName:          &objectStorageBucketName,
+			BackupDestinationRemoteBase:          backupDestinationRemoteBase,
+			ObjectStorageProvider:                &objectStorageProvider,
+			ObjectStorageProviderRegion:          objectStorageProviderRegionPtr,
+			ObjectStorageProviderAccessKeyId:     &objectStorageProviderAccessKeyId,
+			ObjectStorageProviderSecretAccessKey: objectStorageProviderSecretAccessKeyPtr,
+			ObjectStorageEndpointUrl:             &objectStorageEndpointUrl,
+			ObjectStorageBucketName:              &objectStorageBucketName,
 		}, nil
 	case valueObject.BackupDestinationTypeRemoteHost:
 		remoteHostType, err := valueObject.NewBackupDestinationRemoteHostType(
@@ -236,6 +261,21 @@ func (model BackupDestination) ToEntity() (
 			return destinationEntity, err
 		}
 
+		var remoteHostPasswordPtr *valueObject.Password
+		if model.RemoteHostPassword != nil {
+			decryptedPassword, err := infraHelper.DecryptStr(
+				encryptSecretKey, *model.RemoteHostPassword,
+			)
+			if err != nil {
+				return destinationEntity, errors.New("DecryptPasswordFailed: " + err.Error())
+			}
+			remoteHostPassword, err := valueObject.NewPassword(decryptedPassword)
+			if err != nil {
+				return destinationEntity, err
+			}
+			remoteHostPasswordPtr = &remoteHostPassword
+		}
+
 		var remoteHostPrivateKeyFilePathPtr *valueObject.UnixFilePath
 		if model.RemoteHostPrivateKeyFilePath != nil {
 			remoteHostPrivateKeyFilePath, err := valueObject.NewUnixFilePath(
@@ -253,6 +293,7 @@ func (model BackupDestination) ToEntity() (
 			RemoteHostname:                  &remoteHostname,
 			RemoteHostNetworkPort:           &remoteHostNetworkPort,
 			RemoteHostUsername:              &remoteHostUsername,
+			RemoteHostPassword:              remoteHostPasswordPtr,
 			RemoteHostPrivateKeyFilePath:    remoteHostPrivateKeyFilePathPtr,
 			RemoteHostConnectionTimeoutSecs: model.RemoteHostConnectionTimeoutSecs,
 			RemoteHostConnectionRetrySecs:   model.RemoteHostConnectionRetrySecs,
