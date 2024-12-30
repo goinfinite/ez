@@ -1,10 +1,14 @@
 package backupInfra
 
 import (
+	"errors"
+	"os"
+
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type BackupCmdRepo struct {
@@ -31,6 +35,11 @@ func (repo *BackupCmdRepo) CreateDestination(
 		destinationPath = createDto.DestinationPath.String()
 	}
 
+	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
+	if encryptSecretKey == "" {
+		return destinationId, errors.New("BackupKeysSecretMissing")
+	}
+
 	var objectStorageProviderPtr, objectStorageProviderRegionPtr *string
 	if createDto.ObjectStorageProvider != nil {
 		objectStorageProvider := createDto.ObjectStorageProvider.String()
@@ -47,8 +56,13 @@ func (repo *BackupCmdRepo) CreateDestination(
 		objectStorageProviderAccessKeyIdPtr = &objectStorageProviderAccessKeyId
 	}
 	if createDto.ObjectStorageProviderSecretAccessKey != nil {
-		objectStorageProviderSecretAccessKey := createDto.ObjectStorageProviderSecretAccessKey.String()
-		objectStorageProviderSecretAccessKeyPtr = &objectStorageProviderSecretAccessKey
+		encryptedProviderSecretAccessKey, err := infraHelper.EncryptStr(
+			encryptSecretKey, createDto.ObjectStorageProviderSecretAccessKey.String(),
+		)
+		if err != nil {
+			return destinationId, errors.New("EncryptProviderSecretAccessKeyFailed: " + err.Error())
+		}
+		objectStorageProviderSecretAccessKeyPtr = &encryptedProviderSecretAccessKey
 	}
 
 	var objectStorageEndpointUrlPtr, objectStorageBucketNamePtr *string
@@ -77,8 +91,13 @@ func (repo *BackupCmdRepo) CreateDestination(
 
 	var remoteHostPasswordPtr, remoteHostPrivateKeyFilePathPtr *string
 	if createDto.RemoteHostPassword != nil {
-		remoteHostPassword := createDto.RemoteHostPassword.String()
-		remoteHostPasswordPtr = &remoteHostPassword
+		encryptedPassword, err := infraHelper.EncryptStr(
+			encryptSecretKey, createDto.RemoteHostPassword.String(),
+		)
+		if err != nil {
+			return destinationId, errors.New("EncryptPasswordFailed: " + err.Error())
+		}
+		remoteHostPasswordPtr = &encryptedPassword
 	}
 	if createDto.RemoteHostPrivateKeyFilePath != nil {
 		remoteHostPrivateKeyFilePath := createDto.RemoteHostPrivateKeyFilePath.String()

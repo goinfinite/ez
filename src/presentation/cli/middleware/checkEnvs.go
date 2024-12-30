@@ -13,11 +13,13 @@ import (
 var requiredEnvVars = []string{
 	"JWT_SECRET",
 	"ACC_API_KEY_SECRET",
+	"BACKUP_KEYS_SECRET",
 }
 
 var envVarsToGenerateIfEmpty = []string{
 	"JWT_SECRET",
 	"ACC_API_KEY_SECRET",
+	"BACKUP_KEYS_SECRET",
 }
 
 func genSecret() (string, error) {
