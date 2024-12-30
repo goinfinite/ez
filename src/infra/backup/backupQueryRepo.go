@@ -22,41 +22,41 @@ func NewBackupQueryRepo(
 }
 
 func (repo *BackupQueryRepo) ReadDestination(
-	readDto dto.ReadBackupDestinationsRequest,
+	requestDto dto.ReadBackupDestinationsRequest,
 ) (responseDto dto.ReadBackupDestinationsResponse, err error) {
 	backupDestinationModel := dbModel.BackupDestination{}
-	if readDto.DestinationId != nil {
-		backupDestinationModel.ID = readDto.DestinationId.Uint64()
+	if requestDto.DestinationId != nil {
+		backupDestinationModel.ID = requestDto.DestinationId.Uint64()
 	}
-	if readDto.DestinationName != nil {
-		backupDestinationModel.Name = readDto.DestinationName.String()
+	if requestDto.DestinationName != nil {
+		backupDestinationModel.Name = requestDto.DestinationName.String()
 	}
-	if readDto.DestinationType != nil {
-		backupDestinationModel.Type = readDto.DestinationType.String()
+	if requestDto.DestinationType != nil {
+		backupDestinationModel.Type = requestDto.DestinationType.String()
 	}
-	if readDto.ObjectStorageProvider != nil {
-		objectStorageProviderStr := readDto.ObjectStorageProvider.String()
+	if requestDto.ObjectStorageProvider != nil {
+		objectStorageProviderStr := requestDto.ObjectStorageProvider.String()
 		backupDestinationModel.ObjectStorageProvider = &objectStorageProviderStr
 	}
-	if readDto.RemoteHostType != nil {
-		remoteHostTypeStr := readDto.RemoteHostType.String()
+	if requestDto.RemoteHostType != nil {
+		remoteHostTypeStr := requestDto.RemoteHostType.String()
 		backupDestinationModel.RemoteHostType = &remoteHostTypeStr
 	}
-	if readDto.RemoteHostname != nil {
-		remoteHostnameStr := readDto.RemoteHostname.String()
+	if requestDto.RemoteHostname != nil {
+		remoteHostnameStr := requestDto.RemoteHostname.String()
 		backupDestinationModel.RemoteHostname = &remoteHostnameStr
 	}
 
 	dbQuery := repo.persistentDbSvc.Handler.Model(backupDestinationModel).Where(&backupDestinationModel)
-	if readDto.CreatedBeforeAt != nil {
-		dbQuery = dbQuery.Where("created_at < ?", readDto.CreatedBeforeAt.GetAsGoTime())
+	if requestDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())
 	}
-	if readDto.CreatedAfterAt != nil {
-		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
+	if requestDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
 	}
 
 	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
-		dbQuery, readDto.Pagination,
+		dbQuery, requestDto.Pagination,
 	)
 	if err != nil {
 		return responseDto, errors.New("PaginationQueryBuilderError: " + err.Error())
@@ -89,56 +89,56 @@ func (repo *BackupQueryRepo) ReadDestination(
 }
 
 func (repo *BackupQueryRepo) ReadJob(
-	readDto dto.ReadBackupJobsRequest,
+	requestDto dto.ReadBackupJobsRequest,
 ) (responseDto dto.ReadBackupJobsResponse, err error) {
 	backupJobModel := dbModel.BackupJob{}
-	if readDto.JobId != nil {
-		backupJobModel.ID = readDto.JobId.Uint64()
+	if requestDto.JobId != nil {
+		backupJobModel.ID = requestDto.JobId.Uint64()
 	}
-	if readDto.JobStatus != nil {
-		backupJobModel.JobStatus = *readDto.JobStatus
+	if requestDto.JobStatus != nil {
+		backupJobModel.JobStatus = *requestDto.JobStatus
 	}
-	if readDto.AccountId != nil {
-		backupJobModel.AccountID = readDto.AccountId.Uint64()
+	if requestDto.AccountId != nil {
+		backupJobModel.AccountID = requestDto.AccountId.Uint64()
 	}
-	if readDto.DestinationId != nil {
-		backupJobModel.DestinationIds = []uint64{readDto.DestinationId.Uint64()}
+	if requestDto.DestinationId != nil {
+		backupJobModel.DestinationIds = []uint64{requestDto.DestinationId.Uint64()}
 	}
-	if readDto.RetentionStrategy != nil {
-		retentionStrategyStr := readDto.RetentionStrategy.String()
+	if requestDto.RetentionStrategy != nil {
+		retentionStrategyStr := requestDto.RetentionStrategy.String()
 		backupJobModel.RetentionStrategy = retentionStrategyStr
 	}
-	if readDto.ArchiveCompressionFormat != nil {
-		archiveCompressionFormatStr := readDto.ArchiveCompressionFormat.String()
+	if requestDto.ArchiveCompressionFormat != nil {
+		archiveCompressionFormatStr := requestDto.ArchiveCompressionFormat.String()
 		backupJobModel.ArchiveCompressionFormat = archiveCompressionFormatStr
 	}
-	if readDto.LastRunStatus != nil {
-		lastRunStatusStr := readDto.LastRunStatus.String()
+	if requestDto.LastRunStatus != nil {
+		lastRunStatusStr := requestDto.LastRunStatus.String()
 		backupJobModel.LastRunStatus = &lastRunStatusStr
 	}
 
 	dbQuery := repo.persistentDbSvc.Handler.Model(backupJobModel).Where(&backupJobModel)
-	if readDto.LastRunBeforeAt != nil {
-		dbQuery = dbQuery.Where("last_run_at < ?", readDto.LastRunBeforeAt.GetAsGoTime())
+	if requestDto.LastRunBeforeAt != nil {
+		dbQuery = dbQuery.Where("last_run_at < ?", requestDto.LastRunBeforeAt.GetAsGoTime())
 	}
-	if readDto.LastRunAfterAt != nil {
-		dbQuery = dbQuery.Where("last_run_at > ?", readDto.LastRunAfterAt.GetAsGoTime())
+	if requestDto.LastRunAfterAt != nil {
+		dbQuery = dbQuery.Where("last_run_at > ?", requestDto.LastRunAfterAt.GetAsGoTime())
 	}
-	if readDto.NextRunBeforeAt != nil {
-		dbQuery = dbQuery.Where("next_run_at < ?", readDto.NextRunBeforeAt.GetAsGoTime())
+	if requestDto.NextRunBeforeAt != nil {
+		dbQuery = dbQuery.Where("next_run_at < ?", requestDto.NextRunBeforeAt.GetAsGoTime())
 	}
-	if readDto.NextRunAfterAt != nil {
-		dbQuery = dbQuery.Where("next_run_at > ?", readDto.NextRunAfterAt.GetAsGoTime())
+	if requestDto.NextRunAfterAt != nil {
+		dbQuery = dbQuery.Where("next_run_at > ?", requestDto.NextRunAfterAt.GetAsGoTime())
 	}
-	if readDto.CreatedBeforeAt != nil {
-		dbQuery = dbQuery.Where("created_at < ?", readDto.CreatedBeforeAt.GetAsGoTime())
+	if requestDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())
 	}
-	if readDto.CreatedAfterAt != nil {
-		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
+	if requestDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
 	}
 
 	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
-		dbQuery, readDto.Pagination,
+		dbQuery, requestDto.Pagination,
 	)
 	if err != nil {
 		return responseDto, errors.New("PaginationQueryBuilderError: " + err.Error())
@@ -171,55 +171,55 @@ func (repo *BackupQueryRepo) ReadJob(
 }
 
 func (repo *BackupQueryRepo) ReadTask(
-	readDto dto.ReadBackupTasksRequest,
+	requestDto dto.ReadBackupTasksRequest,
 ) (responseDto dto.ReadBackupTasksResponse, err error) {
 	backupTaskModel := dbModel.BackupTask{}
-	if readDto.TaskId != nil {
-		backupTaskModel.ID = readDto.TaskId.Uint64()
+	if requestDto.TaskId != nil {
+		backupTaskModel.ID = requestDto.TaskId.Uint64()
 	}
-	if readDto.AccountId != nil {
-		backupTaskModel.AccountID = readDto.AccountId.Uint64()
+	if requestDto.AccountId != nil {
+		backupTaskModel.AccountID = requestDto.AccountId.Uint64()
 	}
-	if readDto.JobId != nil {
-		backupTaskModel.JobID = readDto.JobId.Uint64()
+	if requestDto.JobId != nil {
+		backupTaskModel.JobID = requestDto.JobId.Uint64()
 	}
-	if readDto.DestinationId != nil {
-		backupTaskModel.DestinationID = readDto.DestinationId.Uint64()
+	if requestDto.DestinationId != nil {
+		backupTaskModel.DestinationID = requestDto.DestinationId.Uint64()
 	}
-	if readDto.TaskStatus != nil {
-		taskStatusStr := readDto.TaskStatus.String()
+	if requestDto.TaskStatus != nil {
+		taskStatusStr := requestDto.TaskStatus.String()
 		backupTaskModel.TaskStatus = taskStatusStr
 	}
-	if readDto.RetentionStrategy != nil {
-		retentionStrategyStr := readDto.RetentionStrategy.String()
+	if requestDto.RetentionStrategy != nil {
+		retentionStrategyStr := requestDto.RetentionStrategy.String()
 		backupTaskModel.RetentionStrategy = retentionStrategyStr
 	}
-	if readDto.ContainerId != nil {
-		backupTaskModel.ContainerIds = []string{readDto.ContainerId.String()}
+	if requestDto.ContainerId != nil {
+		backupTaskModel.ContainerIds = []string{requestDto.ContainerId.String()}
 	}
 
 	dbQuery := repo.persistentDbSvc.Handler.Model(backupTaskModel).Where(&backupTaskModel)
-	if readDto.StartedBeforeAt != nil {
-		dbQuery = dbQuery.Where("started_at < ?", readDto.StartedBeforeAt.GetAsGoTime())
+	if requestDto.StartedBeforeAt != nil {
+		dbQuery = dbQuery.Where("started_at < ?", requestDto.StartedBeforeAt.GetAsGoTime())
 	}
-	if readDto.StartedAfterAt != nil {
-		dbQuery = dbQuery.Where("started_at > ?", readDto.StartedAfterAt.GetAsGoTime())
+	if requestDto.StartedAfterAt != nil {
+		dbQuery = dbQuery.Where("started_at > ?", requestDto.StartedAfterAt.GetAsGoTime())
 	}
-	if readDto.FinishedBeforeAt != nil {
-		dbQuery = dbQuery.Where("finished_at < ?", readDto.FinishedBeforeAt.GetAsGoTime())
+	if requestDto.FinishedBeforeAt != nil {
+		dbQuery = dbQuery.Where("finished_at < ?", requestDto.FinishedBeforeAt.GetAsGoTime())
 	}
-	if readDto.FinishedAfterAt != nil {
-		dbQuery = dbQuery.Where("finished_at > ?", readDto.FinishedAfterAt.GetAsGoTime())
+	if requestDto.FinishedAfterAt != nil {
+		dbQuery = dbQuery.Where("finished_at > ?", requestDto.FinishedAfterAt.GetAsGoTime())
 	}
-	if readDto.CreatedBeforeAt != nil {
-		dbQuery = dbQuery.Where("created_at < ?", readDto.CreatedBeforeAt.GetAsGoTime())
+	if requestDto.CreatedBeforeAt != nil {
+		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())
 	}
-	if readDto.CreatedAfterAt != nil {
-		dbQuery = dbQuery.Where("created_at > ?", readDto.CreatedAfterAt.GetAsGoTime())
+	if requestDto.CreatedAfterAt != nil {
+		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
 	}
 
 	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
-		dbQuery, readDto.Pagination,
+		dbQuery, requestDto.Pagination,
 	)
 	if err != nil {
 		return responseDto, errors.New("PaginationQueryBuilderError: " + err.Error())
