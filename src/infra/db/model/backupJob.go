@@ -21,9 +21,9 @@ type BackupJob struct {
 	MaxTaskRetentionDays      *uint16
 	MaxConcurrentCpuCores     *uint16
 	ContainerAccountIds       []uint64 `gorm:"serializer:json"`
-	ContainerIds              []uint64 `gorm:"serializer:json"`
+	ContainerIds              []string `gorm:"serializer:json"`
 	IgnoreContainerAccountIds []uint64 `gorm:"serializer:json"`
-	IgnoreContainerIds        []uint64 `gorm:"serializer:json"`
+	IgnoreContainerIds        []string `gorm:"serializer:json"`
 	TasksCount                *uint16
 	TotalSpaceUsageBytes      *uint64
 	LastRunAt                 *time.Time
@@ -35,6 +35,44 @@ type BackupJob struct {
 
 func (model BackupJob) TableName() string {
 	return "backup_jobs"
+}
+
+func NewBackupJob(
+	id, accountId uint64,
+	jobStatus bool,
+	jobDescription *string,
+	destinationIds []uint64,
+	retentionStrategy, backupSchedule, archiveCompressionFormat string,
+	timeoutSecs uint64,
+	maxTaskRetentionCount, maxTaskRetentionDays, maxConcurrentCpuCores *uint16,
+	containerAccountIds []uint64,
+	containerIds []string,
+	ignoreContainerAccountIds []uint64,
+	ignoreContainerIds []string,
+) BackupJob {
+	jobModel := BackupJob{
+		AccountID:                 accountId,
+		JobStatus:                 jobStatus,
+		JobDescription:            jobDescription,
+		DestinationIds:            destinationIds,
+		RetentionStrategy:         retentionStrategy,
+		BackupSchedule:            backupSchedule,
+		ArchiveCompressionFormat:  archiveCompressionFormat,
+		TimeoutSecs:               timeoutSecs,
+		MaxTaskRetentionCount:     maxTaskRetentionCount,
+		MaxTaskRetentionDays:      maxTaskRetentionDays,
+		MaxConcurrentCpuCores:     maxConcurrentCpuCores,
+		ContainerAccountIds:       containerAccountIds,
+		ContainerIds:              containerIds,
+		IgnoreContainerAccountIds: ignoreContainerAccountIds,
+		IgnoreContainerIds:        ignoreContainerIds,
+	}
+
+	if id != 0 {
+		jobModel.ID = id
+	}
+
+	return jobModel
 }
 
 func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {

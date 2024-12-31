@@ -140,5 +140,69 @@ func (repo *BackupCmdRepo) CreateDestination(
 func (repo *BackupCmdRepo) CreateJob(
 	createDto dto.CreateBackupJob,
 ) (backupJobId valueObject.BackupJobId, err error) {
+	var jobDescriptionPtr *string
+	if createDto.JobDescription != nil {
+		jobDescription := createDto.JobDescription.String()
+		jobDescriptionPtr = &jobDescription
+	}
+
+	archiveCompressionFormat := valueObject.CompressionFormatBrotli
+	if createDto.ArchiveCompressionFormat != nil {
+		archiveCompressionFormat = *createDto.ArchiveCompressionFormat
+	}
+
+	destinationIdsUint64 := []uint64{}
+	for _, destinationId := range createDto.DestinationIds {
+		destinationIdsUint64 = append(destinationIdsUint64, destinationId.Uint64())
+	}
+
+	retentionStrategy := valueObject.BackupRetentionStrategyFull
+	if createDto.RetentionStrategy != nil {
+		retentionStrategy = *createDto.RetentionStrategy
+	}
+
+	timeoutSecs := uint64(48 * 60 * 60)
+	if createDto.TimeoutSecs != nil {
+		timeoutSecs = *createDto.TimeoutSecs
+	}
+
+	var containerAccountIdsUint64 []uint64
+	for _, containerAccountId := range createDto.ContainerAccountIds {
+		containerAccountIdsUint64 = append(containerAccountIdsUint64, containerAccountId.Uint64())
+	}
+
+	var containerIds []string
+	for _, containerId := range createDto.ContainerIds {
+		containerIds = append(containerIds, containerId.String())
+	}
+
+	var ignoreContainerAccountIdsUint64 []uint64
+	for _, ignoreContainerAccountId := range createDto.IgnoreContainerAccountIds {
+		ignoreContainerAccountIdsUint64 = append(ignoreContainerAccountIdsUint64, ignoreContainerAccountId.Uint64())
+	}
+
+	var ignoreContainerIds []string
+	for _, ignoreContainerId := range createDto.IgnoreContainerIds {
+		ignoreContainerIds = append(ignoreContainerIds, ignoreContainerId.String())
+	}
+
+	jobModel := dbModel.NewBackupJob(
+		0, createDto.AccountId.Uint64(), true, jobDescriptionPtr, destinationIdsUint64,
+		retentionStrategy.String(), createDto.BackupSchedule.String(), archiveCompressionFormat.String(),
+		timeoutSecs, createDto.MaxTaskRetentionCount, createDto.MaxTaskRetentionDays,
+		createDto.MaxConcurrentCpuCores, containerAccountIdsUint64, containerIds,
+		ignoreContainerAccountIdsUint64, ignoreContainerIds,
+	)
+
+	err = repo.persistentDbSvc.Handler.Create(&jobModel).Error
+	if err != nil {
+		return backupJobId, err
+	}
+
+	backupJobId, err = valueObject.NewBackupJobId(jobModel.ID)
+	if err != nil {
+		return backupJobId, err
+	}
+
 	return backupJobId, nil
 }

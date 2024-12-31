@@ -27,6 +27,22 @@ func TestBackupCmdRepo(t *testing.T) {
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
+	})
 
+	t.Run("CreateBackupJob", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(1000)
+		destinationId, _ := valueObject.NewBackupDestinationId(1)
+		backupSchedule, _ := valueObject.NewCronSchedule("@daily")
+
+		createDto := dto.CreateBackupJob{
+			AccountId:      accountId,
+			DestinationIds: []valueObject.BackupDestinationId{destinationId},
+			BackupSchedule: backupSchedule,
+		}
+
+		_, err := backupCmdRepo.CreateJob(createDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
 	})
 }
