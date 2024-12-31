@@ -493,6 +493,43 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "CreateBackupJob",
+                "parameters": [
+                    {
+                        "description": "CreateBackupJob",
+                        "name": "createBackupJobDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupJob"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupJobCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
             }
         },
         "/v1/backup/task/": {
@@ -2400,6 +2437,68 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "uploadBytesSecRateLimit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateBackupJob": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "archiveCompressionFormat": {
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "destinationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ignoreContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ignoreContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "jobDescription": {
+                    "type": "string"
+                },
+                "maxConcurrentCpuCores": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionCount": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionDays": {
+                    "type": "integer"
+                },
+                "retentionStrategy": {
+                    "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
+                },
+                "timeoutSecs": {
                     "type": "integer"
                 }
             }

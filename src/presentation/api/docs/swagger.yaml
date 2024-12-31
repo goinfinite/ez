@@ -112,6 +112,47 @@ definitions:
       uploadBytesSecRateLimit:
         type: integer
     type: object
+  dto.CreateBackupJob:
+    properties:
+      accountId:
+        type: integer
+      archiveCompressionFormat:
+        $ref: '#/definitions/valueObject.CompressionFormat'
+      backupSchedule:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      destinationIds:
+        items:
+          type: integer
+        type: array
+      ignoreContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      ignoreContainerIds:
+        items:
+          type: string
+        type: array
+      jobDescription:
+        type: string
+      maxConcurrentCpuCores:
+        type: integer
+      maxTaskRetentionCount:
+        type: integer
+      maxTaskRetentionDays:
+        type: integer
+      retentionStrategy:
+        $ref: '#/definitions/valueObject.BackupRetentionStrategy'
+      timeoutSecs:
+        type: integer
+    type: object
   dto.CreateContainer:
     properties:
       accountId:
@@ -1315,6 +1356,29 @@ paths:
       security:
       - Bearer: []
       summary: ReadBackupJobs
+      tags:
+      - backup
+    post:
+      consumes:
+      - application/json
+      description: Create a backup destination.
+      parameters:
+      - description: CreateBackupJob
+        in: body
+        name: createBackupJobDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBackupJob'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupJobCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateBackupJob
       tags:
       - backup
   /v1/backup/task/:

@@ -3,9 +3,11 @@ package apiController
 import (
 	"strings"
 
+	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
 	"github.com/goinfinite/ez/src/presentation/service"
+	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	"github.com/labstack/echo/v4"
 )
 
@@ -145,6 +147,37 @@ func (controller *BackupController) ReadJob(c echo.Context) error {
 
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.backupService.ReadJob(requestBody),
+	)
+}
+
+// CreateBackupJob	 godoc
+// @Summary      CreateBackupJob
+// @Description  Create a backup destination.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createBackupJobDto 	  body    dto.CreateBackupJob  true  "CreateBackupJob"
+// @Success      201 {object} object{} "BackupJobCreated"
+// @Router       /v1/backup/job/ [post]
+func (controller *BackupController) CreateJob(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	if requestBody["accountId"] == nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
+	if requestBody["destinationIds"] != nil {
+		requestBody["destinationIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["destinationIds"], valueObject.NewBackupDestinationId,
+		)
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.CreateJob(requestBody),
 	)
 }
 

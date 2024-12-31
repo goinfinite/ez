@@ -68,6 +68,13 @@ func (router *Router) backupRoutes() {
 	destinationGroup := backupGroup.Group("/destination")
 	destinationGroup.GET("/", backupController.ReadDestination)
 	destinationGroup.POST("/", backupController.CreateDestination)
+
+	jobGroup := backupGroup.Group("/job")
+	jobGroup.GET("/", backupController.ReadJob)
+	jobGroup.POST("/", backupController.CreateJob)
+
+	taskGroup := backupGroup.Group("/task")
+	taskGroup.GET("/", backupController.ReadTask)
 }
 
 func (router *Router) containerRoutes() {
