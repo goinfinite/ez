@@ -136,3 +136,9 @@ func (repo *BackupCmdRepo) CreateDestination(
 
 	return destinationId, nil
 }
+
+func (repo *BackupCmdRepo) CreateJob(
+	createDto dto.CreateBackupJob,
+) (backupJobId valueObject.BackupJobId, err error) {
+	return backupJobId, nil
+}
