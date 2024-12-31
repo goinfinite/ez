@@ -410,3 +410,21 @@ func (uc *CreateSecurityActivityRecord) CreateBackupDestination(
 
 	uc.createActivityRecord(createRecordDto)
 }
+
+func (uc *CreateSecurityActivityRecord) CreateBackupJob(
+	createDto dto.CreateBackupJob,
+	jobId valueObject.BackupJobId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupJobCreated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupJobSri(createDto.AccountId, jobId),
+		},
+		OperatorAccountId: &createDto.OperatorAccountId,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}

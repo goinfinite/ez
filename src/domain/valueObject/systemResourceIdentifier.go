@@ -96,6 +96,12 @@ func NewBackupDestinationSri(
 	)
 }
 
+func NewBackupJobSri(accountId AccountId, backupJobId BackupJobId) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupJob/" + backupJobId.String(),
+	)
+}
+
 func (vo SystemResourceIdentifier) String() string {
 	return string(vo)
 }
