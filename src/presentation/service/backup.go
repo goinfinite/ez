@@ -539,6 +539,163 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 	return NewServiceOutput(Success, responseDto)
 }
 
+func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"accountId", "destinationIds", "backupSchedule"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	var jobDescriptionPtr *valueObject.BackupJobDescription
+	if input["jobDescription"] != nil {
+		jobDescription, err := valueObject.NewBackupJobDescription(input["jobDescription"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		jobDescriptionPtr = &jobDescription
+	}
+
+	destinationIds, assertOk := input["destinationIds"].([]valueObject.BackupDestinationId)
+	if !assertOk {
+		return NewServiceOutput(UserError, errors.New("InvalidDestinationIds"))
+	}
+
+	backupSchedule, err := valueObject.NewCronSchedule(input["backupSchedule"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	var retentionStrategyPtr *valueObject.BackupRetentionStrategy
+	if input["retentionStrategy"] != nil {
+		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(
+			input["retentionStrategy"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		retentionStrategyPtr = &retentionStrategy
+	}
+
+	var archiveCompressionFormatPtr *valueObject.CompressionFormat
+	if input["archiveCompressionFormat"] != nil {
+		archiveCompressionFormat, err := valueObject.NewCompressionFormat(
+			input["archiveCompressionFormat"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		archiveCompressionFormatPtr = &archiveCompressionFormat
+	}
+
+	var timeoutSecsPtr *uint64
+	if input["timeoutSecs"] != nil {
+		timeoutSecs, err := voHelper.InterfaceToUint64(input["timeoutSecs"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		timeoutSecsPtr = &timeoutSecs
+	}
+
+	var maxTaskRetentionCountPtr *uint16
+	if input["maxTaskRetentionCount"] != nil {
+		maxTaskRetentionCount, err := voHelper.InterfaceToUint16(
+			input["maxTaskRetentionCount"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		maxTaskRetentionCountPtr = &maxTaskRetentionCount
+	}
+
+	var maxTaskRetentionDaysPtr *uint16
+	if input["maxTaskRetentionDays"] != nil {
+		maxTaskRetentionDays, err := voHelper.InterfaceToUint16(input["maxTaskRetentionDays"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		maxTaskRetentionDaysPtr = &maxTaskRetentionDays
+	}
+
+	var maxConcurrentCpuCoresPtr *uint16
+	if input["maxConcurrentCpuCores"] != nil {
+		maxConcurrentCpuCores, err := voHelper.InterfaceToUint16(input["maxConcurrentCpuCores"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		maxConcurrentCpuCoresPtr = &maxConcurrentCpuCores
+	}
+
+	containerAccountIds := []valueObject.AccountId{}
+	if input["containerAccountIds"] != nil {
+		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidContainerAccountIds"))
+		}
+	}
+
+	containerIds := []valueObject.ContainerId{}
+	if input["containerIds"] != nil {
+		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+		}
+	}
+
+	ignoreContainerAccountIds := []valueObject.AccountId{}
+	if input["ignoreContainerAccountIds"] != nil {
+		ignoreContainerAccountIds, assertOk = input["ignoreContainerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerAccountIds"))
+		}
+	}
+
+	ignoreContainerIds := []valueObject.ContainerId{}
+	if input["ignoreContainerIds"] != nil {
+		ignoreContainerIds, assertOk = input["ignoreContainerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerIds"))
+		}
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	createDto := dto.NewCreateBackupJob(
+		accountId, jobDescriptionPtr, destinationIds, retentionStrategyPtr, backupSchedule,
+		archiveCompressionFormatPtr, timeoutSecsPtr, maxTaskRetentionCountPtr,
+		maxTaskRetentionDaysPtr, maxConcurrentCpuCoresPtr, containerAccountIds,
+		containerIds, ignoreContainerAccountIds, ignoreContainerIds,
+		operatorAccountId, operatorIpAddress,
+	)
+
+	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
+	err = useCase.CreateBackupJob(backupCmdRepo, service.activityRecordCmdRepo, createDto)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Created, "BackupJobCreated")
+}
+
 func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {
 	var taskIdPtr *valueObject.BackupTaskId
 	if input["taskId"] != nil {
