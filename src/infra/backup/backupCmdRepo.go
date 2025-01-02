@@ -129,12 +129,7 @@ func (repo *BackupCmdRepo) CreateDestination(
 		return destinationId, err
 	}
 
-	destinationId, err = valueObject.NewBackupDestinationId(destinationModel.ID)
-	if err != nil {
-		return destinationId, err
-	}
-
-	return destinationId, nil
+	return valueObject.NewBackupDestinationId(destinationModel.ID)
 }
 
 func (repo *BackupCmdRepo) CreateJob(
@@ -199,10 +194,5 @@ func (repo *BackupCmdRepo) CreateJob(
 		return backupJobId, err
 	}
 
-	backupJobId, err = valueObject.NewBackupJobId(jobModel.ID)
-	if err != nil {
-		return backupJobId, err
-	}
-
-	return backupJobId, nil
+	return valueObject.NewBackupJobId(jobModel.ID)
 }
