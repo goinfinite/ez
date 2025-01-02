@@ -312,6 +312,43 @@
                     }
                 }
             },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "UpdateBackupDestination",
+                "parameters": [
+                    {
+                        "description": "UpdateBackupDestination",
+                        "name": "updateBackupDestinationDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBackupDestination"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupDestinationUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -2785,6 +2822,89 @@
                 },
                 "shouldUpdateApiKey": {
                     "type": "boolean"
+                }
+            }
+        },
+        "dto.UpdateBackupDestination": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "destinationDescription": {
+                    "type": "string"
+                },
+                "destinationId": {
+                    "type": "integer"
+                },
+                "destinationName": {
+                    "type": "string"
+                },
+                "destinationPath": {
+                    "type": "string"
+                },
+                "destinationType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationType"
+                },
+                "downloadBytesSecRateLimit": {
+                    "type": "integer"
+                },
+                "maxConcurrentConnections": {
+                    "type": "integer"
+                },
+                "maxDestinationStorageUsagePercent": {
+                    "type": "integer"
+                },
+                "minLocalStorageFreePercent": {
+                    "type": "integer"
+                },
+                "objectStorageBucketName": {
+                    "type": "string"
+                },
+                "objectStorageEndpointUrl": {
+                    "type": "string"
+                },
+                "objectStorageProvider": {
+                    "$ref": "#/definitions/valueObject.ObjectStorageProvider"
+                },
+                "objectStorageProviderAccessKeyId": {
+                    "type": "string"
+                },
+                "objectStorageProviderRegion": {
+                    "type": "string"
+                },
+                "objectStorageProviderSecretAccessKey": {
+                    "type": "string"
+                },
+                "remoteHostConnectionRetrySecs": {
+                    "type": "integer"
+                },
+                "remoteHostConnectionTimeoutSecs": {
+                    "type": "integer"
+                },
+                "remoteHostNetworkPort": {
+                    "type": "integer"
+                },
+                "remoteHostPassword": {
+                    "type": "string"
+                },
+                "remoteHostPrivateKeyFilePath": {
+                    "type": "string"
+                },
+                "remoteHostType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationRemoteHostType"
+                },
+                "remoteHostUsername": {
+                    "type": "string"
+                },
+                "remoteHostname": {
+                    "type": "string"
+                },
+                "skipCertificateVerification": {
+                    "type": "boolean"
+                },
+                "uploadBytesSecRateLimit": {
+                    "type": "integer"
                 }
             }
         },

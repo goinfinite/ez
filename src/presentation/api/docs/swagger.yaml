@@ -343,6 +343,61 @@ definitions:
       shouldUpdateApiKey:
         type: boolean
     type: object
+  dto.UpdateBackupDestination:
+    properties:
+      accountId:
+        type: integer
+      destinationDescription:
+        type: string
+      destinationId:
+        type: integer
+      destinationName:
+        type: string
+      destinationPath:
+        type: string
+      destinationType:
+        $ref: '#/definitions/valueObject.BackupDestinationType'
+      downloadBytesSecRateLimit:
+        type: integer
+      maxConcurrentConnections:
+        type: integer
+      maxDestinationStorageUsagePercent:
+        type: integer
+      minLocalStorageFreePercent:
+        type: integer
+      objectStorageBucketName:
+        type: string
+      objectStorageEndpointUrl:
+        type: string
+      objectStorageProvider:
+        $ref: '#/definitions/valueObject.ObjectStorageProvider'
+      objectStorageProviderAccessKeyId:
+        type: string
+      objectStorageProviderRegion:
+        type: string
+      objectStorageProviderSecretAccessKey:
+        type: string
+      remoteHostConnectionRetrySecs:
+        type: integer
+      remoteHostConnectionTimeoutSecs:
+        type: integer
+      remoteHostNetworkPort:
+        type: integer
+      remoteHostPassword:
+        type: string
+      remoteHostPrivateKeyFilePath:
+        type: string
+      remoteHostType:
+        $ref: '#/definitions/valueObject.BackupDestinationRemoteHostType'
+      remoteHostUsername:
+        type: string
+      remoteHostname:
+        type: string
+      skipCertificateVerification:
+        type: boolean
+      uploadBytesSecRateLimit:
+        type: integer
+    type: object
   dto.UpdateContainer:
     properties:
       accountId:
@@ -1266,6 +1321,29 @@ paths:
       security:
       - Bearer: []
       summary: CreateBackupDestination
+      tags:
+      - backup
+    put:
+      consumes:
+      - application/json
+      description: Update a backup destination.
+      parameters:
+      - description: UpdateBackupDestination
+        in: body
+        name: updateBackupDestinationDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBackupDestination'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupDestinationUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateBackupDestination
       tags:
       - backup
   /v1/backup/job/:

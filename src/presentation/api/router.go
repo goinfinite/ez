@@ -68,6 +68,7 @@ func (router *Router) backupRoutes() {
 	destinationGroup := backupGroup.Group("/destination")
 	destinationGroup.GET("/", backupController.ReadDestination)
 	destinationGroup.POST("/", backupController.CreateDestination)
+	destinationGroup.PUT("/", backupController.UpdateDestination)
 
 	jobGroup := backupGroup.Group("/job")
 	jobGroup.GET("/", backupController.ReadJob)

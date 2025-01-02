@@ -437,6 +437,335 @@ func (service *BackupService) CreateDestination(
 	return NewServiceOutput(Created, "BackupDestinationCreated")
 }
 
+func (service *BackupService) UpdateDestination(
+	input map[string]interface{},
+) ServiceOutput {
+	requiredParams := []string{"destinationId", "accountId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	var destinationNamePtr *valueObject.BackupDestinationName
+	if input["destinationName"] != nil {
+		destinationName, err := valueObject.NewBackupDestinationName(input["destinationName"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		destinationNamePtr = &destinationName
+	}
+
+	var destinationDescriptionPtr *valueObject.BackupDestinationDescription
+	if input["destinationDescription"] != nil {
+		destinationDescription, err := valueObject.NewBackupDestinationDescription(
+			input["destinationDescription"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		destinationDescriptionPtr = &destinationDescription
+	}
+
+	var destinationTypePtr *valueObject.BackupDestinationType
+	if input["destinationType"] != nil {
+		destinationType, err := valueObject.NewBackupDestinationType(input["destinationType"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		destinationTypePtr = &destinationType
+	}
+
+	var destinationPathPtr *valueObject.UnixFilePath
+	if input["destinationPath"] != nil {
+		destinationPath, err := valueObject.NewUnixFilePath(input["destinationPath"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		destinationPathPtr = &destinationPath
+	}
+
+	var minLocalStorageFreePercentPtr *uint8
+	if input["minLocalStorageFreePercent"] != nil {
+		minLocalStorageFreePercent, err := voHelper.InterfaceToUint8(
+			input["minLocalStorageFreePercent"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		minLocalStorageFreePercentPtr = &minLocalStorageFreePercent
+	}
+
+	var maxDestinationStorageUsagePercentPtr *uint8
+	if input["maxDestinationStorageUsagePercent"] != nil {
+		maxDestinationStorageUsagePercent, err := voHelper.InterfaceToUint8(
+			input["maxDestinationStorageUsagePercent"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		maxDestinationStorageUsagePercentPtr = &maxDestinationStorageUsagePercent
+	}
+
+	var maxConcurrentConnectionsPtr *uint16
+	if input["maxConcurrentConnections"] != nil {
+		maxConcurrentConnections, err := voHelper.InterfaceToUint16(
+			input["maxConcurrentConnections"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		maxConcurrentConnectionsPtr = &maxConcurrentConnections
+	}
+
+	var downloadBytesSecRateLimitPtr *uint64
+	if input["downloadBytesSecRateLimit"] != nil {
+		downloadBytesSecRateLimit, err := voHelper.InterfaceToUint64(
+			input["downloadBytesSecRateLimit"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
+	}
+
+	var uploadBytesSecRateLimitPtr *uint64
+	if input["uploadBytesSecRateLimit"] != nil {
+		uploadBytesSecRateLimit, err := voHelper.InterfaceToUint64(
+			input["uploadBytesSecRateLimit"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
+	}
+
+	var skipCertificateVerificationPtr *bool
+	if input["skipCertificateVerification"] != nil {
+		skipCertificateVerification, err := voHelper.InterfaceToBool(
+			input["skipCertificateVerification"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		skipCertificateVerificationPtr = &skipCertificateVerification
+	}
+
+	var objectStorageProviderPtr *valueObject.ObjectStorageProvider
+	if input["objectStorageProvider"] != nil {
+		objectStorageProvider, err := valueObject.NewObjectStorageProvider(
+			input["objectStorageProvider"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		objectStorageProviderPtr = &objectStorageProvider
+	}
+
+	var objectStorageProviderRegionPtr *valueObject.ObjectStorageProviderRegion
+	if input["objectStorageProviderRegion"] != nil {
+		objectStorageProviderRegion, err := valueObject.NewObjectStorageProviderRegion(
+			input["objectStorageProviderRegion"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		objectStorageProviderRegionPtr = &objectStorageProviderRegion
+	}
+
+	var objectStorageProviderAccessKeyIdPtr *valueObject.ObjectStorageProviderAccessKeyId
+	if input["objectStorageProviderAccessKeyId"] != nil {
+		objectStorageProviderAccessKeyId, err := valueObject.NewObjectStorageProviderAccessKeyId(
+			input["objectStorageProviderAccessKeyId"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		objectStorageProviderAccessKeyIdPtr = &objectStorageProviderAccessKeyId
+	}
+
+	var objectStorageProviderSecretAccessKeyPtr *valueObject.ObjectStorageProviderSecretAccessKey
+	if input["objectStorageProviderSecretAccessKey"] != nil {
+		objectStorageProviderSecretAccessKey, err := valueObject.NewObjectStorageProviderSecretAccessKey(
+			input["objectStorageProviderSecretAccessKey"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		objectStorageProviderSecretAccessKeyPtr = &objectStorageProviderSecretAccessKey
+	}
+
+	var objectStorageEndpointUrlPtr *valueObject.Url
+	if input["objectStorageEndpointUrl"] != nil {
+		objectStorageEndpointUrl, err := valueObject.NewUrl(input["objectStorageEndpointUrl"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		objectStorageEndpointUrlPtr = &objectStorageEndpointUrl
+	}
+
+	var objectStorageBucketNamePtr *valueObject.ObjectStorageBucketName
+	if input["objectStorageBucketName"] != nil {
+		objectStorageBucketName, err := valueObject.NewObjectStorageBucketName(
+			input["objectStorageBucketName"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		objectStorageBucketNamePtr = &objectStorageBucketName
+	}
+
+	var remoteHostTypePtr *valueObject.BackupDestinationRemoteHostType
+	if input["remoteHostType"] != nil {
+		remoteHostType, err := valueObject.NewBackupDestinationRemoteHostType(
+			input["remoteHostType"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostTypePtr = &remoteHostType
+	}
+
+	var remoteHostnamePtr *valueObject.NetworkHost
+	if input["remoteHostname"] != nil {
+		remoteHostname, err := valueObject.NewNetworkHost(input["remoteHostname"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostnamePtr = &remoteHostname
+	}
+
+	var remoteHostNetworkPortPtr *valueObject.NetworkPort
+	if input["remoteHostNetworkPort"] != nil {
+		remoteHostNetworkPort, err := valueObject.NewNetworkPort(
+			input["remoteHostNetworkPort"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostNetworkPortPtr = &remoteHostNetworkPort
+	}
+
+	var remoteHostUsernamePtr *valueObject.UnixUsername
+	if input["remoteHostUsername"] != nil {
+		remoteHostUsername, err := valueObject.NewUnixUsername(input["remoteHostUsername"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostUsernamePtr = &remoteHostUsername
+	}
+
+	var remoteHostPasswordPtr *valueObject.Password
+	if input["remoteHostPassword"] != nil {
+		remoteHostPassword, err := valueObject.NewPassword(input["remoteHostPassword"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostPasswordPtr = &remoteHostPassword
+	}
+
+	var remoteHostPrivateKeyFilePathPtr *valueObject.UnixFilePath
+	if input["remoteHostPrivateKeyFilePath"] != nil {
+		remoteHostPrivateKeyFilePath, err := valueObject.NewUnixFilePath(
+			input["remoteHostPrivateKeyFilePath"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
+	}
+
+	var remoteHostConnectionTimeoutSecsPtr *uint16
+	if input["remoteHostConnectionTimeoutSecs"] != nil {
+		remoteHostConnectionTimeoutSecs, err := voHelper.InterfaceToUint16(
+			input["remoteHostConnectionTimeoutSecs"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
+	}
+
+	var remoteHostConnectionRetrySecsPtr *uint16
+	if input["remoteHostConnectionRetrySecs"] != nil {
+		remoteHostConnectionRetrySecs, err := voHelper.InterfaceToUint16(
+			input["remoteHostConnectionRetrySecs"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	updateDto := dto.UpdateBackupDestination{
+		DestinationId:                        destinationId,
+		AccountId:                            accountId,
+		DestinationName:                      destinationNamePtr,
+		DestinationDescription:               destinationDescriptionPtr,
+		DestinationType:                      destinationTypePtr,
+		DestinationPath:                      destinationPathPtr,
+		MinLocalStorageFreePercent:           minLocalStorageFreePercentPtr,
+		MaxDestinationStorageUsagePercent:    maxDestinationStorageUsagePercentPtr,
+		MaxConcurrentConnections:             maxConcurrentConnectionsPtr,
+		DownloadBytesSecRateLimit:            downloadBytesSecRateLimitPtr,
+		UploadBytesSecRateLimit:              uploadBytesSecRateLimitPtr,
+		SkipCertificateVerification:          skipCertificateVerificationPtr,
+		ObjectStorageProvider:                objectStorageProviderPtr,
+		ObjectStorageProviderRegion:          objectStorageProviderRegionPtr,
+		ObjectStorageProviderAccessKeyId:     objectStorageProviderAccessKeyIdPtr,
+		ObjectStorageProviderSecretAccessKey: objectStorageProviderSecretAccessKeyPtr,
+		ObjectStorageEndpointUrl:             objectStorageEndpointUrlPtr,
+		ObjectStorageBucketName:              objectStorageBucketNamePtr,
+		RemoteHostType:                       remoteHostTypePtr,
+		RemoteHostname:                       remoteHostnamePtr,
+		RemoteHostNetworkPort:                remoteHostNetworkPortPtr,
+		RemoteHostUsername:                   remoteHostUsernamePtr,
+		RemoteHostPassword:                   remoteHostPasswordPtr,
+		RemoteHostPrivateKeyFilePath:         remoteHostPrivateKeyFilePathPtr,
+		RemoteHostConnectionTimeoutSecs:      remoteHostConnectionTimeoutSecsPtr,
+		RemoteHostConnectionRetrySecs:        remoteHostConnectionRetrySecsPtr,
+		OperatorAccountId:                    operatorAccountId,
+		OperatorIpAddress:                    operatorIpAddress,
+	}
+
+	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
+	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
+	err = useCase.UpdateBackupDestination(
+		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, updateDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupDestinationUpdated")
+}
+
 func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutput {
 	var jobIdPtr *valueObject.BackupJobId
 	if input["jobId"] != nil {

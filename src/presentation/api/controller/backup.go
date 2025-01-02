@@ -91,12 +91,29 @@ func (controller *BackupController) CreateDestination(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.CreateDestination(requestBody),
+	)
+}
+
+// UpdateBackupDestination	 godoc
+// @Summary      UpdateBackupDestination
+// @Description  Update a backup destination.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        updateBackupDestinationDto 	  body    dto.UpdateBackupDestination  true  "UpdateBackupDestination"
+// @Success      200 {object} object{} "BackupDestinationUpdated"
+// @Router       /v1/backup/destination/ [put]
+func (controller *BackupController) UpdateDestination(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
 	}
 
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.backupService.CreateDestination(requestBody),
+		c, controller.backupService.UpdateDestination(requestBody),
 	)
 }
 
@@ -164,10 +181,6 @@ func (controller *BackupController) CreateJob(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
-	}
-
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
 	if requestBody["destinationIds"] != nil {
