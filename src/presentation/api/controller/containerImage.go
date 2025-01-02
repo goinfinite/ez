@@ -164,10 +164,6 @@ func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) er
 		return err
 	}
 
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
-	}
-
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.containerImageService.CreateArchiveFile(requestBody, true),
 	)
@@ -202,9 +198,6 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
-	}
 	accountId, err := valueObject.NewAccountId(requestBody["accountId"])
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())

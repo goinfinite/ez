@@ -374,10 +374,6 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
-	}
-
 	if _, exists := requestBody["imageAddress"]; !exists {
 		possibleKeys := []string{"imgAddr", "imageAddr", "imgAddress"}
 		for _, possibleKey := range possibleKeys {
@@ -485,10 +481,6 @@ func (controller *ContainerController) Update(c echo.Context) error {
 		if _, exists := requestBody["id"]; exists {
 			requestBody["containerId"] = requestBody["id"]
 		}
-	}
-
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
 	return apiHelper.ServiceResponseWrapper(
