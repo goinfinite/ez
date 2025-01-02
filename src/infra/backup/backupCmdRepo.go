@@ -35,11 +35,6 @@ func (repo *BackupCmdRepo) CreateDestination(
 		destinationPath = createDto.DestinationPath.String()
 	}
 
-	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
-	if encryptSecretKey == "" {
-		return destinationId, errors.New("BackupKeysSecretMissing")
-	}
-
 	var objectStorageProviderPtr, objectStorageProviderRegionPtr *string
 	if createDto.ObjectStorageProvider != nil {
 		objectStorageProvider := createDto.ObjectStorageProvider.String()
@@ -55,6 +50,12 @@ func (repo *BackupCmdRepo) CreateDestination(
 		objectStorageProviderAccessKeyId := createDto.ObjectStorageProviderAccessKeyId.String()
 		objectStorageProviderAccessKeyIdPtr = &objectStorageProviderAccessKeyId
 	}
+
+	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
+	if encryptSecretKey == "" {
+		return destinationId, errors.New("BackupKeysSecretMissing")
+	}
+
 	if createDto.ObjectStorageProviderSecretAccessKey != nil {
 		encryptedProviderSecretAccessKey, err := infraHelper.EncryptStr(
 			encryptSecretKey, createDto.ObjectStorageProviderSecretAccessKey.String(),
@@ -130,6 +131,140 @@ func (repo *BackupCmdRepo) CreateDestination(
 	}
 
 	return valueObject.NewBackupDestinationId(destinationModel.ID)
+}
+
+func (repo *BackupCmdRepo) UpdateDestination(
+	updateDto dto.UpdateBackupDestination,
+) error {
+	updateMap := map[string]interface{}{
+		"account_id": updateDto.AccountId.Uint64(),
+	}
+
+	if updateDto.DestinationName != nil {
+		updateMap["name"] = updateDto.DestinationName.String()
+	}
+
+	if updateDto.DestinationDescription != nil {
+		updateMap["description"] = updateDto.DestinationDescription.String()
+	}
+
+	if updateDto.DestinationType != nil {
+		updateMap["type"] = updateDto.DestinationType.String()
+	}
+
+	if updateDto.DestinationPath != nil {
+		updateMap["path"] = updateDto.DestinationPath.String()
+	}
+
+	if updateDto.MinLocalStorageFreePercent != nil {
+		updateMap["min_local_storage_free_percent"] = *updateDto.MinLocalStorageFreePercent
+	}
+
+	if updateDto.MaxDestinationStorageUsagePercent != nil {
+		updateMap["max_destination_storage_usage_percent"] = *updateDto.MaxDestinationStorageUsagePercent
+	}
+
+	if updateDto.MaxConcurrentConnections != nil {
+		updateMap["max_concurrent_connections"] = *updateDto.MaxConcurrentConnections
+	}
+
+	if updateDto.TotalSpaceUsageBytes != nil {
+		updateMap["total_space_usage_bytes"] = uint64(updateDto.TotalSpaceUsageBytes.Int64())
+	}
+
+	if updateDto.TotalSpaceUsagePercent != nil {
+		updateMap["total_space_usage_percent"] = *updateDto.TotalSpaceUsagePercent
+	}
+
+	if updateDto.DownloadBytesSecRateLimit != nil {
+		updateMap["download_bytes_sec_rate_limit"] = *updateDto.DownloadBytesSecRateLimit
+	}
+
+	if updateDto.UploadBytesSecRateLimit != nil {
+		updateMap["upload_bytes_sec_rate_limit"] = *updateDto.UploadBytesSecRateLimit
+	}
+
+	if updateDto.SkipCertificateVerification != nil {
+		updateMap["skip_certificate_verification"] = *updateDto.SkipCertificateVerification
+	}
+
+	if updateDto.ObjectStorageProvider != nil {
+		updateMap["object_storage_provider"] = updateDto.ObjectStorageProvider.String()
+	}
+
+	if updateDto.ObjectStorageProviderRegion != nil {
+		updateMap["object_storage_provider_region"] = updateDto.ObjectStorageProviderRegion.String()
+	}
+
+	if updateDto.ObjectStorageProviderAccessKeyId != nil {
+		updateMap["object_storage_provider_access_key_id"] = updateDto.ObjectStorageProviderAccessKeyId.String()
+	}
+
+	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
+	if encryptSecretKey == "" {
+		return errors.New("BackupKeysSecretMissing")
+	}
+
+	if updateDto.ObjectStorageProviderSecretAccessKey != nil {
+		encryptedProviderSecretAccessKey, err := infraHelper.EncryptStr(
+			encryptSecretKey, updateDto.ObjectStorageProviderSecretAccessKey.String(),
+		)
+		if err != nil {
+			return errors.New("EncryptProviderSecretAccessKeyFailed: " + err.Error())
+		}
+		updateMap["object_storage_provider_secret_access_key"] = encryptedProviderSecretAccessKey
+	}
+
+	if updateDto.ObjectStorageEndpointUrl != nil {
+		updateMap["object_storage_endpoint_url"] = updateDto.ObjectStorageEndpointUrl.String()
+	}
+
+	if updateDto.ObjectStorageBucketName != nil {
+		updateMap["object_storage_bucket_name"] = updateDto.ObjectStorageBucketName.String()
+	}
+
+	if updateDto.RemoteHostType != nil {
+		updateMap["remote_host_type"] = updateDto.RemoteHostType.String()
+	}
+
+	if updateDto.RemoteHostname != nil {
+		updateMap["remote_hostname"] = updateDto.RemoteHostname.String()
+	}
+
+	if updateDto.RemoteHostNetworkPort != nil {
+		updateMap["remote_host_network_port"] = updateDto.RemoteHostNetworkPort.Uint16()
+	}
+
+	if updateDto.RemoteHostUsername != nil {
+		updateMap["remote_host_username"] = updateDto.RemoteHostUsername.String()
+	}
+
+	if updateDto.RemoteHostPassword != nil {
+		encryptedPassword, err := infraHelper.EncryptStr(
+			encryptSecretKey, updateDto.RemoteHostPassword.String(),
+		)
+		if err != nil {
+			return errors.New("EncryptPasswordFailed: " + err.Error())
+		}
+		updateMap["remote_host_password"] = encryptedPassword
+	}
+
+	if updateDto.RemoteHostPrivateKeyFilePath != nil {
+		updateMap["remote_host_private_key_file_path"] = updateDto.RemoteHostPrivateKeyFilePath.String()
+	}
+
+	if updateDto.RemoteHostConnectionTimeoutSecs != nil {
+		updateMap["remote_host_connection_timeout_secs"] = *updateDto.RemoteHostConnectionTimeoutSecs
+	}
+
+	if updateDto.RemoteHostConnectionRetrySecs != nil {
+		updateMap["remote_host_connection_retry_secs"] = *updateDto.RemoteHostConnectionRetrySecs
+	}
+
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.BackupDestination{}).
+		Where("id = ?", updateDto.DestinationId.Uint64()).
+		Updates(updateMap).Error
 }
 
 func (repo *BackupCmdRepo) CreateJob(

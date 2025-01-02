@@ -29,6 +29,23 @@ func TestBackupCmdRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("UpdateBackupDestination", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(1000)
+		destinationId, _ := valueObject.NewBackupDestinationId(1)
+		newDestinationName, _ := valueObject.NewBackupDestinationName("test2")
+
+		updateDto := dto.UpdateBackupDestination{
+			AccountId:       accountId,
+			DestinationId:   destinationId,
+			DestinationName: &newDestinationName,
+		}
+
+		err := backupCmdRepo.UpdateDestination(updateDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
 	t.Run("CreateBackupJob", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(1000)
 		destinationId, _ := valueObject.NewBackupDestinationId(1)
