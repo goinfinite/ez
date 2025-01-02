@@ -8,4 +8,5 @@ import (
 type BackupCmdRepo interface {
 	CreateDestination(dto.CreateBackupDestination) (valueObject.BackupDestinationId, error)
 	CreateJob(dto.CreateBackupJob) (valueObject.BackupJobId, error)
+	UpdateDestination(dto.UpdateBackupDestination) error
 }

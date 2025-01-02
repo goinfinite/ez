@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 )
 
 type BackupQueryRepo interface {
@@ -9,6 +10,10 @@ type BackupQueryRepo interface {
 		requestDto dto.ReadBackupDestinationsRequest,
 		withSecrets bool,
 	) (dto.ReadBackupDestinationsResponse, error)
+	ReadFirstDestination(
+		requestDto dto.ReadBackupDestinationsRequest,
+		withSecrets bool,
+	) (entity.IBackupDestination, error)
 	ReadJob(dto.ReadBackupJobsRequest) (dto.ReadBackupJobsResponse, error)
 	ReadTask(dto.ReadBackupTasksRequest) (dto.ReadBackupTasksResponse, error)
 }
