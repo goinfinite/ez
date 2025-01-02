@@ -89,6 +89,27 @@ func (repo *BackupQueryRepo) ReadDestination(
 	}, nil
 }
 
+func (repo *BackupQueryRepo) ReadFirstDestination(
+	requestDto dto.ReadBackupDestinationsRequest,
+	withSecrets bool,
+) (destinationEntity entity.IBackupDestination, err error) {
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+
+	responseDto, err := repo.ReadDestination(requestDto, withSecrets)
+	if err != nil {
+		return destinationEntity, err
+	}
+
+	if len(responseDto.Destinations) == 0 {
+		return destinationEntity, errors.New("BackupDestinationNotFound")
+	}
+
+	return responseDto.Destinations[0], nil
+}
+
 func (repo *BackupQueryRepo) ReadJob(
 	requestDto dto.ReadBackupJobsRequest,
 ) (responseDto dto.ReadBackupJobsResponse, err error) {
