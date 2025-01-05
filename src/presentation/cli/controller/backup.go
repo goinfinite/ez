@@ -340,8 +340,9 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 		Short: "updateBackupDestination",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"destinationId": destinationIdUint,
-				"accountId":     accountIdUint,
+				"destinationId":               destinationIdUint,
+				"accountId":                   accountIdUint,
+				"skipCertificateVerification": skipCertificateVerificationBoolStr,
 			}
 
 			if destinationNameStr != "" {
@@ -350,10 +351,6 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 
 			if destinationTypeStr != "" {
 				requestBody["destinationType"] = destinationTypeStr
-			}
-
-			if skipCertificateVerificationBoolStr != "" {
-				requestBody["skipCertificateVerification"] = skipCertificateVerificationBoolStr
 			}
 
 			if destinationDescriptionStr != "" {
@@ -719,6 +716,119 @@ func (controller *BackupController) CreateJob() *cobra.Command {
 	cmd.Flags().StringVarP(
 		&archiveCompressionFormatStr, "archive-compression-format", "c", "", "ArchiveCompressionFormat",
 	)
+	cmd.Flags().Uint64VarP(&timeoutSecsUint, "timeout-secs", "t", 0, "TimeoutSecs")
+	cmd.Flags().Uint16VarP(
+		&maxTaskRetentionCountUint, "max-task-retention-count", "M", 0, "MaxTaskRetentionCount",
+	)
+	cmd.Flags().Uint16VarP(
+		&maxTaskRetentionDaysUint, "max-task-retention-days", "R", 0, "MaxTaskRetentionDays",
+	)
+	cmd.Flags().Uint16VarP(
+		&maxConcurrentCpuCoresUint, "max-concurrent-cpu-cores", "C", 0, "MaxConcurrentCpuCores",
+	)
+	cmd.Flags().StringSliceVarP(
+		&containerAccountIdsSlice, "container-account-ids", "u", []string{}, "ContainerAccountIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&containerIdsSlice, "container-ids", "i", []string{}, "ContainerIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&ignoreContainerAccountIdsSlice, "ignore-container-account-ids", "U", []string{}, "IgnoreContainerAccountIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&ignoreContainerIdsSlice, "ignore-container-ids", "I", []string{}, "IgnoreContainerIds",
+	)
+
+	return cmd
+}
+
+func (controller *BackupController) UpdateJob() *cobra.Command {
+	var jobIdUint, accountIdUint, timeoutSecsUint uint64
+	var maxTaskRetentionCountUint, maxTaskRetentionDaysUint, maxConcurrentCpuCoresUint uint16
+	var jobStatusBoolStr, jobDescriptionStr, backupScheduleStr string
+	var destinationIdsSlice, containerAccountIdsSlice, ignoreContainerAccountIdsSlice []string
+	var containerIdsSlice, ignoreContainerIdsSlice []string
+
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "UpdateBackupJob",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"jobId":     jobIdUint,
+				"accountId": accountIdUint,
+				"jobStatus": jobStatusBoolStr,
+			}
+
+			if jobDescriptionStr != "" {
+				requestBody["jobDescription"] = jobDescriptionStr
+			}
+
+			if len(destinationIdsSlice) > 0 {
+				requestBody["destinationIds"] = sharedHelper.StringSliceValueObjectParser(
+					destinationIdsSlice, valueObject.NewBackupDestinationId,
+				)
+			}
+
+			if backupScheduleStr != "" {
+				requestBody["backupSchedule"] = backupScheduleStr
+			}
+
+			if timeoutSecsUint != 0 {
+				requestBody["timeoutSecs"] = timeoutSecsUint
+			}
+
+			if maxTaskRetentionCountUint != 0 {
+				requestBody["maxTaskRetentionCount"] = maxTaskRetentionCountUint
+			}
+
+			if maxTaskRetentionDaysUint != 0 {
+				requestBody["maxTaskRetentionDays"] = maxTaskRetentionDaysUint
+			}
+
+			if maxConcurrentCpuCoresUint != 0 {
+				requestBody["maxConcurrentCpuCores"] = maxConcurrentCpuCoresUint
+			}
+
+			if len(containerAccountIdsSlice) > 0 {
+				requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+					containerAccountIdsSlice, valueObject.NewAccountId,
+				)
+			}
+
+			if len(containerIdsSlice) > 0 {
+				requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
+					containerIdsSlice, valueObject.NewContainerId,
+				)
+			}
+
+			if len(ignoreContainerAccountIdsSlice) > 0 {
+				requestBody["ignoreContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+					ignoreContainerAccountIdsSlice, valueObject.NewAccountId,
+				)
+			}
+
+			if len(ignoreContainerIdsSlice) > 0 {
+				requestBody["ignoreContainerIds"] = sharedHelper.StringSliceValueObjectParser(
+					ignoreContainerIdsSlice, valueObject.NewContainerId,
+				)
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.UpdateJob(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&jobIdUint, "job-id", "j", 0, "BackupJobId")
+	cmd.MarkFlagRequired("job-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	cmd.Flags().StringVarP(&jobStatusBoolStr, "job-status", "S", "true", "BackupJobStatus")
+	cmd.Flags().StringVarP(&jobDescriptionStr, "job-description", "d", "", "BackupJobDescription")
+	cmd.Flags().StringSliceVarP(
+		&destinationIdsSlice, "destination-ids", "D", []string{}, "BackupDestinationIds",
+	)
+	cmd.Flags().StringVarP(&backupScheduleStr, "backup-schedule", "s", "", "BackupSchedule")
 	cmd.Flags().Uint64VarP(&timeoutSecsUint, "timeout-secs", "t", 0, "TimeoutSecs")
 	cmd.Flags().Uint16VarP(
 		&maxTaskRetentionCountUint, "max-task-retention-count", "M", 0, "MaxTaskRetentionCount",

@@ -524,6 +524,43 @@
                     }
                 }
             },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a backup job.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "UpdateBackupJob",
+                "parameters": [
+                    {
+                        "description": "UpdateBackupJob",
+                        "name": "updateBackupJobDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBackupJob"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupJobUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -2904,6 +2941,68 @@
                     "type": "boolean"
                 },
                 "uploadBytesSecRateLimit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateBackupJob": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "destinationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ignoreContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ignoreContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "jobDescription": {
+                    "type": "string"
+                },
+                "jobId": {
+                    "type": "integer"
+                },
+                "jobStatus": {
+                    "type": "boolean"
+                },
+                "maxConcurrentCpuCores": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionCount": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionDays": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
                     "type": "integer"
                 }
             }

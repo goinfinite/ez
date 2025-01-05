@@ -194,6 +194,27 @@ func (controller *BackupController) CreateJob(c echo.Context) error {
 	)
 }
 
+// UpdateBackupJob	 godoc
+// @Summary      UpdateBackupJob
+// @Description  Update a backup job.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        updateBackupJobDto 	  body    dto.UpdateBackupJob  true  "UpdateBackupJob"
+// @Success      200 {object} object{} "BackupJobUpdated"
+// @Router       /v1/backup/job/ [put]
+func (controller *BackupController) UpdateJob(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.UpdateJob(requestBody),
+	)
+}
+
 // ReadBackupTasks	 godoc
 // @Summary      ReadBackupTasks
 // @Description  List backup tasks.

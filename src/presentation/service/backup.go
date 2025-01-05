@@ -176,7 +176,7 @@ func (service *BackupService) CreateDestination(
 			input["minLocalStorageFreePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMinLocalStorageFreePercent"))
 		}
 		minLocalStorageFreePercentPtr = &minLocalStorageFreePercent
 	}
@@ -187,7 +187,7 @@ func (service *BackupService) CreateDestination(
 			input["maxDestinationStorageUsagePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxDestinationStorageUsagePercent"))
 		}
 		maxDestinationStorageUsagePercentPtr = &maxDestinationStorageUsagePercent
 	}
@@ -198,7 +198,7 @@ func (service *BackupService) CreateDestination(
 			input["maxConcurrentConnections"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentConnections"))
 		}
 		maxConcurrentConnectionsPtr = &maxConcurrentConnections
 	}
@@ -209,7 +209,7 @@ func (service *BackupService) CreateDestination(
 			input["downloadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidDownloadBytesSecRateLimit"))
 		}
 		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
 	}
@@ -220,7 +220,7 @@ func (service *BackupService) CreateDestination(
 			input["uploadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidUploadBytesSecRateLimit"))
 		}
 		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
 	}
@@ -231,7 +231,7 @@ func (service *BackupService) CreateDestination(
 			input["skipCertificateVerification"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidSkipCertificateVerification"))
 		}
 		skipCertificateVerificationPtr = &skipCertificateVerification
 	}
@@ -284,7 +284,7 @@ func (service *BackupService) CreateDestination(
 	if input["objectStorageEndpointUrl"] != nil {
 		objectStorageEndpointUrl, err := valueObject.NewUrl(input["objectStorageEndpointUrl"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidObjectStorageEndpointUrl"))
 		}
 		objectStorageEndpointUrlPtr = &objectStorageEndpointUrl
 	}
@@ -355,7 +355,7 @@ func (service *BackupService) CreateDestination(
 			input["remoteHostPrivateKeyFilePath"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostPrivateKeyFilePath"))
 		}
 		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 	}
@@ -366,7 +366,7 @@ func (service *BackupService) CreateDestination(
 			input["remoteHostConnectionTimeoutSecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionTimeoutSecs"))
 		}
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
@@ -377,7 +377,7 @@ func (service *BackupService) CreateDestination(
 			input["remoteHostConnectionRetrySecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionRetrySecs"))
 		}
 		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
 	}
@@ -437,9 +437,7 @@ func (service *BackupService) CreateDestination(
 	return NewServiceOutput(Created, "BackupDestinationCreated")
 }
 
-func (service *BackupService) UpdateDestination(
-	input map[string]interface{},
-) ServiceOutput {
+func (service *BackupService) UpdateDestination(input map[string]interface{}) ServiceOutput {
 	requiredParams := []string{"destinationId", "accountId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
@@ -501,7 +499,7 @@ func (service *BackupService) UpdateDestination(
 			input["minLocalStorageFreePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMinLocalStorageFreePercent"))
 		}
 		minLocalStorageFreePercentPtr = &minLocalStorageFreePercent
 	}
@@ -512,7 +510,7 @@ func (service *BackupService) UpdateDestination(
 			input["maxDestinationStorageUsagePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxDestinationStorageUsagePercent"))
 		}
 		maxDestinationStorageUsagePercentPtr = &maxDestinationStorageUsagePercent
 	}
@@ -523,7 +521,7 @@ func (service *BackupService) UpdateDestination(
 			input["maxConcurrentConnections"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentConnections"))
 		}
 		maxConcurrentConnectionsPtr = &maxConcurrentConnections
 	}
@@ -534,7 +532,7 @@ func (service *BackupService) UpdateDestination(
 			input["downloadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidDownloadBytesSecRateLimit"))
 		}
 		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
 	}
@@ -545,7 +543,7 @@ func (service *BackupService) UpdateDestination(
 			input["uploadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidUploadBytesSecRateLimit"))
 		}
 		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
 	}
@@ -556,7 +554,7 @@ func (service *BackupService) UpdateDestination(
 			input["skipCertificateVerification"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidSkipCertificateVerification"))
 		}
 		skipCertificateVerificationPtr = &skipCertificateVerification
 	}
@@ -609,7 +607,7 @@ func (service *BackupService) UpdateDestination(
 	if input["objectStorageEndpointUrl"] != nil {
 		objectStorageEndpointUrl, err := valueObject.NewUrl(input["objectStorageEndpointUrl"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidObjectStorageEndpointUrl"))
 		}
 		objectStorageEndpointUrlPtr = &objectStorageEndpointUrl
 	}
@@ -680,7 +678,7 @@ func (service *BackupService) UpdateDestination(
 			input["remoteHostPrivateKeyFilePath"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostPrivateKeyFilePath"))
 		}
 		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 	}
@@ -691,7 +689,7 @@ func (service *BackupService) UpdateDestination(
 			input["remoteHostConnectionTimeoutSecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionTimeoutSecs"))
 		}
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
@@ -702,7 +700,7 @@ func (service *BackupService) UpdateDestination(
 			input["remoteHostConnectionRetrySecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionRetrySecs"))
 		}
 		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
 	}
@@ -825,7 +823,7 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 	if input["lastRunStatus"] != nil {
 		lastRunStatus, err := valueObject.NewBackupTaskStatus(input["lastRunStatus"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidLastRunStatus"))
 		}
 		lastRunStatusPtr = &lastRunStatus
 	}
@@ -926,7 +924,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["timeoutSecs"] != nil {
 		timeoutSecs, err := voHelper.InterfaceToUint64(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
 		}
 		timeoutSecsPtr = &timeoutSecs
 	}
@@ -937,7 +935,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 			input["maxTaskRetentionCount"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionCount"))
 		}
 		maxTaskRetentionCountPtr = &maxTaskRetentionCount
 	}
@@ -946,7 +944,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["maxTaskRetentionDays"] != nil {
 		maxTaskRetentionDays, err := voHelper.InterfaceToUint16(input["maxTaskRetentionDays"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionDays"))
 		}
 		maxTaskRetentionDaysPtr = &maxTaskRetentionDays
 	}
@@ -955,7 +953,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["maxConcurrentCpuCores"] != nil {
 		maxConcurrentCpuCores, err := voHelper.InterfaceToUint16(input["maxConcurrentCpuCores"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentCpuCores"))
 		}
 		maxConcurrentCpuCoresPtr = &maxConcurrentCpuCores
 	}
@@ -1023,6 +1021,177 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	}
 
 	return NewServiceOutput(Created, "BackupJobCreated")
+}
+
+func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"jobId", "accountId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	jobId, err := valueObject.NewBackupJobId(input["jobId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	var jobStatusPtr *bool
+	if input["jobStatus"] != nil {
+		jobStatus, err := voHelper.InterfaceToBool(input["jobStatus"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidJobStatus"))
+		}
+		jobStatusPtr = &jobStatus
+	}
+
+	var jobDescriptionPtr *valueObject.BackupJobDescription
+	if input["jobDescription"] != nil {
+		jobDescription, err := valueObject.NewBackupJobDescription(input["jobDescription"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		jobDescriptionPtr = &jobDescription
+	}
+
+	var destinationIds []valueObject.BackupDestinationId
+	var assertOk bool
+	if input["destinationIds"] != nil {
+		destinationIds, assertOk = input["destinationIds"].([]valueObject.BackupDestinationId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidDestinationIds"))
+		}
+	}
+
+	var backupSchedulePtr *valueObject.CronSchedule
+	if input["backupSchedule"] != nil {
+		backupSchedule, err := valueObject.NewCronSchedule(input["backupSchedule"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		backupSchedulePtr = &backupSchedule
+	}
+
+	var timeoutSecsPtr *uint64
+	if input["timeoutSecs"] != nil {
+		timeoutSecs, err := voHelper.InterfaceToUint64(input["timeoutSecs"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
+		}
+		timeoutSecsPtr = &timeoutSecs
+	}
+
+	var maxTaskRetentionCountPtr *uint16
+	if input["maxTaskRetentionCount"] != nil {
+		maxTaskRetentionCount, err := voHelper.InterfaceToUint16(
+			input["maxTaskRetentionCount"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionCount"))
+		}
+		maxTaskRetentionCountPtr = &maxTaskRetentionCount
+	}
+
+	var maxTaskRetentionDaysPtr *uint16
+	if input["maxTaskRetentionDays"] != nil {
+		maxTaskRetentionDays, err := voHelper.InterfaceToUint16(input["maxTaskRetentionDays"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionDays"))
+		}
+		maxTaskRetentionDaysPtr = &maxTaskRetentionDays
+	}
+
+	var maxConcurrentCpuCoresPtr *uint16
+	if input["maxConcurrentCpuCores"] != nil {
+		maxConcurrentCpuCores, err := voHelper.InterfaceToUint16(input["maxConcurrentCpuCores"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentCpuCores"))
+		}
+		maxConcurrentCpuCoresPtr = &maxConcurrentCpuCores
+	}
+
+	var containerAccountIds []valueObject.AccountId
+	if input["containerAccountIds"] != nil {
+		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidContainerAccountIds"))
+		}
+	}
+
+	var containerIds []valueObject.ContainerId
+	if input["containerIds"] != nil {
+		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+		}
+	}
+
+	var ignoreContainerAccountIds []valueObject.AccountId
+	if input["ignoreContainerAccountIds"] != nil {
+		ignoreContainerAccountIds, assertOk = input["ignoreContainerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerAccountIds"))
+		}
+	}
+
+	var ignoreContainerIds []valueObject.ContainerId
+	if input["ignoreContainerIds"] != nil {
+		ignoreContainerIds, assertOk = input["ignoreContainerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerIds"))
+		}
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	updateDto := dto.UpdateBackupJob{
+		JobId:                     jobId,
+		AccountId:                 accountId,
+		JobStatus:                 jobStatusPtr,
+		JobDescription:            jobDescriptionPtr,
+		DestinationIds:            destinationIds,
+		BackupSchedule:            backupSchedulePtr,
+		TimeoutSecs:               timeoutSecsPtr,
+		MaxTaskRetentionCount:     maxTaskRetentionCountPtr,
+		MaxTaskRetentionDays:      maxTaskRetentionDaysPtr,
+		MaxConcurrentCpuCores:     maxConcurrentCpuCoresPtr,
+		ContainerAccountIds:       containerAccountIds,
+		ContainerIds:              containerIds,
+		IgnoreContainerAccountIds: ignoreContainerAccountIds,
+		IgnoreContainerIds:        ignoreContainerIds,
+		OperatorAccountId:         operatorAccountId,
+		OperatorIpAddress:         operatorIpAddress,
+	}
+
+	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
+	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
+	err = useCase.UpdateBackupJob(
+		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, updateDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupJobUpdated")
 }
 
 func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {

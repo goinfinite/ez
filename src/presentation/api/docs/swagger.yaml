@@ -398,6 +398,47 @@ definitions:
       uploadBytesSecRateLimit:
         type: integer
     type: object
+  dto.UpdateBackupJob:
+    properties:
+      accountId:
+        type: integer
+      backupSchedule:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      destinationIds:
+        items:
+          type: integer
+        type: array
+      ignoreContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      ignoreContainerIds:
+        items:
+          type: string
+        type: array
+      jobDescription:
+        type: string
+      jobId:
+        type: integer
+      jobStatus:
+        type: boolean
+      maxConcurrentCpuCores:
+        type: integer
+      maxTaskRetentionCount:
+        type: integer
+      maxTaskRetentionDays:
+        type: integer
+      timeoutSecs:
+        type: integer
+    type: object
   dto.UpdateContainer:
     properties:
       accountId:
@@ -1457,6 +1498,29 @@ paths:
       security:
       - Bearer: []
       summary: CreateBackupJob
+      tags:
+      - backup
+    put:
+      consumes:
+      - application/json
+      description: Update a backup job.
+      parameters:
+      - description: UpdateBackupJob
+        in: body
+        name: updateBackupJobDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBackupJob'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupJobUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateBackupJob
       tags:
       - backup
   /v1/backup/task/:
