@@ -331,3 +331,86 @@ func (repo *BackupCmdRepo) CreateJob(
 
 	return valueObject.NewBackupJobId(jobModel.ID)
 }
+
+func (repo *BackupCmdRepo) UpdateJob(
+	updateDto dto.UpdateBackupJob,
+) error {
+	jobUpdatedModel := dbModel.BackupJob{
+		AccountID: updateDto.AccountId.Uint64(),
+	}
+
+	if updateDto.JobStatus != nil {
+		jobUpdatedModel.JobStatus = *updateDto.JobStatus
+	}
+
+	if updateDto.JobDescription != nil {
+		jobDescriptionStr := updateDto.JobDescription.String()
+		jobUpdatedModel.JobDescription = &jobDescriptionStr
+	}
+
+	if updateDto.DestinationIds != nil {
+		destinationIdsUint64 := []uint64{}
+		for _, destinationId := range updateDto.DestinationIds {
+			destinationIdsUint64 = append(destinationIdsUint64, destinationId.Uint64())
+		}
+		jobUpdatedModel.DestinationIds = destinationIdsUint64
+	}
+
+	if updateDto.BackupSchedule != nil {
+		backupScheduleStr := updateDto.BackupSchedule.String()
+		jobUpdatedModel.BackupSchedule = backupScheduleStr
+	}
+
+	if updateDto.TimeoutSecs != nil {
+		jobUpdatedModel.TimeoutSecs = *updateDto.TimeoutSecs
+	}
+
+	if updateDto.MaxTaskRetentionCount != nil {
+		jobUpdatedModel.MaxTaskRetentionCount = updateDto.MaxTaskRetentionCount
+	}
+
+	if updateDto.MaxTaskRetentionDays != nil {
+		jobUpdatedModel.MaxTaskRetentionDays = updateDto.MaxTaskRetentionDays
+	}
+
+	if updateDto.MaxConcurrentCpuCores != nil {
+		jobUpdatedModel.MaxConcurrentCpuCores = updateDto.MaxConcurrentCpuCores
+	}
+
+	if updateDto.ContainerAccountIds != nil {
+		containerAccountIdsUint64 := []uint64{}
+		for _, containerAccountId := range updateDto.ContainerAccountIds {
+			containerAccountIdsUint64 = append(containerAccountIdsUint64, containerAccountId.Uint64())
+		}
+		jobUpdatedModel.ContainerAccountIds = containerAccountIdsUint64
+	}
+
+	if updateDto.ContainerIds != nil {
+		containerIds := []string{}
+		for _, containerId := range updateDto.ContainerIds {
+			containerIds = append(containerIds, containerId.String())
+		}
+		jobUpdatedModel.ContainerIds = containerIds
+	}
+
+	if updateDto.IgnoreContainerAccountIds != nil {
+		ignoreContainerAccountIdsUint64 := []uint64{}
+		for _, ignoreContainerAccountId := range updateDto.IgnoreContainerAccountIds {
+			ignoreContainerAccountIdsUint64 = append(ignoreContainerAccountIdsUint64, ignoreContainerAccountId.Uint64())
+		}
+		jobUpdatedModel.IgnoreContainerAccountIds = ignoreContainerAccountIdsUint64
+	}
+
+	if updateDto.IgnoreContainerIds != nil {
+		ignoreContainerIds := []string{}
+		for _, ignoreContainerId := range updateDto.IgnoreContainerIds {
+			ignoreContainerIds = append(ignoreContainerIds, ignoreContainerId.String())
+		}
+		jobUpdatedModel.IgnoreContainerIds = ignoreContainerIds
+	}
+
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.BackupJob{}).
+		Where("id = ?", updateDto.JobId.Uint64()).
+		Updates(&jobUpdatedModel).Error
+}

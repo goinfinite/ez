@@ -62,4 +62,24 @@ func TestBackupCmdRepo(t *testing.T) {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 	})
+
+	t.Run("UpdateBackupJob", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(1000)
+		jobId, _ := valueObject.NewBackupJobId(1)
+		newBackupSchedule, _ := valueObject.NewCronSchedule("@hourly")
+		firstDestinationId, _ := valueObject.NewBackupDestinationId(1)
+		secondDestinationId, _ := valueObject.NewBackupDestinationId(2)
+
+		updateDto := dto.UpdateBackupJob{
+			JobId:          jobId,
+			AccountId:      accountId,
+			DestinationIds: []valueObject.BackupDestinationId{firstDestinationId, secondDestinationId},
+			BackupSchedule: &newBackupSchedule,
+		}
+
+		err := backupCmdRepo.UpdateJob(updateDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
 }

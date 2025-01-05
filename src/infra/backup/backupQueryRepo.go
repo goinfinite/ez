@@ -192,6 +192,26 @@ func (repo *BackupQueryRepo) ReadJob(
 	}, nil
 }
 
+func (repo *BackupQueryRepo) ReadFirstJob(
+	requestDto dto.ReadBackupJobsRequest,
+) (jobEntity entity.BackupJob, err error) {
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+
+	responseDto, err := repo.ReadJob(requestDto)
+	if err != nil {
+		return jobEntity, err
+	}
+
+	if len(responseDto.Jobs) == 0 {
+		return jobEntity, errors.New("BackupJobNotFound")
+	}
+
+	return responseDto.Jobs[0], nil
+}
+
 func (repo *BackupQueryRepo) ReadTask(
 	requestDto dto.ReadBackupTasksRequest,
 ) (responseDto dto.ReadBackupTasksResponse, err error) {
