@@ -46,6 +46,21 @@ func TestBackupCmdRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("DeleteBackupDestination", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(1000)
+		destinationId, _ := valueObject.NewBackupDestinationId(1)
+
+		deleteDto := dto.DeleteBackupDestination{
+			AccountId:     accountId,
+			DestinationId: destinationId,
+		}
+
+		err := backupCmdRepo.DeleteDestination(deleteDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
 	t.Run("CreateBackupJob", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(1000)
 		destinationId, _ := valueObject.NewBackupDestinationId(1)

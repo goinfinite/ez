@@ -267,6 +267,18 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		Updates(updateMap).Error
 }
 
+func (repo *BackupCmdRepo) DeleteDestination(
+	deleteDto dto.DeleteBackupDestination,
+) error {
+	return repo.persistentDbSvc.Handler.
+		Model(&dbModel.BackupDestination{}).
+		Delete(
+			"id = ? AND account_id = ?",
+			deleteDto.DestinationId.Uint64(),
+			deleteDto.AccountId.Uint64(),
+		).Error
+}
+
 func (repo *BackupCmdRepo) CreateJob(
 	createDto dto.CreateBackupJob,
 ) (backupJobId valueObject.BackupJobId, err error) {
