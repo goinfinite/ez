@@ -239,6 +239,30 @@ func (controller *BackupController) UpdateJob(c echo.Context) error {
 	)
 }
 
+// DeleteBackupJob	 godoc
+// @Summary      DeleteBackupJob
+// @Description  Delete a backup job.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        accountId 	  path   string  true  "AccountId"
+// @Param        jobId path  string  true  "BackupJobId"
+// @Success      200 {object} object{} "BackupJobDeleted"
+// @Router       /v1/backup/job/{accountId}/{jobId} [delete]
+func (controller *BackupController) DeleteJob(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"accountId":         c.Param("accountId"),
+		"jobId":             c.Param("jobId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.DeleteJob(requestBody),
+	)
+}
+
 // ReadBackupTasks	 godoc
 // @Summary      ReadBackupTasks
 // @Description  List backup tasks.

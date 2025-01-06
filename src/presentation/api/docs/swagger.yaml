@@ -1551,6 +1551,34 @@ paths:
       summary: UpdateBackupJob
       tags:
       - backup
+  /v1/backup/job/{accountId}/{jobId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup job.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: BackupJobId
+        in: path
+        name: jobId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupJobDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupJob
+      tags:
+      - backup
   /v1/backup/task/:
     get:
       consumes:
