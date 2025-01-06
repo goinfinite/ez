@@ -481,3 +481,20 @@ func (uc *CreateSecurityActivityRecord) UpdateBackupJob(
 
 	uc.createActivityRecord(createRecordDto)
 }
+
+func (uc *CreateSecurityActivityRecord) DeleteBackupJob(
+	deleteDto dto.DeleteBackupJob,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupJobDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupJobSri(deleteDto.AccountId, deleteDto.JobId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
