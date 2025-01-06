@@ -429,6 +429,23 @@ func (uc *CreateSecurityActivityRecord) UpdateBackupDestination(
 	uc.createActivityRecord(createRecordDto)
 }
 
+func (uc *CreateSecurityActivityRecord) DeleteBackupDestination(
+	deleteDto dto.DeleteBackupDestination,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupDestinationDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupDestinationSri(deleteDto.AccountId, deleteDto.DestinationId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
 func (uc *CreateSecurityActivityRecord) CreateBackupJob(
 	createDto dto.CreateBackupJob,
 	jobId valueObject.BackupJobId,
