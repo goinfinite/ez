@@ -270,13 +270,10 @@ func (repo *BackupCmdRepo) UpdateDestination(
 func (repo *BackupCmdRepo) DeleteDestination(
 	deleteDto dto.DeleteBackupDestination,
 ) error {
-	return repo.persistentDbSvc.Handler.
-		Model(&dbModel.BackupDestination{}).
-		Delete(
-			"id = ? AND account_id = ?",
-			deleteDto.DestinationId.Uint64(),
-			deleteDto.AccountId.Uint64(),
-		).Error
+	return repo.persistentDbSvc.Handler.Model(&dbModel.BackupDestination{}).Delete(
+		"id = ? AND account_id = ?",
+		deleteDto.DestinationId.Uint64(), deleteDto.AccountId.Uint64(),
+	).Error
 }
 
 func (repo *BackupCmdRepo) CreateJob(
@@ -425,4 +422,13 @@ func (repo *BackupCmdRepo) UpdateJob(
 		Model(&dbModel.BackupJob{}).
 		Where("id = ?", updateDto.JobId.Uint64()).
 		Updates(&jobUpdatedModel).Error
+}
+
+func (repo *BackupCmdRepo) DeleteJob(
+	deleteDto dto.DeleteBackupJob,
+) error {
+	return repo.persistentDbSvc.Handler.Model(&dbModel.BackupJob{}).Delete(
+		"id = ? AND account_id = ?",
+		deleteDto.JobId.Uint64(), deleteDto.AccountId.Uint64(),
+	).Error
 }

@@ -97,4 +97,19 @@ func TestBackupCmdRepo(t *testing.T) {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 	})
+
+	t.Run("DeleteBackupJob", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(1000)
+		jobId, _ := valueObject.NewBackupJobId(1)
+
+		deleteDto := dto.DeleteBackupJob{
+			JobId:     jobId,
+			AccountId: accountId,
+		}
+
+		err := backupCmdRepo.DeleteJob(deleteDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
 }
