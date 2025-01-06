@@ -329,7 +329,7 @@ func (service *ContainerImageService) CreateArchiveFile(
 	}
 
 	createDto := dto.NewCreateContainerImageArchiveFile(
-		accountId, imageId, compressionFormatPtr, operatorAccountId, operatorIpAddress,
+		accountId, imageId, compressionFormatPtr, nil, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)

@@ -266,6 +266,9 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	if err != nil {
 		return archiveFile, err
 	}
+	if createDto.DestinationPath != nil {
+		archiveDir = *createDto.DestinationPath
+	}
 	archiveDirStr := archiveDir.String()
 
 	archiveFilePathStr := archiveDirStr + "/" + archiveFileName.String()
