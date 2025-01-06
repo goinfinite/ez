@@ -532,6 +532,31 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 	return cmd
 }
 
+func (controller *BackupController) DeleteDestination() *cobra.Command {
+	var destinationIdUint, accountIdUint uint64
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteBackupDestination",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"destinationId": destinationIdUint,
+				"accountId":     accountIdUint,
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.DeleteDestination(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&destinationIdUint, "destination-id", "d", 0, "BackupDestinationId")
+	cmd.MarkFlagRequired("destination-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	return cmd
+}
+
 func (controller *BackupController) ReadJob() *cobra.Command {
 	var jobIdUint, accountIdUint, destinationIdUint uint64
 	var retentionStrategyStr, jobStatusStr, archiveCompressionFormatStr, lastRunStatusStr string

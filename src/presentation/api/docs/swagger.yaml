@@ -1387,6 +1387,34 @@ paths:
       summary: UpdateBackupDestination
       tags:
       - backup
+  /v1/backup/destination/{accountId}/{destinationId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup destination.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: BackupDestinationId
+        in: path
+        name: destinationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupDestinationDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupDestination
+      tags:
+      - backup
   /v1/backup/job/:
     get:
       consumes:

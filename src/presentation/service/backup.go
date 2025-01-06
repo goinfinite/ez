@@ -764,6 +764,56 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 	return NewServiceOutput(Success, "BackupDestinationUpdated")
 }
 
+func (service *BackupService) DeleteDestination(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"destinationId", "accountId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteBackupDestination(
+		destinationId, accountId, operatorAccountId, operatorIpAddress,
+	)
+
+	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
+	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
+	err = useCase.DeleteBackupDestination(
+		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, deleteDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupDestinationDeleted")
+}
+
 func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutput {
 	var jobIdPtr *valueObject.BackupJobId
 	if input["jobId"] != nil {

@@ -117,6 +117,30 @@ func (controller *BackupController) UpdateDestination(c echo.Context) error {
 	)
 }
 
+// DeleteBackupDestination	 godoc
+// @Summary      DeleteBackupDestination
+// @Description  Delete a backup destination.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        accountId 	  path   string  true  "AccountId"
+// @Param        destinationId path  string  true  "BackupDestinationId"
+// @Success      200 {object} object{} "BackupDestinationDeleted"
+// @Router       /v1/backup/destination/{accountId}/{destinationId} [delete]
+func (controller *BackupController) DeleteDestination(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"accountId":         c.Param("accountId"),
+		"destinationId":     c.Param("destinationId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.DeleteDestination(requestBody),
+	)
+}
+
 // ReadBackupJobs	 godoc
 // @Summary      ReadBackupJobs
 // @Description  List backup jobs.

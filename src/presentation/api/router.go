@@ -69,6 +69,7 @@ func (router *Router) backupRoutes() {
 	destinationGroup.GET("/", backupController.ReadDestination)
 	destinationGroup.POST("/", backupController.CreateDestination)
 	destinationGroup.PUT("/", backupController.UpdateDestination)
+	destinationGroup.DELETE("/:accountId/:destinationId/", backupController.DeleteDestination)
 
 	jobGroup := backupGroup.Group("/job")
 	jobGroup.GET("/", backupController.ReadJob)
