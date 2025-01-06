@@ -143,9 +143,6 @@ func (repo *ContainerCmdRepo) containerEntityFactory(
 	if !assertOk {
 		return containerEntity, errors.New("ImageIdParseError")
 	}
-	if len(rawImageId) > 12 {
-		rawImageId = rawImageId[:12]
-	}
 	imageId, err := valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
 		return containerEntity, err

@@ -41,9 +41,6 @@ func (repo *ContainerQueryRepo) containerMetricFactory(
 	if !assertOk {
 		return containerMetrics, errors.New("ContainerIdNotFound")
 	}
-	if len(rawContainerId) > 12 {
-		rawContainerId = rawContainerId[:12]
-	}
 	containerId, err := valueObject.NewContainerId(rawContainerId)
 	if err != nil {
 		return containerMetrics, err

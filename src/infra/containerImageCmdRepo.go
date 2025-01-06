@@ -64,9 +64,6 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	if err != nil {
 		return imageId, err
 	}
-	if len(rawImageId) > 12 {
-		rawImageId = rawImageId[:12]
-	}
 
 	return valueObject.NewContainerImageId(rawImageId)
 }
@@ -188,9 +185,6 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 	}
 	rawImageId = strings.TrimPrefix(rawImageId, "Loaded image: sha256:")
 	rawImageId = strings.TrimSpace(rawImageId)
-	if len(rawImageId) > 12 {
-		rawImageId = rawImageId[:12]
-	}
 
 	imageId, err = valueObject.NewContainerImageId(rawImageId)
 	if err != nil {

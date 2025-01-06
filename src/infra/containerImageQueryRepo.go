@@ -36,9 +36,6 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	if !assertOk {
 		return containerImage, errors.New("InvalidContainerImageId")
 	}
-	if len(rawImageId) > 12 {
-		rawImageId = rawImageId[:12]
-	}
 	imageId, err := valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
 		return containerImage, err
