@@ -73,6 +73,7 @@ func (router *Router) backupRoutes() {
 	backupJobCmd.AddCommand(backupController.CreateJob())
 	backupJobCmd.AddCommand(backupController.UpdateJob())
 	backupJobCmd.AddCommand(backupController.DeleteJob())
+	backupJobCmd.AddCommand(backupController.RunJob())
 	backupCmd.AddCommand(backupJobCmd)
 
 	var backupTaskCmd = &cobra.Command{

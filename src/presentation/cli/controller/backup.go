@@ -905,6 +905,31 @@ func (controller *BackupController) DeleteJob() *cobra.Command {
 	return cmd
 }
 
+func (controller *BackupController) RunJob() *cobra.Command {
+	var jobIdUint, accountIdUint uint64
+
+	cmd := &cobra.Command{
+		Use:   "run",
+		Short: "RunBackupJob",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"jobId":     jobIdUint,
+				"accountId": accountIdUint,
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.RunJob(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&jobIdUint, "job-id", "j", 0, "BackupJobId")
+	cmd.MarkFlagRequired("job-id")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.MarkFlagRequired("account-id")
+	return cmd
+}
+
 func (controller *BackupController) ReadTask() *cobra.Command {
 	var taskIdUint, accountIdUint, jobIdUint, destinationIdUint uint64
 	var taskStatusStr, retentionStrategyStr, containerIdStr string

@@ -263,6 +263,30 @@ func (controller *BackupController) DeleteJob(c echo.Context) error {
 	)
 }
 
+// RunBackupJob	 godoc
+// @Summary      RunBackupJob
+// @Description  Run a backup job.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        accountId 	  path   string  true  "AccountId"
+// @Param        jobId path  string  true  "BackupJobId"
+// @Success      201 {object} object{} "BackupTaskCreated"
+// @Router       /v1/backup/job/{accountId}/{jobId}/run/ [post]
+func (controller *BackupController) RunJob(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"accountId":         c.Param("accountId"),
+		"jobId":             c.Param("jobId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.RunJob(requestBody),
+	)
+}
+
 // ReadBackupTasks	 godoc
 // @Summary      ReadBackupTasks
 // @Description  List backup tasks.

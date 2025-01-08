@@ -1292,6 +1292,54 @@ func (service *BackupService) DeleteJob(input map[string]interface{}) ServiceOut
 	return NewServiceOutput(Success, "BackupJobDeleted")
 }
 
+func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"jobId", "accountId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	jobId, err := valueObject.NewBackupJobId(input["jobId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	accountId, err := valueObject.NewAccountId(input["accountId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	runDto := dto.NewRunBackupJob(jobId, accountId, operatorAccountId, operatorIpAddress)
+
+	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
+	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
+	err = useCase.RunBackupJob(
+		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, runDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Created, "BackupTaskCreated")
+}
+
 func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {
 	var taskIdPtr *valueObject.BackupTaskId
 	if input["taskId"] != nil {

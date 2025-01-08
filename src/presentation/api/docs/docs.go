@@ -694,6 +694,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/job/{accountId}/{jobId}/run/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Run a backup job.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "RunBackupJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupTaskCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/backup/task/": {
             "get": {
                 "security": [
@@ -3309,12 +3353,6 @@ const docTemplate = `{
                 "backupSchedule": {
                     "type": "string"
                 },
-                "containerIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "createdAt": {
                     "type": "integer"
                 },
@@ -3326,6 +3364,12 @@ const docTemplate = `{
                 },
                 "executionOutput": {
                     "type": "string"
+                },
+                "failedContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finishedAt": {
                     "type": "integer"
@@ -3339,6 +3383,12 @@ const docTemplate = `{
                 "startedAt": {
                     "type": "integer"
                 },
+                "successfulContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "taskId": {
                     "type": "integer"
                 },
@@ -3346,6 +3396,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/valueObject.BackupTaskStatus"
                 },
                 "timeoutSecs": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "integer"
                 }
             }

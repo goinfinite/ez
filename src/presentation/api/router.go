@@ -76,6 +76,7 @@ func (router *Router) backupRoutes() {
 	jobGroup.POST("/", backupController.CreateJob)
 	jobGroup.PUT("/", backupController.UpdateJob)
 	jobGroup.DELETE("/:accountId/:jobId/", backupController.DeleteJob)
+	jobGroup.POST("/:accountId/:jobId/run/", backupController.RunJob)
 
 	taskGroup := backupGroup.Group("/task")
 	taskGroup.GET("/", backupController.ReadTask)
