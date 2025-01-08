@@ -13,4 +13,5 @@ type BackupCmdRepo interface {
 	CreateJob(dto.CreateBackupJob) (valueObject.BackupJobId, error)
 	UpdateJob(dto.UpdateBackupJob) error
 	DeleteJob(dto.DeleteBackupJob) error
+	RunJob(dto.RunBackupJob) error
 }
