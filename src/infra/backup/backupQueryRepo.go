@@ -236,11 +236,15 @@ func (repo *BackupQueryRepo) ReadTask(
 		retentionStrategyStr := requestDto.RetentionStrategy.String()
 		backupTaskModel.RetentionStrategy = retentionStrategyStr
 	}
-	if requestDto.ContainerId != nil {
-		backupTaskModel.ContainerIds = []string{requestDto.ContainerId.String()}
-	}
 
 	dbQuery := repo.persistentDbSvc.Handler.Model(backupTaskModel).Where(&backupTaskModel)
+	if requestDto.ContainerId != nil {
+		containerIdLikeStr := "%" + requestDto.ContainerId.String() + "%"
+		dbQuery = dbQuery.Where(
+			"successful_container_ids LIKE ? OR failed_container_ids LIKE ?",
+			containerIdLikeStr, containerIdLikeStr,
+		)
+	}
 	if requestDto.StartedBeforeAt != nil {
 		dbQuery = dbQuery.Where("started_at < ?", requestDto.StartedBeforeAt.GetAsGoTime())
 	}

@@ -1,6 +1,7 @@
 package dbModel
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/goinfinite/ez/src/domain/entity"
@@ -8,21 +9,22 @@ import (
 )
 
 type BackupTask struct {
-	ID                uint64   `gorm:"primarykey"`
-	AccountID         uint64   `gorm:"not null"`
-	JobID             uint64   `gorm:"not null"`
-	DestinationID     uint64   `gorm:"not null"`
-	TaskStatus        string   `gorm:"not null"`
-	RetentionStrategy string   `gorm:"not null"`
-	BackupSchedule    string   `gorm:"not null"`
-	TimeoutSecs       uint64   `gorm:"not null"`
-	ContainerIds      []string `gorm:"serializer:json"`
-	ExecutionOutput   *string
-	StartedAt         *time.Time
-	FinishedAt        *time.Time
-	ElapsedSecs       *uint64
-	CreatedAt         time.Time `gorm:"not null"`
-	UpdatedAt         time.Time `gorm:"not null"`
+	ID                     uint64   `gorm:"primarykey"`
+	AccountID              uint64   `gorm:"not null"`
+	JobID                  uint64   `gorm:"not null"`
+	DestinationID          uint64   `gorm:"not null"`
+	TaskStatus             string   `gorm:"not null"`
+	RetentionStrategy      string   `gorm:"not null"`
+	BackupSchedule         string   `gorm:"not null"`
+	TimeoutSecs            uint64   `gorm:"not null"`
+	SuccessfulContainerIds []string `gorm:"serializer:json"`
+	FailedContainerIds     []string `gorm:"serializer:json"`
+	ExecutionOutput        *string
+	StartedAt              *time.Time
+	FinishedAt             *time.Time
+	ElapsedSecs            *uint64
+	CreatedAt              time.Time `gorm:"not null"`
+	UpdatedAt              time.Time `gorm:"not null"`
 }
 
 func (model BackupTask) TableName() string {
@@ -65,13 +67,24 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 		return taskEntity, err
 	}
 
-	containerIds := []valueObject.ContainerId{}
-	for _, containerId := range model.ContainerIds {
-		containerId, err := valueObject.NewContainerId(containerId)
+	successfulContainerIds := []valueObject.ContainerId{}
+	for _, rawContainerId := range model.SuccessfulContainerIds {
+		containerId, err := valueObject.NewContainerId(rawContainerId)
 		if err != nil {
-			return taskEntity, err
+			slog.Debug(err.Error(), slog.String("containerId", rawContainerId))
+			continue
 		}
-		containerIds = append(containerIds, containerId)
+		successfulContainerIds = append(successfulContainerIds, containerId)
+	}
+
+	failedContainerIds := []valueObject.ContainerId{}
+	for _, rawContainerId := range model.FailedContainerIds {
+		containerId, err := valueObject.NewContainerId(rawContainerId)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("containerId", rawContainerId))
+			continue
+		}
+		failedContainerIds = append(failedContainerIds, containerId)
 	}
 
 	var executionOutputPtr *valueObject.BackupTaskExecutionOutput
@@ -108,9 +121,9 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 
 	return entity.NewBackupTask(
 		taskId, accountId, jobId, destinationId, taskStatus, retentionStrategy,
-		backupSchedule, model.TimeoutSecs, containerIds, executionOutputPtr,
-		startedAtPtr, finishedAtPtr, elapsedSecsPtr,
+		backupSchedule, model.TimeoutSecs, successfulContainerIds, failedContainerIds,
+		executionOutputPtr, startedAtPtr, finishedAtPtr, elapsedSecsPtr,
 		valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
+		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
 	), nil
-
 }

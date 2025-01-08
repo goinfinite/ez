@@ -5,20 +5,22 @@ import (
 )
 
 type BackupTask struct {
-	TaskId            valueObject.BackupTaskId               `json:"taskId"`
-	AccountId         valueObject.AccountId                  `json:"accountId"`
-	JobId             valueObject.BackupJobId                `json:"jobId"`
-	DestinationId     valueObject.BackupDestinationId        `json:"destinationId"`
-	TaskStatus        valueObject.BackupTaskStatus           `json:"taskStatus"`
-	RetentionStrategy valueObject.BackupRetentionStrategy    `json:"retentionStrategy"`
-	BackupSchedule    valueObject.CronSchedule               `json:"backupSchedule"`
-	TimeoutSecs       uint64                                 `json:"timeoutSecs"`
-	ContainerIds      []valueObject.ContainerId              `json:"containerIds"`
-	ExecutionOutput   *valueObject.BackupTaskExecutionOutput `json:"executionOutput"`
-	StartedAt         *valueObject.UnixTime                  `json:"startedAt"`
-	FinishedAt        *valueObject.UnixTime                  `json:"finishedAt"`
-	ElapsedSecs       *uint64                                `json:"elapsedSecs"`
-	CreatedAt         valueObject.UnixTime                   `json:"createdAt"`
+	TaskId                 valueObject.BackupTaskId               `json:"taskId"`
+	AccountId              valueObject.AccountId                  `json:"accountId"`
+	JobId                  valueObject.BackupJobId                `json:"jobId"`
+	DestinationId          valueObject.BackupDestinationId        `json:"destinationId"`
+	TaskStatus             valueObject.BackupTaskStatus           `json:"taskStatus"`
+	RetentionStrategy      valueObject.BackupRetentionStrategy    `json:"retentionStrategy"`
+	BackupSchedule         valueObject.CronSchedule               `json:"backupSchedule"`
+	TimeoutSecs            uint64                                 `json:"timeoutSecs"`
+	SuccessfulContainerIds []valueObject.ContainerId              `json:"successfulContainerIds"`
+	FailedContainerIds     []valueObject.ContainerId              `json:"failedContainerIds"`
+	ExecutionOutput        *valueObject.BackupTaskExecutionOutput `json:"executionOutput"`
+	StartedAt              *valueObject.UnixTime                  `json:"startedAt"`
+	FinishedAt             *valueObject.UnixTime                  `json:"finishedAt"`
+	ElapsedSecs            *uint64                                `json:"elapsedSecs"`
+	CreatedAt              valueObject.UnixTime                   `json:"createdAt"`
+	UpdatedAt              valueObject.UnixTime                   `json:"updatedAt"`
 }
 
 func NewBackupTask(
@@ -30,26 +32,28 @@ func NewBackupTask(
 	retentionStrategy valueObject.BackupRetentionStrategy,
 	backupSchedule valueObject.CronSchedule,
 	timeoutSecs uint64,
-	containerIds []valueObject.ContainerId,
+	successfulContainerIds, failedContainerIds []valueObject.ContainerId,
 	executionOutput *valueObject.BackupTaskExecutionOutput,
 	startedAt, finishedAt *valueObject.UnixTime,
 	elapsedSecs *uint64,
-	createdAt valueObject.UnixTime,
+	createdAt, updatedAt valueObject.UnixTime,
 ) BackupTask {
 	return BackupTask{
-		TaskId:            taskId,
-		AccountId:         accountId,
-		JobId:             jobId,
-		DestinationId:     destinationId,
-		TaskStatus:        taskStatus,
-		RetentionStrategy: retentionStrategy,
-		BackupSchedule:    backupSchedule,
-		TimeoutSecs:       timeoutSecs,
-		ContainerIds:      containerIds,
-		ExecutionOutput:   executionOutput,
-		StartedAt:         startedAt,
-		FinishedAt:        finishedAt,
-		ElapsedSecs:       elapsedSecs,
-		CreatedAt:         createdAt,
+		TaskId:                 taskId,
+		AccountId:              accountId,
+		JobId:                  jobId,
+		DestinationId:          destinationId,
+		TaskStatus:             taskStatus,
+		RetentionStrategy:      retentionStrategy,
+		BackupSchedule:         backupSchedule,
+		TimeoutSecs:            timeoutSecs,
+		SuccessfulContainerIds: successfulContainerIds,
+		FailedContainerIds:     failedContainerIds,
+		ExecutionOutput:        executionOutput,
+		StartedAt:              startedAt,
+		FinishedAt:             finishedAt,
+		ElapsedSecs:            elapsedSecs,
+		CreatedAt:              createdAt,
+		UpdatedAt:              updatedAt,
 	}
 }

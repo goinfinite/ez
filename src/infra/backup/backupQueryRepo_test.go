@@ -6,6 +6,7 @@ import (
 	testHelpers "github.com/goinfinite/ez/src/devUtils"
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func TestBackupQueryRepo(t *testing.T) {
@@ -46,8 +47,11 @@ func TestBackupQueryRepo(t *testing.T) {
 	})
 
 	t.Run("ReadTask", func(t *testing.T) {
+		containerId, _ := valueObject.NewContainerId("58837bc95af5")
+
 		readDto := dto.ReadBackupTasksRequest{
-			Pagination: useCase.BackupTasksDefaultPagination,
+			Pagination:  useCase.BackupTasksDefaultPagination,
+			ContainerId: &containerId,
 		}
 
 		responseDto, err := backupQueryRepo.ReadTask(readDto)
