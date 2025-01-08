@@ -98,6 +98,21 @@ func TestBackupCmdRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("RunBackupJob", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(1000)
+		jobId, _ := valueObject.NewBackupJobId(1)
+
+		runDto := dto.RunBackupJob{
+			JobId:     jobId,
+			AccountId: accountId,
+		}
+
+		err := backupCmdRepo.RunJob(runDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
 	t.Run("DeleteBackupJob", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(1000)
 		jobId, _ := valueObject.NewBackupJobId(1)

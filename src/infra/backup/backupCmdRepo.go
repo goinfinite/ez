@@ -432,3 +432,7 @@ func (repo *BackupCmdRepo) DeleteJob(
 		deleteDto.JobId.Uint64(), deleteDto.AccountId.Uint64(),
 	).Error
 }
+
+func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
+	return nil
+}
