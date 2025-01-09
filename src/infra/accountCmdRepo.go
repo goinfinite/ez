@@ -352,7 +352,7 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	}
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:         readContainersPaginationDto,
-		ContainerAccountId: &accountId,
+		ContainerAccountId: []valueObject.AccountId{accountId},
 	}
 
 	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)

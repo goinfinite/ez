@@ -31,7 +31,7 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
-		ContainerId: &createDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{createDto.ContainerId},
 	}
 
 	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)

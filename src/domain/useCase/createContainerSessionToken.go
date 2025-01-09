@@ -17,7 +17,7 @@ func CreateContainerSessionToken(
 ) (accessToken valueObject.AccessTokenValue, err error) {
 	readContainersDto := dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
-		ContainerId: &createDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{createDto.ContainerId},
 	}
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)

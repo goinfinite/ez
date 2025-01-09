@@ -35,22 +35,21 @@ func NewContainerService(
 }
 
 func (service *ContainerService) Read(input map[string]interface{}) ServiceOutput {
-	var containerIdPtr *valueObject.ContainerId
+	var containerId []valueObject.ContainerId
+	var assertOk bool
 	if input["containerId"] != nil {
-		containerId, err := valueObject.NewContainerId(input["containerId"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+		containerId, assertOk = input["containerId"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidContainerId")
 		}
-		containerIdPtr = &containerId
 	}
 
-	var containerAccountIdPtr *valueObject.AccountId
+	var containerAccountId []valueObject.AccountId
 	if input["containerAccountId"] != nil {
-		containerAccountId, err := valueObject.NewAccountId(input["containerAccountId"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+		containerAccountId, assertOk = input["containerAccountId"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidContainerAccountId")
 		}
-		containerAccountIdPtr = &containerAccountId
 	}
 
 	var containerHostnamePtr *valueObject.Fqdn
@@ -102,7 +101,6 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 
 	containerPortBindings := []valueObject.PortBinding{}
 	if input["containerPortBindings"] != nil {
-		var assertOk bool
 		containerPortBindings, assertOk = input["containerPortBindings"].([]valueObject.PortBinding)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidContainerPortBindings")
@@ -226,8 +224,8 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 
 	readDto := dto.ReadContainersRequest{
 		Pagination:             paginationDto,
-		ContainerId:            containerIdPtr,
-		ContainerAccountId:     containerAccountIdPtr,
+		ContainerId:            containerId,
+		ContainerAccountId:     containerAccountId,
 		ContainerHostname:      containerHostnamePtr,
 		ContainerStatus:        containerStatusPtr,
 		ContainerImageId:       containerImageIdPtr,

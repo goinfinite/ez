@@ -86,7 +86,7 @@ func TestContainerCmdRepo(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 		readContainersRequestDto := dto.ReadContainersRequest{
 			Pagination:         useCase.ContainersDefaultPagination,
-			ContainerAccountId: &accountId,
+			ContainerAccountId: []valueObject.AccountId{accountId},
 		}
 
 		responseDto, err := containerQueryRepo.Read(readContainersRequestDto)

@@ -7,8 +7,8 @@ import (
 
 type ReadContainersRequest struct {
 	Pagination             Pagination                          `json:"pagination"`
-	ContainerId            *valueObject.ContainerId            `json:"containerId,omitempty"`
-	ContainerAccountId     *valueObject.AccountId              `json:"containerAccountId,omitempty"`
+	ContainerId            []valueObject.ContainerId           `json:"containerId,omitempty"`
+	ContainerAccountId     []valueObject.AccountId             `json:"containerAccountId,omitempty"`
 	ContainerHostname      *valueObject.Fqdn                   `json:"containerHostname,omitempty"`
 	ContainerStatus        *bool                               `json:"containerStatus,omitempty"`
 	ContainerImageId       *valueObject.ContainerImageId       `json:"containerImageId,omitempty"`

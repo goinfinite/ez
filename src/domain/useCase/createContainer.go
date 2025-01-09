@@ -51,7 +51,7 @@ func CreateContainer(
 	if createDto.ExistingContainerId != nil {
 		readContainersRequestDto = dto.ReadContainersRequest{
 			Pagination:  ContainersDefaultPagination,
-			ContainerId: createDto.ExistingContainerId,
+			ContainerId: []valueObject.ContainerId{*createDto.ExistingContainerId},
 		}
 
 		responseDto, err := ReadContainers(containerQueryRepo, readContainersRequestDto)
@@ -119,7 +119,7 @@ func CreateContainer(
 
 	readContainersRequestDto = dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
-		ContainerId: &containerId,
+		ContainerId: []valueObject.ContainerId{containerId},
 	}
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersRequestDto)

@@ -17,6 +17,7 @@ import (
 	"github.com/goinfinite/ez/src/infra/db"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
 	"github.com/goinfinite/ez/src/presentation/service"
+	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,6 +87,18 @@ func (controller *ContainerController) Read(c echo.Context) error {
 		paramValue := c.QueryParam(paramName)
 		if paramValue == "" {
 			continue
+		}
+
+		if paramName == "containerId" {
+			requestBody["containerId"] = sharedHelper.StringSliceValueObjectParser(
+				requestBody["containerId"], valueObject.NewContainerId,
+			)
+		}
+
+		if paramName == "containerAccountId" {
+			requestBody["containerAccountId"] = sharedHelper.StringSliceValueObjectParser(
+				requestBody["containerAccountId"], valueObject.NewAccountId,
+			)
 		}
 
 		if paramName == "containerPortBindings" {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func CreateContainerSnapshotImage(
@@ -19,7 +20,7 @@ func CreateContainerSnapshotImage(
 	withMetrics := true
 	readContainersDto := dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
-		ContainerId: &createSnapshotDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{createSnapshotDto.ContainerId},
 		WithMetrics: &withMetrics,
 	}
 

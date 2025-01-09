@@ -229,7 +229,7 @@ func (repo *MappingCmdRepo) CreateTarget(
 ) (targetId valueObject.MappingTargetId, err error) {
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
-		ContainerId: &createDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{createDto.ContainerId},
 	}
 
 	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)

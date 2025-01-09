@@ -11,6 +11,7 @@ import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
+	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
@@ -260,11 +261,15 @@ func (presenter *OverviewPresenter) ReadContainers(c echo.Context) (
 	}
 
 	if c.QueryParam("containersContainerId") != "" {
-		readContainersRequestBody["containerId"] = c.QueryParam("containersContainerId")
+		readContainersRequestBody["containerId"] = sharedHelper.StringSliceValueObjectParser(
+			readContainersRequestBody["containerId"], valueObject.NewContainerId,
+		)
 	}
 
 	if c.QueryParam("containersAccountId") != "" {
-		readContainersRequestBody["containerAccountId"] = c.QueryParam("containersAccountId")
+		readContainersRequestBody["containerAccountId"] = sharedHelper.StringSliceValueObjectParser(
+			readContainersRequestBody["containerAccountId"], valueObject.NewAccountId,
+		)
 	}
 
 	if c.QueryParam("containersHostname") != "" {
@@ -297,7 +302,7 @@ func (presenter *OverviewPresenter) ReadContainers(c echo.Context) (
 
 	readContainersServiceOutput := containerService.Read(readContainersRequestBody)
 	if readContainersServiceOutput.Status != service.Success {
-		slog.Debug("ReadContainersFailure")
+		slog.Debug("ReadContainersFailure: %v", readContainersServiceOutput.Body)
 		return responseDto
 	}
 

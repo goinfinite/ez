@@ -508,7 +508,7 @@ func (repo *ContainerCmdRepo) Create(
 func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
-		ContainerId: &updateDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{updateDto.ContainerId},
 	}
 
 	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
@@ -570,7 +570,7 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
-		ContainerId: &deleteDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{deleteDto.ContainerId},
 	}
 
 	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
@@ -637,7 +637,7 @@ func (repo *ContainerCmdRepo) CreateContainerSessionToken(
 ) (tokenValue valueObject.AccessTokenValue, err error) {
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
-		ContainerId: &createDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{createDto.ContainerId},
 	}
 
 	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
