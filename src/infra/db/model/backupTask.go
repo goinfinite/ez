@@ -31,6 +31,38 @@ func (model BackupTask) TableName() string {
 	return "backup_tasks"
 }
 
+func NewBackupTask(
+	id, accountId, jobId, destinationId uint64,
+	taskStatus, retentionStrategy, backupSchedule string,
+	timeoutSecs uint64,
+	successfulContainerIds, failedContainerIds []string,
+	executionOutput *string,
+	startedAt, finishedAt *time.Time,
+	elapsedSecs *uint64,
+) BackupTask {
+	taskModel := BackupTask{
+		AccountID:              accountId,
+		JobID:                  jobId,
+		DestinationID:          destinationId,
+		TaskStatus:             taskStatus,
+		RetentionStrategy:      retentionStrategy,
+		BackupSchedule:         backupSchedule,
+		TimeoutSecs:            timeoutSecs,
+		SuccessfulContainerIds: successfulContainerIds,
+		FailedContainerIds:     failedContainerIds,
+		ExecutionOutput:        executionOutput,
+		StartedAt:              startedAt,
+		FinishedAt:             finishedAt,
+		ElapsedSecs:            elapsedSecs,
+	}
+
+	if id != 0 {
+		taskModel.ID = id
+	}
+
+	return taskModel
+}
+
 func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 	taskId, err := valueObject.NewBackupTaskId(model.ID)
 	if err != nil {
