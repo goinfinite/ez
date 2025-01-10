@@ -305,11 +305,11 @@ func (repo *ContainerQueryRepo) Read(
 	if len(requestDto.ContainerAccountId) > 0 {
 		dbQuery = dbQuery.Where("account_id IN ?", requestDto.ContainerAccountId)
 	}
-	if len(requestDto.IgnoreContainerId) > 0 {
-		dbQuery = dbQuery.Where("id NOT IN ?", requestDto.IgnoreContainerId)
+	if len(requestDto.ExceptContainerId) > 0 {
+		dbQuery = dbQuery.Where("id NOT IN ?", requestDto.ExceptContainerId)
 	}
-	if len(requestDto.IgnoreContainerAccountId) > 0 {
-		dbQuery = dbQuery.Where("account_id NOT IN ?", requestDto.IgnoreContainerAccountId)
+	if len(requestDto.ExceptContainerAccountId) > 0 {
+		dbQuery = dbQuery.Where("account_id NOT IN ?", requestDto.ExceptContainerAccountId)
 	}
 	if requestDto.CreatedBeforeAt != nil {
 		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())

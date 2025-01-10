@@ -9,8 +9,8 @@ type ReadContainersRequest struct {
 	Pagination               Pagination                          `json:"pagination"`
 	ContainerId              []valueObject.ContainerId           `json:"containerId,omitempty"`
 	ContainerAccountId       []valueObject.AccountId             `json:"containerAccountId,omitempty"`
-	IgnoreContainerId        []valueObject.ContainerId           `json:"ignoreContainerId,omitempty"`
-	IgnoreContainerAccountId []valueObject.AccountId             `json:"ignoreContainerAccountId,omitempty"`
+	ExceptContainerId        []valueObject.ContainerId           `json:"exceptContainerId,omitempty"`
+	ExceptContainerAccountId []valueObject.AccountId             `json:"exceptContainerAccountId,omitempty"`
 	ContainerHostname        *valueObject.Fqdn                   `json:"containerHostname,omitempty"`
 	ContainerStatus          *bool                               `json:"containerStatus,omitempty"`
 	ContainerImageId         *valueObject.ContainerImageId       `json:"containerImageId,omitempty"`

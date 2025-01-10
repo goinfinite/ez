@@ -17,8 +17,8 @@ type CreateBackupJob struct {
 	MaxConcurrentCpuCores     *uint16                              `json:"maxConcurrentCpuCores,omitempty"`
 	ContainerAccountIds       []valueObject.AccountId              `json:"containerAccountIds"`
 	ContainerIds              []valueObject.ContainerId            `json:"containerIds"`
-	IgnoreContainerAccountIds []valueObject.AccountId              `json:"ignoreContainerAccountIds"`
-	IgnoreContainerIds        []valueObject.ContainerId            `json:"ignoreContainerIds"`
+	ExceptContainerAccountIds []valueObject.AccountId              `json:"exceptContainerAccountIds"`
+	ExceptContainerIds        []valueObject.ContainerId            `json:"exceptContainerIds"`
 	OperatorAccountId         valueObject.AccountId                `json:"-"`
 	OperatorIpAddress         valueObject.IpAddress                `json:"-"`
 }
@@ -36,8 +36,8 @@ func NewCreateBackupJob(
 	maxConcurrentCpuCores *uint16,
 	containerAccountIds []valueObject.AccountId,
 	containerIds []valueObject.ContainerId,
-	ignoreContainerAccountIds []valueObject.AccountId,
-	ignoreContainerIds []valueObject.ContainerId,
+	exceptContainerAccountIds []valueObject.AccountId,
+	exceptContainerIds []valueObject.ContainerId,
 	operatorAccountId valueObject.AccountId,
 	operatorIpAddress valueObject.IpAddress,
 ) CreateBackupJob {
@@ -54,8 +54,8 @@ func NewCreateBackupJob(
 		MaxConcurrentCpuCores:     maxConcurrentCpuCores,
 		ContainerAccountIds:       containerAccountIds,
 		ContainerIds:              containerIds,
-		IgnoreContainerAccountIds: ignoreContainerAccountIds,
-		IgnoreContainerIds:        ignoreContainerIds,
+		ExceptContainerAccountIds: exceptContainerAccountIds,
+		ExceptContainerIds:        exceptContainerIds,
 		OperatorAccountId:         operatorAccountId,
 		OperatorIpAddress:         operatorIpAddress,
 	}

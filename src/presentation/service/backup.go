@@ -1024,19 +1024,19 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 		}
 	}
 
-	ignoreContainerAccountIds := []valueObject.AccountId{}
-	if input["ignoreContainerAccountIds"] != nil {
-		ignoreContainerAccountIds, assertOk = input["ignoreContainerAccountIds"].([]valueObject.AccountId)
+	exceptContainerAccountIds := []valueObject.AccountId{}
+	if input["exceptContainerAccountIds"] != nil {
+		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerAccountIds"))
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
 		}
 	}
 
-	ignoreContainerIds := []valueObject.ContainerId{}
-	if input["ignoreContainerIds"] != nil {
-		ignoreContainerIds, assertOk = input["ignoreContainerIds"].([]valueObject.ContainerId)
+	exceptContainerIds := []valueObject.ContainerId{}
+	if input["exceptContainerIds"] != nil {
+		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerIds"))
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
 		}
 	}
 
@@ -1060,7 +1060,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 		accountId, jobDescriptionPtr, destinationIds, retentionStrategyPtr, backupSchedule,
 		archiveCompressionFormatPtr, timeoutSecsPtr, maxTaskRetentionCountPtr,
 		maxTaskRetentionDaysPtr, maxConcurrentCpuCoresPtr, containerAccountIds,
-		containerIds, ignoreContainerAccountIds, ignoreContainerIds,
+		containerIds, exceptContainerAccountIds, exceptContainerIds,
 		operatorAccountId, operatorIpAddress,
 	)
 
@@ -1181,19 +1181,19 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 		}
 	}
 
-	var ignoreContainerAccountIds []valueObject.AccountId
-	if input["ignoreContainerAccountIds"] != nil {
-		ignoreContainerAccountIds, assertOk = input["ignoreContainerAccountIds"].([]valueObject.AccountId)
+	var exceptContainerAccountIds []valueObject.AccountId
+	if input["exceptContainerAccountIds"] != nil {
+		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerAccountIds"))
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
 		}
 	}
 
-	var ignoreContainerIds []valueObject.ContainerId
-	if input["ignoreContainerIds"] != nil {
-		ignoreContainerIds, assertOk = input["ignoreContainerIds"].([]valueObject.ContainerId)
+	var exceptContainerIds []valueObject.ContainerId
+	if input["exceptContainerIds"] != nil {
+		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidIgnoreContainerIds"))
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
 		}
 	}
 
@@ -1226,8 +1226,8 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 		MaxConcurrentCpuCores:     maxConcurrentCpuCoresPtr,
 		ContainerAccountIds:       containerAccountIds,
 		ContainerIds:              containerIds,
-		IgnoreContainerAccountIds: ignoreContainerAccountIds,
-		IgnoreContainerIds:        ignoreContainerIds,
+		ExceptContainerAccountIds: exceptContainerAccountIds,
+		ExceptContainerIds:        exceptContainerIds,
 		OperatorAccountId:         operatorAccountId,
 		OperatorIpAddress:         operatorIpAddress,
 	}

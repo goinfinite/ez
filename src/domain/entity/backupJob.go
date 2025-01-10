@@ -21,8 +21,8 @@ type BackupJob struct {
 	MaxConcurrentCpuCores     *uint16                             `json:"maxConcurrentCpuCores"`
 	ContainerAccountIds       []valueObject.AccountId             `json:"containerAccountIds"`
 	ContainerIds              []valueObject.ContainerId           `json:"containerIds"`
-	IgnoreContainerAccountIds []valueObject.AccountId             `json:"ignoreContainerAccountIds"`
-	IgnoreContainerIds        []valueObject.ContainerId           `json:"ignoreContainerIds"`
+	ExceptContainerAccountIds []valueObject.AccountId             `json:"exceptContainerAccountIds"`
+	ExceptContainerIds        []valueObject.ContainerId           `json:"exceptContainerIds"`
 	TasksCount                *uint16                             `json:"tasksCount"`
 	TotalSpaceUsageBytes      *valueObject.Byte                   `json:"totalSpaceUsageBytes"`
 	LastRunAt                 *valueObject.UnixTime               `json:"lastRunAt"`
@@ -45,8 +45,8 @@ func NewBackupJob(
 	maxTaskRetentionCount, maxTaskRetentionDays, maxConcurrentCpuCores *uint16,
 	containerAccountIds []valueObject.AccountId,
 	containerIds []valueObject.ContainerId,
-	ignoreContainerAccountIds []valueObject.AccountId,
-	ignoreContainerIds []valueObject.ContainerId,
+	exceptContainerAccountIds []valueObject.AccountId,
+	exceptContainerIds []valueObject.ContainerId,
 	tasksCount *uint16,
 	totalSpaceUsageBytes *valueObject.Byte,
 	lastRunAt *valueObject.UnixTime,
@@ -87,8 +87,8 @@ func NewBackupJob(
 		MaxConcurrentCpuCores:     maxConcurrentCpuCores,
 		ContainerAccountIds:       containerAccountIds,
 		ContainerIds:              containerIds,
-		IgnoreContainerAccountIds: ignoreContainerAccountIds,
-		IgnoreContainerIds:        ignoreContainerIds,
+		ExceptContainerAccountIds: exceptContainerAccountIds,
+		ExceptContainerIds:        exceptContainerIds,
 		TasksCount:                tasksCount,
 		TotalSpaceUsageBytes:      totalSpaceUsageBytes,
 		LastRunAt:                 lastRunAt,

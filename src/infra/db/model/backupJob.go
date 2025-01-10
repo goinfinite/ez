@@ -22,8 +22,8 @@ type BackupJob struct {
 	MaxConcurrentCpuCores     *uint16
 	ContainerAccountIds       []uint64 `gorm:"serializer:json"`
 	ContainerIds              []string `gorm:"serializer:json"`
-	IgnoreContainerAccountIds []uint64 `gorm:"serializer:json"`
-	IgnoreContainerIds        []string `gorm:"serializer:json"`
+	ExceptContainerAccountIds []uint64 `gorm:"serializer:json"`
+	ExceptContainerIds        []string `gorm:"serializer:json"`
 	TasksCount                *uint16
 	TotalSpaceUsageBytes      *uint64
 	LastRunAt                 *time.Time
@@ -47,8 +47,8 @@ func NewBackupJob(
 	maxTaskRetentionCount, maxTaskRetentionDays, maxConcurrentCpuCores *uint16,
 	containerAccountIds []uint64,
 	containerIds []string,
-	ignoreContainerAccountIds []uint64,
-	ignoreContainerIds []string,
+	exceptContainerAccountIds []uint64,
+	exceptContainerIds []string,
 ) BackupJob {
 	jobModel := BackupJob{
 		AccountID:                 accountId,
@@ -64,8 +64,8 @@ func NewBackupJob(
 		MaxConcurrentCpuCores:     maxConcurrentCpuCores,
 		ContainerAccountIds:       containerAccountIds,
 		ContainerIds:              containerIds,
-		IgnoreContainerAccountIds: ignoreContainerAccountIds,
-		IgnoreContainerIds:        ignoreContainerIds,
+		ExceptContainerAccountIds: exceptContainerAccountIds,
+		ExceptContainerIds:        exceptContainerIds,
 	}
 
 	if id != 0 {
@@ -137,22 +137,22 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 		containerIds = append(containerIds, containerId)
 	}
 
-	ignoreContainerAccountIds := []valueObject.AccountId{}
-	for _, ignoreContainerAccountId := range model.IgnoreContainerAccountIds {
-		ignoreContainerAccountId, err := valueObject.NewAccountId(ignoreContainerAccountId)
+	exceptContainerAccountIds := []valueObject.AccountId{}
+	for _, exceptContainerAccountId := range model.ExceptContainerAccountIds {
+		exceptContainerAccountId, err := valueObject.NewAccountId(exceptContainerAccountId)
 		if err != nil {
 			return jobEntity, err
 		}
-		ignoreContainerAccountIds = append(ignoreContainerAccountIds, ignoreContainerAccountId)
+		exceptContainerAccountIds = append(exceptContainerAccountIds, exceptContainerAccountId)
 	}
 
-	ignoreContainerIds := []valueObject.ContainerId{}
-	for _, ignoreContainerId := range model.IgnoreContainerIds {
-		ignoreContainerId, err := valueObject.NewContainerId(ignoreContainerId)
+	exceptContainerIds := []valueObject.ContainerId{}
+	for _, exceptContainerId := range model.ExceptContainerIds {
+		exceptContainerId, err := valueObject.NewContainerId(exceptContainerId)
 		if err != nil {
 			return jobEntity, err
 		}
-		ignoreContainerIds = append(ignoreContainerIds, ignoreContainerId)
+		exceptContainerIds = append(exceptContainerIds, exceptContainerId)
 	}
 
 	var totalSpaceUsageBytesPtr *valueObject.Byte
@@ -190,7 +190,7 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 		retentionStrategy, backupSchedule, &archiveCompressionFormat, &model.TimeoutSecs,
 		model.MaxTaskRetentionCount, model.MaxTaskRetentionDays,
 		model.MaxConcurrentCpuCores, containerAccountIds, containerIds,
-		ignoreContainerAccountIds, ignoreContainerIds, model.TasksCount,
+		exceptContainerAccountIds, exceptContainerIds, model.TasksCount,
 		totalSpaceUsageBytesPtr, lastRunAtPtr, lastRunStatusPtr,
 		nextRunAtPtr, valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
 		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),

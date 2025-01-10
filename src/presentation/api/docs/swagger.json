@@ -2670,13 +2670,13 @@
                         "type": "integer"
                     }
                 },
-                "ignoreContainerAccountIds": {
+                "exceptContainerAccountIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ignoreContainerIds": {
+                "exceptContainerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3104,13 +3104,13 @@
                         "type": "integer"
                     }
                 },
-                "ignoreContainerAccountIds": {
+                "exceptContainerAccountIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ignoreContainerIds": {
+                "exceptContainerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3281,13 +3281,13 @@
                         "type": "integer"
                     }
                 },
-                "ignoreContainerAccountIds": {
+                "exceptContainerAccountIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ignoreContainerIds": {
+                "exceptContainerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"

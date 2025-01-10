@@ -132,11 +132,11 @@ definitions:
         items:
           type: integer
         type: array
-      ignoreContainerAccountIds:
+      exceptContainerAccountIds:
         items:
           type: integer
         type: array
-      ignoreContainerIds:
+      exceptContainerIds:
         items:
           type: string
         type: array
@@ -416,11 +416,11 @@ definitions:
         items:
           type: integer
         type: array
-      ignoreContainerAccountIds:
+      exceptContainerAccountIds:
         items:
           type: integer
         type: array
-      ignoreContainerIds:
+      exceptContainerIds:
         items:
           type: string
         type: array
@@ -532,11 +532,11 @@ definitions:
         items:
           type: integer
         type: array
-      ignoreContainerAccountIds:
+      exceptContainerAccountIds:
         items:
           type: integer
         type: array
-      ignoreContainerIds:
+      exceptContainerIds:
         items:
           type: string
         type: array

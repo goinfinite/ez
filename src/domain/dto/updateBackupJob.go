@@ -17,8 +17,8 @@ type UpdateBackupJob struct {
 	MaxConcurrentCpuCores     *uint16                           `json:"maxConcurrentCpuCores,omitempty"`
 	ContainerAccountIds       []valueObject.AccountId           `json:"containerAccountIds,omitempty"`
 	ContainerIds              []valueObject.ContainerId         `json:"containerIds,omitempty"`
-	IgnoreContainerAccountIds []valueObject.AccountId           `json:"ignoreContainerAccountIds,omitempty"`
-	IgnoreContainerIds        []valueObject.ContainerId         `json:"ignoreContainerIds,omitempty"`
+	ExceptContainerAccountIds []valueObject.AccountId           `json:"exceptContainerAccountIds,omitempty"`
+	ExceptContainerIds        []valueObject.ContainerId         `json:"exceptContainerIds,omitempty"`
 	TasksCount                *uint16                           `json:"-"`
 	TotalSpaceUsageBytes      *valueObject.Byte                 `json:"-"`
 	LastRunAt                 *valueObject.UnixTime             `json:"-"`

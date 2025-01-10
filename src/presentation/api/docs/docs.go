@@ -2677,13 +2677,13 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "ignoreContainerAccountIds": {
+                "exceptContainerAccountIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ignoreContainerIds": {
+                "exceptContainerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3111,13 +3111,13 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "ignoreContainerAccountIds": {
+                "exceptContainerAccountIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ignoreContainerIds": {
+                "exceptContainerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3288,13 +3288,13 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "ignoreContainerAccountIds": {
+                "exceptContainerAccountIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ignoreContainerIds": {
+                "exceptContainerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"

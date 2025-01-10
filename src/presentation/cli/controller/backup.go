@@ -654,8 +654,8 @@ func (controller *BackupController) CreateJob() *cobra.Command {
 	var maxTaskRetentionCountUint, maxTaskRetentionDaysUint, maxConcurrentCpuCoresUint uint16
 	var jobDescriptionStr, retentionStrategyStr, backupScheduleStr string
 	var archiveCompressionFormatStr string
-	var destinationIdsSlice, containerAccountIdsSlice, ignoreContainerAccountIdsSlice []string
-	var containerIdsSlice, ignoreContainerIdsSlice []string
+	var destinationIdsSlice, containerAccountIdsSlice, exceptContainerAccountIdsSlice []string
+	var containerIdsSlice, exceptContainerIdsSlice []string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -710,15 +710,15 @@ func (controller *BackupController) CreateJob() *cobra.Command {
 				)
 			}
 
-			if len(ignoreContainerAccountIdsSlice) > 0 {
-				requestBody["ignoreContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
-					ignoreContainerAccountIdsSlice, valueObject.NewAccountId,
+			if len(exceptContainerAccountIdsSlice) > 0 {
+				requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+					exceptContainerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
 
-			if len(ignoreContainerIdsSlice) > 0 {
-				requestBody["ignoreContainerIds"] = sharedHelper.StringSliceValueObjectParser(
-					ignoreContainerIdsSlice, valueObject.NewContainerId,
+			if len(exceptContainerIdsSlice) > 0 {
+				requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
+					exceptContainerIdsSlice, valueObject.NewContainerId,
 				)
 			}
 
@@ -758,10 +758,10 @@ func (controller *BackupController) CreateJob() *cobra.Command {
 		&containerIdsSlice, "container-ids", "i", []string{}, "ContainerIds",
 	)
 	cmd.Flags().StringSliceVarP(
-		&ignoreContainerAccountIdsSlice, "ignore-container-account-ids", "U", []string{}, "IgnoreContainerAccountIds",
+		&exceptContainerAccountIdsSlice, "except-container-account-ids", "U", []string{}, "ExceptContainerAccountIds",
 	)
 	cmd.Flags().StringSliceVarP(
-		&ignoreContainerIdsSlice, "ignore-container-ids", "I", []string{}, "IgnoreContainerIds",
+		&exceptContainerIdsSlice, "except-container-ids", "I", []string{}, "ExceptContainerIds",
 	)
 
 	return cmd
@@ -771,8 +771,8 @@ func (controller *BackupController) UpdateJob() *cobra.Command {
 	var jobIdUint, accountIdUint, timeoutSecsUint uint64
 	var maxTaskRetentionCountUint, maxTaskRetentionDaysUint, maxConcurrentCpuCoresUint uint16
 	var jobStatusBoolStr, jobDescriptionStr, backupScheduleStr string
-	var destinationIdsSlice, containerAccountIdsSlice, ignoreContainerAccountIdsSlice []string
-	var containerIdsSlice, ignoreContainerIdsSlice []string
+	var destinationIdsSlice, containerAccountIdsSlice, exceptContainerAccountIdsSlice []string
+	var containerIdsSlice, exceptContainerIdsSlice []string
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -826,15 +826,15 @@ func (controller *BackupController) UpdateJob() *cobra.Command {
 				)
 			}
 
-			if len(ignoreContainerAccountIdsSlice) > 0 {
-				requestBody["ignoreContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
-					ignoreContainerAccountIdsSlice, valueObject.NewAccountId,
+			if len(exceptContainerAccountIdsSlice) > 0 {
+				requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+					exceptContainerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
 
-			if len(ignoreContainerIdsSlice) > 0 {
-				requestBody["ignoreContainerIds"] = sharedHelper.StringSliceValueObjectParser(
-					ignoreContainerIdsSlice, valueObject.NewContainerId,
+			if len(exceptContainerIdsSlice) > 0 {
+				requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
+					exceptContainerIdsSlice, valueObject.NewContainerId,
 				)
 			}
 
@@ -871,10 +871,10 @@ func (controller *BackupController) UpdateJob() *cobra.Command {
 		&containerIdsSlice, "container-ids", "i", []string{}, "ContainerIds",
 	)
 	cmd.Flags().StringSliceVarP(
-		&ignoreContainerAccountIdsSlice, "ignore-container-account-ids", "U", []string{}, "IgnoreContainerAccountIds",
+		&exceptContainerAccountIdsSlice, "except-container-account-ids", "U", []string{}, "ExceptContainerAccountIds",
 	)
 	cmd.Flags().StringSliceVarP(
-		&ignoreContainerIdsSlice, "ignore-container-ids", "I", []string{}, "IgnoreContainerIds",
+		&exceptContainerIdsSlice, "except-container-ids", "I", []string{}, "ExceptContainerIds",
 	)
 
 	return cmd
