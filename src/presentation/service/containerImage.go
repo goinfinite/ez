@@ -142,7 +142,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	}
 
 	createSnapshotImageDto := dto.NewCreateContainerSnapshotImage(
-		containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr,
+		containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr, nil,
 		shouldDiscardImagePtr, operatorAccountId, operatorIpAddress,
 	)
 

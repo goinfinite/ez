@@ -61,8 +61,9 @@ func CreateContainerSnapshotImage(
 	}
 
 	createArchiveDto := dto.NewCreateContainerImageArchiveFile(
-		containerAccountId, imageId, createSnapshotDto.ArchiveCompressionFormat, nil,
-		createSnapshotDto.OperatorAccountId, createSnapshotDto.OperatorIpAddress,
+		containerAccountId, imageId, createSnapshotDto.ArchiveCompressionFormat,
+		createSnapshotDto.ArchiveDestinationPath, createSnapshotDto.OperatorAccountId,
+		createSnapshotDto.OperatorIpAddress,
 	)
 	_, err = CreateContainerImageArchiveFile(
 		containerImageQueryRepo, containerImageCmdRepo,

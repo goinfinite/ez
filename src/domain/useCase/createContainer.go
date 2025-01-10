@@ -63,7 +63,7 @@ func CreateContainer(
 		isInfiniteOs = existingContainerEntity.ImageAddress.IsInfiniteOs()
 
 		createSnapshotDto := dto.NewCreateContainerSnapshotImage(
-			*createDto.ExistingContainerId, nil, nil, nil, createDto.OperatorAccountId,
+			*createDto.ExistingContainerId, nil, nil, nil, nil, createDto.OperatorAccountId,
 			createDto.OperatorIpAddress,
 		)
 
