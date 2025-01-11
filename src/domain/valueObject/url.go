@@ -33,3 +33,8 @@ func NewUrl(value interface{}) (url Url, err error) {
 func (vo Url) String() string {
 	return string(vo)
 }
+
+func (vo Url) WithoutSchema() string {
+	voStr := strings.TrimPrefix(string(vo), "http://")
+	return strings.TrimPrefix(voStr, "https://")
+}
