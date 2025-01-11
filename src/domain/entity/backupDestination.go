@@ -16,6 +16,7 @@ type BackupDestinationBase struct {
 	DestinationPath                   valueObject.UnixFilePath                  `json:"destinationPath"`
 	MinLocalStorageFreePercent        *uint8                                    `json:"minLocalStorageFreePercent,omitempty"`
 	MaxDestinationStorageUsagePercent *uint8                                    `json:"maxDestinationStorageUsagePercent,omitempty"`
+	EncryptionKey                     valueObject.Password                      `json:"-"`
 	TotalSpaceUsageBytes              *valueObject.Byte                         `json:"totalSpaceUsageBytes,omitempty"`
 	TotalSpaceUsagePercent            *uint8                                    `json:"totalSpaceUsagePercent,omitempty"`
 	CreatedAt                         valueObject.UnixTime                      `json:"createdAt"`
