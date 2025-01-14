@@ -587,6 +587,43 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 	return taskIdRunDetailsMap
 }
 
+func (repo *BackupCmdRepo) accountStorageAllocator(
+	containerWithMetrics dto.ContainerWithMetrics,
+	accountEntity entity.Account,
+	accountCmdRepo *infra.AccountCmdRepo,
+) error {
+	userDataDirectoryStats, err := repo.readUserDataStats()
+	if err != nil {
+		return err
+	}
+
+	containerSizeBytes := containerWithMetrics.Metrics.StorageSpaceBytes.Uint64()
+	containerSizeWithMargin := containerSizeBytes + containerSizeBytes/10
+	containerSizeWithMarginBytes, err := valueObject.NewByte(containerSizeWithMargin)
+	if err != nil {
+		return errors.New("ContainerSizeWithMarginBytesCreateError")
+	}
+
+	if containerSizeWithMarginBytes.Uint64() > userDataDirectoryStats.Free {
+		return errors.New("InsufficientUserDataDirectoryFreeSpace")
+	}
+
+	accountFreeStorageBytes := accountEntity.Quota.StorageBytes - accountEntity.QuotaUsage.StorageBytes
+	if containerSizeBytes > accountFreeStorageBytes.Uint64() {
+		tempUpdatedStorageBytesQuota := accountEntity.Quota.StorageBytes + containerSizeWithMarginBytes
+		tempUpdatedAccountQuota := valueObject.AccountQuota{
+			StorageBytes: tempUpdatedStorageBytesQuota,
+		}
+
+		err = accountCmdRepo.UpdateQuota(containerWithMetrics.AccountId, tempUpdatedAccountQuota)
+		if err != nil {
+			return errors.New("UpdateAccountQuotaFailed")
+		}
+	}
+
+	return nil
+}
+
 func (repo *BackupCmdRepo) createJobTmpDir(tmpDir valueObject.UnixFilePath) error {
 	tmpDirStr := tmpDir.String()
 	err := infraHelper.MakeDir(tmpDirStr)
@@ -623,6 +660,70 @@ func (repo *BackupCmdRepo) createJobTmpDir(tmpDir valueObject.UnixFilePath) erro
 	}
 
 	return nil
+}
+
+func (repo *BackupCmdRepo) sharedTaskFailRegister(
+	accountId *valueObject.AccountId,
+	containerId *valueObject.ContainerId,
+	executionOutputPtr *string,
+	failedContainerIdsPtr *[]string,
+	error error,
+) {
+	tagIdentifier := ""
+	slogAttrs := []interface{}{}
+
+	if accountId != nil {
+		accountIdStr := accountId.String()
+		tagIdentifier = "[" + accountIdStr + "] "
+		slogAttrs = append(slogAttrs, "accountId", accountIdStr)
+	}
+
+	if containerId != nil {
+		containerIdStr := containerId.String()
+		tagIdentifier += "[" + containerIdStr + "] "
+		*failedContainerIdsPtr = append(*failedContainerIdsPtr, containerIdStr)
+		slogAttrs = append(slogAttrs, "containerId", containerIdStr)
+	}
+
+	*executionOutputPtr += tagIdentifier + error.Error() + "\n"
+	slog.Debug(error.Error(), slogAttrs...)
+}
+
+func (repo *BackupCmdRepo) createContainerArchive(
+	containerWithMetrics dto.ContainerWithMetrics,
+	containerImageCmdRepo *infra.ContainerImageCmdRepo,
+	jobTmpDir valueObject.UnixFilePath,
+) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	shouldCreateArchive := false
+	createSnapshotDto := dto.CreateContainerSnapshotImage{
+		ContainerId:         containerWithMetrics.Id,
+		ShouldCreateArchive: &shouldCreateArchive,
+	}
+	snapshotImageId, err := containerImageCmdRepo.CreateSnapshot(createSnapshotDto)
+	if err != nil {
+		return archiveFile, errors.New("CreateSnapshotImageFailed: " + err.Error())
+	}
+
+	createArchiveDto := dto.CreateContainerImageArchiveFile{
+		AccountId:       containerWithMetrics.AccountId,
+		ImageId:         snapshotImageId,
+		DestinationPath: &jobTmpDir,
+	}
+	archiveFile, err = containerImageCmdRepo.CreateArchiveFile(createArchiveDto)
+	if err != nil {
+		return archiveFile, errors.New("CreateArchiveFileFailed: " + err.Error())
+	}
+
+	deleteSnapshotDto := dto.DeleteContainerImage{
+		AccountId: containerWithMetrics.AccountId,
+		ImageId:   snapshotImageId,
+	}
+	err = containerImageCmdRepo.Delete(deleteSnapshotDto)
+	if err != nil {
+		return archiveFile, errors.New("DeleteSnapshotImageFailed: " + err.Error())
+	}
+
+	return archiveFile, nil
 }
 
 func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
@@ -675,115 +776,42 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
 
-	accountIdOriginalStorageBytesQuotaMap := map[valueObject.AccountId]valueObject.Byte{}
-
 	sharedTaskExecutionOutput := ""
 	sharedTaskSuccessfulContainerIds := []string{}
 	sharedTaskFailedContainerIds := []string{}
 
 	for accountId, containerWithMetricsSlice := range accountIdContainerWithMetricsMap {
-		// Check if Account has enough storage space
-		accountEntity, err := accountQueryRepo.ReadById(accountId)
+		preTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
-			slog.Debug(err.Error(), slog.Uint64("accountId", accountId.Uint64()))
+			repo.sharedTaskFailRegister(
+				&accountId, nil, &sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+			)
 			continue
 		}
-
-		accountFreeStorageBytes := accountEntity.Quota.StorageBytes - accountEntity.QuotaUsage.StorageBytes
 
 		for _, containerWithMetrics := range containerWithMetricsSlice {
 			containerIdStr := containerWithMetrics.Id.String()
 			containerIdOutputTag := "[" + containerIdStr + "] "
 
-			userDataDirectoryStats, err = repo.readUserDataStats()
+			err = repo.accountStorageAllocator(
+				containerWithMetrics, preTaskAccountEntity, accountCmdRepo,
+			)
 			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-				slog.Debug(err.Error(), slog.String("containerId", containerIdStr))
+				repo.sharedTaskFailRegister(
+					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
+					&sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+				)
 				continue
 			}
 
-			// Check if Container size exceeds Account storage quota
-			containerSizeBytes := containerWithMetrics.Metrics.StorageSpaceBytes.Uint64()
-			containerSizeWithMargin := containerSizeBytes + containerSizeBytes/10
-			containerSizeWithMarginBytes, err := valueObject.NewByte(containerSizeWithMargin)
+			archiveFile, err := repo.createContainerArchive(
+				containerWithMetrics, containerImageCmdRepo, jobTmpDir,
+			)
 			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-				errorMessage := "ContainerSizeWithMarginBytesCreateError"
-				slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-				sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-				continue
-			}
-
-			if containerSizeWithMarginBytes.Uint64() > userDataDirectoryStats.Free {
-				sharedTaskExecutionOutput += containerIdOutputTag + "InsufficientUserDataDirectoryFreeSpace\n"
-				continue
-			}
-
-			if containerSizeBytes > accountFreeStorageBytes.Uint64() {
-				// Update Account storage quota if possible and necessary
-				accountIdOriginalStorageBytesQuotaMap[accountId] = accountEntity.Quota.StorageBytes
-
-				tempUpdatedStorageBytesQuota := accountEntity.Quota.StorageBytes + containerSizeWithMarginBytes
-				tempUpdatedAccountQuota := valueObject.AccountQuota{
-					StorageBytes: tempUpdatedStorageBytesQuota,
-				}
-
-				err = accountCmdRepo.UpdateQuota(accountId, tempUpdatedAccountQuota)
-				if err != nil {
-					sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-					errorMessage := "UpdateAccountQuotaFailed"
-					slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-					sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-					continue
-				}
-			}
-
-			// Create Container Snapshot
-			shouldCreateArchive := false
-			createSnapshotDto := dto.CreateContainerSnapshotImage{
-				ContainerId:         containerWithMetrics.Id,
-				ShouldCreateArchive: &shouldCreateArchive,
-			}
-			snapshotImageId, err := containerImageCmdRepo.CreateSnapshot(createSnapshotDto)
-			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-				errorMessage := "CreateSnapshotImageFailed"
-				slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-				sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-				continue
-			}
-
-			// Create Archive File
-			createArchiveDto := dto.CreateContainerImageArchiveFile{
-				AccountId:       accountId,
-				ImageId:         snapshotImageId,
-				DestinationPath: &jobTmpDir,
-			}
-			archiveFile, err := containerImageCmdRepo.CreateArchiveFile(createArchiveDto)
-			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-				errorMessage := "CreateArchiveFileFailed"
-				slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-				sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-				continue
-			}
-
-			// Delete Snapshot Image
-			deleteSnapshotDto := dto.DeleteContainerImage{
-				AccountId: accountId,
-				ImageId:   snapshotImageId,
-			}
-			err = containerImageCmdRepo.Delete(deleteSnapshotDto)
-			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-				errorMessage := "DeleteSnapshotImageFailed"
-				slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-				sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
+				repo.sharedTaskFailRegister(
+					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
+					&sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+				)
 				continue
 			}
 
@@ -900,27 +928,28 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 		}
+
+		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
+		if err != nil {
+			slog.Debug(err.Error(), slog.Uint64("accountId", accountId.Uint64()))
+			continue
+		}
+
+		if preTaskAccountEntity.Quota.StorageBytes != postTaskAccountEntity.Quota.StorageBytes {
+			err = accountCmdRepo.UpdateQuota(accountId, postTaskAccountEntity.Quota)
+			if err != nil {
+				slog.Debug(
+					"RestoreOriginalAccountQuotaFailed",
+					slog.Uint64("accountId", accountId.Uint64()),
+					slog.String("error", err.Error()),
+				)
+			}
+		}
 	}
 
 	err = os.RemoveAll(jobTmpDir.String())
 	if err != nil {
 		return errors.New("RemoveBackupJobTmpDirFailed: " + err.Error())
-	}
-
-	// Restore Account Quotas
-	for accountId, originalStorageBytesQuota := range accountIdOriginalStorageBytesQuotaMap {
-		originalAccountQuota := valueObject.AccountQuota{
-			StorageBytes: originalStorageBytesQuota,
-		}
-
-		err = accountCmdRepo.UpdateQuota(accountId, originalAccountQuota)
-		if err != nil {
-			slog.Debug(
-				"RestoreOriginalAccountQuotaFailed",
-				slog.Uint64("accountId", accountId.Uint64()),
-				slog.String("error", err.Error()),
-			)
-		}
 	}
 
 	// Update Backup Tasks
