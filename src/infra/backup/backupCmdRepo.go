@@ -51,7 +51,7 @@ func (repo *BackupCmdRepo) CreateDestination(
 		return responseDto, errors.New("BackupKeysSecretMissing")
 	}
 
-	rawEncryptionKey := infraHelper.GenPass(16)
+	rawEncryptionKey := infraHelper.GenPass(32)
 	encryptionKey, err := valueObject.NewPassword(rawEncryptionKey)
 	if err != nil {
 		return responseDto, errors.New("CreateEncryptionKeyFailed: " + err.Error())
