@@ -522,6 +522,7 @@ func (repo *BackupCmdRepo) readAccountContainersWithMetrics(
 }
 
 type BackupTaskRunDetails struct {
+	TaskId                 valueObject.BackupTaskId
 	DestinationEntity      entity.IBackupDestination
 	ExecutionOutput        string
 	SuccessfulContainerIds []string
@@ -577,6 +578,7 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 		}
 
 		taskIdRunDetailsMap[taskId] = BackupTaskRunDetails{
+			TaskId:                 taskId,
 			DestinationEntity:      destinationEntity,
 			ExecutionOutput:        "",
 			SuccessfulContainerIds: []string{},
@@ -726,6 +728,105 @@ func (repo *BackupCmdRepo) createContainerArchive(
 	return archiveFile, nil
 }
 
+func (repo *BackupCmdRepo) uploadContainerArchive(
+	taskRunDetails BackupTaskRunDetails,
+	containerWithMetrics dto.ContainerWithMetrics,
+	archiveFilePath valueObject.UnixFilePath,
+) BackupTaskRunDetails {
+	containerIdStr := containerWithMetrics.Id.String()
+	containerIdOutputTag := "[" + containerIdStr + "] "
+
+	unencryptedDestEnvPrefix := "RCLONE_CONFIG_RAWDEST"
+	encryptedDestEnvPrefix := "RCLONE_CONFIG_ENCDEST"
+
+	var backupBinaryEnvs []string
+	var backupBinaryFlags []string
+
+	encryptionKeyStr := ""
+	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	case entity.BackupDestinationLocal:
+		backupBinaryEnvs = []string{
+			unencryptedDestEnvPrefix + "_TYPE=" + "local",
+		}
+		encryptionKeyStr = destinationEntity.EncryptionKey.String()
+	case entity.BackupDestinationRemoteHost:
+		backupBinaryEnvs = []string{
+			unencryptedDestEnvPrefix + "_TYPE=" + "sftp",
+			unencryptedDestEnvPrefix + "_HOST=" + destinationEntity.RemoteHostname.String(),
+			unencryptedDestEnvPrefix + "_USER=" + destinationEntity.RemoteHostUsername.String(),
+		}
+		encryptionKeyStr = destinationEntity.EncryptionKey.String()
+		if destinationEntity.RemoteHostNetworkPort != nil {
+			backupBinaryEnvs = append(
+				backupBinaryEnvs,
+				unencryptedDestEnvPrefix+"_PORT="+destinationEntity.RemoteHostNetworkPort.String(),
+			)
+		}
+		if destinationEntity.RemoteHostPassword != nil {
+			backupBinaryEnvs = append(
+				backupBinaryEnvs,
+				unencryptedDestEnvPrefix+"_PASS="+destinationEntity.RemoteHostPassword.String(),
+			)
+		}
+		if destinationEntity.RemoteHostPrivateKeyFilePath != nil {
+			backupBinaryEnvs = append(
+				backupBinaryEnvs,
+				unencryptedDestEnvPrefix+"_KEY_FILE="+destinationEntity.RemoteHostPrivateKeyFilePath.String(),
+			)
+		}
+
+	case entity.BackupDestinationObjectStorage:
+		backupBinaryEnvs = []string{
+			unencryptedDestEnvPrefix + "_TYPE=" + "s3",
+			unencryptedDestEnvPrefix + "_PROVIDER=Custom",
+			unencryptedDestEnvPrefix + "_ACCESS_KEY_ID=" + destinationEntity.ObjectStorageProviderAccessKeyId.String(),
+			unencryptedDestEnvPrefix + "_SECRET_ACCESS_KEY=" + destinationEntity.ObjectStorageProviderSecretAccessKey.String(),
+			unencryptedDestEnvPrefix + "_ENDPOINT=" + destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
+		}
+		encryptionKeyStr = destinationEntity.EncryptionKey.String()
+		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
+	default:
+		taskRunDetails.FailedContainerIds = append(
+			taskRunDetails.FailedContainerIds, containerIdStr,
+		)
+		taskRunDetails.ExecutionOutput += containerIdOutputTag + "InvalidBackupDestinationType" + "\n"
+		return taskRunDetails
+	}
+
+	backupBinaryEnvs = append(
+		backupBinaryEnvs,
+		encryptedDestEnvPrefix+"_TYPE="+"crypt",
+		encryptedDestEnvPrefix+"_DIRECTORY_NAME_ENCRYPTION=false",
+		encryptedDestEnvPrefix+"_FILENAME_ENCRYPTION=off",
+		encryptedDestEnvPrefix+"_PASSWORD=$(echo '"+encryptionKeyStr+"' | rclone obscure -)",
+	)
+
+	srcFilePathStr := archiveFilePath.String()
+	destFilePathStr := "encdest:/" + taskRunDetails.TaskId.String() + "/" +
+		archiveFilePath.ReadFileName().String()
+
+	backupBinaryCli := strings.Join(backupBinaryEnvs, " ") + " rclone"
+	backupBinaryCmd := backupBinaryCli + strings.Join(backupBinaryFlags, " ") +
+		" copyto " + srcFilePathStr + " " + destFilePathStr
+
+	_, err := infraHelper.RunCmdAsUserWithSubShell(
+		containerWithMetrics.AccountId, backupBinaryCmd,
+	)
+	if err != nil {
+		taskRunDetails.FailedContainerIds = append(
+			taskRunDetails.FailedContainerIds, containerIdStr,
+		)
+		taskRunDetails.ExecutionOutput += containerIdOutputTag + "UploadArchiveFailed" + "\n"
+		return taskRunDetails
+	}
+
+	taskRunDetails.SuccessfulContainerIds = append(
+		taskRunDetails.SuccessfulContainerIds, containerIdStr,
+	)
+
+	return taskRunDetails
+}
+
 func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	userDataDirectoryWatermarkLimitPercent := float64(92)
 	userDataDirectoryStats, err := repo.readUserDataStats()
@@ -771,13 +872,11 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		return errors.New("CreateBackupJobTmpDirFailed: " + err.Error())
 	}
 
-	// Run Container Snapshots
 	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
 
 	sharedTaskExecutionOutput := ""
-	sharedTaskSuccessfulContainerIds := []string{}
 	sharedTaskFailedContainerIds := []string{}
 
 	for accountId, containerWithMetricsSlice := range accountIdContainerWithMetricsMap {
@@ -790,9 +889,6 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		}
 
 		for _, containerWithMetrics := range containerWithMetricsSlice {
-			containerIdStr := containerWithMetrics.Id.String()
-			containerIdOutputTag := "[" + containerIdStr + "] "
-
 			err = repo.accountStorageAllocator(
 				containerWithMetrics, preTaskAccountEntity, accountCmdRepo,
 			)
@@ -815,123 +911,28 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
-			// Upload Archive File to Backup Destination
 			for taskId, taskRunDetails := range taskIdRunDetailsMap {
-				unencryptedDestEnvPrefix := "RCLONE_CONFIG_RAWDEST"
-				encryptedDestEnvPrefix := "RCLONE_CONFIG_ENCDEST"
-
-				var backupBinaryEnvs []string
-				var backupBinaryFlags []string
-
-				encryptionKeyStr := ""
-				switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
-				case entity.BackupDestinationLocal:
-					backupBinaryEnvs = []string{
-						unencryptedDestEnvPrefix + "_TYPE=" + "local",
-					}
-					encryptionKeyStr = destinationEntity.EncryptionKey.String()
-				case entity.BackupDestinationRemoteHost:
-					backupBinaryEnvs = []string{
-						unencryptedDestEnvPrefix + "_TYPE=" + "sftp",
-						unencryptedDestEnvPrefix + "_HOST=" + destinationEntity.RemoteHostname.String(),
-						unencryptedDestEnvPrefix + "_USER=" + destinationEntity.RemoteHostUsername.String(),
-					}
-					encryptionKeyStr = destinationEntity.EncryptionKey.String()
-					if destinationEntity.RemoteHostNetworkPort != nil {
-						backupBinaryEnvs = append(
-							backupBinaryEnvs,
-							unencryptedDestEnvPrefix+"_PORT="+destinationEntity.RemoteHostNetworkPort.String(),
-						)
-					}
-					if destinationEntity.RemoteHostPassword != nil {
-						backupBinaryEnvs = append(
-							backupBinaryEnvs,
-							unencryptedDestEnvPrefix+"_PASS="+destinationEntity.RemoteHostPassword.String(),
-						)
-					}
-					if destinationEntity.RemoteHostPrivateKeyFilePath != nil {
-						backupBinaryEnvs = append(
-							backupBinaryEnvs,
-							unencryptedDestEnvPrefix+"_KEY_FILE="+destinationEntity.RemoteHostPrivateKeyFilePath.String(),
-						)
-					}
-
-				case entity.BackupDestinationObjectStorage:
-					backupBinaryEnvs = []string{
-						unencryptedDestEnvPrefix + "_TYPE=" + "s3",
-						unencryptedDestEnvPrefix + "_PROVIDER=Custom",
-						unencryptedDestEnvPrefix + "_ACCESS_KEY_ID=" + destinationEntity.ObjectStorageProviderAccessKeyId.String(),
-						unencryptedDestEnvPrefix + "_SECRET_ACCESS_KEY=" + destinationEntity.ObjectStorageProviderSecretAccessKey.String(),
-						unencryptedDestEnvPrefix + "_ENDPOINT=" + destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
-					}
-					encryptionKeyStr = destinationEntity.EncryptionKey.String()
-					backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
-				default:
-					errorMessage := "InvalidBackupDestinationType"
-
-					taskRunDetails.FailedContainerIds = append(
-						taskRunDetails.FailedContainerIds, containerIdStr,
-					)
-					taskRunDetails.ExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-					taskIdRunDetailsMap[taskId] = taskRunDetails
-
-					slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-					continue
-				}
-
-				backupBinaryEnvs = append(
-					backupBinaryEnvs,
-					encryptedDestEnvPrefix+"_TYPE="+"crypt",
-					encryptedDestEnvPrefix+"_DIRECTORY_NAME_ENCRYPTION=false",
-					encryptedDestEnvPrefix+"_FILENAME_ENCRYPTION=off",
-					encryptedDestEnvPrefix+"_PASSWORD=$(echo '"+encryptionKeyStr+"' | rclone obscure -)",
+				taskRunDetails = repo.uploadContainerArchive(
+					taskRunDetails, containerWithMetrics, archiveFile.UnixFilePath,
 				)
-
-				srcFilePathStr := archiveFile.UnixFilePath.String()
-				destFilePathStr := "encdest:/" + taskId.String() + "/" + archiveFile.UnixFilePath.ReadFileName().String()
-				backupBinaryCli := strings.Join(backupBinaryEnvs, " ") + " rclone"
-				backupBinaryCmd := backupBinaryCli + strings.Join(backupBinaryFlags, " ") +
-					" copyto " + srcFilePathStr + " " + destFilePathStr
-
-				_, err := infraHelper.RunCmdAsUserWithSubShell(accountId, backupBinaryCmd)
-				if err != nil {
-					errorMessage := "BackupOperationFailed"
-
-					taskRunDetails.FailedContainerIds = append(
-						taskRunDetails.FailedContainerIds, containerIdStr,
-					)
-					taskRunDetails.ExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-					taskIdRunDetailsMap[taskId] = taskRunDetails
-
-					slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-					continue
-				}
+				taskIdRunDetailsMap[taskId] = taskRunDetails
 			}
-
-			// Delete Archive File
-			sharedTaskSuccessfulContainerIds = append(
-				sharedTaskSuccessfulContainerIds, containerIdStr,
-			)
 
 			err = containerImageCmdRepo.DeleteArchiveFile(archiveFile)
 			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-				errorMessage := "DeleteArchiveFileFailed"
-				slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-				sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-				continue
-			}
-
-			userDataDirectoryStats, err = repo.readUserDataStats()
-			if err != nil {
+				repo.sharedTaskFailRegister(
+					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
+					&sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+				)
 				continue
 			}
 		}
 
 		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
-			slog.Debug(err.Error(), slog.Uint64("accountId", accountId.Uint64()))
+			repo.sharedTaskFailRegister(
+				&accountId, nil, &sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+			)
 			continue
 		}
 
@@ -943,21 +944,21 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 					slog.Uint64("accountId", accountId.Uint64()),
 					slog.String("error", err.Error()),
 				)
+				continue
 			}
 		}
 	}
 
 	err = os.RemoveAll(jobTmpDir.String())
 	if err != nil {
-		return errors.New("RemoveBackupJobTmpDirFailed: " + err.Error())
+		slog.Debug(
+			"RemoveBackupJobTmpDirFailed",
+			slog.String("error", err.Error()),
+		)
 	}
 
-	// Update Backup Tasks
 	for taskId, taskRunDetails := range taskIdRunDetailsMap {
 		executionOutput := sharedTaskExecutionOutput + "\n" + taskRunDetails.ExecutionOutput
-		successfulContainerIds := append(
-			sharedTaskSuccessfulContainerIds, taskRunDetails.SuccessfulContainerIds...,
-		)
 		failedContainerIds := append(
 			sharedTaskFailedContainerIds, taskRunDetails.FailedContainerIds...,
 		)
@@ -966,14 +967,14 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		if len(failedContainerIds) > 0 {
 			taskStatus = valueObject.BackupTaskStatusPartial.String()
 		}
-		if len(successfulContainerIds) == 0 {
+		if len(taskRunDetails.SuccessfulContainerIds) == 0 {
 			taskStatus = valueObject.BackupTaskStatusFailed.String()
 		}
 
 		taskModelUpdated := dbModel.BackupTask{
 			TaskStatus:             taskStatus,
 			ExecutionOutput:        &executionOutput,
-			SuccessfulContainerIds: successfulContainerIds,
+			SuccessfulContainerIds: taskRunDetails.SuccessfulContainerIds,
 			FailedContainerIds:     failedContainerIds,
 		}
 
@@ -981,7 +982,10 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			Where("id = ?", taskId.Uint64()).
 			Updates(&taskModelUpdated).Error
 		if err != nil {
-			slog.Debug(err.Error(), slog.Uint64("taskId", taskId.Uint64()))
+			slog.Debug(
+				"UpdateBackupTaskModelError: "+err.Error(),
+				slog.Uint64("taskId", taskId.Uint64()))
+			continue
 		}
 	}
 
