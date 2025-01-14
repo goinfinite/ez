@@ -19,6 +19,7 @@ type BackupDestination struct {
 	Path                                 string `gorm:"not null"`
 	MinLocalStorageFreePercent           *uint8
 	MaxDestinationStorageUsagePercent    *uint8
+	EncryptionKey                        string `gorm:"not null"`
 	TotalSpaceUsageBytes                 *uint64
 	TotalSpaceUsagePercent               *uint8
 	MaxConcurrentConnections             *uint16
@@ -51,7 +52,7 @@ func NewBackupDestination(
 	id, accountId uint64,
 	name string,
 	description *string,
-	destinationType, path string,
+	destinationType, path, encryptionKey string,
 	minLocalStorageFreePercent, maxDestinationStorageUsagePercent *uint8,
 	maxConcurrentConnections *uint16,
 	downloadBytesSecRateLimit, uploadBytesSecRateLimit *uint64,
@@ -70,6 +71,7 @@ func NewBackupDestination(
 		Path:                                 path,
 		MinLocalStorageFreePercent:           minLocalStorageFreePercent,
 		MaxDestinationStorageUsagePercent:    maxDestinationStorageUsagePercent,
+		EncryptionKey:                        encryptionKey,
 		MaxConcurrentConnections:             maxConcurrentConnections,
 		DownloadBytesSecRateLimit:            downloadBytesSecRateLimit,
 		UploadBytesSecRateLimit:              uploadBytesSecRateLimit,
@@ -129,6 +131,16 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		return destinationEntity, err
 	}
 
+	var minLocalStorageFreePercentPtr *uint8
+	if model.MinLocalStorageFreePercent != nil {
+		minLocalStorageFreePercentPtr = model.MinLocalStorageFreePercent
+	}
+
+	var maxDestinationStorageUsagePercentPtr *uint8
+	if model.MaxDestinationStorageUsagePercent != nil {
+		maxDestinationStorageUsagePercentPtr = model.MaxDestinationStorageUsagePercent
+	}
+
 	var totalSpaceUsageBytesPtr *valueObject.Byte
 	if model.TotalSpaceUsageBytes != nil {
 		totalSpaceUsageBytes, err := valueObject.NewByte(*model.TotalSpaceUsageBytes)
@@ -143,17 +155,37 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		return destinationEntity, err
 	}
 
+	dbEncryptSecret := os.Getenv("BACKUP_KEYS_SECRET")
+	if dbEncryptSecret == "" {
+		return destinationId, errors.New("BackupKeysSecretMissing")
+	}
+	decryptedEncryptionKey, err := infraHelper.DecryptStr(
+		dbEncryptSecret, model.EncryptionKey,
+	)
+	if err != nil {
+		return destinationEntity, errors.New("DecryptEncryptionKeyFailed: " + err.Error())
+	}
+	encryptionKey, err := valueObject.NewPassword(decryptedEncryptionKey)
+	if err != nil {
+		return destinationEntity, err
+	}
+
 	backupDestinationBase := entity.BackupDestinationBase{
-		DestinationId:          destinationId,
-		AccountId:              accountId,
-		DestinationName:        destinationName,
-		DestinationDescription: destinationDescriptionPtr,
-		DestinationType:        destinationType,
-		DestinationPath:        destinationPath,
-		TotalSpaceUsageBytes:   totalSpaceUsageBytesPtr,
-		TotalSpaceUsagePercent: model.TotalSpaceUsagePercent,
-		CreatedAt:              valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
-		UpdatedAt:              valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
+		DestinationId:                     destinationId,
+		AccountId:                         accountId,
+		DestinationName:                   destinationName,
+		DestinationDescription:            destinationDescriptionPtr,
+		DestinationType:                   destinationType,
+		DestinationPath:                   destinationPath,
+		MinLocalStorageFreePercent:        minLocalStorageFreePercentPtr,
+		MaxDestinationStorageUsagePercent: maxDestinationStorageUsagePercentPtr,
+		TotalSpaceUsageBytes:              totalSpaceUsageBytesPtr,
+		TotalSpaceUsagePercent:            model.TotalSpaceUsagePercent,
+		CreatedAt:                         valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
+		UpdatedAt:                         valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
+	}
+	if withSecrets {
+		backupDestinationBase.EncryptionKey = encryptionKey
 	}
 
 	backupDestinationRemoteBase := entity.BackupDestinationRemoteBase{
@@ -162,11 +194,6 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		DownloadBytesSecRateLimit:   model.DownloadBytesSecRateLimit,
 		UploadBytesSecRateLimit:     model.UploadBytesSecRateLimit,
 		SkipCertificateVerification: model.SkipCertificateVerification,
-	}
-
-	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
-	if encryptSecretKey == "" {
-		return destinationId, errors.New("BackupKeysSecretMissing")
 	}
 
 	switch destinationType {
@@ -201,9 +228,9 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		}
 
 		var objectStorageProviderSecretAccessKeyPtr *valueObject.ObjectStorageProviderSecretAccessKey
-		if model.ObjectStorageProviderSecretAccessKey != nil {
+		if model.ObjectStorageProviderSecretAccessKey != nil && withSecrets {
 			decryptedSecretAccessKey, err := infraHelper.DecryptStr(
-				encryptSecretKey, *model.ObjectStorageProviderSecretAccessKey,
+				dbEncryptSecret, *model.ObjectStorageProviderSecretAccessKey,
 			)
 			if err != nil {
 				return destinationEntity, errors.New("DecryptProviderSecretAccessKeyFailed: " + err.Error())
@@ -262,9 +289,9 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		}
 
 		var remoteHostPasswordPtr *valueObject.Password
-		if model.RemoteHostPassword != nil {
+		if model.RemoteHostPassword != nil && withSecrets {
 			decryptedPassword, err := infraHelper.DecryptStr(
-				encryptSecretKey, *model.RemoteHostPassword,
+				dbEncryptSecret, *model.RemoteHostPassword,
 			)
 			if err != nil {
 				return destinationEntity, errors.New("DecryptPasswordFailed: " + err.Error())

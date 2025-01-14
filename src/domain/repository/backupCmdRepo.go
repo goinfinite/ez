@@ -6,7 +6,7 @@ import (
 )
 
 type BackupCmdRepo interface {
-	CreateDestination(dto.CreateBackupDestination) (valueObject.BackupDestinationId, error)
+	CreateDestination(dto.CreateBackupDestinationRequest) (dto.CreateBackupDestinationResponse, error)
 	UpdateDestination(dto.UpdateBackupDestination) error
 	DeleteDestination(dto.DeleteBackupDestination) error
 

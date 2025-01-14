@@ -394,7 +394,7 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
 }
 
 func (uc *CreateSecurityActivityRecord) CreateBackupDestination(
-	createDto dto.CreateBackupDestination,
+	createDto dto.CreateBackupDestinationRequest,
 	destinationId valueObject.BackupDestinationId,
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("BackupDestinationCreated")

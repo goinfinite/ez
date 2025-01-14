@@ -4,7 +4,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-type CreateBackupDestination struct {
+type CreateBackupDestinationRequest struct {
 	AccountId                            valueObject.AccountId                             `json:"accountId"`
 	DestinationName                      valueObject.BackupDestinationName                 `json:"destinationName"`
 	DestinationDescription               *valueObject.BackupDestinationDescription         `json:"destinationDescription"`
@@ -32,4 +32,9 @@ type CreateBackupDestination struct {
 	RemoteHostConnectionRetrySecs        *uint16                                           `json:"remoteHostConnectionRetrySecs,omitempty"`
 	OperatorAccountId                    valueObject.AccountId                             `json:"-"`
 	OperatorIpAddress                    valueObject.IpAddress                             `json:"-"`
+}
+
+type CreateBackupDestinationResponse struct {
+	DestinationId valueObject.BackupDestinationId `json:"destinationId"`
+	EncryptionKey valueObject.Password            `json:"encryptionKey"`
 }

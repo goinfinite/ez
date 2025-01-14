@@ -380,15 +380,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateBackupDestination"
+                            "$ref": "#/definitions/dto.CreateBackupDestinationRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "BackupDestinationCreated",
+                        "description": "Created",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/dto.CreateBackupDestinationResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "CreateBackupDestinationInfraError",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -2567,7 +2573,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateBackupDestination": {
+        "dto.CreateBackupDestinationRequest": {
             "type": "object",
             "properties": {
                 "accountId": {
@@ -2644,6 +2650,17 @@ const docTemplate = `{
                 },
                 "uploadBytesSecRateLimit": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.CreateBackupDestinationResponse": {
+            "type": "object",
+            "properties": {
+                "destinationId": {
+                    "type": "integer"
+                },
+                "encryptionKey": {
+                    "type": "string"
                 }
             }
         },

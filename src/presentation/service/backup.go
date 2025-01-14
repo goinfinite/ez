@@ -398,7 +398,7 @@ func (service *BackupService) CreateDestination(
 		}
 	}
 
-	createDto := dto.CreateBackupDestination{
+	createDto := dto.CreateBackupDestinationRequest{
 		AccountId:                            accountId,
 		DestinationName:                      destinationName,
 		DestinationDescription:               destinationDescriptionPtr,
@@ -429,12 +429,14 @@ func (service *BackupService) CreateDestination(
 	}
 
 	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
-	err = useCase.CreateBackupDestination(backupCmdRepo, service.activityRecordCmdRepo, createDto)
+	responseDto, err := useCase.CreateBackupDestination(
+		backupCmdRepo, service.activityRecordCmdRepo, createDto,
+	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "BackupDestinationCreated")
+	return NewServiceOutput(Created, responseDto)
 }
 
 func (service *BackupService) UpdateDestination(input map[string]interface{}) ServiceOutput {

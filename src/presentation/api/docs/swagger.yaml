@@ -59,7 +59,7 @@ definitions:
       username:
         type: string
     type: object
-  dto.CreateBackupDestination:
+  dto.CreateBackupDestinationRequest:
     properties:
       accountId:
         type: integer
@@ -111,6 +111,13 @@ definitions:
         type: boolean
       uploadBytesSecRateLimit:
         type: integer
+    type: object
+  dto.CreateBackupDestinationResponse:
+    properties:
+      destinationId:
+        type: integer
+      encryptionKey:
+        type: string
     type: object
   dto.CreateBackupJob:
     properties:
@@ -1357,14 +1364,18 @@ paths:
         name: createBackupDestinationDto
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateBackupDestination'
+          $ref: '#/definitions/dto.CreateBackupDestinationRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: BackupDestinationCreated
+          description: Created
           schema:
-            type: object
+            $ref: '#/definitions/dto.CreateBackupDestinationResponse'
+        "500":
+          description: CreateBackupDestinationInfraError
+          schema:
+            type: string
       security:
       - Bearer: []
       summary: CreateBackupDestination

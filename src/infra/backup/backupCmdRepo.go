@@ -33,17 +33,35 @@ func NewBackupCmdRepo(
 }
 
 func (repo *BackupCmdRepo) CreateDestination(
-	createDto dto.CreateBackupDestination,
-) (destinationId valueObject.BackupDestinationId, err error) {
+	createDto dto.CreateBackupDestinationRequest,
+) (responseDto dto.CreateBackupDestinationResponse, err error) {
 	var descriptionPtr *string
 	if createDto.DestinationDescription != nil {
 		description := createDto.DestinationDescription.String()
 		descriptionPtr = &description
 	}
 
-	destinationPath := "/"
+	destinationPathStr := "/"
 	if createDto.DestinationPath != nil {
-		destinationPath = createDto.DestinationPath.String()
+		destinationPathStr = createDto.DestinationPath.String()
+	}
+
+	dbEncryptSecret := os.Getenv("BACKUP_KEYS_SECRET")
+	if dbEncryptSecret == "" {
+		return responseDto, errors.New("BackupKeysSecretMissing")
+	}
+
+	rawEncryptionKey := infraHelper.GenPass(16)
+	encryptionKey, err := valueObject.NewPassword(rawEncryptionKey)
+	if err != nil {
+		return responseDto, errors.New("CreateEncryptionKeyFailed: " + err.Error())
+	}
+
+	encryptedEncryptionKeyStr, err := infraHelper.EncryptStr(
+		dbEncryptSecret, encryptionKey.String(),
+	)
+	if err != nil {
+		return responseDto, errors.New("EncryptEncryptionKeyFailed: " + err.Error())
 	}
 
 	var objectStorageProviderPtr, objectStorageProviderRegionPtr *string
@@ -62,17 +80,12 @@ func (repo *BackupCmdRepo) CreateDestination(
 		objectStorageProviderAccessKeyIdPtr = &objectStorageProviderAccessKeyId
 	}
 
-	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
-	if encryptSecretKey == "" {
-		return destinationId, errors.New("BackupKeysSecretMissing")
-	}
-
 	if createDto.ObjectStorageProviderSecretAccessKey != nil {
 		encryptedProviderSecretAccessKey, err := infraHelper.EncryptStr(
-			encryptSecretKey, createDto.ObjectStorageProviderSecretAccessKey.String(),
+			dbEncryptSecret, createDto.ObjectStorageProviderSecretAccessKey.String(),
 		)
 		if err != nil {
-			return destinationId, errors.New("EncryptProviderSecretAccessKeyFailed: " + err.Error())
+			return responseDto, errors.New("EncryptProviderSecretAccessKeyFailed: " + err.Error())
 		}
 		objectStorageProviderSecretAccessKeyPtr = &encryptedProviderSecretAccessKey
 	}
@@ -104,10 +117,10 @@ func (repo *BackupCmdRepo) CreateDestination(
 	var remoteHostPasswordPtr, remoteHostPrivateKeyFilePathPtr *string
 	if createDto.RemoteHostPassword != nil {
 		encryptedPassword, err := infraHelper.EncryptStr(
-			encryptSecretKey, createDto.RemoteHostPassword.String(),
+			dbEncryptSecret, createDto.RemoteHostPassword.String(),
 		)
 		if err != nil {
-			return destinationId, errors.New("EncryptPasswordFailed: " + err.Error())
+			return responseDto, errors.New("EncryptPasswordFailed: " + err.Error())
 		}
 		remoteHostPasswordPtr = &encryptedPassword
 	}
@@ -124,11 +137,12 @@ func (repo *BackupCmdRepo) CreateDestination(
 
 	destinationModel := dbModel.NewBackupDestination(
 		0, createDto.AccountId.Uint64(), createDto.DestinationName.String(),
-		descriptionPtr, createDto.DestinationType.String(), destinationPath,
-		createDto.MinLocalStorageFreePercent, createDto.MaxDestinationStorageUsagePercent,
-		createDto.MaxConcurrentConnections, createDto.DownloadBytesSecRateLimit,
-		createDto.UploadBytesSecRateLimit, createDto.SkipCertificateVerification,
-		objectStorageProviderPtr, objectStorageProviderRegionPtr, objectStorageProviderAccessKeyIdPtr,
+		descriptionPtr, createDto.DestinationType.String(), destinationPathStr,
+		encryptedEncryptionKeyStr, createDto.MinLocalStorageFreePercent,
+		createDto.MaxDestinationStorageUsagePercent, createDto.MaxConcurrentConnections,
+		createDto.DownloadBytesSecRateLimit, createDto.UploadBytesSecRateLimit,
+		createDto.SkipCertificateVerification, objectStorageProviderPtr,
+		objectStorageProviderRegionPtr, objectStorageProviderAccessKeyIdPtr,
 		objectStorageProviderSecretAccessKeyPtr, objectStorageEndpointUrlPtr,
 		objectStorageBucketNamePtr, remoteHostTypePtr, remoteHostnamePtr,
 		remoteHostUsernamePtr, remoteHostPasswordPtr, remoteHostPrivateKeyFilePathPtr,
@@ -138,10 +152,18 @@ func (repo *BackupCmdRepo) CreateDestination(
 
 	err = repo.persistentDbSvc.Handler.Create(&destinationModel).Error
 	if err != nil {
-		return destinationId, err
+		return responseDto, err
 	}
 
-	return valueObject.NewBackupDestinationId(destinationModel.ID)
+	destinationId, err := valueObject.NewBackupDestinationId(destinationModel.ID)
+	if err != nil {
+		return responseDto, err
+	}
+
+	return dto.CreateBackupDestinationResponse{
+		DestinationId: destinationId,
+		EncryptionKey: encryptionKey,
+	}, nil
 }
 
 func (repo *BackupCmdRepo) UpdateDestination(
@@ -211,14 +233,14 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		updateMap["object_storage_provider_access_key_id"] = updateDto.ObjectStorageProviderAccessKeyId.String()
 	}
 
-	encryptSecretKey := os.Getenv("BACKUP_KEYS_SECRET")
-	if encryptSecretKey == "" {
+	dbEncryptSecret := os.Getenv("BACKUP_KEYS_SECRET")
+	if dbEncryptSecret == "" {
 		return errors.New("BackupKeysSecretMissing")
 	}
 
 	if updateDto.ObjectStorageProviderSecretAccessKey != nil {
 		encryptedProviderSecretAccessKey, err := infraHelper.EncryptStr(
-			encryptSecretKey, updateDto.ObjectStorageProviderSecretAccessKey.String(),
+			dbEncryptSecret, updateDto.ObjectStorageProviderSecretAccessKey.String(),
 		)
 		if err != nil {
 			return errors.New("EncryptProviderSecretAccessKeyFailed: " + err.Error())
@@ -252,7 +274,7 @@ func (repo *BackupCmdRepo) UpdateDestination(
 
 	if updateDto.RemoteHostPassword != nil {
 		encryptedPassword, err := infraHelper.EncryptStr(
-			encryptSecretKey, updateDto.RemoteHostPassword.String(),
+			dbEncryptSecret, updateDto.RemoteHostPassword.String(),
 		)
 		if err != nil {
 			return errors.New("EncryptPasswordFailed: " + err.Error())
@@ -467,7 +489,6 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		AccountId: &runDto.AccountId,
 		JobId:     &runDto.JobId,
 	}
-
 	backupQueryRepo := NewBackupQueryRepo(repo.persistentDbSvc)
 	jobEntity, err := backupQueryRepo.ReadFirstJob(requestJobDto)
 	if err != nil {
@@ -486,7 +507,6 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		ExceptContainerId:        jobEntity.ExceptContainerIds,
 		WithMetrics:              &withMetrics,
 	}
-
 	containerQueryRepo := infra.NewContainerQueryRepo(repo.persistentDbSvc)
 	responseContainersDto, err := containerQueryRepo.Read(requestContainersDto)
 	if err != nil {
@@ -521,7 +541,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 	for _, destinationId := range jobEntity.DestinationIds {
 		taskModel := dbModel.BackupTask{
-			AccountID:         runDto.AccountId.Uint64(),
+			AccountID:         runDto.OperatorAccountId.Uint64(),
 			JobID:             runDto.JobId.Uint64(),
 			DestinationID:     destinationId.Uint64(),
 			TaskStatus:        valueObject.BackupTaskStatusExecuting.String(),
@@ -529,7 +549,6 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			BackupSchedule:    jobEntity.BackupSchedule.String(),
 			TimeoutSecs:       jobEntity.TimeoutSecs,
 		}
-
 		err = repo.persistentDbSvc.Handler.Create(&taskModel).Error
 		if err != nil {
 			return errors.New("CreateBackupTaskFailed: " + err.Error())
@@ -545,7 +564,6 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			Pagination:    useCase.BackupDestinationsDefaultPagination,
 			DestinationId: &destinationId,
 		}
-
 		destinationEntity, err := backupQueryRepo.ReadFirstDestination(
 			requestDestinationDto, true,
 		)
@@ -627,7 +645,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			containerIdStr := containerWithMetrics.Id.String()
 			containerIdOutputTag := "[" + containerIdStr + "] "
 
-			userDataDirectoryStats, err := repo.readUserDataStats()
+			userDataDirectoryStats, err = repo.readUserDataStats()
 			if err != nil {
 				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
 				slog.Debug(err.Error(), slog.String("containerId", containerIdStr))

@@ -82,8 +82,9 @@ func (controller *BackupController) ReadDestination(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createBackupDestinationDto 	  body    dto.CreateBackupDestination  true  "CreateBackupDestination"
-// @Success      201 {object} object{} "BackupDestinationCreated"
+// @Param        createBackupDestinationDto 	  body    dto.CreateBackupDestinationRequest  true  "CreateBackupDestination"
+// @Success      201 {object} dto.CreateBackupDestinationResponse
+// @Failure      500 {string} string "CreateBackupDestinationInfraError"
 // @Router       /v1/backup/destination/ [post]
 func (controller *BackupController) CreateDestination(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)

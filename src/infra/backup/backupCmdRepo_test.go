@@ -17,7 +17,7 @@ func TestBackupCmdRepo(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(1000)
 		destinationName, _ := valueObject.NewBackupDestinationName("test")
 
-		createDto := dto.CreateBackupDestination{
+		createDto := dto.CreateBackupDestinationRequest{
 			AccountId:       accountId,
 			DestinationName: destinationName,
 			DestinationType: valueObject.BackupDestinationTypeObjectStorage,
