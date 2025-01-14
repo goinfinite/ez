@@ -24,12 +24,16 @@ import (
 
 type BackupCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	backupQueryRepo *BackupQueryRepo
 }
 
 func NewBackupCmdRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *BackupCmdRepo {
-	return &BackupCmdRepo{persistentDbSvc: persistentDbSvc}
+	return &BackupCmdRepo{
+		persistentDbSvc: persistentDbSvc,
+		backupQueryRepo: NewBackupQueryRepo(persistentDbSvc),
+	}
 }
 
 func (repo *BackupCmdRepo) CreateDestination(
@@ -475,26 +479,10 @@ func (repo *BackupCmdRepo) readUserDataStats() (disk.UsageStat, error) {
 	return *userDataDirectoryStats, nil
 }
 
-func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
-	userDataDirectoryWatermarkLimitPercent := float64(92)
-	userDataDirectoryStats, err := repo.readUserDataStats()
-	if err != nil {
-		return err
-	}
-	if userDataDirectoryStats.UsedPercent > userDataDirectoryWatermarkLimitPercent {
-		return errors.New("UserDataDirectoryUsageExceedsWatermarkLimit")
-	}
-
-	requestJobDto := dto.ReadBackupJobsRequest{
-		AccountId: &runDto.AccountId,
-		JobId:     &runDto.JobId,
-	}
-	backupQueryRepo := NewBackupQueryRepo(repo.persistentDbSvc)
-	jobEntity, err := backupQueryRepo.ReadFirstJob(requestJobDto)
-	if err != nil {
-		return errors.New("ReadBackupJobFailed: " + err.Error())
-	}
-
+func (repo *BackupCmdRepo) readAccountContainersWithMetrics(
+	jobEntity entity.BackupJob,
+) (map[valueObject.AccountId][]dto.ContainerWithMetrics, error) {
+	accountIdContainersMap := map[valueObject.AccountId][]dto.ContainerWithMetrics{}
 	withMetrics := true
 	requestContainersDto := dto.ReadContainersRequest{
 		Pagination: dto.Pagination{
@@ -510,48 +498,64 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	containerQueryRepo := infra.NewContainerQueryRepo(repo.persistentDbSvc)
 	responseContainersDto, err := containerQueryRepo.Read(requestContainersDto)
 	if err != nil {
-		return errors.New("ReadContainersFailed: " + err.Error())
+		return accountIdContainersMap, errors.New("ReadContainersFailed: " + err.Error())
 	}
 
 	if len(responseContainersDto.ContainersWithMetrics) == 0 {
-		return errors.New("NoContainersFound")
+		return accountIdContainersMap, errors.New("NoContainersFound")
 	}
 
-	accountIdContainerWithMetricsMap := map[valueObject.AccountId][]dto.ContainerWithMetrics{}
 	for _, containerWithMetrics := range responseContainersDto.ContainersWithMetrics {
 		accountId := containerWithMetrics.AccountId
-		accountIdContainerWithMetricsMap[accountId] = append(
-			accountIdContainerWithMetricsMap[accountId], containerWithMetrics,
+		accountIdContainersMap[accountId] = append(
+			accountIdContainersMap[accountId], containerWithMetrics,
 		)
 	}
 
-	for _, containerWithMetrics := range accountIdContainerWithMetricsMap {
+	for _, containerWithMetrics := range accountIdContainersMap {
 		sort.SliceStable(containerWithMetrics, func(i, j int) bool {
 			return containerWithMetrics[i].Metrics.StorageSpaceBytes < containerWithMetrics[j].Metrics.StorageSpaceBytes
 		})
 	}
 
-	type BackupTaskRunDetails struct {
-		DestinationEntity      entity.IBackupDestination
-		ExecutionOutput        string
-		SuccessfulContainerIds []string
-		FailedContainerIds     []string
-	}
+	return accountIdContainersMap, nil
+}
+
+type BackupTaskRunDetails struct {
+	DestinationEntity      entity.IBackupDestination
+	ExecutionOutput        string
+	SuccessfulContainerIds []string
+	FailedContainerIds     []string
+}
+
+func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
+	jobEntity entity.BackupJob,
+	operatorAccountId valueObject.AccountId,
+) map[valueObject.BackupTaskId]BackupTaskRunDetails {
 	taskIdRunDetailsMap := map[valueObject.BackupTaskId]BackupTaskRunDetails{}
+
+	if operatorAccountId == valueObject.SystemAccountId {
+		operatorAccountId = jobEntity.AccountId
+	}
 
 	for _, destinationId := range jobEntity.DestinationIds {
 		taskModel := dbModel.BackupTask{
-			AccountID:         runDto.OperatorAccountId.Uint64(),
-			JobID:             runDto.JobId.Uint64(),
+			AccountID:         operatorAccountId.Uint64(),
+			JobID:             jobEntity.JobId.Uint64(),
 			DestinationID:     destinationId.Uint64(),
 			TaskStatus:        valueObject.BackupTaskStatusExecuting.String(),
 			RetentionStrategy: jobEntity.RetentionStrategy.String(),
 			BackupSchedule:    jobEntity.BackupSchedule.String(),
 			TimeoutSecs:       jobEntity.TimeoutSecs,
 		}
-		err = repo.persistentDbSvc.Handler.Create(&taskModel).Error
+		err := repo.persistentDbSvc.Handler.Create(&taskModel).Error
 		if err != nil {
-			return errors.New("CreateBackupTaskFailed: " + err.Error())
+			slog.Debug(
+				"CreateBackupTaskFailed",
+				slog.Uint64("destinationId", destinationId.Uint64()),
+				slog.String("error", err.Error()),
+			)
+			continue
 		}
 
 		taskId, err := valueObject.NewBackupTaskId(taskModel.ID)
@@ -564,7 +568,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			Pagination:    useCase.BackupDestinationsDefaultPagination,
 			DestinationId: &destinationId,
 		}
-		destinationEntity, err := backupQueryRepo.ReadFirstDestination(
+		destinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
 			requestDestinationDto, true,
 		)
 		if err != nil {
@@ -580,23 +584,14 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		}
 	}
 
-	if len(taskIdRunDetailsMap) == 0 {
-		return errors.New("NoBackupTasksCreated")
-	}
+	return taskIdRunDetailsMap
+}
 
-	rawJobTempDir := fmt.Sprintf(
-		"%s/nobody/backup/%d/%d/",
-		infraEnvs.UserDataDirectory, runDto.AccountId.Uint64(), runDto.JobId.Uint64(),
-	)
-	jobTempDir, err := valueObject.NewUnixFilePath(rawJobTempDir)
+func (repo *BackupCmdRepo) createJobTmpDir(tmpDir valueObject.UnixFilePath) error {
+	tmpDirStr := tmpDir.String()
+	err := infraHelper.MakeDir(tmpDirStr)
 	if err != nil {
-		return errors.New("ValidateBackupJobTempDirFailed: " + err.Error())
-	}
-	jobTempDirStr := jobTempDir.String()
-
-	err = infraHelper.MakeDir(jobTempDirStr)
-	if err != nil {
-		return errors.New("MakeBackupJobTempDirFailed: " + err.Error())
+		return errors.New("MakeBackupJobTmpDirFailed: " + err.Error())
 	}
 
 	nobodyUser, err := user.Lookup("nobody")
@@ -617,11 +612,65 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		return errors.New("ConvertNoGroupGidFailed: " + err.Error())
 	}
 
-	err = os.Chown(jobTempDirStr, nobodyUid, nogroupGid)
+	err = os.Chown(tmpDirStr, nobodyUid, nogroupGid)
 	if err != nil {
-		return errors.New("ChownJobTempDirFailed: " + err.Error())
+		return errors.New("ChownJobTmpDirFailed: " + err.Error())
 	}
 
+	err = os.Chmod(tmpDirStr, 0777)
+	if err != nil {
+		return errors.New("ChmodJobTmpDirFailed: " + err.Error())
+	}
+
+	return nil
+}
+
+func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
+	userDataDirectoryWatermarkLimitPercent := float64(92)
+	userDataDirectoryStats, err := repo.readUserDataStats()
+	if err != nil {
+		return err
+	}
+	if userDataDirectoryStats.UsedPercent > userDataDirectoryWatermarkLimitPercent {
+		return errors.New("UserDataDirectoryUsageExceedsWatermarkLimit")
+	}
+
+	requestJobDto := dto.ReadBackupJobsRequest{
+		AccountId: &runDto.AccountId,
+		JobId:     &runDto.JobId,
+	}
+	jobEntity, err := repo.backupQueryRepo.ReadFirstJob(requestJobDto)
+	if err != nil {
+		return errors.New("ReadBackupJobFailed: " + err.Error())
+	}
+
+	accountIdContainerWithMetricsMap, err := repo.readAccountContainersWithMetrics(jobEntity)
+	if err != nil {
+		return errors.New("ReadAccountContainersFailed: " + err.Error())
+	}
+
+	taskIdRunDetailsMap := repo.backupTaskRunDetailsFactory(
+		jobEntity, runDto.OperatorAccountId,
+	)
+	if len(taskIdRunDetailsMap) == 0 {
+		return errors.New("NoBackupTasksCreated")
+	}
+
+	rawJobTmpDir := fmt.Sprintf(
+		"%s/nobody/backup/%d/%d/",
+		infraEnvs.UserDataDirectory, runDto.AccountId.Uint64(), runDto.JobId.Uint64(),
+	)
+	jobTmpDir, err := valueObject.NewUnixFilePath(rawJobTmpDir)
+	if err != nil {
+		return errors.New("ValidateBackupJobTmpDirFailed: " + err.Error())
+	}
+
+	err = repo.createJobTmpDir(jobTmpDir)
+	if err != nil {
+		return errors.New("CreateBackupJobTmpDirFailed: " + err.Error())
+	}
+
+	// Run Container Snapshots
 	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
@@ -633,6 +682,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	sharedTaskFailedContainerIds := []string{}
 
 	for accountId, containerWithMetricsSlice := range accountIdContainerWithMetricsMap {
+		// Check if Account has enough storage space
 		accountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
 			slog.Debug(err.Error(), slog.Uint64("accountId", accountId.Uint64()))
@@ -652,6 +702,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
+			// Check if Container size exceeds Account storage quota
 			containerSizeBytes := containerWithMetrics.Metrics.StorageSpaceBytes.Uint64()
 			containerSizeWithMargin := containerSizeBytes + containerSizeBytes/10
 			containerSizeWithMarginBytes, err := valueObject.NewByte(containerSizeWithMargin)
@@ -670,6 +721,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			}
 
 			if containerSizeBytes > accountFreeStorageBytes.Uint64() {
+				// Update Account storage quota if possible and necessary
 				accountIdOriginalStorageBytesQuotaMap[accountId] = accountEntity.Quota.StorageBytes
 
 				tempUpdatedStorageBytesQuota := accountEntity.Quota.StorageBytes + containerSizeWithMarginBytes
@@ -688,6 +740,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				}
 			}
 
+			// Create Container Snapshot
 			shouldCreateArchive := false
 			createSnapshotDto := dto.CreateContainerSnapshotImage{
 				ContainerId:         containerWithMetrics.Id,
@@ -703,20 +756,11 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
-			err = os.Chmod(jobTempDirStr, 0777)
-			if err != nil {
-				sharedTaskFailedContainerIds = append(sharedTaskFailedContainerIds, containerIdStr)
-
-				errorMessage := "ChmodJobTempDirFailed"
-				slog.Debug(errorMessage, slog.String("containerId", containerIdStr))
-				sharedTaskExecutionOutput += containerIdOutputTag + errorMessage + "\n"
-				continue
-			}
-
+			// Create Archive File
 			createArchiveDto := dto.CreateContainerImageArchiveFile{
 				AccountId:       accountId,
 				ImageId:         snapshotImageId,
-				DestinationPath: &jobTempDir,
+				DestinationPath: &jobTmpDir,
 			}
 			archiveFile, err := containerImageCmdRepo.CreateArchiveFile(createArchiveDto)
 			if err != nil {
@@ -728,6 +772,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
+			// Delete Snapshot Image
 			deleteSnapshotDto := dto.DeleteContainerImage{
 				AccountId: accountId,
 				ImageId:   snapshotImageId,
@@ -742,6 +787,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
+			// Upload Archive File to Backup Destination
 			for taskId, taskRunDetails := range taskIdRunDetailsMap {
 				unencryptedDestEnvPrefix := "RCLONE_CONFIG_RAWDEST"
 				encryptedDestEnvPrefix := "RCLONE_CONFIG_ENCDEST"
@@ -834,6 +880,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				}
 			}
 
+			// Delete Archive File
 			sharedTaskSuccessfulContainerIds = append(
 				sharedTaskSuccessfulContainerIds, containerIdStr,
 			)
@@ -855,11 +902,12 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		}
 	}
 
-	err = os.RemoveAll(jobTempDirStr)
+	err = os.RemoveAll(jobTmpDir.String())
 	if err != nil {
-		return errors.New("RemoveBackupJobTempDirFailed: " + err.Error())
+		return errors.New("RemoveBackupJobTmpDirFailed: " + err.Error())
 	}
 
+	// Restore Account Quotas
 	for accountId, originalStorageBytesQuota := range accountIdOriginalStorageBytesQuotaMap {
 		originalAccountQuota := valueObject.AccountQuota{
 			StorageBytes: originalStorageBytesQuota,
@@ -875,6 +923,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		}
 	}
 
+	// Update Backup Tasks
 	for taskId, taskRunDetails := range taskIdRunDetailsMap {
 		executionOutput := sharedTaskExecutionOutput + "\n" + taskRunDetails.ExecutionOutput
 		successfulContainerIds := append(
