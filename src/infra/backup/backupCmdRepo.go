@@ -479,7 +479,7 @@ func (repo *BackupCmdRepo) readUserDataStats() (disk.UsageStat, error) {
 	return *userDataDirectoryStats, nil
 }
 
-func (repo *BackupCmdRepo) readAccountContainersWithMetrics(
+func (repo *BackupCmdRepo) readAccountsContainersWithMetrics(
 	jobEntity entity.BackupJob,
 ) (map[valueObject.AccountId][]dto.ContainerWithMetrics, error) {
 	accountIdContainersMap := map[valueObject.AccountId][]dto.ContainerWithMetrics{}
@@ -599,9 +599,9 @@ func (repo *BackupCmdRepo) accountStorageAllocator(
 		return err
 	}
 
-	containerSizeBytes := containerWithMetrics.Metrics.StorageSpaceBytes.Uint64()
-	containerSizeWithMargin := containerSizeBytes + containerSizeBytes/10
-	containerSizeWithMarginBytes, err := valueObject.NewByte(containerSizeWithMargin)
+	containerSizeBytesUint := containerWithMetrics.Metrics.StorageSpaceBytes.Uint64()
+	rawContainerSizeWithMargin := containerSizeBytesUint + containerSizeBytesUint/10
+	containerSizeWithMarginBytes, err := valueObject.NewByte(rawContainerSizeWithMargin)
 	if err != nil {
 		return errors.New("ContainerSizeWithMarginBytesCreateError")
 	}
@@ -611,7 +611,7 @@ func (repo *BackupCmdRepo) accountStorageAllocator(
 	}
 
 	accountFreeStorageBytes := accountEntity.Quota.StorageBytes - accountEntity.QuotaUsage.StorageBytes
-	if containerSizeBytes > accountFreeStorageBytes.Uint64() {
+	if containerSizeBytesUint > accountFreeStorageBytes.Uint64() {
 		tempUpdatedStorageBytesQuota := accountEntity.Quota.StorageBytes + containerSizeWithMarginBytes
 		tempUpdatedAccountQuota := valueObject.AccountQuota{
 			StorageBytes: tempUpdatedStorageBytesQuota,
@@ -619,7 +619,7 @@ func (repo *BackupCmdRepo) accountStorageAllocator(
 
 		err = accountCmdRepo.UpdateQuota(containerWithMetrics.AccountId, tempUpdatedAccountQuota)
 		if err != nil {
-			return errors.New("UpdateAccountQuotaFailed")
+			return errors.New("UpdateAccountQuotaFailed: " + err.Error())
 		}
 	}
 
@@ -728,13 +728,23 @@ func (repo *BackupCmdRepo) createContainerArchive(
 	return archiveFile, nil
 }
 
+func (repo *BackupCmdRepo) taskRunDetailsFailRegister(
+	taskRunDetails *BackupTaskRunDetails,
+	containerIdStr string,
+	errorMessage string,
+) {
+	taskRunDetails.FailedContainerIds = append(
+		taskRunDetails.FailedContainerIds, containerIdStr,
+	)
+	taskRunDetails.ExecutionOutput += "[" + containerIdStr + "] " + errorMessage + "\n"
+}
+
 func (repo *BackupCmdRepo) uploadContainerArchive(
 	taskRunDetails BackupTaskRunDetails,
 	containerWithMetrics dto.ContainerWithMetrics,
 	archiveFilePath valueObject.UnixFilePath,
 ) BackupTaskRunDetails {
 	containerIdStr := containerWithMetrics.Id.String()
-	containerIdOutputTag := "[" + containerIdStr + "] "
 
 	unencryptedDestEnvPrefix := "RCLONE_CONFIG_RAWDEST"
 	encryptedDestEnvPrefix := "RCLONE_CONFIG_ENCDEST"
@@ -746,12 +756,12 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
 	case entity.BackupDestinationLocal:
 		backupBinaryEnvs = []string{
-			unencryptedDestEnvPrefix + "_TYPE=" + "local",
+			unencryptedDestEnvPrefix + "_TYPE=local",
 		}
 		encryptionKeyStr = destinationEntity.EncryptionKey.String()
 	case entity.BackupDestinationRemoteHost:
 		backupBinaryEnvs = []string{
-			unencryptedDestEnvPrefix + "_TYPE=" + "sftp",
+			unencryptedDestEnvPrefix + "_TYPE=sftp",
 			unencryptedDestEnvPrefix + "_HOST=" + destinationEntity.RemoteHostname.String(),
 			unencryptedDestEnvPrefix + "_USER=" + destinationEntity.RemoteHostUsername.String(),
 		}
@@ -771,34 +781,55 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		if destinationEntity.RemoteHostPrivateKeyFilePath != nil {
 			backupBinaryEnvs = append(
 				backupBinaryEnvs,
-				unencryptedDestEnvPrefix+"_KEY_FILE="+destinationEntity.RemoteHostPrivateKeyFilePath.String(),
+				unencryptedDestEnvPrefix+"_KEY_FILE="+
+					destinationEntity.RemoteHostPrivateKeyFilePath.String(),
 			)
 		}
 
 	case entity.BackupDestinationObjectStorage:
 		backupBinaryEnvs = []string{
-			unencryptedDestEnvPrefix + "_TYPE=" + "s3",
+			unencryptedDestEnvPrefix + "_TYPE=s3",
 			unencryptedDestEnvPrefix + "_PROVIDER=Custom",
-			unencryptedDestEnvPrefix + "_ACCESS_KEY_ID=" + destinationEntity.ObjectStorageProviderAccessKeyId.String(),
-			unencryptedDestEnvPrefix + "_SECRET_ACCESS_KEY=" + destinationEntity.ObjectStorageProviderSecretAccessKey.String(),
-			unencryptedDestEnvPrefix + "_ENDPOINT=" + destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
+			unencryptedDestEnvPrefix + "_ACCESS_KEY_ID=" +
+				destinationEntity.ObjectStorageProviderAccessKeyId.String(),
+			unencryptedDestEnvPrefix + "_SECRET_ACCESS_KEY=" +
+				destinationEntity.ObjectStorageProviderSecretAccessKey.String(),
+			unencryptedDestEnvPrefix + "_ENDPOINT=" +
+				destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
 		}
 		encryptionKeyStr = destinationEntity.EncryptionKey.String()
 		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
 	default:
-		taskRunDetails.FailedContainerIds = append(
-			taskRunDetails.FailedContainerIds, containerIdStr,
+		repo.taskRunDetailsFailRegister(
+			&taskRunDetails, containerIdStr, "InvalidBackupDestinationType",
 		)
-		taskRunDetails.ExecutionOutput += containerIdOutputTag + "InvalidBackupDestinationType" + "\n"
+		return taskRunDetails
+	}
+
+	rawObscuredPassword, err := infraHelper.RunCmdAsUserWithSubShell(
+		containerWithMetrics.AccountId, "echo '"+encryptionKeyStr+"' | rclone obscure -",
+	)
+	if err != nil || len(rawObscuredPassword) == 0 {
+		repo.taskRunDetailsFailRegister(
+			&taskRunDetails, containerIdStr, "CreateObscurePasswordFailed",
+		)
+		return taskRunDetails
+	}
+	rawObscuredPassword = strings.TrimSpace(rawObscuredPassword)
+	obscuredPassword, err := valueObject.NewPassword(rawObscuredPassword)
+	if err != nil {
+		repo.taskRunDetailsFailRegister(
+			&taskRunDetails, containerIdStr, "ValidateObscurePasswordFailed",
+		)
 		return taskRunDetails
 	}
 
 	backupBinaryEnvs = append(
 		backupBinaryEnvs,
-		encryptedDestEnvPrefix+"_TYPE="+"crypt",
+		encryptedDestEnvPrefix+"_TYPE=crypt",
 		encryptedDestEnvPrefix+"_DIRECTORY_NAME_ENCRYPTION=false",
 		encryptedDestEnvPrefix+"_FILENAME_ENCRYPTION=off",
-		encryptedDestEnvPrefix+"_PASSWORD=$(echo '"+encryptionKeyStr+"' | rclone obscure -)",
+		encryptedDestEnvPrefix+"_PASSWORD="+obscuredPassword.String(),
 	)
 
 	srcFilePathStr := archiveFilePath.String()
@@ -809,14 +840,18 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	backupBinaryCmd := backupBinaryCli + strings.Join(backupBinaryFlags, " ") +
 		" copyto " + srcFilePathStr + " " + destFilePathStr
 
-	_, err := infraHelper.RunCmdAsUserWithSubShell(
+	_, err = infraHelper.RunCmdAsUserWithSubShell(
 		containerWithMetrics.AccountId, backupBinaryCmd,
 	)
 	if err != nil {
-		taskRunDetails.FailedContainerIds = append(
-			taskRunDetails.FailedContainerIds, containerIdStr,
+		repo.taskRunDetailsFailRegister(
+			&taskRunDetails, containerIdStr, "UploadArchiveFailed",
 		)
-		taskRunDetails.ExecutionOutput += containerIdOutputTag + "UploadArchiveFailed" + "\n"
+		slog.Debug(
+			"UploadContainerArchiveFailed",
+			slog.String("containerId", containerIdStr),
+			slog.String("error", err.Error()),
+		)
 		return taskRunDetails
 	}
 
@@ -833,7 +868,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	if err != nil {
 		return err
 	}
-	if userDataDirectoryStats.UsedPercent > userDataDirectoryWatermarkLimitPercent {
+	if userDataDirectoryStats.UsedPercent >= userDataDirectoryWatermarkLimitPercent {
 		return errors.New("UserDataDirectoryUsageExceedsWatermarkLimit")
 	}
 
@@ -846,7 +881,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		return errors.New("ReadBackupJobFailed: " + err.Error())
 	}
 
-	accountIdContainerWithMetricsMap, err := repo.readAccountContainersWithMetrics(jobEntity)
+	accountIdContainerWithMetricsMap, err := repo.readAccountsContainersWithMetrics(jobEntity)
 	if err != nil {
 		return errors.New("ReadAccountContainersFailed: " + err.Error())
 	}
@@ -876,14 +911,14 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
 
-	sharedTaskExecutionOutput := ""
-	sharedTaskFailedContainerIds := []string{}
+	sharedExecutionOutputStr := ""
+	sharedFailedContainerIdStrs := []string{}
 
 	for accountId, containerWithMetricsSlice := range accountIdContainerWithMetricsMap {
 		preTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
 			repo.sharedTaskFailRegister(
-				&accountId, nil, &sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+				&accountId, nil, &sharedExecutionOutputStr, &sharedFailedContainerIdStrs, err,
 			)
 			continue
 		}
@@ -895,7 +930,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			if err != nil {
 				repo.sharedTaskFailRegister(
 					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
-					&sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+					&sharedExecutionOutputStr, &sharedFailedContainerIdStrs, err,
 				)
 				continue
 			}
@@ -906,23 +941,23 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			if err != nil {
 				repo.sharedTaskFailRegister(
 					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
-					&sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+					&sharedExecutionOutputStr, &sharedFailedContainerIdStrs, err,
 				)
 				continue
 			}
 
-			for taskId, taskRunDetails := range taskIdRunDetailsMap {
-				taskRunDetails = repo.uploadContainerArchive(
-					taskRunDetails, containerWithMetrics, archiveFile.UnixFilePath,
+			for taskId, preUploadTaskRunDetails := range taskIdRunDetailsMap {
+				postUploadTaskRunDetails := repo.uploadContainerArchive(
+					preUploadTaskRunDetails, containerWithMetrics, archiveFile.UnixFilePath,
 				)
-				taskIdRunDetailsMap[taskId] = taskRunDetails
+				taskIdRunDetailsMap[taskId] = postUploadTaskRunDetails
 			}
 
 			err = containerImageCmdRepo.DeleteArchiveFile(archiveFile)
 			if err != nil {
 				repo.sharedTaskFailRegister(
 					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
-					&sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+					&sharedExecutionOutputStr, &sharedFailedContainerIdStrs, err,
 				)
 				continue
 			}
@@ -931,7 +966,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
 			repo.sharedTaskFailRegister(
-				&accountId, nil, &sharedTaskExecutionOutput, &sharedTaskFailedContainerIds, err,
+				&accountId, nil, &sharedExecutionOutputStr, &sharedFailedContainerIdStrs, err,
 			)
 			continue
 		}
@@ -951,20 +986,17 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 	err = os.RemoveAll(jobTmpDir.String())
 	if err != nil {
-		slog.Debug(
-			"RemoveBackupJobTmpDirFailed",
-			slog.String("error", err.Error()),
-		)
+		slog.Debug("RemoveBackupJobTmpDirFailed", slog.String("error", err.Error()))
 	}
 
 	for taskId, taskRunDetails := range taskIdRunDetailsMap {
-		executionOutput := sharedTaskExecutionOutput + "\n" + taskRunDetails.ExecutionOutput
-		failedContainerIds := append(
-			sharedTaskFailedContainerIds, taskRunDetails.FailedContainerIds...,
+		combinedExecutionOutput := sharedExecutionOutputStr + "\n" + taskRunDetails.ExecutionOutput
+		combinedFailedContainerIds := append(
+			sharedFailedContainerIdStrs, taskRunDetails.FailedContainerIds...,
 		)
 
 		taskStatus := valueObject.BackupTaskStatusCompleted.String()
-		if len(failedContainerIds) > 0 {
+		if len(combinedFailedContainerIds) > 0 {
 			taskStatus = valueObject.BackupTaskStatusPartial.String()
 		}
 		if len(taskRunDetails.SuccessfulContainerIds) == 0 {
@@ -973,9 +1005,9 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 		taskModelUpdated := dbModel.BackupTask{
 			TaskStatus:             taskStatus,
-			ExecutionOutput:        &executionOutput,
+			ExecutionOutput:        &combinedExecutionOutput,
 			SuccessfulContainerIds: taskRunDetails.SuccessfulContainerIds,
-			FailedContainerIds:     failedContainerIds,
+			FailedContainerIds:     combinedFailedContainerIds,
 		}
 
 		err := repo.persistentDbSvc.Handler.Model(&dbModel.BackupTask{}).
