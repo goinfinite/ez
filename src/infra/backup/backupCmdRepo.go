@@ -486,7 +486,7 @@ func (repo *BackupCmdRepo) readAccountsContainersWithMetrics(
 	withMetrics := true
 	requestContainersDto := dto.ReadContainersRequest{
 		Pagination: dto.Pagination{
-			PageNumber:   1,
+			PageNumber:   0,
 			ItemsPerPage: 1000,
 		},
 		ContainerAccountId:       jobEntity.ContainerAccountIds,
@@ -831,13 +831,24 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		encryptedDestEnvPrefix+"_FILENAME_ENCRYPTION=off",
 		encryptedDestEnvPrefix+"_PASSWORD="+obscuredPassword.String(),
 	)
+	encryptedDestEnvRemote := encryptedDestEnvPrefix + "_REMOTE=rawdest:"
+	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	case entity.BackupDestinationLocal:
+		encryptedDestEnvRemote += destinationEntity.DestinationPath.String()
+	case entity.BackupDestinationObjectStorage:
+		encryptedDestEnvRemote += destinationEntity.ObjectStorageBucketName.String() +
+			destinationEntity.DestinationPath.String()
+	case entity.BackupDestinationRemoteHost:
+		encryptedDestEnvRemote += destinationEntity.DestinationPath.String()
+	}
+	backupBinaryEnvs = append(backupBinaryEnvs, encryptedDestEnvRemote)
 
 	srcFilePathStr := archiveFilePath.String()
 	destFilePathStr := "encdest:/" + taskRunDetails.TaskId.String() + "/" +
 		archiveFilePath.ReadFileName().String()
 
 	backupBinaryCli := strings.Join(backupBinaryEnvs, " ") + " rclone"
-	backupBinaryCmd := backupBinaryCli + strings.Join(backupBinaryFlags, " ") +
+	backupBinaryCmd := backupBinaryCli + " " + strings.Join(backupBinaryFlags, " ") +
 		" copyto " + srcFilePathStr + " " + destFilePathStr
 
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
@@ -894,7 +905,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	}
 
 	rawJobTmpDir := fmt.Sprintf(
-		"%s/nobody/backup/%d/%d/",
+		"%s/nobody/backup/%d/%d",
 		infraEnvs.UserDataDirectory, runDto.AccountId.Uint64(), runDto.JobId.Uint64(),
 	)
 	jobTmpDir, err := valueObject.NewUnixFilePath(rawJobTmpDir)
