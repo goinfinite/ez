@@ -79,6 +79,7 @@
     "Procs",
     "Ptrs",
     "quadlet",
+    "rawdest",
     "RAWDEST",
     "rclone",
     "RCLONE",
