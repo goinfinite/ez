@@ -5,6 +5,7 @@ go 1.23
 require (
 	github.com/a-h/templ v0.2.778
 	github.com/alecthomas/chroma v0.10.0
+	github.com/alessio/shellescape v1.4.2
 	github.com/dgraph-io/badger/v4 v4.3.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/glebarez/sqlite v1.11.0
