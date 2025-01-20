@@ -96,7 +96,9 @@ func (controller *BackupController) ReadDestination() *cobra.Command {
 	cmd.Flags().StringVarP(
 		&objectStorageProviderStr, "objectStorageProvider", "p", "", "ObjectStorageProvider",
 	)
-	cmd.Flags().StringVarP(&remoteHostTypeStr, "remoteHostType", "r", "", "RemoteHostType")
+	cmd.Flags().StringVarP(
+		&remoteHostTypeStr, "remoteHostType", "r", "", "RemoteHostType (sftp|ftp)",
+	)
 	cmd.Flags().StringVarP(&remoteHostnameStr, "remoteHostname", "H", "", "RemoteHostname")
 	cmd.Flags().Uint32VarP(
 		&paginationPageNumberUint32, "page-number", "o", 0, "PageNumber (Pagination)",
@@ -242,7 +244,7 @@ func (controller *BackupController) CreateDestination() *cobra.Command {
 		&destinationDescriptionStr, "destination-description", "D", "", "BackupDestinationDescription",
 	)
 	cmd.Flags().StringVarP(
-		&destinationTypeStr, "destination-type", "t", "", "BackupDestinationType",
+		&destinationTypeStr, "destination-type", "t", "", "BackupDestinationType (object-storage|remote-host|local)",
 	)
 	cmd.MarkFlagRequired("destination-type")
 	cmd.Flags().StringVarP(
@@ -294,7 +296,7 @@ func (controller *BackupController) CreateDestination() *cobra.Command {
 		&objectStorageBucketNameStr, "object-storage-bucket-name", "b", "", "ObjectStorageBucketName",
 	)
 	cmd.Flags().StringVarP(
-		&remoteHostTypeStr, "remote-host-type", "R", "", "RemoteHostType",
+		&remoteHostTypeStr, "remote-host-type", "R", "", "RemoteHostType (sftp|ftp)",
 	)
 	cmd.Flags().StringVarP(
 		&remoteHostnameStr, "remote-hostname", "H", "", "RemoteHostname",
@@ -454,7 +456,7 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 		&destinationDescriptionStr, "destination-description", "D", "", "BackupDestinationDescription",
 	)
 	cmd.Flags().StringVarP(
-		&destinationTypeStr, "destination-type", "t", "", "BackupDestinationType",
+		&destinationTypeStr, "destination-type", "t", "", "BackupDestinationType (object-storage|remote-host|local)",
 	)
 	cmd.Flags().StringVarP(
 		&destinationPathStr, "destination-path", "p", "", "BackupDestinationPath",
@@ -505,7 +507,7 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 		&objectStorageBucketNameStr, "object-storage-bucket-name", "b", "", "ObjectStorageBucketName",
 	)
 	cmd.Flags().StringVarP(
-		&remoteHostTypeStr, "remote-host-type", "R", "", "RemoteHostType",
+		&remoteHostTypeStr, "remote-host-type", "R", "", "RemoteHostType (sftp|ftp)",
 	)
 	cmd.Flags().StringVarP(
 		&remoteHostnameStr, "remote-hostname", "H", "", "RemoteHostname",
