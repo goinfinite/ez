@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alessio/shellescape"
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/useCase"
@@ -728,6 +729,25 @@ func (repo *BackupCmdRepo) createContainerArchive(
 	return archiveFile, nil
 }
 
+func (repo *BackupCmdRepo) obscurePassword(
+	plainPass valueObject.Password,
+) (obscuredPass valueObject.Password, err error) {
+	rawObscuredPassword, err := infraHelper.RunCmdWithSubShell(
+		"echo '" + plainPass.String() + "' | rclone obscure -",
+	)
+	if err != nil || len(rawObscuredPassword) == 0 {
+		return obscuredPass, errors.New("CreateObscurePasswordFailed")
+	}
+	rawObscuredPassword = strings.TrimSpace(rawObscuredPassword)
+
+	obscuredPassword, err := valueObject.NewPassword(rawObscuredPassword)
+	if err != nil {
+		return obscuredPass, errors.New("ValidateObscurePasswordFailed")
+	}
+
+	return obscuredPassword, nil
+}
+
 func (repo *BackupCmdRepo) taskRunDetailsFailRegister(
 	taskRunDetails *BackupTaskRunDetails,
 	containerIdStr string,
@@ -752,20 +772,27 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	var backupBinaryEnvs []string
 	var backupBinaryFlags []string
 
-	encryptionKeyStr := ""
+	var encryptionKey valueObject.Password
 	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
 	case entity.BackupDestinationLocal:
 		backupBinaryEnvs = []string{
 			unencryptedDestEnvPrefix + "_TYPE=local",
 		}
-		encryptionKeyStr = destinationEntity.EncryptionKey.String()
+		encryptionKey = destinationEntity.EncryptionKey
 	case entity.BackupDestinationRemoteHost:
-		backupBinaryEnvs = []string{
-			unencryptedDestEnvPrefix + "_TYPE=sftp",
-			unencryptedDestEnvPrefix + "_HOST=" + destinationEntity.RemoteHostname.String(),
-			unencryptedDestEnvPrefix + "_USER=" + destinationEntity.RemoteHostUsername.String(),
+		remoteHostTypeStr := "sftp"
+		if destinationEntity.RemoteHostType != nil {
+			remoteHostTypeStr = destinationEntity.RemoteHostType.String()
 		}
-		encryptionKeyStr = destinationEntity.EncryptionKey.String()
+
+		backupBinaryEnvs = []string{
+			unencryptedDestEnvPrefix + "_TYPE=" + remoteHostTypeStr,
+			unencryptedDestEnvPrefix + "_HOST=" +
+				shellescape.Quote(destinationEntity.RemoteHostname.String()),
+			unencryptedDestEnvPrefix + "_USER=" +
+				shellescape.Quote(destinationEntity.RemoteHostUsername.String()),
+		}
+		encryptionKey = destinationEntity.EncryptionKey
 		if destinationEntity.RemoteHostNetworkPort != nil {
 			backupBinaryEnvs = append(
 				backupBinaryEnvs,
@@ -773,16 +800,20 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 			)
 		}
 		if destinationEntity.RemoteHostPassword != nil {
+			obscuredPassword, err := repo.obscurePassword(*destinationEntity.RemoteHostPassword)
+			if err != nil {
+				repo.taskRunDetailsFailRegister(&taskRunDetails, containerIdStr, err.Error())
+				return taskRunDetails
+			}
 			backupBinaryEnvs = append(
-				backupBinaryEnvs,
-				unencryptedDestEnvPrefix+"_PASS="+destinationEntity.RemoteHostPassword.String(),
+				backupBinaryEnvs, unencryptedDestEnvPrefix+"_PASS="+obscuredPassword.String(),
 			)
 		}
 		if destinationEntity.RemoteHostPrivateKeyFilePath != nil {
 			backupBinaryEnvs = append(
 				backupBinaryEnvs,
 				unencryptedDestEnvPrefix+"_KEY_FILE="+
-					destinationEntity.RemoteHostPrivateKeyFilePath.String(),
+					shellescape.Quote(destinationEntity.RemoteHostPrivateKeyFilePath.String()),
 			)
 		}
 
@@ -797,7 +828,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 			unencryptedDestEnvPrefix + "_ENDPOINT=" +
 				destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
 		}
-		encryptionKeyStr = destinationEntity.EncryptionKey.String()
+		encryptionKey = destinationEntity.EncryptionKey
 		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
 	default:
 		repo.taskRunDetailsFailRegister(
@@ -806,21 +837,9 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		return taskRunDetails
 	}
 
-	rawObscuredPassword, err := infraHelper.RunCmdAsUserWithSubShell(
-		containerWithMetrics.AccountId, "echo '"+encryptionKeyStr+"' | rclone obscure -",
-	)
-	if err != nil || len(rawObscuredPassword) == 0 {
-		repo.taskRunDetailsFailRegister(
-			&taskRunDetails, containerIdStr, "CreateObscurePasswordFailed",
-		)
-		return taskRunDetails
-	}
-	rawObscuredPassword = strings.TrimSpace(rawObscuredPassword)
-	obscuredPassword, err := valueObject.NewPassword(rawObscuredPassword)
+	encryptionKeyObscured, err := repo.obscurePassword(encryptionKey)
 	if err != nil {
-		repo.taskRunDetailsFailRegister(
-			&taskRunDetails, containerIdStr, "ValidateObscurePasswordFailed",
-		)
+		repo.taskRunDetailsFailRegister(&taskRunDetails, containerIdStr, err.Error())
 		return taskRunDetails
 	}
 
@@ -829,27 +848,38 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		encryptedDestEnvPrefix+"_TYPE=crypt",
 		encryptedDestEnvPrefix+"_DIRECTORY_NAME_ENCRYPTION=false",
 		encryptedDestEnvPrefix+"_FILENAME_ENCRYPTION=off",
-		encryptedDestEnvPrefix+"_PASSWORD="+obscuredPassword.String(),
+		encryptedDestEnvPrefix+"_PASSWORD="+encryptionKeyObscured.String(),
 	)
-	encryptedDestEnvRemote := encryptedDestEnvPrefix + "_REMOTE=rawdest:"
+	unencryptedDestPathStr := ""
 	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
 	case entity.BackupDestinationLocal:
-		encryptedDestEnvRemote += destinationEntity.DestinationPath.String()
+		unencryptedDestPathStr = destinationEntity.DestinationPath.String()
 	case entity.BackupDestinationObjectStorage:
-		encryptedDestEnvRemote += destinationEntity.ObjectStorageBucketName.String() +
+		unencryptedDestPathStr += destinationEntity.ObjectStorageBucketName.String() +
 			destinationEntity.DestinationPath.String()
 	case entity.BackupDestinationRemoteHost:
-		encryptedDestEnvRemote += destinationEntity.DestinationPath.String()
+		unencryptedDestPathStr = destinationEntity.DestinationPath.String()
+		if unencryptedDestPathStr == "/" {
+			unencryptedDestPathStr = ""
+		}
 	}
-	backupBinaryEnvs = append(backupBinaryEnvs, encryptedDestEnvRemote)
+	backupBinaryEnvs = append(
+		backupBinaryEnvs, encryptedDestEnvPrefix+"_REMOTE=rawdest:"+unencryptedDestPathStr,
+	)
 
 	srcFilePathStr := archiveFilePath.String()
-	destFilePathStr := "encdest:/" + taskRunDetails.TaskId.String() + "/" +
-		archiveFilePath.ReadFileName().String()
+	destFilePathStr := "encdest:"
+	if unencryptedDestPathStr != "" {
+		destFilePathStr += "/"
+	}
+	destFilePathStr += taskRunDetails.TaskId.String() + "/" + archiveFilePath.ReadFileName().String()
 
 	backupBinaryCli := strings.Join(backupBinaryEnvs, " ") + " rclone"
-	backupBinaryCmd := backupBinaryCli + " " + strings.Join(backupBinaryFlags, " ") +
-		" copyto " + srcFilePathStr + " " + destFilePathStr
+	backupBinaryCmd := backupBinaryCli
+	if len(backupBinaryFlags) > 0 {
+		backupBinaryCmd += " " + strings.Join(backupBinaryFlags, " ")
+	}
+	backupBinaryCmd += " copyto " + srcFilePathStr + " " + destFilePathStr
 
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
 		containerWithMetrics.AccountId, backupBinaryCmd,
