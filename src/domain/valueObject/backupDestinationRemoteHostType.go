@@ -10,8 +10,8 @@ import (
 type BackupDestinationRemoteHostType string
 
 const (
+	BackupDestinationRemoteHostTypeFtp  BackupDestinationRemoteHostType = "ftp"
 	BackupDestinationRemoteHostTypeSftp BackupDestinationRemoteHostType = "sftp"
-	BackupDestinationRemoteHostTypeRest BackupDestinationRemoteHostType = "rest"
 )
 
 func NewBackupDestinationRemoteHostType(value interface{}) (
@@ -25,7 +25,7 @@ func NewBackupDestinationRemoteHostType(value interface{}) (
 
 	stringValueVo := BackupDestinationRemoteHostType(stringValue)
 	switch stringValueVo {
-	case BackupDestinationRemoteHostTypeSftp, BackupDestinationRemoteHostTypeRest:
+	case BackupDestinationRemoteHostTypeFtp, BackupDestinationRemoteHostTypeSftp:
 		return stringValueVo, nil
 	default:
 		return hostType, errors.New("InvalidBackupDestinationRemoteHostType")
