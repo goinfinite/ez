@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/alessio/shellescape"
 	"github.com/goinfinite/ez/src/domain/dto"
@@ -528,6 +529,9 @@ type BackupTaskRunDetails struct {
 	ExecutionOutput        string
 	SuccessfulContainerIds []string
 	FailedContainerIds     []string
+	StartedAt              time.Time
+	FinishedAt             time.Time
+	ElapsedSecs            uint64
 }
 
 func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
@@ -541,6 +545,7 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 	}
 
 	for _, destinationId := range jobEntity.DestinationIds {
+		startedAt := time.Now()
 		taskModel := dbModel.BackupTask{
 			AccountID:         operatorAccountId.Uint64(),
 			JobID:             jobEntity.JobId.Uint64(),
@@ -549,6 +554,7 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 			RetentionStrategy: jobEntity.RetentionStrategy.String(),
 			BackupSchedule:    jobEntity.BackupSchedule.String(),
 			TimeoutSecs:       jobEntity.TimeoutSecs,
+			StartedAt:         &startedAt,
 		}
 		err := repo.persistentDbSvc.Handler.Create(&taskModel).Error
 		if err != nil {
@@ -584,6 +590,9 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 			ExecutionOutput:        "",
 			SuccessfulContainerIds: []string{},
 			FailedContainerIds:     []string{},
+			StartedAt:              startedAt,
+			FinishedAt:             startedAt,
+			ElapsedSecs:            0,
 		}
 	}
 
@@ -757,6 +766,10 @@ func (repo *BackupCmdRepo) taskRunDetailsFailRegister(
 		taskRunDetails.FailedContainerIds, containerIdStr,
 	)
 	taskRunDetails.ExecutionOutput += "[" + containerIdStr + "] " + errorMessage + "\n"
+	taskRunDetails.FinishedAt = time.Now()
+	taskRunDetails.ElapsedSecs = uint64(
+		taskRunDetails.FinishedAt.Sub(taskRunDetails.StartedAt).Seconds(),
+	)
 }
 
 func (repo *BackupCmdRepo) uploadContainerArchive(
@@ -899,6 +912,10 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	taskRunDetails.SuccessfulContainerIds = append(
 		taskRunDetails.SuccessfulContainerIds, containerIdStr,
 	)
+	taskRunDetails.FinishedAt = time.Now()
+	taskRunDetails.ElapsedSecs = uint64(
+		taskRunDetails.FinishedAt.Sub(taskRunDetails.StartedAt).Seconds(),
+	)
 
 	return taskRunDetails
 }
@@ -1031,7 +1048,10 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	}
 
 	for taskId, taskRunDetails := range taskIdRunDetailsMap {
-		combinedExecutionOutput := sharedExecutionOutputStr + "\n" + taskRunDetails.ExecutionOutput
+		combinedExecutionOutput := taskRunDetails.ExecutionOutput
+		if len(sharedExecutionOutputStr) > 0 {
+			combinedExecutionOutput = sharedExecutionOutputStr + "\n" + taskRunDetails.ExecutionOutput
+		}
 		combinedFailedContainerIds := append(
 			sharedFailedContainerIdStrs, taskRunDetails.FailedContainerIds...,
 		)
@@ -1049,6 +1069,8 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			ExecutionOutput:        &combinedExecutionOutput,
 			SuccessfulContainerIds: taskRunDetails.SuccessfulContainerIds,
 			FailedContainerIds:     combinedFailedContainerIds,
+			ElapsedSecs:            &taskRunDetails.ElapsedSecs,
+			FinishedAt:             &taskRunDetails.FinishedAt,
 		}
 
 		err := repo.persistentDbSvc.Handler.Model(&dbModel.BackupTask{}).
