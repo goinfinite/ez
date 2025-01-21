@@ -7,4 +7,5 @@ const (
 	InfiniteEzBinary     string = InfiniteEzMainDir + "/ez"
 	AccessTokenCookieKey string = "control-access-token"
 	UserDataDirectory    string = "/var/data"
+	BackupCronFilePath   string = "/etc/cron.d/ez-backup"
 )
