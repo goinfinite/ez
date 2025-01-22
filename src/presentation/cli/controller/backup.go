@@ -1021,3 +1021,30 @@ func (controller *BackupController) ReadTask() *cobra.Command {
 
 	return cmd
 }
+
+func (controller *BackupController) DeleteTask() *cobra.Command {
+	var taskIdUint uint64
+	var shouldDiscardFilesBoolStr string
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteBackupTask",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"taskId":             taskIdUint,
+				"shouldDiscardFiles": shouldDiscardFilesBoolStr,
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.DeleteTask(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "t", 0, "BackupTaskId")
+	cmd.MarkFlagRequired("task-id")
+	cmd.Flags().StringVarP(
+		&shouldDiscardFilesBoolStr, "should-discard-files", "s", "false", "ShouldDiscardFiles",
+	)
+	return cmd
+}

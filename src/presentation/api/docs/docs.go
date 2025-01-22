@@ -882,6 +882,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/task/{taskId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a backup task and its files if \"shouldDiscardFiles\" is true.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DeleteBackupTask",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskId",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ShouldDiscardFiles (bool)",
+                        "name": "shouldDiscardFiles",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/": {
             "get": {
                 "security": [
@@ -3896,12 +3939,12 @@ const docTemplate = `{
         "valueObject.BackupDestinationRemoteHostType": {
             "type": "string",
             "enum": [
-                "sftp",
-                "rest"
+                "ftp",
+                "sftp"
             ],
             "x-enum-varnames": [
-                "BackupDestinationRemoteHostTypeSftp",
-                "BackupDestinationRemoteHostTypeRest"
+                "BackupDestinationRemoteHostTypeFtp",
+                "BackupDestinationRemoteHostTypeSftp"
             ]
         },
         "valueObject.BackupDestinationType": {

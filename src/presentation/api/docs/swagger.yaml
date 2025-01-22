@@ -929,12 +929,12 @@ definitions:
     type: object
   valueObject.BackupDestinationRemoteHostType:
     enum:
+    - ftp
     - sftp
-    - rest
     type: string
     x-enum-varnames:
+    - BackupDestinationRemoteHostTypeFtp
     - BackupDestinationRemoteHostTypeSftp
-    - BackupDestinationRemoteHostTypeRest
   valueObject.BackupDestinationType:
     enum:
     - local
@@ -1712,6 +1712,33 @@ paths:
       security:
       - Bearer: []
       summary: ReadBackupTasks
+      tags:
+      - backup
+  /v1/backup/task/{taskId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup task and its files if "shouldDiscardFiles" is true.
+      parameters:
+      - description: BackupTaskId
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: ShouldDiscardFiles (bool)
+        in: query
+        name: shouldDiscardFiles
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupTaskDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupTask
       tags:
       - backup
   /v1/container/:

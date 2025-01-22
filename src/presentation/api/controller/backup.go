@@ -336,3 +336,29 @@ func (controller *BackupController) ReadTask(c echo.Context) error {
 		c, controller.backupService.ReadTask(requestBody),
 	)
 }
+
+// DeleteBackupTask	 godoc
+// @Summary      DeleteBackupTask
+// @Description  Delete a backup task and its files if "shouldDiscardFiles" is true.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        taskId path  string  true  "BackupTaskId"
+// @Param        shouldDiscardFiles query  string  false  "ShouldDiscardFiles (bool)"
+// @Success      200 {object} object{} "BackupTaskDeleted"
+// @Router       /v1/backup/task/{taskId}/ [delete]
+func (controller *BackupController) DeleteTask(c echo.Context) error {
+	requestBody := map[string]interface{}{
+		"taskId":            c.Param("taskId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
+	}
+	if c.QueryParam("shouldDiscardFiles") != "" {
+		requestBody["shouldDiscardFiles"] = c.QueryParam("shouldDiscardFiles")
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.DeleteTask(requestBody),
+	)
+}

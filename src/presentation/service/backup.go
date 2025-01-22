@@ -1443,3 +1443,55 @@ func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutp
 
 	return NewServiceOutput(Success, responseDto)
 }
+
+func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"taskId"}
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	shouldDiscardFiles := false
+	if input["shouldDiscardFiles"] != nil {
+		shouldDiscardFiles, err = voHelper.InterfaceToBool(input["shouldDiscardFiles"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteBackupTask(
+		taskId, shouldDiscardFiles, operatorAccountId, operatorIpAddress,
+	)
+
+	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
+	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
+	err = useCase.DeleteBackupTask(
+		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, deleteDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupTaskDeleted")
+}
