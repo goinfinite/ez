@@ -130,19 +130,13 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 
 	var startedAtPtr *valueObject.UnixTime
 	if model.StartedAt != nil {
-		startedAt, err := valueObject.NewUnixTime(*model.StartedAt)
-		if err != nil {
-			return taskEntity, err
-		}
+		startedAt := valueObject.NewUnixTimeWithGoTime(*model.StartedAt)
 		startedAtPtr = &startedAt
 	}
 
 	var finishedAtPtr *valueObject.UnixTime
 	if model.FinishedAt != nil {
-		finishedAt, err := valueObject.NewUnixTime(*model.FinishedAt)
-		if err != nil {
-			return taskEntity, err
-		}
+		finishedAt := valueObject.NewUnixTimeWithGoTime(*model.FinishedAt)
 		finishedAtPtr = &finishedAt
 	}
 
