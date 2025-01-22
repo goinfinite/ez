@@ -11,6 +11,7 @@ import (
 func TestBackupCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
+	backupQueryRepo := NewBackupQueryRepo(persistentDbSvc)
 	backupCmdRepo := NewBackupCmdRepo(persistentDbSvc)
 
 	t.Run("CreateBackupDestination", func(t *testing.T) {
@@ -123,6 +124,24 @@ func TestBackupCmdRepo(t *testing.T) {
 		}
 
 		err := backupCmdRepo.DeleteJob(deleteDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
+	t.Run("DeleteBackupTask", func(t *testing.T) {
+		taskEntity, err := backupQueryRepo.ReadFirstTask(dto.ReadBackupTasksRequest{})
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+			return
+		}
+
+		deleteDo := dto.DeleteBackupTask{
+			TaskId:             taskEntity.TaskId,
+			ShouldDiscardFiles: true,
+		}
+
+		err = backupCmdRepo.DeleteTask(deleteDo)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
