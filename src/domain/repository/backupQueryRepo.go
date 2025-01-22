@@ -14,7 +14,10 @@ type BackupQueryRepo interface {
 		requestDto dto.ReadBackupDestinationsRequest,
 		withSecrets bool,
 	) (entity.IBackupDestination, error)
+
 	ReadJob(dto.ReadBackupJobsRequest) (dto.ReadBackupJobsResponse, error)
 	ReadFirstJob(dto.ReadBackupJobsRequest) (entity.BackupJob, error)
+
 	ReadTask(dto.ReadBackupTasksRequest) (dto.ReadBackupTasksResponse, error)
+	ReadFirstTask(dto.ReadBackupTasksRequest) (entity.BackupTask, error)
 }

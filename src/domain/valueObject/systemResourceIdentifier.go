@@ -102,6 +102,12 @@ func NewBackupJobSri(accountId AccountId, backupJobId BackupJobId) SystemResourc
 	)
 }
 
+func NewBackupTaskSri(accountId AccountId, backupTaskId BackupTaskId) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupTask/" + backupTaskId.String(),
+	)
+}
+
 func (vo SystemResourceIdentifier) String() string {
 	return string(vo)
 }

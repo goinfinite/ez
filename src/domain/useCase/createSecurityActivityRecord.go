@@ -513,3 +513,21 @@ func (uc *CreateSecurityActivityRecord) RunBackupJob(runDto dto.RunBackupJob) {
 
 	uc.createActivityRecord(createRecordDto)
 }
+
+func (uc *CreateSecurityActivityRecord) DeleteBackupTask(
+	deleteDto dto.DeleteBackupTask,
+	accountId valueObject.AccountId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupTaskSri(accountId, deleteDto.TaskId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
