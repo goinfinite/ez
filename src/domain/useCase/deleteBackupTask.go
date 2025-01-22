@@ -14,17 +14,16 @@ func DeleteBackupTask(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	deleteDto dto.DeleteBackupTask,
 ) error {
-	tasksReadRequestDto := dto.ReadBackupTasksRequest{
-		TaskId: &deleteDto.TaskId,
-	}
-	taskEntity, err := backupQueryRepo.ReadFirstTask(tasksReadRequestDto)
+	taskEntity, err := backupQueryRepo.ReadFirstTask(
+		dto.ReadBackupTasksRequest{TaskId: &deleteDto.TaskId},
+	)
 	if err != nil {
 		return errors.New("BackupTaskNotFound")
 	}
 
 	err = backupCmdRepo.DeleteTask(deleteDto)
 	if err != nil {
-		slog.Error("DeleteBackupTaskInfraError", slog.Any("error", err))
+		slog.Error("DeleteBackupTaskInfraError", slog.String("error", err.Error()))
 		return errors.New("DeleteBackupTaskError")
 	}
 
