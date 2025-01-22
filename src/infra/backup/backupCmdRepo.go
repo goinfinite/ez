@@ -822,21 +822,16 @@ func (repo *BackupCmdRepo) taskRunDetailsFailRegister(
 	)
 }
 
-func (repo *BackupCmdRepo) uploadContainerArchive(
-	taskRunDetails BackupTaskRunDetails,
-	containerWithMetrics dto.ContainerWithMetrics,
-	archiveFilePath valueObject.UnixFilePath,
-) BackupTaskRunDetails {
-	containerIdStr := containerWithMetrics.Id.String()
-
+func (repo *BackupCmdRepo) backupBinaryCliFactory(
+	destinationIEntity entity.IBackupDestination,
+) (string, error) {
 	unencryptedDestEnvPrefix := "RCLONE_CONFIG_RAWDEST"
 	encryptedDestEnvPrefix := "RCLONE_CONFIG_ENCDEST"
 
 	var backupBinaryEnvs []string
-	var backupBinaryFlags []string
 
 	var encryptionKey valueObject.Password
-	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	switch destinationEntity := destinationIEntity.(type) {
 	case entity.BackupDestinationLocal:
 		backupBinaryEnvs = []string{
 			unencryptedDestEnvPrefix + "_TYPE=local",
@@ -865,8 +860,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		if destinationEntity.RemoteHostPassword != nil {
 			obscuredPassword, err := repo.obscurePassword(*destinationEntity.RemoteHostPassword)
 			if err != nil {
-				repo.taskRunDetailsFailRegister(&taskRunDetails, containerIdStr, err.Error())
-				return taskRunDetails
+				return "", err
 			}
 			backupBinaryEnvs = append(
 				backupBinaryEnvs, unencryptedDestEnvPrefix+"_PASS="+obscuredPassword.String(),
@@ -892,18 +886,13 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 				destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
 		}
 		encryptionKey = destinationEntity.EncryptionKey
-		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
 	default:
-		repo.taskRunDetailsFailRegister(
-			&taskRunDetails, containerIdStr, "InvalidBackupDestinationType",
-		)
-		return taskRunDetails
+		return "", errors.New("InvalidBackupDestinationType")
 	}
 
 	encryptionKeyObscured, err := repo.obscurePassword(encryptionKey)
 	if err != nil {
-		repo.taskRunDetailsFailRegister(&taskRunDetails, containerIdStr, err.Error())
-		return taskRunDetails
+		return "", err
 	}
 
 	backupBinaryEnvs = append(
@@ -914,7 +903,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		encryptedDestEnvPrefix+"_PASSWORD="+encryptionKeyObscured.String(),
 	)
 	unencryptedDestPathStr := ""
-	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	switch destinationEntity := destinationIEntity.(type) {
 	case entity.BackupDestinationLocal:
 		unencryptedDestPathStr = destinationEntity.DestinationPath.String()
 	case entity.BackupDestinationObjectStorage:
@@ -930,19 +919,50 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		backupBinaryEnvs, encryptedDestEnvPrefix+"_REMOTE=rawdest:"+unencryptedDestPathStr,
 	)
 
-	srcFilePathStr := archiveFilePath.String()
-	destFilePathStr := "encdest:"
-	if unencryptedDestPathStr != "" {
-		destFilePathStr += "/"
-	}
-	destFilePathStr += taskRunDetails.TaskId.String() + "/" + archiveFilePath.ReadFileName().String()
+	backupCliWithEnvs := strings.Join(backupBinaryEnvs, " ") + " rclone"
 
-	backupBinaryCli := strings.Join(backupBinaryEnvs, " ") + " rclone"
+	return strings.TrimSpace(backupCliWithEnvs), nil
+}
+
+func (repo *BackupCmdRepo) uploadContainerArchive(
+	taskRunDetails BackupTaskRunDetails,
+	containerWithMetrics dto.ContainerWithMetrics,
+	archiveFilePath valueObject.UnixFilePath,
+) BackupTaskRunDetails {
+	containerIdStr := containerWithMetrics.Id.String()
+
+	backupBinaryCli, err := repo.backupBinaryCliFactory(taskRunDetails.DestinationEntity)
+	if err != nil {
+		repo.taskRunDetailsFailRegister(
+			&taskRunDetails, containerIdStr, "BackupCliFactoryFailed",
+		)
+		slog.Debug(
+			"BackupCliFactoryFailed",
+			slog.String("containerId", containerIdStr),
+			slog.String("error", err.Error()),
+		)
+		return taskRunDetails
+	}
+
+	var backupBinaryFlags []string
+	destPathStr := "encdest:"
+	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	case entity.BackupDestinationObjectStorage:
+		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.DestinationPath.String() != "/" {
+			destPathStr += destinationEntity.DestinationPath.String()
+		}
+	}
+
+	srcFilePathStr := archiveFilePath.String()
+	destPathStr += taskRunDetails.TaskId.String() + "/" + archiveFilePath.ReadFileName().String()
+
 	backupBinaryCmd := backupBinaryCli
 	if len(backupBinaryFlags) > 0 {
 		backupBinaryCmd += " " + strings.Join(backupBinaryFlags, " ")
 	}
-	backupBinaryCmd += " copyto " + srcFilePathStr + " " + destFilePathStr
+	backupBinaryCmd += " copyto " + srcFilePathStr + " " + destPathStr
 
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
 		containerWithMetrics.AccountId, backupBinaryCmd,
@@ -1135,4 +1155,15 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	}
 
 	return nil
+}
+
+func (repo *BackupCmdRepo) DeleteTask(
+	deleteDto dto.DeleteBackupTask,
+) error {
+	// TODO: Delete files if deleteDto.ShouldDiscardFiles is true.
+
+	return repo.persistentDbSvc.Handler.Model(&dbModel.BackupTask{}).Delete(
+		"id = ?",
+		deleteDto.TaskId.Uint64(),
+	).Error
 }
