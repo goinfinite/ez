@@ -931,19 +931,6 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 ) BackupTaskRunDetails {
 	containerIdStr := containerWithMetrics.Id.String()
 
-	backupBinaryCli, err := repo.backupBinaryCliFactory(taskRunDetails.DestinationEntity)
-	if err != nil {
-		repo.taskRunDetailsFailRegister(
-			&taskRunDetails, containerIdStr, "BackupCliFactoryFailed",
-		)
-		slog.Debug(
-			"BackupCliFactoryFailed",
-			slog.String("containerId", containerIdStr),
-			slog.String("error", err.Error()),
-		)
-		return taskRunDetails
-	}
-
 	var backupBinaryFlags []string
 	destPathStr := "encdest:"
 	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
@@ -958,6 +945,18 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	srcFilePathStr := archiveFilePath.String()
 	destPathStr += taskRunDetails.TaskId.String() + "/" + archiveFilePath.ReadFileName().String()
 
+	backupBinaryCli, err := repo.backupBinaryCliFactory(taskRunDetails.DestinationEntity)
+	if err != nil {
+		repo.taskRunDetailsFailRegister(
+			&taskRunDetails, containerIdStr, "BackupCliFactoryFailed",
+		)
+		slog.Debug(
+			"BackupCliFactoryFailed",
+			slog.String("containerId", containerIdStr),
+			slog.String("error", err.Error()),
+		)
+		return taskRunDetails
+	}
 	backupBinaryCmd := backupBinaryCli
 	if len(backupBinaryFlags) > 0 {
 		backupBinaryCmd += " " + strings.Join(backupBinaryFlags, " ")
@@ -1160,10 +1159,50 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 func (repo *BackupCmdRepo) DeleteTask(
 	deleteDto dto.DeleteBackupTask,
 ) error {
-	// TODO: Delete files if deleteDto.ShouldDiscardFiles is true.
+	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
+		dto.ReadBackupTasksRequest{TaskId: &deleteDto.TaskId},
+	)
+	if err != nil {
+		return errors.New("ReadBackupTaskFailed: " + err.Error())
+	}
 
-	return repo.persistentDbSvc.Handler.Model(&dbModel.BackupTask{}).Delete(
-		"id = ?",
-		deleteDto.TaskId.Uint64(),
+	err = repo.persistentDbSvc.Handler.Model(&dbModel.BackupTask{}).Delete(
+		"id = ?", deleteDto.TaskId.Uint64(),
 	).Error
+	if err != nil {
+		return errors.New("DeleteBackupTaskDatabaseEntryFailed: " + err.Error())
+	}
+
+	if !deleteDto.ShouldDiscardFiles {
+		return nil
+	}
+
+	destinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
+		dto.ReadBackupDestinationsRequest{DestinationId: &taskEntity.DestinationId}, true,
+	)
+	if err != nil {
+		return errors.New("ReadBackupDestinationFailed: " + err.Error())
+	}
+
+	backupBinaryCli, err := repo.backupBinaryCliFactory(destinationEntity)
+	if err != nil {
+		return errors.New("BackupCliFactoryFailed: " + err.Error())
+	}
+
+	remotePathStr := "encdest:"
+	switch destinationEntity := destinationEntity.(type) {
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.DestinationPath.String() != "/" {
+			remotePathStr += destinationEntity.DestinationPath.String()
+		}
+	}
+
+	backupBinaryCmd := backupBinaryCli + " delete " +
+		remotePathStr + taskEntity.TaskId.String() + "/"
+	_, err = infraHelper.RunCmdAsUserWithSubShell(taskEntity.AccountId, backupBinaryCmd)
+	if err != nil {
+		return errors.New("DeleteBackupTaskFilesFailed: " + err.Error())
+	}
+
+	return nil
 }
