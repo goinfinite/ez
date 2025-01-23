@@ -16,6 +16,7 @@ type BackupTask struct {
 	SuccessfulContainerIds []valueObject.ContainerId              `json:"successfulContainerIds"`
 	FailedContainerIds     []valueObject.ContainerId              `json:"failedContainerIds"`
 	ExecutionOutput        *valueObject.BackupTaskExecutionOutput `json:"executionOutput"`
+	SizeBytes              *valueObject.Byte                      `json:"sizeBytes"`
 	StartedAt              *valueObject.UnixTime                  `json:"startedAt"`
 	FinishedAt             *valueObject.UnixTime                  `json:"finishedAt"`
 	ElapsedSecs            *uint64                                `json:"elapsedSecs"`
@@ -34,6 +35,7 @@ func NewBackupTask(
 	timeoutSecs uint64,
 	successfulContainerIds, failedContainerIds []valueObject.ContainerId,
 	executionOutput *valueObject.BackupTaskExecutionOutput,
+	sizeBytes *valueObject.Byte,
 	startedAt, finishedAt *valueObject.UnixTime,
 	elapsedSecs *uint64,
 	createdAt, updatedAt valueObject.UnixTime,
@@ -50,6 +52,7 @@ func NewBackupTask(
 		SuccessfulContainerIds: successfulContainerIds,
 		FailedContainerIds:     failedContainerIds,
 		ExecutionOutput:        executionOutput,
+		SizeBytes:              sizeBytes,
 		StartedAt:              startedAt,
 		FinishedAt:             finishedAt,
 		ElapsedSecs:            elapsedSecs,

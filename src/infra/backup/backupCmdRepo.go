@@ -579,6 +579,7 @@ type BackupTaskRunDetails struct {
 	ExecutionOutput        string
 	SuccessfulContainerIds []string
 	FailedContainerIds     []string
+	SizeBytes              uint64
 	StartedAt              time.Time
 	FinishedAt             time.Time
 	ElapsedSecs            uint64
@@ -640,6 +641,7 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 			ExecutionOutput:        "",
 			SuccessfulContainerIds: []string{},
 			FailedContainerIds:     []string{},
+			SizeBytes:              0,
 			StartedAt:              startedAt,
 			FinishedAt:             startedAt,
 			ElapsedSecs:            0,
@@ -927,7 +929,7 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 func (repo *BackupCmdRepo) uploadContainerArchive(
 	taskRunDetails BackupTaskRunDetails,
 	containerWithMetrics dto.ContainerWithMetrics,
-	archiveFilePath valueObject.UnixFilePath,
+	archiveFileEntity entity.ContainerImageArchiveFile,
 ) BackupTaskRunDetails {
 	containerIdStr := containerWithMetrics.Id.String()
 
@@ -942,6 +944,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		}
 	}
 
+	archiveFilePath := archiveFileEntity.UnixFilePath
 	srcFilePathStr := archiveFilePath.String()
 	destPathStr += taskRunDetails.TaskId.String() + "/" + archiveFilePath.ReadFileName().String()
 
@@ -981,6 +984,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	taskRunDetails.SuccessfulContainerIds = append(
 		taskRunDetails.SuccessfulContainerIds, containerIdStr,
 	)
+	taskRunDetails.SizeBytes += archiveFileEntity.SizeBytes.Uint64()
 	taskRunDetails.FinishedAt = time.Now()
 	taskRunDetails.ElapsedSecs = uint64(
 		taskRunDetails.FinishedAt.Sub(taskRunDetails.StartedAt).Seconds(),
@@ -1062,7 +1066,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
-			archiveFile, err := repo.createContainerArchive(
+			archiveFileEntity, err := repo.createContainerArchive(
 				containerWithMetrics, containerImageCmdRepo, jobTmpDir,
 			)
 			if err != nil {
@@ -1075,12 +1079,12 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 			for taskId, preUploadTaskRunDetails := range taskIdRunDetailsMap {
 				postUploadTaskRunDetails := repo.uploadContainerArchive(
-					preUploadTaskRunDetails, containerWithMetrics, archiveFile.UnixFilePath,
+					preUploadTaskRunDetails, containerWithMetrics, archiveFileEntity,
 				)
 				taskIdRunDetailsMap[taskId] = postUploadTaskRunDetails
 			}
 
-			err = containerImageCmdRepo.DeleteArchiveFile(archiveFile)
+			err = containerImageCmdRepo.DeleteArchiveFile(archiveFileEntity)
 			if err != nil {
 				repo.sharedTaskFailRegister(
 					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
@@ -1138,6 +1142,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			ExecutionOutput:        &combinedExecutionOutput,
 			SuccessfulContainerIds: taskRunDetails.SuccessfulContainerIds,
 			FailedContainerIds:     combinedFailedContainerIds,
+			SizeBytes:              &taskRunDetails.SizeBytes,
 			ElapsedSecs:            &taskRunDetails.ElapsedSecs,
 			FinishedAt:             &taskRunDetails.FinishedAt,
 		}

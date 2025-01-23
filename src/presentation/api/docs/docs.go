@@ -3440,6 +3440,9 @@ const docTemplate = `{
                 "retentionStrategy": {
                     "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
                 },
+                "sizeBytes": {
+                    "type": "integer"
+                },
                 "startedAt": {
                     "type": "integer"
                 },

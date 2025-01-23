@@ -20,6 +20,7 @@ type BackupTask struct {
 	SuccessfulContainerIds []string `gorm:"serializer:json"`
 	FailedContainerIds     []string `gorm:"serializer:json"`
 	ExecutionOutput        *string
+	SizeBytes              *uint64
 	StartedAt              *time.Time
 	FinishedAt             *time.Time
 	ElapsedSecs            *uint64
@@ -37,6 +38,7 @@ func NewBackupTask(
 	timeoutSecs uint64,
 	successfulContainerIds, failedContainerIds []string,
 	executionOutput *string,
+	sizeBytes *uint64,
 	startedAt, finishedAt *time.Time,
 	elapsedSecs *uint64,
 ) BackupTask {
@@ -51,6 +53,7 @@ func NewBackupTask(
 		SuccessfulContainerIds: successfulContainerIds,
 		FailedContainerIds:     failedContainerIds,
 		ExecutionOutput:        executionOutput,
+		SizeBytes:              sizeBytes,
 		StartedAt:              startedAt,
 		FinishedAt:             finishedAt,
 		ElapsedSecs:            elapsedSecs,
@@ -128,6 +131,15 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 		executionOutputPtr = &executionOutput
 	}
 
+	var sizeBytesPtr *valueObject.Byte
+	if model.SizeBytes != nil {
+		sizeBytes, err := valueObject.NewByte(*model.SizeBytes)
+		if err != nil {
+			return taskEntity, err
+		}
+		sizeBytesPtr = &sizeBytes
+	}
+
 	var startedAtPtr *valueObject.UnixTime
 	if model.StartedAt != nil {
 		startedAt := valueObject.NewUnixTimeWithGoTime(*model.StartedAt)
@@ -148,7 +160,7 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 	return entity.NewBackupTask(
 		taskId, accountId, jobId, destinationId, taskStatus, retentionStrategy,
 		backupSchedule, model.TimeoutSecs, successfulContainerIds, failedContainerIds,
-		executionOutputPtr, startedAtPtr, finishedAtPtr, elapsedSecsPtr,
+		executionOutputPtr, sizeBytesPtr, startedAtPtr, finishedAtPtr, elapsedSecsPtr,
 		valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
 		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
 	), nil
