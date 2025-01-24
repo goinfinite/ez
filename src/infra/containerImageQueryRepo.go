@@ -267,10 +267,12 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 		return archiveFile, errors.New("SplitArchiveFilePartsError")
 	}
 
-	rawImageId := archiveFileNameParts[0]
-	imageId, err := valueObject.NewContainerImageId(rawImageId)
+	imageId, err := valueObject.NewContainerImageId(archiveFileNameParts[1])
 	if err != nil {
-		return archiveFile, errors.New("ArchiveFileImageIdParseError")
+		imageId, err = valueObject.NewContainerImageId(archiveFileNameParts[0])
+		if err != nil {
+			return archiveFile, errors.New("ArchiveFileImageIdParseError")
+		}
 	}
 
 	fileInfo, err := os.Stat(archiveFilePath.String())

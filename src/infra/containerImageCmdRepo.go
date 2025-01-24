@@ -213,10 +213,15 @@ func (repo *ContainerImageCmdRepo) Delete(
 func (repo *ContainerImageCmdRepo) archiveFileNameFactory(
 	imageEntity entity.ContainerImage,
 ) (archiveFileName valueObject.UnixFileName, err error) {
+	rawArchiveFileName := imageEntity.AccountId.String() + "-" + imageEntity.Id.String()
+
 	imageOrgNameStr := ""
 	imageOrgName, err := imageEntity.ImageAddress.ReadOrgName()
 	if err == nil {
 		imageOrgNameStr = imageOrgName.String()
+	}
+	if imageOrgNameStr != "" {
+		rawArchiveFileName += "-" + imageOrgNameStr
 	}
 
 	imageNameStr := ""
@@ -224,26 +229,20 @@ func (repo *ContainerImageCmdRepo) archiveFileNameFactory(
 	if err == nil {
 		imageNameStr = imageName.String()
 	}
+	if imageNameStr != "" {
+		rawArchiveFileName += "-" + imageNameStr
+	}
 
 	imageTagStr := ""
 	imageTag, err := imageEntity.ImageAddress.ReadImageTag()
 	if err == nil {
 		imageTagStr = imageTag.String()
 	}
-
-	rawArchiveFileName := imageEntity.Id.String()
-	if imageOrgNameStr != "" {
-		rawArchiveFileName += "-" + imageOrgNameStr
-	}
-	if imageNameStr != "" {
-		rawArchiveFileName += "-" + imageNameStr
-	}
 	if imageTagStr != "" {
 		rawArchiveFileName += "-" + imageTagStr
 	}
-	rawArchiveFileName += ".tar"
 
-	return valueObject.NewUnixFileName(rawArchiveFileName)
+	return valueObject.NewUnixFileName(rawArchiveFileName + ".tar")
 }
 
 func (repo *ContainerImageCmdRepo) CreateArchiveFile(
