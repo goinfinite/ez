@@ -10,12 +10,12 @@ import (
 type BackupTaskId uint64
 
 func NewBackupTaskId(value interface{}) (BackupTaskId, error) {
-	destinationId, err := voHelper.InterfaceToUint64(value)
+	taskId, err := voHelper.InterfaceToUint64(value)
 	if err != nil {
 		return 0, errors.New("InvalidBackupTaskId")
 	}
 
-	return BackupTaskId(destinationId), nil
+	return BackupTaskId(taskId), nil
 }
 
 func (vo BackupTaskId) Uint64() uint64 {
