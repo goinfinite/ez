@@ -491,12 +491,11 @@ func (service *ContainerService) Create(
 			createParams = append(createParams, "true")
 		}
 
-		timeoutSeconds := uint16(600)
-
+		timeoutSeconds := uint32(600)
 		if existingContainerIdPtr != nil {
 			createParams = append(createParams, "--existing-container-id")
 			createParams = append(createParams, existingContainerIdPtr.String())
-			timeoutSeconds = uint16(1800)
+			timeoutSeconds = uint32(1800)
 		}
 
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")

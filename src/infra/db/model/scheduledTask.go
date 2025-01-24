@@ -13,7 +13,7 @@ type ScheduledTask struct {
 	Status      string `gorm:"not null,index"`
 	Command     string `gorm:"not null"`
 	Tags        []ScheduledTaskTag
-	TimeoutSecs *uint16
+	TimeoutSecs *uint32
 	RunAt       *time.Time
 	Output      *string
 	Error       *string
@@ -32,7 +32,7 @@ func NewScheduledTask(
 	id uint64,
 	name, status, command string,
 	tags []ScheduledTaskTag,
-	timeoutSecs *uint16,
+	timeoutSecs *uint32,
 	runAt *time.Time,
 	output, err *string,
 	startedAt, finishedAt *time.Time,

@@ -10,7 +10,7 @@ import (
 
 const ScheduledTasksRunIntervalSecs uint8 = 90
 
-var scheduledTasksDefaultTimeoutSecs uint16 = 300
+var scheduledTasksDefaultTimeoutSecs uint32 = 300
 
 func RunScheduledTasks(
 	scheduledTaskQueryRepo repository.ScheduledTaskQueryRepo,
