@@ -16,4 +16,5 @@ type BackupCmdRepo interface {
 	RunJob(dto.RunBackupJob) error
 
 	DeleteTask(dto.DeleteBackupTask) error
+	CreateTaskArchive(dto.CreateBackupTaskArchive) (valueObject.BackupTaskArchiveId, error)
 }
