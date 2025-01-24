@@ -2,6 +2,8 @@ package service
 
 import (
 	"errors"
+	"strconv"
+	"strings"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
@@ -10,12 +12,14 @@ import (
 	"github.com/goinfinite/ez/src/infra"
 	backupInfra "github.com/goinfinite/ez/src/infra/backup"
 	"github.com/goinfinite/ez/src/infra/db"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 )
 
 type BackupService struct {
 	persistentDbSvc       *db.PersistentDatabaseService
 	backupQueryRepo       *backupInfra.BackupQueryRepo
+	backupCmdRepo         *backupInfra.BackupCmdRepo
 	activityRecordCmdRepo *infra.ActivityRecordCmdRepo
 }
 
@@ -26,6 +30,7 @@ func NewBackupService(
 	return &BackupService{
 		persistentDbSvc:       persistentDbSvc,
 		backupQueryRepo:       backupInfra.NewBackupQueryRepo(persistentDbSvc),
+		backupCmdRepo:         backupInfra.NewBackupCmdRepo(persistentDbSvc),
 		activityRecordCmdRepo: infra.NewActivityRecordCmdRepo(trailDbSvc),
 	}
 }
@@ -428,9 +433,8 @@ func (service *BackupService) CreateDestination(
 		OperatorIpAddress:                    operatorIpAddress,
 	}
 
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	responseDto, err := useCase.CreateBackupDestination(
-		backupCmdRepo, service.activityRecordCmdRepo, createDto,
+		service.backupCmdRepo, service.activityRecordCmdRepo, createDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -754,10 +758,9 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		OperatorIpAddress:                    operatorIpAddress,
 	}
 
-	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	err = useCase.UpdateBackupDestination(
-		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, updateDto,
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, updateDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -804,10 +807,9 @@ func (service *BackupService) DeleteDestination(input map[string]interface{}) Se
 		destinationId, accountId, operatorAccountId, operatorIpAddress,
 	)
 
-	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	err = useCase.DeleteBackupDestination(
-		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, deleteDto,
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -1066,8 +1068,9 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 		operatorAccountId, operatorIpAddress,
 	)
 
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
-	err = useCase.CreateBackupJob(backupCmdRepo, service.activityRecordCmdRepo, createDto)
+	err = useCase.CreateBackupJob(
+		service.backupCmdRepo, service.activityRecordCmdRepo, createDto,
+	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -1234,10 +1237,9 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 		OperatorIpAddress:         operatorIpAddress,
 	}
 
-	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	err = useCase.UpdateBackupJob(
-		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, updateDto,
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, updateDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -1282,10 +1284,9 @@ func (service *BackupService) DeleteJob(input map[string]interface{}) ServiceOut
 
 	deleteDto := dto.NewDeleteBackupJob(jobId, accountId, operatorAccountId, operatorIpAddress)
 
-	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	err = useCase.DeleteBackupJob(
-		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, deleteDto,
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -1330,10 +1331,9 @@ func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput
 
 	runDto := dto.NewRunBackupJob(jobId, accountId, operatorAccountId, operatorIpAddress)
 
-	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	err = useCase.RunBackupJob(
-		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, runDto,
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, runDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
@@ -1484,14 +1484,143 @@ func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOu
 		taskId, shouldDiscardFiles, operatorAccountId, operatorIpAddress,
 	)
 
-	backupQueryRepo := backupInfra.NewBackupQueryRepo(service.persistentDbSvc)
-	backupCmdRepo := backupInfra.NewBackupCmdRepo(service.persistentDbSvc)
 	err = useCase.DeleteBackupTask(
-		backupQueryRepo, backupCmdRepo, service.activityRecordCmdRepo, deleteDto,
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, deleteDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
 	return NewServiceOutput(Success, "BackupTaskDeleted")
+}
+
+func (service *BackupService) CreateTaskArchive(
+	input map[string]interface{},
+	shouldSchedule bool,
+) ServiceOutput {
+	requiredParams := []string{"taskId"}
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	timeoutSeconds := useCase.CreateBackupTaskArchiveDefaultTimeoutSecs
+	if input["timeoutSeconds"] != nil {
+		timeoutSeconds, err = voHelper.InterfaceToUint32(input["timeoutSeconds"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSeconds"))
+		}
+	}
+
+	var assertOk bool
+	var containerAccountIds []valueObject.AccountId
+	if input["containerAccountIds"] != nil {
+		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidAccountIds"))
+		}
+	}
+
+	var containerIds []valueObject.ContainerId
+	if input["containerIds"] != nil {
+		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+		}
+	}
+
+	var exceptContainerAccountIds []valueObject.AccountId
+	if input["exceptContainerAccountIds"] != nil {
+		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
+		}
+	}
+
+	var exceptContainerIds []valueObject.ContainerId
+	if input["exceptContainerIds"] != nil {
+		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
+		}
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	if shouldSchedule {
+		cliCmd := infraEnvs.InfiniteEzBinary + " backup task archive create"
+		createParams := []string{
+			"--task-id", taskId.String(),
+			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
+		}
+		for _, accountId := range containerAccountIds {
+			createParams = append(createParams, "--container-account-ids", accountId.String())
+		}
+
+		for _, containerId := range containerIds {
+			createParams = append(createParams, "--container-ids", containerId.String())
+		}
+
+		for _, accountId := range exceptContainerAccountIds {
+			createParams = append(createParams, "--except-container-account-ids", accountId.String())
+		}
+
+		for _, containerId := range exceptContainerIds {
+			createParams = append(createParams, "--except-container-ids", containerId.String())
+		}
+
+		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
+
+		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
+		taskName, _ := valueObject.NewScheduledTaskName("CreateBackupTaskArchive")
+		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
+		taskTag, _ := valueObject.NewScheduledTaskTag("backup")
+		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+
+		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
+			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+		)
+
+		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+
+		return NewServiceOutput(Created, "CreateBackupTaskArchiveScheduled")
+	}
+
+	createDto := dto.NewCreateBackupTaskArchive(
+		taskId, &timeoutSeconds, containerAccountIds, containerIds, exceptContainerAccountIds,
+		exceptContainerIds, operatorAccountId, operatorIpAddress,
+	)
+
+	err = useCase.CreateBackupTaskArchive(
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, createDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Created, "BackupTaskArchiveCreated")
 }

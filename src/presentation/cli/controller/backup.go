@@ -1046,5 +1046,73 @@ func (controller *BackupController) DeleteTask() *cobra.Command {
 	cmd.Flags().StringVarP(
 		&shouldDiscardFilesBoolStr, "should-discard-files", "s", "false", "ShouldDiscardFiles",
 	)
+
+	return cmd
+}
+
+func (controller *BackupController) CreateTaskArchive() *cobra.Command {
+	var taskIdUint uint64
+	var timeoutSecondsUint uint32
+	var containerIdsSlice, containerAccountIdsSlice []string
+	var exceptContainerIdsSlice, exceptContainerAccountIdsSlice []string
+
+	cmd := &cobra.Command{
+		Use:   "create",
+		Short: "CreateBackupTaskArchive",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"taskId": taskIdUint,
+			}
+
+			if timeoutSecondsUint != 0 {
+				requestBody["timeoutSeconds"] = timeoutSecondsUint
+			}
+
+			if len(containerAccountIdsSlice) > 0 {
+				requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+					containerAccountIdsSlice, valueObject.NewAccountId,
+				)
+			}
+
+			if len(containerIdsSlice) > 0 {
+				requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
+					containerIdsSlice, valueObject.NewContainerId,
+				)
+			}
+
+			if len(exceptContainerAccountIdsSlice) > 0 {
+				requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+					exceptContainerAccountIdsSlice, valueObject.NewAccountId,
+				)
+			}
+
+			if len(exceptContainerIdsSlice) > 0 {
+				requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
+					exceptContainerIdsSlice, valueObject.NewContainerId,
+				)
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.CreateTaskArchive(requestBody, false),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "t", 0, "BackupTaskId")
+	cmd.MarkFlagRequired("task-id")
+	cmd.Flags().Uint32VarP(&timeoutSecondsUint, "timeout-secs", "T", 0, "TimeoutSeconds")
+	cmd.Flags().StringSliceVarP(
+		&containerAccountIdsSlice, "container-account-ids", "u", []string{}, "ContainerAccountIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&containerIdsSlice, "container-ids", "i", []string{}, "ContainerIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&exceptContainerAccountIdsSlice, "except-container-account-ids", "U", []string{}, "ExceptContainerAccountIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&exceptContainerIdsSlice, "except-container-ids", "I", []string{}, "ExceptContainerIds",
+	)
+
 	return cmd
 }

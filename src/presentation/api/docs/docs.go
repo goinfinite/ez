@@ -882,6 +882,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/task/archive/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Schedule a backup task archive creation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "CreateBackupTaskArchive",
+                "parameters": [
+                    {
+                        "description": "CreateBackupTaskArchive",
+                        "name": "createBackupTaskArchiveDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupTaskArchive"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupTaskArchiveCreationScheduled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/backup/task/{taskId}/": {
             "delete": {
                 "security": [
@@ -2763,6 +2802,41 @@ const docTemplate = `{
                 },
                 "retentionStrategy": {
                     "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateBackupTaskArchive": {
+            "type": "object",
+            "properties": {
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "taskId": {
+                    "type": "integer"
                 },
                 "timeoutSecs": {
                     "type": "integer"

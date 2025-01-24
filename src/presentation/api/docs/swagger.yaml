@@ -160,6 +160,29 @@ definitions:
       timeoutSecs:
         type: integer
     type: object
+  dto.CreateBackupTaskArchive:
+    properties:
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      taskId:
+        type: integer
+      timeoutSecs:
+        type: integer
+    type: object
   dto.CreateContainer:
     properties:
       accountId:
@@ -1741,6 +1764,30 @@ paths:
       security:
       - Bearer: []
       summary: DeleteBackupTask
+      tags:
+      - backup
+  /v1/backup/task/archive/:
+    post:
+      consumes:
+      - application/json
+      description: Schedule a backup task archive creation.
+      parameters:
+      - description: CreateBackupTaskArchive
+        in: body
+        name: createBackupTaskArchiveDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBackupTaskArchive'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupTaskArchiveCreationScheduled
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateBackupTaskArchive
       tags:
       - backup
   /v1/container/:

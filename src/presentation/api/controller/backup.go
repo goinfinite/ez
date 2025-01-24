@@ -362,3 +362,72 @@ func (controller *BackupController) DeleteTask(c echo.Context) error {
 		c, controller.backupService.DeleteTask(requestBody),
 	)
 }
+
+// CreateBackupTaskArchive	godoc
+// @Summary      CreateBackupTaskArchive
+// @Description  Schedule a backup task archive creation.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        createBackupTaskArchiveDto	body	dto.CreateBackupTaskArchive	true	"CreateBackupTaskArchive"
+// @Success      201	{object}	object{}	"BackupTaskArchiveCreationScheduled"
+// @Router       /v1/backup/task/archive/	[post]
+func (controller *BackupController) CreateTaskArchive(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	if requestBody["containerAccountIds"] == nil {
+		if requestBody["containerAccountId"] != nil {
+			requestBody["containerAccountIds"] = requestBody["containerAccountId"]
+		}
+	}
+
+	if requestBody["containerAccountIds"] != nil {
+		requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["containerAccountIds"], valueObject.NewAccountId,
+		)
+	}
+
+	if requestBody["containerIds"] == nil {
+		if requestBody["containerId"] != nil {
+			requestBody["containerIds"] = requestBody["containerId"]
+		}
+	}
+
+	if requestBody["containerIds"] != nil {
+		requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["containerIds"], valueObject.NewContainerId,
+		)
+	}
+
+	if requestBody["exceptContainerAccountIds"] == nil {
+		if requestBody["exceptContainerAccountId"] != nil {
+			requestBody["exceptContainerAccountIds"] = requestBody["exceptContainerAccountId"]
+		}
+	}
+
+	if requestBody["exceptContainerAccountIds"] != nil {
+		requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["exceptContainerAccountIds"], valueObject.NewAccountId,
+		)
+	}
+
+	if requestBody["exceptContainerIds"] == nil {
+		if requestBody["exceptContainerId"] != nil {
+			requestBody["exceptContainerIds"] = requestBody["exceptContainerId"]
+		}
+	}
+
+	if requestBody["exceptContainerIds"] != nil {
+		requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["exceptContainerIds"], valueObject.NewContainerId,
+		)
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.CreateTaskArchive(requestBody, true),
+	)
+}
