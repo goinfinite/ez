@@ -146,4 +146,27 @@ func TestBackupCmdRepo(t *testing.T) {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 	})
+
+	t.Run("CreateBackupTaskArchive", func(t *testing.T) {
+		taskEntity, err := backupQueryRepo.ReadFirstTask(dto.ReadBackupTasksRequest{})
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+			return
+		}
+
+		timeoutSecs := uint32(60)
+		createDto := dto.CreateBackupTaskArchive{
+			TaskId:                    taskEntity.TaskId,
+			TimeoutSecs:               &timeoutSecs,
+			ContainerAccountIds:       []valueObject.AccountId{},
+			ContainerIds:              []valueObject.ContainerId{},
+			ExceptContainerAccountIds: []valueObject.AccountId{},
+			ExceptContainerIds:        []valueObject.ContainerId{},
+		}
+
+		_, err = backupCmdRepo.CreateTaskArchive(createDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
 }

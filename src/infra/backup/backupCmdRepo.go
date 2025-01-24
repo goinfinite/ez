@@ -1211,3 +1211,9 @@ func (repo *BackupCmdRepo) DeleteTask(
 
 	return nil
 }
+
+func (repo *BackupCmdRepo) CreateTaskArchive(
+	createDto dto.CreateBackupTaskArchive,
+) (archiveId valueObject.BackupTaskArchiveId, err error) {
+	return archiveId, err
+}
