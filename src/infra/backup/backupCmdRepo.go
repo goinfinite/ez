@@ -1,6 +1,7 @@
 package backupInfra
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -531,6 +532,20 @@ func (repo *BackupCmdRepo) readUserDataStats() (disk.UsageStat, error) {
 	return *userDataDirectoryStats, nil
 }
 
+func (repo *BackupCmdRepo) userDataWatermarkLimitValidator() error {
+	userDataDirectoryWatermarkLimitPercent := float64(92)
+	userDataDirectoryStats, err := repo.readUserDataStats()
+	if err != nil {
+		return err
+	}
+
+	if userDataDirectoryStats.UsedPercent >= userDataDirectoryWatermarkLimitPercent {
+		return errors.New("UserDataDirectoryUsageExceedsWatermarkLimit")
+	}
+
+	return nil
+}
+
 func (repo *BackupCmdRepo) readAccountsContainersWithMetrics(
 	jobEntity entity.BackupJob,
 ) (map[valueObject.AccountId][]dto.ContainerWithMetrics, error) {
@@ -944,9 +959,15 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		}
 	}
 
-	archiveFilePath := archiveFileEntity.UnixFilePath
-	srcFilePathStr := archiveFilePath.String()
-	destPathStr += taskRunDetails.TaskId.String() + "/" + archiveFilePath.ReadFileName().String()
+	archiveFileExtStr := ".tar.br"
+	archiveFileExt, err := archiveFileEntity.UnixFilePath.ReadCompoundFileExtension()
+	if err == nil {
+		archiveFileExtStr = "." + archiveFileExt.String()
+	}
+
+	destFileNameStr := containerWithMetrics.AccountId.String() + "-" + containerIdStr +
+		"-" + archiveFileEntity.ImageId.String() + archiveFileExtStr
+	destPathStr += taskRunDetails.TaskId.String() + "/" + destFileNameStr
 
 	backupBinaryCli, err := repo.backupBinaryCliFactory(taskRunDetails.DestinationEntity)
 	if err != nil {
@@ -964,7 +985,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	if len(backupBinaryFlags) > 0 {
 		backupBinaryCmd += " " + strings.Join(backupBinaryFlags, " ")
 	}
-	backupBinaryCmd += " copyto " + srcFilePathStr + " " + destPathStr
+	backupBinaryCmd += " copyto " + archiveFileEntity.UnixFilePath.String() + " " + destPathStr
 
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
 		containerWithMetrics.AccountId, backupBinaryCmd,
@@ -994,13 +1015,9 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 }
 
 func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
-	userDataDirectoryWatermarkLimitPercent := float64(92)
-	userDataDirectoryStats, err := repo.readUserDataStats()
+	err := repo.userDataWatermarkLimitValidator()
 	if err != nil {
 		return err
-	}
-	if userDataDirectoryStats.UsedPercent >= userDataDirectoryWatermarkLimitPercent {
-		return errors.New("UserDataDirectoryUsageExceedsWatermarkLimit")
 	}
 
 	requestJobDto := dto.ReadBackupJobsRequest{
@@ -1215,5 +1232,236 @@ func (repo *BackupCmdRepo) DeleteTask(
 func (repo *BackupCmdRepo) CreateTaskArchive(
 	createDto dto.CreateBackupTaskArchive,
 ) (archiveId valueObject.BackupTaskArchiveId, err error) {
+	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
+		dto.ReadBackupTasksRequest{TaskId: &createDto.TaskId},
+	)
+	if err != nil {
+		return archiveId, errors.New("ReadBackupTaskFailed: " + err.Error())
+	}
+
+	userDataDirectoryStats, err := repo.readUserDataStats()
+	if err != nil {
+		return archiveId, errors.New("ReadUserDataDirStatsError: " + err.Error())
+	}
+
+	accountIdsFilterProvided := len(createDto.ContainerAccountIds) > 0
+	containerIdsFilterProvided := len(createDto.ContainerIds) > 0
+	exceptAccountIdsFilterProvided := len(createDto.ExceptContainerAccountIds) > 0
+	exceptContainerIdsFilterProvided := len(createDto.ExceptContainerIds) > 0
+
+	wereFiltersProvided := accountIdsFilterProvided || containerIdsFilterProvided ||
+		exceptAccountIdsFilterProvided || exceptContainerIdsFilterProvided
+	necessaryFreeStorageBytes := taskEntity.SizeBytes.Uint64() * 2
+	if !wereFiltersProvided && necessaryFreeStorageBytes >= userDataDirectoryStats.Free {
+		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
+	}
+
+	destinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
+		dto.ReadBackupDestinationsRequest{DestinationId: &taskEntity.DestinationId}, true,
+	)
+	if err != nil {
+		return archiveId, errors.New("ReadBackupDestinationFailed: " + err.Error())
+	}
+
+	backupBinaryCli, err := repo.backupBinaryCliFactory(destinationEntity)
+	if err != nil {
+		return archiveId, errors.New("BackupCliFactoryFailed: " + err.Error())
+	}
+
+	remoteBasePathStr := "encdest:"
+	switch destinationEntity := destinationEntity.(type) {
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.DestinationPath.String() != "/" {
+			remoteBasePathStr += destinationEntity.DestinationPath.String()
+		}
+	}
+	taskIdStr := taskEntity.TaskId.String()
+	remoteBasePathStr += taskIdStr
+
+	backupBinaryCmd := backupBinaryCli + " lsjson " +
+		"--files-only --no-mimetype --no-modtime " + remoteBasePathStr
+
+	// [
+	// {"Path":"1000-677403a6cade-4b2a68046d58.tar.br","Name":"1000-677403a6cade-4b2a68046d58.tar.br","Size":407824652,"ModTime":"","IsDir":false,"Tier":"STANDARD"},
+	// {"Path":"1000-b50f1fda0c69-0db3107e7d2c.tar.br","Name":"1000-b50f1fda0c69-0db3107e7d2c.tar.br","Size":252874653,"ModTime":"","IsDir":false,"Tier":"STANDARD"}
+	// ]
+	rawArchiveFilesList, err := infraHelper.RunCmdAsUserWithSubShell(
+		taskEntity.AccountId, backupBinaryCmd,
+	)
+	if err != nil || len(rawArchiveFilesList) == 0 {
+		return archiveId, errors.New("ListBackupTaskFilesFailed: " + err.Error())
+	}
+
+	var rawArchiveFilesListMap []map[string]interface{}
+	err = json.Unmarshal([]byte(rawArchiveFilesList), &rawArchiveFilesListMap)
+	if err != nil {
+		return archiveId, errors.New("UnmarshalBackupTaskFilesListFailed: " + err.Error())
+	}
+
+	accountIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ContainerAccountIds)
+	containerIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ContainerIds)
+	exceptAccountIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ExceptContainerAccountIds)
+	exceptContainerIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ExceptContainerIds)
+
+	necessaryFreeStorageBytes = 0
+	filePathsToDownload := []valueObject.UnixFilePath{}
+	for _, rawArchiveFile := range rawArchiveFilesListMap {
+		rawName, assertOk := rawArchiveFile["Name"].(string)
+		if !assertOk {
+			slog.Debug("AssertNameFailed", slog.Any("rawArchiveFile", rawArchiveFile))
+			continue
+		}
+
+		nameParts := strings.Split(rawName, "-")
+		if len(nameParts) < 3 {
+			slog.Debug("SplitNamePartsFailed", slog.String("rawName", rawName))
+			continue
+		}
+
+		accountId, err := valueObject.NewAccountId(nameParts[0])
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("rawAccountId", nameParts[0]))
+			continue
+		}
+
+		if accountIdsFilterProvided {
+			if _, exists := accountIdsFilterSet[accountId]; !exists {
+				continue
+			}
+		}
+
+		if exceptAccountIdsFilterProvided {
+			if _, exists := exceptAccountIdsFilterSet[accountId]; exists {
+				continue
+			}
+		}
+
+		containerId, err := valueObject.NewContainerId(nameParts[1])
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("rawContainerId", nameParts[1]))
+			continue
+		}
+
+		if containerIdsFilterProvided {
+			if _, exists := containerIdsFilterSet[containerId]; !exists {
+				continue
+			}
+		}
+
+		if exceptContainerIdsFilterProvided {
+			if _, exists := exceptContainerIdsFilterSet[containerId]; exists {
+				continue
+			}
+		}
+
+		sizeBytes, err := valueObject.NewByte(rawArchiveFile["Size"])
+		if err != nil {
+			slog.Debug(err.Error(), slog.Any("sizeBytes", rawArchiveFile["Size"]))
+			continue
+		}
+
+		rawPath, assertOk := rawArchiveFile["Path"].(string)
+		if !assertOk {
+			slog.Debug("AssertPathFailed", slog.Any("rawArchiveFile", rawArchiveFile))
+			continue
+		}
+		if !strings.HasPrefix(rawPath, "/") {
+			rawPath = "/" + rawPath
+		}
+		filePath, err := valueObject.NewUnixFilePath(rawPath)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("rawPath", rawPath))
+			continue
+		}
+
+		filePathsToDownload = append(filePathsToDownload, filePath)
+		necessaryFreeStorageBytes += sizeBytes.Uint64()
+	}
+
+	if len(filePathsToDownload) == 0 {
+		return archiveId, errors.New("NoBackupFilesFound")
+	}
+
+	if necessaryFreeStorageBytes*2 >= userDataDirectoryStats.Free {
+		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
+	}
+
+	archivesDirectoryStr := infraEnvs.InfiniteEzMainDir + "/archives"
+	if createDto.OperatorAccountId != valueObject.SystemAccountId {
+		accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
+		operatorAccountEntity, err := accountQueryRepo.ReadById(createDto.OperatorAccountId)
+		if err != nil {
+			return archiveId, errors.New("ReadOperatorAccountFailed: " + err.Error())
+		}
+		if necessaryFreeStorageBytes*2 >= operatorAccountEntity.Quota.StorageBytes.Uint64() {
+			return archiveId, errors.New("InsufficientOperatorAccountQuota")
+		}
+
+		archivesDirectoryStr = operatorAccountEntity.HomeDirectory.String() + "/archives"
+	}
+
+	createDtoJson, err := json.Marshal(createDto)
+	if err != nil {
+		return archiveId, errors.New("MarshalCreateDtoFailed: " + err.Error())
+	}
+	rawOperationHash := infraHelper.GenStrongShortHash(string(createDtoJson))
+	archiveId, err = valueObject.NewBackupTaskArchiveId(rawOperationHash)
+	if err != nil {
+		return archiveId, errors.New("ValidateArchiveTaskIdFailed: " + err.Error())
+	}
+	archiveIdStr := archiveId.String()
+
+	taskArchiveDirName := taskIdStr + "-" + archiveIdStr
+	rawArchivesDirTaskDir := archivesDirectoryStr + "/" + taskArchiveDirName
+	archivesDirTaskDir, err := valueObject.NewUnixFilePath(rawArchivesDirTaskDir)
+	if err != nil {
+		return archiveId, errors.New("ValidateArchiveTaskDirPathFailed: " + err.Error())
+	}
+	archivesDirTaskDirStr := archivesDirTaskDir.String()
+
+	err = infraHelper.MakeDir(archivesDirTaskDirStr)
+	if err != nil {
+		return archiveId, errors.New("MakeArchiveTaskDirFailed: " + err.Error())
+	}
+
+	for _, filePath := range filePathsToDownload {
+		backupBinaryCmd = backupBinaryCli + " copyto " + remoteBasePathStr + filePath.String() +
+			" " + archivesDirTaskDirStr + "/" + filePath.ReadFileName().String()
+		_, err = infraHelper.RunCmdWithSubShell(backupBinaryCmd)
+		if err != nil {
+			slog.Debug(
+				"DownloadContainerBackupFileFailed",
+				slog.String("filePath", filePath.String()),
+				slog.String("error", err.Error()),
+			)
+			continue
+		}
+	}
+
+	rawTaskArchiveFilePath := archivesDirectoryStr + "/" + taskIdStr + "-" + archiveIdStr + ".tar"
+	taskArchiveFilePath, err := valueObject.NewUnixFilePath(rawTaskArchiveFilePath)
+	if err != nil {
+		return archiveId, errors.New("ValidateArchiveTaskFilePathFailed: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmdWithSubShell(
+		"tar -cf " + taskArchiveFilePath.String() +
+			" -C " + archivesDirectoryStr + " " + taskArchiveDirName,
+	)
+	if err != nil {
+		return archiveId, errors.New("CompressArchiveTaskDirFailed: " + err.Error())
+	}
+
+	err = os.RemoveAll(archivesDirTaskDirStr)
+	if err != nil {
+		return archiveId, errors.New("RemoveArchiveTaskDirFailed: " + err.Error())
+	}
+
+	operatorAccountIdInt := int(createDto.OperatorAccountId)
+	err = os.Chown(taskArchiveFilePath.String(), operatorAccountIdInt, operatorAccountIdInt)
+	if err != nil {
+		return archiveId, errors.New("ChownArchiveTaskFileFailed: " + err.Error())
+	}
+
 	return archiveId, err
 }
