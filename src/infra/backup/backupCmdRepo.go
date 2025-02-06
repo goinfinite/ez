@@ -839,8 +839,9 @@ func (repo *BackupCmdRepo) taskRunDetailsFailRegister(
 	)
 }
 
-func (repo *BackupCmdRepo) readBackupRemotePath(
+func (repo *BackupCmdRepo) readTaskRemotePath(
 	destinationEntity entity.IBackupDestination,
+	taskId valueObject.BackupTaskId,
 ) string {
 	remotePathStr := "encdest:"
 	switch destinationEntity := destinationEntity.(type) {
@@ -850,7 +851,7 @@ func (repo *BackupCmdRepo) readBackupRemotePath(
 		}
 	}
 
-	return remotePathStr
+	return remotePathStr + taskId.String()
 }
 
 func (repo *BackupCmdRepo) backupBinaryCliFactory(
@@ -976,8 +977,8 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 
 	destFileNameStr := containerWithMetrics.AccountId.String() + "-" + containerIdStr +
 		"-" + archiveFileEntity.ImageId.String() + archiveFileExtStr
-	destPathStr := repo.readBackupRemotePath(taskRunDetails.DestinationEntity)
-	destPathStr += taskRunDetails.TaskId.String() + "/" + destFileNameStr
+	destPathStr := repo.readTaskRemotePath(taskRunDetails.DestinationEntity, taskRunDetails.TaskId)
+	destPathStr += "/" + destFileNameStr
 
 	backupBinaryCli, err := repo.backupBinaryCliFactory(taskRunDetails.DestinationEntity)
 	if err != nil {
@@ -1221,10 +1222,8 @@ func (repo *BackupCmdRepo) DeleteTask(
 		return errors.New("BackupCliFactoryFailed: " + err.Error())
 	}
 
-	remotePathStr := repo.readBackupRemotePath(destinationEntity)
-
-	backupBinaryCmd := backupBinaryCli + " delete " +
-		remotePathStr + taskEntity.TaskId.String() + "/"
+	remotePathStr := repo.readTaskRemotePath(destinationEntity, taskEntity.TaskId)
+	backupBinaryCmd := backupBinaryCli + " delete " + remotePathStr
 	_, err = infraHelper.RunCmdAsUserWithSubShell(taskEntity.AccountId, backupBinaryCmd)
 	if err != nil {
 		return errors.New("DeleteBackupTaskFilesFailed: " + err.Error())
@@ -1243,8 +1242,7 @@ func (repo *BackupCmdRepo) readRemoteContainerArchives(
 ) ([]entity.ContainerImageArchiveFile, error) {
 	containerArchives := []entity.ContainerImageArchiveFile{}
 
-	remoteBasePathStr := repo.readBackupRemotePath(destinationEntity)
-	remoteBasePathStr += taskEntity.TaskId.String()
+	taskRemotePath := repo.readTaskRemotePath(destinationEntity, taskEntity.TaskId)
 
 	backupBinaryCli, err := repo.backupBinaryCliFactory(destinationEntity)
 	if err != nil {
@@ -1252,7 +1250,7 @@ func (repo *BackupCmdRepo) readRemoteContainerArchives(
 	}
 
 	backupBinaryCmd := backupBinaryCli + " lsjson " +
-		"--files-only --no-mimetype --no-modtime " + remoteBasePathStr
+		"--files-only --no-mimetype --no-modtime " + taskRemotePath
 
 	// [
 	// {"Path":"1000-677403a6cade-4b2a68046d58.tar.br","Name":"1000-677403a6cade-4b2a68046d58.tar.br","Size":407824652,"ModTime":"","IsDir":false,"Tier":"STANDARD"},
@@ -1336,12 +1334,6 @@ func (repo *BackupCmdRepo) readRemoteContainerArchives(
 			continue
 		}
 
-		imageId, err := valueObject.NewContainerImageId(nameParts[2])
-		if err != nil {
-			slog.Debug(err.Error(), slog.String("rawImageId", nameParts[2]))
-			continue
-		}
-
 		rawPath, assertOk := rawArchiveFile["Path"].(string)
 		if !assertOk {
 			slog.Debug("AssertPathFailed", slog.Any("rawArchiveFile", rawArchiveFile))
@@ -1357,7 +1349,6 @@ func (repo *BackupCmdRepo) readRemoteContainerArchives(
 		}
 
 		imageArchiveFile := entity.ContainerImageArchiveFile{
-			ImageId:      imageId,
 			AccountId:    accountId,
 			UnixFilePath: filePath,
 			SizeBytes:    sizeBytes,
@@ -1412,6 +1403,10 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("ReadRemoteContainerArchivesFailed: " + err.Error())
 	}
 
+	if len(containerArchiveEntities) == 0 {
+		return archiveId, errors.New("NoContainerArchivesFound")
+	}
+
 	for _, containerArchiveEntity := range containerArchiveEntities {
 		necessaryFreeStorageBytes += containerArchiveEntity.SizeBytes.Uint64()
 	}
@@ -1463,13 +1458,13 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("BackupCliFactoryFailed: " + err.Error())
 	}
 
-	remoteBasePathStr := repo.readBackupRemotePath(destinationEntity)
+	taskRemotePathStr := repo.readTaskRemotePath(destinationEntity, taskEntity.TaskId)
 
 	for _, containerArchiveEntity := range containerArchiveEntities {
 		archiveFilePath := containerArchiveEntity.UnixFilePath
 
 		backupBinaryCmd := backupBinaryCli + " copyto " +
-			remoteBasePathStr + archiveFilePath.String() +
+			taskRemotePathStr + archiveFilePath.String() +
 			" " + archivesDirTaskDirStr + "/" + archiveFilePath.ReadFileName().String()
 
 		_, err = infraHelper.RunCmdWithSubShell(backupBinaryCmd)
