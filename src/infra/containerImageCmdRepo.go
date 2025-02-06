@@ -360,8 +360,8 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 	)
 
 	return entity.NewContainerImageArchiveFile(
-		createDto.ImageId, imageEntity.AccountId, finalFilePath, downloadUrl,
-		sizeBytes, valueObject.NewUnixTimeNow(),
+		createDto.ImageId, imageEntity.AccountId, finalFilePath, sizeBytes,
+		&downloadUrl, nil, valueObject.NewUnixTimeNow(),
 	), nil
 }
 

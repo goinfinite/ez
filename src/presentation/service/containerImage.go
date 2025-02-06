@@ -239,7 +239,7 @@ func (service *ContainerImageService) ReadArchiveFiles(
 				return NewServiceOutput(InfraError, err.Error())
 			}
 
-			archiveFilesList[archiveFileIndex].DownloadUrl = updatedUrl
+			archiveFilesList[archiveFileIndex].DownloadUrl = &updatedUrl
 		}
 	}
 

@@ -286,21 +286,21 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 		return archiveFile, errors.New("ArchiveFileOwnerAccountIdParseError")
 	}
 
-	downloadUrl, _ := valueObject.NewUrl(
-		"https://" + serverHostname.String() + "/api/v1/container/image/archive/" +
-			accountId.String() + "/" + imageId.String() + "/",
-	)
-
 	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
 	if err != nil {
 		return archiveFile, errors.New("ArchiveFileSizeBytesParseError")
 	}
 
+	downloadUrl, _ := valueObject.NewUrl(
+		"https://" + serverHostname.String() + "/api/v1/container/image/archive/" +
+			accountId.String() + "/" + imageId.String() + "/",
+	)
+
 	rawCreatedAt := fileInfo.ModTime()
 	createdAt := valueObject.NewUnixTimeWithGoTime(rawCreatedAt)
 
 	return entity.NewContainerImageArchiveFile(
-		imageId, accountId, archiveFilePath, downloadUrl, sizeBytes, createdAt,
+		imageId, accountId, archiveFilePath, sizeBytes, &downloadUrl, nil, createdAt,
 	), nil
 }
 

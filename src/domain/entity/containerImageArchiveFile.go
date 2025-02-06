@@ -10,8 +10,9 @@ type ContainerImageArchiveFile struct {
 	ImageId      valueObject.ContainerImageId `json:"imageId"`
 	AccountId    valueObject.AccountId        `json:"accountId"`
 	UnixFilePath valueObject.UnixFilePath     `json:"unixFilePath"`
-	DownloadUrl  valueObject.Url              `json:"downloadUrl"`
 	SizeBytes    valueObject.Byte             `json:"sizeBytes"`
+	DownloadUrl  *valueObject.Url             `json:"downloadUrl,omitempty"`
+	ContainerId  *valueObject.ContainerId     `json:"containerId,omitempty"`
 	CreatedAt    valueObject.UnixTime         `json:"createdAt"`
 }
 
@@ -19,16 +20,18 @@ func NewContainerImageArchiveFile(
 	imageId valueObject.ContainerImageId,
 	accountId valueObject.AccountId,
 	unixFilePath valueObject.UnixFilePath,
-	downloadUrl valueObject.Url,
 	sizeBytes valueObject.Byte,
+	downloadUrl *valueObject.Url,
+	containerId *valueObject.ContainerId,
 	createdAt valueObject.UnixTime,
 ) ContainerImageArchiveFile {
 	return ContainerImageArchiveFile{
 		ImageId:      imageId,
 		AccountId:    accountId,
 		UnixFilePath: unixFilePath,
-		DownloadUrl:  downloadUrl,
 		SizeBytes:    sizeBytes,
+		DownloadUrl:  downloadUrl,
+		ContainerId:  containerId,
 		CreatedAt:    createdAt,
 	}
 }
