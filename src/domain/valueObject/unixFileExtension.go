@@ -9,7 +9,7 @@ import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
-const unixFileExtensionRegexExpression = `^[\w\_\-]{1,15}$`
+const unixFileExtensionRegexExpression = `^([\w\-]{1,15}\.)?[\w\-]{1,15}$`
 
 type UnixFileExtension string
 
