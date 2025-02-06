@@ -839,6 +839,20 @@ func (repo *BackupCmdRepo) taskRunDetailsFailRegister(
 	)
 }
 
+func (repo *BackupCmdRepo) readBackupRemotePath(
+	destinationEntity entity.IBackupDestination,
+) string {
+	remotePathStr := "encdest:"
+	switch destinationEntity := destinationEntity.(type) {
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.DestinationPath.String() != "/" {
+			remotePathStr += destinationEntity.DestinationPath.String()
+		}
+	}
+
+	return remotePathStr
+}
+
 func (repo *BackupCmdRepo) backupBinaryCliFactory(
 	destinationIEntity entity.IBackupDestination,
 ) (string, error) {
@@ -949,14 +963,9 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	containerIdStr := containerWithMetrics.Id.String()
 
 	var backupBinaryFlags []string
-	destPathStr := "encdest:"
-	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	switch taskRunDetails.DestinationEntity.(type) {
 	case entity.BackupDestinationObjectStorage:
 		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
-	case entity.BackupDestinationRemoteHost:
-		if destinationEntity.DestinationPath.String() != "/" {
-			destPathStr += destinationEntity.DestinationPath.String()
-		}
 	}
 
 	archiveFileExtStr := ".tar.br"
@@ -967,6 +976,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 
 	destFileNameStr := containerWithMetrics.AccountId.String() + "-" + containerIdStr +
 		"-" + archiveFileEntity.ImageId.String() + archiveFileExtStr
+	destPathStr := repo.readBackupRemotePath(taskRunDetails.DestinationEntity)
 	destPathStr += taskRunDetails.TaskId.String() + "/" + destFileNameStr
 
 	backupBinaryCli, err := repo.backupBinaryCliFactory(taskRunDetails.DestinationEntity)
@@ -1211,13 +1221,7 @@ func (repo *BackupCmdRepo) DeleteTask(
 		return errors.New("BackupCliFactoryFailed: " + err.Error())
 	}
 
-	remotePathStr := "encdest:"
-	switch destinationEntity := destinationEntity.(type) {
-	case entity.BackupDestinationRemoteHost:
-		if destinationEntity.DestinationPath.String() != "/" {
-			remotePathStr += destinationEntity.DestinationPath.String()
-		}
-	}
+	remotePathStr := repo.readBackupRemotePath(destinationEntity)
 
 	backupBinaryCmd := backupBinaryCli + " delete " +
 		remotePathStr + taskEntity.TaskId.String() + "/"
@@ -1229,54 +1233,23 @@ func (repo *BackupCmdRepo) DeleteTask(
 	return nil
 }
 
-func (repo *BackupCmdRepo) CreateTaskArchive(
-	createDto dto.CreateBackupTaskArchive,
-) (archiveId valueObject.BackupTaskArchiveId, err error) {
-	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
-		dto.ReadBackupTasksRequest{TaskId: &createDto.TaskId},
-	)
-	if err != nil {
-		return archiveId, errors.New("ReadBackupTaskFailed: " + err.Error())
-	}
+func (repo *BackupCmdRepo) readRemoteContainerArchives(
+	taskEntity entity.BackupTask,
+	destinationEntity entity.IBackupDestination,
+	containerAccountIds []valueObject.AccountId,
+	containerIds []valueObject.ContainerId,
+	exceptContainerAccountIds []valueObject.AccountId,
+	exceptContainerIds []valueObject.ContainerId,
+) ([]entity.ContainerImageArchiveFile, error) {
+	containerArchives := []entity.ContainerImageArchiveFile{}
 
-	userDataDirectoryStats, err := repo.readUserDataStats()
-	if err != nil {
-		return archiveId, errors.New("ReadUserDataDirStatsError: " + err.Error())
-	}
-
-	accountIdsFilterProvided := len(createDto.ContainerAccountIds) > 0
-	containerIdsFilterProvided := len(createDto.ContainerIds) > 0
-	exceptAccountIdsFilterProvided := len(createDto.ExceptContainerAccountIds) > 0
-	exceptContainerIdsFilterProvided := len(createDto.ExceptContainerIds) > 0
-
-	wereFiltersProvided := accountIdsFilterProvided || containerIdsFilterProvided ||
-		exceptAccountIdsFilterProvided || exceptContainerIdsFilterProvided
-	necessaryFreeStorageBytes := taskEntity.SizeBytes.Uint64() * 2
-	if !wereFiltersProvided && necessaryFreeStorageBytes >= userDataDirectoryStats.Free {
-		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
-	}
-
-	destinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
-		dto.ReadBackupDestinationsRequest{DestinationId: &taskEntity.DestinationId}, true,
-	)
-	if err != nil {
-		return archiveId, errors.New("ReadBackupDestinationFailed: " + err.Error())
-	}
+	remoteBasePathStr := repo.readBackupRemotePath(destinationEntity)
+	remoteBasePathStr += taskEntity.TaskId.String()
 
 	backupBinaryCli, err := repo.backupBinaryCliFactory(destinationEntity)
 	if err != nil {
-		return archiveId, errors.New("BackupCliFactoryFailed: " + err.Error())
+		return containerArchives, errors.New("BackupCliFactoryFailed: " + err.Error())
 	}
-
-	remoteBasePathStr := "encdest:"
-	switch destinationEntity := destinationEntity.(type) {
-	case entity.BackupDestinationRemoteHost:
-		if destinationEntity.DestinationPath.String() != "/" {
-			remoteBasePathStr += destinationEntity.DestinationPath.String()
-		}
-	}
-	taskIdStr := taskEntity.TaskId.String()
-	remoteBasePathStr += taskIdStr
 
 	backupBinaryCmd := backupBinaryCli + " lsjson " +
 		"--files-only --no-mimetype --no-modtime " + remoteBasePathStr
@@ -1289,22 +1262,25 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		taskEntity.AccountId, backupBinaryCmd,
 	)
 	if err != nil || len(rawArchiveFilesList) == 0 {
-		return archiveId, errors.New("ListBackupTaskFilesFailed: " + err.Error())
+		return containerArchives, errors.New("ListBackupTaskFilesFailed: " + err.Error())
 	}
 
 	var rawArchiveFilesListMap []map[string]interface{}
 	err = json.Unmarshal([]byte(rawArchiveFilesList), &rawArchiveFilesListMap)
 	if err != nil {
-		return archiveId, errors.New("UnmarshalBackupTaskFilesListFailed: " + err.Error())
+		return containerArchives, errors.New("UnmarshalBackupTaskFilesListFailed: " + err.Error())
 	}
 
-	accountIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ContainerAccountIds)
-	containerIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ContainerIds)
-	exceptAccountIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ExceptContainerAccountIds)
-	exceptContainerIdsFilterSet := infraHelper.SliceToSetTransformer(createDto.ExceptContainerIds)
+	accountIdsFilterProvided := len(containerAccountIds) > 0
+	containerIdsFilterProvided := len(containerIds) > 0
+	exceptAccountIdsFilterProvided := len(exceptContainerAccountIds) > 0
+	exceptContainerIdsFilterProvided := len(exceptContainerIds) > 0
 
-	necessaryFreeStorageBytes = 0
-	filePathsToDownload := []valueObject.UnixFilePath{}
+	accountIdsFilterSet := infraHelper.SliceToSetTransformer(containerAccountIds)
+	containerIdsFilterSet := infraHelper.SliceToSetTransformer(containerIds)
+	exceptAccountIdsFilterSet := infraHelper.SliceToSetTransformer(exceptContainerAccountIds)
+	exceptContainerIdsFilterSet := infraHelper.SliceToSetTransformer(exceptContainerIds)
+
 	for _, rawArchiveFile := range rawArchiveFilesListMap {
 		rawName, assertOk := rawArchiveFile["Name"].(string)
 		if !assertOk {
@@ -1360,6 +1336,12 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 			continue
 		}
 
+		imageId, err := valueObject.NewContainerImageId(nameParts[2])
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("rawImageId", nameParts[2]))
+			continue
+		}
+
 		rawPath, assertOk := rawArchiveFile["Path"].(string)
 		if !assertOk {
 			slog.Debug("AssertPathFailed", slog.Any("rawArchiveFile", rawArchiveFile))
@@ -1374,14 +1356,65 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 			continue
 		}
 
-		filePathsToDownload = append(filePathsToDownload, filePath)
-		necessaryFreeStorageBytes += sizeBytes.Uint64()
+		imageArchiveFile := entity.ContainerImageArchiveFile{
+			ImageId:      imageId,
+			AccountId:    accountId,
+			UnixFilePath: filePath,
+			SizeBytes:    sizeBytes,
+			ContainerId:  &containerId,
+		}
+		containerArchives = append(containerArchives, imageArchiveFile)
 	}
 
-	if len(filePathsToDownload) == 0 {
-		return archiveId, errors.New("NoBackupFilesFound")
+	return containerArchives, nil
+}
+
+func (repo *BackupCmdRepo) CreateTaskArchive(
+	createDto dto.CreateBackupTaskArchive,
+) (archiveId valueObject.BackupTaskArchiveId, err error) {
+	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
+		dto.ReadBackupTasksRequest{TaskId: &createDto.TaskId},
+	)
+	if err != nil {
+		return archiveId, errors.New("ReadBackupTaskFailed: " + err.Error())
 	}
 
+	userDataDirectoryStats, err := repo.readUserDataStats()
+	if err != nil {
+		return archiveId, errors.New("ReadUserDataDirStatsError: " + err.Error())
+	}
+
+	accountIdsFilterProvided := len(createDto.ContainerAccountIds) > 0
+	containerIdsFilterProvided := len(createDto.ContainerIds) > 0
+	exceptAccountIdsFilterProvided := len(createDto.ExceptContainerAccountIds) > 0
+	exceptContainerIdsFilterProvided := len(createDto.ExceptContainerIds) > 0
+
+	wereFiltersProvided := accountIdsFilterProvided || containerIdsFilterProvided ||
+		exceptAccountIdsFilterProvided || exceptContainerIdsFilterProvided
+	necessaryFreeStorageBytes := taskEntity.SizeBytes.Uint64() * 2
+	if !wereFiltersProvided && necessaryFreeStorageBytes >= userDataDirectoryStats.Free {
+		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
+	}
+
+	destinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
+		dto.ReadBackupDestinationsRequest{DestinationId: &taskEntity.DestinationId}, true,
+	)
+	if err != nil {
+		return archiveId, errors.New("ReadBackupDestinationFailed: " + err.Error())
+	}
+
+	necessaryFreeStorageBytes = 0
+	containerArchiveEntities, err := repo.readRemoteContainerArchives(
+		taskEntity, destinationEntity, createDto.ContainerAccountIds, createDto.ContainerIds,
+		createDto.ExceptContainerAccountIds, createDto.ExceptContainerIds,
+	)
+	if err != nil {
+		return archiveId, errors.New("ReadRemoteContainerArchivesFailed: " + err.Error())
+	}
+
+	for _, containerArchiveEntity := range containerArchiveEntities {
+		necessaryFreeStorageBytes += containerArchiveEntity.SizeBytes.Uint64()
+	}
 	if necessaryFreeStorageBytes*2 >= userDataDirectoryStats.Free {
 		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
 	}
@@ -1410,6 +1443,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("ValidateArchiveTaskIdFailed: " + err.Error())
 	}
 	archiveIdStr := archiveId.String()
+	taskIdStr := taskEntity.TaskId.String()
 
 	taskArchiveDirName := taskIdStr + "-" + archiveIdStr
 	rawArchivesDirTaskDir := archivesDirectoryStr + "/" + taskArchiveDirName
@@ -1424,14 +1458,26 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("MakeArchiveTaskDirFailed: " + err.Error())
 	}
 
-	for _, filePath := range filePathsToDownload {
-		backupBinaryCmd = backupBinaryCli + " copyto " + remoteBasePathStr + filePath.String() +
-			" " + archivesDirTaskDirStr + "/" + filePath.ReadFileName().String()
+	backupBinaryCli, err := repo.backupBinaryCliFactory(destinationEntity)
+	if err != nil {
+		return archiveId, errors.New("BackupCliFactoryFailed: " + err.Error())
+	}
+
+	remoteBasePathStr := repo.readBackupRemotePath(destinationEntity)
+
+	for _, containerArchiveEntity := range containerArchiveEntities {
+		archiveFilePath := containerArchiveEntity.UnixFilePath
+
+		backupBinaryCmd := backupBinaryCli + " copyto " +
+			remoteBasePathStr + archiveFilePath.String() +
+			" " + archivesDirTaskDirStr + "/" + archiveFilePath.ReadFileName().String()
+
 		_, err = infraHelper.RunCmdWithSubShell(backupBinaryCmd)
 		if err != nil {
 			slog.Debug(
-				"DownloadContainerBackupFileFailed",
-				slog.String("filePath", filePath.String()),
+				"DownloadContainerArchiveFileFailed",
+				slog.String("containerId", containerArchiveEntity.ContainerId.String()),
+				slog.String("archiveFilePath", archiveFilePath.String()),
 				slog.String("error", err.Error()),
 			)
 			continue
