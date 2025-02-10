@@ -86,6 +86,7 @@ func (router *Router) backupRoutes() {
 		Use:   "archive",
 		Short: "BackupTaskArchiveManagement",
 	}
+	backupTaskArchiveCmd.AddCommand(backupController.ReadTaskArchive())
 	backupTaskArchiveCmd.AddCommand(backupController.CreateTaskArchive())
 	backupTaskCmd.AddCommand(backupTaskArchiveCmd)
 	backupCmd.AddCommand(backupTaskCmd)

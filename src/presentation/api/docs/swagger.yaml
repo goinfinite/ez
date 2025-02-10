@@ -322,6 +322,15 @@ definitions:
       pagination:
         $ref: '#/definitions/dto.Pagination'
     type: object
+  dto.ReadBackupTaskArchivesResponse:
+    properties:
+      archives:
+        items:
+          $ref: '#/definitions/entity.BackupTaskArchive'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+    type: object
   dto.ReadBackupTasksResponse:
     properties:
       pagination:
@@ -640,6 +649,23 @@ definitions:
       updatedAt:
         type: integer
     type: object
+  entity.BackupTaskArchive:
+    properties:
+      accountId:
+        type: integer
+      archiveId:
+        type: string
+      createdAt:
+        type: integer
+      downloadUrl:
+        type: string
+      sizeBytes:
+        type: integer
+      taskId:
+        type: integer
+      unixFilePath:
+        type: string
+    type: object
   entity.Container:
     properties:
       accountId:
@@ -712,6 +738,8 @@ definitions:
     properties:
       accountId:
         type: integer
+      containerId:
+        type: string
       createdAt:
         type: integer
       downloadUrl:
@@ -1767,6 +1795,63 @@ paths:
       tags:
       - backup
   /v1/backup/task/archive/:
+    get:
+      consumes:
+      - application/json
+      description: List backup tasks archives.
+      parameters:
+      - description: BackupTaskArchiveId
+        in: query
+        name: archiveId
+        type: string
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupTaskId
+        in: query
+        name: taskId
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupTaskArchivesResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupTaskArchives
+      tags:
+      - backup
     post:
       consumes:
       - application/json

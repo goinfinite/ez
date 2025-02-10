@@ -363,6 +363,45 @@ func (controller *BackupController) DeleteTask(c echo.Context) error {
 	)
 }
 
+// ReadBackupTaskArchives	 godoc
+// @Summary      ReadBackupTaskArchives
+// @Description  List backup tasks archives.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        archiveId query  string  false  "BackupTaskArchiveId"
+// @Param        accountId query  uint  false  "BackupAccountId"
+// @Param        taskId query  string  false  "BackupTaskId"
+// @Param        createdBeforeAt query  string  false  "CreatedBeforeAt"
+// @Param        createdAfterAt query  string  false  "CreatedAfterAt"
+// @Param        pageNumber query  uint  false  "PageNumber (Pagination)"
+// @Param        itemsPerPage query  uint  false  "ItemsPerPage (Pagination)"
+// @Param        sortBy query  string  false  "SortBy (Pagination)"
+// @Param        sortDirection query  string  false  "SortDirection (Pagination)"
+// @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
+// @Success      200 {object} dto.ReadBackupTaskArchivesResponse
+// @Router       /v1/backup/task/archive/ [get]
+func (controller *BackupController) ReadTaskArchive(c echo.Context) error {
+	requestBody := map[string]interface{}{}
+	queryParameters := []string{
+		"archiveId", "accountId", "taskId", "createdBeforeAt", "createdAfterAt",
+		"pageNumber", "itemsPerPage", "sortBy", "sortDirection", "lastSeenId",
+	}
+	for _, paramName := range queryParameters {
+		paramValue := c.QueryParam(paramName)
+		if paramValue == "" {
+			continue
+		}
+
+		requestBody[paramName] = strings.Trim(paramValue, "\"")
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.ReadTaskArchive(requestBody),
+	)
+}
+
 // CreateBackupTaskArchive	godoc
 // @Summary      CreateBackupTaskArchive
 // @Description  Schedule a backup task archive creation.

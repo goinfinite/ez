@@ -883,6 +883,94 @@ const docTemplate = `{
             }
         },
         "/v1/backup/task/archive/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backup tasks archives.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupTaskArchives",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskArchiveId",
+                        "name": "archiveId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupTaskId",
+                        "name": "taskId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupTaskArchivesResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -3056,6 +3144,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ReadBackupTaskArchivesResponse": {
+            "type": "object",
+            "properties": {
+                "archives": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.BackupTaskArchive"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                }
+            }
+        },
         "dto.ReadBackupTasksResponse": {
             "type": "object",
             "properties": {
@@ -3540,6 +3642,32 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.BackupTaskArchive": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "archiveId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "downloadUrl": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "unixFilePath": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Container": {
             "type": "object",
             "properties": {
@@ -3648,6 +3776,9 @@ const docTemplate = `{
             "properties": {
                 "accountId": {
                     "type": "integer"
+                },
+                "containerId": {
+                    "type": "string"
                 },
                 "createdAt": {
                     "type": "integer"

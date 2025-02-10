@@ -28,8 +28,7 @@ func (controller *BackupController) ReadDestination() *cobra.Command {
 	var objectStorageProviderStr, remoteHostTypeStr, remoteHostnameStr string
 	var paginationPageNumberUint32 uint32
 	var paginationItemsPerPageUint16 uint16
-	var paginationSortByStr, paginationSortDirectionStr string
-	var paginationLastSeenIdStr string
+	var paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -40,46 +39,29 @@ func (controller *BackupController) ReadDestination() *cobra.Command {
 			if destinationIdUint != 0 {
 				requestBody["destinationId"] = destinationIdUint
 			}
-
 			if accountIdUint != 0 {
 				requestBody["accountId"] = accountIdUint
 			}
-
 			if destinationNameStr != "" {
 				requestBody["destinationName"] = destinationNameStr
 			}
-
 			if destinationTypeStr != "" {
 				requestBody["destinationType"] = destinationTypeStr
 			}
-
 			if objectStorageProviderStr != "" {
 				requestBody["objectStorageProvider"] = objectStorageProviderStr
 			}
-
 			if remoteHostTypeStr != "" {
 				requestBody["remoteHostType"] = remoteHostTypeStr
 			}
-
 			if remoteHostnameStr != "" {
 				requestBody["remoteHostname"] = remoteHostnameStr
 			}
 
-			if paginationPageNumberUint32 != 0 {
-				requestBody["pageNumber"] = paginationPageNumberUint32
-			}
-			if paginationItemsPerPageUint16 != 0 {
-				requestBody["itemsPerPage"] = paginationItemsPerPageUint16
-			}
-			if paginationSortByStr != "" {
-				requestBody["sortBy"] = paginationSortByStr
-			}
-			if paginationSortDirectionStr != "" {
-				requestBody["sortDirection"] = paginationSortDirectionStr
-			}
-			if paginationLastSeenIdStr != "" {
-				requestBody["lastSeenId"] = paginationLastSeenIdStr
-			}
+			requestBody = cliHelper.PaginationParser(
+				requestBody, paginationPageNumberUint32, paginationItemsPerPageUint16,
+				paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr,
+			)
 
 			cliHelper.ServiceResponseWrapper(
 				controller.backupService.ReadDestination(requestBody),
@@ -147,83 +129,63 @@ func (controller *BackupController) CreateDestination() *cobra.Command {
 			if destinationDescriptionStr != "" {
 				requestBody["destinationDescription"] = destinationDescriptionStr
 			}
-
 			if destinationPathStr != "" {
 				requestBody["destinationPath"] = destinationPathStr
 			}
-
 			if minLocalStorageFreePercentUint8 != 0 {
 				requestBody["minLocalStorageFreePercent"] = minLocalStorageFreePercentUint8
 			}
-
 			if maxDestinationStorageUsagePercentUint8 != 0 {
 				requestBody["maxDestinationStorageUsagePercent"] = maxDestinationStorageUsagePercentUint8
 			}
-
 			if maxConcurrentConnectionsUint16 != 0 {
 				requestBody["maxConcurrentConnections"] = maxConcurrentConnectionsUint16
 			}
-
 			if downloadBytesSecRateLimitUint64 != 0 {
 				requestBody["downloadBytesSecRateLimit"] = downloadBytesSecRateLimitUint64
 			}
-
 			if uploadBytesSecRateLimitUint64 != 0 {
 				requestBody["uploadBytesSecRateLimit"] = uploadBytesSecRateLimitUint64
 			}
-
 			if objectStorageProviderStr != "" {
 				requestBody["objectStorageProvider"] = objectStorageProviderStr
 			}
-
 			if objectStorageProviderRegionStr != "" {
 				requestBody["objectStorageProviderRegion"] = objectStorageProviderRegionStr
 			}
-
 			if objectStorageProviderAccessKeyIdStr != "" {
 				requestBody["objectStorageProviderAccessKeyId"] = objectStorageProviderAccessKeyIdStr
 			}
-
 			if objectStorageProviderSecretAccessKeyStr != "" {
 				requestBody["objectStorageProviderSecretAccessKey"] = objectStorageProviderSecretAccessKeyStr
 			}
-
 			if objectStorageEndpointUrlStr != "" {
 				requestBody["objectStorageEndpointUrl"] = objectStorageEndpointUrlStr
 			}
-
 			if objectStorageBucketNameStr != "" {
 				requestBody["objectStorageBucketName"] = objectStorageBucketNameStr
 			}
-
 			if remoteHostTypeStr != "" {
 				requestBody["remoteHostType"] = remoteHostTypeStr
 			}
-
 			if remoteHostnameStr != "" {
 				requestBody["remoteHostname"] = remoteHostnameStr
 			}
-
 			if remoteHostNetworkPortUint16 != 0 {
 				requestBody["remoteHostNetworkPort"] = remoteHostNetworkPortUint16
 			}
-
 			if remoteHostUsernameStr != "" {
 				requestBody["remoteHostUsername"] = remoteHostUsernameStr
 			}
-
 			if remoteHostPasswordStr != "" {
 				requestBody["remoteHostPassword"] = remoteHostPasswordStr
 			}
-
 			if remoteHostPrivateKeyFilePathStr != "" {
 				requestBody["remoteHostPrivateKeyFilePath"] = remoteHostPrivateKeyFilePathStr
 			}
-
 			if remoteHostConnectionTimeoutSecsUint16 != 0 {
 				requestBody["remoteHostConnectionTimeoutSecs"] = remoteHostConnectionTimeoutSecsUint16
 			}
-
 			if remoteHostConnectionRetrySecsUint16 != 0 {
 				requestBody["remoteHostConnectionRetrySecs"] = remoteHostConnectionRetrySecsUint16
 			}
@@ -350,91 +312,69 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 			if destinationNameStr != "" {
 				requestBody["destinationName"] = destinationNameStr
 			}
-
 			if destinationTypeStr != "" {
 				requestBody["destinationType"] = destinationTypeStr
 			}
-
 			if destinationDescriptionStr != "" {
 				requestBody["destinationDescription"] = destinationDescriptionStr
 			}
-
 			if destinationPathStr != "" {
 				requestBody["destinationPath"] = destinationPathStr
 			}
-
 			if minLocalStorageFreePercentUint8 != 0 {
 				requestBody["minLocalStorageFreePercent"] = minLocalStorageFreePercentUint8
 			}
-
 			if maxDestinationStorageUsagePercentUint8 != 0 {
 				requestBody["maxDestinationStorageUsagePercent"] = maxDestinationStorageUsagePercentUint8
 			}
-
 			if maxConcurrentConnectionsUint16 != 0 {
 				requestBody["maxConcurrentConnections"] = maxConcurrentConnectionsUint16
 			}
-
 			if downloadBytesSecRateLimitUint64 != 0 {
 				requestBody["downloadBytesSecRateLimit"] = downloadBytesSecRateLimitUint64
 			}
-
 			if uploadBytesSecRateLimitUint64 != 0 {
 				requestBody["uploadBytesSecRateLimit"] = uploadBytesSecRateLimitUint64
 			}
-
 			if objectStorageProviderStr != "" {
 				requestBody["objectStorageProvider"] = objectStorageProviderStr
 			}
-
 			if objectStorageProviderRegionStr != "" {
 				requestBody["objectStorageProviderRegion"] = objectStorageProviderRegionStr
 			}
-
 			if objectStorageProviderAccessKeyIdStr != "" {
 				requestBody["objectStorageProviderAccessKeyId"] = objectStorageProviderAccessKeyIdStr
 			}
-
 			if objectStorageProviderSecretAccessKeyStr != "" {
 				requestBody["objectStorageProviderSecretAccessKey"] = objectStorageProviderSecretAccessKeyStr
 			}
-
 			if objectStorageEndpointUrlStr != "" {
 				requestBody["objectStorageEndpointUrl"] = objectStorageEndpointUrlStr
 			}
-
 			if objectStorageBucketNameStr != "" {
 				requestBody["objectStorageBucketName"] = objectStorageBucketNameStr
 			}
-
 			if remoteHostTypeStr != "" {
 				requestBody["remoteHostType"] = remoteHostTypeStr
 			}
-
 			if remoteHostnameStr != "" {
 				requestBody["remoteHostname"] = remoteHostnameStr
 			}
-
 			if remoteHostNetworkPortUint16 != 0 {
 				requestBody["remoteHostNetworkPort"] = remoteHostNetworkPortUint16
 			}
-
 			if remoteHostUsernameStr != "" {
 				requestBody["remoteHostUsername"] = remoteHostUsernameStr
 			}
-
 			if remoteHostPasswordStr != "" {
 				requestBody["remoteHostPassword"] = remoteHostPasswordStr
 			}
-
 			if remoteHostPrivateKeyFilePathStr != "" {
 				requestBody["remoteHostPrivateKeyFilePath"] = remoteHostPrivateKeyFilePathStr
 			}
-
 			if remoteHostConnectionTimeoutSecsUint16 != 0 {
 				requestBody["remoteHostConnectionTimeoutSecs"] = remoteHostConnectionTimeoutSecsUint16
 			}
-
 			if remoteHostConnectionRetrySecsUint16 != 0 {
 				requestBody["remoteHostConnectionRetrySecs"] = remoteHostConnectionRetrySecsUint16
 			}
@@ -564,8 +504,7 @@ func (controller *BackupController) ReadJob() *cobra.Command {
 	var retentionStrategyStr, jobStatusStr, archiveCompressionFormatStr, lastRunStatusStr string
 	var paginationPageNumberUint32 uint32
 	var paginationItemsPerPageUint16 uint16
-	var paginationSortByStr, paginationSortDirectionStr string
-	var paginationLastSeenIdStr string
+	var paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -576,46 +515,29 @@ func (controller *BackupController) ReadJob() *cobra.Command {
 			if jobIdUint != 0 {
 				requestBody["jobId"] = jobIdUint
 			}
-
 			if jobStatusStr != "" {
 				requestBody["jobStatus"] = jobStatusStr
 			}
-
 			if accountIdUint != 0 {
 				requestBody["accountId"] = accountIdUint
 			}
-
 			if destinationIdUint != 0 {
 				requestBody["destinationId"] = destinationIdUint
 			}
-
 			if retentionStrategyStr != "" {
 				requestBody["retentionStrategy"] = retentionStrategyStr
 			}
-
 			if archiveCompressionFormatStr != "" {
 				requestBody["archiveCompressionFormat"] = archiveCompressionFormatStr
 			}
-
 			if lastRunStatusStr != "" {
 				requestBody["lastRunStatus"] = lastRunStatusStr
 			}
 
-			if paginationPageNumberUint32 != 0 {
-				requestBody["pageNumber"] = paginationPageNumberUint32
-			}
-			if paginationItemsPerPageUint16 != 0 {
-				requestBody["itemsPerPage"] = paginationItemsPerPageUint16
-			}
-			if paginationSortByStr != "" {
-				requestBody["sortBy"] = paginationSortByStr
-			}
-			if paginationSortDirectionStr != "" {
-				requestBody["sortDirection"] = paginationSortDirectionStr
-			}
-			if paginationLastSeenIdStr != "" {
-				requestBody["lastSeenId"] = paginationLastSeenIdStr
-			}
+			requestBody = cliHelper.PaginationParser(
+				requestBody, paginationPageNumberUint32, paginationItemsPerPageUint16,
+				paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr,
+			)
 
 			cliHelper.ServiceResponseWrapper(
 				controller.backupService.ReadJob(requestBody),
@@ -671,53 +593,42 @@ func (controller *BackupController) CreateJob() *cobra.Command {
 			requestBody["destinationIds"] = sharedHelper.StringSliceValueObjectParser(
 				destinationIdsSlice, valueObject.NewBackupDestinationId,
 			)
-
 			if jobDescriptionStr != "" {
 				requestBody["jobDescription"] = jobDescriptionStr
 			}
-
 			if retentionStrategyStr != "" {
 				requestBody["retentionStrategy"] = retentionStrategyStr
 			}
-
 			if archiveCompressionFormatStr != "" {
 				requestBody["archiveCompressionFormat"] = archiveCompressionFormatStr
 			}
-
 			if timeoutSecsUint != 0 {
 				requestBody["timeoutSecs"] = timeoutSecsUint
 			}
-
 			if maxTaskRetentionCountUint != 0 {
 				requestBody["maxTaskRetentionCount"] = maxTaskRetentionCountUint
 			}
-
 			if maxTaskRetentionDaysUint != 0 {
 				requestBody["maxTaskRetentionDays"] = maxTaskRetentionDaysUint
 			}
-
 			if maxConcurrentCpuCoresUint != 0 {
 				requestBody["maxConcurrentCpuCores"] = maxConcurrentCpuCoresUint
 			}
-
 			if len(containerAccountIdsSlice) > 0 {
 				requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
 					containerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
-
 			if len(containerIdsSlice) > 0 {
 				requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
 					containerIdsSlice, valueObject.NewContainerId,
 				)
 			}
-
 			if len(exceptContainerAccountIdsSlice) > 0 {
 				requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
 					exceptContainerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
-
 			if len(exceptContainerIdsSlice) > 0 {
 				requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
 					exceptContainerIdsSlice, valueObject.NewContainerId,
@@ -789,51 +700,41 @@ func (controller *BackupController) UpdateJob() *cobra.Command {
 			if jobDescriptionStr != "" {
 				requestBody["jobDescription"] = jobDescriptionStr
 			}
-
 			if len(destinationIdsSlice) > 0 {
 				requestBody["destinationIds"] = sharedHelper.StringSliceValueObjectParser(
 					destinationIdsSlice, valueObject.NewBackupDestinationId,
 				)
 			}
-
 			if backupScheduleStr != "" {
 				requestBody["backupSchedule"] = backupScheduleStr
 			}
-
 			if timeoutSecsUint != 0 {
 				requestBody["timeoutSecs"] = timeoutSecsUint
 			}
-
 			if maxTaskRetentionCountUint != 0 {
 				requestBody["maxTaskRetentionCount"] = maxTaskRetentionCountUint
 			}
-
 			if maxTaskRetentionDaysUint != 0 {
 				requestBody["maxTaskRetentionDays"] = maxTaskRetentionDaysUint
 			}
-
 			if maxConcurrentCpuCoresUint != 0 {
 				requestBody["maxConcurrentCpuCores"] = maxConcurrentCpuCoresUint
 			}
-
 			if len(containerAccountIdsSlice) > 0 {
 				requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
 					containerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
-
 			if len(containerIdsSlice) > 0 {
 				requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
 					containerIdsSlice, valueObject.NewContainerId,
 				)
 			}
-
 			if len(exceptContainerAccountIdsSlice) > 0 {
 				requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
 					exceptContainerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
-
 			if len(exceptContainerIdsSlice) > 0 {
 				requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
 					exceptContainerIdsSlice, valueObject.NewContainerId,
@@ -937,8 +838,7 @@ func (controller *BackupController) ReadTask() *cobra.Command {
 	var taskStatusStr, retentionStrategyStr, containerIdStr string
 	var paginationPageNumberUint32 uint32
 	var paginationItemsPerPageUint16 uint16
-	var paginationSortByStr, paginationSortDirectionStr string
-	var paginationLastSeenIdStr string
+	var paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -949,46 +849,29 @@ func (controller *BackupController) ReadTask() *cobra.Command {
 			if taskIdUint != 0 {
 				requestBody["taskId"] = taskIdUint
 			}
-
 			if accountIdUint != 0 {
 				requestBody["accountId"] = accountIdUint
 			}
-
 			if jobIdUint != 0 {
 				requestBody["jobId"] = jobIdUint
 			}
-
 			if destinationIdUint != 0 {
 				requestBody["destinationId"] = destinationIdUint
 			}
-
 			if taskStatusStr != "" {
 				requestBody["taskStatus"] = taskStatusStr
 			}
-
 			if retentionStrategyStr != "" {
 				requestBody["retentionStrategy"] = retentionStrategyStr
 			}
-
 			if containerIdStr != "" {
 				requestBody["containerId"] = containerIdStr
 			}
 
-			if paginationPageNumberUint32 != 0 {
-				requestBody["pageNumber"] = paginationPageNumberUint32
-			}
-			if paginationItemsPerPageUint16 != 0 {
-				requestBody["itemsPerPage"] = paginationItemsPerPageUint16
-			}
-			if paginationSortByStr != "" {
-				requestBody["sortBy"] = paginationSortByStr
-			}
-			if paginationSortDirectionStr != "" {
-				requestBody["sortDirection"] = paginationSortDirectionStr
-			}
-			if paginationLastSeenIdStr != "" {
-				requestBody["lastSeenId"] = paginationLastSeenIdStr
-			}
+			requestBody = cliHelper.PaginationParser(
+				requestBody, paginationPageNumberUint32, paginationItemsPerPageUint16,
+				paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr,
+			)
 
 			cliHelper.ServiceResponseWrapper(
 				controller.backupService.ReadTask(requestBody),
@@ -1045,6 +928,62 @@ func (controller *BackupController) DeleteTask() *cobra.Command {
 	cmd.MarkFlagRequired("task-id")
 	cmd.Flags().StringVarP(
 		&shouldDiscardFilesBoolStr, "should-discard-files", "s", "false", "ShouldDiscardFiles",
+	)
+
+	return cmd
+}
+
+func (controller *BackupController) ReadTaskArchive() *cobra.Command {
+	var archiveIdStr string
+	var accountIdUint, taskIdUint uint64
+	var paginationPageNumberUint32 uint32
+	var paginationItemsPerPageUint16 uint16
+	var paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "ReadBackupTaskArchives",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{}
+
+			if archiveIdStr != "" {
+				requestBody["archiveId"] = archiveIdStr
+			}
+			if accountIdUint != 0 {
+				requestBody["accountId"] = accountIdUint
+			}
+			if taskIdUint != 0 {
+				requestBody["taskId"] = taskIdUint
+			}
+
+			requestBody = cliHelper.PaginationParser(
+				requestBody, paginationPageNumberUint32, paginationItemsPerPageUint16,
+				paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr,
+			)
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.ReadTaskArchive(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().StringVarP(&archiveIdStr, "archive-id", "r", "", "BackupTaskArchiveId")
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "BackupAccountId")
+	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "t", 0, "BackupTaskId")
+	cmd.Flags().Uint32VarP(
+		&paginationPageNumberUint32, "page-number", "o", 0, "PageNumber (Pagination)",
+	)
+	cmd.Flags().Uint16VarP(
+		&paginationItemsPerPageUint16, "items-per-page", "I", 0, "ItemsPerPage (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortByStr, "sort-by", "y", "", "SortBy (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortDirectionStr, "sort-direction", "x", "", "SortDirection (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationLastSeenIdStr, "last-seen-id", "L", "", "LastSeenId (Pagination)",
 	)
 
 	return cmd

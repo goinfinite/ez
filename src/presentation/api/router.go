@@ -82,6 +82,7 @@ func (router *Router) backupRoutes() {
 	taskGroup.GET("/", backupController.ReadTask)
 	taskGroup.DELETE("/:taskId/", backupController.DeleteTask)
 	taskArchiveGroup := taskGroup.Group("/archive")
+	taskArchiveGroup.GET("/", backupController.ReadTaskArchive)
 	taskArchiveGroup.POST("/", backupController.CreateTaskArchive)
 }
 

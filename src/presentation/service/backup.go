@@ -109,7 +109,7 @@ func (service *BackupService) ReadDestination(input map[string]interface{}) Serv
 		return NewServiceOutput(UserError, err)
 	}
 
-	readDto := dto.ReadBackupDestinationsRequest{
+	requestDto := dto.ReadBackupDestinationsRequest{
 		Pagination:            requestPagination,
 		DestinationId:         destinationIdPtr,
 		AccountId:             accountIdPtr,
@@ -122,7 +122,7 @@ func (service *BackupService) ReadDestination(input map[string]interface{}) Serv
 		CreatedAfterAt:        timeParamPtrs["createdAfterAt"],
 	}
 
-	responseDto, err := useCase.ReadBackupDestinations(service.backupQueryRepo, readDto)
+	responseDto, err := useCase.ReadBackupDestinations(service.backupQueryRepo, requestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -895,7 +895,7 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 		return NewServiceOutput(UserError, err)
 	}
 
-	readDto := dto.ReadBackupJobsRequest{
+	requestDto := dto.ReadBackupJobsRequest{
 		Pagination:               requestPagination,
 		JobId:                    jobIdPtr,
 		JobStatus:                jobStatusPtr,
@@ -912,7 +912,7 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 		CreatedAfterAt:           timeParamPtrs["createdAfterAt"],
 	}
 
-	responseDto, err := useCase.ReadBackupJobs(service.backupQueryRepo, readDto)
+	responseDto, err := useCase.ReadBackupJobs(service.backupQueryRepo, requestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -1419,7 +1419,7 @@ func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutp
 		return NewServiceOutput(UserError, err)
 	}
 
-	readDto := dto.ReadBackupTasksRequest{
+	requestDto := dto.ReadBackupTasksRequest{
 		Pagination:        requestPagination,
 		TaskId:            taskIdPtr,
 		AccountId:         accountIdPtr,
@@ -1436,7 +1436,7 @@ func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutp
 		CreatedAfterAt:    timeParamPtrs["createdAfterAt"],
 	}
 
-	responseDto, err := useCase.ReadBackupTasks(service.backupQueryRepo, readDto)
+	responseDto, err := useCase.ReadBackupTasks(service.backupQueryRepo, requestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -1493,6 +1493,61 @@ func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOu
 	}
 
 	return NewServiceOutput(Success, "BackupTaskDeleted")
+}
+
+func (service *BackupService) ReadTaskArchive(input map[string]interface{}) ServiceOutput {
+	var archiveIdPtr *valueObject.BackupTaskArchiveId
+	if input["archiveId"] != nil {
+		archiveId, err := valueObject.NewBackupTaskArchiveId(input["archiveId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		archiveIdPtr = &archiveId
+	}
+
+	var accountIdPtr *valueObject.AccountId
+	if input["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(input["accountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		accountIdPtr = &accountId
+	}
+
+	var taskIdPtr *valueObject.BackupTaskId
+	if input["taskId"] != nil {
+		taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		taskIdPtr = &taskId
+	}
+
+	timeParamNames := []string{"createdBeforeAt", "createdAfterAt"}
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+
+	requestPagination, err := serviceHelper.PaginationParser(
+		input, useCase.BackupTaskArchivesDefaultPagination,
+	)
+	if err != nil {
+		return NewServiceOutput(UserError, err)
+	}
+
+	requestDto := dto.ReadBackupTaskArchivesRequest{
+		Pagination:      requestPagination,
+		ArchiveId:       archiveIdPtr,
+		AccountId:       accountIdPtr,
+		TaskId:          taskIdPtr,
+		CreatedBeforeAt: timeParamPtrs["createdBeforeAt"],
+		CreatedAfterAt:  timeParamPtrs["createdAfterAt"],
+	}
+
+	responseDto, err := useCase.ReadBackupTaskArchives(service.backupQueryRepo, requestDto)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, responseDto)
 }
 
 func (service *BackupService) CreateTaskArchive(
