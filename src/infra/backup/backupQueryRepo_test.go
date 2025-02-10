@@ -15,11 +15,11 @@ func TestBackupQueryRepo(t *testing.T) {
 	backupQueryRepo := NewBackupQueryRepo(persistentDbSvc)
 
 	t.Run("ReadDestination", func(t *testing.T) {
-		readDto := dto.ReadBackupDestinationsRequest{
+		requestDto := dto.ReadBackupDestinationsRequest{
 			Pagination: useCase.BackupDestinationsDefaultPagination,
 		}
 
-		responseDto, err := backupQueryRepo.ReadDestination(readDto, true)
+		responseDto, err := backupQueryRepo.ReadDestination(requestDto, true)
 		if err != nil {
 			t.Errorf("ReadDestinationError: %v", err)
 			return
@@ -31,11 +31,11 @@ func TestBackupQueryRepo(t *testing.T) {
 	})
 
 	t.Run("ReadJob", func(t *testing.T) {
-		readDto := dto.ReadBackupJobsRequest{
+		requestDto := dto.ReadBackupJobsRequest{
 			Pagination: useCase.BackupJobsDefaultPagination,
 		}
 
-		responseDto, err := backupQueryRepo.ReadJob(readDto)
+		responseDto, err := backupQueryRepo.ReadJob(requestDto)
 		if err != nil {
 			t.Errorf("ReadJobError: %v", err)
 			return
@@ -49,18 +49,35 @@ func TestBackupQueryRepo(t *testing.T) {
 	t.Run("ReadTask", func(t *testing.T) {
 		containerId, _ := valueObject.NewContainerId("58837bc95af5")
 
-		readDto := dto.ReadBackupTasksRequest{
+		requestDto := dto.ReadBackupTasksRequest{
 			Pagination:  useCase.BackupTasksDefaultPagination,
 			ContainerId: &containerId,
 		}
 
-		responseDto, err := backupQueryRepo.ReadTask(readDto)
+		responseDto, err := backupQueryRepo.ReadTask(requestDto)
 		if err != nil {
 			t.Errorf("ReadTaskError: %v", err)
 			return
 		}
 
 		if len(responseDto.Tasks) == 0 {
+			t.Errorf("NoItemsFound")
+		}
+	})
+
+	t.Run("ReadTaskArchive", func(t *testing.T) {
+
+		requestDto := dto.ReadBackupTaskArchivesRequest{
+			Pagination: useCase.BackupTaskArchivesDefaultPagination,
+		}
+
+		responseDto, err := backupQueryRepo.ReadTaskArchive(requestDto)
+		if err != nil {
+			t.Errorf("ReadTaskArchiveError: %v", err)
+			return
+		}
+
+		if len(responseDto.Archives) == 0 {
 			t.Errorf("NoItemsFound")
 		}
 	})

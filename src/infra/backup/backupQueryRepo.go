@@ -316,3 +316,9 @@ func (repo *BackupQueryRepo) ReadFirstTask(
 
 	return responseDto.Tasks[0], nil
 }
+
+func (repo *BackupQueryRepo) ReadTaskArchive(
+	requestDto dto.ReadBackupTaskArchivesRequest,
+) (responseDto dto.ReadBackupTaskArchivesResponse, err error) {
+	return responseDto, nil
+}
