@@ -1427,6 +1427,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 
 		archivesDirectoryStr = operatorAccountEntity.HomeDirectory.String() + "/archives"
 	}
+	archivesDirectoryStr += "/tasks"
 
 	createDtoJson, err := json.Marshal(createDto)
 	if err != nil {
