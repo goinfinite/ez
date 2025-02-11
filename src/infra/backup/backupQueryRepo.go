@@ -3,12 +3,19 @@ package backupInfra
 import (
 	"errors"
 	"log/slog"
+	"os"
+	"slices"
+	"strings"
+	"syscall"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	dbHelper "github.com/goinfinite/ez/src/infra/db/helper"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
+	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type BackupQueryRepo struct {
@@ -317,8 +324,175 @@ func (repo *BackupQueryRepo) ReadFirstTask(
 	return responseDto.Tasks[0], nil
 }
 
+func (repo *BackupQueryRepo) archiveFileFactory(
+	archiveFilePath valueObject.UnixFilePath,
+	serverHostname valueObject.Fqdn,
+) (archiveFile entity.BackupTaskArchive, err error) {
+	archiveFileName := archiveFilePath.ReadFileName()
+	archiveFileNameParts := strings.Split(archiveFileName.String(), "-")
+	if len(archiveFileNameParts) < 2 {
+		return archiveFile, errors.New("SplitArchiveFilePartsError")
+	}
+
+	taskId, err := valueObject.NewBackupTaskId(archiveFileNameParts[0])
+	if err != nil {
+		return archiveFile, err
+	}
+
+	rawArchiveId := strings.TrimSuffix(archiveFileNameParts[1], ".tar")
+	archiveId, err := valueObject.NewBackupTaskArchiveId(rawArchiveId)
+	if err != nil {
+		return archiveFile, err
+	}
+
+	fileInfo, err := os.Stat(archiveFilePath.String())
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileStatError: " + err.Error())
+	}
+
+	rawOwnerAccountId := fileInfo.Sys().(*syscall.Stat_t).Uid
+	accountId, err := valueObject.NewAccountId(rawOwnerAccountId)
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileOwnerAccountIdParseError")
+	}
+
+	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
+	if err != nil {
+		return archiveFile, errors.New("ArchiveFileSizeBytesParseError")
+	}
+
+	downloadUrl, _ := valueObject.NewUrl(
+		"https://" + serverHostname.String() + "/api/v1/backup/task/archive/" +
+			archiveId.String() + "/",
+	)
+
+	rawCreatedAt := fileInfo.ModTime()
+	createdAt := valueObject.NewUnixTimeWithGoTime(rawCreatedAt)
+
+	return entity.NewBackupTaskArchive(
+		archiveId, accountId, taskId, archiveFilePath, sizeBytes, &downloadUrl, createdAt,
+	), nil
+}
+
 func (repo *BackupQueryRepo) ReadTaskArchive(
 	requestDto dto.ReadBackupTaskArchivesRequest,
 ) (responseDto dto.ReadBackupTaskArchivesResponse, err error) {
-	return responseDto, nil
+	if requestDto.Pagination.LastSeenId != nil {
+		return responseDto, errors.New("LastSeenIdPaginationNotSupported")
+	}
+
+	archiveFiles := []entity.BackupTaskArchive{}
+
+	findResult, err := infraHelper.RunCmd(
+		"find", infraEnvs.UserDataDirectory, infraEnvs.InfiniteEzMainDir,
+		"-type", "f",
+		"-path", "*/archives/tasks/*",
+		"-regex", `.*\.tar$`,
+	)
+	if err != nil {
+		return responseDto, errors.New("FindArchiveFilesError: " + err.Error())
+	}
+
+	rawArchiveFilesPaths := strings.Split(findResult, "\n")
+	if len(rawArchiveFilesPaths) == 0 {
+		return responseDto, nil
+	}
+
+	serverHostname, err := infraHelper.ReadServerHostname()
+	if err != nil {
+		return responseDto, errors.New("InvalidServerHostname: " + err.Error())
+	}
+
+	itemsTotal := uint64(0)
+	for _, rawArchiveFilePath := range rawArchiveFilesPaths {
+		if rawArchiveFilePath == "" {
+			continue
+		}
+
+		archiveFilePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("path", rawArchiveFilePath))
+			continue
+		}
+
+		archiveFile, err := repo.archiveFileFactory(archiveFilePath, serverHostname)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("path", rawArchiveFilePath))
+			continue
+		}
+
+		itemsTotal++
+
+		if requestDto.ArchiveId != nil && archiveFile.ArchiveId != *requestDto.ArchiveId {
+			continue
+		}
+
+		if requestDto.AccountId != nil && archiveFile.AccountId != *requestDto.AccountId {
+			continue
+		}
+
+		if requestDto.TaskId != nil && archiveFile.TaskId != *requestDto.TaskId {
+			continue
+		}
+
+		if requestDto.CreatedBeforeAt != nil && archiveFile.CreatedAt > *requestDto.CreatedBeforeAt {
+			continue
+		}
+
+		if requestDto.CreatedAfterAt != nil && archiveFile.CreatedAt < *requestDto.CreatedAfterAt {
+			continue
+		}
+
+		archiveFiles = append(archiveFiles, archiveFile)
+	}
+
+	sortByStr := "createdAt"
+	if requestDto.Pagination.SortBy != nil {
+		sortByStr = requestDto.Pagination.SortBy.String()
+	}
+	sortDirectionStr := "asc"
+	if requestDto.Pagination.SortDirection != nil {
+		sortDirectionStr = requestDto.Pagination.SortDirection.String()
+	}
+
+	slices.SortStableFunc(archiveFiles, func(a, b entity.BackupTaskArchive) int {
+		firstElement := a
+		secondElement := b
+		if sortDirectionStr != "asc" {
+			firstElement = b
+			secondElement = a
+		}
+
+		switch sortByStr {
+		case "archiveId", "id":
+			return strings.Compare(firstElement.ArchiveId.String(), secondElement.ArchiveId.String())
+		case "accountId":
+			if firstElement.AccountId < secondElement.AccountId {
+				return -1
+			}
+			return 1
+		case "taskId":
+			if firstElement.TaskId < secondElement.TaskId {
+				return -1
+			}
+			return 1
+		case "createdAt":
+			if firstElement.CreatedAt < secondElement.CreatedAt {
+				return -1
+			}
+			return 1
+		default:
+			return 0
+		}
+	})
+
+	pagesTotal := uint32(itemsTotal / uint64(requestDto.Pagination.ItemsPerPage))
+	responsePagination := requestDto.Pagination
+	responsePagination.PagesTotal = &pagesTotal
+	responsePagination.ItemsTotal = &itemsTotal
+
+	return dto.ReadBackupTaskArchivesResponse{
+		Pagination: responsePagination,
+		Archives:   archiveFiles,
+	}, nil
 }
