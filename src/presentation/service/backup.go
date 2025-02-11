@@ -1657,6 +1657,7 @@ func (service *BackupService) CreateTaskArchive(
 		cliCmd := infraEnvs.InfiniteEzBinary + " backup task archive create"
 		createParams := []string{
 			"--task-id", taskId.String(),
+			"--operator-account-id", operatorAccountId.String(),
 			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
 		}
 		for _, accountId := range containerAccountIds {

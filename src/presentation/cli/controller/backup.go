@@ -990,7 +990,7 @@ func (controller *BackupController) ReadTaskArchive() *cobra.Command {
 }
 
 func (controller *BackupController) CreateTaskArchive() *cobra.Command {
-	var taskIdUint uint64
+	var taskIdUint, operatorAccountIdUint uint64
 	var timeoutSecondsUint uint32
 	var containerIdsSlice, containerAccountIdsSlice []string
 	var exceptContainerIdsSlice, exceptContainerAccountIdsSlice []string
@@ -1031,6 +1031,10 @@ func (controller *BackupController) CreateTaskArchive() *cobra.Command {
 				)
 			}
 
+			if operatorAccountIdUint != 0 {
+				requestBody["operatorAccountId"] = operatorAccountIdUint
+			}
+
 			cliHelper.ServiceResponseWrapper(
 				controller.backupService.CreateTaskArchive(requestBody, false),
 			)
@@ -1051,6 +1055,9 @@ func (controller *BackupController) CreateTaskArchive() *cobra.Command {
 	)
 	cmd.Flags().StringSliceVarP(
 		&exceptContainerIdsSlice, "except-container-ids", "I", []string{}, "ExceptContainerIds",
+	)
+	cmd.Flags().Uint64VarP(
+		&operatorAccountIdUint, "operator-account-id", "A", 0, "OperatorAccountId",
 	)
 
 	return cmd
