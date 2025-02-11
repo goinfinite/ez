@@ -1701,7 +1701,7 @@ func (service *BackupService) CreateTaskArchive(
 		exceptContainerIds, operatorAccountId, operatorIpAddress,
 	)
 
-	err = useCase.CreateBackupTaskArchive(
+	archiveEntity, err := useCase.CreateBackupTaskArchive(
 		service.backupQueryRepo, service.backupCmdRepo,
 		service.activityRecordCmdRepo, createDto,
 	)
@@ -1709,5 +1709,5 @@ func (service *BackupService) CreateTaskArchive(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "BackupTaskArchiveCreated")
+	return NewServiceOutput(Created, archiveEntity)
 }
