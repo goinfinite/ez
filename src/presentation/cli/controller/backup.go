@@ -962,7 +962,7 @@ func (controller *BackupController) ReadTaskArchive() *cobra.Command {
 			)
 
 			cliHelper.ServiceResponseWrapper(
-				controller.backupService.ReadTaskArchive(requestBody),
+				controller.backupService.ReadTaskArchive(requestBody, nil),
 			)
 		},
 	}

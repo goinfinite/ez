@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 	backupInfra "github.com/goinfinite/ez/src/infra/backup"
 	"github.com/goinfinite/ez/src/infra/db"
 	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
 )
 
@@ -1495,7 +1497,10 @@ func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOu
 	return NewServiceOutput(Success, "BackupTaskDeleted")
 }
 
-func (service *BackupService) ReadTaskArchive(input map[string]interface{}) ServiceOutput {
+func (service *BackupService) ReadTaskArchive(
+	input map[string]interface{},
+	requestHostname *string,
+) ServiceOutput {
 	var archiveIdPtr *valueObject.BackupTaskArchiveId
 	if input["archiveId"] != nil {
 		archiveId, err := valueObject.NewBackupTaskArchiveId(input["archiveId"])
@@ -1545,6 +1550,32 @@ func (service *BackupService) ReadTaskArchive(input map[string]interface{}) Serv
 	responseDto, err := useCase.ReadBackupTaskArchives(service.backupQueryRepo, requestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	if requestHostname != nil {
+		serverHostname, err := infraHelper.ReadServerHostname()
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+		serverHostnameStr := serverHostname.String()
+
+		for archiveFileIndex, archiveFile := range responseDto.Archives {
+			rawUpdatedUrl := strings.Replace(
+				archiveFile.DownloadUrl.String(), serverHostnameStr, *requestHostname, 1,
+			)
+
+			updatedUrl, err := valueObject.NewUrl(rawUpdatedUrl)
+			if err != nil {
+				slog.Debug(
+					"UpdateDownloadUrlError",
+					slog.Int("archiveFileIndex", archiveFileIndex),
+					slog.String("rawUpdatedUrl", rawUpdatedUrl),
+				)
+				continue
+			}
+
+			responseDto.Archives[archiveFileIndex].DownloadUrl = &updatedUrl
+		}
 	}
 
 	return NewServiceOutput(Success, responseDto)

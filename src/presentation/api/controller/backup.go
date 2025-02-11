@@ -398,7 +398,7 @@ func (controller *BackupController) ReadTaskArchive(c echo.Context) error {
 	}
 
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.backupService.ReadTaskArchive(requestBody),
+		c, controller.backupService.ReadTaskArchive(requestBody, &c.Request().Host),
 	)
 }
 
