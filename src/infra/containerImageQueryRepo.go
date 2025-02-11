@@ -313,6 +313,7 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 		"find", infraEnvs.UserDataDirectory,
 		"-type", "f",
 		"-path", "*/archives/*",
+		"-maxdepth", "3",
 		"-regex", `.*\.\(`+strings.Join(valueObject.ValidCompressionFormats, `\|`)+`\)$`,
 	)
 	if err != nil {
