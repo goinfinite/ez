@@ -1044,6 +1044,41 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a backup task archive.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DeleteBackupTaskArchive",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskArchiveId",
+                        "name": "archiveId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskArchiveDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
             }
         },
         "/v1/backup/task/{taskId}/": {

@@ -509,3 +509,28 @@ func (controller *BackupController) CreateTaskArchive(c echo.Context) error {
 		c, controller.backupService.CreateTaskArchive(requestBody, true),
 	)
 }
+
+// DeleteBackupTaskArchive	 godoc
+// @Summary      DeleteBackupTaskArchive
+// @Description  Delete a backup task archive.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        archiveId path  string  true  "BackupTaskArchiveId"
+// @Success      200 {object} object{} "BackupTaskArchiveDeleted"
+// @Router       /v1/backup/task/archive/{archiveId}/ [delete]
+func (controller *BackupController) DeleteTaskArchive(c echo.Context) error {
+	if c.Param("archiveId") == "" {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "ArchiveIdRequired")
+	}
+	requestBody := map[string]interface{}{
+		"archiveId":         c.Param("archiveId"),
+		"operatorAccountId": c.Get("accountId"),
+		"operatorIpAddress": c.RealIP(),
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.DeleteTaskArchive(requestBody),
+	)
+}

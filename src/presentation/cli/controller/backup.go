@@ -1062,3 +1062,25 @@ func (controller *BackupController) CreateTaskArchive() *cobra.Command {
 
 	return cmd
 }
+
+func (controller *BackupController) DeleteTaskArchive() *cobra.Command {
+	var archiveIdStr string
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "DeleteBackupTaskArchive",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"archiveId": archiveIdStr,
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.DeleteTaskArchive(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().StringVarP(&archiveIdStr, "archive-id", "r", "", "BackupTaskArchiveId")
+	cmd.MarkFlagRequired("archive-id")
+	return cmd
+}

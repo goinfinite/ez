@@ -1876,6 +1876,28 @@ paths:
       tags:
       - backup
   /v1/backup/task/archive/{archiveId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup task archive.
+      parameters:
+      - description: BackupTaskArchiveId
+        in: path
+        name: archiveId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupTaskArchiveDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupTaskArchive
+      tags:
+      - backup
     get:
       consumes:
       - application/json

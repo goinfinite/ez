@@ -1711,3 +1711,47 @@ func (service *BackupService) CreateTaskArchive(
 
 	return NewServiceOutput(Created, archiveEntity)
 }
+
+func (service *BackupService) DeleteTaskArchive(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"archiveId"}
+
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	archiveId, err := valueObject.NewBackupTaskArchiveId(input["archiveId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	deleteDto := dto.NewDeleteBackupTaskArchive(
+		archiveId, operatorAccountId, operatorIpAddress,
+	)
+
+	err = useCase.DeleteBackupTaskArchive(
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, deleteDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupTaskArchiveDeleted")
+}
