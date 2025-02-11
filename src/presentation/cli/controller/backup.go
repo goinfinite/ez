@@ -933,7 +933,7 @@ func (controller *BackupController) DeleteTask() *cobra.Command {
 	return cmd
 }
 
-func (controller *BackupController) ReadTaskArchive() *cobra.Command {
+func (controller *BackupController) ReadTaskArchives() *cobra.Command {
 	var archiveIdStr string
 	var accountIdUint, taskIdUint uint64
 	var paginationPageNumberUint32 uint32
