@@ -1009,6 +1009,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/task/archive/{archiveId}/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Download a backup task archive file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DownloadBackupTaskArchiveFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ArchiveId",
+                        "name": "archiveId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskArchiveFile",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/backup/task/{taskId}/": {
             "delete": {
                 "security": [

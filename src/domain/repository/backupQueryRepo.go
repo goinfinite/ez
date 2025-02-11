@@ -24,4 +24,7 @@ type BackupQueryRepo interface {
 	ReadTaskArchive(
 		dto.ReadBackupTaskArchivesRequest,
 	) (dto.ReadBackupTaskArchivesResponse, error)
+	ReadFirstTaskArchive(
+		dto.ReadBackupTaskArchivesRequest,
+	) (entity.BackupTaskArchive, error)
 }

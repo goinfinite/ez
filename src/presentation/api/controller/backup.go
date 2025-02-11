@@ -1,9 +1,13 @@
 package apiController
 
 import (
+	"net/http"
 	"strings"
 
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	backupInfra "github.com/goinfinite/ez/src/infra/backup"
 	"github.com/goinfinite/ez/src/infra/db"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
 	"github.com/goinfinite/ez/src/presentation/service"
@@ -382,7 +386,7 @@ func (controller *BackupController) DeleteTask(c echo.Context) error {
 // @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
 // @Success      200 {object} dto.ReadBackupTaskArchivesResponse
 // @Router       /v1/backup/task/archive/ [get]
-func (controller *BackupController) ReadTaskArchive(c echo.Context) error {
+func (controller *BackupController) ReadTaskArchives(c echo.Context) error {
 	requestBody := map[string]interface{}{}
 	queryParameters := []string{
 		"archiveId", "accountId", "taskId", "createdBeforeAt", "createdAfterAt",
@@ -399,6 +403,41 @@ func (controller *BackupController) ReadTaskArchive(c echo.Context) error {
 
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.backupService.ReadTaskArchive(requestBody, &c.Request().Host),
+	)
+}
+
+// DownloadBackupTaskArchiveFile	 godoc
+// @Summary      DownloadBackupTaskArchiveFile
+// @Description  Download a backup task archive file.
+// @Tags         backup
+// @Accept       json
+// @Produce      octet-stream
+// @Security     Bearer
+// @Param        archiveId 	  path   string  true  "ArchiveId"
+// @Success      200 file file "BackupTaskArchiveFile"
+// @Router       /v1/backup/task/archive/{archiveId}/ [get]
+func (controller *BackupController) ReadTaskArchive(c echo.Context) error {
+	if c.Param("archiveId") == "" {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "ArchiveIdRequired")
+	}
+	archiveId, err := valueObject.NewBackupTaskArchiveId(c.Param("archiveId"))
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
+	}
+
+	backupQueryRepo := backupInfra.NewBackupQueryRepo(controller.persistentDbSvc)
+	requestDto := dto.ReadBackupTaskArchivesRequest{
+		ArchiveId: &archiveId,
+	}
+
+	archiveFile, err := useCase.ReadBackupTaskArchive(backupQueryRepo, requestDto)
+	if err != nil {
+		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return c.Attachment(
+		archiveFile.UnixFilePath.String(),
+		archiveFile.UnixFilePath.ReadFileName().String(),
 	)
 }
 

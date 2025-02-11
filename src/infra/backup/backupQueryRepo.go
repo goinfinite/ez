@@ -496,3 +496,23 @@ func (repo *BackupQueryRepo) ReadTaskArchive(
 		Archives:   archiveFiles,
 	}, nil
 }
+
+func (repo *BackupQueryRepo) ReadFirstTaskArchive(
+	requestDto dto.ReadBackupTaskArchivesRequest,
+) (taskArchiveEntity entity.BackupTaskArchive, err error) {
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+
+	responseDto, err := repo.ReadTaskArchive(requestDto)
+	if err != nil {
+		return taskArchiveEntity, err
+	}
+
+	if len(responseDto.Archives) == 0 {
+		return taskArchiveEntity, errors.New("BackupTaskNotFound")
+	}
+
+	return responseDto.Archives[0], nil
+}

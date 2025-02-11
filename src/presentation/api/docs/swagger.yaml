@@ -1875,6 +1875,29 @@ paths:
       summary: CreateBackupTaskArchive
       tags:
       - backup
+  /v1/backup/task/archive/{archiveId}/:
+    get:
+      consumes:
+      - application/json
+      description: Download a backup task archive file.
+      parameters:
+      - description: ArchiveId
+        in: path
+        name: archiveId
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: BackupTaskArchiveFile
+          schema:
+            type: file
+      security:
+      - Bearer: []
+      summary: DownloadBackupTaskArchiveFile
+      tags:
+      - backup
   /v1/container/:
     get:
       consumes:
