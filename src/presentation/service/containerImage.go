@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/goinfinite/ez/src/domain/dto"
@@ -236,7 +237,12 @@ func (service *ContainerImageService) ReadArchiveFiles(
 
 			updatedUrl, err := valueObject.NewUrl(rawUpdatedUrl)
 			if err != nil {
-				return NewServiceOutput(InfraError, err.Error())
+				slog.Debug(
+					"UpdateDownloadUrlError",
+					slog.Int("archiveFileIndex", archiveFileIndex),
+					slog.String("rawUpdatedUrl", rawUpdatedUrl),
+				)
+				continue
 			}
 
 			archiveFilesList[archiveFileIndex].DownloadUrl = &updatedUrl
