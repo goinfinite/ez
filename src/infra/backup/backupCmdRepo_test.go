@@ -169,4 +169,21 @@ func TestBackupCmdRepo(t *testing.T) {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}
 	})
+
+	t.Run("DeleteBackupTaskArchive", func(t *testing.T) {
+		archiveEntity, err := backupQueryRepo.ReadFirstTaskArchive(dto.ReadBackupTaskArchivesRequest{})
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+			return
+		}
+
+		deleteDto := dto.DeleteBackupTaskArchive{
+			ArchiveId: archiveEntity.ArchiveId,
+		}
+
+		err = backupCmdRepo.DeleteTaskArchive(deleteDto)
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
 }

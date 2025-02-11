@@ -1507,3 +1507,21 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 
 	return archiveId, err
 }
+
+func (repo *BackupCmdRepo) DeleteTaskArchive(
+	deleteDto dto.DeleteBackupTaskArchive,
+) error {
+	taskArchiveEntity, err := repo.backupQueryRepo.ReadFirstTaskArchive(
+		dto.ReadBackupTaskArchivesRequest{ArchiveId: &deleteDto.ArchiveId},
+	)
+	if err != nil {
+		return errors.New("BackupTaskArchiveNotFound")
+	}
+
+	err = os.Remove(taskArchiveEntity.UnixFilePath.String())
+	if err != nil {
+		return errors.New("RemoveTaskArchiveFileFailed: " + err.Error())
+	}
+
+	return nil
+}
