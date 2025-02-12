@@ -1189,9 +1189,11 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	return nil
 }
 
-func (repo *BackupCmdRepo) DeleteTask(
-	deleteDto dto.DeleteBackupTask,
-) error {
+func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
+	return nil
+}
+
+func (repo *BackupCmdRepo) DeleteTask(deleteDto dto.DeleteBackupTask) error {
 	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
 		dto.ReadBackupTasksRequest{TaskId: &deleteDto.TaskId},
 	)
