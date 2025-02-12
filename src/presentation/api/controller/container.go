@@ -450,7 +450,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 			accountId = operatorAccountId
 		}
 
-		importDto := dto.NewImportContainerImageArchiveFile(
+		importDto := dto.NewImportContainerImageArchive(
 			accountId, archiveImageFile, operatorAccountId, operatorIpAddress,
 		)
 
@@ -458,7 +458,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 		activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
 
-		importedImageId, err := useCase.ImportContainerImageArchiveFile(
+		importedImageId, err := useCase.ImportContainerImageArchive(
 			containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
 		)
 		if err != nil {

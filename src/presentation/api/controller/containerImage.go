@@ -3,6 +3,7 @@ package apiController
 import (
 	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
@@ -90,23 +91,46 @@ func (controller *ContainerImageController) Delete(c echo.Context) error {
 	)
 }
 
-// ReadContainerImageArchiveFiles	 godoc
-// @Summary      ReadContainerImageArchiveFiles
+// ReadContainerImageArchives	 godoc
+// @Summary      ReadContainerImageArchives
 // @Description  List container image archive files.
 // @Tags         containerImageArchive
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Success      200 {array} entity.ContainerImageArchiveFile
+// @Param        imageId query  string  false  "ImageId"
+// @Param        accountId query  uint  false  "AccountId"
+// @Param        createdBeforeAt query  string  false  "CreatedBeforeAt"
+// @Param        createdAfterAt query  string  false  "CreatedAfterAt"
+// @Param        pageNumber query  uint  false  "PageNumber (Pagination)"
+// @Param        itemsPerPage query  uint  false  "ItemsPerPage (Pagination)"
+// @Param        sortBy query  string  false  "SortBy (Pagination)"
+// @Param        sortDirection query  string  false  "SortDirection (Pagination)"
+// @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
+// @Success      200 {object} dto.ReadContainerImageArchivesResponse
 // @Router       /v1/container/image/archive/ [get]
-func (controller *ContainerImageController) ReadArchiveFiles(c echo.Context) error {
+func (controller *ContainerImageController) ReadArchives(c echo.Context) error {
+	requestBody := map[string]interface{}{}
+	queryParameters := []string{
+		"imageId", "accountId", "createdBeforeAt", "createdAfterAt",
+		"pageNumber", "itemsPerPage", "sortBy", "sortDirection", "lastSeenId",
+	}
+	for _, paramName := range queryParameters {
+		paramValue := c.QueryParam(paramName)
+		if paramValue == "" {
+			continue
+		}
+
+		requestBody[paramName] = strings.Trim(paramValue, "\"")
+	}
+
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.ReadArchiveFiles(&c.Request().Host),
+		c, controller.containerImageService.ReadArchives(requestBody, &c.Request().Host),
 	)
 }
 
-// DownloadContainerImageArchiveFile	 godoc
-// @Summary      DownloadContainerImageArchiveFile
+// DownloadContainerImageArchive	 godoc
+// @Summary      DownloadContainerImageArchive
 // @Description  Download a container image archive file.
 // @Tags         containerImageArchive
 // @Accept       json
@@ -114,9 +138,9 @@ func (controller *ContainerImageController) ReadArchiveFiles(c echo.Context) err
 // @Security     Bearer
 // @Param        accountId 	  path   string  true  "AccountId"
 // @Param        imageId 	  path   string  true  "ImageId"
-// @Success      200 file file "ContainerImageArchiveFile"
+// @Success      200 file file "ContainerImageArchive"
 // @Router       /v1/container/image/archive/{accountId}/{imageId}/ [get]
-func (controller *ContainerImageController) ReadArchiveFile(c echo.Context) error {
+func (controller *ContainerImageController) ReadArchive(c echo.Context) error {
 	if c.Param("accountId") == "" {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, "AccountIdRequired")
 	}
@@ -135,9 +159,9 @@ func (controller *ContainerImageController) ReadArchiveFile(c echo.Context) erro
 
 	containerImageQueryRepo := infra.NewContainerImageQueryRepo(controller.persistentDbSvc)
 
-	readDto := dto.NewReadContainerImageArchiveFile(accountId, imageId)
+	readDto := dto.NewReadContainerImageArchive(accountId, imageId)
 
-	archiveFile, err := useCase.ReadContainerImageArchiveFile(containerImageQueryRepo, readDto)
+	archiveFile, err := useCase.ReadContainerImageArchive(containerImageQueryRepo, readDto)
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusInternalServerError, err.Error())
 	}
@@ -148,24 +172,24 @@ func (controller *ContainerImageController) ReadArchiveFile(c echo.Context) erro
 	)
 }
 
-// CreateContainerImageArchiveFile	 godoc
-// @Summary      CreateContainerImageArchiveFile
+// CreateContainerImageArchive	 godoc
+// @Summary      CreateContainerImageArchive
 // @Description  Export a container image to a file. This is an asynchronous operation.
 // @Tags         containerImageArchive
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        createContainerImageArchiveFileDto 	  body    dto.CreateContainerImageArchiveFile  true  "CreateContainerImageArchiveFileDto"
-// @Success      201 {object} object{} "ContainerImageArchiveFileCreationScheduled"
+// @Param        createContainerImageArchiveDto 	  body    dto.CreateContainerImageArchive  true  "CreateContainerImageArchiveDto"
+// @Success      201 {object} object{} "ContainerImageArchiveCreationScheduled"
 // @Router       /v1/container/image/archive/ [post]
-func (controller *ContainerImageController) CreateArchiveFile(c echo.Context) error {
+func (controller *ContainerImageController) CreateArchive(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
 	}
 
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.CreateArchiveFile(requestBody, true),
+		c, controller.containerImageService.CreateArchive(requestBody, true),
 	)
 }
 
@@ -174,8 +198,8 @@ type FailedArchiveFileUpload struct {
 	FailReason string `json:"failReason"`
 }
 
-// ImportContainerImageArchiveFiles	godoc
-// @Summary      ImportContainerImageArchiveFiles
+// ImportContainerImageArchives	godoc
+// @Summary      ImportContainerImageArchives
 // @Description  Import container images from archive files.
 // @Tags         containerImageArchive
 // @Accept       mpfd
@@ -183,10 +207,10 @@ type FailedArchiveFileUpload struct {
 // @Security     Bearer
 // @Param        accountId		formData	string	false	"AccountId"
 // @Param        archiveFiles	formData	file	true	"ArchiveFiles"
-// @Success      201 string string "ContainerImageArchiveFilesImported"
-// @Success      207 {object} []FailedArchiveFileUpload "ContainerImageArchiveFilesPartiallyImported"
+// @Success      201 string string "ContainerImageArchivesImported"
+// @Success      207 {object} []FailedArchiveFileUpload "ContainerImageArchivesPartiallyImported"
 // @Router       /v1/container/image/archive/import/ [post]
-func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) error {
+func (controller *ContainerImageController) ImportArchive(c echo.Context) error {
 	requestBody, err := apiHelper.ReadRequestBody(c)
 	if err != nil {
 		return err
@@ -231,11 +255,11 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 
 	failedUploads := []FailedArchiveFileUpload{}
 	for _, archiveFile := range archiveFiles {
-		importDto := dto.NewImportContainerImageArchiveFile(
+		importDto := dto.NewImportContainerImageArchive(
 			accountId, archiveFile, operatorAccountId, operatorIpAddress,
 		)
 
-		_, err = useCase.ImportContainerImageArchiveFile(
+		_, err = useCase.ImportContainerImageArchive(
 			containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
 		)
 		if err != nil {
@@ -253,12 +277,12 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 	}
 
 	return apiHelper.ResponseWrapper(
-		c, http.StatusCreated, "ContainerImageArchiveFilesImported",
+		c, http.StatusCreated, "ContainerImageArchivesImported",
 	)
 }
 
-// DeleteContainerImageArchiveFile	 godoc
-// @Summary      DeleteContainerImageArchiveFile
+// DeleteContainerImageArchive	 godoc
+// @Summary      DeleteContainerImageArchive
 // @Description  Delete a container image archive file.
 // @Tags         containerImageArchive
 // @Accept       json
@@ -266,9 +290,9 @@ func (controller *ContainerImageController) ImportArchiveFile(c echo.Context) er
 // @Security     Bearer
 // @Param        accountId 	  path   string  true  "AccountId"
 // @Param        imageId 	  path   string  true  "ImageId"
-// @Success      200 {object} object{} "ContainerImageArchiveFileDeleted"
+// @Success      200 {object} object{} "ContainerImageArchiveDeleted"
 // @Router       /v1/container/image/archive/{accountId}/{imageId}/ [delete]
-func (controller *ContainerImageController) DeleteArchiveFile(c echo.Context) error {
+func (controller *ContainerImageController) DeleteArchive(c echo.Context) error {
 	requestBody := map[string]interface{}{
 		"accountId":         c.Param("accountId"),
 		"imageId":           c.Param("imageId"),
@@ -277,6 +301,6 @@ func (controller *ContainerImageController) DeleteArchiveFile(c echo.Context) er
 	}
 
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.containerImageService.DeleteArchiveFile(requestBody),
+		c, controller.containerImageService.DeleteArchive(requestBody),
 	)
 }

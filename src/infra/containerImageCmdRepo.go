@@ -89,8 +89,8 @@ func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
 	return valueObject.NewUnixFilePath(archiveDirStr)
 }
 
-func (repo *ContainerImageCmdRepo) ImportArchiveFile(
-	importDto dto.ImportContainerImageArchiveFile,
+func (repo *ContainerImageCmdRepo) ImportArchive(
+	importDto dto.ImportContainerImageArchive,
 ) (imageId valueObject.ContainerImageId, err error) {
 	inputFileHandler, err := importDto.ArchiveFile.Open()
 	if err != nil {
@@ -112,7 +112,7 @@ func (repo *ContainerImageCmdRepo) ImportArchiveFile(
 
 	outputFileHandler, err := os.Create(outputFilePathStr)
 	if err != nil {
-		return imageId, errors.New("CreateArchiveFileError: " + err.Error())
+		return imageId, errors.New("CreateArchiveError: " + err.Error())
 	}
 	defer outputFileHandler.Close()
 
@@ -245,9 +245,9 @@ func (repo *ContainerImageCmdRepo) archiveFileNameFactory(
 	return valueObject.NewUnixFileName(rawArchiveFileName + ".tar")
 }
 
-func (repo *ContainerImageCmdRepo) CreateArchiveFile(
-	createDto dto.CreateContainerImageArchiveFile,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+func (repo *ContainerImageCmdRepo) CreateArchive(
+	createDto dto.CreateContainerImageArchive,
+) (archiveFile entity.ContainerImageArchive, err error) {
 	containerImageQueryRepo := NewContainerImageQueryRepo(repo.persistentDbSvc)
 	imageEntity, err := containerImageQueryRepo.ReadById(
 		createDto.AccountId, createDto.ImageId,
@@ -359,15 +359,15 @@ func (repo *ContainerImageCmdRepo) CreateArchiveFile(
 			"/v1/container/image/archive/" + accountIdStr + "/" + imageIdStr + "/",
 	)
 
-	return entity.NewContainerImageArchiveFile(
+	return entity.NewContainerImageArchive(
 		createDto.ImageId, imageEntity.AccountId, finalFilePath, sizeBytes,
 		&downloadUrl, nil, valueObject.NewUnixTimeNow(),
 	), nil
 }
 
-func (repo *ContainerImageCmdRepo) DeleteArchiveFile(
-	archiveFileEntity entity.ContainerImageArchiveFile,
+func (repo *ContainerImageCmdRepo) DeleteArchive(
+	archiveEntity entity.ContainerImageArchive,
 ) error {
-	_, err := infraHelper.RunCmd("rm", "-f", archiveFileEntity.UnixFilePath.String())
+	_, err := infraHelper.RunCmd("rm", "-f", archiveEntity.UnixFilePath.String())
 	return err
 }

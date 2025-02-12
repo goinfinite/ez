@@ -150,9 +150,9 @@ func (router *Router) containerRoutes() {
 		Use:   "archive",
 		Short: "ContainerImageArchiveManagement",
 	}
-	containerImageArchiveCmd.AddCommand(containerImageController.ReadArchiveFiles())
-	containerImageArchiveCmd.AddCommand(containerImageController.CreateArchiveFile())
-	containerImageArchiveCmd.AddCommand(containerImageController.DeleteArchiveFile())
+	containerImageArchiveCmd.AddCommand(containerImageController.ReadArchives())
+	containerImageArchiveCmd.AddCommand(containerImageController.CreateArchive())
+	containerImageArchiveCmd.AddCommand(containerImageController.DeleteArchive())
 	containerImageCmd.AddCommand(containerImageArchiveCmd)
 
 	containerCmd.AddCommand(containerProfileCmd)

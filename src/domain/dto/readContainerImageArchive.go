@@ -4,16 +4,16 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-type ReadContainerImageArchiveFile struct {
+type ReadContainerImageArchive struct {
 	AccountId valueObject.AccountId        `json:"accountId"`
 	ImageId   valueObject.ContainerImageId `json:"imageId"`
 }
 
-func NewReadContainerImageArchiveFile(
+func NewReadContainerImageArchive(
 	accountId valueObject.AccountId,
 	imageId valueObject.ContainerImageId,
-) ReadContainerImageArchiveFile {
-	return ReadContainerImageArchiveFile{
+) ReadContainerImageArchive {
+	return ReadContainerImageArchive{
 		AccountId: accountId,
 		ImageId:   imageId,
 	}

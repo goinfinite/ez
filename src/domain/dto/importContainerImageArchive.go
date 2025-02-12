@@ -6,20 +6,20 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-type ImportContainerImageArchiveFile struct {
+type ImportContainerImageArchive struct {
 	AccountId         valueObject.AccountId `json:"accountId"`
 	ArchiveFile       *multipart.FileHeader `json:"archiveFile"`
 	OperatorAccountId valueObject.AccountId `json:"-"`
 	OperatorIpAddress valueObject.IpAddress `json:"-"`
 }
 
-func NewImportContainerImageArchiveFile(
+func NewImportContainerImageArchive(
 	accountId valueObject.AccountId,
 	archiveFile *multipart.FileHeader,
 	operatorAccountId valueObject.AccountId,
 	operatorIpAddress valueObject.IpAddress,
-) ImportContainerImageArchiveFile {
-	return ImportContainerImageArchiveFile{
+) ImportContainerImageArchive {
+	return ImportContainerImageArchive{
 		AccountId:         accountId,
 		ArchiveFile:       archiveFile,
 		OperatorAccountId: operatorAccountId,

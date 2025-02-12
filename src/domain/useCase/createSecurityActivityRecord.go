@@ -342,10 +342,10 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 	uc.createActivityRecord(createRecordDto)
 }
 
-func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
-	createDto dto.CreateContainerImageArchiveFile,
+func (uc *CreateSecurityActivityRecord) CreateContainerImageArchive(
+	createDto dto.CreateContainerImageArchive,
 ) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileCreated")
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveCreated")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel: uc.recordLevel,
 		RecordCode:  recordCode,
@@ -359,11 +359,11 @@ func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
 	uc.createActivityRecord(createRecordDto)
 }
 
-func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
-	importDto dto.ImportContainerImageArchiveFile,
+func (uc *CreateSecurityActivityRecord) ImportContainerImageArchive(
+	importDto dto.ImportContainerImageArchive,
 	imageId valueObject.ContainerImageId,
 ) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileImported")
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveImported")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel: uc.recordLevel,
 		RecordCode:  recordCode,
@@ -377,10 +377,10 @@ func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
 	uc.createActivityRecord(createRecordDto)
 }
 
-func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
-	deleteDto dto.DeleteContainerImageArchiveFile,
+func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchive(
+	deleteDto dto.DeleteContainerImageArchive,
 ) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileDeleted")
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveDeleted")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel: uc.recordLevel,
 		RecordCode:  recordCode,

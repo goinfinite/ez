@@ -772,7 +772,7 @@ func (repo *BackupCmdRepo) createContainerArchive(
 	containerWithMetrics dto.ContainerWithMetrics,
 	containerImageCmdRepo *infra.ContainerImageCmdRepo,
 	jobTmpDir valueObject.UnixFilePath,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+) (archiveFile entity.ContainerImageArchive, err error) {
 	shouldCreateArchive := false
 	createSnapshotDto := dto.CreateContainerSnapshotImage{
 		ContainerId:         containerWithMetrics.Id,
@@ -783,14 +783,14 @@ func (repo *BackupCmdRepo) createContainerArchive(
 		return archiveFile, errors.New("CreateSnapshotImageFailed: " + err.Error())
 	}
 
-	createArchiveDto := dto.CreateContainerImageArchiveFile{
+	createArchiveDto := dto.CreateContainerImageArchive{
 		AccountId:       containerWithMetrics.AccountId,
 		ImageId:         snapshotImageId,
 		DestinationPath: &jobTmpDir,
 	}
-	archiveFile, err = containerImageCmdRepo.CreateArchiveFile(createArchiveDto)
+	archiveFile, err = containerImageCmdRepo.CreateArchive(createArchiveDto)
 	if err != nil {
-		return archiveFile, errors.New("CreateArchiveFileFailed: " + err.Error())
+		return archiveFile, errors.New("CreateArchiveFailed: " + err.Error())
 	}
 
 	deleteSnapshotDto := dto.DeleteContainerImage{
@@ -959,7 +959,7 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 func (repo *BackupCmdRepo) uploadContainerArchive(
 	taskRunDetails BackupTaskRunDetails,
 	containerWithMetrics dto.ContainerWithMetrics,
-	archiveFileEntity entity.ContainerImageArchiveFile,
+	archiveEntity entity.ContainerImageArchive,
 ) BackupTaskRunDetails {
 	containerIdStr := containerWithMetrics.Id.String()
 
@@ -970,13 +970,13 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	}
 
 	archiveFileExtStr := ".tar.br"
-	archiveFileExt, err := archiveFileEntity.UnixFilePath.ReadCompoundFileExtension()
+	archiveFileExt, err := archiveEntity.UnixFilePath.ReadCompoundFileExtension()
 	if err == nil {
 		archiveFileExtStr = "." + archiveFileExt.String()
 	}
 
 	destFileNameStr := containerWithMetrics.AccountId.String() + "-" + containerIdStr +
-		"-" + archiveFileEntity.ImageId.String() + archiveFileExtStr
+		"-" + archiveEntity.ImageId.String() + archiveFileExtStr
 	destPathStr := repo.readTaskRemotePath(taskRunDetails.DestinationEntity, taskRunDetails.TaskId)
 	destPathStr += "/" + destFileNameStr
 
@@ -996,7 +996,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	if len(backupBinaryFlags) > 0 {
 		backupBinaryCmd += " " + strings.Join(backupBinaryFlags, " ")
 	}
-	backupBinaryCmd += " copyto " + archiveFileEntity.UnixFilePath.String() + " " + destPathStr
+	backupBinaryCmd += " copyto " + archiveEntity.UnixFilePath.String() + " " + destPathStr
 
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
 		containerWithMetrics.AccountId, backupBinaryCmd,
@@ -1016,7 +1016,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	taskRunDetails.SuccessfulContainerIds = append(
 		taskRunDetails.SuccessfulContainerIds, containerIdStr,
 	)
-	taskRunDetails.SizeBytes += archiveFileEntity.SizeBytes.Uint64()
+	taskRunDetails.SizeBytes += archiveEntity.SizeBytes.Uint64()
 	taskRunDetails.FinishedAt = time.Now()
 	taskRunDetails.ElapsedSecs = uint64(
 		taskRunDetails.FinishedAt.Sub(taskRunDetails.StartedAt).Seconds(),
@@ -1094,7 +1094,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 				continue
 			}
 
-			archiveFileEntity, err := repo.createContainerArchive(
+			archiveEntity, err := repo.createContainerArchive(
 				containerWithMetrics, containerImageCmdRepo, jobTmpDir,
 			)
 			if err != nil {
@@ -1107,12 +1107,12 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 			for taskId, preUploadTaskRunDetails := range taskIdRunDetailsMap {
 				postUploadTaskRunDetails := repo.uploadContainerArchive(
-					preUploadTaskRunDetails, containerWithMetrics, archiveFileEntity,
+					preUploadTaskRunDetails, containerWithMetrics, archiveEntity,
 				)
 				taskIdRunDetailsMap[taskId] = postUploadTaskRunDetails
 			}
 
-			err = containerImageCmdRepo.DeleteArchiveFile(archiveFileEntity)
+			err = containerImageCmdRepo.DeleteArchive(archiveEntity)
 			if err != nil {
 				repo.sharedTaskFailRegister(
 					&containerWithMetrics.AccountId, &containerWithMetrics.Id,
@@ -1190,6 +1190,55 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 }
 
 func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
+	if restoreDto.ArchiveId == nil {
+		createArchiveDto := dto.CreateBackupTaskArchive{
+			TaskId:                    restoreDto.TaskId,
+			TimeoutSecs:               restoreDto.TimeoutSecs,
+			ContainerAccountIds:       restoreDto.ContainerAccountIds,
+			ContainerIds:              restoreDto.ContainerIds,
+			ExceptContainerAccountIds: restoreDto.ExceptContainerAccountIds,
+			ExceptContainerIds:        restoreDto.ExceptContainerIds,
+			OperatorAccountId:         valueObject.SystemAccountId,
+		}
+
+		archiveId, err := repo.CreateTaskArchive(createArchiveDto)
+		if err != nil {
+			return errors.New("CreateTaskArchiveFailed: " + err.Error())
+		}
+		restoreDto.ArchiveId = &archiveId
+	}
+
+	archiveEntity, err := repo.backupQueryRepo.ReadFirstTaskArchive(
+		dto.ReadBackupTaskArchivesRequest{ArchiveId: restoreDto.ArchiveId},
+	)
+	if err != nil {
+		return errors.New("ReadBackupTaskArchiveFailed: " + err.Error())
+	}
+
+	err = infraHelper.MakeDir(infraEnvs.RestoreTaskTmpDir)
+	if err != nil {
+		return errors.New("MakeRestoreTaskTmpDirFailed: " + err.Error())
+	}
+
+	_, err = infraHelper.RunCmd(
+		"tar -xf " + archiveEntity.UnixFilePath.String() + " -C " + infraEnvs.RestoreTaskTmpDir,
+	)
+	if err != nil {
+		return errors.New("ExtractTaskArchiveFailed: " + err.Error())
+	}
+
+	err = os.Remove(archiveEntity.UnixFilePath.String())
+	if err != nil {
+		return errors.New("DeleteTaskArchiveFailed: " + err.Error())
+	}
+
+	// => Run download task; (only if the archiveId is not provided)
+	// => Extract tar file;
+	// => Delete tar file;
+	// => For each container in the task:
+	// => Restore container snapshot archive, adding a suffix to the container name if it already exists OR replace the existing container if shouldReplaceExistingContainers is true;
+	// => Delete container snapshot archive;
+
 	return nil
 }
 
@@ -1241,8 +1290,8 @@ func (repo *BackupCmdRepo) readRemoteContainerArchives(
 	containerIds []valueObject.ContainerId,
 	exceptContainerAccountIds []valueObject.AccountId,
 	exceptContainerIds []valueObject.ContainerId,
-) ([]entity.ContainerImageArchiveFile, error) {
-	containerArchives := []entity.ContainerImageArchiveFile{}
+) ([]entity.ContainerImageArchive, error) {
+	containerArchives := []entity.ContainerImageArchive{}
 
 	taskRemotePath := repo.readTaskRemotePath(destinationEntity, taskEntity.TaskId)
 
@@ -1350,7 +1399,7 @@ func (repo *BackupCmdRepo) readRemoteContainerArchives(
 			continue
 		}
 
-		imageArchiveFile := entity.ContainerImageArchiveFile{
+		imageArchiveFile := entity.ContainerImageArchive{
 			AccountId:    accountId,
 			UnixFilePath: filePath,
 			SizeBytes:    sizeBytes,

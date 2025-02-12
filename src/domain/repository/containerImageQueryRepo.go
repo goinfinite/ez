@@ -12,8 +12,10 @@ type ContainerImageQueryRepo interface {
 		accountId valueObject.AccountId,
 		imageId valueObject.ContainerImageId,
 	) (entity.ContainerImage, error)
-	ReadArchiveFiles() ([]entity.ContainerImageArchiveFile, error)
-	ReadArchiveFile(readDto dto.ReadContainerImageArchiveFile) (
-		entity.ContainerImageArchiveFile, error,
-	)
+	ReadArchives(
+		dto.ReadContainerImageArchivesRequest,
+	) (dto.ReadContainerImageArchivesResponse, error)
+	ReadArchive(
+		dto.ReadContainerImageArchive,
+	) (entity.ContainerImageArchive, error)
 }

@@ -12,11 +12,11 @@ type ContainerImageCmdRepo interface {
 	)
 	Delete(dto.DeleteContainerImage) error
 
-	CreateArchiveFile(
-		dto.CreateContainerImageArchiveFile,
-	) (entity.ContainerImageArchiveFile, error)
-	ImportArchiveFile(dto.ImportContainerImageArchiveFile) (
+	CreateArchive(
+		dto.CreateContainerImageArchive,
+	) (entity.ContainerImageArchive, error)
+	ImportArchive(dto.ImportContainerImageArchive) (
 		valueObject.ContainerImageId, error,
 	)
-	DeleteArchiveFile(entity.ContainerImageArchiveFile) error
+	DeleteArchive(entity.ContainerImageArchive) error
 }

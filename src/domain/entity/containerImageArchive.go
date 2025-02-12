@@ -6,7 +6,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-type ContainerImageArchiveFile struct {
+type ContainerImageArchive struct {
 	ImageId      valueObject.ContainerImageId `json:"imageId"`
 	AccountId    valueObject.AccountId        `json:"accountId"`
 	UnixFilePath valueObject.UnixFilePath     `json:"unixFilePath"`
@@ -16,7 +16,7 @@ type ContainerImageArchiveFile struct {
 	CreatedAt    valueObject.UnixTime         `json:"createdAt"`
 }
 
-func NewContainerImageArchiveFile(
+func NewContainerImageArchive(
 	imageId valueObject.ContainerImageId,
 	accountId valueObject.AccountId,
 	unixFilePath valueObject.UnixFilePath,
@@ -24,8 +24,8 @@ func NewContainerImageArchiveFile(
 	downloadUrl *valueObject.Url,
 	containerId *valueObject.ContainerId,
 	createdAt valueObject.UnixTime,
-) ContainerImageArchiveFile {
-	return ContainerImageArchiveFile{
+) ContainerImageArchive {
+	return ContainerImageArchive{
 		ImageId:      imageId,
 		AccountId:    accountId,
 		UnixFilePath: unixFilePath,
@@ -36,7 +36,7 @@ func NewContainerImageArchiveFile(
 	}
 }
 
-func (entity ContainerImageArchiveFile) JsonSerialize() string {
+func (entity ContainerImageArchive) JsonSerialize() string {
 	jsonBytes, _ := json.Marshal(entity)
 	return string(jsonBytes)
 }

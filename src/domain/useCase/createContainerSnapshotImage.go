@@ -60,12 +60,12 @@ func CreateContainerSnapshotImage(
 		return nil
 	}
 
-	createArchiveDto := dto.NewCreateContainerImageArchiveFile(
+	createArchiveDto := dto.NewCreateContainerImageArchive(
 		containerAccountId, imageId, createSnapshotDto.ArchiveCompressionFormat,
 		createSnapshotDto.ArchiveDestinationPath, createSnapshotDto.OperatorAccountId,
 		createSnapshotDto.OperatorIpAddress,
 	)
-	_, err = CreateContainerImageArchiveFile(
+	_, err = CreateContainerImageArchive(
 		containerImageQueryRepo, containerImageCmdRepo,
 		accountQueryRepo, activityRecordCmdRepo, createArchiveDto,
 	)

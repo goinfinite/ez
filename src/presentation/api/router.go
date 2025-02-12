@@ -132,16 +132,16 @@ func (router *Router) containerRoutes() {
 	containerImageGroup.POST("/snapshot/", containerImageController.CreateSnapshot)
 
 	containerImageArchiveGroup := containerImageGroup.Group("/archive")
-	containerImageArchiveGroup.GET("/", containerImageController.ReadArchiveFiles)
+	containerImageArchiveGroup.GET("/", containerImageController.ReadArchives)
 	containerImageArchiveGroup.GET(
-		"/:accountId/:imageId/", containerImageController.ReadArchiveFile,
+		"/:accountId/:imageId/", containerImageController.ReadArchive,
 	)
-	containerImageArchiveGroup.POST("/", containerImageController.CreateArchiveFile)
+	containerImageArchiveGroup.POST("/", containerImageController.CreateArchive)
 	containerImageArchiveGroup.POST(
-		"/import/", containerImageController.ImportArchiveFile,
+		"/import/", containerImageController.ImportArchive,
 	)
 	containerImageArchiveGroup.DELETE(
-		"/:accountId/:imageId/", containerImageController.DeleteArchiveFile,
+		"/:accountId/:imageId/", containerImageController.DeleteArchive,
 	)
 }
 

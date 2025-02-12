@@ -9,13 +9,13 @@ import (
 	"github.com/goinfinite/ez/src/domain/repository"
 )
 
-func CreateContainerImageArchiveFile(
+func CreateContainerImageArchive(
 	containerImageQueryRepo repository.ContainerImageQueryRepo,
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	accountQueryRepo repository.AccountQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	createDto dto.CreateContainerImageArchiveFile,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+	createDto dto.CreateContainerImageArchive,
+) (archiveFile entity.ContainerImageArchive, err error) {
 	imageEntity, err := containerImageQueryRepo.ReadById(
 		createDto.AccountId, createDto.ImageId,
 	)
@@ -35,14 +35,14 @@ func CreateContainerImageArchiveFile(
 		return archiveFile, errors.New("AccountStorageQuotaUsageExceeded")
 	}
 
-	archiveFile, err = containerImageCmdRepo.CreateArchiveFile(createDto)
+	archiveFile, err = containerImageCmdRepo.CreateArchive(createDto)
 	if err != nil {
-		slog.Error("CreateContainerImageArchiveFileInfraError", slog.Any("error", err))
-		return archiveFile, errors.New("CreateContainerImageArchiveFileInfraError")
+		slog.Error("CreateContainerImageArchiveInfraError", slog.Any("error", err))
+		return archiveFile, errors.New("CreateContainerImageArchiveInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		CreateContainerImageArchiveFile(createDto)
+		CreateContainerImageArchive(createDto)
 
 	return archiveFile, nil
 }
