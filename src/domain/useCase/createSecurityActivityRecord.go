@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/repository"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
@@ -509,6 +510,25 @@ func (uc *CreateSecurityActivityRecord) RunBackupJob(runDto dto.RunBackupJob) {
 		},
 		OperatorAccountId: &runDto.OperatorAccountId,
 		OperatorIpAddress: &runDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) RestoreBackupTask(
+	restoreDto dto.RestoreBackupTask,
+	taskEntity entity.BackupTask,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskRestored")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupTaskSri(taskEntity.AccountId, taskEntity.TaskId),
+		},
+		RecordDetails:     restoreDto,
+		OperatorAccountId: &restoreDto.OperatorAccountId,
+		OperatorIpAddress: &restoreDto.OperatorIpAddress,
 	}
 
 	uc.createActivityRecord(createRecordDto)
