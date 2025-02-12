@@ -1446,6 +1446,158 @@ func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutp
 	return NewServiceOutput(Success, responseDto)
 }
 
+func (service *BackupService) RestoreTask(
+	input map[string]interface{},
+	shouldSchedule bool,
+) ServiceOutput {
+	requiredParams := []string{"taskId"}
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	var archiveIdPtr *valueObject.BackupTaskArchiveId
+	if input["archiveId"] != nil {
+		archiveId, err := valueObject.NewBackupTaskArchiveId(input["archiveId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		archiveIdPtr = &archiveId
+	}
+
+	shouldReplaceExistingContainers := false
+	if input["shouldReplaceExistingContainers"] != nil {
+		shouldReplaceExistingContainers, err = voHelper.InterfaceToBool(
+			input["shouldReplaceExistingContainers"],
+		)
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	timeoutSeconds := useCase.RestoreBackupTaskDefaultTimeoutSecs
+	if input["timeoutSeconds"] != nil {
+		timeoutSeconds, err = voHelper.InterfaceToUint32(input["timeoutSeconds"])
+		if err != nil {
+			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSeconds"))
+		}
+	}
+
+	var assertOk bool
+	var containerAccountIds []valueObject.AccountId
+	if input["containerAccountIds"] != nil {
+		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidAccountIds"))
+		}
+	}
+
+	var containerIds []valueObject.ContainerId
+	if input["containerIds"] != nil {
+		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+		}
+	}
+
+	var exceptContainerAccountIds []valueObject.AccountId
+	if input["exceptContainerAccountIds"] != nil {
+		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
+		}
+	}
+
+	var exceptContainerIds []valueObject.ContainerId
+	if input["exceptContainerIds"] != nil {
+		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
+		}
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	if shouldSchedule {
+		cliCmd := infraEnvs.InfiniteEzBinary + " backup task restore"
+		cliParams := []string{
+			"--task-id", taskId.String(),
+			"--should-replace-existing-containers", strconv.FormatBool(shouldReplaceExistingContainers),
+			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
+		}
+		if archiveIdPtr != nil {
+			cliParams = append(cliParams, "--archive-id", archiveIdPtr.String())
+		}
+
+		for _, accountId := range containerAccountIds {
+			cliParams = append(cliParams, "--container-account-ids", accountId.String())
+		}
+		for _, containerId := range containerIds {
+			cliParams = append(cliParams, "--container-ids", containerId.String())
+		}
+		for _, accountId := range exceptContainerAccountIds {
+			cliParams = append(cliParams, "--except-container-account-ids", accountId.String())
+		}
+		for _, containerId := range exceptContainerIds {
+			cliParams = append(cliParams, "--except-container-ids", containerId.String())
+		}
+
+		cliCmd = cliCmd + " " + strings.Join(cliParams, " ")
+
+		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
+		taskName, _ := valueObject.NewScheduledTaskName("RestoreBackupTask")
+		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
+		taskTag, _ := valueObject.NewScheduledTaskTag("backup")
+		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+
+		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
+			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+		)
+
+		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+
+		return NewServiceOutput(Created, "BackupTaskRestoreScheduled")
+	}
+
+	restoreDto := dto.NewRestoreBackupTask(
+		taskId, archiveIdPtr, &shouldReplaceExistingContainers, &timeoutSeconds,
+		containerAccountIds, containerIds, exceptContainerAccountIds, exceptContainerIds,
+		operatorAccountId, operatorIpAddress,
+	)
+
+	err = useCase.RestoreBackupTask(
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, restoreDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupTaskRestored")
+}
+
 func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOutput {
 	requiredParams := []string{"taskId"}
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
@@ -1655,28 +1807,25 @@ func (service *BackupService) CreateTaskArchive(
 
 	if shouldSchedule {
 		cliCmd := infraEnvs.InfiniteEzBinary + " backup task archive create"
-		createParams := []string{
+		cliParams := []string{
 			"--task-id", taskId.String(),
 			"--operator-account-id", operatorAccountId.String(),
 			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
 		}
 		for _, accountId := range containerAccountIds {
-			createParams = append(createParams, "--container-account-ids", accountId.String())
+			cliParams = append(cliParams, "--container-account-ids", accountId.String())
 		}
-
 		for _, containerId := range containerIds {
-			createParams = append(createParams, "--container-ids", containerId.String())
+			cliParams = append(cliParams, "--container-ids", containerId.String())
 		}
-
 		for _, accountId := range exceptContainerAccountIds {
-			createParams = append(createParams, "--except-container-account-ids", accountId.String())
+			cliParams = append(cliParams, "--except-container-account-ids", accountId.String())
 		}
-
 		for _, containerId := range exceptContainerIds {
-			createParams = append(createParams, "--except-container-ids", containerId.String())
+			cliParams = append(cliParams, "--except-container-ids", containerId.String())
 		}
 
-		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
+		cliCmd = cliCmd + " " + strings.Join(cliParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
 		taskName, _ := valueObject.NewScheduledTaskName("CreateBackupTaskArchive")

@@ -371,6 +371,33 @@ definitions:
           $ref: '#/definitions/entity.ScheduledTask'
         type: array
     type: object
+  dto.RestoreBackupTask:
+    properties:
+      archiveId:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      shouldReplaceExistingContainers:
+        type: boolean
+      taskId:
+        type: integer
+      timeoutSecs:
+        type: integer
+    type: object
   dto.UpdateAccount:
     properties:
       accountId:
@@ -1918,6 +1945,30 @@ paths:
       security:
       - Bearer: []
       summary: DownloadBackupTaskArchiveFile
+      tags:
+      - backup
+  /v1/backup/task/restore/:
+    post:
+      consumes:
+      - application/json
+      description: Schedule a backup task restoration.
+      parameters:
+      - description: RestoreBackupTask
+        in: body
+        name: restoreBackupTaskDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RestoreBackupTask'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupTaskRestorationScheduled
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: RestoreBackupTask
       tags:
       - backup
   /v1/container/:

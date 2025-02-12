@@ -341,6 +341,75 @@ func (controller *BackupController) ReadTask(c echo.Context) error {
 	)
 }
 
+// RestoreBackupTask	godoc
+// @Summary      RestoreBackupTask
+// @Description  Schedule a backup task restoration.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        restoreBackupTaskDto	body	dto.RestoreBackupTask	true	"RestoreBackupTask"
+// @Success      201	{object}	object{}	"BackupTaskRestorationScheduled"
+// @Router       /v1/backup/task/restore/	[post]
+func (controller *BackupController) RestoreTask(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	if requestBody["containerAccountIds"] == nil {
+		if requestBody["containerAccountId"] != nil {
+			requestBody["containerAccountIds"] = requestBody["containerAccountId"]
+		}
+	}
+
+	if requestBody["containerAccountIds"] != nil {
+		requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["containerAccountIds"], valueObject.NewAccountId,
+		)
+	}
+
+	if requestBody["containerIds"] == nil {
+		if requestBody["containerId"] != nil {
+			requestBody["containerIds"] = requestBody["containerId"]
+		}
+	}
+
+	if requestBody["containerIds"] != nil {
+		requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["containerIds"], valueObject.NewContainerId,
+		)
+	}
+
+	if requestBody["exceptContainerAccountIds"] == nil {
+		if requestBody["exceptContainerAccountId"] != nil {
+			requestBody["exceptContainerAccountIds"] = requestBody["exceptContainerAccountId"]
+		}
+	}
+
+	if requestBody["exceptContainerAccountIds"] != nil {
+		requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["exceptContainerAccountIds"], valueObject.NewAccountId,
+		)
+	}
+
+	if requestBody["exceptContainerIds"] == nil {
+		if requestBody["exceptContainerId"] != nil {
+			requestBody["exceptContainerIds"] = requestBody["exceptContainerId"]
+		}
+	}
+
+	if requestBody["exceptContainerIds"] != nil {
+		requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
+			requestBody["exceptContainerIds"], valueObject.NewContainerId,
+		)
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.RestoreTask(requestBody, true),
+	)
+}
+
 // DeleteBackupTask	 godoc
 // @Summary      DeleteBackupTask
 // @Description  Delete a backup task and its files if "shouldDiscardFiles" is true.

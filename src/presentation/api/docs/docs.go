@@ -1081,6 +1081,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/task/restore/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Schedule a backup task restoration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "RestoreBackupTask",
+                "parameters": [
+                    {
+                        "description": "RestoreBackupTask",
+                        "name": "restoreBackupTaskDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RestoreBackupTask"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupTaskRestorationScheduled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/backup/task/{taskId}/": {
             "delete": {
                 "security": [
@@ -3289,6 +3328,47 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.ScheduledTask"
                     }
+                }
+            }
+        },
+        "dto.RestoreBackupTask": {
+            "type": "object",
+            "properties": {
+                "archiveId": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "shouldReplaceExistingContainers": {
+                    "type": "boolean"
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
                 }
             }
         },
