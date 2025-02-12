@@ -216,7 +216,7 @@ definitions:
       useImageExposedPorts:
         type: boolean
     type: object
-  dto.CreateContainerImageArchiveFile:
+  dto.CreateContainerImageArchive:
     properties:
       accountId:
         type: integer
@@ -339,6 +339,15 @@ definitions:
         items:
           $ref: '#/definitions/entity.BackupTask'
         type: array
+    type: object
+  dto.ReadContainerImageArchivesResponse:
+    properties:
+      archives:
+        items:
+          $ref: '#/definitions/entity.ContainerImageArchive'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
     type: object
   dto.ReadContainersResponse:
     properties:
@@ -761,7 +770,7 @@ definitions:
       sizeBytes:
         type: integer
     type: object
-  entity.ContainerImageArchiveFile:
+  entity.ContainerImageArchive:
     properties:
       accountId:
         type: integer
@@ -2213,18 +2222,53 @@ paths:
       consumes:
       - application/json
       description: List container image archive files.
+      parameters:
+      - description: ImageId
+        in: query
+        name: imageId
+        type: string
+      - description: AccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.ContainerImageArchiveFile'
-            type: array
+            $ref: '#/definitions/dto.ReadContainerImageArchivesResponse'
       security:
       - Bearer: []
-      summary: ReadContainerImageArchiveFiles
+      summary: ReadContainerImageArchives
       tags:
       - containerImageArchive
     post:
@@ -2232,22 +2276,22 @@ paths:
       - application/json
       description: Export a container image to a file. This is an asynchronous operation.
       parameters:
-      - description: CreateContainerImageArchiveFileDto
+      - description: CreateContainerImageArchiveDto
         in: body
-        name: createContainerImageArchiveFileDto
+        name: createContainerImageArchiveDto
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateContainerImageArchiveFile'
+          $ref: '#/definitions/dto.CreateContainerImageArchive'
       produces:
       - application/json
       responses:
         "201":
-          description: ContainerImageArchiveFileCreationScheduled
+          description: ContainerImageArchiveCreationScheduled
           schema:
             type: object
       security:
       - Bearer: []
-      summary: CreateContainerImageArchiveFile
+      summary: CreateContainerImageArchive
       tags:
       - containerImageArchive
   /v1/container/image/archive/{accountId}/{imageId}/:
@@ -2270,12 +2314,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: ContainerImageArchiveFileDeleted
+          description: ContainerImageArchiveDeleted
           schema:
             type: object
       security:
       - Bearer: []
-      summary: DeleteContainerImageArchiveFile
+      summary: DeleteContainerImageArchive
       tags:
       - containerImageArchive
     get:
@@ -2297,12 +2341,12 @@ paths:
       - application/octet-stream
       responses:
         "200":
-          description: ContainerImageArchiveFile
+          description: ContainerImageArchive
           schema:
             type: file
       security:
       - Bearer: []
-      summary: DownloadContainerImageArchiveFile
+      summary: DownloadContainerImageArchive
       tags:
       - containerImageArchive
   /v1/container/image/archive/import/:
@@ -2324,18 +2368,18 @@ paths:
       - application/json
       responses:
         "201":
-          description: ContainerImageArchiveFilesImported
+          description: ContainerImageArchivesImported
           schema:
             type: string
         "207":
-          description: ContainerImageArchiveFilesPartiallyImported
+          description: ContainerImageArchivesPartiallyImported
           schema:
             items:
               $ref: '#/definitions/apiController.FailedArchiveFileUpload'
             type: array
       security:
       - Bearer: []
-      summary: ImportContainerImageArchiveFiles
+      summary: ImportContainerImageArchives
       tags:
       - containerImageArchive
   /v1/container/image/snapshot/:

@@ -1459,15 +1459,68 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "ReadContainerImageArchiveFiles",
+                "summary": "ReadContainerImageArchives",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ImageId",
+                        "name": "imageId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.ContainerImageArchiveFile"
-                            }
+                            "$ref": "#/definitions/dto.ReadContainerImageArchivesResponse"
                         }
                     }
                 }
@@ -1488,21 +1541,21 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "CreateContainerImageArchiveFile",
+                "summary": "CreateContainerImageArchive",
                 "parameters": [
                     {
-                        "description": "CreateContainerImageArchiveFileDto",
-                        "name": "createContainerImageArchiveFileDto",
+                        "description": "CreateContainerImageArchiveDto",
+                        "name": "createContainerImageArchiveDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateContainerImageArchiveFile"
+                            "$ref": "#/definitions/dto.CreateContainerImageArchive"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "ContainerImageArchiveFileCreationScheduled",
+                        "description": "ContainerImageArchiveCreationScheduled",
                         "schema": {
                             "type": "object"
                         }
@@ -1527,7 +1580,7 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "ImportContainerImageArchiveFiles",
+                "summary": "ImportContainerImageArchives",
                 "parameters": [
                     {
                         "type": "string",
@@ -1545,13 +1598,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "ContainerImageArchiveFilesImported",
+                        "description": "ContainerImageArchivesImported",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "207": {
-                        "description": "ContainerImageArchiveFilesPartiallyImported",
+                        "description": "ContainerImageArchivesPartiallyImported",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1579,7 +1632,7 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "DownloadContainerImageArchiveFile",
+                "summary": "DownloadContainerImageArchive",
                 "parameters": [
                     {
                         "type": "string",
@@ -1598,7 +1651,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ContainerImageArchiveFile",
+                        "description": "ContainerImageArchive",
                         "schema": {
                             "type": "file"
                         }
@@ -1621,7 +1674,7 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "DeleteContainerImageArchiveFile",
+                "summary": "DeleteContainerImageArchive",
                 "parameters": [
                     {
                         "type": "string",
@@ -1640,7 +1693,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ContainerImageArchiveFileDeleted",
+                        "description": "ContainerImageArchiveDeleted",
                         "schema": {
                             "type": "object"
                         }
@@ -3092,7 +3145,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateContainerImageArchiveFile": {
+        "dto.CreateContainerImageArchive": {
             "type": "object",
             "properties": {
                 "accountId": {
@@ -3280,6 +3333,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.BackupTask"
                     }
+                }
+            }
+        },
+        "dto.ReadContainerImageArchivesResponse": {
+            "type": "object",
+            "properties": {
+                "archives": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.ContainerImageArchive"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
                 }
             }
         },
@@ -3923,7 +3990,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.ContainerImageArchiveFile": {
+        "entity.ContainerImageArchive": {
             "type": "object",
             "properties": {
                 "accountId": {

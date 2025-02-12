@@ -137,7 +137,7 @@ script ContainerImageIndexLocalState() {
 
 templ ContainerImageIndex(
 	imagesEntities []entity.ContainerImage,
-	archiveFilesEntities []entity.ContainerImageArchiveFile,
+	archiveEntities []entity.ContainerImageArchive,
 	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 	accountsSelectPairs []componentForm.SelectLabelValuePair,
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
@@ -157,7 +157,7 @@ templ ContainerImageIndex(
 				"Compressed image files ready to be downloaded to your local machine.",
 				"ph-file-zip",
 			)
-			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdEntityMap)
+			@ContainerImageArchivesTable(archiveEntities, accountIdEntityMap)
 			<p class="mt-2 text-xs">
 				Note: archive files are automatically deleted after 24h to preserve storage space.
 			</p>
@@ -198,8 +198,8 @@ templ ContainerImageIndex(
 	</div>
 }
 
-templ ContainerImageArchiveFilesTable(
-	archiveFilesEntities []entity.ContainerImageArchiveFile,
+templ ContainerImageArchivesTable(
+	archiveEntities []entity.ContainerImageArchive,
 	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	<table
@@ -222,35 +222,35 @@ templ ContainerImageArchiveFilesTable(
 			</tr>
 		</thead>
 		<tbody>
-			for _, archiveFileEntity := range archiveFilesEntities {
+			for _, archiveEntity := range archiveEntities {
 				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-sm">
-					<td class="w-3/6 px-3 py-2">{ archiveFileEntity.UnixFilePath.String() }</td>
-					<td class="px-3 py-2">{ archiveFileEntity.ImageId.String() }</td>
+					<td class="w-3/6 px-3 py-2">{ archiveEntity.UnixFilePath.String() }</td>
+					<td class="px-3 py-2">{ archiveEntity.ImageId.String() }</td>
 					<td class="px-3 py-2 leading-tight">
-						<p>{ accountIdEntityMap[archiveFileEntity.AccountId].Username.String() }</p>
+						<p>{ accountIdEntityMap[archiveEntity.AccountId].Username.String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">
-							({ archiveFileEntity.AccountId.String() })
+							({ archiveEntity.AccountId.String() })
 						</i>
 					</td>
 					<td class="w-24 px-3 py-2">
-						{ archiveFileEntity.SizeBytes.StringWithSuffix() }
+						{ archiveEntity.SizeBytes.StringWithSuffix() }
 					</td>
-					<td class="px-3 py-2">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="px-3 py-2">{ archiveEntity.CreatedAt.GetRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
 						@componentStructural.CircularIconButtonWithTooltip(
 							"download-archive", "ph-download", "ez-300", "ez-200",
-							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
+							"window.open('"+archiveEntity.DownloadUrl.String()+"')",
 							"Download Archive", "ez-300",
 						)
 						@componentStructural.CircularIconButtonWithTooltip(
 							"delete-archive", "ph-trash", "red-900", "red-700",
-							"openDeleteArchiveModal('"+archiveFileEntity.AccountId.String()+"','"+archiveFileEntity.ImageId.String()+"')",
+							"openDeleteArchiveModal('"+archiveEntity.AccountId.String()+"','"+archiveEntity.ImageId.String()+"')",
 							"Delete Archive", "red-700",
 						)
 					</td>
 				</tr>
 			}
-			if len(archiveFilesEntities) == 0 {
+			if len(archiveEntities) == 0 {
 				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 					<td class="px-6 py-4" colspan="12">No image archives found.</td>
 				</tr>

@@ -260,7 +260,7 @@ func (repo *ContainerImageQueryRepo) ReadById(
 func (repo *ContainerImageQueryRepo) archiveFileFactory(
 	archiveFilePath valueObject.UnixFilePath,
 	serverHostname valueObject.Fqdn,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+) (archiveFile entity.ContainerImageArchive, err error) {
 	archiveFileName := archiveFilePath.ReadFileName()
 	archiveFileNameParts := strings.Split(archiveFileName.String(), "-")
 	if len(archiveFileNameParts) == 0 {
@@ -299,15 +299,15 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 	rawCreatedAt := fileInfo.ModTime()
 	createdAt := valueObject.NewUnixTimeWithGoTime(rawCreatedAt)
 
-	return entity.NewContainerImageArchiveFile(
+	return entity.NewContainerImageArchive(
 		imageId, accountId, archiveFilePath, sizeBytes, &downloadUrl, nil, createdAt,
 	), nil
 }
 
-func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
-	[]entity.ContainerImageArchiveFile, error,
-) {
-	archiveFiles := []entity.ContainerImageArchiveFile{}
+func (repo *ContainerImageQueryRepo) ReadArchives(
+	requestDto dto.ReadContainerImageArchivesRequest,
+) (responseDto dto.ReadContainerImageArchivesResponse, err error) {
+	archiveFiles := []entity.ContainerImageArchive{}
 
 	findResult, err := infraHelper.RunCmd(
 		"find", infraEnvs.UserDataDirectory,
@@ -317,17 +317,17 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 		"-regex", `.*\.\(`+strings.Join(valueObject.ValidCompressionFormats, `\|`)+`\)$`,
 	)
 	if err != nil {
-		return archiveFiles, errors.New("FindArchiveFilesError: " + err.Error())
+		return responseDto, errors.New("FindArchiveFilesError: " + err.Error())
 	}
 
 	rawArchiveFilesPaths := strings.Split(findResult, "\n")
 	if len(rawArchiveFilesPaths) == 0 {
-		return archiveFiles, nil
+		return responseDto, nil
 	}
 
 	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
-		return archiveFiles, errors.New("InvalidServerHostname: " + err.Error())
+		return responseDto, errors.New("InvalidServerHostname: " + err.Error())
 	}
 
 	for _, rawArchiveFilePath := range rawArchiveFilesPaths {
@@ -349,12 +349,15 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 		archiveFiles = append(archiveFiles, archiveFile)
 	}
 
-	return archiveFiles, nil
+	return dto.ReadContainerImageArchivesResponse{
+		Pagination: requestDto.Pagination,
+		Archives:   archiveFiles,
+	}, nil
 }
 
-func (repo *ContainerImageQueryRepo) ReadArchiveFile(
-	readDto dto.ReadContainerImageArchiveFile,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+func (repo *ContainerImageQueryRepo) ReadArchive(
+	readDto dto.ReadContainerImageArchive,
+) (archiveFile entity.ContainerImageArchive, err error) {
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
 	accountEntity, err := accountQueryRepo.ReadById(readDto.AccountId)
 	if err != nil {
