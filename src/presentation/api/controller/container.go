@@ -451,7 +451,7 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		}
 
 		importDto := dto.NewImportContainerImageArchive(
-			accountId, archiveImageFile, operatorAccountId, operatorIpAddress,
+			accountId, archiveImageFile, nil, operatorAccountId, operatorIpAddress,
 		)
 
 		containerImageCmdRepo := infra.NewContainerImageCmdRepo(controller.persistentDbSvc)

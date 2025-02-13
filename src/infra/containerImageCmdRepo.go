@@ -92,40 +92,57 @@ func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
 func (repo *ContainerImageCmdRepo) ImportArchive(
 	importDto dto.ImportContainerImageArchive,
 ) (imageId valueObject.ContainerImageId, err error) {
-	inputFileHandler, err := importDto.ArchiveFile.Open()
-	if err != nil {
-		return imageId, errors.New("OpenArchiveFileError: " + err.Error())
-	}
-	defer inputFileHandler.Close()
+	if importDto.ArchiveFilePath == nil {
+		inputFileHandler, err := importDto.ArchiveFile.Open()
+		if err != nil {
+			return imageId, errors.New("OpenArchiveFileError: " + err.Error())
+		}
+		defer inputFileHandler.Close()
 
-	archiveDir, err := repo.readArchiveFilesDirectory(importDto.AccountId)
-	if err != nil {
-		return imageId, err
+		archiveDir, err := repo.readArchiveFilesDirectory(importDto.AccountId)
+		if err != nil {
+			return imageId, err
+		}
+
+		rawOutputFilePath := archiveDir.String() + "/" + importDto.ArchiveFile.Filename
+		localArchiveFilePath, err := valueObject.NewUnixFilePath(rawOutputFilePath)
+		if err != nil {
+			return imageId, errors.New("ArchiveFilePathError: " + err.Error())
+		}
+
+		localArchiveFileHandler, err := os.Create(localArchiveFilePath.String())
+		if err != nil {
+			return imageId, errors.New("CreateArchiveError: " + err.Error())
+		}
+		defer localArchiveFileHandler.Close()
+
+		_, err = io.Copy(localArchiveFileHandler, inputFileHandler)
+		if err != nil {
+			return imageId, errors.New("CopyArchiveFileError: " + err.Error())
+		}
+
+		importDto.ArchiveFilePath = &localArchiveFilePath
 	}
 
-	rawOutputFilePath := archiveDir.String() + "/" + importDto.ArchiveFile.Filename
-	outputFilePath, err := valueObject.NewUnixFilePath(rawOutputFilePath)
+	localArchiveFilePathStr := importDto.ArchiveFilePath.String()
+	localArchiveFileExt, err := importDto.ArchiveFilePath.ReadFileExtension()
 	if err != nil {
-		return imageId, errors.New("ArchiveFilePathError: " + err.Error())
-	}
-	outputFilePathStr := outputFilePath.String()
-
-	outputFileHandler, err := os.Create(outputFilePathStr)
-	if err != nil {
-		return imageId, errors.New("CreateArchiveError: " + err.Error())
-	}
-	defer outputFileHandler.Close()
-
-	outputFileExtension, err := outputFilePath.ReadFileExtension()
-	if err != nil {
-		if !strings.HasSuffix(outputFilePathStr, ".br") {
+		if !strings.HasSuffix(localArchiveFilePathStr, ".br") {
 			return imageId, errors.New("ReadFileExtensionError: " + err.Error())
 		}
 	}
 
+	accountIdStr := importDto.AccountId.String()
+	_, err = infraHelper.RunCmd(
+		"chown", accountIdStr+":"+accountIdStr, localArchiveFilePathStr,
+	)
+	if err != nil {
+		return imageId, errors.New("ChownArchiveError: " + err.Error())
+	}
+
 	decompressionCmd := ""
-	outputFileExtStr := outputFileExtension.String()
-	switch outputFileExtStr {
+	localArchiveFileExtStr := localArchiveFileExt.String()
+	switch localArchiveFileExtStr {
 	case "tar":
 		decompressionCmd = ""
 	case "br":
@@ -140,23 +157,10 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		return imageId, errors.New("UnsupportedArchiveFileExtension")
 	}
 
-	_, err = io.Copy(outputFileHandler, inputFileHandler)
-	if err != nil {
-		return imageId, errors.New("CopyArchiveFileError: " + err.Error())
-	}
-
-	accountIdStr := importDto.AccountId.String()
-	_, err = infraHelper.RunCmd(
-		"chown", accountIdStr+":"+accountIdStr, outputFilePathStr,
-	)
-	if err != nil {
-		return imageId, errors.New("ChownArchiveError: " + err.Error())
-	}
-
-	archiveFilePathStr := outputFilePathStr
+	archiveFilePathStr := localArchiveFilePathStr
 	shouldDecompress := len(decompressionCmd) > 0
 	if shouldDecompress {
-		archiveFilePathStr = strings.TrimSuffix(outputFilePathStr, "."+outputFileExtStr)
+		archiveFilePathStr = strings.TrimSuffix(localArchiveFilePathStr, "."+localArchiveFileExtStr)
 		_, err = infraHelper.RunCmdAsUserWithSubShell(
 			importDto.AccountId, "rm -f "+archiveFilePathStr,
 		)
@@ -165,7 +169,7 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		}
 
 		_, err = infraHelper.RunCmdAsUserWithSubShell(
-			importDto.AccountId, decompressionCmd+" "+outputFilePathStr,
+			importDto.AccountId, decompressionCmd+" "+localArchiveFilePathStr,
 		)
 		if err != nil {
 			return imageId, errors.New("DecompressImageError: " + err.Error())

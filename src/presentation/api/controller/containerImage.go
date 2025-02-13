@@ -256,7 +256,7 @@ func (controller *ContainerImageController) ImportArchive(c echo.Context) error 
 	failedUploads := []FailedArchiveFileUpload{}
 	for _, archiveFile := range archiveFiles {
 		importDto := dto.NewImportContainerImageArchive(
-			accountId, archiveFile, operatorAccountId, operatorIpAddress,
+			accountId, archiveFile, nil, operatorAccountId, operatorIpAddress,
 		)
 
 		_, err = useCase.ImportContainerImageArchive(
