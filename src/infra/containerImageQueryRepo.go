@@ -309,8 +309,13 @@ func (repo *ContainerImageQueryRepo) ReadArchives(
 ) (responseDto dto.ReadContainerImageArchivesResponse, err error) {
 	archiveFiles := []entity.ContainerImageArchive{}
 
+	archiveFilesBaseDirectoryStr := infraEnvs.UserDataDirectory
+	if requestDto.ArchivesDirectory != nil {
+		archiveFilesBaseDirectoryStr = requestDto.ArchivesDirectory.String()
+	}
+
 	findResult, err := infraHelper.RunCmd(
-		"find", infraEnvs.UserDataDirectory,
+		"find", archiveFilesBaseDirectoryStr,
 		"-type", "f",
 		"-path", "*/archives/*",
 		"-maxdepth", "3",
