@@ -1480,6 +1480,14 @@ func (service *BackupService) RestoreTask(
 		}
 	}
 
+	shouldRestoreMappings := true
+	if input["shouldRestoreMappings"] != nil {
+		shouldRestoreMappings, err = voHelper.InterfaceToBool(input["shouldRestoreMappings"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
 	timeoutSeconds := useCase.RestoreBackupTaskDefaultTimeoutSecs
 	if input["timeoutSeconds"] != nil {
 		timeoutSeconds, err = voHelper.InterfaceToUint32(input["timeoutSeconds"])
@@ -1542,6 +1550,7 @@ func (service *BackupService) RestoreTask(
 		cliParams := []string{
 			"--task-id", taskId.String(),
 			"--should-replace-existing-containers", strconv.FormatBool(shouldReplaceExistingContainers),
+			"--should-restore-mappings", strconv.FormatBool(shouldRestoreMappings),
 			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
 		}
 		if archiveIdPtr != nil {
@@ -1582,9 +1591,9 @@ func (service *BackupService) RestoreTask(
 	}
 
 	restoreDto := dto.NewRestoreBackupTask(
-		taskId, archiveIdPtr, &shouldReplaceExistingContainers, &timeoutSeconds,
-		containerAccountIds, containerIds, exceptContainerAccountIds, exceptContainerIds,
-		operatorAccountId, operatorIpAddress,
+		taskId, archiveIdPtr, &shouldReplaceExistingContainers, &shouldRestoreMappings,
+		&timeoutSeconds, containerAccountIds, containerIds, exceptContainerAccountIds,
+		exceptContainerIds, operatorAccountId, operatorIpAddress,
 	)
 
 	err = useCase.RestoreBackupTask(

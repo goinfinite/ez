@@ -907,7 +907,8 @@ func (controller *BackupController) ReadTask() *cobra.Command {
 
 func (controller *BackupController) RestoreTask() *cobra.Command {
 	var taskIdUint uint64
-	var archiveIdStr, shouldReplaceExistingContainersBoolStr string
+	var archiveIdStr string
+	var shouldReplaceExistingContainersBoolStr, shouldRestoreMappingsBoolStr string
 	var timeoutSecondsUint uint32
 	var containerIdsSlice, containerAccountIdsSlice []string
 	var exceptContainerIdsSlice, exceptContainerAccountIdsSlice []string
@@ -919,6 +920,7 @@ func (controller *BackupController) RestoreTask() *cobra.Command {
 			requestBody := map[string]interface{}{
 				"taskId":                          taskIdUint,
 				"shouldReplaceExistingContainers": shouldReplaceExistingContainersBoolStr,
+				"shouldRestoreMappings":           shouldRestoreMappingsBoolStr,
 			}
 
 			if archiveIdStr != "" {
@@ -967,6 +969,10 @@ func (controller *BackupController) RestoreTask() *cobra.Command {
 	cmd.Flags().StringVarP(
 		&shouldReplaceExistingContainersBoolStr,
 		"should-replace-existing-containers", "R", "false", "ShouldReplaceExistingContainers",
+	)
+	cmd.Flags().StringVarP(
+		&shouldRestoreMappingsBoolStr,
+		"should-restore-mappings", "M", "true", "ShouldRestoreMappings",
 	)
 	cmd.Flags().Uint32VarP(&timeoutSecondsUint, "timeout-secs", "T", 0, "TimeoutSeconds")
 	cmd.Flags().StringSliceVarP(

@@ -402,6 +402,8 @@ definitions:
         type: array
       shouldReplaceExistingContainers:
         type: boolean
+      shouldRestoreMappings:
+        type: boolean
       taskId:
         type: integer
       timeoutSecs:
@@ -763,6 +765,8 @@ definitions:
         type: string
       isa:
         type: string
+      originContainerDetails:
+        $ref: '#/definitions/entity.Container'
       portBindings:
         items:
           $ref: '#/definitions/valueObject.PortBinding'

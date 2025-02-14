@@ -3431,6 +3431,9 @@ const docTemplate = `{
                 "shouldReplaceExistingContainers": {
                     "type": "boolean"
                 },
+                "shouldRestoreMappings": {
+                    "type": "boolean"
+                },
                 "taskId": {
                     "type": "integer"
                 },
@@ -3978,6 +3981,9 @@ const docTemplate = `{
                 },
                 "isa": {
                     "type": "string"
+                },
+                "originContainerDetails": {
+                    "$ref": "#/definitions/entity.Container"
                 },
                 "portBindings": {
                     "type": "array",

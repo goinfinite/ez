@@ -8,6 +8,7 @@ type RestoreBackupTask struct {
 	TaskId                          valueObject.BackupTaskId         `json:"taskId"`
 	ArchiveId                       *valueObject.BackupTaskArchiveId `json:"archiveId,omitempty"`
 	ShouldReplaceExistingContainers *bool                            `json:"shouldReplaceExistingContainers,omitempty"`
+	ShouldRestoreMappings           *bool                            `json:"shouldRestoreMappings,omitempty"`
 	TimeoutSecs                     *uint32                          `json:"timeoutSecs,omitempty"`
 	ContainerAccountIds             []valueObject.AccountId          `json:"containerAccountIds"`
 	ContainerIds                    []valueObject.ContainerId        `json:"containerIds"`
@@ -20,7 +21,7 @@ type RestoreBackupTask struct {
 func NewRestoreBackupTask(
 	taskId valueObject.BackupTaskId,
 	archiveId *valueObject.BackupTaskArchiveId,
-	shouldReplaceExistingContainers *bool,
+	shouldReplaceExistingContainers, shouldRestoreMappings *bool,
 	timeoutSecs *uint32,
 	containerAccountIds []valueObject.AccountId,
 	containerIds []valueObject.ContainerId,
@@ -33,6 +34,7 @@ func NewRestoreBackupTask(
 		TaskId:                          taskId,
 		ArchiveId:                       archiveId,
 		ShouldReplaceExistingContainers: shouldReplaceExistingContainers,
+		ShouldRestoreMappings:           shouldRestoreMappings,
 		TimeoutSecs:                     timeoutSecs,
 		ContainerAccountIds:             containerAccountIds,
 		ContainerIds:                    containerIds,
