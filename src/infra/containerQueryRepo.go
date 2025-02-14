@@ -376,3 +376,23 @@ func (repo *ContainerQueryRepo) Read(
 
 	return responseDto, nil
 }
+
+func (repo *ContainerQueryRepo) ReadFirst(
+	requestDto dto.ReadContainersRequest,
+) (containerEntity entity.Container, err error) {
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+
+	responseDto, err := repo.Read(requestDto)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	if len(responseDto.Containers) == 0 {
+		return containerEntity, errors.New("ContainerNotFound")
+	}
+
+	return responseDto.Containers[0], nil
+}
