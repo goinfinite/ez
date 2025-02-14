@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -29,21 +30,23 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 ) (imageId valueObject.ContainerImageId, err error) {
 	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
 
-	readContainersRequestDto := dto.ReadContainersRequest{
+	requestContainersDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
 		ContainerId: []valueObject.ContainerId{createDto.ContainerId},
 	}
 
-	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)
-	if err != nil || len(readContainersResponseDto.Containers) == 0 {
-		return imageId, errors.New("ContainerNotFound")
+	containerEntity, err := containerQueryRepo.ReadFirst(requestContainersDto)
+	if err != nil {
+		return imageId, err
 	}
-	containerEntity := readContainersResponseDto.Containers[0]
-	containerIdStr := createDto.ContainerId.String()
+
 	containerHostnameStrSimplified := strings.ReplaceAll(
 		containerEntity.Hostname.String(), ".", "-",
 	)
 	containerHostnameStrSimplified = strings.ToLower(containerHostnameStrSimplified)
+
+	containerIdStr := createDto.ContainerId.String()
+
 	snapshotName := containerIdStr + "-" +
 		containerHostnameStrSimplified +
 		":" + valueObject.NewUnixTimeNow().String()
@@ -54,10 +57,25 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 		return imageId, err
 	}
 
+	containerEntity.Entrypoint = nil
+	containerEntity.PortBindings = []valueObject.PortBinding{}
+	containerEntity.Envs = []valueObject.ContainerEnv{}
+	containerEntity.StartedAt = nil
+	containerEntity.StoppedAt = nil
+	containerEntityJsonBytes, err := json.Marshal(containerEntity)
+	if err != nil {
+		return imageId, errors.New("MarshalContainerEntityError: " + err.Error())
+	}
+	encodedContainerEntityJson, err := infraHelper.EncodeStr(string(containerEntityJsonBytes))
+	if err != nil {
+		return imageId, errors.New("EncodeContainerEntityError: " + err.Error())
+	}
+
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		containerEntity.AccountId,
 		"podman", "commit", "--quiet",
 		"--author", "ez:"+createDto.OperatorAccountId.String(),
+		"--change", "LABEL=ez.originContainerDetails="+encodedContainerEntityJson,
 		containerIdStr,
 		"localhost/"+accountEntity.Username.String()+"/"+snapshotName,
 	)

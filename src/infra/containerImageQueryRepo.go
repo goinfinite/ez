@@ -28,6 +28,74 @@ func NewContainerImageQueryRepo(
 	return &ContainerImageQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
+func (repo *ContainerImageQueryRepo) originContainerDetailsFactory(
+	rawOriginContainerDetails string,
+) (originContainerDetails entity.Container, err error) {
+	decodedDetails, err := infraHelper.DecodeStr(rawOriginContainerDetails)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	var originContainerDetailsMap map[string]interface{}
+	err = json.Unmarshal([]byte(decodedDetails), &originContainerDetails)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	rawContainerId, exists := originContainerDetailsMap["Id"]
+	if !exists {
+		return originContainerDetails, errors.New("ContainerIdNotFound")
+	}
+	containerId, err := valueObject.NewContainerId(rawContainerId)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	rawAccountId, exists := originContainerDetailsMap["AccountId"]
+	if !exists {
+		return originContainerDetails, errors.New("AccountIdNotFound")
+	}
+	accountId, err := valueObject.NewAccountId(rawAccountId)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	rawHostname, exists := originContainerDetailsMap["Hostname"]
+	if !exists {
+		return originContainerDetails, errors.New("HostnameNotFound")
+	}
+	containerHostname, err := valueObject.NewFqdn(rawHostname)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	rawRestartPolicy, exists := originContainerDetailsMap["RestartPolicy"]
+	if !exists {
+		return originContainerDetails, errors.New("RestartPolicyNotFound")
+	}
+	restartPolicy, err := valueObject.NewContainerRestartPolicy(rawRestartPolicy)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	rawProfileId, exists := originContainerDetailsMap["ProfileId"]
+	if !exists {
+		return originContainerDetails, errors.New("ProfileIdNotFound")
+	}
+	profileId, err := valueObject.NewContainerProfileId(rawProfileId)
+	if err != nil {
+		return originContainerDetails, err
+	}
+
+	return entity.Container{
+		Id:            containerId,
+		AccountId:     accountId,
+		Hostname:      containerHostname,
+		RestartPolicy: restartPolicy,
+		ProfileId:     profileId,
+	}, nil
+}
+
 func (repo *ContainerImageQueryRepo) containerImageFactory(
 	accountId valueObject.AccountId,
 	rawContainerImage map[string]interface{},
@@ -39,11 +107,6 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	imageId, err := valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
 		return containerImage, err
-	}
-
-	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageConfig")
 	}
 
 	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
@@ -109,6 +172,11 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
+	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageConfig")
+	}
+
 	portBindings := []valueObject.PortBinding{}
 	rawPortBindings, assertOk := rawConfig["ExposedPorts"].(map[string]interface{})
 	if assertOk {
@@ -160,6 +228,22 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		entrypointPtr = &entrypoint
 	}
 
+	rawLabels, assertOk := rawConfig["Labels"].(map[string]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageLabels")
+	}
+
+	originContainerDetails := entity.Container{}
+	rawEncodedOriginContainerDetails, assertOk := rawLabels["ez.originContainerDetails"].(string)
+	if assertOk {
+		originContainerDetails, err = repo.originContainerDetailsFactory(
+			rawEncodedOriginContainerDetails,
+		)
+		if err != nil {
+			return containerImage, err
+		}
+	}
+
 	rawCreated, assertOk := rawContainerImage["Created"].(string)
 	if !assertOk {
 		return containerImage, errors.New("InvalidContainerImageCreated")
@@ -172,7 +256,7 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 
 	return entity.NewContainerImage(
 		imageId, accountId, imageAddress, imageHash, isa, sizeBytes,
-		portBindings, envs, entrypointPtr, createdAt,
+		portBindings, envs, entrypointPtr, &originContainerDetails, createdAt,
 	), nil
 }
 

@@ -7,16 +7,17 @@ import (
 )
 
 type ContainerImage struct {
-	Id           valueObject.ContainerImageId           `json:"id"`
-	AccountId    valueObject.AccountId                  `json:"accountId"`
-	ImageAddress valueObject.ContainerImageAddress      `json:"imageAddress"`
-	ImageHash    valueObject.Hash                       `json:"imageHash"`
-	Isa          valueObject.InstructionSetArchitecture `json:"isa"`
-	SizeBytes    valueObject.Byte                       `json:"sizeBytes"`
-	PortBindings []valueObject.PortBinding              `json:"portBindings"`
-	Envs         []valueObject.ContainerEnv             `json:"envs"`
-	Entrypoint   *valueObject.ContainerEntrypoint       `json:"entrypoint"`
-	CreatedAt    valueObject.UnixTime                   `json:"createdAt"`
+	Id                     valueObject.ContainerImageId           `json:"id"`
+	AccountId              valueObject.AccountId                  `json:"accountId"`
+	ImageAddress           valueObject.ContainerImageAddress      `json:"imageAddress"`
+	ImageHash              valueObject.Hash                       `json:"imageHash"`
+	Isa                    valueObject.InstructionSetArchitecture `json:"isa"`
+	SizeBytes              valueObject.Byte                       `json:"sizeBytes"`
+	PortBindings           []valueObject.PortBinding              `json:"portBindings"`
+	Envs                   []valueObject.ContainerEnv             `json:"envs"`
+	Entrypoint             *valueObject.ContainerEntrypoint       `json:"entrypoint"`
+	OriginContainerDetails *Container                             `json:"originContainerDetails,omitempty"`
+	CreatedAt              valueObject.UnixTime                   `json:"createdAt"`
 }
 
 func NewContainerImage(
@@ -29,19 +30,21 @@ func NewContainerImage(
 	portBindings []valueObject.PortBinding,
 	envs []valueObject.ContainerEnv,
 	entrypoint *valueObject.ContainerEntrypoint,
+	originContainerDetails *Container,
 	createdAt valueObject.UnixTime,
 ) ContainerImage {
 	return ContainerImage{
-		Id:           id,
-		AccountId:    accountId,
-		ImageAddress: imageAddress,
-		ImageHash:    imageHash,
-		Isa:          isa,
-		SizeBytes:    sizeBytes,
-		PortBindings: portBindings,
-		Envs:         envs,
-		Entrypoint:   entrypoint,
-		CreatedAt:    createdAt,
+		Id:                     id,
+		AccountId:              accountId,
+		ImageAddress:           imageAddress,
+		ImageHash:              imageHash,
+		Isa:                    isa,
+		SizeBytes:              sizeBytes,
+		PortBindings:           portBindings,
+		Envs:                   envs,
+		Entrypoint:             entrypoint,
+		OriginContainerDetails: originContainerDetails,
+		CreatedAt:              createdAt,
 	}
 }
 
