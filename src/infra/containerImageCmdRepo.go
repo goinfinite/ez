@@ -66,10 +66,7 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	if err != nil {
 		return imageId, errors.New("MarshalContainerEntityError: " + err.Error())
 	}
-	encodedContainerEntityJson, err := infraHelper.EncodeStr(string(containerEntityJsonBytes))
-	if err != nil {
-		return imageId, errors.New("EncodeContainerEntityError: " + err.Error())
-	}
+	encodedContainerEntityJson := infraHelper.EncodeStr(string(containerEntityJsonBytes))
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		containerEntity.AccountId,
