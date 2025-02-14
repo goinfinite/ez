@@ -396,3 +396,25 @@ func (repo *ContainerQueryRepo) ReadFirst(
 
 	return responseDto.Containers[0], nil
 }
+
+func (repo *ContainerQueryRepo) ReadFirstWithMetrics(
+	requestDto dto.ReadContainersRequest,
+) (containerWithMetrics dto.ContainerWithMetrics, err error) {
+	withMetrics := true
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+	requestDto.WithMetrics = &withMetrics
+
+	responseDto, err := repo.Read(requestDto)
+	if err != nil {
+		return containerWithMetrics, err
+	}
+
+	if len(responseDto.ContainersWithMetrics) == 0 {
+		return containerWithMetrics, errors.New("ContainerNotFound")
+	}
+
+	return responseDto.ContainersWithMetrics[0], nil
+}
