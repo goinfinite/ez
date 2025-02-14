@@ -151,7 +151,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 
-	err = useCase.CreateContainerSnapshotImage(
+	imageEntity, err := useCase.CreateContainerSnapshotImage(
 		service.containerImageQueryRepo, containerImageCmdRepo, containerQueryRepo,
 		accountQueryRepo, service.activityRecordCmdRepo, createSnapshotImageDto,
 	)
@@ -159,7 +159,7 @@ func (service *ContainerImageService) CreateSnapshot(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "ContainerSnapshotImageCreated")
+	return NewServiceOutput(Created, imageEntity)
 }
 
 func (service *ContainerImageService) Delete(
