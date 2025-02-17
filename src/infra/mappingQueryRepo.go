@@ -2,7 +2,7 @@ package infra
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
@@ -24,18 +24,56 @@ func (repo *MappingQueryRepo) Read() ([]entity.Mapping, error) {
 	mappingEntities := []entity.Mapping{}
 
 	var mappingModels []dbModel.Mapping
-
 	err := repo.persistentDbSvc.Handler.
 		Preload("Targets").
 		Find(&mappingModels).Error
 	if err != nil {
-		return mappingEntities, errors.New("DbQueryMappingError")
+		return mappingEntities, errors.New("ReadMappingsFromDatabaseError: " + err.Error())
 	}
 
 	for _, mappingModel := range mappingModels {
 		mappingEntity, err := mappingModel.ToEntity()
 		if err != nil {
-			log.Printf("MappingModelToEntityError: %v", err.Error())
+			slog.Debug(
+				"MappingModelToEntityError",
+				slog.Uint64("mappingId", mappingModel.ID),
+				slog.String("error", err.Error()),
+			)
+			continue
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
+}
+
+func (repo *MappingQueryRepo) ReadByContainerId(
+	containerId valueObject.ContainerId,
+) ([]entity.Mapping, error) {
+	mappingEntities := []entity.Mapping{}
+
+	var mappingModels []dbModel.Mapping
+	err := repo.persistentDbSvc.Handler.
+		Preload("Targets", "container_id = ?", containerId.String()).
+		Model(&dbModel.Mapping{}).
+		Find(&mappingModels).Error
+	if err != nil {
+		return mappingEntities, errors.New("ReadMappingsFromDatabaseError: " + err.Error())
+	}
+
+	for _, mappingModel := range mappingModels {
+		if len(mappingModel.Targets) == 0 {
+			continue
+		}
+
+		mappingEntity, err := mappingModel.ToEntity()
+		if err != nil {
+			slog.Debug(
+				"MappingModelToEntityError",
+				slog.Uint64("mappingId", mappingModel.ID),
+				slog.String("error", err.Error()),
+			)
 			continue
 		}
 
@@ -71,13 +109,17 @@ func (repo *MappingQueryRepo) GetByProtocol(
 		Where("protocol = ?", protocol.String()).
 		Find(&mappingModels).Error
 	if err != nil {
-		return mappingEntities, errors.New("ReadMappingsFromDatabaseError")
+		return mappingEntities, errors.New("ReadMappingsFromDatabaseError: " + err.Error())
 	}
 
 	for _, mappingModel := range mappingModels {
 		mappingEntity, err := mappingModel.ToEntity()
 		if err != nil {
-			log.Printf("MappingModelToEntityError: %v", err.Error())
+			slog.Debug(
+				"MappingModelToEntityError",
+				slog.Uint64("mappingId", mappingModel.ID),
+				slog.String("error", err.Error()),
+			)
 			continue
 		}
 
@@ -113,13 +155,17 @@ func (repo *MappingQueryRepo) ReadTargetsByContainerId(
 		Where("container_id = ?", containerId.String()).
 		Find(&mappingTargetModels).Error
 	if err != nil {
-		return mappingTargets, errors.New("GetTargetsFromDatabaseError")
+		return mappingTargets, errors.New("ReadTargetsFromDatabaseError: " + err.Error())
 	}
 
 	for _, mappingTargetModel := range mappingTargetModels {
 		mappingTargetEntity, err := mappingTargetModel.ToEntity()
 		if err != nil {
-			log.Printf("MappingTargetModelToEntityError: %v", err.Error())
+			slog.Debug(
+				"MappingTargetModelToEntityError",
+				slog.Uint64("mappingTargetId", mappingTargetModel.ID),
+				slog.String("error", err.Error()),
+			)
 			continue
 		}
 
