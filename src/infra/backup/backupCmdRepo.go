@@ -1189,6 +1189,116 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	return nil
 }
 
+func (repo *BackupCmdRepo) restoreContainer(
+	containerArchiveEntity entity.ContainerImageArchive,
+	containerCmdRepo *infra.ContainerCmdRepo,
+	containerImageQueryRepo *infra.ContainerImageQueryRepo,
+	containerImageCmdRepo *infra.ContainerImageCmdRepo,
+	mappingQueryRepo *infra.MappingQueryRepo,
+	mappingCmdRepo *infra.MappingCmdRepo,
+	shouldReplaceExistingContainers bool,
+	shouldRestoreMappings bool,
+) error {
+	importImageArchiveDto := dto.ImportContainerImageArchive{
+		AccountId:       containerArchiveEntity.AccountId,
+		ArchiveFilePath: &containerArchiveEntity.UnixFilePath,
+	}
+	imageId, err := containerImageCmdRepo.ImportArchive(importImageArchiveDto)
+	if err != nil {
+		return errors.New("ImportContainerImageArchiveFailed: " + err.Error())
+	}
+
+	imageEntity, err := containerImageQueryRepo.ReadById(
+		containerArchiveEntity.AccountId, imageId,
+	)
+	if err != nil {
+		return errors.New("ReadContainerImageFailed: " + err.Error())
+	}
+
+	if imageEntity.OriginContainerDetails == nil {
+		return errors.New("OriginContainerDetailsNotFound")
+	}
+
+	rawContainerHostname := imageEntity.OriginContainerDetails.Hostname.String()
+	if !shouldReplaceExistingContainers {
+		archiveCreatedAtStr := containerArchiveEntity.CreatedAt.String()
+		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
+	}
+	containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
+	if err != nil {
+		return errors.New("ValidateContainerHostnameFailed: " + err.Error())
+	}
+
+	createContainerDto := dto.CreateContainer{
+		AccountId:          containerArchiveEntity.AccountId,
+		Hostname:           containerHostname,
+		ImageId:            &imageId,
+		PortBindings:       imageEntity.PortBindings,
+		Envs:               imageEntity.Envs,
+		Entrypoint:         imageEntity.Entrypoint,
+		ProfileId:          &imageEntity.OriginContainerDetails.ProfileId,
+		RestartPolicy:      &imageEntity.OriginContainerDetails.RestartPolicy,
+		AutoCreateMappings: false,
+	}
+
+	containerId, err := containerCmdRepo.Create(createContainerDto)
+	if err != nil {
+		return errors.New("RestoreContainerFailed: " + err.Error())
+	}
+
+	err = os.Remove(containerArchiveEntity.UnixFilePath.String())
+	if err != nil {
+		return errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
+	}
+
+	if !shouldRestoreMappings {
+		return nil
+	}
+
+	for _, mappingEntity := range imageEntity.OriginContainerMappings {
+		currentMappingEntity, err := mappingQueryRepo.ReadById(mappingEntity.Id)
+		if err == nil {
+			isSameHostname := currentMappingEntity.Hostname == mappingEntity.Hostname
+			isSamePublicPort := currentMappingEntity.PublicPort == mappingEntity.PublicPort
+			if isSameHostname && isSamePublicPort {
+				createMappingTargetDto := dto.CreateMappingTarget{
+					AccountId:   containerArchiveEntity.AccountId,
+					MappingId:   currentMappingEntity.Id,
+					ContainerId: containerId,
+				}
+				_, err = mappingCmdRepo.CreateTarget(createMappingTargetDto)
+				if err != nil {
+					slog.Debug(
+						"RestoreMappingTargetFailed",
+						slog.String("containerId", containerId.String()),
+						slog.String("error", err.Error()),
+					)
+					continue
+				}
+			}
+		}
+
+		createMappingDto := dto.CreateMapping{
+			AccountId:    containerArchiveEntity.AccountId,
+			Hostname:     mappingEntity.Hostname,
+			PublicPort:   mappingEntity.PublicPort,
+			Protocol:     mappingEntity.Protocol,
+			ContainerIds: []valueObject.ContainerId{containerId},
+		}
+		_, err = mappingCmdRepo.Create(createMappingDto)
+		if err != nil {
+			slog.Debug(
+				"RestoreMappingFailed",
+				slog.String("containerId", containerId.String()),
+				slog.String("error", err.Error()),
+			)
+			continue
+		}
+	}
+
+	return nil
+}
+
 func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 	if restoreDto.ArchiveId == nil {
 		createArchiveDto := dto.CreateBackupTaskArchive{
@@ -1287,104 +1397,20 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
 	mappingQueryRepo := infra.NewMappingQueryRepo(repo.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(repo.persistentDbSvc)
-	taskArchiveCreatedAtStr := archiveEntity.CreatedAt.String()
 
 	for _, containerImageArchive := range containerImagesResponseDto.Archives {
-		importImageArchiveDto := dto.ImportContainerImageArchive{
-			AccountId:       containerImageArchive.AccountId,
-			ArchiveFilePath: &containerImageArchive.UnixFilePath,
-		}
-
-		imageId, err := containerImageCmdRepo.ImportArchive(importImageArchiveDto)
-		if err != nil {
-			return errors.New("ImportContainerImageArchiveFailed: " + err.Error())
-		}
-
-		imageEntity, err := containerImageQueryRepo.ReadById(
-			containerImageArchive.AccountId, imageId,
+		err = repo.restoreContainer(
+			containerImageArchive, containerCmdRepo, containerImageQueryRepo,
+			containerImageCmdRepo, mappingQueryRepo, mappingCmdRepo,
+			shouldReplaceExistingContainers, shouldRestoreMappings,
 		)
 		if err != nil {
-			return errors.New("ReadContainerImageFailed: " + err.Error())
-		}
-
-		if imageEntity.OriginContainerDetails == nil {
-			return errors.New("OriginContainerDetailsNotFound")
-		}
-
-		rawContainerHostname := imageEntity.OriginContainerDetails.Hostname.String()
-		if !shouldReplaceExistingContainers {
-			rawContainerHostname = taskArchiveCreatedAtStr + ".restored." + rawContainerHostname
-		}
-		containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
-		if err != nil {
-			return errors.New("ValidateContainerHostnameFailed: " + err.Error())
-		}
-
-		createContainerDto := dto.CreateContainer{
-			AccountId:          containerImageArchive.AccountId,
-			Hostname:           containerHostname,
-			ImageId:            &imageId,
-			PortBindings:       imageEntity.PortBindings,
-			Envs:               imageEntity.Envs,
-			Entrypoint:         imageEntity.Entrypoint,
-			ProfileId:          &imageEntity.OriginContainerDetails.ProfileId,
-			RestartPolicy:      &imageEntity.OriginContainerDetails.RestartPolicy,
-			AutoCreateMappings: false,
-		}
-
-		containerId, err := containerCmdRepo.Create(createContainerDto)
-		if err != nil {
-			return errors.New("RestoreContainerFailed: " + err.Error())
-		}
-
-		err = os.Remove(containerImageArchive.UnixFilePath.String())
-		if err != nil {
-			return errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
-		}
-
-		if !shouldRestoreMappings {
+			slog.Debug(
+				"RestoreContainerFailed",
+				slog.String("containerImageArchiveId", containerImageArchive.ImageId.String()),
+				slog.String("error", err.Error()),
+			)
 			continue
-		}
-
-		for _, mappingEntity := range imageEntity.OriginContainerMappings {
-			currentMappingEntity, err := mappingQueryRepo.ReadById(mappingEntity.Id)
-			if err == nil {
-				isSameHostname := currentMappingEntity.Hostname == mappingEntity.Hostname
-				isSamePublicPort := currentMappingEntity.PublicPort == mappingEntity.PublicPort
-				if isSameHostname && isSamePublicPort {
-					createMappingTargetDto := dto.CreateMappingTarget{
-						AccountId:   containerImageArchive.AccountId,
-						MappingId:   currentMappingEntity.Id,
-						ContainerId: containerId,
-					}
-					_, err = mappingCmdRepo.CreateTarget(createMappingTargetDto)
-					if err != nil {
-						slog.Debug(
-							"RestoreMappingTargetFailed",
-							slog.String("containerId", containerId.String()),
-							slog.String("error", err.Error()),
-						)
-						continue
-					}
-				}
-			}
-
-			createMappingDto := dto.CreateMapping{
-				AccountId:    containerImageArchive.AccountId,
-				Hostname:     mappingEntity.Hostname,
-				PublicPort:   mappingEntity.PublicPort,
-				Protocol:     mappingEntity.Protocol,
-				ContainerIds: []valueObject.ContainerId{containerId},
-			}
-			_, err = mappingCmdRepo.Create(createMappingDto)
-			if err != nil {
-				slog.Debug(
-					"RestoreMappingFailed",
-					slog.String("containerId", containerId.String()),
-					slog.String("error", err.Error()),
-				)
-				continue
-			}
 		}
 	}
 
