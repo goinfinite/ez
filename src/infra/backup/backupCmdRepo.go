@@ -1215,13 +1215,28 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		return errors.New("ReadBackupTaskArchiveFailed: " + err.Error())
 	}
 
-	err = infraHelper.MakeDir(infraEnvs.RestoreTaskTmpDir)
+	userDataDirectoryStats, err := repo.readUserDataStats()
 	if err != nil {
-		return errors.New("MakeRestoreTaskTmpDirFailed: " + err.Error())
+		return errors.New("ReadUserDataDirStatsError: " + err.Error())
+	}
+	// @see https://ntorga.com/gzip-bzip2-xz-zstd-7z-brotli-or-lz4/
+	necessaryFreeStorageBytes := archiveEntity.SizeBytes.Uint64() * 3
+	if necessaryFreeStorageBytes > userDataDirectoryStats.Free {
+		return errors.New("InsufficientUserDataDirectoryFreeSpace")
+	}
+
+	restoreBaseTmpDir, err := valueObject.NewUnixFilePath(infraEnvs.RestoreTaskTmpDir)
+	if err != nil {
+		return errors.New("ValidateRestoreBaseTaskTmpDirFailed: " + err.Error())
+	}
+	restoreBaseTmpDirStr := restoreBaseTmpDir.String()
+	err = infraHelper.MakeDir(restoreBaseTmpDirStr)
+	if err != nil {
+		return errors.New("MakeRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
-		"tar -xf " + archiveEntity.UnixFilePath.String() + " -C " + infraEnvs.RestoreTaskTmpDir,
+		"tar -xf " + archiveEntity.UnixFilePath.String() + " -C " + restoreBaseTmpDirStr,
 	)
 	if err != nil {
 		return errors.New("ExtractTaskArchiveFailed: " + err.Error())
@@ -1232,12 +1247,151 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		return errors.New("DeleteTaskArchiveFailed: " + err.Error())
 	}
 
-	// => Run download task; (only if the archiveId is not provided)
-	// => Extract tar file;
-	// => Delete tar file;
-	// => For each container in the task:
-	// => Restore container snapshot archive, adding a suffix to the container name if it already exists OR replace the existing container if shouldReplaceExistingContainers is true;
-	// => Delete container snapshot archive;
+	rawRestoreTmpDir := restoreBaseTmpDirStr + "/" +
+		archiveEntity.UnixFilePath.ReadFileNameWithoutExtension().String()
+	restoreTmpDir, err := valueObject.NewUnixFilePath(rawRestoreTmpDir)
+	if err != nil {
+		return errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
+	}
+
+	containerImageQueryRepo := infra.NewContainerImageQueryRepo(repo.persistentDbSvc)
+	requestContainerImagesDto := dto.ReadContainerImageArchivesRequest{
+		Pagination: dto.Pagination{
+			ItemsPerPage: 1000,
+		},
+		ArchivesDirectory: &restoreTmpDir,
+	}
+
+	containerImagesResponseDto, err := containerImageQueryRepo.ReadArchives(
+		requestContainerImagesDto,
+	)
+	if err != nil {
+		return errors.New("ReadContainerImageArchivesFailed: " + err.Error())
+	}
+
+	if len(containerImagesResponseDto.Archives) == 0 {
+		return errors.New("NoContainerImageArchivesFound")
+	}
+
+	shouldReplaceExistingContainers := false
+	if restoreDto.ShouldReplaceExistingContainers != nil {
+		shouldReplaceExistingContainers = *restoreDto.ShouldReplaceExistingContainers
+	}
+
+	shouldRestoreMappings := true
+	if restoreDto.ShouldRestoreMappings != nil {
+		shouldRestoreMappings = *restoreDto.ShouldRestoreMappings
+	}
+
+	containerCmdRepo := infra.NewContainerCmdRepo(repo.persistentDbSvc)
+	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
+	mappingQueryRepo := infra.NewMappingQueryRepo(repo.persistentDbSvc)
+	mappingCmdRepo := infra.NewMappingCmdRepo(repo.persistentDbSvc)
+	taskArchiveCreatedAtStr := archiveEntity.CreatedAt.String()
+
+	for _, containerImageArchive := range containerImagesResponseDto.Archives {
+		importImageArchiveDto := dto.ImportContainerImageArchive{
+			AccountId:       containerImageArchive.AccountId,
+			ArchiveFilePath: &containerImageArchive.UnixFilePath,
+		}
+
+		imageId, err := containerImageCmdRepo.ImportArchive(importImageArchiveDto)
+		if err != nil {
+			return errors.New("ImportContainerImageArchiveFailed: " + err.Error())
+		}
+
+		imageEntity, err := containerImageQueryRepo.ReadById(
+			containerImageArchive.AccountId, imageId,
+		)
+		if err != nil {
+			return errors.New("ReadContainerImageFailed: " + err.Error())
+		}
+
+		if imageEntity.OriginContainerDetails == nil {
+			return errors.New("OriginContainerDetailsNotFound")
+		}
+
+		rawContainerHostname := imageEntity.OriginContainerDetails.Hostname.String()
+		if !shouldReplaceExistingContainers {
+			rawContainerHostname = taskArchiveCreatedAtStr + ".restored." + rawContainerHostname
+		}
+		containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
+		if err != nil {
+			return errors.New("ValidateContainerHostnameFailed: " + err.Error())
+		}
+
+		createContainerDto := dto.CreateContainer{
+			AccountId:          containerImageArchive.AccountId,
+			Hostname:           containerHostname,
+			ImageId:            &imageId,
+			PortBindings:       imageEntity.PortBindings,
+			Envs:               imageEntity.Envs,
+			Entrypoint:         imageEntity.Entrypoint,
+			ProfileId:          &imageEntity.OriginContainerDetails.ProfileId,
+			RestartPolicy:      &imageEntity.OriginContainerDetails.RestartPolicy,
+			AutoCreateMappings: false,
+		}
+
+		containerId, err := containerCmdRepo.Create(createContainerDto)
+		if err != nil {
+			return errors.New("RestoreContainerFailed: " + err.Error())
+		}
+
+		err = os.Remove(containerImageArchive.UnixFilePath.String())
+		if err != nil {
+			return errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
+		}
+
+		if !shouldRestoreMappings {
+			continue
+		}
+
+		for _, mappingEntity := range imageEntity.OriginContainerMappings {
+			currentMappingEntity, err := mappingQueryRepo.ReadById(mappingEntity.Id)
+			if err == nil {
+				isSameHostname := currentMappingEntity.Hostname == mappingEntity.Hostname
+				isSamePublicPort := currentMappingEntity.PublicPort == mappingEntity.PublicPort
+				if isSameHostname && isSamePublicPort {
+					createMappingTargetDto := dto.CreateMappingTarget{
+						AccountId:   containerImageArchive.AccountId,
+						MappingId:   currentMappingEntity.Id,
+						ContainerId: containerId,
+					}
+					_, err = mappingCmdRepo.CreateTarget(createMappingTargetDto)
+					if err != nil {
+						slog.Debug(
+							"RestoreMappingTargetFailed",
+							slog.String("containerId", containerId.String()),
+							slog.String("error", err.Error()),
+						)
+						continue
+					}
+				}
+			}
+
+			createMappingDto := dto.CreateMapping{
+				AccountId:    containerImageArchive.AccountId,
+				Hostname:     mappingEntity.Hostname,
+				PublicPort:   mappingEntity.PublicPort,
+				Protocol:     mappingEntity.Protocol,
+				ContainerIds: []valueObject.ContainerId{containerId},
+			}
+			_, err = mappingCmdRepo.Create(createMappingDto)
+			if err != nil {
+				slog.Debug(
+					"RestoreMappingFailed",
+					slog.String("containerId", containerId.String()),
+					slog.String("error", err.Error()),
+				)
+				continue
+			}
+		}
+	}
+
+	err = os.RemoveAll(restoreTmpDir.String())
+	if err != nil {
+		return errors.New("RemoveRestoreTmpDirFailed: " + err.Error())
+	}
 
 	return nil
 }
