@@ -40,17 +40,6 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 		return imageId, err
 	}
 
-	containerHostnameStrSimplified := strings.ReplaceAll(
-		containerEntity.Hostname.String(), ".", "-",
-	)
-	containerHostnameStrSimplified = strings.ToLower(containerHostnameStrSimplified)
-
-	containerIdStr := createDto.ContainerId.String()
-
-	snapshotName := containerIdStr + "-" +
-		containerHostnameStrSimplified +
-		":" + valueObject.NewUnixTimeNow().String()
-
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
 	accountEntity, err := accountQueryRepo.ReadById(containerEntity.AccountId)
 	if err != nil {
@@ -68,13 +57,46 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	}
 	encodedContainerEntityJson := infraHelper.EncodeStr(string(containerEntityJsonBytes))
 
+	containerHostnameStrSimplified := strings.ReplaceAll(
+		containerEntity.Hostname.String(), ".", "-",
+	)
+	containerHostnameStrSimplified = strings.ToLower(containerHostnameStrSimplified)
+	containerIdStr := createDto.ContainerId.String()
+
+	snapshotName := containerIdStr + "-" +
+		containerHostnameStrSimplified +
+		":" + valueObject.NewUnixTimeNow().String()
+
+	commitParams := []string{
+		"commit",
+		"--quiet",
+		"--author", "ez:" + createDto.OperatorAccountId.String(),
+		"--change", "LABEL=ez.originContainerDetails=" + encodedContainerEntityJson,
+		containerIdStr,
+		"localhost/" + accountEntity.Username.String() + "/" + snapshotName,
+	}
+
+	mappingQueryRepo := NewMappingQueryRepo(repo.persistentDbSvc)
+	containerMappingEntities, err := mappingQueryRepo.ReadByContainerId(createDto.ContainerId)
+	if err != nil {
+		return imageId, err
+	}
+
+	if len(containerMappingEntities) > 0 {
+		containerMappingEntitiesJsonBytes, err := json.Marshal(containerMappingEntities)
+		if err != nil {
+			return imageId, errors.New("MarshalContainerMappingEntitiesError: " + err.Error())
+		}
+		encodedMappingEntitiesJson := infraHelper.EncodeStr(string(containerMappingEntitiesJsonBytes))
+		commitParams = append(
+			commitParams,
+			"--change", "LABEL=ez.originContainerMappings="+encodedMappingEntitiesJson,
+		)
+	}
+
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		containerEntity.AccountId,
-		"podman", "commit", "--quiet",
-		"--author", "ez:"+createDto.OperatorAccountId.String(),
-		"--change", "LABEL=ez.originContainerDetails="+encodedContainerEntityJson,
-		containerIdStr,
-		"localhost/"+accountEntity.Username.String()+"/"+snapshotName,
+		"podman", commitParams...,
 	)
 	if err != nil {
 		return imageId, err

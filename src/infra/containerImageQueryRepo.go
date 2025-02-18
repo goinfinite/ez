@@ -30,61 +30,61 @@ func NewContainerImageQueryRepo(
 
 func (repo *ContainerImageQueryRepo) originContainerDetailsFactory(
 	rawOriginContainerDetails string,
-) (originContainerDetails entity.Container, err error) {
+) (containerEntity entity.Container, err error) {
 	decodedDetails, err := infraHelper.DecodeStr(rawOriginContainerDetails)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
 	var originContainerDetailsMap map[string]interface{}
-	err = json.Unmarshal([]byte(decodedDetails), &originContainerDetails)
+	err = json.Unmarshal([]byte(decodedDetails), &originContainerDetailsMap)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
-	rawContainerId, exists := originContainerDetailsMap["Id"]
+	rawContainerId, exists := originContainerDetailsMap["id"]
 	if !exists {
-		return originContainerDetails, errors.New("ContainerIdNotFound")
+		return containerEntity, errors.New("ContainerIdNotFound")
 	}
 	containerId, err := valueObject.NewContainerId(rawContainerId)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
-	rawAccountId, exists := originContainerDetailsMap["AccountId"]
+	rawAccountId, exists := originContainerDetailsMap["accountId"]
 	if !exists {
-		return originContainerDetails, errors.New("AccountIdNotFound")
+		return containerEntity, errors.New("AccountIdNotFound")
 	}
 	accountId, err := valueObject.NewAccountId(rawAccountId)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
-	rawHostname, exists := originContainerDetailsMap["Hostname"]
+	rawHostname, exists := originContainerDetailsMap["hostname"]
 	if !exists {
-		return originContainerDetails, errors.New("HostnameNotFound")
+		return containerEntity, errors.New("HostnameNotFound")
 	}
 	containerHostname, err := valueObject.NewFqdn(rawHostname)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
-	rawRestartPolicy, exists := originContainerDetailsMap["RestartPolicy"]
+	rawRestartPolicy, exists := originContainerDetailsMap["restartPolicy"]
 	if !exists {
-		return originContainerDetails, errors.New("RestartPolicyNotFound")
+		return containerEntity, errors.New("RestartPolicyNotFound")
 	}
 	restartPolicy, err := valueObject.NewContainerRestartPolicy(rawRestartPolicy)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
-	rawProfileId, exists := originContainerDetailsMap["ProfileId"]
+	rawProfileId, exists := originContainerDetailsMap["profileId"]
 	if !exists {
-		return originContainerDetails, errors.New("ProfileIdNotFound")
+		return containerEntity, errors.New("ProfileIdNotFound")
 	}
 	profileId, err := valueObject.NewContainerProfileId(rawProfileId)
 	if err != nil {
-		return originContainerDetails, err
+		return containerEntity, err
 	}
 
 	return entity.Container{
@@ -94,6 +94,139 @@ func (repo *ContainerImageQueryRepo) originContainerDetailsFactory(
 		RestartPolicy: restartPolicy,
 		ProfileId:     profileId,
 	}, nil
+}
+
+func (repo *ContainerImageQueryRepo) originContainerMappingTargetFactory(
+	rawTarget interface{},
+) (targetEntity entity.MappingTarget, err error) {
+	rawTargetMap, assertOk := rawTarget.(map[string]interface{})
+	if !assertOk {
+		return targetEntity, errors.New("InvalidContainerMappingTarget")
+	}
+
+	targetId, err := valueObject.NewMappingTargetId(rawTargetMap["id"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	mappingId, err := valueObject.NewMappingId(rawTargetMap["mappingId"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	containerId, err := valueObject.NewContainerId(rawTargetMap["containerId"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	containerHostname, err := valueObject.NewFqdn(rawTargetMap["containerHostname"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	containerPrivatePort, err := valueObject.NewNetworkPort(rawTargetMap["containerPrivatePort"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	return entity.NewMappingTarget(
+		targetId, mappingId, containerId, containerHostname, containerPrivatePort,
+	), nil
+}
+
+func (repo *ContainerImageQueryRepo) originContainerMappingFactory(
+	rawMapping interface{},
+) (mappingEntity entity.Mapping, err error) {
+	rawMappingMap, assertOk := rawMapping.(map[string]interface{})
+	if !assertOk {
+		return mappingEntity, errors.New("InvalidContainerMappingStructure")
+	}
+
+	mappingId, err := valueObject.NewMappingId(rawMappingMap["id"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	accountId, err := valueObject.NewAccountId(rawMappingMap["accountId"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	var hostnamePtr *valueObject.Fqdn
+	if rawMappingMap["hostname"] != nil {
+		hostname, err := valueObject.NewFqdn(rawMappingMap["hostname"])
+		if err != nil {
+			return mappingEntity, err
+		}
+		hostnamePtr = &hostname
+	}
+
+	publicPort, err := valueObject.NewNetworkPort(rawMappingMap["publicPort"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	protocol, err := valueObject.NewNetworkProtocol(rawMappingMap["protocol"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	targetEntities := []entity.MappingTarget{}
+	rawTargets, assertOk := rawMappingMap["targets"].([]interface{})
+	if !assertOk {
+		return mappingEntity, errors.New("InvalidContainerMappingTargets")
+	}
+	for _, rawTarget := range rawTargets {
+		targetEntity, err := repo.originContainerMappingTargetFactory(rawTarget)
+		if err != nil {
+			slog.Debug(err.Error(), slog.Any("rawTarget", rawTarget))
+			return mappingEntity, err
+		}
+
+		targetEntities = append(targetEntities, targetEntity)
+	}
+
+	createdAt, err := valueObject.NewUnixTime(rawMappingMap["createdAt"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	updatedAt, err := valueObject.NewUnixTime(rawMappingMap["updatedAt"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	return entity.NewMapping(
+		mappingId, accountId, hostnamePtr, publicPort, protocol,
+		targetEntities, createdAt, updatedAt,
+	), nil
+}
+
+func (repo *ContainerImageQueryRepo) originContainerMappingsFactory(
+	rawOriginContainerMappings string,
+) (mappingEntities []entity.Mapping, err error) {
+	decodedMappings, err := infraHelper.DecodeStr(rawOriginContainerMappings)
+	if err != nil {
+		return mappingEntities, err
+	}
+
+	var originContainerMappingsRawList []interface{}
+	err = json.Unmarshal([]byte(decodedMappings), &originContainerMappingsRawList)
+	if err != nil {
+		return mappingEntities, err
+	}
+
+	for _, rawMapping := range originContainerMappingsRawList {
+		mappingEntity, err := repo.originContainerMappingFactory(rawMapping)
+		if err != nil {
+			slog.Debug(err.Error(), slog.Any("rawMapping", rawMapping))
+			return mappingEntities, err
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
 }
 
 func (repo *ContainerImageQueryRepo) containerImageFactory(
@@ -240,7 +373,18 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 			rawEncodedOriginContainerDetails,
 		)
 		if err != nil {
-			return containerImage, err
+			return containerImage, errors.New("ParseContainerImageDetailsError: " + err.Error())
+		}
+	}
+
+	originContainerMappings := []entity.Mapping{}
+	rawEncodedOriginContainerMappings, assertOk := rawLabels["ez.originContainerMappings"].(string)
+	if assertOk {
+		originContainerMappings, err = repo.originContainerMappingsFactory(
+			rawEncodedOriginContainerMappings,
+		)
+		if err != nil {
+			return containerImage, errors.New("ParseContainerImageMappingsError: " + err.Error())
 		}
 	}
 
@@ -255,8 +399,8 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	createdAt := valueObject.NewUnixTimeWithGoTime(createdTime)
 
 	return entity.NewContainerImage(
-		imageId, accountId, imageAddress, imageHash, isa, sizeBytes,
-		portBindings, envs, entrypointPtr, &originContainerDetails, createdAt,
+		imageId, accountId, imageAddress, imageHash, isa, sizeBytes, portBindings, envs,
+		entrypointPtr, &originContainerDetails, originContainerMappings, createdAt,
 	), nil
 }
 
