@@ -1189,8 +1189,9 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	return nil
 }
 
-func (repo *BackupCmdRepo) restoreContainer(
+func (repo *BackupCmdRepo) restoreContainerArchive(
 	containerArchiveEntity entity.ContainerImageArchive,
+	containerQueryRepo *infra.ContainerQueryRepo,
 	containerCmdRepo *infra.ContainerCmdRepo,
 	containerImageQueryRepo *infra.ContainerImageQueryRepo,
 	containerImageCmdRepo *infra.ContainerImageCmdRepo,
@@ -1208,18 +1209,18 @@ func (repo *BackupCmdRepo) restoreContainer(
 		return errors.New("ImportContainerImageArchiveFailed: " + err.Error())
 	}
 
-	imageEntity, err := containerImageQueryRepo.ReadById(
+	containerImageEntity, err := containerImageQueryRepo.ReadById(
 		containerArchiveEntity.AccountId, imageId,
 	)
 	if err != nil {
 		return errors.New("ReadContainerImageFailed: " + err.Error())
 	}
 
-	if imageEntity.OriginContainerDetails == nil {
+	if containerImageEntity.OriginContainerDetails == nil {
 		return errors.New("OriginContainerDetailsNotFound")
 	}
 
-	rawContainerHostname := imageEntity.OriginContainerDetails.Hostname.String()
+	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
 	if !shouldReplaceExistingContainers {
 		archiveCreatedAtStr := containerArchiveEntity.CreatedAt.String()
 		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
@@ -1229,15 +1230,35 @@ func (repo *BackupCmdRepo) restoreContainer(
 		return errors.New("ValidateContainerHostnameFailed: " + err.Error())
 	}
 
+	if shouldReplaceExistingContainers {
+		requestContainerDto := dto.ReadContainersRequest{
+			ContainerId: []valueObject.ContainerId{
+				containerImageEntity.OriginContainerDetails.Id,
+			},
+		}
+		_, err = containerQueryRepo.ReadFirst(requestContainerDto)
+		if err == nil {
+			deleteContainerDto := dto.DeleteContainer{
+				AccountId:   containerImageEntity.OriginContainerDetails.AccountId,
+				ContainerId: containerImageEntity.OriginContainerDetails.Id,
+			}
+
+			err = containerCmdRepo.Delete(deleteContainerDto)
+			if err != nil {
+				return errors.New("DeleteContainerFailed: " + err.Error())
+			}
+		}
+	}
+
 	createContainerDto := dto.CreateContainer{
 		AccountId:          containerArchiveEntity.AccountId,
 		Hostname:           containerHostname,
 		ImageId:            &imageId,
-		PortBindings:       imageEntity.PortBindings,
-		Envs:               imageEntity.Envs,
-		Entrypoint:         imageEntity.Entrypoint,
-		ProfileId:          &imageEntity.OriginContainerDetails.ProfileId,
-		RestartPolicy:      &imageEntity.OriginContainerDetails.RestartPolicy,
+		PortBindings:       containerImageEntity.PortBindings,
+		Envs:               containerImageEntity.Envs,
+		Entrypoint:         containerImageEntity.Entrypoint,
+		ProfileId:          &containerImageEntity.OriginContainerDetails.ProfileId,
+		RestartPolicy:      &containerImageEntity.OriginContainerDetails.RestartPolicy,
 		AutoCreateMappings: false,
 	}
 
@@ -1255,7 +1276,7 @@ func (repo *BackupCmdRepo) restoreContainer(
 		return nil
 	}
 
-	for _, mappingEntity := range imageEntity.OriginContainerMappings {
+	for _, mappingEntity := range containerImageEntity.OriginContainerMappings {
 		currentMappingEntity, err := mappingQueryRepo.ReadById(mappingEntity.Id)
 		if err == nil {
 			isSameHostname := currentMappingEntity.Hostname == mappingEntity.Hostname
@@ -1270,11 +1291,13 @@ func (repo *BackupCmdRepo) restoreContainer(
 				if err != nil {
 					slog.Debug(
 						"RestoreMappingTargetFailed",
+						slog.Uint64("currentMappingId", currentMappingEntity.Id.Uint64()),
 						slog.String("containerId", containerId.String()),
 						slog.String("error", err.Error()),
 					)
-					continue
 				}
+
+				continue
 			}
 		}
 
@@ -1289,6 +1312,7 @@ func (repo *BackupCmdRepo) restoreContainer(
 		if err != nil {
 			slog.Debug(
 				"RestoreMappingFailed",
+				slog.Uint64("publicPort", uint64(mappingEntity.PublicPort.Uint16())),
 				slog.String("containerId", containerId.String()),
 				slog.String("error", err.Error()),
 			)
@@ -1393,21 +1417,23 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		shouldRestoreMappings = *restoreDto.ShouldRestoreMappings
 	}
 
+	containerQueryRepo := infra.NewContainerQueryRepo(repo.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
 	mappingQueryRepo := infra.NewMappingQueryRepo(repo.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(repo.persistentDbSvc)
 
-	for _, containerImageArchive := range containerImagesResponseDto.Archives {
-		err = repo.restoreContainer(
-			containerImageArchive, containerCmdRepo, containerImageQueryRepo,
-			containerImageCmdRepo, mappingQueryRepo, mappingCmdRepo,
+	for _, imageArchiveEntity := range containerImagesResponseDto.Archives {
+		err = repo.restoreContainerArchive(
+			imageArchiveEntity, containerQueryRepo, containerCmdRepo,
+			containerImageQueryRepo, containerImageCmdRepo,
+			mappingQueryRepo, mappingCmdRepo,
 			shouldReplaceExistingContainers, shouldRestoreMappings,
 		)
 		if err != nil {
 			slog.Debug(
-				"RestoreContainerFailed",
-				slog.String("containerImageArchiveId", containerImageArchive.ImageId.String()),
+				"RestoreContainerArchiveFailed",
+				slog.String("imageArchiveEntityId", imageArchiveEntity.ImageId.String()),
 				slog.String("error", err.Error()),
 			)
 			continue
