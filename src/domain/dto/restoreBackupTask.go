@@ -5,7 +5,7 @@ import (
 )
 
 type RestoreBackupTask struct {
-	TaskId                          valueObject.BackupTaskId         `json:"taskId"`
+	TaskId                          *valueObject.BackupTaskId        `json:"taskId,omitempty"`
 	ArchiveId                       *valueObject.BackupTaskArchiveId `json:"archiveId,omitempty"`
 	ShouldReplaceExistingContainers *bool                            `json:"shouldReplaceExistingContainers,omitempty"`
 	ShouldRestoreMappings           *bool                            `json:"shouldRestoreMappings,omitempty"`
@@ -19,7 +19,7 @@ type RestoreBackupTask struct {
 }
 
 func NewRestoreBackupTask(
-	taskId valueObject.BackupTaskId,
+	taskId *valueObject.BackupTaskId,
 	archiveId *valueObject.BackupTaskArchiveId,
 	shouldReplaceExistingContainers, shouldRestoreMappings *bool,
 	timeoutSecs *uint32,

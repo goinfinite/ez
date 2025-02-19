@@ -1450,15 +1450,13 @@ func (service *BackupService) RestoreTask(
 	input map[string]interface{},
 	shouldSchedule bool,
 ) ServiceOutput {
-	requiredParams := []string{"taskId"}
-	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
-	if err != nil {
-		return NewServiceOutput(UserError, err.Error())
-	}
-
-	taskId, err := valueObject.NewBackupTaskId(input["taskId"])
-	if err != nil {
-		return NewServiceOutput(UserError, err.Error())
+	var taskIdPtr *valueObject.BackupTaskId
+	if input["taskId"] != nil {
+		taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		taskIdPtr = &taskId
 	}
 
 	var archiveIdPtr *valueObject.BackupTaskArchiveId
@@ -1470,6 +1468,7 @@ func (service *BackupService) RestoreTask(
 		archiveIdPtr = &archiveId
 	}
 
+	var err error
 	shouldReplaceExistingContainers := false
 	if input["shouldReplaceExistingContainers"] != nil {
 		shouldReplaceExistingContainers, err = voHelper.InterfaceToBool(
@@ -1548,10 +1547,12 @@ func (service *BackupService) RestoreTask(
 	if shouldSchedule {
 		cliCmd := infraEnvs.InfiniteEzBinary + " backup task restore"
 		cliParams := []string{
-			"--task-id", taskId.String(),
 			"--should-replace-existing-containers", strconv.FormatBool(shouldReplaceExistingContainers),
 			"--should-restore-mappings", strconv.FormatBool(shouldRestoreMappings),
 			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
+		}
+		if taskIdPtr != nil {
+			cliParams = append(cliParams, "--task-id", taskIdPtr.String())
 		}
 		if archiveIdPtr != nil {
 			cliParams = append(cliParams, "--archive-id", archiveIdPtr.String())
@@ -1591,7 +1592,7 @@ func (service *BackupService) RestoreTask(
 	}
 
 	restoreDto := dto.NewRestoreBackupTask(
-		taskId, archiveIdPtr, &shouldReplaceExistingContainers, &shouldRestoreMappings,
+		taskIdPtr, archiveIdPtr, &shouldReplaceExistingContainers, &shouldRestoreMappings,
 		&timeoutSeconds, containerAccountIds, containerIds, exceptContainerAccountIds,
 		exceptContainerIds, operatorAccountId, operatorIpAddress,
 	)

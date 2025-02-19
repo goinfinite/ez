@@ -4,7 +4,6 @@ import (
 	"log/slog"
 
 	"github.com/goinfinite/ez/src/domain/dto"
-	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/repository"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
@@ -517,18 +516,31 @@ func (uc *CreateSecurityActivityRecord) RunBackupJob(runDto dto.RunBackupJob) {
 
 func (uc *CreateSecurityActivityRecord) RestoreBackupTask(
 	restoreDto dto.RestoreBackupTask,
-	taskEntity entity.BackupTask,
+	accountId valueObject.AccountId,
+	taskId *valueObject.BackupTaskId,
+	archiveId *valueObject.BackupTaskArchiveId,
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskRestored")
 	createRecordDto := dto.CreateActivityRecord{
-		RecordLevel: uc.recordLevel,
-		RecordCode:  recordCode,
-		AffectedResources: []valueObject.SystemResourceIdentifier{
-			valueObject.NewBackupTaskSri(taskEntity.AccountId, taskEntity.TaskId),
-		},
+		RecordLevel:       uc.recordLevel,
+		RecordCode:        recordCode,
 		RecordDetails:     restoreDto,
 		OperatorAccountId: &restoreDto.OperatorAccountId,
 		OperatorIpAddress: &restoreDto.OperatorIpAddress,
+	}
+
+	if taskId != nil {
+		createRecordDto.AffectedResources = append(
+			createRecordDto.AffectedResources,
+			valueObject.NewBackupTaskSri(accountId, *taskId),
+		)
+	}
+
+	if archiveId != nil {
+		createRecordDto.AffectedResources = append(
+			createRecordDto.AffectedResources,
+			valueObject.NewBackupTaskArchiveSri(accountId, *archiveId),
+		)
 	}
 
 	uc.createActivityRecord(createRecordDto)

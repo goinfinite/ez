@@ -137,7 +137,7 @@ func TestBackupCmdRepo(t *testing.T) {
 		}
 
 		restoreDto := dto.RestoreBackupTask{
-			TaskId: taskEntity.TaskId,
+			TaskId: &taskEntity.TaskId,
 		}
 
 		err = backupCmdRepo.RestoreTask(restoreDto)

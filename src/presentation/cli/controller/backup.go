@@ -918,9 +918,12 @@ func (controller *BackupController) RestoreTask() *cobra.Command {
 		Short: "RestoreBackupTask",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
-				"taskId":                          taskIdUint,
 				"shouldReplaceExistingContainers": shouldReplaceExistingContainersBoolStr,
 				"shouldRestoreMappings":           shouldRestoreMappingsBoolStr,
+			}
+
+			if taskIdUint > 0 {
+				requestBody["taskId"] = taskIdUint
 			}
 
 			if archiveIdStr != "" {
@@ -962,7 +965,6 @@ func (controller *BackupController) RestoreTask() *cobra.Command {
 	}
 
 	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "t", 0, "BackupTaskId")
-	cmd.MarkFlagRequired("task-id")
 	cmd.Flags().StringVarP(
 		&archiveIdStr, "archive-id", "r", "", "BackupTaskArchiveId",
 	)
