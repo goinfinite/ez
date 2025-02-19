@@ -20,10 +20,7 @@ func NewUnixFileExtension(value interface{}) (
 	if err != nil {
 		return unixFileExtension, errors.New("UnixFileExtensionMustBeString")
 	}
-
-	if strings.HasPrefix(stringValue, ".") {
-		stringValue, _ = strings.CutPrefix(stringValue, ".")
-	}
+	stringValue = strings.TrimPrefix(stringValue, ".")
 
 	re := regexp.MustCompile(unixFileExtensionRegexExpression)
 	if !re.MatchString(stringValue) {
