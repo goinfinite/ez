@@ -8,5 +8,6 @@ const (
 	AccessTokenCookieKey string = "control-access-token"
 	UserDataDirectory    string = "/var/data"
 	BackupCronFilePath   string = "/etc/cron.d/ez-backup"
-	RestoreTaskTmpDir    string = UserDataDirectory + "/nobody/tasks-restores-tmp"
+	NobodyDataDirectory  string = UserDataDirectory + "/nobody"
+	RestoreTaskTmpDir    string = NobodyDataDirectory + "/tasks-restores-tmp"
 )

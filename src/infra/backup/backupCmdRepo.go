@@ -1326,7 +1326,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 	if restoreDto.ArchiveId == nil {
 		createArchiveDto := dto.CreateBackupTaskArchive{
-			TaskId:                    restoreDto.TaskId,
+			TaskId:                    *restoreDto.TaskId,
 			TimeoutSecs:               restoreDto.TimeoutSecs,
 			ContainerAccountIds:       restoreDto.ContainerAccountIds,
 			ContainerIds:              restoreDto.ContainerIds,
@@ -1671,7 +1671,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
 	}
 
-	archivesDirectoryStr := infraEnvs.InfiniteEzMainDir + "/archives"
+	archivesDirectoryStr := infraEnvs.NobodyDataDirectory + "/archives"
 	if createDto.OperatorAccountId != valueObject.SystemAccountId {
 		accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 		operatorAccountEntity, err := accountQueryRepo.ReadById(createDto.OperatorAccountId)

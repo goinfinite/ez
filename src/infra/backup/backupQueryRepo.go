@@ -384,7 +384,7 @@ func (repo *BackupQueryRepo) ReadTaskArchive(
 	archiveFiles := []entity.BackupTaskArchive{}
 
 	findResult, err := infraHelper.RunCmd(
-		"find", infraEnvs.UserDataDirectory, infraEnvs.InfiniteEzMainDir,
+		"find", infraEnvs.UserDataDirectory,
 		"-type", "f",
 		"-path", "*/archives/tasks/*",
 		"-regex", `.*\.tar$`,
