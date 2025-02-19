@@ -1324,7 +1324,8 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 }
 
 func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
-	if restoreDto.ArchiveId == nil {
+	taskArchiveProvided := restoreDto.ArchiveId != nil
+	if !taskArchiveProvided {
 		createArchiveDto := dto.CreateBackupTaskArchive{
 			TaskId:                    *restoreDto.TaskId,
 			TimeoutSecs:               restoreDto.TimeoutSecs,
@@ -1370,15 +1371,17 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 	}
 
 	_, err = infraHelper.RunCmd(
-		"tar -xf " + archiveEntity.UnixFilePath.String() + " -C " + restoreBaseTmpDirStr,
+		"tar", "-xf", archiveEntity.UnixFilePath.String(), "-C", restoreBaseTmpDirStr,
 	)
 	if err != nil {
 		return errors.New("ExtractTaskArchiveFailed: " + err.Error())
 	}
 
-	err = os.Remove(archiveEntity.UnixFilePath.String())
-	if err != nil {
-		return errors.New("DeleteTaskArchiveFailed: " + err.Error())
+	if !taskArchiveProvided {
+		err = os.Remove(archiveEntity.UnixFilePath.String())
+		if err != nil {
+			return errors.New("DeleteTempTaskArchiveFailed: " + err.Error())
+		}
 	}
 
 	rawRestoreTmpDir := restoreBaseTmpDirStr + "/" +
