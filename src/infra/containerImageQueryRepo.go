@@ -538,14 +538,16 @@ func (repo *ContainerImageQueryRepo) ReadArchives(
 	archiveFiles := []entity.ContainerImageArchive{}
 
 	archiveFilesBaseDirectoryStr := infraEnvs.UserDataDirectory
+	findPathFlagValue := "*/archives/*"
 	if requestDto.ArchivesDirectory != nil {
 		archiveFilesBaseDirectoryStr = requestDto.ArchivesDirectory.String()
+		findPathFlagValue = "*"
 	}
 
 	findResult, err := infraHelper.RunCmd(
 		"find", archiveFilesBaseDirectoryStr,
 		"-type", "f",
-		"-path", "*/archives/*",
+		"-path", findPathFlagValue,
 		"-maxdepth", "3",
 		"-regex", `.*\.\(`+strings.Join(valueObject.ValidCompressionFormats, `\|`)+`\)$`,
 	)
