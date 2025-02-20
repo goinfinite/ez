@@ -1189,8 +1189,67 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	return nil
 }
 
+func (repo *BackupCmdRepo) restoreImageArchive(
+	imageArchiveEntity entity.ContainerImageArchive,
+	containerImageQueryRepo *infra.ContainerImageQueryRepo,
+	containerImageCmdRepo *infra.ContainerImageCmdRepo,
+) (imageEntity entity.ContainerImage, err error) {
+	if imageArchiveEntity.AccountId == valueObject.SystemAccountId {
+		imageArchiveEntity.AccountId = valueObject.NobodyAccountId
+	}
+
+	if imageArchiveEntity.AccountId == valueObject.NobodyAccountId {
+		_, err = infraHelper.RunCmd(
+			"usermod", "--add-subuids", "100000-165535",
+			"--add-subgids", "100000-165535", "nobody",
+		)
+		if err != nil {
+			return imageEntity, errors.New("UsermodAddSubUidsNobodyFailed: " + err.Error())
+		}
+	}
+
+	accountIdInt := int(imageArchiveEntity.AccountId.Uint64())
+	err = os.Chown(imageArchiveEntity.UnixFilePath.String(), accountIdInt, accountIdInt)
+	if err != nil {
+		return imageEntity, errors.New("ChownContainerImageArchiveFailed: " + err.Error())
+	}
+
+	importImageArchiveDto := dto.ImportContainerImageArchive{
+		AccountId:       imageArchiveEntity.AccountId,
+		ArchiveFilePath: &imageArchiveEntity.UnixFilePath,
+	}
+	imageId, err := containerImageCmdRepo.ImportArchive(importImageArchiveDto)
+	if err != nil {
+		return imageEntity, errors.New("ImportContainerImageArchiveFailed: " + err.Error())
+	}
+
+	containerImageEntity, err := containerImageQueryRepo.ReadById(
+		imageArchiveEntity.AccountId, imageId,
+	)
+	if err != nil {
+		return imageEntity, errors.New("ReadContainerImageFailed: " + err.Error())
+	}
+
+	if imageArchiveEntity.AccountId == valueObject.NobodyAccountId {
+		_, err = infraHelper.RunCmd(
+			"usermod", "--del-subuids", "100000-165535",
+			"--del-subgids", "100000-165535", "nobody",
+		)
+		if err != nil {
+			return imageEntity, errors.New("UsermodDelSubUidsNobodyFailed: " + err.Error())
+		}
+	}
+
+	if containerImageEntity.OriginContainerDetails == nil {
+		return imageEntity, errors.New("OriginContainerDetailsNotFound")
+	}
+
+	return containerImageEntity, nil
+}
+
 func (repo *BackupCmdRepo) restoreContainerArchive(
-	containerArchiveEntity entity.ContainerImageArchive,
+	archiveEntity entity.ContainerImageArchive,
+	accountQueryRepo *infra.AccountQueryRepo,
 	containerQueryRepo *infra.ContainerQueryRepo,
 	containerCmdRepo *infra.ContainerCmdRepo,
 	containerImageQueryRepo *infra.ContainerImageQueryRepo,
@@ -1200,29 +1259,41 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	shouldReplaceExistingContainers bool,
 	shouldRestoreMappings bool,
 ) (containerId valueObject.ContainerId, err error) {
-	importImageArchiveDto := dto.ImportContainerImageArchive{
-		AccountId:       containerArchiveEntity.AccountId,
-		ArchiveFilePath: &containerArchiveEntity.UnixFilePath,
-	}
-	imageId, err := containerImageCmdRepo.ImportArchive(importImageArchiveDto)
-	if err != nil {
-		return containerId, errors.New("ImportContainerImageArchiveFailed: " + err.Error())
-	}
-
-	containerImageEntity, err := containerImageQueryRepo.ReadById(
-		containerArchiveEntity.AccountId, imageId,
+	containerImageEntity, err := repo.restoreImageArchive(
+		archiveEntity, containerImageQueryRepo, containerImageCmdRepo,
 	)
 	if err != nil {
-		return containerId, errors.New("ReadContainerImageFailed: " + err.Error())
+		return containerId, errors.New("InitialImageArchiveRestoreFailed: " + err.Error())
 	}
 
-	if containerImageEntity.OriginContainerDetails == nil {
-		return containerId, errors.New("OriginContainerDetailsNotFound")
+	originalAccountOwnerId := containerImageEntity.OriginContainerDetails.AccountId
+	if containerImageEntity.AccountId != originalAccountOwnerId {
+		_, err = accountQueryRepo.ReadById(originalAccountOwnerId)
+		if err == nil {
+			deleteImageDto := dto.DeleteContainerImage{
+				AccountId: containerImageEntity.AccountId,
+				ImageId:   containerImageEntity.Id,
+			}
+			err = containerImageCmdRepo.Delete(deleteImageDto)
+			if err != nil {
+				return containerId, errors.New("DeleteInitialContainerImageFailed: " + err.Error())
+			}
+
+			archiveEntity.AccountId = originalAccountOwnerId
+			containerImageEntity, err = repo.restoreImageArchive(
+				archiveEntity, containerImageQueryRepo, containerImageCmdRepo,
+			)
+			if err != nil {
+				return containerId, errors.New(
+					"PostOwnershipFixImageArchiveRestoreFailed: " + err.Error(),
+				)
+			}
+		}
 	}
 
 	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
 	if !shouldReplaceExistingContainers {
-		archiveCreatedAtStr := containerArchiveEntity.CreatedAt.String()
+		archiveCreatedAtStr := archiveEntity.CreatedAt.String()
 		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
 	}
 	containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
@@ -1236,11 +1307,11 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 				containerImageEntity.OriginContainerDetails.Id,
 			},
 		}
-		_, err = containerQueryRepo.ReadFirst(requestContainerDto)
+		containerEntity, err := containerQueryRepo.ReadFirst(requestContainerDto)
 		if err == nil {
 			deleteContainerDto := dto.DeleteContainer{
-				AccountId:   containerImageEntity.OriginContainerDetails.AccountId,
-				ContainerId: containerImageEntity.OriginContainerDetails.Id,
+				AccountId:   containerEntity.AccountId,
+				ContainerId: containerEntity.Id,
 			}
 
 			err = containerCmdRepo.Delete(deleteContainerDto)
@@ -1251,9 +1322,9 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	}
 
 	createContainerDto := dto.CreateContainer{
-		AccountId:          containerArchiveEntity.AccountId,
+		AccountId:          archiveEntity.AccountId,
 		Hostname:           containerHostname,
-		ImageId:            &imageId,
+		ImageId:            &containerImageEntity.Id,
 		PortBindings:       containerImageEntity.PortBindings,
 		Envs:               containerImageEntity.Envs,
 		Entrypoint:         containerImageEntity.Entrypoint,
@@ -1267,7 +1338,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		return containerId, errors.New("RestoreContainerFailed: " + err.Error())
 	}
 
-	err = os.Remove(containerArchiveEntity.UnixFilePath.String())
+	err = os.Remove(archiveEntity.UnixFilePath.String())
 	if err != nil {
 		return containerId, errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
 	}
@@ -1283,7 +1354,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 			isSamePublicPort := currentMappingEntity.PublicPort == mappingEntity.PublicPort
 			if isSameHostname && isSamePublicPort {
 				createMappingTargetDto := dto.CreateMappingTarget{
-					AccountId:   containerArchiveEntity.AccountId,
+					AccountId:   archiveEntity.AccountId,
 					MappingId:   currentMappingEntity.Id,
 					ContainerId: containerId,
 				}
@@ -1302,7 +1373,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 
 		createMappingDto := dto.CreateMapping{
-			AccountId:    containerArchiveEntity.AccountId,
+			AccountId:    archiveEntity.AccountId,
 			Hostname:     mappingEntity.Hostname,
 			PublicPort:   mappingEntity.PublicPort,
 			Protocol:     mappingEntity.Protocol,
@@ -1335,7 +1406,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 			ContainerIds:              requestRestoreDto.ContainerIds,
 			ExceptContainerAccountIds: requestRestoreDto.ExceptContainerAccountIds,
 			ExceptContainerIds:        requestRestoreDto.ExceptContainerIds,
-			OperatorAccountId:         valueObject.SystemAccountId,
+			OperatorAccountId:         requestRestoreDto.OperatorAccountId,
 		}
 
 		archiveId, err := repo.CreateTaskArchive(createArchiveDto)
@@ -1372,11 +1443,6 @@ func (repo *BackupCmdRepo) RestoreTask(
 		return responseRestoreDto, errors.New("MakeRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd("chown", "nobody:nogroup", restoreBaseTmpDirStr)
-	if err != nil {
-		return responseRestoreDto, errors.New("ChownRestoreBaseTaskTmpDirFailed: " + err.Error())
-	}
-
 	_, err = infraHelper.RunCmd(
 		"tar", "-xf", archiveEntity.UnixFilePath.String(), "-C", restoreBaseTmpDirStr,
 	)
@@ -1391,19 +1457,16 @@ func (repo *BackupCmdRepo) RestoreTask(
 		}
 	}
 
-	rawRestoreTmpDir := restoreBaseTmpDirStr + "/" +
-		archiveEntity.UnixFilePath.ReadFileNameWithoutExtension().String()
-	restoreTaskTmpDir, err := valueObject.NewUnixFilePath(rawRestoreTmpDir)
+	_, err = infraHelper.RunCmd("chown", "-R", "nobody:nogroup", restoreBaseTmpDirStr)
 	if err != nil {
-		return responseRestoreDto, errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ChownRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 
-	operatorAccountIdInt := int(requestRestoreDto.OperatorAccountId)
-	err = os.Chown(
-		restoreTaskTmpDir.String(), operatorAccountIdInt, operatorAccountIdInt,
-	)
+	rawRestoreTaskTmpDir := restoreBaseTmpDirStr + "/" +
+		archiveEntity.UnixFilePath.ReadFileNameWithoutExtension().String()
+	restoreTaskTmpDir, err := valueObject.NewUnixFilePath(rawRestoreTaskTmpDir)
 	if err != nil {
-		return responseRestoreDto, errors.New("ChownRestoreTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
 	}
 
 	containerImageQueryRepo := infra.NewContainerImageQueryRepo(repo.persistentDbSvc)
@@ -1435,6 +1498,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 		shouldRestoreMappings = *requestRestoreDto.ShouldRestoreMappings
 	}
 
+	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(repo.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
@@ -1443,9 +1507,8 @@ func (repo *BackupCmdRepo) RestoreTask(
 
 	for _, imageArchiveEntity := range containerImagesResponseDto.Archives {
 		containerId, err := repo.restoreContainerArchive(
-			imageArchiveEntity, containerQueryRepo, containerCmdRepo,
-			containerImageQueryRepo, containerImageCmdRepo,
-			mappingQueryRepo, mappingCmdRepo,
+			imageArchiveEntity, accountQueryRepo, containerQueryRepo, containerCmdRepo,
+			containerImageQueryRepo, containerImageCmdRepo, mappingQueryRepo, mappingCmdRepo,
 			shouldReplaceExistingContainers, shouldRestoreMappings,
 		)
 		if err != nil {
