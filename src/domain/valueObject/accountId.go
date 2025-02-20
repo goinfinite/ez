@@ -8,6 +8,7 @@ import (
 )
 
 var SystemAccountId = AccountId(0)
+var NobodyAccountId = AccountId(65534)
 
 type AccountId uint64
 
