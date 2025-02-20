@@ -1595,7 +1595,7 @@ func (service *BackupService) RestoreTask(
 		return NewServiceOutput(Created, "BackupTaskRestoreScheduled")
 	}
 
-	restoreDto := dto.NewRestoreBackupTask(
+	requestRestoreDto := dto.NewRestoreBackupTaskRequest(
 		taskIdPtr, archiveIdPtr, &shouldReplaceExistingContainers, &shouldRestoreMappings,
 		&timeoutSeconds, containerAccountIds, containerIds, exceptContainerAccountIds,
 		exceptContainerIds, operatorAccountId, operatorIpAddress,
@@ -1603,7 +1603,7 @@ func (service *BackupService) RestoreTask(
 
 	err = useCase.RestoreBackupTask(
 		service.backupQueryRepo, service.backupCmdRepo,
-		service.activityRecordCmdRepo, restoreDto,
+		service.activityRecordCmdRepo, requestRestoreDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())

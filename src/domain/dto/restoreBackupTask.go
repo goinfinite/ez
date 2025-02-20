@@ -4,7 +4,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-type RestoreBackupTask struct {
+type RestoreBackupTaskRequest struct {
 	TaskId                          *valueObject.BackupTaskId        `json:"taskId,omitempty"`
 	ArchiveId                       *valueObject.BackupTaskArchiveId `json:"archiveId,omitempty"`
 	ShouldReplaceExistingContainers *bool                            `json:"shouldReplaceExistingContainers,omitempty"`
@@ -18,7 +18,7 @@ type RestoreBackupTask struct {
 	OperatorIpAddress               valueObject.IpAddress            `json:"-"`
 }
 
-func NewRestoreBackupTask(
+func NewRestoreBackupTaskRequest(
 	taskId *valueObject.BackupTaskId,
 	archiveId *valueObject.BackupTaskArchiveId,
 	shouldReplaceExistingContainers, shouldRestoreMappings *bool,
@@ -29,8 +29,8 @@ func NewRestoreBackupTask(
 	exceptContainerIds []valueObject.ContainerId,
 	operatorAccountId valueObject.AccountId,
 	operatorIpAddress valueObject.IpAddress,
-) RestoreBackupTask {
-	return RestoreBackupTask{
+) RestoreBackupTaskRequest {
+	return RestoreBackupTaskRequest{
 		TaskId:                          taskId,
 		ArchiveId:                       archiveId,
 		ShouldReplaceExistingContainers: shouldReplaceExistingContainers,

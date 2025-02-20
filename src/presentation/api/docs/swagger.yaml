@@ -380,7 +380,7 @@ definitions:
           $ref: '#/definitions/entity.ScheduledTask'
         type: array
     type: object
-  dto.RestoreBackupTask:
+  dto.RestoreBackupTaskRequest:
     properties:
       archiveId:
         type: string
@@ -767,6 +767,10 @@ definitions:
         type: string
       originContainerDetails:
         $ref: '#/definitions/entity.Container'
+      originContainerMappings:
+        items:
+          $ref: '#/definitions/entity.Mapping'
+        type: array
       portBindings:
         items:
           $ref: '#/definitions/valueObject.PortBinding'
@@ -1971,7 +1975,7 @@ paths:
         name: restoreBackupTaskDto
         required: true
         schema:
-          $ref: '#/definitions/dto.RestoreBackupTask'
+          $ref: '#/definitions/dto.RestoreBackupTaskRequest'
       produces:
       - application/json
       responses:

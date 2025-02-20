@@ -515,31 +515,29 @@ func (uc *CreateSecurityActivityRecord) RunBackupJob(runDto dto.RunBackupJob) {
 }
 
 func (uc *CreateSecurityActivityRecord) RestoreBackupTask(
-	restoreDto dto.RestoreBackupTask,
+	requestRestoreDto dto.RestoreBackupTaskRequest,
 	accountId valueObject.AccountId,
-	taskId *valueObject.BackupTaskId,
-	archiveId *valueObject.BackupTaskArchiveId,
 ) {
 	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskRestored")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel:       uc.recordLevel,
 		RecordCode:        recordCode,
-		RecordDetails:     restoreDto,
-		OperatorAccountId: &restoreDto.OperatorAccountId,
-		OperatorIpAddress: &restoreDto.OperatorIpAddress,
+		RecordDetails:     requestRestoreDto,
+		OperatorAccountId: &requestRestoreDto.OperatorAccountId,
+		OperatorIpAddress: &requestRestoreDto.OperatorIpAddress,
 	}
 
-	if taskId != nil {
+	if requestRestoreDto.TaskId != nil {
 		createRecordDto.AffectedResources = append(
 			createRecordDto.AffectedResources,
-			valueObject.NewBackupTaskSri(accountId, *taskId),
+			valueObject.NewBackupTaskSri(accountId, *requestRestoreDto.TaskId),
 		)
 	}
 
-	if archiveId != nil {
+	if requestRestoreDto.ArchiveId != nil {
 		createRecordDto.AffectedResources = append(
 			createRecordDto.AffectedResources,
-			valueObject.NewBackupTaskArchiveSri(accountId, *archiveId),
+			valueObject.NewBackupTaskArchiveSri(accountId, *requestRestoreDto.ArchiveId),
 		)
 	}
 

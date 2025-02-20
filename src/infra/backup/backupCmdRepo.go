@@ -1323,16 +1323,18 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	return nil
 }
 
-func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
-	taskArchiveProvided := restoreDto.ArchiveId != nil
+func (repo *BackupCmdRepo) RestoreTask(
+	requestRestoreDto dto.RestoreBackupTaskRequest,
+) error {
+	taskArchiveProvided := requestRestoreDto.ArchiveId != nil
 	if !taskArchiveProvided {
 		createArchiveDto := dto.CreateBackupTaskArchive{
-			TaskId:                    *restoreDto.TaskId,
-			TimeoutSecs:               restoreDto.TimeoutSecs,
-			ContainerAccountIds:       restoreDto.ContainerAccountIds,
-			ContainerIds:              restoreDto.ContainerIds,
-			ExceptContainerAccountIds: restoreDto.ExceptContainerAccountIds,
-			ExceptContainerIds:        restoreDto.ExceptContainerIds,
+			TaskId:                    *requestRestoreDto.TaskId,
+			TimeoutSecs:               requestRestoreDto.TimeoutSecs,
+			ContainerAccountIds:       requestRestoreDto.ContainerAccountIds,
+			ContainerIds:              requestRestoreDto.ContainerIds,
+			ExceptContainerAccountIds: requestRestoreDto.ExceptContainerAccountIds,
+			ExceptContainerIds:        requestRestoreDto.ExceptContainerIds,
 			OperatorAccountId:         valueObject.SystemAccountId,
 		}
 
@@ -1340,11 +1342,11 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		if err != nil {
 			return errors.New("CreateTaskArchiveFailed: " + err.Error())
 		}
-		restoreDto.ArchiveId = &archiveId
+		requestRestoreDto.ArchiveId = &archiveId
 	}
 
 	archiveEntity, err := repo.backupQueryRepo.ReadFirstTaskArchive(
-		dto.ReadBackupTaskArchivesRequest{ArchiveId: restoreDto.ArchiveId},
+		dto.ReadBackupTaskArchivesRequest{ArchiveId: requestRestoreDto.ArchiveId},
 	)
 	if err != nil {
 		return errors.New("ReadBackupTaskArchiveFailed: " + err.Error())
@@ -1396,7 +1398,7 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		return errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
 	}
 
-	operatorAccountIdInt := int(restoreDto.OperatorAccountId)
+	operatorAccountIdInt := int(requestRestoreDto.OperatorAccountId)
 	err = os.Chown(
 		restoreTaskTmpDir.String(), operatorAccountIdInt, operatorAccountIdInt,
 	)
@@ -1424,13 +1426,13 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 	}
 
 	shouldReplaceExistingContainers := false
-	if restoreDto.ShouldReplaceExistingContainers != nil {
-		shouldReplaceExistingContainers = *restoreDto.ShouldReplaceExistingContainers
+	if requestRestoreDto.ShouldReplaceExistingContainers != nil {
+		shouldReplaceExistingContainers = *requestRestoreDto.ShouldReplaceExistingContainers
 	}
 
 	shouldRestoreMappings := true
-	if restoreDto.ShouldRestoreMappings != nil {
-		shouldRestoreMappings = *restoreDto.ShouldRestoreMappings
+	if requestRestoreDto.ShouldRestoreMappings != nil {
+		shouldRestoreMappings = *requestRestoreDto.ShouldRestoreMappings
 	}
 
 	containerQueryRepo := infra.NewContainerQueryRepo(repo.persistentDbSvc)

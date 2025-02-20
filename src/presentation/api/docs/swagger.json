@@ -1099,7 +1099,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RestoreBackupTask"
+                            "$ref": "#/definitions/dto.RestoreBackupTaskRequest"
                         }
                     }
                 ],
@@ -3391,7 +3391,7 @@
                 }
             }
         },
-        "dto.RestoreBackupTask": {
+        "dto.RestoreBackupTaskRequest": {
             "type": "object",
             "properties": {
                 "archiveId": {
@@ -3977,6 +3977,12 @@
                 },
                 "originContainerDetails": {
                     "$ref": "#/definitions/entity.Container"
+                },
+                "originContainerMappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Mapping"
+                    }
                 },
                 "portBindings": {
                     "type": "array",

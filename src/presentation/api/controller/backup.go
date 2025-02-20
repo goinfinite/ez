@@ -348,7 +348,7 @@ func (controller *BackupController) ReadTask(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     Bearer
-// @Param        restoreBackupTaskDto	body	dto.RestoreBackupTask	true	"RestoreBackupTask"
+// @Param        restoreBackupTaskDto	body	dto.RestoreBackupTaskRequest	true	"RestoreBackupTask"
 // @Success      201	{object}	object{}	"BackupTaskRestorationScheduled"
 // @Router       /v1/backup/task/restore/	[post]
 func (controller *BackupController) RestoreTask(c echo.Context) error {

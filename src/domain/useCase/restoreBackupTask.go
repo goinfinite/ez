@@ -14,16 +14,16 @@ func RestoreBackupTask(
 	backupQueryRepo repository.BackupQueryRepo,
 	backupCmdRepo repository.BackupCmdRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	restoreDto dto.RestoreBackupTask,
+	requestRestoreDto dto.RestoreBackupTaskRequest,
 ) error {
-	if restoreDto.ArchiveId == nil && restoreDto.TaskId == nil {
+	if requestRestoreDto.ArchiveId == nil && requestRestoreDto.TaskId == nil {
 		return errors.New("TaskIdOrArchiveIdRequired")
 	}
 
-	accountId := restoreDto.OperatorAccountId
-	if restoreDto.ArchiveId == nil {
+	accountId := requestRestoreDto.OperatorAccountId
+	if requestRestoreDto.ArchiveId == nil {
 		taskEntity, err := backupQueryRepo.ReadFirstTask(
-			dto.ReadBackupTasksRequest{TaskId: restoreDto.TaskId},
+			dto.ReadBackupTasksRequest{TaskId: requestRestoreDto.TaskId},
 		)
 		if err != nil {
 			slog.Error("BackupTaskNotFound", slog.String("error", err.Error()))
@@ -32,14 +32,14 @@ func RestoreBackupTask(
 		accountId = taskEntity.AccountId
 	}
 
-	err := backupCmdRepo.RestoreTask(restoreDto)
+	err := backupCmdRepo.RestoreTask(requestRestoreDto)
 	if err != nil {
 		slog.Error("RestoreTaskError", slog.String("error", err.Error()))
 		return errors.New("RestoreTaskInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		RestoreBackupTask(restoreDto, accountId, restoreDto.TaskId, restoreDto.ArchiveId)
+		RestoreBackupTask(requestRestoreDto, accountId)
 
 	return nil
 }

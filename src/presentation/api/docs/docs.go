@@ -1106,7 +1106,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RestoreBackupTask"
+                            "$ref": "#/definitions/dto.RestoreBackupTaskRequest"
                         }
                     }
                 ],
@@ -3398,7 +3398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RestoreBackupTask": {
+        "dto.RestoreBackupTaskRequest": {
             "type": "object",
             "properties": {
                 "archiveId": {
@@ -3984,6 +3984,12 @@ const docTemplate = `{
                 },
                 "originContainerDetails": {
                     "$ref": "#/definitions/entity.Container"
+                },
+                "originContainerMappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Mapping"
+                    }
                 },
                 "portBindings": {
                     "type": "array",
