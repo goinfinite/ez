@@ -1199,25 +1199,25 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	mappingCmdRepo *infra.MappingCmdRepo,
 	shouldReplaceExistingContainers bool,
 	shouldRestoreMappings bool,
-) error {
+) (containerId valueObject.ContainerId, err error) {
 	importImageArchiveDto := dto.ImportContainerImageArchive{
 		AccountId:       containerArchiveEntity.AccountId,
 		ArchiveFilePath: &containerArchiveEntity.UnixFilePath,
 	}
 	imageId, err := containerImageCmdRepo.ImportArchive(importImageArchiveDto)
 	if err != nil {
-		return errors.New("ImportContainerImageArchiveFailed: " + err.Error())
+		return containerId, errors.New("ImportContainerImageArchiveFailed: " + err.Error())
 	}
 
 	containerImageEntity, err := containerImageQueryRepo.ReadById(
 		containerArchiveEntity.AccountId, imageId,
 	)
 	if err != nil {
-		return errors.New("ReadContainerImageFailed: " + err.Error())
+		return containerId, errors.New("ReadContainerImageFailed: " + err.Error())
 	}
 
 	if containerImageEntity.OriginContainerDetails == nil {
-		return errors.New("OriginContainerDetailsNotFound")
+		return containerId, errors.New("OriginContainerDetailsNotFound")
 	}
 
 	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
@@ -1227,7 +1227,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	}
 	containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
 	if err != nil {
-		return errors.New("ValidateContainerHostnameFailed: " + err.Error())
+		return containerId, errors.New("ValidateContainerHostnameFailed: " + err.Error())
 	}
 
 	if shouldReplaceExistingContainers {
@@ -1245,7 +1245,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 
 			err = containerCmdRepo.Delete(deleteContainerDto)
 			if err != nil {
-				return errors.New("DeleteContainerFailed: " + err.Error())
+				return containerId, errors.New("DeleteContainerFailed: " + err.Error())
 			}
 		}
 	}
@@ -1262,18 +1262,18 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		AutoCreateMappings: false,
 	}
 
-	containerId, err := containerCmdRepo.Create(createContainerDto)
+	containerId, err = containerCmdRepo.Create(createContainerDto)
 	if err != nil {
-		return errors.New("RestoreContainerFailed: " + err.Error())
+		return containerId, errors.New("RestoreContainerFailed: " + err.Error())
 	}
 
 	err = os.Remove(containerArchiveEntity.UnixFilePath.String())
 	if err != nil {
-		return errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
+		return containerId, errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
 	}
 
 	if !shouldRestoreMappings {
-		return nil
+		return containerId, nil
 	}
 
 	for _, mappingEntity := range containerImageEntity.OriginContainerMappings {
@@ -1320,12 +1320,12 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 	}
 
-	return nil
+	return containerId, nil
 }
 
 func (repo *BackupCmdRepo) RestoreTask(
 	requestRestoreDto dto.RestoreBackupTaskRequest,
-) error {
+) (responseRestoreDto dto.RestoreBackupTaskResponse, err error) {
 	taskArchiveProvided := requestRestoreDto.ArchiveId != nil
 	if !taskArchiveProvided {
 		createArchiveDto := dto.CreateBackupTaskArchive{
@@ -1340,7 +1340,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 
 		archiveId, err := repo.CreateTaskArchive(createArchiveDto)
 		if err != nil {
-			return errors.New("CreateTaskArchiveFailed: " + err.Error())
+			return responseRestoreDto, errors.New("CreateTaskArchiveFailed: " + err.Error())
 		}
 		requestRestoreDto.ArchiveId = &archiveId
 	}
@@ -1349,45 +1349,45 @@ func (repo *BackupCmdRepo) RestoreTask(
 		dto.ReadBackupTaskArchivesRequest{ArchiveId: requestRestoreDto.ArchiveId},
 	)
 	if err != nil {
-		return errors.New("ReadBackupTaskArchiveFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ReadBackupTaskArchiveFailed: " + err.Error())
 	}
 
 	userDataDirectoryStats, err := repo.readUserDataStats()
 	if err != nil {
-		return errors.New("ReadUserDataDirStatsError: " + err.Error())
+		return responseRestoreDto, errors.New("ReadUserDataDirStatsError: " + err.Error())
 	}
 	// @see https://ntorga.com/gzip-bzip2-xz-zstd-7z-brotli-or-lz4/
 	necessaryFreeStorageBytes := archiveEntity.SizeBytes.Uint64() * 3
 	if necessaryFreeStorageBytes > userDataDirectoryStats.Free {
-		return errors.New("InsufficientUserDataDirectoryFreeSpace")
+		return responseRestoreDto, errors.New("InsufficientUserDataDirectoryFreeSpace")
 	}
 
 	restoreBaseTmpDir, err := valueObject.NewUnixFilePath(infraEnvs.RestoreTaskTmpDir)
 	if err != nil {
-		return errors.New("ValidateRestoreBaseTaskTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ValidateRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 	restoreBaseTmpDirStr := restoreBaseTmpDir.String()
 	err = infraHelper.MakeDir(restoreBaseTmpDirStr)
 	if err != nil {
-		return errors.New("MakeRestoreBaseTaskTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("MakeRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd("chown", "nobody:nogroup", restoreBaseTmpDirStr)
 	if err != nil {
-		return errors.New("ChownRestoreBaseTaskTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ChownRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmd(
 		"tar", "-xf", archiveEntity.UnixFilePath.String(), "-C", restoreBaseTmpDirStr,
 	)
 	if err != nil {
-		return errors.New("ExtractTaskArchiveFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ExtractTaskArchiveFailed: " + err.Error())
 	}
 
 	if !taskArchiveProvided {
 		err = os.Remove(archiveEntity.UnixFilePath.String())
 		if err != nil {
-			return errors.New("DeleteTempTaskArchiveFailed: " + err.Error())
+			return responseRestoreDto, errors.New("DeleteTempTaskArchiveFailed: " + err.Error())
 		}
 	}
 
@@ -1395,7 +1395,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 		archiveEntity.UnixFilePath.ReadFileNameWithoutExtension().String()
 	restoreTaskTmpDir, err := valueObject.NewUnixFilePath(rawRestoreTmpDir)
 	if err != nil {
-		return errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
 	}
 
 	operatorAccountIdInt := int(requestRestoreDto.OperatorAccountId)
@@ -1403,7 +1403,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 		restoreTaskTmpDir.String(), operatorAccountIdInt, operatorAccountIdInt,
 	)
 	if err != nil {
-		return errors.New("ChownRestoreTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ChownRestoreTmpDirFailed: " + err.Error())
 	}
 
 	containerImageQueryRepo := infra.NewContainerImageQueryRepo(repo.persistentDbSvc)
@@ -1418,11 +1418,11 @@ func (repo *BackupCmdRepo) RestoreTask(
 		requestContainerImagesDto,
 	)
 	if err != nil {
-		return errors.New("ReadContainerImageArchivesFailed: " + err.Error())
+		return responseRestoreDto, errors.New("ReadContainerImageArchivesFailed: " + err.Error())
 	}
 
 	if len(containerImagesResponseDto.Archives) == 0 {
-		return errors.New("NoContainerImageArchivesFound")
+		return responseRestoreDto, errors.New("NoContainerImageArchivesFound")
 	}
 
 	shouldReplaceExistingContainers := false
@@ -1442,7 +1442,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 	mappingCmdRepo := infra.NewMappingCmdRepo(repo.persistentDbSvc)
 
 	for _, imageArchiveEntity := range containerImagesResponseDto.Archives {
-		err = repo.restoreContainerArchive(
+		containerId, err := repo.restoreContainerArchive(
 			imageArchiveEntity, containerQueryRepo, containerCmdRepo,
 			containerImageQueryRepo, containerImageCmdRepo,
 			mappingQueryRepo, mappingCmdRepo,
@@ -1454,16 +1454,22 @@ func (repo *BackupCmdRepo) RestoreTask(
 				slog.String("imageArchiveEntityId", imageArchiveEntity.ImageId.String()),
 				slog.String("error", err.Error()),
 			)
+			responseRestoreDto.FailedContainerImageIds = append(
+				responseRestoreDto.FailedContainerImageIds, imageArchiveEntity.ImageId,
+			)
 			continue
 		}
+		responseRestoreDto.SuccessfulContainerIds = append(
+			responseRestoreDto.SuccessfulContainerIds, containerId,
+		)
 	}
 
 	err = os.RemoveAll(restoreTaskTmpDir.String())
 	if err != nil {
-		return errors.New("RemoveRestoreTmpDirFailed: " + err.Error())
+		return responseRestoreDto, errors.New("RemoveRestoreTmpDirFailed: " + err.Error())
 	}
 
-	return nil
+	return responseRestoreDto, nil
 }
 
 func (repo *BackupCmdRepo) DeleteTask(deleteDto dto.DeleteBackupTask) error {

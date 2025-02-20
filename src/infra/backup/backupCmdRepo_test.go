@@ -140,7 +140,7 @@ func TestBackupCmdRepo(t *testing.T) {
 			TaskId: &taskEntity.TaskId,
 		}
 
-		err = backupCmdRepo.RestoreTask(requestRestoreDto)
+		_, err = backupCmdRepo.RestoreTask(requestRestoreDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

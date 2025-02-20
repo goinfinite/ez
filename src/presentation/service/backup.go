@@ -1601,7 +1601,7 @@ func (service *BackupService) RestoreTask(
 		exceptContainerIds, operatorAccountId, operatorIpAddress,
 	)
 
-	err = useCase.RestoreBackupTask(
+	responseRestoreDto, err := useCase.RestoreBackupTask(
 		service.backupQueryRepo, service.backupCmdRepo,
 		service.activityRecordCmdRepo, requestRestoreDto,
 	)
@@ -1609,7 +1609,15 @@ func (service *BackupService) RestoreTask(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, "BackupTaskRestored")
+	responseStatusEnum := Success
+	if len(responseRestoreDto.FailedContainerImageIds) > 0 {
+		responseStatusEnum = MultiStatus
+	}
+	if len(responseRestoreDto.SuccessfulContainerIds) == 0 {
+		responseStatusEnum = InfraError
+	}
+
+	return NewServiceOutput(responseStatusEnum, responseRestoreDto)
 }
 
 func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOutput {

@@ -44,3 +44,8 @@ func NewRestoreBackupTaskRequest(
 		OperatorIpAddress:               operatorIpAddress,
 	}
 }
+
+type RestoreBackupTaskResponse struct {
+	SuccessfulContainerIds  []valueObject.ContainerId      `json:"successfulContainerIds"`
+	FailedContainerImageIds []valueObject.ContainerImageId `json:"failedContainerImageIds"`
+}
