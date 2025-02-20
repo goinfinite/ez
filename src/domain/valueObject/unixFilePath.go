@@ -55,17 +55,6 @@ func (vo UnixFilePath) ReadFileName() UnixFileName {
 	return unixFileName
 }
 
-func (vo UnixFilePath) ReadFileNameWithoutExtension() UnixFileName {
-	fileBase := filepath.Base(string(vo))
-	fileExt, err := vo.ReadCompoundFileExtension()
-	if err != nil {
-		return vo.ReadFileName()
-	}
-	fileBaseWithoutExtStr := strings.TrimSuffix(fileBase, fileExt.String())
-	fileNameWithoutExt, _ := NewUnixFileName(fileBaseWithoutExtStr)
-	return fileNameWithoutExt
-}
-
 func (vo UnixFilePath) ReadFileExtension() (UnixFileExtension, error) {
 	unixFileExtensionStr := filepath.Ext(string(vo))
 	return NewUnixFileExtension(unixFileExtensionStr)
@@ -78,6 +67,17 @@ func (vo UnixFilePath) ReadCompoundFileExtension() (UnixFileExtension, error) {
 	}
 	extensionsOnly := fileNameParts[1:]
 	return NewUnixFileExtension(strings.Join(extensionsOnly, "."))
+}
+
+func (vo UnixFilePath) ReadFileNameWithoutExtension() UnixFileName {
+	fileBase := filepath.Base(string(vo))
+	fileExt, err := vo.ReadCompoundFileExtension()
+	if err != nil {
+		return vo.ReadFileName()
+	}
+	fileBaseWithoutExtStr := strings.TrimSuffix(fileBase, "."+fileExt.String())
+	fileNameWithoutExt, _ := NewUnixFileName(fileBaseWithoutExtStr)
+	return fileNameWithoutExt
 }
 
 func (vo UnixFilePath) ReadFileDir() UnixFilePath {
