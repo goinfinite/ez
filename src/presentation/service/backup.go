@@ -1571,6 +1571,10 @@ func (service *BackupService) RestoreTask(
 			cliParams = append(cliParams, "--except-container-ids", containerId.String())
 		}
 
+		if operatorAccountId != LocalOperatorAccountId {
+			cliParams = append(cliParams, "--operator-account-id", operatorAccountId.String())
+		}
+
 		cliCmd = cliCmd + " " + strings.Join(cliParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)

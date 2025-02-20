@@ -906,7 +906,7 @@ func (controller *BackupController) ReadTask() *cobra.Command {
 }
 
 func (controller *BackupController) RestoreTask() *cobra.Command {
-	var taskIdUint uint64
+	var taskIdUint, operatorAccountIdUint uint64
 	var archiveIdStr string
 	var shouldReplaceExistingContainersBoolStr, shouldRestoreMappingsBoolStr string
 	var timeoutSecondsUint uint32
@@ -925,37 +925,34 @@ func (controller *BackupController) RestoreTask() *cobra.Command {
 			if taskIdUint > 0 {
 				requestBody["taskId"] = taskIdUint
 			}
-
 			if archiveIdStr != "" {
 				requestBody["archiveId"] = archiveIdStr
 			}
-
 			if timeoutSecondsUint != 0 {
 				requestBody["timeoutSeconds"] = timeoutSecondsUint
 			}
-
 			if len(containerAccountIdsSlice) > 0 {
 				requestBody["containerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
 					containerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
-
 			if len(containerIdsSlice) > 0 {
 				requestBody["containerIds"] = sharedHelper.StringSliceValueObjectParser(
 					containerIdsSlice, valueObject.NewContainerId,
 				)
 			}
-
 			if len(exceptContainerAccountIdsSlice) > 0 {
 				requestBody["exceptContainerAccountIds"] = sharedHelper.StringSliceValueObjectParser(
 					exceptContainerAccountIdsSlice, valueObject.NewAccountId,
 				)
 			}
-
 			if len(exceptContainerIdsSlice) > 0 {
 				requestBody["exceptContainerIds"] = sharedHelper.StringSliceValueObjectParser(
 					exceptContainerIdsSlice, valueObject.NewContainerId,
 				)
+			}
+			if operatorAccountIdUint != 0 {
+				requestBody["operatorAccountId"] = operatorAccountIdUint
 			}
 
 			cliHelper.ServiceResponseWrapper(
@@ -988,6 +985,9 @@ func (controller *BackupController) RestoreTask() *cobra.Command {
 	)
 	cmd.Flags().StringSliceVarP(
 		&exceptContainerIdsSlice, "except-container-ids", "I", []string{}, "ExceptContainerIds",
+	)
+	cmd.Flags().Uint64VarP(
+		&operatorAccountIdUint, "operator-account-id", "A", 0, "OperatorAccountId",
 	)
 
 	return cmd
