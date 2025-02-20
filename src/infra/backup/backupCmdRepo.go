@@ -1370,6 +1370,11 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		return errors.New("MakeRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
 
+	_, err = infraHelper.RunCmd("chown", "nobody:nogroup", restoreBaseTmpDirStr)
+	if err != nil {
+		return errors.New("ChownRestoreBaseTaskTmpDirFailed: " + err.Error())
+	}
+
 	_, err = infraHelper.RunCmd(
 		"tar", "-xf", archiveEntity.UnixFilePath.String(), "-C", restoreBaseTmpDirStr,
 	)
@@ -1386,9 +1391,17 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 
 	rawRestoreTmpDir := restoreBaseTmpDirStr + "/" +
 		archiveEntity.UnixFilePath.ReadFileNameWithoutExtension().String()
-	restoreTmpDir, err := valueObject.NewUnixFilePath(rawRestoreTmpDir)
+	restoreTaskTmpDir, err := valueObject.NewUnixFilePath(rawRestoreTmpDir)
 	if err != nil {
 		return errors.New("ValidateRestoreTmpDirFailed: " + err.Error())
+	}
+
+	operatorAccountIdInt := int(restoreDto.OperatorAccountId)
+	err = os.Chown(
+		restoreTaskTmpDir.String(), operatorAccountIdInt, operatorAccountIdInt,
+	)
+	if err != nil {
+		return errors.New("ChownRestoreTmpDirFailed: " + err.Error())
 	}
 
 	containerImageQueryRepo := infra.NewContainerImageQueryRepo(repo.persistentDbSvc)
@@ -1396,7 +1409,7 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		Pagination: dto.Pagination{
 			ItemsPerPage: 1000,
 		},
-		ArchivesDirectory: &restoreTmpDir,
+		ArchivesDirectory: &restoreTaskTmpDir,
 	}
 
 	containerImagesResponseDto, err := containerImageQueryRepo.ReadArchives(
@@ -1443,7 +1456,7 @@ func (repo *BackupCmdRepo) RestoreTask(restoreDto dto.RestoreBackupTask) error {
 		}
 	}
 
-	err = os.RemoveAll(restoreTmpDir.String())
+	err = os.RemoveAll(restoreTaskTmpDir.String())
 	if err != nil {
 		return errors.New("RemoveRestoreTmpDirFailed: " + err.Error())
 	}
