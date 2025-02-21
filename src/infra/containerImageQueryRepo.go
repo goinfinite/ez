@@ -244,25 +244,26 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 
 	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
 	if !assertOk {
-		accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-		accountEntity, err := accountQueryRepo.ReadById(accountId)
+		rawAccountUsername := "unknown"
+		idOutput, err := infraHelper.RunCmd("id", "-nu", accountId.String())
+		if err == nil {
+			rawAccountUsername = idOutput
+		}
+
+		accountUsername, err := valueObject.NewUnixUsername(rawAccountUsername)
 		if err != nil {
-			return containerImage, errors.New("ReadOwnerAccountError")
+			return containerImage, errors.New("ParseContainerImageAccountUsernameError")
 		}
 
 		rawImageNames = []interface{}{
-			"localhost/" + accountEntity.Username.String() + "/" + imageId.String(),
+			"localhost/" + accountUsername.String() + "/" + imageId.String(),
 		}
 	}
 	if len(rawImageNames) == 0 {
 		return containerImage, errors.New("ReadContainerImageNamesError")
 	}
 
-	imageAddressStr, assertOk := rawImageNames[0].(string)
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageAddress")
-	}
-	imageAddress, err := valueObject.NewContainerImageAddress(imageAddressStr)
+	imageAddress, err := valueObject.NewContainerImageAddress(rawImageNames[0])
 	if err != nil {
 		return containerImage, err
 	}
