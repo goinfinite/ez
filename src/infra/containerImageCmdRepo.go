@@ -129,7 +129,8 @@ func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
 func (repo *ContainerImageCmdRepo) ImportArchive(
 	importDto dto.ImportContainerImageArchive,
 ) (imageId valueObject.ContainerImageId, err error) {
-	if importDto.ArchiveFilePath == nil {
+	wasArchiveFilePathProvided := importDto.ArchiveFilePath != nil
+	if !wasArchiveFilePathProvided {
 		inputFileHandler, err := importDto.ArchiveFile.Open()
 		if err != nil {
 			return imageId, errors.New("OpenArchiveFileError: " + err.Error())
@@ -232,11 +233,13 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		return imageId, err
 	}
 
-	_, err = infraHelper.RunCmdAsUser(
-		importDto.AccountId, "rm", "-f", archiveFilePathStr,
-	)
-	if err != nil {
-		return imageId, errors.New("RemoveArchiveFileError: " + err.Error())
+	if !wasArchiveFilePathProvided {
+		_, err = infraHelper.RunCmdAsUser(
+			importDto.AccountId, "rm", "-f", archiveFilePathStr,
+		)
+		if err != nil {
+			return imageId, errors.New("RemoveTmpArchiveFileError: " + err.Error())
+		}
 	}
 
 	return imageId, nil
