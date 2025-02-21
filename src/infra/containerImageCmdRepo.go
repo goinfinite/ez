@@ -178,9 +178,13 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		return imageId, errors.New("ChownArchiveError: " + err.Error())
 	}
 
+	compressionFormat, err := valueObject.NewCompressionFormat(localArchiveFileExt.String())
+	if err != nil {
+		return imageId, errors.New("UnsupportedArchiveFileExtension")
+	}
+
 	decompressionCmd := ""
-	localArchiveFileExtStr := localArchiveFileExt.String()
-	switch localArchiveFileExtStr {
+	switch compressionFormatStr := compressionFormat.String(); compressionFormatStr {
 	case "tar":
 		decompressionCmd = ""
 	case "br":
@@ -195,15 +199,20 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		return imageId, errors.New("UnsupportedArchiveFileExtension")
 	}
 
-	archiveFilePathStr := localArchiveFilePathStr
 	shouldDecompress := len(decompressionCmd) > 0
 	if shouldDecompress {
-		archiveFilePathStr = strings.TrimSuffix(localArchiveFilePathStr, "."+localArchiveFileExtStr)
-		_, err = infraHelper.RunCmdAsUserWithSubShell(
-			importDto.AccountId, "rm -f "+archiveFilePathStr,
+		rawUncompressedArchiveFilePath := strings.TrimSuffix(
+			localArchiveFilePathStr, "."+compressionFormat.String(),
 		)
+		uncompressedArchiveFilePath, err := valueObject.NewUnixFilePath(rawUncompressedArchiveFilePath)
 		if err != nil {
-			return imageId, errors.New("RemoveExistingTarFileError: " + err.Error())
+			return imageId, errors.New("DefineUncompressedArchiveFilePathError")
+		}
+		uncompressedLocalArchiveFileStr := uncompressedArchiveFilePath.String()
+
+		err = os.Remove(uncompressedLocalArchiveFileStr)
+		if err != nil {
+			return imageId, errors.New("RemovePreviouslyExistingTarFileError: " + err.Error())
 		}
 
 		_, err = infraHelper.RunCmdAsUserWithSubShell(
@@ -212,11 +221,13 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		if err != nil {
 			return imageId, errors.New("DecompressImageError: " + err.Error())
 		}
+		importDto.ArchiveFilePath = &uncompressedArchiveFilePath
+		localArchiveFilePathStr = uncompressedLocalArchiveFileStr
 	}
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		importDto.AccountId,
-		"podman", "load", "--quiet", "--input", archiveFilePathStr,
+		"podman", "load", "--quiet", "--input", localArchiveFilePathStr,
 	)
 	if err != nil {
 		return imageId, errors.New("PodmanLoadError: " + err.Error())
@@ -234,11 +245,19 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 	}
 
 	if !wasArchiveFilePathProvided {
-		_, err = infraHelper.RunCmdAsUser(
-			importDto.AccountId, "rm", "-f", archiveFilePathStr,
-		)
+		err = os.Remove(localArchiveFilePathStr)
 		if err != nil {
 			return imageId, errors.New("RemoveTmpArchiveFileError: " + err.Error())
+		}
+		return imageId, nil
+	}
+
+	if shouldDecompress {
+		_, err = repo.compressImageArchiveFile(
+			*importDto.ArchiveFilePath, importDto.AccountId, &compressionFormat,
+		)
+		if err != nil {
+			return imageId, errors.New("CompressImageArchiveBackError: " + err.Error())
 		}
 	}
 
@@ -289,6 +308,58 @@ func (repo *ContainerImageCmdRepo) archiveFileNameFactory(
 	return valueObject.NewUnixFileName(rawArchiveFileName + ".tar")
 }
 
+func (repo *ContainerImageCmdRepo) compressImageArchiveFile(
+	uncompressedArchiveFilePath valueObject.UnixFilePath,
+	accountId valueObject.AccountId,
+	compressionFormat *valueObject.CompressionFormat,
+) (compressedArchiveFilePath valueObject.UnixFilePath, err error) {
+	uncompressedArchiveFilePathStr := uncompressedArchiveFilePath.String()
+
+	compressionCmd := "brotli --quality=4 --rm"
+	compressionSuffix := ".br"
+	if compressionFormat != nil {
+		switch compressionFormatStr := compressionFormat.String(); compressionFormatStr {
+		case "tar":
+			compressionCmd = ""
+			compressionSuffix = ""
+		case "br":
+			compressionCmd = "brotli --quality=4 --rm"
+			compressionSuffix = ".br"
+		case "gzip":
+			compressionCmd = "gzip -6"
+			compressionSuffix = ".gz"
+		case "zip":
+			compressionCmd = "zip -q -m -6 " + uncompressedArchiveFilePathStr + ".zip"
+			compressionSuffix = ".zip"
+		case "xz":
+			compressionCmd = "xz -1 --memlimit=10%"
+			compressionSuffix = ".xz"
+		default:
+			return compressedArchiveFilePath, errors.New("UnsupportedCompressionFormat")
+		}
+	}
+
+	compressedArchiveFilePath, err = valueObject.NewUnixFilePath(
+		uncompressedArchiveFilePathStr + compressionSuffix,
+	)
+	if err != nil {
+		return compressedArchiveFilePath, errors.New("NewCompressedArchiveFilePathError")
+	}
+
+	if compressionCmd == "" {
+		return uncompressedArchiveFilePath, nil
+	}
+
+	_, err = infraHelper.RunCmdAsUserWithSubShell(
+		accountId, compressionCmd+" "+uncompressedArchiveFilePathStr,
+	)
+	if err != nil {
+		return compressedArchiveFilePath, errors.New("CompressImageArchiveError: " + err.Error())
+	}
+
+	return compressedArchiveFilePath, nil
+}
+
 func (repo *ContainerImageCmdRepo) CreateArchive(
 	createDto dto.CreateContainerImageArchive,
 ) (archiveFile entity.ContainerImageArchive, err error) {
@@ -314,12 +385,24 @@ func (repo *ContainerImageCmdRepo) CreateArchive(
 	}
 	archiveDirStr := archiveDir.String()
 
-	archiveFilePathStr := archiveDirStr + "/" + archiveFileName.String()
-	_, err = infraHelper.RunCmdAsUser(
-		imageEntity.AccountId, "rm", "-f", archiveFilePathStr,
+	rawArchiveFilePath := archiveDirStr + "/" + archiveFileName.String()
+	archiveFilePath, err := valueObject.NewUnixFilePath(rawArchiveFilePath)
+	if err != nil {
+		return archiveFile, errors.New("DefineNewArchiveFilePathError")
+	}
+	archiveFilePathStr := archiveFilePath.String()
+
+	err = os.Remove(archiveFilePathStr)
+	if err != nil {
+		return archiveFile, errors.New("RemovePreviouslyExistingFileError: " + err.Error())
+	}
+
+	accountIdStr := imageEntity.AccountId.String()
+	_, err = infraHelper.RunCmd(
+		"chown", "-R", accountIdStr+":"+accountIdStr, archiveDirStr,
 	)
 	if err != nil {
-		return archiveFile, errors.New("RemoveExistingTarFileError: " + err.Error())
+		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
 	}
 
 	imageIdStr := imageEntity.Id.String()
@@ -334,63 +417,21 @@ func (repo *ContainerImageCmdRepo) CreateArchive(
 		return archiveFile, errors.New("PodmanSaveError: " + err.Error())
 	}
 
-	compressionCmd := "brotli --quality=4 --rm"
-	compressionSuffix := ".br"
-	if createDto.CompressionFormat != nil {
-		compressionFormatStr := createDto.CompressionFormat.String()
-		switch compressionFormatStr {
-		case "tar":
-			compressionCmd = ""
-			compressionSuffix = ""
-		case "br":
-			compressionCmd = "brotli --quality=4 --rm"
-			compressionSuffix = ".br"
-		case "gzip":
-			compressionCmd = "gzip -6"
-			compressionSuffix = ".gz"
-		case "zip":
-			compressionCmd = "zip -q -m -6 " + archiveFilePathStr + ".zip"
-			compressionSuffix = ".zip"
-		case "xz":
-			compressionCmd = "xz -1 --memlimit=10%"
-			compressionSuffix = ".xz"
-		default:
-			return archiveFile, errors.New("UnsupportedCompressionFormat")
-		}
-	}
-
-	if compressionCmd != "" {
-		_, err = infraHelper.RunCmdAsUserWithSubShell(
-			imageEntity.AccountId, compressionCmd+" "+archiveFilePathStr,
-		)
-		if err != nil {
-			return archiveFile, errors.New("CompressImageError: " + err.Error())
-		}
-	}
-
-	accountIdStr := imageEntity.AccountId.String()
-	_, err = infraHelper.RunCmd(
-		"chown", "-R", accountIdStr+":"+accountIdStr, archiveDirStr,
+	compressedImageArchiveFilePath, err := repo.compressImageArchiveFile(
+		archiveFilePath, imageEntity.AccountId, createDto.CompressionFormat,
 	)
 	if err != nil {
-		return archiveFile, errors.New("ChownArchiveDirError: " + err.Error())
+		return archiveFile, errors.New("CompressImageArchiveError: " + err.Error())
 	}
 
-	finalFilePath, err := valueObject.NewUnixFilePath(
-		archiveFilePathStr + compressionSuffix,
-	)
-	if err != nil {
-		return archiveFile, errors.New("NewFinalFilePathError: " + err.Error())
-	}
-
-	fileInfo, err := os.Stat(finalFilePath.String())
+	archiveFileInfo, err := os.Stat(compressedImageArchiveFilePath.String())
 	if err != nil {
 		return archiveFile, errors.New("StatFinalFileError: " + err.Error())
 	}
 
-	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
+	sizeBytes, err := valueObject.NewByte(archiveFileInfo.Size())
 	if err != nil {
-		return archiveFile, errors.New("NewSizeBytesError: " + err.Error())
+		return archiveFile, errors.New("CalculateArchiveFileSizeError")
 	}
 
 	serverHostname, err := infraHelper.ReadServerHostname()
@@ -404,7 +445,7 @@ func (repo *ContainerImageCmdRepo) CreateArchive(
 	)
 
 	return entity.NewContainerImageArchive(
-		createDto.ImageId, imageEntity.AccountId, finalFilePath, sizeBytes,
+		createDto.ImageId, imageEntity.AccountId, compressedImageArchiveFilePath, sizeBytes,
 		&downloadUrl, nil, valueObject.NewUnixTimeNow(),
 	), nil
 }
