@@ -1189,6 +1189,29 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	return nil
 }
 
+func (repo *BackupCmdRepo) toggleNobodyUserSession(sessionStatus bool) error {
+	_, _ = infraHelper.RunCmd("pkill", "-u", "nobody")
+
+	userModFlags := []string{"--add-subuids", "--add-subgids"}
+	if !sessionStatus {
+		userModFlags = []string{"--del-subuids", "--del-subgids"}
+	}
+
+	uidGidsRange := "100000-165535"
+	_, err := infraHelper.RunCmd(
+		"usermod", userModFlags[0], uidGidsRange, userModFlags[1], uidGidsRange, "nobody",
+	)
+	if err != nil {
+		return errors.New("UsermodAddSubUidsNobodyFailed: " + err.Error())
+	}
+
+	if sessionStatus {
+		return infraHelper.EnableLingering(valueObject.NobodyAccountId)
+	}
+
+	return infraHelper.DisableLingering(valueObject.NobodyAccountId)
+}
+
 func (repo *BackupCmdRepo) restoreImageArchive(
 	imageArchiveEntity entity.ContainerImageArchive,
 	containerImageQueryRepo *infra.ContainerImageQueryRepo,
@@ -1196,16 +1219,6 @@ func (repo *BackupCmdRepo) restoreImageArchive(
 ) (imageEntity entity.ContainerImage, err error) {
 	if imageArchiveEntity.AccountId == valueObject.SystemAccountId {
 		imageArchiveEntity.AccountId = valueObject.NobodyAccountId
-	}
-
-	if imageArchiveEntity.AccountId == valueObject.NobodyAccountId {
-		_, err = infraHelper.RunCmd(
-			"usermod", "--add-subuids", "100000-165535",
-			"--add-subgids", "100000-165535", "nobody",
-		)
-		if err != nil {
-			return imageEntity, errors.New("UsermodAddSubUidsNobodyFailed: " + err.Error())
-		}
 	}
 
 	accountIdInt := int(imageArchiveEntity.AccountId.Uint64())
@@ -1228,16 +1241,6 @@ func (repo *BackupCmdRepo) restoreImageArchive(
 	)
 	if err != nil {
 		return imageEntity, errors.New("ReadContainerImageFailed: " + err.Error())
-	}
-
-	if imageArchiveEntity.AccountId == valueObject.NobodyAccountId {
-		_, err = infraHelper.RunCmd(
-			"usermod", "--del-subuids", "100000-165535",
-			"--del-subgids", "100000-165535", "nobody",
-		)
-		if err != nil {
-			return imageEntity, errors.New("UsermodDelSubUidsNobodyFailed: " + err.Error())
-		}
 	}
 
 	if containerImageEntity.OriginContainerDetails == nil {
@@ -1505,6 +1508,11 @@ func (repo *BackupCmdRepo) RestoreTask(
 	mappingQueryRepo := infra.NewMappingQueryRepo(repo.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(repo.persistentDbSvc)
 
+	err = repo.toggleNobodyUserSession(true)
+	if err != nil {
+		return responseRestoreDto, errors.New("ToggleNobodyUserSessionFailed: " + err.Error())
+	}
+
 	for _, imageArchiveEntity := range containerImagesResponseDto.Archives {
 		containerId, err := repo.restoreContainerArchive(
 			imageArchiveEntity, accountQueryRepo, containerQueryRepo, containerCmdRepo,
@@ -1530,6 +1538,11 @@ func (repo *BackupCmdRepo) RestoreTask(
 	err = os.RemoveAll(restoreTaskTmpDir.String())
 	if err != nil {
 		return responseRestoreDto, errors.New("RemoveRestoreTmpDirFailed: " + err.Error())
+	}
+
+	err = repo.toggleNobodyUserSession(false)
+	if err != nil {
+		return responseRestoreDto, errors.New("ToggleNobodyUserSessionFailed: " + err.Error())
 	}
 
 	return responseRestoreDto, nil
@@ -1758,7 +1771,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
 	}
 
-	archivesDirectoryStr := infraEnvs.NobodyDataDirectory + "/archives"
+	accountHomeDirStr := infraEnvs.NobodyDataDirectory
 	if createDto.OperatorAccountId != valueObject.SystemAccountId {
 		accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 		operatorAccountEntity, err := accountQueryRepo.ReadById(createDto.OperatorAccountId)
@@ -1769,9 +1782,9 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 			return archiveId, errors.New("InsufficientOperatorAccountQuota")
 		}
 
-		archivesDirectoryStr = operatorAccountEntity.HomeDirectory.String() + "/archives"
+		accountHomeDirStr = operatorAccountEntity.HomeDirectory.String()
 	}
-	archivesDirectoryStr += "/tasks"
+	archivesDirectoryStr := accountHomeDirStr + "/tasks/archives"
 
 	createDtoJson, err := json.Marshal(createDto)
 	if err != nil {
@@ -1862,10 +1875,5 @@ func (repo *BackupCmdRepo) DeleteTaskArchive(
 		return errors.New("BackupTaskArchiveNotFound")
 	}
 
-	err = os.Remove(taskArchiveEntity.UnixFilePath.String())
-	if err != nil {
-		return errors.New("RemoveTaskArchiveFileFailed: " + err.Error())
-	}
-
-	return nil
+	return os.Remove(taskArchiveEntity.UnixFilePath.String())
 }
