@@ -25,6 +25,8 @@ import (
 	"github.com/shirou/gopsutil/disk"
 )
 
+const TasksArchivesRelativePath = "/backup/tasks/archives"
+
 type BackupCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 	backupQueryRepo *BackupQueryRepo
@@ -1053,8 +1055,8 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	}
 
 	rawJobTmpDir := fmt.Sprintf(
-		"%s/nobody/backup/%d/%d",
-		infraEnvs.UserDataDirectory, runDto.AccountId.Uint64(), runDto.JobId.Uint64(),
+		"%s/backup/jobs/%d/%d",
+		infraEnvs.NobodyDataDirectory, runDto.AccountId.Uint64(), runDto.JobId.Uint64(),
 	)
 	jobTmpDir, err := valueObject.NewUnixFilePath(rawJobTmpDir)
 	if err != nil {
@@ -1191,6 +1193,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 func (repo *BackupCmdRepo) toggleNobodyUserSession(sessionStatus bool) error {
 	_, _ = infraHelper.RunCmd("pkill", "-u", "nobody")
+	time.Sleep(1 * time.Second)
 
 	userModFlags := []string{"--add-subuids", "--add-subgids"}
 	if !sessionStatus {
@@ -1436,7 +1439,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 		return responseRestoreDto, errors.New("InsufficientUserDataDirectoryFreeSpace")
 	}
 
-	restoreBaseTmpDir, err := valueObject.NewUnixFilePath(infraEnvs.RestoreTaskTmpDir)
+	restoreBaseTmpDir, err := valueObject.NewUnixFilePath(infraEnvs.RestoreBackupTaskTmpDir)
 	if err != nil {
 		return responseRestoreDto, errors.New("ValidateRestoreBaseTaskTmpDirFailed: " + err.Error())
 	}
@@ -1784,7 +1787,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 
 		accountHomeDirStr = operatorAccountEntity.HomeDirectory.String()
 	}
-	archivesDirectoryStr := accountHomeDirStr + "/tasks/archives"
+	archivesDirectoryStr := accountHomeDirStr + TasksArchivesRelativePath
 
 	createDtoJson, err := json.Marshal(createDto)
 	if err != nil {
