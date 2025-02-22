@@ -11,8 +11,9 @@ import (
 func TestBackupCmdRepo(t *testing.T) {
 	testHelpers.LoadEnvVars()
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
+	trailDbSvc := testHelpers.GetTrailDbSvc()
 	backupQueryRepo := NewBackupQueryRepo(persistentDbSvc)
-	backupCmdRepo := NewBackupCmdRepo(persistentDbSvc)
+	backupCmdRepo := NewBackupCmdRepo(persistentDbSvc, trailDbSvc)
 
 	t.Run("CreateBackupDestination", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(1000)

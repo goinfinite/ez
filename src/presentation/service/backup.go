@@ -32,7 +32,7 @@ func NewBackupService(
 	return &BackupService{
 		persistentDbSvc:       persistentDbSvc,
 		backupQueryRepo:       backupInfra.NewBackupQueryRepo(persistentDbSvc),
-		backupCmdRepo:         backupInfra.NewBackupCmdRepo(persistentDbSvc),
+		backupCmdRepo:         backupInfra.NewBackupCmdRepo(persistentDbSvc, trailDbSvc),
 		activityRecordCmdRepo: infra.NewActivityRecordCmdRepo(trailDbSvc),
 	}
 }
