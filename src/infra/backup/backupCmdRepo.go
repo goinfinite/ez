@@ -1197,7 +1197,8 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 func (repo *BackupCmdRepo) toggleNobodyUserSession(sessionStatus bool) error {
 	_, _ = infraHelper.RunCmd("pkill", "-u", "nobody")
-	time.Sleep(1 * time.Second)
+	_, _ = infraHelper.RunCmd("pkill", "-u", "nobody")
+	time.Sleep(3 * time.Second)
 
 	userModFlags := []string{"--add-subuids", "--add-subgids"}
 	if !sessionStatus {
@@ -1299,7 +1300,6 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 	}
 
-	isThereAnExistingContainer := false
 	if shouldReplaceExistingContainers {
 		requestContainerDto := dto.ReadContainersRequest{
 			ContainerId: []valueObject.ContainerId{
@@ -1308,7 +1308,6 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 		containerEntity, err := containerQueryRepo.ReadFirst(requestContainerDto)
 		if err == nil {
-			isThereAnExistingContainer = true
 			deleteContainerDto := dto.DeleteContainer{
 				AccountId:   containerEntity.AccountId,
 				ContainerId: containerEntity.Id,
@@ -1322,7 +1321,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	}
 
 	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
-	if !shouldReplaceExistingContainers && isThereAnExistingContainer {
+	if !shouldReplaceExistingContainers {
 		archiveCreatedAtStr := archiveEntity.CreatedAt.String()
 		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
 	}
@@ -1388,42 +1387,24 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	}
 
 	for _, mappingEntity := range containerImageEntity.OriginContainerMappings {
-		currentMappingEntity, err := mappingQueryRepo.ReadById(mappingEntity.Id)
-		if err == nil {
-			isSameHostname := currentMappingEntity.Hostname == mappingEntity.Hostname
-			isSamePublicPort := currentMappingEntity.PublicPort == mappingEntity.PublicPort
-			if isSameHostname && isSamePublicPort {
-				createMappingTargetDto := dto.CreateMappingTarget{
-					AccountId:   archiveEntity.AccountId,
-					MappingId:   currentMappingEntity.Id,
-					ContainerId: containerId,
-				}
-				_, err = mappingCmdRepo.CreateTarget(createMappingTargetDto)
-				if err != nil {
-					slog.Debug(
-						"RestoreMappingTargetFailed",
-						slog.Uint64("currentMappingId", currentMappingEntity.Id.Uint64()),
-						slog.String("containerId", containerId.String()),
-						slog.String("error", err.Error()),
-					)
-				}
-				continue
-			}
-		}
-
 		createMappingDto := dto.CreateMapping{
-			AccountId:    archiveEntity.AccountId,
-			Hostname:     mappingEntity.Hostname,
-			PublicPort:   mappingEntity.PublicPort,
-			Protocol:     mappingEntity.Protocol,
-			ContainerIds: []valueObject.ContainerId{containerId},
+			AccountId:         mappingEntity.AccountId,
+			Hostname:          mappingEntity.Hostname,
+			PublicPort:        mappingEntity.PublicPort,
+			Protocol:          mappingEntity.Protocol,
+			ContainerIds:      []valueObject.ContainerId{containerId},
+			OperatorAccountId: valueObject.SystemAccountId,
 		}
-		_, err = mappingCmdRepo.Create(createMappingDto)
+		err = useCase.CreateMapping(
+			mappingQueryRepo, mappingCmdRepo, containerQueryRepo,
+			activityRecordCmdRepo, createMappingDto,
+		)
 		if err != nil {
-			slog.Debug(
-				"RestoreMappingFailed",
-				slog.Uint64("publicPort", uint64(mappingEntity.PublicPort.Uint16())),
+			slog.Error(
+				"RestoreContainerMappingFailed",
 				slog.String("containerId", containerId.String()),
+				slog.String("publicPort", mappingEntity.PublicPort.String()),
+				slog.String("previousMappingId", mappingEntity.Id.String()),
 				slog.String("error", err.Error()),
 			)
 			continue
