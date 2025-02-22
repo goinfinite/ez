@@ -1300,28 +1300,26 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 	}
 
-	if shouldReplaceExistingContainers {
-		requestContainerDto := dto.ReadContainersRequest{
-			ContainerId: []valueObject.ContainerId{
-				containerImageEntity.OriginContainerDetails.Id,
-			},
+	containerEntity, err := containerQueryRepo.ReadFirst(dto.ReadContainersRequest{
+		ContainerId: []valueObject.ContainerId{
+			containerImageEntity.OriginContainerDetails.Id,
+		},
+	})
+	previousContainerStillExists := err == nil
+	if previousContainerStillExists && shouldReplaceExistingContainers {
+		deleteContainerDto := dto.DeleteContainer{
+			AccountId:   containerEntity.AccountId,
+			ContainerId: containerEntity.Id,
 		}
-		containerEntity, err := containerQueryRepo.ReadFirst(requestContainerDto)
-		if err == nil {
-			deleteContainerDto := dto.DeleteContainer{
-				AccountId:   containerEntity.AccountId,
-				ContainerId: containerEntity.Id,
-			}
 
-			err = containerCmdRepo.Delete(deleteContainerDto)
-			if err != nil {
-				return containerId, errors.New("DeleteContainerFailed: " + err.Error())
-			}
+		err = containerCmdRepo.Delete(deleteContainerDto)
+		if err != nil {
+			return containerId, errors.New("DeleteExistingContainerFailed: " + err.Error())
 		}
 	}
 
 	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
-	if !shouldReplaceExistingContainers {
+	if previousContainerStillExists && !shouldReplaceExistingContainers {
 		archiveCreatedAtStr := archiveEntity.CreatedAt.String()
 		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
 	}
