@@ -1299,16 +1299,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 	}
 
-	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
-	if !shouldReplaceExistingContainers {
-		archiveCreatedAtStr := archiveEntity.CreatedAt.String()
-		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
-	}
-	containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
-	if err != nil {
-		return containerId, errors.New("ValidateContainerHostnameFailed: " + err.Error())
-	}
-
+	isThereAnExistingContainer := false
 	if shouldReplaceExistingContainers {
 		requestContainerDto := dto.ReadContainersRequest{
 			ContainerId: []valueObject.ContainerId{
@@ -1317,6 +1308,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 		containerEntity, err := containerQueryRepo.ReadFirst(requestContainerDto)
 		if err == nil {
+			isThereAnExistingContainer = true
 			deleteContainerDto := dto.DeleteContainer{
 				AccountId:   containerEntity.AccountId,
 				ContainerId: containerEntity.Id,
@@ -1327,6 +1319,16 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 				return containerId, errors.New("DeleteContainerFailed: " + err.Error())
 			}
 		}
+	}
+
+	rawContainerHostname := containerImageEntity.OriginContainerDetails.Hostname.String()
+	if !shouldReplaceExistingContainers && isThereAnExistingContainer {
+		archiveCreatedAtStr := archiveEntity.CreatedAt.String()
+		rawContainerHostname = archiveCreatedAtStr + ".restored." + rawContainerHostname
+	}
+	containerHostname, err := valueObject.NewFqdn(rawContainerHostname)
+	if err != nil {
+		return containerId, errors.New("ValidateContainerHostnameFailed: " + err.Error())
 	}
 
 	removableEnvsRegex := regexp.MustCompile(`^(PRIMARY_VHOST|HOSTNAME)`)
