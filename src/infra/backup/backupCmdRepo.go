@@ -1350,7 +1350,16 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 
 	err = os.Remove(archiveEntity.UnixFilePath.String())
 	if err != nil {
-		return containerId, errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
+		actualArchiveFilePath, err := containerImageCmdRepo.ImageArchiveFileLocator(
+			archiveEntity.UnixFilePath,
+		)
+		if err != nil {
+			return containerId, errors.New("LocateContainerImageArchiveFailed: " + err.Error())
+		}
+		err = os.Remove(actualArchiveFilePath.String())
+		if err != nil {
+			return containerId, errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
+		}
 	}
 
 	if !shouldRestoreMappings {
