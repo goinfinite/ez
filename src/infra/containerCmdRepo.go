@@ -412,7 +412,16 @@ func (repo *ContainerCmdRepo) Create(
 	}
 
 	if createDto.Entrypoint != nil {
-		createParams = append(createParams, "--entrypoint", createDto.Entrypoint.String())
+		entrypointArgs := infraHelper.StringToArgs(createDto.Entrypoint.String())
+		if len(entrypointArgs) > 0 {
+			createParams = append(createParams, "--entrypoint")
+			entrypointArgsStr := "["
+			for _, entrypointArg := range entrypointArgs {
+				entrypointArgsStr += "\"" + entrypointArg + "\","
+			}
+			entrypointArgsStr = strings.TrimSuffix(entrypointArgsStr, ",") + "]"
+			createParams = append(createParams, entrypointArgsStr)
+		}
 	}
 
 	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
