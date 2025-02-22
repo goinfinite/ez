@@ -205,13 +205,7 @@ func (repo *ContainerImageCmdRepo) decompressImageArchiveFile(
 	}
 	uncompressedLocalArchiveFileStr := uncompressedArchiveFilePath.String()
 
-	err = os.Remove(uncompressedLocalArchiveFileStr)
-	if err != nil {
-		return uncompressedArchiveFilePath, errors.New(
-			"RemovePreviouslyExistingTarFileError: " + err.Error(),
-		)
-	}
-
+	_ = os.Remove(uncompressedLocalArchiveFileStr)
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
 		accountId,
 		decompressionCmd+" "+compressedArchiveFilePathStr,
@@ -431,11 +425,6 @@ func (repo *ContainerImageCmdRepo) CreateArchive(
 	}
 	archiveFilePathStr := archiveFilePath.String()
 
-	err = os.Remove(archiveFilePathStr)
-	if err != nil {
-		return archiveFile, errors.New("RemovePreviouslyExistingFileError: " + err.Error())
-	}
-
 	accountIdStr := imageEntity.AccountId.String()
 	_, err = infraHelper.RunCmd(
 		"chown", "-R", accountIdStr+":"+accountIdStr, archiveDirStr,
@@ -445,6 +434,7 @@ func (repo *ContainerImageCmdRepo) CreateArchive(
 	}
 
 	imageIdStr := imageEntity.Id.String()
+	_ = os.Remove(archiveFilePathStr)
 	_, err = infraHelper.RunCmdAsUser(
 		imageEntity.AccountId,
 		"podman", "save",
