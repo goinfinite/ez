@@ -1224,12 +1224,6 @@ func (repo *BackupCmdRepo) restoreImageArchive(
 		imageArchiveEntity.AccountId = valueObject.NobodyAccountId
 	}
 
-	accountIdInt := int(imageArchiveEntity.AccountId.Uint64())
-	err = os.Chown(imageArchiveEntity.UnixFilePath.String(), accountIdInt, accountIdInt)
-	if err != nil {
-		return imageEntity, errors.New("ChownContainerImageArchiveFailed: " + err.Error())
-	}
-
 	importImageArchiveDto := dto.ImportContainerImageArchive{
 		AccountId:       imageArchiveEntity.AccountId,
 		ArchiveFilePath: &imageArchiveEntity.UnixFilePath,
