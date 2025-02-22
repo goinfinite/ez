@@ -1334,6 +1334,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 	createContainerDto := dto.CreateContainer{
 		AccountId:          archiveEntity.AccountId,
 		Hostname:           containerHostname,
+		ImageAddress:       containerImageEntity.ImageAddress,
 		ImageId:            &containerImageEntity.Id,
 		PortBindings:       containerImageEntity.PortBindings,
 		Envs:               adjustedEnvs,
