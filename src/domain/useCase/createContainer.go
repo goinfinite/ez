@@ -22,13 +22,13 @@ func CreateContainer(
 	containerProxyCmdRepo repository.ContainerProxyCmdRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateContainer,
-) error {
-	err := CheckAccountQuota(
+) (containerId valueObject.ContainerId, err error) {
+	err = CheckAccountQuota(
 		accountQueryRepo, containerProfileQueryRepo, createDto.AccountId,
 		*createDto.ProfileId, nil,
 	)
 	if err != nil {
-		return err
+		return containerId, err
 	}
 
 	readContainersRequestDto := dto.ReadContainersRequest{
@@ -40,11 +40,11 @@ func CreateContainer(
 		containerQueryRepo, readContainersRequestDto,
 	)
 	if err != nil {
-		return errors.New("ReadContainersInfraError")
+		return containerId, errors.New("ReadContainersInfraError")
 	}
 
 	if len(readContainersResponseDto.Containers) > 0 {
-		return errors.New("ContainerHostnameAlreadyInUse")
+		return containerId, errors.New("ContainerHostnameAlreadyInUse")
 	}
 
 	isInfiniteOs := createDto.ImageAddress.IsInfiniteOs()
@@ -56,7 +56,7 @@ func CreateContainer(
 
 		responseDto, err := ReadContainers(containerQueryRepo, readContainersRequestDto)
 		if err != nil || len(responseDto.Containers) == 0 {
-			return errors.New("ExistingContainerNotFound")
+			return containerId, errors.New("ExistingContainerNotFound")
 		}
 		existingContainerEntity := responseDto.Containers[0]
 
@@ -70,7 +70,7 @@ func CreateContainer(
 		imageId, err := containerImageCmdRepo.CreateSnapshot(createSnapshotDto)
 		if err != nil {
 			slog.Error("CreateContainerSnapshotImageInfraError", slog.Any("error", err))
-			return errors.New("CreateContainerSnapshotImageInfraError")
+			return containerId, errors.New("CreateContainerSnapshotImageInfraError")
 		}
 
 		createDto.ImageId = &imageId
@@ -81,7 +81,7 @@ func CreateContainer(
 			createDto.AccountId, *createDto.ImageId,
 		)
 		if err != nil {
-			return errors.New("ContainerImageNotFound")
+			return containerId, errors.New("ContainerImageNotFound")
 		}
 
 		createDto.ImageAddress = imageEntity.ImageAddress
@@ -90,16 +90,16 @@ func CreateContainer(
 		createDto.PortBindings = imageEntity.PortBindings
 	}
 
-	containerId, err := containerCmdRepo.Create(createDto)
+	containerId, err = containerCmdRepo.Create(createDto)
 	if err != nil {
 		slog.Error("CreateContainerInfraError", slog.Any("error", err))
-		return errors.New("CreateContainerInfraError")
+		return containerId, errors.New("CreateContainerInfraError")
 	}
 
 	err = accountCmdRepo.UpdateQuotaUsage(createDto.AccountId)
 	if err != nil {
 		slog.Error("UpdateAccountQuotaInfraError", slog.Any("error", err))
-		return errors.New("UpdateAccountQuotaInfraError")
+		return containerId, errors.New("UpdateAccountQuotaInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
@@ -109,12 +109,12 @@ func CreateContainer(
 		err = containerProxyCmdRepo.Create(containerId)
 		if err != nil {
 			slog.Error("CreateContainerProxyInfraError", slog.Any("error", err))
-			return errors.New("CreateContainerProxyInfraError")
+			return containerId, errors.New("CreateContainerProxyInfraError")
 		}
 	}
 
 	if !createDto.AutoCreateMappings {
-		return nil
+		return containerId, nil
 	}
 
 	readContainersRequestDto = dto.ReadContainersRequest{
@@ -124,7 +124,7 @@ func CreateContainer(
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersRequestDto)
 	if err != nil || len(responseDto.Containers) == 0 {
-		return errors.New("ContainerNotFound")
+		return containerId, errors.New("ContainerNotFound")
 	}
 	containerEntity := responseDto.Containers[0]
 
@@ -144,5 +144,5 @@ func CreateContainer(
 		}
 	}
 
-	return nil
+	return containerId, nil
 }

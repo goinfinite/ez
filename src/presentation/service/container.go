@@ -550,7 +550,7 @@ func (service *ContainerService) Create(
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
-	err = useCase.CreateContainer(
+	containerId, err := useCase.CreateContainer(
 		service.containerQueryRepo, containerCmdRepo, containerImageQueryRepo,
 		containerImageCmdRepo, accountQueryRepo, accountCmdRepo,
 		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
@@ -560,7 +560,7 @@ func (service *ContainerService) Create(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "ContainerCreated")
+	return NewServiceOutput(Created, containerId)
 }
 
 func (service *ContainerService) Update(input map[string]interface{}) ServiceOutput {
