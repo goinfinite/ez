@@ -92,6 +92,7 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	snapshotName := containerIdStr + "-" + containerHostnameStrSimplified + ":" + unixTimeStr
 	imageAddress := "localhost/" + accountEntity.Username.String() + "/" + snapshotName
 
+	commitParams = append(commitParams, "--change", "LABEL=ez.imageAddress="+imageAddress)
 	commitParams = append(commitParams, containerIdStr, imageAddress)
 
 	rawImageId, err := infraHelper.RunCmdAsUser(

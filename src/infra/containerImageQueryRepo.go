@@ -242,28 +242,42 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, err
 	}
 
-	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
+	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
 	if !assertOk {
-		rawAccountUsername := "unknown"
-		idOutput, err := infraHelper.RunCmd("id", "-nu", accountId.String())
-		if err == nil {
-			rawAccountUsername = idOutput
-		}
-
-		accountUsername, err := valueObject.NewUnixUsername(rawAccountUsername)
-		if err != nil {
-			return containerImage, errors.New("ParseContainerImageAccountUsernameError")
-		}
-
-		rawImageNames = []interface{}{
-			"localhost/" + accountUsername.String() + "/" + imageId.String(),
-		}
-	}
-	if len(rawImageNames) == 0 {
-		return containerImage, errors.New("ReadContainerImageNamesError")
+		return containerImage, errors.New("InvalidContainerImageConfig")
 	}
 
-	imageAddress, err := valueObject.NewContainerImageAddress(rawImageNames[0])
+	rawLabels, assertOk := rawConfig["Labels"].(map[string]interface{})
+	if !assertOk {
+		return containerImage, errors.New("InvalidContainerImageLabels")
+	}
+
+	rawImageAddress, exists := rawLabels["ez.imageAddress"]
+	if !exists {
+		rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
+		if !assertOk {
+			rawAccountUsername := "unknown"
+			idOutput, err := infraHelper.RunCmd("id", "-nu", accountId.String())
+			if err == nil {
+				rawAccountUsername = idOutput
+			}
+
+			accountUsername, err := valueObject.NewUnixUsername(rawAccountUsername)
+			if err != nil {
+				return containerImage, errors.New("ParseContainerImageAccountUsernameError")
+			}
+
+			rawImageNames = []interface{}{
+				"localhost/" + accountUsername.String() + "/" + imageId.String(),
+			}
+		}
+		if len(rawImageNames) == 0 {
+			return containerImage, errors.New("ReadContainerImageNamesError")
+		}
+		rawImageAddress = rawImageNames[0]
+	}
+
+	imageAddress, err := valueObject.NewContainerImageAddress(rawImageAddress)
 	if err != nil {
 		return containerImage, err
 	}
@@ -304,11 +318,6 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	sizeBytes, err := valueObject.NewByte(rawImageSize)
 	if err != nil {
 		return containerImage, err
-	}
-
-	rawConfig, assertOk := rawContainerImage["Config"].(map[string]interface{})
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageConfig")
 	}
 
 	portBindings := []valueObject.PortBinding{}
@@ -360,11 +369,6 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 			return containerImage, err
 		}
 		entrypointPtr = &entrypoint
-	}
-
-	rawLabels, assertOk := rawConfig["Labels"].(map[string]interface{})
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageLabels")
 	}
 
 	originContainerDetails := entity.Container{}
