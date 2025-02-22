@@ -126,6 +126,103 @@ func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
 	return valueObject.NewUnixFilePath(archiveDirStr)
 }
 
+func (repo *ContainerImageCmdRepo) imageArchiveFileLocator(
+	originalArchiveFilePath valueObject.UnixFilePath,
+) (adjustedArchiveFilePath valueObject.UnixFilePath, err error) {
+	originalArchiveFilePathStr := originalArchiveFilePath.String()
+
+	possibleCompressionExts := []string{".br", ".gz", ".xz", ".zip"}
+	for _, possibleExt := range possibleCompressionExts {
+		archiveFileWithPossibleExt := originalArchiveFilePathStr + possibleExt
+		_, err = os.Stat(archiveFileWithPossibleExt)
+		if err == nil {
+			return valueObject.NewUnixFilePath(archiveFileWithPossibleExt)
+		}
+	}
+
+	for _, possibleExt := range possibleCompressionExts {
+		rawUncompressedArchiveFilePath := strings.ReplaceAll(
+			originalArchiveFilePathStr, possibleExt, "",
+		)
+		_, err = os.Stat(rawUncompressedArchiveFilePath)
+		if err == nil {
+			return valueObject.NewUnixFilePath(rawUncompressedArchiveFilePath)
+		}
+	}
+
+	return originalArchiveFilePath, errors.New("ArchiveFilePathNotFound")
+}
+
+func (repo *ContainerImageCmdRepo) decompressImageArchiveFile(
+	compressedArchiveFilePath valueObject.UnixFilePath,
+	accountId valueObject.AccountId,
+) (uncompressedArchiveFilePath valueObject.UnixFilePath, err error) {
+	compressedArchiveFilePathStr := compressedArchiveFilePath.String()
+	_, err = os.Stat(compressedArchiveFilePathStr)
+	if err != nil {
+		compressedArchiveFilePath, err = repo.imageArchiveFileLocator(compressedArchiveFilePath)
+		if err != nil {
+			return uncompressedArchiveFilePath, errors.New("ArchiveFilePathNotFound: " + err.Error())
+		}
+	}
+
+	compressedArchiveExt, err := compressedArchiveFilePath.ReadFileExtension()
+	if err != nil {
+		return uncompressedArchiveFilePath, errors.New("ReadFileExtensionError: " + err.Error())
+	}
+	compressionFormat, err := valueObject.NewCompressionFormat(compressedArchiveExt.String())
+	if err != nil {
+		return uncompressedArchiveFilePath, errors.New("UnsupportedArchiveFileExtension")
+	}
+
+	decompressionCmd := ""
+	compressionFormatStr := compressionFormat.String()
+	switch compressionFormatStr {
+	case "tar":
+		decompressionCmd = ""
+	case "br":
+		decompressionCmd = "brotli --decompress --rm"
+	case "gz":
+		decompressionCmd = "gunzip"
+	case "zip":
+		decompressionCmd = "unzip -q"
+	case "xz":
+		decompressionCmd = "unxz"
+	default:
+		return uncompressedArchiveFilePath, errors.New("UnsupportedArchiveFileExtension")
+	}
+
+	if len(decompressionCmd) == 0 {
+		return compressedArchiveFilePath, nil
+	}
+
+	rawUncompressedArchiveFilePath := strings.TrimSuffix(
+		compressedArchiveFilePathStr, "."+compressionFormatStr,
+	)
+	uncompressedArchiveFilePath, err = valueObject.NewUnixFilePath(rawUncompressedArchiveFilePath)
+	if err != nil {
+		return uncompressedArchiveFilePath, errors.New("DefineUncompressedArchiveFilePathError")
+	}
+	uncompressedLocalArchiveFileStr := uncompressedArchiveFilePath.String()
+
+	err = os.Remove(uncompressedLocalArchiveFileStr)
+	if err != nil {
+		return uncompressedArchiveFilePath, errors.New(
+			"RemovePreviouslyExistingTarFileError: " + err.Error(),
+		)
+	}
+
+	_, err = infraHelper.RunCmdAsUserWithSubShell(
+		accountId,
+		decompressionCmd+" "+compressedArchiveFilePathStr,
+	)
+	if err != nil {
+		return uncompressedArchiveFilePath, errors.New("DecompressCmdError: " + err.Error())
+	}
+
+	return uncompressedArchiveFilePath, nil
+}
+
 func (repo *ContainerImageCmdRepo) ImportArchive(
 	importDto dto.ImportContainerImageArchive,
 ) (imageId valueObject.ContainerImageId, err error) {
@@ -161,68 +258,23 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 
 		importDto.ArchiveFilePath = &localArchiveFilePath
 	}
-
 	localArchiveFilePathStr := importDto.ArchiveFilePath.String()
-	localArchiveFileExt, err := importDto.ArchiveFilePath.ReadFileExtension()
-	if err != nil {
-		if !strings.HasSuffix(localArchiveFilePathStr, ".br") {
-			return imageId, errors.New("ReadFileExtensionError: " + err.Error())
-		}
-	}
 
-	accountIdStr := importDto.AccountId.String()
-	_, err = infraHelper.RunCmd(
-		"chown", accountIdStr+":"+accountIdStr, localArchiveFilePathStr,
+	accountIdInt := int(importDto.AccountId)
+	_ = os.Chown(localArchiveFilePathStr, accountIdInt, accountIdInt)
+
+	uncompressedArchiveFilePath, err := repo.decompressImageArchiveFile(
+		*importDto.ArchiveFilePath, importDto.AccountId,
 	)
 	if err != nil {
-		return imageId, errors.New("ChownArchiveError: " + err.Error())
+		return imageId, errors.New("DecompressImageArchiveError: " + err.Error())
 	}
+	importDto.ArchiveFilePath = &uncompressedArchiveFilePath
+	localArchiveFilePathStr = uncompressedArchiveFilePath.String()
 
-	compressionFormat, err := valueObject.NewCompressionFormat(localArchiveFileExt.String())
+	err = os.Chown(localArchiveFilePathStr, accountIdInt, accountIdInt)
 	if err != nil {
-		return imageId, errors.New("UnsupportedArchiveFileExtension")
-	}
-
-	decompressionCmd := ""
-	switch compressionFormatStr := compressionFormat.String(); compressionFormatStr {
-	case "tar":
-		decompressionCmd = ""
-	case "br":
-		decompressionCmd = "brotli --decompress --rm"
-	case "gz":
-		decompressionCmd = "gunzip"
-	case "zip":
-		decompressionCmd = "unzip -q"
-	case "xz":
-		decompressionCmd = "unxz"
-	default:
-		return imageId, errors.New("UnsupportedArchiveFileExtension")
-	}
-
-	shouldDecompress := len(decompressionCmd) > 0
-	if shouldDecompress {
-		rawUncompressedArchiveFilePath := strings.TrimSuffix(
-			localArchiveFilePathStr, "."+compressionFormat.String(),
-		)
-		uncompressedArchiveFilePath, err := valueObject.NewUnixFilePath(rawUncompressedArchiveFilePath)
-		if err != nil {
-			return imageId, errors.New("DefineUncompressedArchiveFilePathError")
-		}
-		uncompressedLocalArchiveFileStr := uncompressedArchiveFilePath.String()
-
-		err = os.Remove(uncompressedLocalArchiveFileStr)
-		if err != nil {
-			return imageId, errors.New("RemovePreviouslyExistingTarFileError: " + err.Error())
-		}
-
-		_, err = infraHelper.RunCmdAsUserWithSubShell(
-			importDto.AccountId, decompressionCmd+" "+localArchiveFilePathStr,
-		)
-		if err != nil {
-			return imageId, errors.New("DecompressImageError: " + err.Error())
-		}
-		importDto.ArchiveFilePath = &uncompressedArchiveFilePath
-		localArchiveFilePathStr = uncompressedLocalArchiveFileStr
+		return imageId, errors.New("ChownUncompressedArchiveFileError: " + err.Error())
 	}
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
@@ -244,24 +296,11 @@ func (repo *ContainerImageCmdRepo) ImportArchive(
 		return imageId, err
 	}
 
-	if !wasArchiveFilePathProvided {
-		err = os.Remove(localArchiveFilePathStr)
-		if err != nil {
-			return imageId, errors.New("RemoveTmpArchiveFileError: " + err.Error())
-		}
+	if wasArchiveFilePathProvided {
 		return imageId, nil
 	}
 
-	if shouldDecompress {
-		_, err = repo.compressImageArchiveFile(
-			*importDto.ArchiveFilePath, importDto.AccountId, &compressionFormat,
-		)
-		if err != nil {
-			return imageId, errors.New("CompressImageArchiveBackError: " + err.Error())
-		}
-	}
-
-	return imageId, nil
+	return imageId, os.Remove(localArchiveFilePathStr)
 }
 
 func (repo *ContainerImageCmdRepo) Delete(
