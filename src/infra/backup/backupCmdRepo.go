@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/user"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -1321,12 +1322,21 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 	}
 
+	removableEnvsRegex := regexp.MustCompile(`^(PRIMARY_VHOST|HOSTNAME)`)
+	adjustedEnvs := []valueObject.ContainerEnv{}
+	for _, originalEnv := range containerImageEntity.Envs {
+		if removableEnvsRegex.MatchString(originalEnv.String()) {
+			continue
+		}
+		adjustedEnvs = append(adjustedEnvs, originalEnv)
+	}
+
 	createContainerDto := dto.CreateContainer{
 		AccountId:          archiveEntity.AccountId,
 		Hostname:           containerHostname,
 		ImageId:            &containerImageEntity.Id,
 		PortBindings:       containerImageEntity.PortBindings,
-		Envs:               containerImageEntity.Envs,
+		Envs:               adjustedEnvs,
 		Entrypoint:         containerImageEntity.Entrypoint,
 		ProfileId:          &containerImageEntity.OriginContainerDetails.ProfileId,
 		RestartPolicy:      &containerImageEntity.OriginContainerDetails.RestartPolicy,
