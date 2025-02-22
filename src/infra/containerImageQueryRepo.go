@@ -603,7 +603,7 @@ func (repo *ContainerImageQueryRepo) ReadArchive(
 	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
 	rawArchiveFilePath, err := infraHelper.RunCmdAsUser(
 		readDto.AccountId,
-		"find", archiveDirStr, "-type", "f", "-name", readDto.ImageId.String()+"*",
+		"find", archiveDirStr, "-type", "f", "-name", "*"+readDto.ImageId.String()+"*",
 	)
 	if err != nil {
 		return archiveFile, errors.New("FindArchiveFileError: " + err.Error())
