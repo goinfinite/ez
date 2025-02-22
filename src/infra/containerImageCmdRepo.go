@@ -57,23 +57,11 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	}
 	encodedContainerEntityJson := infraHelper.EncodeStr(string(containerEntityJsonBytes))
 
-	containerHostnameStrSimplified := strings.ReplaceAll(
-		containerEntity.Hostname.String(), ".", "-",
-	)
-	containerHostnameStrSimplified = strings.ToLower(containerHostnameStrSimplified)
-	containerIdStr := createDto.ContainerId.String()
-
-	snapshotName := containerIdStr + "-" +
-		containerHostnameStrSimplified +
-		":" + valueObject.NewUnixTimeNow().String()
-
 	commitParams := []string{
 		"commit",
 		"--quiet",
 		"--author", "ez:" + createDto.OperatorAccountId.String(),
 		"--change", "LABEL=ez.originContainerDetails=" + encodedContainerEntityJson,
-		containerIdStr,
-		"localhost/" + accountEntity.Username.String() + "/" + snapshotName,
 	}
 
 	mappingQueryRepo := NewMappingQueryRepo(repo.persistentDbSvc)
@@ -93,6 +81,18 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 			"--change", "LABEL=ez.originContainerMappings="+encodedMappingEntitiesJson,
 		)
 	}
+
+	containerIdStr := createDto.ContainerId.String()
+	containerHostnameStrSimplified := strings.ReplaceAll(
+		containerEntity.Hostname.String(), ".", "-",
+	)
+	containerHostnameStrSimplified = strings.ToLower(containerHostnameStrSimplified)
+	unixTimeStr := valueObject.NewUnixTimeNow().String()
+
+	snapshotName := containerIdStr + "-" + containerHostnameStrSimplified + ":" + unixTimeStr
+	imageAddress := "localhost/" + accountEntity.Username.String() + "/" + snapshotName
+
+	commitParams = append(commitParams, containerIdStr, imageAddress)
 
 	rawImageId, err := infraHelper.RunCmdAsUser(
 		containerEntity.AccountId,
@@ -126,7 +126,7 @@ func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
 	return valueObject.NewUnixFilePath(archiveDirStr)
 }
 
-func (repo *ContainerImageCmdRepo) imageArchiveFileLocator(
+func (repo *ContainerImageCmdRepo) ImageArchiveFileLocator(
 	originalArchiveFilePath valueObject.UnixFilePath,
 ) (adjustedArchiveFilePath valueObject.UnixFilePath, err error) {
 	originalArchiveFilePathStr := originalArchiveFilePath.String()
@@ -160,7 +160,7 @@ func (repo *ContainerImageCmdRepo) decompressImageArchiveFile(
 	compressedArchiveFilePathStr := compressedArchiveFilePath.String()
 	_, err = os.Stat(compressedArchiveFilePathStr)
 	if err != nil {
-		compressedArchiveFilePath, err = repo.imageArchiveFileLocator(compressedArchiveFilePath)
+		compressedArchiveFilePath, err = repo.ImageArchiveFileLocator(compressedArchiveFilePath)
 		if err != nil {
 			return uncompressedArchiveFilePath, errors.New("ArchiveFilePathNotFound: " + err.Error())
 		}
