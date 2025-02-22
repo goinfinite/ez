@@ -3,6 +3,7 @@
 ```log
 0.1.0 - 2025/X/X
 feat: backups
+fix: entrypoint parsing bug on create container
 
 0.0.9 - 2024/11/27
 refactor: overview frontend
