@@ -30,14 +30,17 @@ const TasksArchivesRelativePath = "/backup/tasks/archives"
 
 type BackupCmdRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 	backupQueryRepo *BackupQueryRepo
 }
 
 func NewBackupCmdRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
+	trailDbSvc *db.TrailDatabaseService,
 ) *BackupCmdRepo {
 	return &BackupCmdRepo{
 		persistentDbSvc: persistentDbSvc,
+		trailDbSvc:      trailDbSvc,
 		backupQueryRepo: NewBackupQueryRepo(persistentDbSvc),
 	}
 }
@@ -1251,12 +1254,16 @@ func (repo *BackupCmdRepo) restoreImageArchive(
 func (repo *BackupCmdRepo) restoreContainerArchive(
 	archiveEntity entity.ContainerImageArchive,
 	accountQueryRepo *infra.AccountQueryRepo,
+	accountCmdRepo *infra.AccountCmdRepo,
 	containerQueryRepo *infra.ContainerQueryRepo,
 	containerCmdRepo *infra.ContainerCmdRepo,
 	containerImageQueryRepo *infra.ContainerImageQueryRepo,
 	containerImageCmdRepo *infra.ContainerImageCmdRepo,
+	containerProfileQueryRepo *infra.ContainerProfileQueryRepo,
+	containerProxyCmdRepo *infra.ContainerProxyCmdRepo,
 	mappingQueryRepo *infra.MappingQueryRepo,
 	mappingCmdRepo *infra.MappingCmdRepo,
+	activityRecordCmdRepo *infra.ActivityRecordCmdRepo,
 	shouldReplaceExistingContainers bool,
 	shouldRestoreMappings bool,
 ) (containerId valueObject.ContainerId, err error) {
@@ -1344,7 +1351,17 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		AutoCreateMappings: false,
 	}
 
-	containerId, err = containerCmdRepo.Create(createContainerDto)
+	restoreMappingsWithNewPublicPorts := shouldRestoreMappings && !shouldReplaceExistingContainers
+	if restoreMappingsWithNewPublicPorts {
+		createContainerDto.AutoCreateMappings = true
+	}
+
+	containerId, err = useCase.CreateContainer(
+		containerQueryRepo, containerCmdRepo, containerImageQueryRepo,
+		containerImageCmdRepo, accountQueryRepo, accountCmdRepo, containerProfileQueryRepo,
+		mappingQueryRepo, mappingCmdRepo, containerProxyCmdRepo, activityRecordCmdRepo,
+		createContainerDto,
+	)
 	if err != nil {
 		return containerId, errors.New("RestoreContainerFailed: " + err.Error())
 	}
@@ -1363,7 +1380,8 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		}
 	}
 
-	if !shouldRestoreMappings {
+	restoreMappingsWithPreviousPublicPorts := shouldRestoreMappings && shouldReplaceExistingContainers
+	if !restoreMappingsWithPreviousPublicPorts {
 		return containerId, nil
 	}
 
@@ -1387,7 +1405,6 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 						slog.String("error", err.Error()),
 					)
 				}
-
 				continue
 			}
 		}
@@ -1417,6 +1434,9 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 func (repo *BackupCmdRepo) RestoreTask(
 	requestRestoreDto dto.RestoreBackupTaskRequest,
 ) (responseRestoreDto dto.RestoreBackupTaskResponse, err error) {
+	responseRestoreDto.SuccessfulContainerIds = []valueObject.ContainerId{}
+	responseRestoreDto.FailedContainerImageIds = []valueObject.ContainerImageId{}
+
 	taskArchiveProvided := requestRestoreDto.ArchiveId != nil
 	if !taskArchiveProvided {
 		createArchiveDto := dto.CreateBackupTaskArchive{
@@ -1519,11 +1539,15 @@ func (repo *BackupCmdRepo) RestoreTask(
 	}
 
 	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
+	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
 	containerQueryRepo := infra.NewContainerQueryRepo(repo.persistentDbSvc)
 	containerCmdRepo := infra.NewContainerCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
+	containerProfileQueryRepo := infra.NewContainerProfileQueryRepo(repo.persistentDbSvc)
+	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(repo.persistentDbSvc)
 	mappingQueryRepo := infra.NewMappingQueryRepo(repo.persistentDbSvc)
 	mappingCmdRepo := infra.NewMappingCmdRepo(repo.persistentDbSvc)
+	activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(repo.trailDbSvc)
 
 	err = repo.toggleNobodyUserSession(true)
 	if err != nil {
@@ -1532,9 +1556,10 @@ func (repo *BackupCmdRepo) RestoreTask(
 
 	for _, imageArchiveEntity := range containerImagesResponseDto.Archives {
 		containerId, err := repo.restoreContainerArchive(
-			imageArchiveEntity, accountQueryRepo, containerQueryRepo, containerCmdRepo,
-			containerImageQueryRepo, containerImageCmdRepo, mappingQueryRepo, mappingCmdRepo,
-			shouldReplaceExistingContainers, shouldRestoreMappings,
+			imageArchiveEntity, accountQueryRepo, accountCmdRepo, containerQueryRepo,
+			containerCmdRepo, containerImageQueryRepo, containerImageCmdRepo,
+			containerProfileQueryRepo, containerProxyCmdRepo, mappingQueryRepo, mappingCmdRepo,
+			activityRecordCmdRepo, shouldReplaceExistingContainers, shouldRestoreMappings,
 		)
 		if err != nil {
 			slog.Debug(
