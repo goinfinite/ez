@@ -1330,7 +1330,7 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 
 	removableEnvsRegex := regexp.MustCompile(`^(PRIMARY_VHOST|HOSTNAME)`)
 	adjustedEnvs := []valueObject.ContainerEnv{}
-	for _, originalEnv := range containerImageEntity.Envs {
+	for _, originalEnv := range containerImageEntity.OriginContainerDetails.Envs {
 		if removableEnvsRegex.MatchString(originalEnv.String()) {
 			continue
 		}
@@ -1342,17 +1342,12 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		Hostname:           containerHostname,
 		ImageAddress:       containerImageEntity.ImageAddress,
 		ImageId:            &containerImageEntity.Id,
-		PortBindings:       containerImageEntity.PortBindings,
+		PortBindings:       containerImageEntity.OriginContainerDetails.PortBindings,
 		Envs:               adjustedEnvs,
 		Entrypoint:         containerImageEntity.Entrypoint,
 		ProfileId:          &containerImageEntity.OriginContainerDetails.ProfileId,
 		RestartPolicy:      &containerImageEntity.OriginContainerDetails.RestartPolicy,
-		AutoCreateMappings: false,
-	}
-
-	restoreMappingsWithNewPublicPorts := shouldRestoreMappings && !shouldReplaceExistingContainers
-	if restoreMappingsWithNewPublicPorts {
-		createContainerDto.AutoCreateMappings = true
+		AutoCreateMappings: shouldRestoreMappings,
 	}
 
 	containerId, err = useCase.CreateContainer(
@@ -1376,36 +1371,6 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 		err = os.Remove(actualArchiveFilePath.String())
 		if err != nil {
 			return containerId, errors.New("DeleteContainerImageArchiveFailed: " + err.Error())
-		}
-	}
-
-	restoreMappingsWithPreviousPublicPorts := shouldRestoreMappings && shouldReplaceExistingContainers
-	if !restoreMappingsWithPreviousPublicPorts {
-		return containerId, nil
-	}
-
-	for _, mappingEntity := range containerImageEntity.OriginContainerMappings {
-		createMappingDto := dto.CreateMapping{
-			AccountId:         mappingEntity.AccountId,
-			Hostname:          mappingEntity.Hostname,
-			PublicPort:        mappingEntity.PublicPort,
-			Protocol:          mappingEntity.Protocol,
-			ContainerIds:      []valueObject.ContainerId{containerId},
-			OperatorAccountId: valueObject.SystemAccountId,
-		}
-		err = useCase.CreateMapping(
-			mappingQueryRepo, mappingCmdRepo, containerQueryRepo,
-			activityRecordCmdRepo, createMappingDto,
-		)
-		if err != nil {
-			slog.Error(
-				"RestoreContainerMappingFailed",
-				slog.String("containerId", containerId.String()),
-				slog.String("publicPort", mappingEntity.PublicPort.String()),
-				slog.String("previousMappingId", mappingEntity.Id.String()),
-				slog.String("error", err.Error()),
-			)
-			continue
 		}
 	}
 
