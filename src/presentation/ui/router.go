@@ -57,6 +57,15 @@ func (router *Router) assetsRoute() {
 	)
 }
 
+func (router *Router) backupRoutes() {
+	backupGroup := router.baseRoute.Group("/backup")
+
+	backupPresenter := presenter.NewBackupPresenter(
+		router.persistentDbSvc, router.transientDbSvc, router.trailDbSvc,
+	)
+	backupGroup.GET("/", backupPresenter.Handler)
+}
+
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/container")
 
@@ -137,6 +146,7 @@ func (router *Router) previousDashboardRoute() {
 
 func (router *Router) RegisterRoutes() {
 	router.assetsRoute()
+	router.backupRoutes()
 	router.containerRoutes()
 	router.loginRoutes()
 	router.overviewRoutes()
