@@ -434,10 +434,6 @@ func (repo *BackupCmdRepo) UpdateJob(
 		AccountID: updateDto.AccountId.Uint64(),
 	}
 
-	if updateDto.JobStatus != nil {
-		jobUpdatedModel.JobStatus = *updateDto.JobStatus
-	}
-
 	if updateDto.JobDescription != nil {
 		jobDescriptionStr := updateDto.JobDescription.String()
 		jobUpdatedModel.JobDescription = &jobDescriptionStr
@@ -510,6 +506,21 @@ func (repo *BackupCmdRepo) UpdateJob(
 		Updates(&jobUpdatedModel).Error
 	if err != nil {
 		return err
+	}
+
+	boolUpdateMap := map[string]interface{}{}
+	if updateDto.JobStatus != nil {
+		boolUpdateMap["job_status"] = *updateDto.JobStatus
+	}
+
+	if len(boolUpdateMap) > 0 {
+		err = repo.persistentDbSvc.Handler.
+			Model(&dbModel.BackupJob{}).
+			Where("id = ?", updateDto.JobId.Uint64()).
+			Updates(boolUpdateMap).Error
+		if err != nil {
+			return err
+		}
 	}
 
 	return repo.updateBackupCronFile()
