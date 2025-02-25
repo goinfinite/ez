@@ -6,29 +6,6 @@ import (
 	"os"
 )
 
-script MainLayoutState() {
-	document.addEventListener('alpine:initializing', () => {
-		Alpine.store('main', {
-			textualViewSelector: Alpine.$persist(false).as('dash.textualViewSelector'),
-			displayScheduledTasksPopover: Alpine.$persist(false).as('dash.displayScheduledTasksPopover'),
-
-			toggleScheduledTasksPopover() {
-				this.displayScheduledTasksPopover = !this.displayScheduledTasksPopover;
-			},
-			refreshScheduledTasksPopover() {
-				window.dispatchEvent(new CustomEvent('refresh:footer'));
-				setTimeout(() => {this.displayScheduledTasksPopover = true}, 1000);
-			},
-
-			init() {
-				Alpine.watch(() => this.textualViewSelector, () => {
-					htmx.process(document.body);
-				});
-			}
-		});
-	});
-}
-
 script DevWsHotReload() {
 	hotReloadWs = new WebSocket("wss://" + document.location.host + "/dev/hot-reload");
 	hotReloadWs.onclose = (() => {
@@ -66,7 +43,7 @@ templ HeadTag() {
 			rel="stylesheet"
 			href="/assets/additional.css"
 		/>
-		<script src="/assets/additional.js"></script>
+		<script type="text/javascript" src="/assets/additional.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime@66.0.0/uno.global.min.js" integrity="sha256-blhgsQv0/ztGg+RPOT4x4o8o0G85scS6EQKcOsVBJl0=" crossorigin="anonymous"></script>
 		<script defer src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.min.js" integrity="sha256-i3DE8yiIpruNsMXiSKI3JOdqxmRlPv7HqIZiKqvaivI=" crossorigin="anonymous"></script>
 		<script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" integrity="sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc=" crossorigin="anonymous"></script>
@@ -83,7 +60,6 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 	<html>
 		@HeadTag()
 		<body class="bg-ez-500 flex text-white">
-			@MainLayoutState()
 			@componentUtil.LoadingOverlay()
 			@Sidebar(currentUrl)
 			<!-- Page Content -->
@@ -93,5 +69,6 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			@FooterSkeleton()
 			@componentUtil.Toast()
 		</body>
+		<script type="text/javascript" src="/assets/global-states/main.js"></script>
 	</html>
 }
