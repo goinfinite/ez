@@ -28,7 +28,11 @@ func NewBackupPresenter(
 }
 
 func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
-	pageContent := page.BackupIndex(page.BackupIndexInputDto{})
+	pageContent := page.BackupIndex(
+		page.BackupTasksInputDto{},
+		page.BackupJobsInputDto{},
+		page.BackupDestinationsInputDto{},
+	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)
 }

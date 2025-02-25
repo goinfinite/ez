@@ -1,10 +1,57 @@
 package page
 
-type BackupIndexInputDto struct {
+import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+
+type BackupTasksInputDto struct {
 }
 
-templ BackupIndex(inputDto BackupIndexInputDto) {
+type BackupJobsInputDto struct {
+}
+
+type BackupDestinationsInputDto struct {
+}
+
+templ BackupIndex(
+	tasksInputDto BackupTasksInputDto,
+	jobsInputDto BackupJobsInputDto,
+	destinationsInputDto BackupDestinationsInputDto,
+) {
 	<!-- BackupIndex JavaScript -->
 	<script src="/assets/local-states/backup.js"></script>
 	<!-- BackupIndex HTML -->
+	<div x-data="backupIndex">
+		@componentStructural.HorizontalTabHeader(
+			[]componentStructural.TabHeaderItem{
+				{Label: "Tasks", Value: "tasks", Icon: "ph-package", Size: "lg"},
+				{Label: "Jobs", Value: "jobs", Icon: "ph-factory", Size: "lg"},
+				{Label: "Destinations", Value: "destinations", Icon: "ph-barn", Size: "lg"},
+			},
+			"backupFeatureTabSelected",
+		)
+		<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] p-4">
+			<div x-show="backupFeatureTabSelected === 'tasks'">
+				@BackupTasks(tasksInputDto)
+			</div>
+			<div x-show="backupFeatureTabSelected === 'jobs'">
+				@BackupJobs(jobsInputDto)
+			</div>
+			<div x-show="backupFeatureTabSelected === 'destinations'">
+				@BackupDestinations(destinationsInputDto)
+			</div>
+		</div>
+	</div>
+}
+
+templ BackupTasks(inputDto BackupTasksInputDto) {
+	Tasks with Pagination (10)
+	<br/>
+	Tasks Archives
+}
+
+templ BackupJobs(inputDto BackupJobsInputDto) {
+	Jobs with Pagination (10)
+}
+
+templ BackupDestinations(inputDto BackupDestinationsInputDto) {
+	Destinations with Pagination (10)
 }
