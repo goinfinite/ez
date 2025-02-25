@@ -4,6 +4,7 @@ type TabHeaderItem struct {
 	Label string
 	Value string
 	Icon  string
+	Size  string
 }
 
 templ VerticalTabHeader(
@@ -32,15 +33,40 @@ templ HorizontalTabHeader(
 	bindValuePath string,
 ) {
 	<!-- HorizontalTabHeader -->
-	<ul class="flex w-full gap-1 text-sm">
+	<ul class="flex w-full gap-1">
 		for _, item := range tabHeaderItems {
+			{{ itemLabelSize := "sm" }}
+			{{ itemIconSize := "lg" }}
+			{{ itemPaddingSize := "2.5" }}
+			switch item.Size {
+				case "md":
+					{{ itemLabelSize = "md" }}
+					{{ itemIconSize = "xl" }}
+					{{ itemPaddingSize = "3" }}
+				case "lg":
+					{{ itemLabelSize = "lg" }}
+					{{ itemIconSize = "2xl" }}
+					{{ itemPaddingSize = "3.5" }}
+				case "xl":
+					{{ itemLabelSize = "xl" }}
+					{{ itemIconSize = "3xl" }}
+					{{ itemPaddingSize = "4" }}
+				case "2xl":
+					{{ itemLabelSize = "2xl" }}
+					{{ itemIconSize = "4xl" }}
+					{{ itemPaddingSize = "4.5" }}
+				case "3xl":
+					{{ itemLabelSize = "3xl" }}
+					{{ itemIconSize = "5xl" }}
+					{{ itemPaddingSize = "5" }}
+			}
 			<li
-				class="bg-ez-400 flex flex-row rounded-t-md p-2.5 transition-all"
-				:class={ bindValuePath + " === '" + item.Value + "' && 'font-bold text-infinite-500 bg-ez-500'" }
+				class={ "bg-neutral-100 bg-opacity-[2%] flex cursor-pointer flex-row rounded-t-md items-center p-" + itemPaddingSize + " transition-all text-" + itemLabelSize }
+				:class={ bindValuePath + " === '" + item.Value + "' && 'font-bold text-infinite-500 bg-opacity-[4%]'" }
 				@click={ bindValuePath + " = '" + item.Value + "'" }
 			>
 				if item.Icon != "" {
-					<i class={ "ph-duotone " + item.Icon + " mr-3 align-middle text-lg" }></i>
+					<i class={ "ph-duotone " + item.Icon + " mr-2 text-" + itemIconSize }></i>
 				}
 				{ item.Label }
 			</li>
