@@ -1,23 +1,18 @@
 package page
 
+import "github.com/goinfinite/ez/src/domain/dto"
+import "strconv"
+
 import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 
-type BackupTasksInputDto struct {
-}
-
-type BackupJobsInputDto struct {
-}
-
-type BackupDestinationsInputDto struct {
-}
-
 templ BackupIndex(
-	tasksInputDto BackupTasksInputDto,
-	jobsInputDto BackupJobsInputDto,
-	destinationsInputDto BackupDestinationsInputDto,
+	readBackupTasksResponse dto.ReadBackupTasksResponse,
+	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+	readBackupJobsResponse dto.ReadBackupJobsResponse,
+	readBackupDestinationsResponse dto.ReadBackupDestinationsResponse,
 ) {
 	<!-- BackupIndex JavaScript -->
-	<script src="/assets/local-states/backup.js"></script>
+	<script type="text/javascript" src="/assets/local-states/backup.js"></script>
 	<!-- BackupIndex HTML -->
 	<div x-data="backupIndex">
 		@componentStructural.HorizontalTabHeader(
@@ -30,28 +25,133 @@ templ BackupIndex(
 		)
 		<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] p-4">
 			<div x-show="backupFeatureTabSelected === 'tasks'">
-				@BackupTasks(tasksInputDto)
+				@BackupTasks(readBackupTasksResponse, readBackupTaskArchivesResponse)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'jobs'">
-				@BackupJobs(jobsInputDto)
+				@BackupJobs(readBackupJobsResponse)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'destinations'">
-				@BackupDestinations(destinationsInputDto)
+				@BackupDestinations(readBackupDestinationsResponse)
 			</div>
 		</div>
 	</div>
 }
 
-templ BackupTasks(inputDto BackupTasksInputDto) {
-	Tasks with Pagination (10)
+templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
+	<!-- Backup Tasks Table -->
+	<div
+		id="backup-tasks-table"
+		hx-get="/backup/"
+		hx-trigger="submit from:form delay:500ms, update:backup-task from:window delay:500ms, delete:backup-task from:window delay:500ms"
+		hx-select="#backup-tasks-table"
+		hx-target="#backup-tasks-table"
+		hx-swap="outerHTML transition:true"
+		@update:backup-tasks-pagination="reloadBackupTasksTable()"
+		@update:backup-tasks-record-filters="reloadBackupTasksTable()"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.RecordFilters("backupTasks", "backupTasksFilters")
+		</div>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[40%] overflow-x-hidden py-3">Results</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%] py-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, backupTaskEntity := range readBackupTasksResponse.Tasks {
+					<!-- Backup Task Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						@templ.JSONScript("backupTaskEntity_"+backupTaskEntity.TaskId.String(), backupTaskEntity)
+						<td class="w-[10%] overflow-x-hidden px-3 py-2">
+							{ backupTaskEntity.TaskId.String() }
+						</td>
+						<td class="w-[20%] overflow-x-hidden px-3 py-2">
+							{ backupTaskEntity.TaskStatus.String() }
+							if backupTaskEntity.StartedAt == nil {
+								<div>---</div>
+							} else {
+								{ backupTaskEntity.StartedAt.String() }
+							}
+							{ backupTaskEntity.UpdatedAt.String() }
+							if backupTaskEntity.FinishedAt == nil {
+								<div>---</div>
+							} else {
+								{ backupTaskEntity.FinishedAt.String() }
+							}
+							if backupTaskEntity.ElapsedSecs == nil {
+								<div>---</div>
+							} else {
+								{ strconv.FormatUint(*backupTaskEntity.ElapsedSecs, 10) + "s" }
+							}
+						</td>
+						<td class="w-[40%] overflow-x-hidden px-3 py-2">
+							if backupTaskEntity.SizeBytes == nil {
+								<div>---</div>
+							} else {
+								{ backupTaskEntity.SizeBytes.StringWithSuffix() }
+							}
+							for _, containerId := range backupTaskEntity.SuccessfulContainerIds {
+								<div>{ containerId.String() } - OK</div>
+							}
+							for _, containerId := range backupTaskEntity.FailedContainerIds {
+								<div>{ containerId.String() } - Failed</div>
+							}
+							if backupTaskEntity.ExecutionOutput == nil {
+								<div>---</div>
+							} else {
+								{ backupTaskEntity.ExecutionOutput.String() }
+							}
+						</td>
+						<td class="w-[20%] overflow-x-hidden px-3 py-2">
+							{ backupTaskEntity.JobId.String() }
+							{ backupTaskEntity.DestinationId.String() }
+							{ backupTaskEntity.AccountId.String() }
+							{ backupTaskEntity.RetentionStrategy.String() }
+							{ backupTaskEntity.BackupSchedule.String() }
+							{ strconv.FormatUint(backupTaskEntity.TimeoutSecs, 10) }
+						</td>
+						<td class="w-[10%] px-3 py-2">
+							<div class="flex flex-wrap items-center gap-1"></div>
+						</td>
+					</tr>
+				}
+				if len(readBackupTasksResponse.Tasks) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No backup tasks created yet.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
+			@componentStructural.Pagination(
+				"backupTasks",
+				readBackupTasksResponse.Pagination, "backupTasksPagination.pageNumber",
+				"backupTasksPagination.itemsPerPage",
+			)
+		</div>
+	</div>
+}
+
+templ BackupTasks(
+	readBackupTasksResponse dto.ReadBackupTasksResponse,
+	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+) {
+	@BackupTasksTable(readBackupTasksResponse)
 	<br/>
 	Tasks Archives
 }
 
-templ BackupJobs(inputDto BackupJobsInputDto) {
+templ BackupJobs(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 	Jobs with Pagination (10)
 }
 
-templ BackupDestinations(inputDto BackupDestinationsInputDto) {
+templ BackupDestinations(readBackupDestinationsResponse dto.ReadBackupDestinationsResponse) {
 	Destinations with Pagination (10)
 }
