@@ -18,7 +18,7 @@ func PaginationParser(
 		)
 	}
 
-	itemNameItemsPerPage := uint16(10)
+	itemNameItemsPerPage := uint16(5)
 	if echoContext.QueryParam(itemName+"ItemsPerPage") != "" {
 		itemNameItemsPerPage, _ = voHelper.InterfaceToUint16(
 			echoContext.QueryParam(itemName + "ItemsPerPage"),
