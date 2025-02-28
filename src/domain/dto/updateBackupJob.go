@@ -11,7 +11,7 @@ type UpdateBackupJob struct {
 	JobDescription            *valueObject.BackupJobDescription `json:"jobDescription,omitempty"`
 	DestinationIds            []valueObject.BackupDestinationId `json:"destinationIds,omitempty"`
 	BackupSchedule            *valueObject.CronSchedule         `json:"backupSchedule,omitempty"`
-	TimeoutSecs               *uint64                           `json:"timeoutSecs,omitempty"`
+	TimeoutSecs               *valueObject.TimeDuration         `json:"timeoutSecs,omitempty"`
 	MaxTaskRetentionCount     *uint16                           `json:"maxTaskRetentionCount,omitempty"`
 	MaxTaskRetentionDays      *uint16                           `json:"maxTaskRetentionDays,omitempty"`
 	MaxConcurrentCpuCores     *uint16                           `json:"maxConcurrentCpuCores,omitempty"`

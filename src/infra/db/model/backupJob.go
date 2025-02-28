@@ -119,6 +119,11 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 		return jobEntity, err
 	}
 
+	timeoutSecs, err := valueObject.NewTimeDuration(model.TimeoutSecs)
+	if err != nil {
+		return jobEntity, err
+	}
+
 	containerAccountIds := []valueObject.AccountId{}
 	for _, containerAccountId := range model.ContainerAccountIds {
 		containerAccountId, err := valueObject.NewAccountId(containerAccountId)
@@ -187,7 +192,7 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 
 	return entity.NewBackupJob(
 		jobId, accountId, model.JobStatus, jobDescriptionPtr, destinationIds,
-		retentionStrategy, backupSchedule, &archiveCompressionFormat, &model.TimeoutSecs,
+		retentionStrategy, backupSchedule, &archiveCompressionFormat, &timeoutSecs,
 		model.MaxTaskRetentionCount, model.MaxTaskRetentionDays,
 		model.MaxConcurrentCpuCores, containerAccountIds, containerIds,
 		exceptContainerAccountIds, exceptContainerIds, model.TasksCount,

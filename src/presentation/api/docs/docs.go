@@ -3870,6 +3870,9 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "accountUsername": {
+                    "type": "string"
+                },
                 "archiveId": {
                     "type": "string"
                 },

@@ -18,6 +18,10 @@ func NewTimeDuration(value interface{}) (TimeDuration, error) {
 	return TimeDuration(timeDuration), nil
 }
 
+func (vo TimeDuration) Uint64() uint64 {
+	return uint64(vo)
+}
+
 func (vo TimeDuration) String() string {
 	return strconv.FormatUint(uint64(vo), 10)
 }

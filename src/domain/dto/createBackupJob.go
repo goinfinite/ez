@@ -11,7 +11,7 @@ type CreateBackupJob struct {
 	RetentionStrategy         *valueObject.BackupRetentionStrategy `json:"retentionStrategy"`
 	BackupSchedule            valueObject.CronSchedule             `json:"backupSchedule"`
 	ArchiveCompressionFormat  *valueObject.CompressionFormat       `json:"archiveCompressionFormat,omitempty"`
-	TimeoutSecs               *uint64                              `json:"timeoutSecs,omitempty"`
+	TimeoutSecs               *valueObject.TimeDuration            `json:"timeoutSecs,omitempty"`
 	MaxTaskRetentionCount     *uint16                              `json:"maxTaskRetentionCount,omitempty"`
 	MaxTaskRetentionDays      *uint16                              `json:"maxTaskRetentionDays,omitempty"`
 	MaxConcurrentCpuCores     *uint16                              `json:"maxConcurrentCpuCores,omitempty"`
@@ -30,7 +30,7 @@ func NewCreateBackupJob(
 	retentionStrategy *valueObject.BackupRetentionStrategy,
 	backupSchedule valueObject.CronSchedule,
 	archiveCompressionFormat *valueObject.CompressionFormat,
-	timeoutSecs *uint64,
+	timeoutSecs *valueObject.TimeDuration,
 	maxTaskRetentionCount *uint16,
 	maxTaskRetentionDays *uint16,
 	maxConcurrentCpuCores *uint16,

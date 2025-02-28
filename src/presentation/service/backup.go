@@ -976,9 +976,9 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 		archiveCompressionFormatPtr = &archiveCompressionFormat
 	}
 
-	var timeoutSecsPtr *uint64
+	var timeoutSecsPtr *valueObject.TimeDuration
 	if input["timeoutSecs"] != nil {
-		timeoutSecs, err := voHelper.InterfaceToUint64(input["timeoutSecs"])
+		timeoutSecs, err := valueObject.NewTimeDuration(input["timeoutSecs"])
 		if err != nil {
 			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
 		}
@@ -1134,9 +1134,9 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 		backupSchedulePtr = &backupSchedule
 	}
 
-	var timeoutSecsPtr *uint64
+	var timeoutSecsPtr *valueObject.TimeDuration
 	if input["timeoutSecs"] != nil {
-		timeoutSecs, err := voHelper.InterfaceToUint64(input["timeoutSecs"])
+		timeoutSecs, err := valueObject.NewTimeDuration(input["timeoutSecs"])
 		if err != nil {
 			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
 		}

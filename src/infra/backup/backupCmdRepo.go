@@ -381,7 +381,7 @@ func (repo *BackupCmdRepo) CreateJob(
 		retentionStrategy = *createDto.RetentionStrategy
 	}
 
-	timeoutSecs := uint64(48 * 60 * 60)
+	timeoutSecs := valueObject.TimeDuration(uint64(48 * 60 * 60))
 	if createDto.TimeoutSecs != nil {
 		timeoutSecs = *createDto.TimeoutSecs
 	}
@@ -409,7 +409,7 @@ func (repo *BackupCmdRepo) CreateJob(
 	jobModel := dbModel.NewBackupJob(
 		0, createDto.AccountId.Uint64(), true, jobDescriptionPtr, destinationIdsUint64,
 		retentionStrategy.String(), createDto.BackupSchedule.String(), archiveCompressionFormat.String(),
-		timeoutSecs, createDto.MaxTaskRetentionCount, createDto.MaxTaskRetentionDays,
+		timeoutSecs.Uint64(), createDto.MaxTaskRetentionCount, createDto.MaxTaskRetentionDays,
 		createDto.MaxConcurrentCpuCores, containerAccountIdsUint64, containerIds,
 		exceptContainerAccountIdsUint64, exceptContainerIds,
 	)
@@ -453,7 +453,7 @@ func (repo *BackupCmdRepo) UpdateJob(
 	}
 
 	if updateDto.TimeoutSecs != nil {
-		jobUpdatedModel.TimeoutSecs = *updateDto.TimeoutSecs
+		jobUpdatedModel.TimeoutSecs = updateDto.TimeoutSecs.Uint64()
 	}
 
 	if updateDto.MaxTaskRetentionCount != nil {
@@ -636,7 +636,7 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 			TaskStatus:        valueObject.BackupTaskStatusExecuting.String(),
 			RetentionStrategy: jobEntity.RetentionStrategy.String(),
 			BackupSchedule:    jobEntity.BackupSchedule.String(),
-			TimeoutSecs:       jobEntity.TimeoutSecs,
+			TimeoutSecs:       jobEntity.TimeoutSecs.Uint64(),
 			StartedAt:         &startedAt,
 		}
 		err := repo.persistentDbSvc.Handler.Create(&taskModel).Error

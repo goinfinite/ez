@@ -691,6 +691,8 @@ definitions:
     properties:
       accountId:
         type: integer
+      accountUsername:
+        type: string
       archiveId:
         type: string
       createdAt:
