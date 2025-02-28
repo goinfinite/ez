@@ -62,7 +62,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Id</th>
 					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Status</th>
-					<th scope="col" class="w-[35%] overflow-x-hidden py-3">Results</th>
+					<th scope="col" class="w-[30%] overflow-x-hidden py-3">Results</th>
 					<th scope="col" class="w-[30%] overflow-x-hidden py-3">Settings</th>
 					<th scope="col" class="w-[10%] py-3"></th>
 				</tr>
@@ -98,19 +98,25 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 							<table class="mt-2 w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 								<tbody>
 									<tr>
-										<td class="rounded-tl-md bg-neutral-950/20 px-2 py-1">Started At</td>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Started At
+										</td>
 										<td class="rounded-tr-md px-2 py-1">
 											{ uiHelper.FormatPointer(backupTaskEntity.StartedAt) }
 										</td>
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
-										<td class="bg-neutral-950/20 px-2 py-1">Finished At</td>
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Finished At
+										</td>
 										<td class="px-2 py-1">
 											{ uiHelper.FormatPointer(backupTaskEntity.FinishedAt) }
 										</td>
 									</tr>
 									<tr>
-										<td class="rounded-bl-md bg-neutral-950/20 px-2 py-1">Elapsed Time</td>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Elapsed Time
+										</td>
 										<td class="rounded-br-md px-2 py-1">
 											{ uiHelper.FormatPointer(backupTaskEntity.ElapsedSecs) }
 										</td>
@@ -118,23 +124,56 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[35%] overflow-x-hidden px-3 py-2">
-							if backupTaskEntity.SizeBytes == nil {
-								<div>---</div>
-							} else {
-								{ backupTaskEntity.SizeBytes.StringWithSuffix() }
-							}
-							for _, containerId := range backupTaskEntity.SuccessfulContainerIds {
-								<div>{ containerId.String() } - OK</div>
-							}
-							for _, containerId := range backupTaskEntity.FailedContainerIds {
-								<div>{ containerId.String() } - Failed</div>
-							}
-							if backupTaskEntity.ExecutionOutput == nil {
-								<div>---</div>
-							} else {
-								{ backupTaskEntity.ExecutionOutput.String() }
-							}
+						<td class="w-[30%] space-y-3 overflow-x-hidden p-3 text-xs">
+							<p>
+								<span class="text-[10px] font-bold uppercase">Total Size:</span>
+								{ uiHelper.FormatPointer(backupTaskEntity.SizeBytes) }
+							</p>
+							<div x-data="{ isExpanded: false }">
+								<table class="w-full rounded-md ring-2 ring-neutral-50/5">
+									<thead class="bg-neutral-950/20 text-[10px] uppercase">
+										<tr class="border-b-2 border-neutral-50/5 text-center">
+											<th class="w-[50%] rounded-tl-md border-r-2 border-neutral-50/5 p-1">
+												Successful ContainerIds
+											</th>
+											<th class="w-[50%] rounded-tr-md p-1">Failed ContainerIds</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="border-r-2 border-neutral-50/5">
+												for containerIndex, containerId := range backupTaskEntity.SuccessfulContainerIds {
+													<p x-show={ "isExpanded || " + strconv.Itoa(containerIndex) + " < 3" }>
+														{ containerId.String() } <i class="ph-duotone ph-check-square"></i>
+													</p>
+												}
+											</td>
+											<td>
+												for containerIndex, containerId := range backupTaskEntity.FailedContainerIds {
+													<p x-show={ "isExpanded || " + strconv.Itoa(containerIndex) + " < 3" }>
+														{ containerId.String() } <i class="ph-duotone ph-x-square text-red-700"></i>
+													</p>
+												}
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								if len(backupTaskEntity.FailedContainerIds) > 3 || len(backupTaskEntity.SuccessfulContainerIds) > 3 {
+									<button
+										x-on:click="isExpanded = !isExpanded"
+										class="flex w-full items-center justify-center rounded-b-md bg-neutral-50/5 py-1.5 text-center text-[8px] text-neutral-200 hover:bg-opacity-20"
+									>
+										<i x-show="isExpanded" class="ph-bold ph-caret-double-up"></i>
+										<i x-show="!isExpanded" class="ph-bold ph-caret-double-down"></i>
+									</button>
+								}
+							</div>
+							<div>
+								<p class="text-[10px] font-bold uppercase">Execution Output</p>
+								<p class="rounded-md bg-neutral-950/10 p-1 font-mono text-neutral-50">
+									{ uiHelper.FormatPointer(backupTaskEntity.ExecutionOutput) }
+								</p>
+							</div>
 						</td>
 						<td class="w-[30%] overflow-x-hidden px-3 py-2">
 							{ backupTaskEntity.JobId.String() }
