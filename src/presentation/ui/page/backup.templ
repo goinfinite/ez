@@ -45,7 +45,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 	<div
 		id="backup-tasks-table"
 		hx-get="/backup/"
-		hx-trigger="submit from:form delay:500ms, update:backup-task from:window delay:500ms, delete:backup-task from:window delay:500ms"
+		hx-trigger="create:backup-task-archive from:window delay:500ms, restore:backup-task from:window delay:500ms, delete:backup-task from:window delay:500ms"
 		hx-select="#backup-tasks-table"
 		hx-target="#backup-tasks-table"
 		hx-swap="outerHTML transition:true"
@@ -269,6 +269,86 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 	</div>
 }
 
+templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse) {
+	<!-- Backup Task Archives Table -->
+	<div
+		id="backup-task-archives-table"
+		hx-get="/backup/"
+		hx-trigger="submit from:form delay:500ms, update:backup-task-archive from:window delay:500ms, delete:backup-task-archive from:window delay:500ms"
+		hx-select="#backup-task-archives-table"
+		hx-target="#backup-task-archives-table"
+		hx-swap="outerHTML transition:true"
+		@update:backup-task-archives-pagination="reloadBackupTaskArchivesTable()"
+	>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-left">
+					<th scope="col" class="w-[50%] p-3">File Path</th>
+					<th scope="col" class="w-[15%] p-3">Archive Id</th>
+					<th scope="col" class="w-[10%] p-3">Size</th>
+					<th scope="col" class="w-[10%] p-3">Created At</th>
+					<th scope="col" class="w-[15%] p-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, backupTaskArchiveEntity := range readBackupTaskArchivesResponse.Archives {
+					@templ.JSONScript(
+						"backupTaskArchiveEntity_"+backupTaskArchiveEntity.ArchiveId.String(),
+						backupTaskArchiveEntity,
+					)
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-sm">
+						<td class="w-[50%] px-3 py-2">
+							{ backupTaskArchiveEntity.UnixFilePath.String() }
+						</td>
+						<td class="w-[15%] space-y-1 p-3">
+							<p>{ backupTaskArchiveEntity.ArchiveId.String() }</p>
+							@componentMisc.Tag(
+								"ph-user", "",
+								backupTaskArchiveEntity.AccountUsername.String()+" <small>("+backupTaskArchiveEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
+						</td>
+						<td class="w-[10%] p-3">
+							{ backupTaskArchiveEntity.SizeBytes.StringWithSuffix() }
+						</td>
+						<td class="w-[10%] p-3">
+							{ backupTaskArchiveEntity.CreatedAt.ReadAsRfcDate() }
+						</td>
+						<td class="w-[15%] p-2">
+							<div class="flex flex-wrap items-center justify-center gap-1">
+								@componentStructural.CircularIconButtonWithTooltip(
+									"download-task-archive", "ph-download", "ez-300", "ez-200",
+									"window.open('"+backupTaskArchiveEntity.DownloadUrl.String()+"')",
+									"Download", "ez-300",
+								)
+								@componentStructural.CircularIconButtonWithTooltip(
+									"delete-task-archive", "ph-trash", "red-900", "red-700",
+									"openDeleteTaskArchiveModal('"+backupTaskArchiveEntity.ArchiveId.String()+"')",
+									"Delete", "red-700",
+								)
+							</div>
+						</td>
+					</tr>
+				}
+				if len(readBackupTaskArchivesResponse.Archives) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-6 py-4" colspan="12">No task archives found.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
+			@componentStructural.Pagination(
+				"backupTaskArchives",
+				readBackupTaskArchivesResponse.Pagination, "backupTaskArchivesPagination.pageNumber",
+				"backupTaskArchivesPagination.itemsPerPage",
+			)
+		</div>
+	</div>
+}
+
 templ BackupTasks(
 	readBackupTasksResponse dto.ReadBackupTasksResponse,
 	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
@@ -276,7 +356,7 @@ templ BackupTasks(
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
 			"Tasks",
-			"Backup tasks are the operations resulting from backup jobs. You can follow the status, download (as archive), restore or delete them here.",
+			"Manage and monitor individual backup operations, including tracking status, downloading, restoring, or deleting tasks.",
 			"ph-package",
 		)
 	</div>
@@ -285,11 +365,14 @@ templ BackupTasks(
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
 			"Tasks Archives",
-			"Backup task archives are the compressed files of the backup tasks. You can download or delete them here.",
+			"Access and manage compressed files of completed backup tasks, with options to download or delete archives.",
 			"ph-box-arrow-down",
 		)
 	</div>
-	Tasks Archives
+	@BackupTaskArchivesTable(readBackupTaskArchivesResponse)
+	<p class="mt-2 text-xs">
+		Note: archive files are automatically deleted after 24h to preserve storage space.
+	</p>
 }
 
 templ BackupJobs(readBackupJobsResponse dto.ReadBackupJobsResponse) {
