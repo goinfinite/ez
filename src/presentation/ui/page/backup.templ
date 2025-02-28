@@ -62,8 +62,8 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Id</th>
 					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Status</th>
-					<th scope="col" class="w-[30%] overflow-x-hidden py-3">Results</th>
-					<th scope="col" class="w-[30%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[40%] overflow-x-hidden py-3">Results</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Settings</th>
 					<th scope="col" class="w-[10%] py-3"></th>
 				</tr>
 			</thead>
@@ -124,7 +124,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[30%] space-y-3 overflow-x-hidden p-3 text-xs">
+						<td class="w-[40%] space-y-3 overflow-x-hidden p-3 text-xs">
 							<p>
 								<span class="text-[10px] font-bold uppercase">Total Size:</span>
 								{ uiHelper.FormatPointer(backupTaskEntity.SizeBytes) }
@@ -175,13 +175,59 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</p>
 							</div>
 						</td>
-						<td class="w-[30%] overflow-x-hidden px-3 py-2">
-							{ backupTaskEntity.JobId.String() }
-							{ backupTaskEntity.DestinationId.String() }
-							{ backupTaskEntity.AccountId.String() }
-							{ backupTaskEntity.RetentionStrategy.String() }
-							{ backupTaskEntity.BackupSchedule.String() }
-							{ strconv.FormatUint(backupTaskEntity.TimeoutSecs, 10) }
+						<td class="w-[20%] overflow-x-hidden p-3">
+							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											JobId
+										</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ backupTaskEntity.JobId.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											DestinationId
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.DestinationId.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											AccountId
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.AccountId.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											RetentionStrategy
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.RetentionStrategy.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Schedule
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.BackupSchedule.String() }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Timeout
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ backupTaskEntity.TimeoutSecs.StringWithSuffix() }
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</td>
 						<td class="w-[10%] px-3 py-2">
 							<div class="flex flex-wrap items-center gap-1"></div>
