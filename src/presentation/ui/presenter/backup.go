@@ -90,18 +90,46 @@ func (presenter *BackupPresenter) ReadTaskArchives(
 	return archivesResponseDto
 }
 
+func (presenter *BackupPresenter) ReadJobs(
+	echoContext echo.Context,
+	backupService *service.BackupService,
+) (jobsResponseDto dto.ReadBackupJobsResponse) {
+	paginationMap := uiHelper.PaginationParser(echoContext, "job", "id")
+	requestParamsMap := uiHelper.ReadRequestParser(
+		echoContext, "job", dto.ReadBackupJobsRequest{},
+	)
+	serviceRequestBody := paginationMap
+	maps.Copy(serviceRequestBody, requestParamsMap)
+
+	readBackupJobsServiceOutput := backupService.ReadJob(serviceRequestBody)
+	if readBackupJobsServiceOutput.Status != service.Success {
+		slog.Debug("ReadBackupJobsFailure", slog.Any("serviceOutput", readBackupJobsServiceOutput))
+		return jobsResponseDto
+	}
+
+	var assertOk bool
+	jobsResponseDto, assertOk = readBackupJobsServiceOutput.Body.(dto.ReadBackupJobsResponse)
+	if !assertOk {
+		slog.Debug("AssertBackupJobsResponseFailure")
+		return jobsResponseDto
+	}
+
+	return jobsResponseDto
+}
+
 func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	backupService := service.NewBackupService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
-	backupTasksResponseDto := presenter.ReadTasks(c, backupService)
+	tasksResponseDto := presenter.ReadTasks(c, backupService)
 	archivesResponseDto := presenter.ReadTaskArchives(c, backupService)
+	jobsResponseDto := presenter.ReadJobs(c, backupService)
 
 	pageContent := page.BackupIndex(
-		backupTasksResponseDto,
+		tasksResponseDto,
 		archivesResponseDto,
-		dto.ReadBackupJobsResponse{},
+		jobsResponseDto,
 		dto.ReadBackupDestinationsResponse{},
 	)
 
