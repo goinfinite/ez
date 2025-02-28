@@ -36,7 +36,9 @@ func (presenter *BackupPresenter) ReadTasks(
 	backupService *service.BackupService,
 ) (tasksResponseDto dto.ReadBackupTasksResponse) {
 	paginationMap := uiHelper.PaginationParser(echoContext, "task", "id")
-	requestParamsMap := uiHelper.ReadRequestParser(echoContext, "task", dto.ReadBackupTasksRequest{})
+	requestParamsMap := uiHelper.ReadRequestParser(
+		echoContext, "task", dto.ReadBackupTasksRequest{},
+	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
 
@@ -56,16 +58,49 @@ func (presenter *BackupPresenter) ReadTasks(
 	return tasksResponseDto
 }
 
+func (presenter *BackupPresenter) ReadTaskArchives(
+	echoContext echo.Context,
+	backupService *service.BackupService,
+) (archivesResponseDto dto.ReadBackupTaskArchivesResponse) {
+	paginationMap := uiHelper.PaginationParser(echoContext, "archive", "id")
+	requestParamsMap := uiHelper.ReadRequestParser(
+		echoContext, "archive", dto.ReadBackupTaskArchivesRequest{},
+	)
+	serviceRequestBody := paginationMap
+	maps.Copy(serviceRequestBody, requestParamsMap)
+
+	readBackupTaskArchivesServiceOutput := backupService.ReadTaskArchive(
+		serviceRequestBody, &echoContext.Request().Host,
+	)
+	if readBackupTaskArchivesServiceOutput.Status != service.Success {
+		slog.Debug(
+			"ReadBackupTaskArchivesFailure",
+			slog.Any("serviceOutput", readBackupTaskArchivesServiceOutput),
+		)
+		return archivesResponseDto
+	}
+
+	var assertOk bool
+	archivesResponseDto, assertOk = readBackupTaskArchivesServiceOutput.Body.(dto.ReadBackupTaskArchivesResponse)
+	if !assertOk {
+		slog.Debug("AssertBackupTaskArchivesResponseFailure")
+		return archivesResponseDto
+	}
+
+	return archivesResponseDto
+}
+
 func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	backupService := service.NewBackupService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
 	backupTasksResponseDto := presenter.ReadTasks(c, backupService)
+	archivesResponseDto := presenter.ReadTaskArchives(c, backupService)
 
 	pageContent := page.BackupIndex(
 		backupTasksResponseDto,
-		dto.ReadBackupTaskArchivesResponse{},
+		archivesResponseDto,
 		dto.ReadBackupJobsResponse{},
 		dto.ReadBackupDestinationsResponse{},
 	)
