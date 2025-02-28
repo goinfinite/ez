@@ -235,7 +235,7 @@ templ ContainerImageArchivesTable(
 					<td class="w-24 px-3 py-2">
 						{ archiveEntity.SizeBytes.StringWithSuffix() }
 					</td>
-					<td class="px-3 py-2">{ archiveEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="px-3 py-2">{ archiveEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
 						@componentStructural.CircularIconButtonWithTooltip(
 							"download-archive", "ph-download", "ez-300", "ez-200",
@@ -309,7 +309,7 @@ templ ContainerImagesTable(
 							<div class="text-center text-neutral-400">---</div>
 						}
 					</td>
-					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="px-6 py-4">{ imageEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
 						@componentStructural.CircularIconButtonWithTooltip(
 							"archive-image", "ph-file-zip", "ez-300", "ez-200",

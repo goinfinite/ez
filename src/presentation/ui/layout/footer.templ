@@ -129,18 +129,18 @@ templ ScheduledTasksPopover(
 												</thead>
 												<tr>
 													<td class="text-wrap break-words p-1">
-														{ scheduledTask.CreatedAt.GetRfcDate() }
+														{ scheduledTask.CreatedAt.ReadAsRfcDate() }
 													</td>
 													<td class="bg-ez-400 text-wrap break-words p-1">
 														if scheduledTask.StartedAt != nil {
-															{ scheduledTask.StartedAt.GetRfcDate() }
+															{ scheduledTask.StartedAt.ReadAsRfcDate() }
 														} else {
 															-
 														}
 													</td>
 													<td class="text-wrap break-words p-1">
 														if scheduledTask.FinishedAt != nil {
-															{ scheduledTask.FinishedAt.GetRfcDate() }
+															{ scheduledTask.FinishedAt.ReadAsRfcDate() }
 														} else {
 															-
 														}
