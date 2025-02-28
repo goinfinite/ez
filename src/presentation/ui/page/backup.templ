@@ -124,7 +124,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[40%] space-y-3 overflow-x-hidden p-3 text-xs">
+						<td class="w-[40%] space-y-3 overflow-x-hidden px-6 py-3 text-xs">
 							<p>
 								<span class="text-[10px] font-bold uppercase">Total Size:</span>
 								{ uiHelper.FormatPointer(backupTaskEntity.SizeBytes) }
@@ -273,8 +273,22 @@ templ BackupTasks(
 	readBackupTasksResponse dto.ReadBackupTasksResponse,
 	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 ) {
+	<div class="mb-4">
+		@componentStructural.PageSubHeading(
+			"Tasks",
+			"Backup tasks are the operations resulting from backup jobs. You can follow the status, download (as archive), restore or delete them here.",
+			"ph-package",
+		)
+	</div>
 	@BackupTasksTable(readBackupTasksResponse)
 	<br/>
+	<div class="mb-4">
+		@componentStructural.PageSubHeading(
+			"Tasks Archives",
+			"Backup task archives are the compressed files of the backup tasks. You can download or delete them here.",
+			"ph-box-arrow-down",
+		)
+	</div>
 	Tasks Archives
 }
 
