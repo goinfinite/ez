@@ -19,7 +19,7 @@ type BackupTask struct {
 	SizeBytes              *valueObject.Byte                      `json:"sizeBytes"`
 	StartedAt              *valueObject.UnixTime                  `json:"startedAt"`
 	FinishedAt             *valueObject.UnixTime                  `json:"finishedAt"`
-	ElapsedSecs            *uint64                                `json:"elapsedSecs"`
+	ElapsedSecs            *valueObject.TimeDuration              `json:"elapsedSecs"`
 	CreatedAt              valueObject.UnixTime                   `json:"createdAt"`
 	UpdatedAt              valueObject.UnixTime                   `json:"updatedAt"`
 }
@@ -37,7 +37,7 @@ func NewBackupTask(
 	executionOutput *valueObject.BackupTaskExecutionOutput,
 	sizeBytes *valueObject.Byte,
 	startedAt, finishedAt *valueObject.UnixTime,
-	elapsedSecs *uint64,
+	elapsedSecs *valueObject.TimeDuration,
 	createdAt, updatedAt valueObject.UnixTime,
 ) BackupTask {
 	return BackupTask{

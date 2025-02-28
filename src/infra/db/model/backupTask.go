@@ -152,9 +152,13 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 		finishedAtPtr = &finishedAt
 	}
 
-	var elapsedSecsPtr *uint64
+	var elapsedSecsPtr *valueObject.TimeDuration
 	if model.ElapsedSecs != nil {
-		elapsedSecsPtr = model.ElapsedSecs
+		elapsedSecs, err := valueObject.NewTimeDuration(*model.ElapsedSecs)
+		if err != nil {
+			return taskEntity, err
+		}
+		elapsedSecsPtr = &elapsedSecs
 	}
 
 	return entity.NewBackupTask(
