@@ -4,11 +4,11 @@ templ PageSubHeading(subHeading string, description string, icon string) {
 	<!-- Page SubHeading -->
 	<div>
 		<span class="align-center flex items-center text-2xl">
-			<i class={ "ph-duotone " + icon + " text-2xl mr-1 p-1.5 bg-ez-800 rounded-xl" }></i>
+			<i class={ "ph-duotone " + icon + " text-2xl mr-1.5 p-1.5 bg-ez-800 rounded-xl" }></i>
 			<h2>{ subHeading }</h2>
 		</span>
 		if description != "" {
-			<p class="text-md mb-2">{ description }</p>
+			<p class="text-md mb-2 mt-0.5">{ description }</p>
 		}
 	</div>
 }
