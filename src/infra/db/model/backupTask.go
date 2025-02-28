@@ -102,6 +102,11 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 		return taskEntity, err
 	}
 
+	timeoutSecs, err := valueObject.NewTimeDuration(model.TimeoutSecs)
+	if err != nil {
+		return taskEntity, err
+	}
+
 	successfulContainerIds := []valueObject.ContainerId{}
 	for _, rawContainerId := range model.SuccessfulContainerIds {
 		containerId, err := valueObject.NewContainerId(rawContainerId)
@@ -163,7 +168,7 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 
 	return entity.NewBackupTask(
 		taskId, accountId, jobId, destinationId, taskStatus, retentionStrategy,
-		backupSchedule, model.TimeoutSecs, successfulContainerIds, failedContainerIds,
+		backupSchedule, timeoutSecs, successfulContainerIds, failedContainerIds,
 		executionOutputPtr, sizeBytesPtr, startedAtPtr, finishedAtPtr, elapsedSecsPtr,
 		valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
 		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
