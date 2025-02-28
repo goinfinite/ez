@@ -75,7 +75,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 						<td class="w-[5%] overflow-x-hidden px-3 py-2">
 							{ backupTaskEntity.TaskId.String() }
 						</td>
-						<td class="w-[20%] overflow-x-hidden px-3 py-2">
+						<td class="w-[20%] overflow-x-hidden p-3">
 							{{ statusColor := "ez-200" }}
 							{{ statusIcon := "ph-check-circle" }}
 							switch backupTaskEntity.TaskStatus {
@@ -95,19 +95,25 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 							@componentMisc.Tag(
 								statusIcon, "", backupTaskEntity.TaskStatus.String(), statusColor,
 							)
-							<table class="text-xs">
+							<table class="mt-2 w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 								<tbody>
 									<tr>
-										<td>Started At</td>
-										<td>{ uiHelper.FormatPointer(backupTaskEntity.StartedAt) }</td>
+										<td class="rounded-tl-md bg-neutral-950/20 px-2 py-1">Started At</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ uiHelper.FormatPointer(backupTaskEntity.StartedAt) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="bg-neutral-950/20 px-2 py-1">Finished At</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(backupTaskEntity.FinishedAt) }
+										</td>
 									</tr>
 									<tr>
-										<td>Finished At</td>
-										<td>{ uiHelper.FormatPointer(backupTaskEntity.FinishedAt) }</td>
-									</tr>
-									<tr>
-										<td>Elapsed Time</td>
-										<td>{ uiHelper.FormatPointer(backupTaskEntity.ElapsedSecs) }</td>
+										<td class="rounded-bl-md bg-neutral-950/20 px-2 py-1">Elapsed Time</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ uiHelper.FormatPointer(backupTaskEntity.ElapsedSecs) }
+										</td>
 									</tr>
 								</tbody>
 							</table>
