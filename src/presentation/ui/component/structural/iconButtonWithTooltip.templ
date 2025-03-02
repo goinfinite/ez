@@ -1,11 +1,20 @@
 package componentStructural
 
-templ SquareIconButtonWithTooltip(
-	id, icon, defaultColor, hoverColor, onClick string,
+const (
+	IconButtonShapeCircular = "circular"
+	IconButtonShapeSquare   = "square"
+)
+
+templ IconButtonWithTooltip(
+	id, shape, icon, defaultColor, hoverColor, onClick string,
 	tooltipText, tooltipColor, tooltipPosition string,
 ) {
-	<!-- SquareIconButtonWithTooltip -->
+	<!-- IconButtonWithTooltip -->
 	<div class="group relative">
+		{{ radiusRoundness := "rounded-full" }}
+		if shape == IconButtonShapeSquare {
+			{{ radiusRoundness = "rounded-sm" }}
+		}
 		<button
 			if id != "" {
 				id={ id }
@@ -14,7 +23,7 @@ templ SquareIconButtonWithTooltip(
 			if onClick != "" {
 				@click={ onClick }
 			}
-			class={ "bg-" + defaultColor + " hover:bg-" + hoverColor + " h-9 w-9 leading-none rounded-sm" }
+			class={ "bg-" + defaultColor + " hover:bg-" + hoverColor + " h-9 w-9 leading-none " + radiusRoundness }
 		>
 			<i class={ "text-xl ph-bold " + icon }></i>
 		</button>

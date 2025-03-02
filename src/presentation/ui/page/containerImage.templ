@@ -237,15 +237,17 @@ templ ContainerImageArchivesTable(
 					</td>
 					<td class="px-3 py-2">{ archiveEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
-						@componentStructural.CircularIconButtonWithTooltip(
-							"download-archive", "ph-download", "ez-300", "ez-200",
+						@componentStructural.IconButtonWithTooltip(
+							"download-archive", componentStructural.IconButtonShapeCircular,
+							"ph-download", "ez-300", "ez-200",
 							"window.open('"+archiveEntity.DownloadUrl.String()+"')",
-							"Download Archive", "ez-300",
+							"Download Archive", "ez-300", "bottom",
 						)
-						@componentStructural.CircularIconButtonWithTooltip(
-							"delete-archive", "ph-trash", "red-900", "red-700",
+						@componentStructural.IconButtonWithTooltip(
+							"delete-archive", componentStructural.IconButtonShapeCircular,
+							"ph-trash", "red-900", "red-700",
 							"openDeleteArchiveModal('"+archiveEntity.AccountId.String()+"','"+archiveEntity.ImageId.String()+"')",
-							"Delete Archive", "red-700",
+							"Delete Archive", "red-700", "bottom",
 						)
 					</td>
 				</tr>
@@ -311,15 +313,17 @@ templ ContainerImagesTable(
 					</td>
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
-						@componentStructural.CircularIconButtonWithTooltip(
-							"archive-image", "ph-file-zip", "ez-300", "ez-200",
+						@componentStructural.IconButtonWithTooltip(
+							"archive-image", componentStructural.IconButtonShapeCircular,
+							"ph-file-zip", "ez-300", "ez-200",
 							"archiveImage('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
-							"Archive/Compress Image", "ez-300",
+							"Archive/Compress Image", "ez-300", "bottom",
 						)
-						@componentStructural.CircularIconButtonWithTooltip(
-							"delete-image", "ph-trash", "red-900", "red-700",
+						@componentStructural.IconButtonWithTooltip(
+							"delete-image", componentStructural.IconButtonShapeCircular,
+							"ph-trash", "red-900", "red-700",
 							"openDeleteImageModal('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
-							"Delete Image", "red-700",
+							"Delete Image", "red-700", "bottom",
 						)
 					</td>
 				</tr>

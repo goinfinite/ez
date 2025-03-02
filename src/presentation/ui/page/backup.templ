@@ -232,20 +232,23 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 						<td class="w-[14%] p-2">
 							<div class="flex flex-wrap items-center justify-center gap-1">
 								if backupTaskEntity.TaskStatus == valueObject.BackupTaskStatusCompleted {
-									@componentStructural.CircularIconButtonWithTooltip(
-										"create-task-archive", "ph-file-zip", "ez-300", "ez-200",
+									@componentStructural.IconButtonWithTooltip(
+										"create-task-archive", componentStructural.IconButtonShapeCircular,
+										"ph-file-zip", "ez-300", "ez-200",
 										"openCreateTaskArchiveModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Create Archive", "ez-300",
+										"Create Archive", "ez-300", "left",
 									)
-									@componentStructural.CircularIconButtonWithTooltip(
-										"restore-task", "ph-clock-clockwise", "ez-300", "ez-200",
+									@componentStructural.IconButtonWithTooltip(
+										"restore-task", componentStructural.IconButtonShapeCircular,
+										"ph-clock-clockwise", "ez-300", "ez-200",
 										"openRestoreTaskModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Restore", "ez-300",
+										"Restore", "ez-300", "bottom",
 									)
-									@componentStructural.CircularIconButtonWithTooltip(
-										"delete-task", "ph-trash", "red-900", "red-700",
+									@componentStructural.IconButtonWithTooltip(
+										"delete-task", componentStructural.IconButtonShapeCircular,
+										"ph-trash", "red-900", "red-700",
 										"openDeleteTaskModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Delete", "red-700",
+										"Delete", "red-700", "right",
 									)
 								}
 							</div>
@@ -318,15 +321,17 @@ templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskA
 						</td>
 						<td class="w-[15%] p-2">
 							<div class="flex flex-wrap items-center justify-center gap-1">
-								@componentStructural.CircularIconButtonWithTooltip(
-									"download-task-archive", "ph-download", "ez-300", "ez-200",
+								@componentStructural.IconButtonWithTooltip(
+									"download-task-archive", componentStructural.IconButtonShapeCircular,
+									"ph-download", "ez-300", "ez-200",
 									"window.open('"+backupTaskArchiveEntity.DownloadUrl.String()+"')",
-									"Download", "ez-300",
+									"Download", "ez-300", "left",
 								)
-								@componentStructural.CircularIconButtonWithTooltip(
-									"delete-task-archive", "ph-trash", "red-900", "red-700",
+								@componentStructural.IconButtonWithTooltip(
+									"delete-task-archive", componentStructural.IconButtonShapeCircular,
+									"ph-trash", "red-900", "red-700",
 									"openDeleteTaskArchiveModal('"+backupTaskArchiveEntity.ArchiveId.String()+"')",
-									"Delete", "red-700",
+									"Delete", "red-700", "right",
 								)
 							</div>
 						</td>
@@ -395,11 +400,10 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 		>
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Id</th>
-					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Description</th>
-					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Status</th>
-					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Settings</th>
-					<th scope="col" class="w-[15%] py-3"></th>
+					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[22.5%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[45%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%] py-3"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -407,13 +411,12 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 					<!-- Backup Job Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("backupJobEntity_"+backupJobEntity.JobId.String(), backupJobEntity)
-						<td class="w-[5%] overflow-x-hidden px-3 py-2">
+						<td class="w-[22.5%] text-clip px-3 py-2 text-left text-xs">
 							{ backupJobEntity.JobId.String() }
-						</td>
-						<td class="w-[5%] overflow-x-hidden px-3 py-2">
+							<br/>
 							{ uiHelper.FormatPointer(backupJobEntity.JobDescription) }
 						</td>
-						<td class="w-[20%] overflow-x-hidden p-3">
+						<td class="w-[22.5%] overflow-x-hidden p-3">
 							{{ statusText := "enabled" }}
 							{{ statusColor := "ez-200" }}
 							{{ statusIcon := "ph-check-circle" }}
@@ -484,7 +487,7 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[20%] overflow-x-hidden p-3">
+						<td class="w-[45%] overflow-x-hidden p-3">
 							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 								<tbody>
 									<tr>
@@ -594,22 +597,25 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[14%] p-2">
-							<div class="flex flex-wrap items-center justify-center gap-1">
-								@componentStructural.CircularIconButtonWithTooltip(
-									"run-job", "ph-queue", "cyan-900", "cyan-700",
+						<td class="w-[10%] p-2">
+							<div class="flex flex-col items-center justify-center gap-1">
+								@componentStructural.IconButtonWithTooltip(
+									"run-job", componentStructural.IconButtonShapeCircular,
+									"ph-queue", "cyan-900", "cyan-700",
 									"openRunJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Run Job Now", "ez-300",
+									"Run Job Now", "ez-300", "left",
 								)
-								@componentStructural.CircularIconButtonWithTooltip(
-									"update-job", "ph-pencil", "ez-300", "ez-200",
+								@componentStructural.IconButtonWithTooltip(
+									"update-job", componentStructural.IconButtonShapeCircular,
+									"ph-pencil", "ez-300", "ez-200",
 									"openUpdateJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Update", "ez-300",
+									"Update", "ez-300", "left",
 								)
-								@componentStructural.CircularIconButtonWithTooltip(
-									"delete-job", "ph-trash", "red-900", "red-700",
+								@componentStructural.IconButtonWithTooltip(
+									"delete-job", componentStructural.IconButtonShapeCircular,
+									"ph-trash", "red-900", "red-700",
 									"openDeleteJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Delete", "red-700",
+									"Delete", "red-700", "left",
 								)
 							</div>
 						</td>

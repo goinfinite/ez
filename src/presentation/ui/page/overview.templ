@@ -619,31 +619,36 @@ templ ContainersTable(
 						</td>
 						<td class="w-[10%] px-3 py-2">
 							<div class="flex flex-wrap items-center gap-1">
-								@componentStructural.SquareIconButtonWithTooltip(
-									"restart-container", "ph-arrows-clockwise", "ez-300", "ez-200",
+								@componentStructural.IconButtonWithTooltip(
+									"restart-container", componentStructural.IconButtonShapeSquare,
+									"ph-arrows-clockwise", "ez-300", "ez-200",
 									"openRestartContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
 									"Restart", "ez-300", "top",
 								)
 								if containerEntity.Status {
-									@componentStructural.SquareIconButtonWithTooltip(
-										"toggle-container-status", "ph-lightning-slash", "yellow-900", "yellow-700",
+									@componentStructural.IconButtonWithTooltip(
+										"toggle-container-status", componentStructural.IconButtonShapeSquare,
+										"ph-lightning-slash", "yellow-900", "yellow-700",
 										"openShutdownContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
 										"Power Off", "yellow-700", "top",
 									)
 								} else {
-									@componentStructural.SquareIconButtonWithTooltip(
-										"toggle-container-status", "ph-lightning", "cyan-900", "cyan-700",
+									@componentStructural.IconButtonWithTooltip(
+										"toggle-container-status", componentStructural.IconButtonShapeSquare,
+										"ph-lightning", "cyan-900", "cyan-700",
 										"powerOnContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
 										"Power On", "cyan-700", "top",
 									)
 								}
-								@componentStructural.SquareIconButtonWithTooltip(
-									"update-container", "ph-gear", "ez-300", "ez-200",
+								@componentStructural.IconButtonWithTooltip(
+									"update-container", componentStructural.IconButtonShapeSquare,
+									"ph-gear", "ez-300", "ez-200",
 									"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.ProfileId.String()+"')",
 									"Update", "ez-300", "bottom",
 								)
-								@componentStructural.SquareIconButtonWithTooltip(
-									"delete-container", "ph-trash", "red-900", "red-700",
+								@componentStructural.IconButtonWithTooltip(
+									"delete-container", componentStructural.IconButtonShapeSquare,
+									"ph-trash", "red-900", "red-700",
 									"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.Hostname.String()+"')",
 									"Delete", "red-700", "bottom",
 								)
