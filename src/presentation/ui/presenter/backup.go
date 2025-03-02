@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
@@ -103,7 +104,10 @@ func (presenter *BackupPresenter) ReadJobs(
 
 	readBackupJobsServiceOutput := backupService.ReadJob(serviceRequestBody)
 	if readBackupJobsServiceOutput.Status != service.Success {
-		slog.Debug("ReadBackupJobsFailure", slog.Any("serviceOutput", readBackupJobsServiceOutput))
+		slog.Debug(
+			"ReadBackupJobsFailure",
+			slog.Any("serviceOutput", readBackupJobsServiceOutput),
+		)
 		return jobsResponseDto
 	}
 
@@ -117,6 +121,64 @@ func (presenter *BackupPresenter) ReadJobs(
 	return jobsResponseDto
 }
 
+func (presenter *BackupPresenter) ReadDestinations(
+	echoContext echo.Context,
+	backupService *service.BackupService,
+) (destinationsResponseDto page.BackupDestinationModifiedResponseDto) {
+	paginationMap := uiHelper.PaginationParser(echoContext, "destination", "id")
+	requestParamsMap := uiHelper.ReadRequestParser(
+		echoContext, "destination", dto.ReadBackupDestinationsRequest{},
+	)
+	serviceRequestBody := paginationMap
+	maps.Copy(serviceRequestBody, requestParamsMap)
+
+	readBackupDestinationsServiceOutput := backupService.ReadDestination(serviceRequestBody)
+	if readBackupDestinationsServiceOutput.Status != service.Success {
+		slog.Debug(
+			"ReadBackupDestinationsFailure",
+			slog.Any("serviceOutput", readBackupDestinationsServiceOutput),
+		)
+		return destinationsResponseDto
+	}
+
+	var assertOk bool
+	originalDestinationsResponseDto, assertOk := readBackupDestinationsServiceOutput.Body.(dto.ReadBackupDestinationsResponse)
+	if !assertOk {
+		slog.Debug("AssertBackupDestinationsResponseFailure")
+		return destinationsResponseDto
+	}
+
+	for _, iDestinationEntity := range originalDestinationsResponseDto.Destinations {
+		destinationUnifiedEntity := page.BackupDestinationUnifiedEntity{}
+
+		switch destinationEntity := iDestinationEntity.(type) {
+		case entity.BackupDestinationLocal:
+			destinationUnifiedEntity = page.BackupDestinationUnifiedEntity{
+				BackupDestinationBase:  destinationEntity.BackupDestinationBase,
+				BackupDestinationLocal: destinationEntity,
+			}
+		case entity.BackupDestinationObjectStorage:
+			destinationUnifiedEntity = page.BackupDestinationUnifiedEntity{
+				BackupDestinationBase:          destinationEntity.BackupDestinationBase,
+				BackupDestinationRemoteBase:    destinationEntity.BackupDestinationRemoteBase,
+				BackupDestinationObjectStorage: destinationEntity,
+			}
+		case entity.BackupDestinationRemoteHost:
+			destinationUnifiedEntity = page.BackupDestinationUnifiedEntity{
+				BackupDestinationBase:       destinationEntity.BackupDestinationBase,
+				BackupDestinationRemoteBase: destinationEntity.BackupDestinationRemoteBase,
+				BackupDestinationRemoteHost: destinationEntity,
+			}
+		}
+
+		destinationsResponseDto.Destinations = append(
+			destinationsResponseDto.Destinations, destinationUnifiedEntity,
+		)
+	}
+
+	return destinationsResponseDto
+}
+
 func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	backupService := service.NewBackupService(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
@@ -125,12 +187,10 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	tasksResponseDto := presenter.ReadTasks(c, backupService)
 	archivesResponseDto := presenter.ReadTaskArchives(c, backupService)
 	jobsResponseDto := presenter.ReadJobs(c, backupService)
+	destinationsResponseDto := presenter.ReadDestinations(c, backupService)
 
 	pageContent := page.BackupIndex(
-		tasksResponseDto,
-		archivesResponseDto,
-		jobsResponseDto,
-		dto.ReadBackupDestinationsResponse{},
+		tasksResponseDto, archivesResponseDto, jobsResponseDto, destinationsResponseDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)

@@ -5,6 +5,7 @@ import "strconv"
 import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 import "github.com/goinfinite/ez/src/domain/valueObject"
 import "github.com/goinfinite/ez/src/presentation/ui/helper"
+import "github.com/goinfinite/ez/src/domain/entity"
 
 import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 
@@ -12,7 +13,7 @@ templ BackupIndex(
 	readBackupTasksResponse dto.ReadBackupTasksResponse,
 	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 	readBackupJobsResponse dto.ReadBackupJobsResponse,
-	readBackupDestinationsResponse dto.ReadBackupDestinationsResponse,
+	readBackupDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
 	<!-- BackupIndex JavaScript -->
 	<script type="text/javascript" src="/assets/local-states/backup.js"></script>
@@ -657,6 +658,89 @@ templ BackupJobs(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 	@BackupJobsTable(readBackupJobsResponse)
 }
 
-templ BackupDestinations(readBackupDestinationsResponse dto.ReadBackupDestinationsResponse) {
-	Destinations with Pagination (10)
+templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResponseDto) {
+	<!-- Backup Destinations Table -->
+	<div
+		id="backup-destinations-table"
+		hx-get="/backup/"
+		hx-trigger="create:backup-destination from:window delay:500ms, update:backup-destination from:window delay:500ms, delete:backup-destination from:window delay:500ms"
+		hx-select="#backup-destinations-table"
+		hx-target="#backup-destinations-table"
+		hx-swap="outerHTML transition:true"
+		@update:backup-destinations-pagination="reloadBackupDestinationsTable()"
+		@update:backup-destinations-record-filters="reloadBackupDestinationsTable()"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.RecordFilters("backupDestinations", "backupDestinationsFilters")
+		</div>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[25%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[45%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%] py-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, destinationEntity := range destinationsResponse.Destinations {
+					<!-- Backup Destination Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						@templ.JSONScript(
+							"backupDestinationEntity_"+destinationEntity.DestinationId.String(),
+							destinationEntity,
+						)
+						<td class="w-[20%] text-clip px-3 py-2 text-left">
+							<p class="font-bold">
+								<span class="text-xs">#</span>{ destinationEntity.DestinationId.String() }
+							</p>
+							<p class="text-xs">
+								{ uiHelper.FormatPointer(destinationEntity.DestinationDescription) }
+							</p>
+						</td>
+					</tr>
+				}
+				if len(destinationsResponse.Destinations) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No backup destinations created yet.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
+			@componentStructural.Pagination(
+				"backupDestinations",
+				destinationsResponse.Pagination,
+				"backupDestinationsPagination.pageNumber",
+				"backupDestinationsPagination.itemsPerPage",
+			)
+		</div>
+	</div>
+}
+
+// Couldn't find how to ignore it via "lint:" directive, but it's safe to ignore.
+type BackupDestinationUnifiedEntity struct {
+	entity.BackupDestinationBase
+	entity.BackupDestinationRemoteBase
+	entity.BackupDestinationLocal
+	entity.BackupDestinationObjectStorage
+	entity.BackupDestinationRemoteHost
+}
+
+type BackupDestinationModifiedResponseDto struct {
+	Destinations []BackupDestinationUnifiedEntity
+	Pagination   dto.Pagination
+}
+
+templ BackupDestinations(destinationsResponse BackupDestinationModifiedResponseDto) {
+	<div class="mb-4">
+		@componentStructural.PageSubHeading(
+			"Destinations",
+			"Manage and monitor backup destinations, including adding, editing, or deleting destinations.",
+			"ph-barn",
+		)
+	</div>
+	@BackupDestinationsTable(destinationsResponse)
 }
