@@ -720,7 +720,8 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 	</div>
 }
 
-// Couldn't find how to ignore it via "lint:" directive, but it's safe to ignore.
+// Couldn't find how to ignore the duplicated json tags warning via "lint:" directive.
+// For the time being, we'll have to live with the warning.
 type BackupDestinationUnifiedEntity struct {
 	entity.BackupDestinationBase
 	entity.BackupDestinationRemoteBase
