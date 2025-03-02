@@ -28,21 +28,22 @@ templ IconButtonWithTooltip(
 			<i class={ "text-xl ph-bold " + icon }></i>
 		</button>
 		if tooltipText != "" {
+			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
 			switch tooltipPosition {
 				case "top":
-					<div class={ "absolute w-fit hidden bottom-full mb-1 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:flex left-1/2 transform -translate-x-1/2 p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
+					<div class={ tooltipBaseClass + " bottom-full mb-1.5 group-hover:-translate-y-0.5 left-1/2 -translate-x-1/2" }>
 						{ tooltipText }
 					</div>
 				case "bottom":
-					<div class={ "absolute hidden top-full mt-1 transition-all duration-300 group-hover:translate-y-0.5 group-hover:flex left-1/2 transform -translate-x-1/2 w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
+					<div class={ tooltipBaseClass + " top-full mt-1.5 group-hover:translate-y-0.5 left-1/2 -translate-x-1/2" }>
 						{ tooltipText }
 					</div>
 				case "left":
-					<div class={ "absolute hidden right-full mr-1 transition-all duration-300 group-hover:translate-x-0.5 group-hover:flex top-1/2 transform -translate-y-1/2 w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
+					<div class={ tooltipBaseClass + " right-full mr-1.5 group-hover:translate-x-0.5 top-1/2 -translate-y-1/2" }>
 						{ tooltipText }
 					</div>
 				case "right":
-					<div class={ "absolute hidden left-full ml-1 transition-all duration-300 group-hover:-translate-x-0.5 group-hover:flex top-1/2 transform -translate-y-1/2 w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }>
+					<div class={ tooltipBaseClass + " left-full ml-1.5 group-hover:-translate-x-0.5 top-1/2 -translate-y-1/2" }>
 						{ tooltipText }
 					</div>
 			}
