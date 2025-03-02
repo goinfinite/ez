@@ -60,11 +60,11 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 		>
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[3%] overflow-x-hidden py-3">Id</th>
-					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Status</th>
-					<th scope="col" class="w-[40%] overflow-x-hidden py-3">Results</th>
-					<th scope="col" class="w-[18%] overflow-x-hidden py-3">Settings</th>
-					<th scope="col" class="w-[14%] py-3"></th>
+					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[22.5%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[42.5%] overflow-x-hidden py-3">Results</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%]"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -72,10 +72,10 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 					<!-- Backup Task Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("backupTaskEntity_"+backupTaskEntity.TaskId.String(), backupTaskEntity)
-						<td class="w-[3%] overflow-x-hidden px-3 py-2">
+						<td class="w-[5%] overflow-x-hidden px-3 py-2">
 							{ backupTaskEntity.TaskId.String() }
 						</td>
-						<td class="w-[20%] overflow-x-hidden p-3">
+						<td class="w-[22.5%] overflow-x-hidden p-3">
 							{{ statusColor := "ez-200" }}
 							{{ statusIcon := "ph-check-circle" }}
 							switch backupTaskEntity.TaskStatus {
@@ -124,7 +124,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[40%] space-y-3 overflow-x-hidden px-6 py-3 text-xs">
+						<td class="w-[42.5%] space-y-3 overflow-x-hidden px-6 py-3 text-xs">
 							<p>
 								<span class="text-[10px] font-bold uppercase">Total Size:</span>
 								{ uiHelper.FormatPointer(backupTaskEntity.SizeBytes) }
@@ -175,7 +175,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</p>
 							</div>
 						</td>
-						<td class="w-[18%] overflow-x-hidden p-3">
+						<td class="w-[20%] overflow-x-hidden p-3">
 							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 								<tbody>
 									<tr>
@@ -229,8 +229,8 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[14%] p-2">
-							<div class="flex flex-wrap items-center justify-center gap-1">
+						<td class="w-[10%]">
+							<div class="flex flex-col items-center justify-center gap-2">
 								if backupTaskEntity.TaskStatus == valueObject.BackupTaskStatusCompleted {
 									@componentStructural.IconButtonWithTooltip(
 										"create-task-archive", componentStructural.IconButtonShapeCircular,
@@ -242,13 +242,13 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 										"restore-task", componentStructural.IconButtonShapeCircular,
 										"ph-clock-clockwise", "ez-300", "ez-200",
 										"openRestoreTaskModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Restore", "ez-300", "bottom",
+										"Restore", "ez-300", "left",
 									)
 									@componentStructural.IconButtonWithTooltip(
 										"delete-task", componentStructural.IconButtonShapeCircular,
 										"ph-trash", "red-900", "red-700",
 										"openDeleteTaskModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Delete", "red-700", "right",
+										"Delete", "red-700", "left",
 									)
 								}
 							</div>
@@ -400,8 +400,8 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 		>
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Id</th>
-					<th scope="col" class="w-[22.5%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[25%] overflow-x-hidden py-3">Status</th>
 					<th scope="col" class="w-[45%] overflow-x-hidden py-3">Settings</th>
 					<th scope="col" class="w-[10%] py-3"></th>
 				</tr>
@@ -411,12 +411,15 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 					<!-- Backup Job Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("backupJobEntity_"+backupJobEntity.JobId.String(), backupJobEntity)
-						<td class="w-[22.5%] text-clip px-3 py-2 text-left text-xs">
-							{ backupJobEntity.JobId.String() }
-							<br/>
-							{ uiHelper.FormatPointer(backupJobEntity.JobDescription) }
+						<td class="w-[20%] text-clip px-3 py-2 text-left">
+							<p class="font-bold">
+								<span class="text-xs">#</span>{ backupJobEntity.JobId.String() }
+							</p>
+							<p class="text-xs">
+								{ uiHelper.FormatPointer(backupJobEntity.JobDescription) }
+							</p>
 						</td>
-						<td class="w-[22.5%] overflow-x-hidden p-3">
+						<td class="w-[25%] overflow-x-hidden p-3">
 							{{ statusText := "enabled" }}
 							{{ statusColor := "ez-200" }}
 							{{ statusIcon := "ph-check-circle" }}
@@ -508,7 +511,7 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											RetentionStrategy
+											Retention Strategy
 										</td>
 										<td class="px-2 py-1">
 											{ backupJobEntity.RetentionStrategy.String() }
@@ -532,33 +535,38 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Max Task Retention Count
+											Max
 										</td>
-										<td class="px-2 py-1">
-											{ uiHelper.FormatPointer(backupJobEntity.MaxTaskRetentionCount) }
+										<td class="p-0">
+											<table class="w-full table-auto text-center">
+												<tr>
+													<td class="bg-neutral-50/10 px-2 py-1">
+														Tasks Count
+													</td>
+													<td class="px-2 py-1">
+														{ uiHelper.FormatPointer(backupJobEntity.MaxTaskRetentionCount) }
+													</td>
+													<td class="bg-neutral-50/10 px-2 py-1">
+														Retention Days
+													</td>
+													<td class="px-2 py-1">
+														{ uiHelper.FormatPointer(backupJobEntity.MaxTaskRetentionDays) }
+													</td>
+													<td class="bg-neutral-50/10 px-2 py-1">
+														CPUs
+													</td>
+													<td class="px-2 py-1">
+														{ uiHelper.FormatPointer(backupJobEntity.MaxConcurrentCpuCores) }
+													</td>
+												</tr>
+											</table>
 										</td>
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Max Task Retention Days
+											ContainerAccountIds
 										</td>
-										<td class="px-2 py-1">
-											{ uiHelper.FormatPointer(backupJobEntity.MaxTaskRetentionDays) }
-										</td>
-									</tr>
-									<tr class="border-y-2 border-neutral-50/5">
-										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Max Concurrent Cpu Cores
-										</td>
-										<td class="px-2 py-1">
-											{ uiHelper.FormatPointer(backupJobEntity.MaxConcurrentCpuCores) }
-										</td>
-									</tr>
-									<tr class="border-y-2 border-neutral-50/5">
-										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Container AccountIds
-										</td>
-										<td class="truncate px-2 py-1">
+										<td class="text-clip px-2 py-1">
 											{ templ.JSONString(backupJobEntity.ContainerAccountIds) }
 										</td>
 									</tr>
@@ -566,15 +574,15 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
 											ContainerIds
 										</td>
-										<td class="truncate px-2 py-1">
+										<td class="text-clip px-2 py-1">
 											{ templ.JSONString(backupJobEntity.ContainerIds) }
 										</td>
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Except Container AccountIds
+											Except ContainerAccountIds
 										</td>
-										<td class="truncate px-2 py-1">
+										<td class="text-clip px-2 py-1">
 											{ templ.JSONString(backupJobEntity.ExceptContainerAccountIds) }
 										</td>
 									</tr>
@@ -582,7 +590,7 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
 											Except ContainerIds
 										</td>
-										<td class="truncate px-2 py-1">
+										<td class="text-clip px-2 py-1">
 											{ templ.JSONString(backupJobEntity.ExceptContainerIds) }
 										</td>
 									</tr>
@@ -597,13 +605,13 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 								</tbody>
 							</table>
 						</td>
-						<td class="w-[10%] p-2">
-							<div class="flex flex-col items-center justify-center gap-1">
+						<td class="w-[10%]">
+							<div class="flex flex-col items-center justify-center gap-2">
 								@componentStructural.IconButtonWithTooltip(
 									"run-job", componentStructural.IconButtonShapeCircular,
 									"ph-queue", "cyan-900", "cyan-700",
 									"openRunJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Run Job Now", "ez-300", "left",
+									"Run Job Now", "cyan-700", "left",
 								)
 								@componentStructural.IconButtonWithTooltip(
 									"update-job", componentStructural.IconButtonShapeCircular,
