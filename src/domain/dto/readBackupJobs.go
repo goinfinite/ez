@@ -7,19 +7,19 @@ import (
 
 type ReadBackupJobsRequest struct {
 	Pagination               Pagination                           `json:"pagination"`
-	JobId                    *valueObject.BackupJobId             `json:"jobId,omitempty"`
-	JobStatus                *bool                                `json:"jobStatus,omitempty"`
-	AccountId                *valueObject.AccountId               `json:"accountId,omitempty"`
-	DestinationId            *valueObject.BackupDestinationId     `json:"destinationId,omitempty"`
-	RetentionStrategy        *valueObject.BackupRetentionStrategy `json:"retentionStrategy,omitempty"`
-	ArchiveCompressionFormat *valueObject.CompressionFormat       `json:"archiveCompressionFormat,omitempty"`
-	LastRunStatus            *valueObject.BackupTaskStatus        `json:"lastRunStatus,omitempty"`
-	LastRunBeforeAt          *valueObject.UnixTime                `json:"lastRunBeforeAt,omitempty"`
-	LastRunAfterAt           *valueObject.UnixTime                `json:"lastRunAfterAt,omitempty"`
-	NextRunBeforeAt          *valueObject.UnixTime                `json:"nextRunBeforeAt,omitempty"`
-	NextRunAfterAt           *valueObject.UnixTime                `json:"nextRunAfterAt,omitempty"`
-	CreatedBeforeAt          *valueObject.UnixTime                `json:"createdBeforeAt,omitempty"`
-	CreatedAfterAt           *valueObject.UnixTime                `json:"createdAfterAt,omitempty"`
+	JobId                    *valueObject.BackupJobId             `json:"jobId"`
+	JobStatus                *bool                                `json:"jobStatus"`
+	AccountId                *valueObject.AccountId               `json:"accountId"`
+	DestinationId            *valueObject.BackupDestinationId     `json:"destinationId"`
+	RetentionStrategy        *valueObject.BackupRetentionStrategy `json:"retentionStrategy"`
+	ArchiveCompressionFormat *valueObject.CompressionFormat       `json:"archiveCompressionFormat"`
+	LastRunStatus            *valueObject.BackupTaskStatus        `json:"lastRunStatus"`
+	LastRunBeforeAt          *valueObject.UnixTime                `json:"lastRunBeforeAt"`
+	LastRunAfterAt           *valueObject.UnixTime                `json:"lastRunAfterAt"`
+	NextRunBeforeAt          *valueObject.UnixTime                `json:"nextRunBeforeAt"`
+	NextRunAfterAt           *valueObject.UnixTime                `json:"nextRunAfterAt"`
+	CreatedBeforeAt          *valueObject.UnixTime                `json:"createdBeforeAt"`
+	CreatedAfterAt           *valueObject.UnixTime                `json:"createdAfterAt"`
 }
 
 type ReadBackupJobsResponse struct {
