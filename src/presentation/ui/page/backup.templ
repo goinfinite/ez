@@ -10,13 +10,14 @@ import "github.com/goinfinite/ez/src/domain/entity"
 import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 
 templ BackupIndex(
-	readBackupTasksResponse dto.ReadBackupTasksResponse,
+	readTasksRequest dto.ReadBackupTasksRequest,
+	readTasksResponse dto.ReadBackupTasksResponse,
 	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 	readBackupJobsResponse dto.ReadBackupJobsResponse,
 	readBackupDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
 	<!-- BackupIndex JavaScript -->
-	<script type="text/javascript" src="/assets/local-states/backup.js"></script>
+	<script type="text/javascript" src="/assets/local-states/page/backup.js"></script>
 	<!-- BackupIndex HTML -->
 	<div x-data="backupIndex">
 		@componentStructural.HorizontalTabHeader(
@@ -29,7 +30,7 @@ templ BackupIndex(
 		)
 		<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] p-4">
 			<div x-show="backupFeatureTabSelected === 'tasks'">
-				@BackupTasks(readBackupTasksResponse, readBackupTaskArchivesResponse)
+				@BackupTasks(readTasksRequest, readTasksResponse, readBackupTaskArchivesResponse)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'jobs'">
 				@BackupJobs(readBackupJobsResponse)
@@ -41,7 +42,10 @@ templ BackupIndex(
 	</div>
 }
 
-templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
+templ BackupTasksTable(
+	readTasksRequest dto.ReadBackupTasksRequest,
+	readTasksResponse dto.ReadBackupTasksResponse,
+) {
 	<!-- Backup Tasks Table -->
 	<div
 		id="backup-tasks-table"
@@ -50,11 +54,11 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 		hx-select="#backup-tasks-table"
 		hx-target="#backup-tasks-table"
 		hx-swap="outerHTML transition:true"
-		@update:backup-tasks-pagination="reloadBackupTasksTable()"
-		@update:backup-tasks-record-filters="reloadBackupTasksTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			@componentStructural.RecordFilters("backupTasks", "backupTasksFilters")
+			@componentStructural.ReadRequestSettingsBar(
+				"backupTasks", "/backup/", "#backup-tasks-table", readTasksRequest,
+			)
 		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
@@ -69,7 +73,7 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 				</tr>
 			</thead>
 			<tbody>
-				for _, backupTaskEntity := range readBackupTasksResponse.Tasks {
+				for _, backupTaskEntity := range readTasksResponse.Tasks {
 					<!-- Backup Task Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("backupTaskEntity_"+backupTaskEntity.TaskId.String(), backupTaskEntity)
@@ -253,20 +257,13 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 						</td>
 					</tr>
 				}
-				if len(readBackupTasksResponse.Tasks) == 0 {
+				if len(readTasksResponse.Tasks) == 0 {
 					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 						<td class="px-3 py-2" colspan="12">No backup tasks created yet.</td>
 					</tr>
 				}
 			</tbody>
 		</table>
-		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			@componentStructural.Pagination(
-				"backupTasks",
-				readBackupTasksResponse.Pagination, "backupTasksPagination.pageNumber",
-				"backupTasksPagination.itemsPerPage",
-			)
-		</div>
 	</div>
 }
 
@@ -343,17 +340,18 @@ templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskA
 			</tbody>
 		</table>
 		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			@componentStructural.Pagination(
-				"backupTaskArchives",
-				readBackupTaskArchivesResponse.Pagination, "backupTaskArchivesPagination.pageNumber",
-				"backupTaskArchivesPagination.itemsPerPage",
-			)
+			//@componentStructural.Pagination(
+			//	"backupTaskArchives",
+			//	readBackupTaskArchivesResponse.Pagination, "backupTaskArchivesPagination.pageNumber",
+			//	"backupTaskArchivesPagination.itemsPerPage",
+			//)
 		</div>
 	</div>
 }
 
 templ BackupTasks(
-	readBackupTasksResponse dto.ReadBackupTasksResponse,
+	readTasksRequest dto.ReadBackupTasksRequest,
+	readTasksResponse dto.ReadBackupTasksResponse,
 	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 ) {
 	<div class="mb-4">
@@ -363,7 +361,9 @@ templ BackupTasks(
 			"ph-package",
 		)
 	</div>
-	@BackupTasksTable(readBackupTasksResponse)
+	<div x-data="backupTasks">
+		@BackupTasksTable(readTasksRequest, readTasksResponse)
+	</div>
 	<br/>
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
@@ -391,7 +391,7 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 		@update:backup-jobs-record-filters="reloadBackupJobsTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			@componentStructural.RecordFilters("backupJobs", "backupJobsFilters")
+			//@componentStructural.RecordFilters("backupJobs", "backupJobsFilters")
 		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
@@ -632,11 +632,11 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 			</tbody>
 		</table>
 		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			@componentStructural.Pagination(
-				"backupJobs",
-				readBackupJobsResponse.Pagination, "backupJobsPagination.pageNumber",
-				"backupJobsPagination.itemsPerPage",
-			)
+			//@componentStructural.Pagination(
+			//	"backupJobs",
+			//	readBackupJobsResponse.Pagination, "backupJobsPagination.pageNumber",
+			//	"backupJobsPagination.itemsPerPage",
+			//)
 		</div>
 	</div>
 }
@@ -665,7 +665,7 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 		@update:backup-destinations-record-filters="reloadBackupDestinationsTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			@componentStructural.RecordFilters("backupDestinations", "backupDestinationsFilters")
+			//@componentStructural.RecordFilters("backupDestinations", "backupDestinationsFilters")
 		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
@@ -965,12 +965,12 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 			</tbody>
 		</table>
 		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			@componentStructural.Pagination(
-				"backupDestinations",
-				destinationsResponse.Pagination,
-				"backupDestinationsPagination.pageNumber",
-				"backupDestinationsPagination.itemsPerPage",
-			)
+			//@componentStructural.Pagination(
+			//	"backupDestinations",
+			//	destinationsResponse.Pagination,
+			//	"backupDestinationsPagination.pageNumber",
+			//	"backupDestinationsPagination.itemsPerPage",
+			//)
 		</div>
 	</div>
 }
