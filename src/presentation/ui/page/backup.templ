@@ -176,7 +176,12 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 								</p>
 							</div>
 						</td>
-						<td class="w-[20%] overflow-x-hidden p-3">
+						<td class="w-[20%] space-y-2 overflow-x-hidden p-3">
+							@componentMisc.Tag(
+								"ph-user", "",
+								backupTaskEntity.AccountUsername.String()+" <small>("+backupTaskEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
 							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 								<tbody>
 									<tr>
@@ -193,14 +198,6 @@ templ BackupTasksTable(readBackupTasksResponse dto.ReadBackupTasksResponse) {
 										</td>
 										<td class="px-2 py-1">
 											{ backupTaskEntity.DestinationId.String() }
-										</td>
-									</tr>
-									<tr class="border-y-2 border-neutral-50/5">
-										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											AccountId
-										</td>
-										<td class="px-2 py-1">
-											{ backupTaskEntity.AccountId.String() }
 										</td>
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
@@ -412,10 +409,15 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 					<!-- Backup Job Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("backupJobEntity_"+backupJobEntity.JobId.String(), backupJobEntity)
-						<td class="w-[20%] text-clip px-3 py-2 text-left">
+						<td class="w-[20%] space-y-2 text-clip px-3 py-2 text-left">
 							<p class="font-bold">
 								<span class="text-xs">#</span>{ backupJobEntity.JobId.String() }
 							</p>
+							@componentMisc.Tag(
+								"ph-user", "",
+								backupJobEntity.AccountUsername.String()+" <small>("+backupJobEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
 							<p class="text-xs">
 								{ uiHelper.FormatPointer(backupJobEntity.JobDescription) }
 							</p>
@@ -494,14 +496,6 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 						<td class="w-[45%] overflow-x-hidden p-3">
 							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 								<tbody>
-									<tr>
-										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											AccountId
-										</td>
-										<td class="rounded-tr-md px-2 py-1">
-											{ backupJobEntity.AccountId.String() }
-										</td>
-									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
 										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
 											DestinationIds
@@ -692,13 +686,158 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 							"backupDestinationEntity_"+destinationEntity.DestinationId.String(),
 							destinationEntity,
 						)
-						<td class="w-[20%] text-clip px-3 py-2 text-left">
-							<p class="font-bold">
-								<span class="text-xs">#</span>{ destinationEntity.DestinationId.String() }
+						<td class="w-[20%] space-y-2 text-clip px-3 py-2 text-left">
+							<p>
+								{ destinationEntity.DestinationName.String() }
+								<span class="font-bold">
+									<span class="text-xs">#</span>{ destinationEntity.DestinationId.String() }
+								</span>
 							</p>
 							<p class="text-xs">
 								{ uiHelper.FormatPointer(destinationEntity.DestinationDescription) }
 							</p>
+							@componentMisc.Tag(
+								"ph-user", "",
+								destinationEntity.AccountUsername.String()+" <small>("+destinationEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
+							{{ destinationTypeIcon := "ph-house-line" }}
+							{{ destinationTypeColor := "zinc-700" }}
+							switch destinationEntity.DestinationType {
+								case valueObject.BackupDestinationTypeRemoteHost:
+									{{ destinationTypeIcon = "ph-hard-drives" }}
+									{{ destinationTypeColor = "cyan-700" }}
+								case valueObject.BackupDestinationTypeObjectStorage:
+									{{ destinationTypeIcon = "ph-cube" }}
+									{{ destinationTypeColor = "yellow-700" }}
+							}
+							@componentMisc.Tag(
+								destinationTypeIcon, "",
+								destinationEntity.DestinationType.String(), destinationTypeColor,
+							)
+						</td>
+						<td class="w-[25%] overflow-x-hidden p-3">
+							<table class="mt-2 w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Total Space Usage
+										</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ uiHelper.FormatPointer(destinationEntity.TotalSpaceUsageBytes) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Total Space Usage (%)
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(destinationEntity.TotalSpaceUsagePercent) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Updated At
+										</td>
+										<td class="px-2 py-1">
+											{ destinationEntity.UpdatedAt.ReadAsRfcDate() }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Created At
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ destinationEntity.CreatedAt.ReadAsRfcDate() }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td class="w-[45%] space-y-4 overflow-x-hidden p-3">
+							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											DestinationPath
+										</td>
+										<td class="px-2 py-1">
+											{ destinationEntity.DestinationPath.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Min Free Local Storage (%)
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(destinationEntity.MinLocalStorageFreePercent) }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Max Destination Storage Usage (%)
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ uiHelper.FormatPointer(destinationEntity.MaxDestinationStorageUsagePercent) }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							{{ isRemoteDestination := destinationEntity.DestinationType == valueObject.BackupDestinationTypeRemoteHost || destinationEntity.DestinationType == valueObject.BackupDestinationTypeObjectStorage }}
+							if isRemoteDestination {
+								<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+									<tbody>
+										<tr>
+											<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Max Concurrent Connections
+											</td>
+											<td class="rounded-tr-md px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.MaxConcurrentConnections) }
+											</td>
+										</tr>
+										<tr class="border-y-2 border-neutral-50/5">
+											<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Max Download Bytes
+											</td>
+											<td class="px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.DownloadBytesSecRateLimit) }
+											</td>
+										</tr>
+										<tr class="border-y-2 border-neutral-50/5">
+											<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Max Upload Bytes
+											</td>
+											<td class="px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.UploadBytesSecRateLimit) }
+											</td>
+										</tr>
+										<tr>
+											<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												SkipCertificateVerification
+											</td>
+											<td class="rounded-br-md px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.SkipCertificateVerification) }
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							}
+						</td>
+						<td class="w-[10%]">
+							<div class="flex flex-col items-center justify-center gap-2">
+								@componentStructural.IconButtonWithTooltip(
+									"update-destination", componentStructural.IconButtonShapeCircular,
+									"ph-pencil", "ez-300", "ez-200",
+									"openUpdateDestinationModal('"+destinationEntity.DestinationId.String()+"')",
+									"Update", "ez-300", "left",
+								)
+								@componentStructural.IconButtonWithTooltip(
+									"delete-destination", componentStructural.IconButtonShapeCircular,
+									"ph-trash", "red-900", "red-700",
+									"openDeleteDestinationModal('"+destinationEntity.DestinationId.String()+"')",
+									"Delete", "red-700", "left",
+								)
+							</div>
 						</td>
 					</tr>
 				}
@@ -739,7 +878,7 @@ templ BackupDestinations(destinationsResponse BackupDestinationModifiedResponseD
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
 			"Destinations",
-			"Manage and monitor backup destinations, including adding, editing, or deleting destinations.",
+			"Manage local, remote and object storage destinations to be used on backup jobs.",
 			"ph-barn",
 		)
 	</div>
