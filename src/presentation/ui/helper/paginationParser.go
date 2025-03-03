@@ -11,9 +11,9 @@ func PaginationParser(
 	itemName string,
 	defaultSortColumnName string,
 ) map[string]interface{} {
-	itemNamePageNumber := uint16(0)
+	itemNamePageNumber := uint32(0)
 	if echoContext.QueryParam(itemName+"PageNumber") != "" {
-		itemNamePageNumber, _ = voHelper.InterfaceToUint16(
+		itemNamePageNumber, _ = voHelper.InterfaceToUint32(
 			echoContext.QueryParam(itemName + "PageNumber"),
 		)
 	}
