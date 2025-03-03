@@ -35,28 +35,34 @@ func NewBackupPresenter(
 func (presenter *BackupPresenter) ReadTasks(
 	echoContext echo.Context,
 	backupService *service.BackupService,
-) (tasksResponseDto dto.ReadBackupTasksResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "task", "id")
+) (readRequestDto dto.ReadBackupTasksRequest, readResponseDto dto.ReadBackupTasksResponse) {
+	paginationMap := uiHelper.PaginationParser(echoContext, "backupTasks", "id")
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "task", dto.ReadBackupTasksRequest{},
+		echoContext, "backupTasks", dto.ReadBackupTasksRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
 
+	readRequestDto, err := backupService.ReadTaskRequestFactory(serviceRequestBody)
+	if err != nil {
+		slog.Debug("ReadTaskRequestFactoryFailure", slog.Any("error", err))
+		return readRequestDto, readResponseDto
+	}
+
 	readBackupTasksServiceOutput := backupService.ReadTask(serviceRequestBody)
 	if readBackupTasksServiceOutput.Status != service.Success {
 		slog.Debug("ReadBackupTasksFailure", slog.Any("serviceOutput", readBackupTasksServiceOutput))
-		return tasksResponseDto
+		return readRequestDto, readResponseDto
 	}
 
 	var assertOk bool
-	tasksResponseDto, assertOk = readBackupTasksServiceOutput.Body.(dto.ReadBackupTasksResponse)
+	readResponseDto, assertOk = readBackupTasksServiceOutput.Body.(dto.ReadBackupTasksResponse)
 	if !assertOk {
 		slog.Debug("AssertBackupTasksResponseFailure")
-		return tasksResponseDto
+		return readRequestDto, readResponseDto
 	}
 
-	return tasksResponseDto
+	return readRequestDto, readResponseDto
 }
 
 func (presenter *BackupPresenter) ReadTaskArchives(
@@ -184,13 +190,14 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
-	tasksResponseDto := presenter.ReadTasks(c, backupService)
+	tasksReadRequestDto, tasksReadResponseDto := presenter.ReadTasks(c, backupService)
 	archivesResponseDto := presenter.ReadTaskArchives(c, backupService)
 	jobsResponseDto := presenter.ReadJobs(c, backupService)
 	destinationsResponseDto := presenter.ReadDestinations(c, backupService)
 
 	pageContent := page.BackupIndex(
-		tasksResponseDto, archivesResponseDto, jobsResponseDto, destinationsResponseDto,
+		tasksReadRequestDto, tasksReadResponseDto,
+		archivesResponseDto, jobsResponseDto, destinationsResponseDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)

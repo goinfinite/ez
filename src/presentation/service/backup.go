@@ -1344,66 +1344,70 @@ func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput
 	return NewServiceOutput(Created, "BackupTaskCreated")
 }
 
-func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {
+func (service *BackupService) ReadTaskRequestFactory(
+	serviceInput map[string]interface{},
+) (readRequest dto.ReadBackupTasksRequest, err error) {
 	var taskIdPtr *valueObject.BackupTaskId
-	if input["taskId"] != nil {
-		taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+	if serviceInput["taskId"] != nil {
+		taskId, err := valueObject.NewBackupTaskId(serviceInput["taskId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		taskIdPtr = &taskId
 	}
 
 	var accountIdPtr *valueObject.AccountId
-	if input["accountId"] != nil {
-		accountId, err := valueObject.NewAccountId(input["accountId"])
+	if serviceInput["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(serviceInput["accountId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		accountIdPtr = &accountId
 	}
 
 	var jobIdPtr *valueObject.BackupJobId
-	if input["jobId"] != nil {
-		jobId, err := valueObject.NewBackupJobId(input["jobId"])
+	if serviceInput["jobId"] != nil {
+		jobId, err := valueObject.NewBackupJobId(serviceInput["jobId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		jobIdPtr = &jobId
 	}
 
 	var destinationIdPtr *valueObject.BackupDestinationId
-	if input["destinationId"] != nil {
-		destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+	if serviceInput["destinationId"] != nil {
+		destinationId, err := valueObject.NewBackupDestinationId(serviceInput["destinationId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		destinationIdPtr = &destinationId
 	}
 
 	var taskStatusPtr *valueObject.BackupTaskStatus
-	if input["taskStatus"] != nil {
-		taskStatus, err := valueObject.NewBackupTaskStatus(input["taskStatus"])
+	if serviceInput["taskStatus"] != nil {
+		taskStatus, err := valueObject.NewBackupTaskStatus(serviceInput["taskStatus"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		taskStatusPtr = &taskStatus
 	}
 
 	var retentionStrategyPtr *valueObject.BackupRetentionStrategy
-	if input["retentionStrategy"] != nil {
-		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(input["retentionStrategy"])
+	if serviceInput["retentionStrategy"] != nil {
+		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(
+			serviceInput["retentionStrategy"],
+		)
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		retentionStrategyPtr = &retentionStrategy
 	}
 
 	var containerIdPtr *valueObject.ContainerId
-	if input["containerId"] != nil {
-		containerId, err := valueObject.NewContainerId(input["containerId"])
+	if serviceInput["containerId"] != nil {
+		containerId, err := valueObject.NewContainerId(serviceInput["containerId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequest, err
 		}
 		containerIdPtr = &containerId
 	}
@@ -1412,16 +1416,16 @@ func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutp
 		"startedBeforeAt", "startedAfterAt", "finishedBeforeAt", "finishedAfterAt",
 		"createdBeforeAt", "createdAfterAt",
 	}
-	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, serviceInput)
 
 	requestPagination, err := serviceHelper.PaginationParser(
-		input, useCase.BackupTasksDefaultPagination,
+		serviceInput, useCase.BackupTasksDefaultPagination,
 	)
 	if err != nil {
-		return NewServiceOutput(UserError, err)
+		return readRequest, err
 	}
 
-	requestDto := dto.ReadBackupTasksRequest{
+	return dto.ReadBackupTasksRequest{
 		Pagination:        requestPagination,
 		TaskId:            taskIdPtr,
 		AccountId:         accountIdPtr,
@@ -1436,9 +1440,16 @@ func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutp
 		FinishedAfterAt:   timeParamPtrs["finishedAfterAt"],
 		CreatedBeforeAt:   timeParamPtrs["createdBeforeAt"],
 		CreatedAfterAt:    timeParamPtrs["createdAfterAt"],
+	}, nil
+}
+
+func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {
+	readRequestDto, err := service.ReadTaskRequestFactory(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err)
 	}
 
-	responseDto, err := useCase.ReadBackupTasks(service.backupQueryRepo, requestDto)
+	responseDto, err := useCase.ReadBackupTasks(service.backupQueryRepo, readRequestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
