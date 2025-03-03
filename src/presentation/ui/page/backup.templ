@@ -13,7 +13,8 @@ templ BackupIndex(
 	readTasksRequest dto.ReadBackupTasksRequest,
 	readTasksResponse dto.ReadBackupTasksResponse,
 	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
-	readBackupJobsResponse dto.ReadBackupJobsResponse,
+	readJobsRequest dto.ReadBackupJobsRequest,
+	readJobsResponse dto.ReadBackupJobsResponse,
 	readBackupDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
 	<!-- BackupIndex JavaScript -->
@@ -33,7 +34,7 @@ templ BackupIndex(
 				@BackupTasks(readTasksRequest, readTasksResponse, readBackupTaskArchivesResponse)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'jobs'">
-				@BackupJobs(readBackupJobsResponse)
+				@BackupJobs(readJobsRequest, readJobsResponse)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'destinations'">
 				@BackupDestinations(readBackupDestinationsResponse)
@@ -378,7 +379,10 @@ templ BackupTasks(
 	</p>
 }
 
-templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
+templ BackupJobsTable(
+	readJobsRequest dto.ReadBackupJobsRequest,
+	readJobsResponse dto.ReadBackupJobsResponse,
+) {
 	<!-- Backup Jobs Table -->
 	<div
 		id="backup-jobs-table"
@@ -391,7 +395,9 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 		@update:backup-jobs-record-filters="reloadBackupJobsTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			//@componentStructural.RecordFilters("backupJobs", "backupJobsFilters")
+			@componentStructural.ReadRequestSettingsBar(
+				"backupJobs", "/backup/", "#backup-jobs-table", readJobsRequest,
+			)
 		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
@@ -405,7 +411,7 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 				</tr>
 			</thead>
 			<tbody>
-				for _, backupJobEntity := range readBackupJobsResponse.Jobs {
+				for _, backupJobEntity := range readJobsResponse.Jobs {
 					<!-- Backup Job Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("backupJobEntity_"+backupJobEntity.JobId.String(), backupJobEntity)
@@ -624,7 +630,7 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 						</td>
 					</tr>
 				}
-				if len(readBackupJobsResponse.Jobs) == 0 {
+				if len(readJobsResponse.Jobs) == 0 {
 					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 						<td class="px-3 py-2" colspan="12">No backup jobs created yet.</td>
 					</tr>
@@ -634,14 +640,17 @@ templ BackupJobsTable(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
 			//@componentStructural.Pagination(
 			//	"backupJobs",
-			//	readBackupJobsResponse.Pagination, "backupJobsPagination.pageNumber",
+			//	readJobsResponse.Pagination, "backupJobsPagination.pageNumber",
 			//	"backupJobsPagination.itemsPerPage",
 			//)
 		</div>
 	</div>
 }
 
-templ BackupJobs(readBackupJobsResponse dto.ReadBackupJobsResponse) {
+templ BackupJobs(
+	readJobsRequest dto.ReadBackupJobsRequest,
+	readJobsResponse dto.ReadBackupJobsResponse,
+) {
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
 			"Jobs",
@@ -649,7 +658,7 @@ templ BackupJobs(readBackupJobsResponse dto.ReadBackupJobsResponse) {
 			"ph-factory",
 		)
 	</div>
-	@BackupJobsTable(readBackupJobsResponse)
+	@BackupJobsTable(readJobsRequest, readJobsResponse)
 }
 
 templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResponseDto) {

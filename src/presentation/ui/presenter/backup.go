@@ -69,9 +69,9 @@ func (presenter *BackupPresenter) ReadTaskArchives(
 	echoContext echo.Context,
 	backupService *service.BackupService,
 ) (archivesResponseDto dto.ReadBackupTaskArchivesResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "archive", "id")
+	paginationMap := uiHelper.PaginationParser(echoContext, "backupArchives", "id")
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "archive", dto.ReadBackupTaskArchivesRequest{},
+		echoContext, "backupArchives", dto.ReadBackupTaskArchivesRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
@@ -100,13 +100,19 @@ func (presenter *BackupPresenter) ReadTaskArchives(
 func (presenter *BackupPresenter) ReadJobs(
 	echoContext echo.Context,
 	backupService *service.BackupService,
-) (jobsResponseDto dto.ReadBackupJobsResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "job", "id")
+) (readRequestDto dto.ReadBackupJobsRequest, readResponseDto dto.ReadBackupJobsResponse) {
+	paginationMap := uiHelper.PaginationParser(echoContext, "backupJobs", "id")
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "job", dto.ReadBackupJobsRequest{},
+		echoContext, "backupJobs", dto.ReadBackupJobsRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
+
+	readRequestDto, err := backupService.ReadJobRequestFactory(serviceRequestBody)
+	if err != nil {
+		slog.Debug("ReadJobRequestFactoryFailure", slog.Any("error", err))
+		return readRequestDto, readResponseDto
+	}
 
 	readBackupJobsServiceOutput := backupService.ReadJob(serviceRequestBody)
 	if readBackupJobsServiceOutput.Status != service.Success {
@@ -114,26 +120,26 @@ func (presenter *BackupPresenter) ReadJobs(
 			"ReadBackupJobsFailure",
 			slog.Any("serviceOutput", readBackupJobsServiceOutput),
 		)
-		return jobsResponseDto
+		return readRequestDto, readResponseDto
 	}
 
 	var assertOk bool
-	jobsResponseDto, assertOk = readBackupJobsServiceOutput.Body.(dto.ReadBackupJobsResponse)
+	readResponseDto, assertOk = readBackupJobsServiceOutput.Body.(dto.ReadBackupJobsResponse)
 	if !assertOk {
 		slog.Debug("AssertBackupJobsResponseFailure")
-		return jobsResponseDto
+		return readRequestDto, readResponseDto
 	}
 
-	return jobsResponseDto
+	return readRequestDto, readResponseDto
 }
 
 func (presenter *BackupPresenter) ReadDestinations(
 	echoContext echo.Context,
 	backupService *service.BackupService,
 ) (destinationsResponseDto page.BackupDestinationModifiedResponseDto) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "destination", "id")
+	paginationMap := uiHelper.PaginationParser(echoContext, "backupDestinations", "id")
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "destination", dto.ReadBackupDestinationsRequest{},
+		echoContext, "backupDestinations", dto.ReadBackupDestinationsRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
@@ -192,12 +198,14 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 
 	tasksReadRequestDto, tasksReadResponseDto := presenter.ReadTasks(c, backupService)
 	archivesResponseDto := presenter.ReadTaskArchives(c, backupService)
-	jobsResponseDto := presenter.ReadJobs(c, backupService)
+	jobsReadRequestDto, jobsReadResponseDto := presenter.ReadJobs(c, backupService)
 	destinationsResponseDto := presenter.ReadDestinations(c, backupService)
 
 	pageContent := page.BackupIndex(
 		tasksReadRequestDto, tasksReadResponseDto,
-		archivesResponseDto, jobsResponseDto, destinationsResponseDto,
+		archivesResponseDto,
+		jobsReadRequestDto, jobsReadResponseDto,
+		destinationsResponseDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)

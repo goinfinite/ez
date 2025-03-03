@@ -820,66 +820,68 @@ func (service *BackupService) DeleteDestination(input map[string]interface{}) Se
 	return NewServiceOutput(Success, "BackupDestinationDeleted")
 }
 
-func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutput {
+func (service *BackupService) ReadJobRequestFactory(
+	serviceInput map[string]interface{},
+) (readRequestDto dto.ReadBackupJobsRequest, err error) {
 	var jobIdPtr *valueObject.BackupJobId
-	if input["jobId"] != nil {
-		jobId, err := valueObject.NewBackupJobId(input["jobId"])
+	if serviceInput["jobId"] != nil {
+		jobId, err := valueObject.NewBackupJobId(serviceInput["jobId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		jobIdPtr = &jobId
 	}
 
 	var jobStatusPtr *bool
-	if input["jobStatus"] != nil {
-		jobStatus, err := voHelper.InterfaceToBool(input["jobStatus"])
+	if serviceInput["jobStatus"] != nil {
+		jobStatus, err := voHelper.InterfaceToBool(serviceInput["jobStatus"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidJobStatus"))
+			return readRequestDto, errors.New("InvalidJobStatus")
 		}
 		jobStatusPtr = &jobStatus
 	}
 
 	var accountIdPtr *valueObject.AccountId
-	if input["accountId"] != nil {
-		accountId, err := valueObject.NewAccountId(input["accountId"])
+	if serviceInput["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(serviceInput["accountId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		accountIdPtr = &accountId
 	}
 
 	var destinationIdPtr *valueObject.BackupDestinationId
-	if input["destinationId"] != nil {
-		destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+	if serviceInput["destinationId"] != nil {
+		destinationId, err := valueObject.NewBackupDestinationId(serviceInput["destinationId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		destinationIdPtr = &destinationId
 	}
 
 	var retentionStrategyPtr *valueObject.BackupRetentionStrategy
-	if input["retentionStrategy"] != nil {
-		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(input["retentionStrategy"])
+	if serviceInput["retentionStrategy"] != nil {
+		retentionStrategy, err := valueObject.NewBackupRetentionStrategy(serviceInput["retentionStrategy"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		retentionStrategyPtr = &retentionStrategy
 	}
 
 	var archiveCompressionFormatPtr *valueObject.CompressionFormat
-	if input["archiveCompressionFormat"] != nil {
-		archiveCompressionFormat, err := valueObject.NewCompressionFormat(input["archiveCompressionFormat"])
+	if serviceInput["archiveCompressionFormat"] != nil {
+		archiveCompressionFormat, err := valueObject.NewCompressionFormat(serviceInput["archiveCompressionFormat"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		archiveCompressionFormatPtr = &archiveCompressionFormat
 	}
 
 	var lastRunStatusPtr *valueObject.BackupTaskStatus
-	if input["lastRunStatus"] != nil {
-		lastRunStatus, err := valueObject.NewBackupTaskStatus(input["lastRunStatus"])
+	if serviceInput["lastRunStatus"] != nil {
+		lastRunStatus, err := valueObject.NewBackupTaskStatus(serviceInput["lastRunStatus"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidLastRunStatus"))
+			return readRequestDto, errors.New("InvalidLastRunStatus")
 		}
 		lastRunStatusPtr = &lastRunStatus
 	}
@@ -888,16 +890,16 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 		"lastRunBeforeAt", "lastRunAfterAt", "nextRunBeforeAt", "nextRunAfterAt",
 		"createdBeforeAt", "createdAfterAt",
 	}
-	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, serviceInput)
 
 	requestPagination, err := serviceHelper.PaginationParser(
-		input, useCase.BackupJobsDefaultPagination,
+		serviceInput, useCase.BackupJobsDefaultPagination,
 	)
 	if err != nil {
-		return NewServiceOutput(UserError, err)
+		return readRequestDto, err
 	}
 
-	requestDto := dto.ReadBackupJobsRequest{
+	return dto.ReadBackupJobsRequest{
 		Pagination:               requestPagination,
 		JobId:                    jobIdPtr,
 		JobStatus:                jobStatusPtr,
@@ -912,9 +914,16 @@ func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutpu
 		NextRunAfterAt:           timeParamPtrs["nextRunAfterAt"],
 		CreatedBeforeAt:          timeParamPtrs["createdBeforeAt"],
 		CreatedAfterAt:           timeParamPtrs["createdAfterAt"],
+	}, nil
+}
+
+func (service *BackupService) ReadJob(input map[string]interface{}) ServiceOutput {
+	readRequestDto, err := service.ReadJobRequestFactory(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
-	responseDto, err := useCase.ReadBackupJobs(service.backupQueryRepo, requestDto)
+	responseDto, err := useCase.ReadBackupJobs(service.backupQueryRepo, readRequestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -1346,12 +1355,12 @@ func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput
 
 func (service *BackupService) ReadTaskRequestFactory(
 	serviceInput map[string]interface{},
-) (readRequest dto.ReadBackupTasksRequest, err error) {
+) (readRequestDto dto.ReadBackupTasksRequest, err error) {
 	var taskIdPtr *valueObject.BackupTaskId
 	if serviceInput["taskId"] != nil {
 		taskId, err := valueObject.NewBackupTaskId(serviceInput["taskId"])
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		taskIdPtr = &taskId
 	}
@@ -1360,7 +1369,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 	if serviceInput["accountId"] != nil {
 		accountId, err := valueObject.NewAccountId(serviceInput["accountId"])
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		accountIdPtr = &accountId
 	}
@@ -1369,7 +1378,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 	if serviceInput["jobId"] != nil {
 		jobId, err := valueObject.NewBackupJobId(serviceInput["jobId"])
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		jobIdPtr = &jobId
 	}
@@ -1378,7 +1387,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 	if serviceInput["destinationId"] != nil {
 		destinationId, err := valueObject.NewBackupDestinationId(serviceInput["destinationId"])
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		destinationIdPtr = &destinationId
 	}
@@ -1387,7 +1396,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 	if serviceInput["taskStatus"] != nil {
 		taskStatus, err := valueObject.NewBackupTaskStatus(serviceInput["taskStatus"])
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		taskStatusPtr = &taskStatus
 	}
@@ -1398,7 +1407,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 			serviceInput["retentionStrategy"],
 		)
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		retentionStrategyPtr = &retentionStrategy
 	}
@@ -1407,7 +1416,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 	if serviceInput["containerId"] != nil {
 		containerId, err := valueObject.NewContainerId(serviceInput["containerId"])
 		if err != nil {
-			return readRequest, err
+			return readRequestDto, err
 		}
 		containerIdPtr = &containerId
 	}
@@ -1422,7 +1431,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 		serviceInput, useCase.BackupTasksDefaultPagination,
 	)
 	if err != nil {
-		return readRequest, err
+		return readRequestDto, err
 	}
 
 	return dto.ReadBackupTasksRequest{
