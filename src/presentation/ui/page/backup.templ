@@ -58,7 +58,8 @@ templ BackupTasksTable(
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.ReadRequestSettingsBar(
-				"backupTasks", "/backup/", "#backup-tasks-table", readTasksRequest,
+				"backupTasks", "/backup/", "#backup-tasks-table",
+				readTasksRequest, readTasksResponse.Pagination,
 			)
 		</div>
 		<table
@@ -391,12 +392,11 @@ templ BackupJobsTable(
 		hx-select="#backup-jobs-table"
 		hx-target="#backup-jobs-table"
 		hx-swap="outerHTML transition:true"
-		@update:backup-jobs-pagination="reloadBackupJobsTable()"
-		@update:backup-jobs-record-filters="reloadBackupJobsTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.ReadRequestSettingsBar(
-				"backupJobs", "/backup/", "#backup-jobs-table", readJobsRequest,
+				"backupJobs", "/backup/", "#backup-jobs-table",
+				readJobsRequest, readJobsResponse.Pagination,
 			)
 		</div>
 		<table

@@ -1,15 +1,22 @@
 package componentStructural
 
+import "github.com/goinfinite/ez/src/domain/dto"
+
 templ ReadRequestSettingsBar(
 	componentId, uiEndpoint, recordsDisplayElementId string,
 	readRequestDto interface{},
+	responsePaginationDto dto.Pagination,
 ) {
 	@templ.JSONScript(componentId+"ReadRequestDto", readRequestDto)
+	@templ.JSONScript(componentId+"PaginationDto", responsePaginationDto)
 	<script type="text/javascript" src="/assets/local-states/component/structural/readRequestSettingsBar.js"></script>
 	@templ.JSFuncCall(
 		"InitReadRequestSettingsLocalState", componentId, uiEndpoint, recordsDisplayElementId,
 	)
-	<div x-data={ componentId + "ReadRequestSettings" }>
+	<div
+		class="flex flex-row items-center justify-between"
+		x-data={ componentId + "ReadRequestSettings" }
+	>
 		<!-- RecordFilters -->
 		<div class="flex flex-row items-center justify-start gap-1.5">
 			<div class="flex flex-row flex-wrap items-center gap-2">
@@ -86,5 +93,9 @@ templ ReadRequestSettingsBar(
 				clear all
 			</button>
 		</div>
+		<!-- Pagination -->
+		@Pagination(
+			componentId, responsePaginationDto, "pagination.pageNumber", "pagination.itemsPerPage",
+		)
 	</div>
 }

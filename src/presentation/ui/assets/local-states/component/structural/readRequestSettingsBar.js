@@ -46,16 +46,18 @@ function InitReadRequestSettingsLocalState(
         const readRequestDto = JSON.parse(
           document.getElementById(componentId + "ReadRequestDto").textContent
         );
-        this.pagination = Object.assign({}, readRequestDto.pagination);
-        this.pagination.itemsPerPage = 5;
         this.filters = Object.assign({}, readRequestDto);
+        delete this.filters.pagination;
         for (let [filterKey, filterValue] of Object.entries(this.filters)) {
           if (filterValue === null) {
             this.filters[filterKey] = "";
           }
         }
 
-        delete this.filters.pagination;
+        this.pagination = JSON.parse(
+          document.getElementById(componentId + "PaginationDto").textContent
+        );
+
         document.addEventListener(
           "update:" + componentId + "-pagination",
           () => {
