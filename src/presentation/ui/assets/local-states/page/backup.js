@@ -3,4 +3,6 @@ document.addEventListener("alpine:init", () => {
     // Primary States
     backupFeatureTabSelected: "tasks",
   }));
+
+  Alpine.data("backupTasks", () => ({}));
 });
