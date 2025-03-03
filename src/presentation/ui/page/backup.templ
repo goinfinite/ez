@@ -708,9 +708,12 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 									{{ destinationTypeIcon = "ph-cube" }}
 									{{ destinationTypeColor = "yellow-700" }}
 							}
+							{{ destinationTypeText := destinationEntity.DestinationType.String() }}
+							if destinationEntity.DestinationType == valueObject.BackupDestinationTypeRemoteHost {
+								{{ destinationTypeText += " <small class='font-italic'>(" + destinationEntity.RemoteHostType.String() + ")</small>" }}
+							}
 							@componentMisc.Tag(
-								destinationTypeIcon, "",
-								destinationEntity.DestinationType.String(), destinationTypeColor,
+								destinationTypeIcon, "", destinationTypeText, destinationTypeColor,
 							)
 							@componentMisc.Tag(
 								"ph-folder-open", "",
@@ -759,26 +762,31 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 							</table>
 						</td>
 						<td class="w-[45%] space-y-4 overflow-x-hidden p-3 text-left">
-							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
-								<tbody>
-									<tr class="border-y-2 border-neutral-50/5">
-										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Min Free Local Storage (%)
-										</td>
-										<td class="px-2 py-1">
-											{ uiHelper.FormatPointer(destinationEntity.MinLocalStorageFreePercent) }
-										</td>
-									</tr>
-									<tr>
-										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-											Max Destination Storage Usage (%)
-										</td>
-										<td class="rounded-br-md px-2 py-1">
-											{ uiHelper.FormatPointer(destinationEntity.MaxDestinationStorageUsagePercent) }
-										</td>
-									</tr>
-								</tbody>
-							</table>
+							<div>
+								<p class="mb-2 text-[10px] font-bold uppercase">
+									Storage
+								</p>
+								<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+									<tbody>
+										<tr class="border-y-2 border-neutral-50/5">
+											<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Min Free Local Storage (%)
+											</td>
+											<td class="px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.MinLocalStorageFreePercent) }
+											</td>
+										</tr>
+										<tr>
+											<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Max Destination Storage Usage (%)
+											</td>
+											<td class="rounded-br-md px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.MaxDestinationStorageUsagePercent) }
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
 							{{ isRemoteDestination := destinationEntity.DestinationType == valueObject.BackupDestinationTypeObjectStorage || destinationEntity.DestinationType == valueObject.BackupDestinationTypeRemoteHost }}
 							if isRemoteDestination {
 								<div>
@@ -787,33 +795,38 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 									</p>
 									<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 										<tbody>
-											<tr>
+											<tr class="border-b-2 border-neutral-50/5">
 												<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-													Max Concurrent Connections
+													Max
 												</td>
-												<td class="rounded-tr-md px-2 py-1">
-													{ uiHelper.FormatPointer(destinationEntity.MaxConcurrentConnections) }
-												</td>
-											</tr>
-											<tr class="border-y-2 border-neutral-50/5">
-												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-													Max Download Bytes
-												</td>
-												<td class="px-2 py-1">
-													{ uiHelper.FormatPointer(destinationEntity.DownloadBytesSecRateLimit) }
-												</td>
-											</tr>
-											<tr class="border-y-2 border-neutral-50/5">
-												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-													Max Upload Bytes
-												</td>
-												<td class="px-2 py-1">
-													{ uiHelper.FormatPointer(destinationEntity.UploadBytesSecRateLimit) }
+												<td class="rounded-tr-md p-0 text-[10px] leading-5">
+													<table class="w-full table-auto text-center">
+														<tr>
+															<td class="bg-neutral-50/10 px-2 py-1">
+																Concurrent Connections
+															</td>
+															<td class="px-2 py-1">
+																{ uiHelper.FormatPointer(destinationEntity.MaxConcurrentConnections) }
+															</td>
+															<td class="bg-neutral-50/10 px-2 py-1">
+																Download Bytes
+															</td>
+															<td class="px-2 py-1">
+																{ uiHelper.FormatPointer(destinationEntity.DownloadBytesSecRateLimit) }
+															</td>
+															<td class="bg-neutral-50/10 px-2 py-1">
+																Upload Bytes
+															</td>
+															<td class="px-2 py-1">
+																{ uiHelper.FormatPointer(destinationEntity.UploadBytesSecRateLimit) }
+															</td>
+														</tr>
+													</table>
 												</td>
 											</tr>
 											<tr>
 												<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-													Skip Certificate Verification
+													Skip Cert Verification
 												</td>
 												<td class="rounded-br-md px-2 py-1">
 													{ uiHelper.FormatPointer(destinationEntity.SkipCertificateVerification) }
@@ -881,14 +894,6 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 									</p>
 									<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
 										<tbody>
-											<tr class="border-y-2 border-neutral-50/5">
-												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
-													Type
-												</td>
-												<td class="px-2 py-1">
-													{ uiHelper.FormatPointer(destinationEntity.RemoteHostType) }
-												</td>
-											</tr>
 											<tr class="border-y-2 border-neutral-50/5">
 												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
 													Hostname
