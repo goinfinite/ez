@@ -10,6 +10,7 @@ type IBackupDestination interface {
 type BackupDestinationBase struct {
 	DestinationId                     valueObject.BackupDestinationId           `json:"destinationId"`
 	AccountId                         valueObject.AccountId                     `json:"accountId"`
+	AccountUsername                   valueObject.UnixUsername                  `json:"accountUsername"`
 	DestinationName                   valueObject.BackupDestinationName         `json:"destinationName"`
 	DestinationDescription            *valueObject.BackupDestinationDescription `json:"destinationDescription,omitempty"`
 	DestinationType                   valueObject.BackupDestinationType         `json:"destinationType"`
@@ -25,10 +26,10 @@ type BackupDestinationBase struct {
 
 type BackupDestinationRemoteBase struct {
 	BackupDestinationBase
-	MaxConcurrentConnections    *uint16 `json:"maxConcurrentConnections,omitempty"`
-	DownloadBytesSecRateLimit   *uint64 `json:"downloadBytesSecRateLimit,omitempty"`
-	UploadBytesSecRateLimit     *uint64 `json:"uploadBytesSecRateLimit,omitempty"`
-	SkipCertificateVerification *bool   `json:"skipCertificateVerification,omitempty"`
+	MaxConcurrentConnections    *uint16           `json:"maxConcurrentConnections,omitempty"`
+	DownloadBytesSecRateLimit   *valueObject.Byte `json:"downloadBytesSecRateLimit,omitempty"`
+	UploadBytesSecRateLimit     *valueObject.Byte `json:"uploadBytesSecRateLimit,omitempty"`
+	SkipCertificateVerification *bool             `json:"skipCertificateVerification,omitempty"`
 }
 
 type BackupDestinationLocal struct {

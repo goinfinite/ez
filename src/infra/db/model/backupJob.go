@@ -5,6 +5,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 )
 
 type BackupJob struct {
@@ -85,6 +86,8 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 	if err != nil {
 		return jobEntity, err
 	}
+
+	accountUsername := infraHelper.ReadAccountUsername(accountId)
 
 	var jobDescriptionPtr *valueObject.BackupJobDescription
 	if model.JobDescription != nil {
@@ -191,7 +194,7 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 	}
 
 	return entity.NewBackupJob(
-		jobId, accountId, model.JobStatus, jobDescriptionPtr, destinationIds,
+		jobId, accountId, accountUsername, model.JobStatus, jobDescriptionPtr, destinationIds,
 		retentionStrategy, backupSchedule, &archiveCompressionFormat, &timeoutSecs,
 		model.MaxTaskRetentionCount, model.MaxTaskRetentionDays,
 		model.MaxConcurrentCpuCores, containerAccountIds, containerIds,

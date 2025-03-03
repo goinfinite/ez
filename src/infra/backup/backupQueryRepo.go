@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"os"
-	"os/user"
 	"slices"
 	"strings"
 	"syscall"
@@ -357,15 +356,7 @@ func (repo *BackupQueryRepo) archiveFileFactory(
 		return archiveFile, errors.New("ArchiveFileOwnerAccountIdParseError")
 	}
 
-	userInfo, err := user.LookupId(accountId.String())
-	if err != nil {
-		return archiveFile, errors.New("LookupUserFailed: " + err.Error())
-	}
-
-	accountUsername, err := valueObject.NewUnixUsername(userInfo.Username)
-	if err != nil {
-		return archiveFile, errors.New("ArchiveFileOwnerUsernameParseError")
-	}
+	accountUsername := infraHelper.ReadAccountUsername(accountId)
 
 	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
 	if err != nil {

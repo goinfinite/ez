@@ -112,6 +112,8 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		return destinationEntity, err
 	}
 
+	accountUsername := infraHelper.ReadAccountUsername(accountId)
+
 	destinationName, err := valueObject.NewBackupDestinationName(model.Name)
 	if err != nil {
 		return destinationEntity, err
@@ -173,6 +175,7 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 	backupDestinationBase := entity.BackupDestinationBase{
 		DestinationId:                     destinationId,
 		AccountId:                         accountId,
+		AccountUsername:                   accountUsername,
 		DestinationName:                   destinationName,
 		DestinationDescription:            destinationDescriptionPtr,
 		DestinationType:                   destinationType,
@@ -188,11 +191,29 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		backupDestinationBase.EncryptionKey = encryptionKey
 	}
 
+	var downloadBytesSecRateLimitPtr *valueObject.Byte
+	if model.DownloadBytesSecRateLimit != nil && *model.DownloadBytesSecRateLimit != 0 {
+		downloadBytesSecRateLimit, err := valueObject.NewByte(*model.DownloadBytesSecRateLimit)
+		if err != nil {
+			return destinationEntity, errors.New("DownloadBytesSecRateLimitFailed: " + err.Error())
+		}
+		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
+	}
+
+	var uploadBytesSecRateLimitPtr *valueObject.Byte
+	if model.UploadBytesSecRateLimit != nil && *model.UploadBytesSecRateLimit != 0 {
+		uploadBytesSecRateLimit, err := valueObject.NewByte(*model.UploadBytesSecRateLimit)
+		if err != nil {
+			return destinationEntity, errors.New("UploadBytesSecRateLimitFailed: " + err.Error())
+		}
+		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
+	}
+
 	backupDestinationRemoteBase := entity.BackupDestinationRemoteBase{
 		BackupDestinationBase:       backupDestinationBase,
 		MaxConcurrentConnections:    model.MaxConcurrentConnections,
-		DownloadBytesSecRateLimit:   model.DownloadBytesSecRateLimit,
-		UploadBytesSecRateLimit:     model.UploadBytesSecRateLimit,
+		DownloadBytesSecRateLimit:   downloadBytesSecRateLimitPtr,
+		UploadBytesSecRateLimit:     uploadBytesSecRateLimitPtr,
 		SkipCertificateVerification: model.SkipCertificateVerification,
 	}
 

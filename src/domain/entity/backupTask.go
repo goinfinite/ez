@@ -7,6 +7,7 @@ import (
 type BackupTask struct {
 	TaskId                 valueObject.BackupTaskId               `json:"taskId"`
 	AccountId              valueObject.AccountId                  `json:"accountId"`
+	AccountUsername        valueObject.UnixUsername               `json:"accountUsername"`
 	JobId                  valueObject.BackupJobId                `json:"jobId"`
 	DestinationId          valueObject.BackupDestinationId        `json:"destinationId"`
 	TaskStatus             valueObject.BackupTaskStatus           `json:"taskStatus"`
@@ -27,6 +28,7 @@ type BackupTask struct {
 func NewBackupTask(
 	taskId valueObject.BackupTaskId,
 	accountId valueObject.AccountId,
+	accountUsername valueObject.UnixUsername,
 	jobId valueObject.BackupJobId,
 	destinationId valueObject.BackupDestinationId,
 	taskStatus valueObject.BackupTaskStatus,
@@ -43,6 +45,7 @@ func NewBackupTask(
 	return BackupTask{
 		TaskId:                 taskId,
 		AccountId:              accountId,
+		AccountUsername:        accountUsername,
 		JobId:                  jobId,
 		DestinationId:          destinationId,
 		TaskStatus:             taskStatus,

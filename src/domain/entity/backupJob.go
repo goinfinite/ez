@@ -9,6 +9,7 @@ import (
 type BackupJob struct {
 	JobId                     valueObject.BackupJobId             `json:"jobId"`
 	AccountId                 valueObject.AccountId               `json:"accountId"`
+	AccountUsername           valueObject.UnixUsername            `json:"accountUsername"`
 	JobStatus                 bool                                `json:"jobsStatus"`
 	JobDescription            *valueObject.BackupJobDescription   `json:"jobDescription"`
 	DestinationIds            []valueObject.BackupDestinationId   `json:"destinationIds"`
@@ -35,6 +36,7 @@ type BackupJob struct {
 func NewBackupJob(
 	jobId valueObject.BackupJobId,
 	accountId valueObject.AccountId,
+	accountUsername valueObject.UnixUsername,
 	jobStatus bool,
 	jobDescription *valueObject.BackupJobDescription,
 	destinationIds []valueObject.BackupDestinationId,
@@ -75,6 +77,7 @@ func NewBackupJob(
 	return BackupJob{
 		JobId:                     jobId,
 		AccountId:                 accountId,
+		AccountUsername:           accountUsername,
 		JobStatus:                 jobStatus,
 		JobDescription:            jobDescription,
 		DestinationIds:            destinationIds,
