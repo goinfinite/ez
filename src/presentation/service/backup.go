@@ -210,9 +210,9 @@ func (service *BackupService) CreateDestination(
 		maxConcurrentConnectionsPtr = &maxConcurrentConnections
 	}
 
-	var downloadBytesSecRateLimitPtr *uint64
+	var downloadBytesSecRateLimitPtr *valueObject.Byte
 	if input["downloadBytesSecRateLimit"] != nil {
-		downloadBytesSecRateLimit, err := voHelper.InterfaceToUint64(
+		downloadBytesSecRateLimit, err := valueObject.NewByte(
 			input["downloadBytesSecRateLimit"],
 		)
 		if err != nil {
@@ -221,9 +221,9 @@ func (service *BackupService) CreateDestination(
 		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
 	}
 
-	var uploadBytesSecRateLimitPtr *uint64
+	var uploadBytesSecRateLimitPtr *valueObject.Byte
 	if input["uploadBytesSecRateLimit"] != nil {
-		uploadBytesSecRateLimit, err := voHelper.InterfaceToUint64(
+		uploadBytesSecRateLimit, err := valueObject.NewByte(
 			input["uploadBytesSecRateLimit"],
 		)
 		if err != nil {
@@ -367,9 +367,9 @@ func (service *BackupService) CreateDestination(
 		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 	}
 
-	var remoteHostConnectionTimeoutSecsPtr *uint16
+	var remoteHostConnectionTimeoutSecsPtr *valueObject.TimeDuration
 	if input["remoteHostConnectionTimeoutSecs"] != nil {
-		remoteHostConnectionTimeoutSecs, err := voHelper.InterfaceToUint16(
+		remoteHostConnectionTimeoutSecs, err := valueObject.NewTimeDuration(
 			input["remoteHostConnectionTimeoutSecs"],
 		)
 		if err != nil {
@@ -378,9 +378,9 @@ func (service *BackupService) CreateDestination(
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
 
-	var remoteHostConnectionRetrySecsPtr *uint16
+	var remoteHostConnectionRetrySecsPtr *valueObject.TimeDuration
 	if input["remoteHostConnectionRetrySecs"] != nil {
-		remoteHostConnectionRetrySecs, err := voHelper.InterfaceToUint16(
+		remoteHostConnectionRetrySecs, err := valueObject.NewTimeDuration(
 			input["remoteHostConnectionRetrySecs"],
 		)
 		if err != nil {
@@ -534,9 +534,9 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		maxConcurrentConnectionsPtr = &maxConcurrentConnections
 	}
 
-	var downloadBytesSecRateLimitPtr *uint64
+	var downloadBytesSecRateLimitPtr *valueObject.Byte
 	if input["downloadBytesSecRateLimit"] != nil {
-		downloadBytesSecRateLimit, err := voHelper.InterfaceToUint64(
+		downloadBytesSecRateLimit, err := valueObject.NewByte(
 			input["downloadBytesSecRateLimit"],
 		)
 		if err != nil {
@@ -545,9 +545,9 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
 	}
 
-	var uploadBytesSecRateLimitPtr *uint64
+	var uploadBytesSecRateLimitPtr *valueObject.Byte
 	if input["uploadBytesSecRateLimit"] != nil {
-		uploadBytesSecRateLimit, err := voHelper.InterfaceToUint64(
+		uploadBytesSecRateLimit, err := valueObject.NewByte(
 			input["uploadBytesSecRateLimit"],
 		)
 		if err != nil {
@@ -691,9 +691,9 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 	}
 
-	var remoteHostConnectionTimeoutSecsPtr *uint16
+	var remoteHostConnectionTimeoutSecsPtr *valueObject.TimeDuration
 	if input["remoteHostConnectionTimeoutSecs"] != nil {
-		remoteHostConnectionTimeoutSecs, err := voHelper.InterfaceToUint16(
+		remoteHostConnectionTimeoutSecs, err := valueObject.NewTimeDuration(
 			input["remoteHostConnectionTimeoutSecs"],
 		)
 		if err != nil {
@@ -702,9 +702,9 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
 
-	var remoteHostConnectionRetrySecsPtr *uint16
+	var remoteHostConnectionRetrySecsPtr *valueObject.TimeDuration
 	if input["remoteHostConnectionRetrySecs"] != nil {
-		remoteHostConnectionRetrySecs, err := voHelper.InterfaceToUint16(
+		remoteHostConnectionRetrySecs, err := valueObject.NewTimeDuration(
 			input["remoteHostConnectionRetrySecs"],
 		)
 		if err != nil {

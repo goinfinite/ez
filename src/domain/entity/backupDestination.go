@@ -54,6 +54,6 @@ type BackupDestinationRemoteHost struct {
 	RemoteHostUsername              *valueObject.UnixUsername                    `json:"remoteHostUsername,omitempty"`
 	RemoteHostPassword              *valueObject.Password                        `json:"-"`
 	RemoteHostPrivateKeyFilePath    *valueObject.UnixFilePath                    `json:"remoteHostPrivateKeyFilePath,omitempty"`
-	RemoteHostConnectionTimeoutSecs *uint16                                      `json:"remoteHostConnectionTimeoutSecs,omitempty"`
-	RemoteHostConnectionRetrySecs   *uint16                                      `json:"remoteHostConnectionRetrySecs,omitempty"`
+	RemoteHostConnectionTimeoutSecs *valueObject.TimeDuration                    `json:"remoteHostConnectionTimeoutSecs,omitempty"`
+	RemoteHostConnectionRetrySecs   *valueObject.TimeDuration                    `json:"remoteHostConnectionRetrySecs,omitempty"`
 }

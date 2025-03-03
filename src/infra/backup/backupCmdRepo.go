@@ -77,6 +77,16 @@ func (repo *BackupCmdRepo) CreateDestination(
 		return responseDto, errors.New("EncryptEncryptionKeyFailed: " + err.Error())
 	}
 
+	var downloadBytesSecRateLimitPtr, uploadBytesSecRateLimitPtr *uint64
+	if createDto.DownloadBytesSecRateLimit != nil {
+		downloadBytesSecRateLimit := createDto.DownloadBytesSecRateLimit.Uint64()
+		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
+	}
+	if createDto.UploadBytesSecRateLimit != nil {
+		uploadBytesSecRateLimit := createDto.UploadBytesSecRateLimit.Uint64()
+		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
+	}
+
 	var objectStorageProviderPtr, objectStorageProviderRegionPtr *string
 	if createDto.ObjectStorageProvider != nil {
 		objectStorageProvider := createDto.ObjectStorageProvider.String()
@@ -148,19 +158,31 @@ func (repo *BackupCmdRepo) CreateDestination(
 		remoteHostNetworkPortPtr = &remoteHostNetworkPort
 	}
 
+	var remoteHostConnectionTimeoutSecsPtr *uint16
+	if createDto.RemoteHostConnectionTimeoutSecs != nil {
+		remoteHostConnectionTimeoutSecs := uint16(createDto.RemoteHostConnectionTimeoutSecs.Uint64())
+		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
+	}
+
+	var remoteHostConnectionRetrySecsPtr *uint16
+	if createDto.RemoteHostConnectionRetrySecs != nil {
+		remoteHostConnectionRetrySecs := uint16(createDto.RemoteHostConnectionRetrySecs.Uint64())
+		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
+	}
+
 	destinationModel := dbModel.NewBackupDestination(
 		0, createDto.AccountId.Uint64(), createDto.DestinationName.String(),
 		descriptionPtr, createDto.DestinationType.String(), destinationPathStr,
 		encryptedEncryptionKeyStr, createDto.MinLocalStorageFreePercent,
 		createDto.MaxDestinationStorageUsagePercent, createDto.MaxConcurrentConnections,
-		createDto.DownloadBytesSecRateLimit, createDto.UploadBytesSecRateLimit,
+		downloadBytesSecRateLimitPtr, uploadBytesSecRateLimitPtr,
 		createDto.SkipCertificateVerification, objectStorageProviderPtr,
 		objectStorageProviderRegionPtr, objectStorageProviderAccessKeyIdPtr,
 		objectStorageProviderSecretAccessKeyPtr, objectStorageEndpointUrlPtr,
 		objectStorageBucketNamePtr, remoteHostTypePtr, remoteHostnamePtr,
 		remoteHostUsernamePtr, remoteHostPasswordPtr, remoteHostPrivateKeyFilePathPtr,
-		remoteHostNetworkPortPtr, createDto.RemoteHostConnectionTimeoutSecs,
-		createDto.RemoteHostConnectionRetrySecs,
+		remoteHostNetworkPortPtr, remoteHostConnectionTimeoutSecsPtr,
+		remoteHostConnectionRetrySecsPtr,
 	)
 
 	err = repo.persistentDbSvc.Handler.Create(&destinationModel).Error
@@ -215,7 +237,7 @@ func (repo *BackupCmdRepo) UpdateDestination(
 	}
 
 	if updateDto.TotalSpaceUsageBytes != nil {
-		updateMap["total_space_usage_bytes"] = uint64(updateDto.TotalSpaceUsageBytes.Int64())
+		updateMap["total_space_usage_bytes"] = updateDto.TotalSpaceUsageBytes.Uint64()
 	}
 
 	if updateDto.TotalSpaceUsagePercent != nil {
@@ -223,11 +245,11 @@ func (repo *BackupCmdRepo) UpdateDestination(
 	}
 
 	if updateDto.DownloadBytesSecRateLimit != nil {
-		updateMap["download_bytes_sec_rate_limit"] = *updateDto.DownloadBytesSecRateLimit
+		updateMap["download_bytes_sec_rate_limit"] = updateDto.DownloadBytesSecRateLimit.Uint64()
 	}
 
 	if updateDto.UploadBytesSecRateLimit != nil {
-		updateMap["upload_bytes_sec_rate_limit"] = *updateDto.UploadBytesSecRateLimit
+		updateMap["upload_bytes_sec_rate_limit"] = updateDto.UploadBytesSecRateLimit.Uint64()
 	}
 
 	if updateDto.SkipCertificateVerification != nil {
@@ -300,11 +322,11 @@ func (repo *BackupCmdRepo) UpdateDestination(
 	}
 
 	if updateDto.RemoteHostConnectionTimeoutSecs != nil {
-		updateMap["remote_host_connection_timeout_secs"] = *updateDto.RemoteHostConnectionTimeoutSecs
+		updateMap["remote_host_connection_timeout_secs"] = uint16(updateDto.RemoteHostConnectionTimeoutSecs.Uint64())
 	}
 
 	if updateDto.RemoteHostConnectionRetrySecs != nil {
-		updateMap["remote_host_connection_retry_secs"] = *updateDto.RemoteHostConnectionRetrySecs
+		updateMap["remote_host_connection_retry_secs"] = uint16(updateDto.RemoteHostConnectionRetrySecs.Uint64())
 	}
 
 	return repo.persistentDbSvc.Handler.

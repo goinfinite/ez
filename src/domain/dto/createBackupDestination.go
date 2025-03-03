@@ -13,8 +13,8 @@ type CreateBackupDestinationRequest struct {
 	MinLocalStorageFreePercent           *uint8                                            `json:"minLocalStorageFreePercent,omitempty"`
 	MaxDestinationStorageUsagePercent    *uint8                                            `json:"maxDestinationStorageUsagePercent,omitempty"`
 	MaxConcurrentConnections             *uint16                                           `json:"maxConcurrentConnections,omitempty"`
-	DownloadBytesSecRateLimit            *uint64                                           `json:"downloadBytesSecRateLimit,omitempty"`
-	UploadBytesSecRateLimit              *uint64                                           `json:"uploadBytesSecRateLimit,omitempty"`
+	DownloadBytesSecRateLimit            *valueObject.Byte                                 `json:"downloadBytesSecRateLimit,omitempty"`
+	UploadBytesSecRateLimit              *valueObject.Byte                                 `json:"uploadBytesSecRateLimit,omitempty"`
 	SkipCertificateVerification          *bool                                             `json:"skipCertificateVerification,omitempty"`
 	ObjectStorageProvider                *valueObject.ObjectStorageProvider                `json:"objectStorageProvider,omitempty"`
 	ObjectStorageProviderRegion          *valueObject.ObjectStorageProviderRegion          `json:"objectStorageProviderRegion,omitempty"`
@@ -28,8 +28,8 @@ type CreateBackupDestinationRequest struct {
 	RemoteHostUsername                   *valueObject.UnixUsername                         `json:"remoteHostUsername,omitempty"`
 	RemoteHostPassword                   *valueObject.Password                             `json:"remoteHostPassword,omitempty"`
 	RemoteHostPrivateKeyFilePath         *valueObject.UnixFilePath                         `json:"remoteHostPrivateKeyFilePath,omitempty"`
-	RemoteHostConnectionTimeoutSecs      *uint16                                           `json:"remoteHostConnectionTimeoutSecs,omitempty"`
-	RemoteHostConnectionRetrySecs        *uint16                                           `json:"remoteHostConnectionRetrySecs,omitempty"`
+	RemoteHostConnectionTimeoutSecs      *valueObject.TimeDuration                         `json:"remoteHostConnectionTimeoutSecs,omitempty"`
+	RemoteHostConnectionRetrySecs        *valueObject.TimeDuration                         `json:"remoteHostConnectionRetrySecs,omitempty"`
 	OperatorAccountId                    valueObject.AccountId                             `json:"-"`
 	OperatorIpAddress                    valueObject.IpAddress                             `json:"-"`
 }

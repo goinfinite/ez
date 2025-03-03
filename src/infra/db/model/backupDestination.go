@@ -335,6 +335,28 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 			remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 		}
 
+		var remoteHostConnectionTimeoutSecsPtr *valueObject.TimeDuration
+		if model.RemoteHostConnectionTimeoutSecs != nil {
+			remoteHostConnectionTimeoutSecs, err := valueObject.NewTimeDuration(
+				*model.RemoteHostConnectionTimeoutSecs,
+			)
+			if err != nil {
+				return destinationEntity, errors.New("RemoteHostConnectionTimeoutSecsFailed: " + err.Error())
+			}
+			remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
+		}
+
+		var remoteHostConnectionRetrySecsPtr *valueObject.TimeDuration
+		if model.RemoteHostConnectionRetrySecs != nil {
+			remoteHostConnectionRetrySecs, err := valueObject.NewTimeDuration(
+				*model.RemoteHostConnectionRetrySecs,
+			)
+			if err != nil {
+				return destinationEntity, errors.New("RemoteHostConnectionRetrySecsFailed: " + err.Error())
+			}
+			remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
+		}
+
 		return entity.BackupDestinationRemoteHost{
 			BackupDestinationRemoteBase:     backupDestinationRemoteBase,
 			RemoteHostType:                  &remoteHostType,
@@ -343,8 +365,8 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 			RemoteHostUsername:              &remoteHostUsername,
 			RemoteHostPassword:              remoteHostPasswordPtr,
 			RemoteHostPrivateKeyFilePath:    remoteHostPrivateKeyFilePathPtr,
-			RemoteHostConnectionTimeoutSecs: model.RemoteHostConnectionTimeoutSecs,
-			RemoteHostConnectionRetrySecs:   model.RemoteHostConnectionRetrySecs,
+			RemoteHostConnectionTimeoutSecs: remoteHostConnectionTimeoutSecsPtr,
+			RemoteHostConnectionRetrySecs:   remoteHostConnectionRetrySecsPtr,
 		}, nil
 	default:
 		return destinationEntity, errors.New("UnsupportedBackupDestinationType")
