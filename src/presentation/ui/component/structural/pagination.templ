@@ -78,7 +78,7 @@ templ Pagination(
 		<div class="ml-3 w-24">
 			@componentForm.SelectInput(
 				componentForm.SelectInputDto{
-					Id:                "itemsPerPage",
+					Id:                componentId + "ItemsPerPage",
 					Label:             "per page",
 					BindValuePath:     selectedItemsPerPageBindValuePath,
 					Options:           []string{"5", "10", "30", "50"},
