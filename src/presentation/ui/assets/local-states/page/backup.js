@@ -45,5 +45,63 @@ document.addEventListener("alpine:init", () => {
     closeRestoreTaskModal() {
       this.isRestoreTaskModalOpen = false;
     },
+
+    isDeleteTaskModalOpen: false,
+    openDeleteTaskModal(taskId) {
+      this.resetPrimaryState();
+      this.updateTaskEntity(taskId);
+      this.isDeleteTaskModalOpen = true;
+    },
+    closeDeleteTaskModal() {
+      this.isDeleteTaskModalOpen = false;
+    },
+    deleteTask() {
+      htmx
+        .ajax("DELETE", "/api/v1/backup/tasks/" + this.taskEntity.id + "/", {
+          swap: "none",
+        })
+        .then(() => {
+          this.$dispatch("delete:backup-task");
+        });
+      this.closeDeleteTaskModal();
+    },
+  }));
+
+  Alpine.data("backupTaskArchives", () => ({
+    taskArchiveEntity: {},
+    resetPrimaryState() {
+      this.taskArchiveEntity = {};
+    },
+    updateTaskArchiveEntity(taskArchiveId) {
+      this.taskArchiveEntity = JSON.parse(
+        document.getElementById("backupTaskArchiveEntity_" + taskArchiveId)
+          .textContent
+      );
+    },
+    init() {
+      this.resetPrimaryState();
+    },
+
+    isDeleteTaskArchiveModalOpen: false,
+    openDeleteTaskArchiveModal(taskArchiveId) {
+      this.resetPrimaryState();
+      this.updateTaskArchiveEntity(taskArchiveId);
+      this.isDeleteTaskArchiveModalOpen = true;
+    },
+    closeDeleteTaskArchiveModal() {
+      this.isDeleteTaskArchiveModalOpen = false;
+    },
+    deleteTaskArchive() {
+      htmx
+        .ajax(
+          "DELETE",
+          "/api/v1/backup/task/archive/" + this.taskArchiveEntity.id + "/",
+          { swap: "none" }
+        )
+        .then(() => {
+          this.$dispatch("delete:backup-task-archive");
+        });
+      this.closeDeleteTaskArchiveModal();
+    },
   }));
 });

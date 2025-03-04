@@ -151,7 +151,7 @@ templ RestoreBackupTaskForm() {
 	<!-- RestoreBackupTaskForm -->
 	<form
 		id="create-backup-task-archive"
-		hx-post="/api/v1/backup/task/archive/"
+		hx-post="/api/v1/backup/task/restore/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		x-on:submit="$store.main.refreshScheduledTasksPopover()"
@@ -257,7 +257,7 @@ templ BackupTasksTable(
 	<div
 		id="backup-tasks-table"
 		hx-get="/backup/"
-		hx-trigger="create:backup-task-archive from:window delay:500ms, restore:backup-task from:window delay:500ms, delete:backup-task from:window delay:500ms"
+		hx-trigger="delete:backup-task from:window delay:500ms"
 		hx-select="#backup-tasks-table"
 		hx-target="#backup-tasks-table"
 		hx-swap="outerHTML transition:true"
@@ -499,7 +499,7 @@ templ BackupTaskArchivesTable(
 	<div
 		id="backup-task-archives-table"
 		hx-get="/backup/"
-		hx-trigger="submit from:form delay:500ms, update:backup-task-archive from:window delay:500ms, delete:backup-task-archive from:window delay:500ms"
+		hx-trigger="delete:backup-task-archive from:window delay:500ms"
 		hx-select="#backup-task-archives-table"
 		hx-target="#backup-task-archives-table"
 		hx-swap="outerHTML transition:true"
@@ -602,6 +602,10 @@ templ BackupTasks(
 		@BackupTasksTable(readTasksRequest, readTasksResponse)
 		@CreateBackupTaskArchiveModal()
 		@RestoreBackupTaskModal()
+		@componentStructural.DeleteModal(
+			"isDeleteTaskModalOpen", "closeDeleteTaskModal()", "deleteTask()",
+			"delete-task", "", "taskEntity.taskId",
+		)
 	</div>
 	<br/>
 	<div class="mb-4">
@@ -611,10 +615,16 @@ templ BackupTasks(
 			"ph-box-arrow-down",
 		)
 	</div>
-	@BackupTaskArchivesTable(readTaskArchivesRequest, readTaskArchivesResponse)
-	<p class="mt-2 text-xs">
-		Note: archive files are automatically deleted after 24h to preserve storage space.
-	</p>
+	<div x-data="backupTaskArchives">
+		@BackupTaskArchivesTable(readTaskArchivesRequest, readTaskArchivesResponse)
+		@componentStructural.DeleteModal(
+			"isDeleteTaskArchiveModalOpen", "closeDeleteTaskArchiveModal()", "deleteTaskArchive()",
+			"delete-task-archive", "", "taskArchiveEntity.archiveId",
+		)
+		<p class="mt-2 text-xs">
+			Note: archive files are automatically deleted after 24h to preserve storage space.
+		</p>
+	</div>
 }
 
 templ BackupJobsTable(
