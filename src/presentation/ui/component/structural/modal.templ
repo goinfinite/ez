@@ -3,7 +3,7 @@ package componentStructural
 templ RegularModal(
 	title, isOpenState, closeModalFunction, elementIdStatePath string,
 ) {
-	<!-- Modal HTML -->
+	<!-- RegularModal HTML -->
 	<div
 		x-show={ isOpenState }
 		x-transition:enter="transition ease-out duration-500"
@@ -15,7 +15,7 @@ templ RegularModal(
 		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
 	>
 		<div class="bg-ez-400 max-w-3/5 relative mx-auto mt-20 rounded-md p-6 drop-shadow-xl xl:mt-24 xl:max-w-3xl">
-			<div class="mb-6 flex justify-between align-middle">
+			<div class="mb-4 flex justify-between align-middle">
 				<h2 class="text-2xl">
 					{ title }
 					if elementIdStatePath != "" {
@@ -40,7 +40,7 @@ templ DeleteModal(
 	isOpenState, closeFunction, deleteFunction, deleteIdTag string,
 	elNameStatePath, elIdStatePath string,
 ) {
-	<!-- Delete Modal HTML -->
+	<!-- DeleteModal HTML -->
 	<div
 		x-show={ isOpenState }
 		x-transition:enter="transition ease-out duration-500"
