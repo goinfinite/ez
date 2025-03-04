@@ -6,6 +6,7 @@ import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 import "github.com/goinfinite/ez/src/domain/valueObject"
 import "github.com/goinfinite/ez/src/presentation/ui/helper"
 import "github.com/goinfinite/ez/src/domain/entity"
+import "github.com/goinfinite/ez/src/presentation/ui/component/form"
 
 import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 
@@ -46,6 +47,55 @@ templ BackupIndex(
 			</div>
 		</div>
 	</div>
+}
+
+templ CreateBackupTaskArchiveForm() {
+	<!-- CreateBackupTaskArchiveForm -->
+	<form
+		id="create-backup-task-archive"
+		hx-post="/api/v1/backup/task/archive/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+	>
+		<div class="flex flex-col space-y-6">
+			<input type="hidden" name="taskId" x-bind:value="createTaskArchive.taskId"/>
+			@componentForm.MultiSelectInputClientSideOptions(
+				componentForm.MultiSelectInputClientSideOptionsDto{
+					Id:                       "containerAccountIds",
+					Label:                    "Container Account Ids",
+					SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
+					OptionsBindValuePath:     "taskEntity.containerAccountIds",
+					IsRequired:               false,
+					ShouldIncludeBlankOption: false,
+				},
+			)
+			// ContainerAccountIds (MultiSelect)
+			// ContainerIds (MultiSelect)
+			// ExceptContainerAccountIds (MultiSelect)
+			// ExceptContainerIds (MultiSelect)
+			// TimeoutSecs (Advanced Settings)
+			@componentForm.SubmitButton(
+				"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
+			)
+		</div>
+	</form>
+	<div class="mt-2">
+		@componentStructural.Alert(
+			componentStructural.AlertTypeInfo,
+			"This is an asynchronous operation. The archive will be created in the background.",
+		)
+	</div>
+}
+
+templ CreateBackupTaskArchiveModal() {
+	<!-- CreateBackupTaskArchiveModal -->
+	@componentStructural.RegularModal(
+		"Create Backup Task Archive", "isCreateTaskArchiveModalOpen",
+		"closeCreateTaskArchiveModal()", "",
+	) {
+		@CreateBackupTaskArchiveForm()
+	}
 }
 
 templ BackupTasksTable(
@@ -399,6 +449,7 @@ templ BackupTasks(
 	</div>
 	<div x-data="backupTasks">
 		@BackupTasksTable(readTasksRequest, readTasksResponse)
+		@CreateBackupTaskArchiveModal()
 	</div>
 	<br/>
 	<div class="mb-4">
