@@ -69,6 +69,77 @@ templ SelectInput(inputDto SelectInputDto) {
 	</div>
 }
 
+type SelectInputClientSideOptionsDto struct {
+	Id                       string
+	Label                    string
+	SelectedBindValuePath    string
+	OptionsBindValuePath     string
+	IsRequired               bool
+	DenseMode                bool
+	ShouldIncludeBlankOption bool
+	DispatchEventName        string
+}
+
+templ SelectInputClientSideOptions(inputDto SelectInputClientSideOptionsDto) {
+	<!-- SelectInputClientSideOptions -->
+	<div class="relative w-full">
+		<select
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+			}
+			if inputDto.SelectedBindValuePath != "" {
+				x-model:value={ inputDto.SelectedBindValuePath }
+			}
+			if inputDto.Label != "" {
+				placeholder={ inputDto.Label }
+			}
+			if inputDto.IsRequired {
+				required
+			}
+			if inputDto.DenseMode {
+				class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full appearance-none rounded-md border px-1.5 text-[13px] leading-normal text-neutral-100 placeholder-transparent outline-none transition-all"
+			} else {
+				class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			}
+			if inputDto.DispatchEventName != "" {
+				@change={ "$dispatch('" + inputDto.DispatchEventName + "')" }
+			}
+		>
+			if inputDto.ShouldIncludeBlankOption {
+				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value></option>
+			}
+			<template x-for={ "selectableOption in " + inputDto.OptionsBindValuePath }>
+				<option
+					class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90"
+					x-text="selectableOption"
+					x-model:value="selectableOption"
+				></option>
+			</template>
+		</select>
+		if inputDto.Label != "" {
+			<label
+				if inputDto.Id != "" {
+					for={ inputDto.Id }
+				}
+				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+			>
+				{ inputDto.Label }
+				if inputDto.IsRequired {
+					<span class="text-red-700">*</span>
+				}
+			</label>
+		}
+		<i
+			if inputDto.DenseMode {
+				class="ph-bold ph-caret-down pointer-events-none absolute right-2 top-3 text-xs"
+			} else {
+				class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"
+			}
+		></i>
+	</div>
+}
+
 type SelectLabelValuePair struct {
 	Label string
 	Value string
