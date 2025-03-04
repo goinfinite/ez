@@ -32,29 +32,31 @@ function InitReadRequestSettingsLocalState(
 
       readQueryParams() {
         queryParams = new URLSearchParams();
-        queryParams.set(componentId + "PageNumber", this.pagination.pageNumber);
-        queryParams.set(
-          componentId + "ItemsPerPage",
-          this.pagination.itemsPerPage
+
+        let paginationWithFilters = Object.assign(
+          {},
+          this.pagination,
+          this.filters
         );
+        delete paginationWithFilters.pagesTotal;
+        delete paginationWithFilters.itemsTotal;
 
-        for (let [filterKey, filterValue] of Object.entries(this.filters)) {
-          if (filterValue === null) {
+        for (let [fieldKey, fieldValue] of Object.entries(
+          paginationWithFilters
+        )) {
+          if (fieldValue === null) {
             continue;
           }
 
-          if (
-            typeof filterValue === "string" ||
-            filterValue instanceof String
-          ) {
-            filterValue = filterValue.trim();
+          if (typeof fieldValue === "string" || fieldValue instanceof String) {
+            fieldValue = fieldValue.trim();
           }
-          if (filterValue === "") {
+          if (fieldValue === "") {
             continue;
           }
-          const filterKeyPascalCase =
-            filterKey.charAt(0).toUpperCase() + filterKey.slice(1);
-          queryParams.set(componentId + filterKeyPascalCase, filterValue);
+          const fieldKeyPascalCase =
+            fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
+          queryParams.set(componentId + fieldKeyPascalCase, fieldValue);
         }
 
         return queryParams.toString();
