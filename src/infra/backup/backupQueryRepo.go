@@ -63,6 +63,12 @@ func (repo *BackupQueryRepo) ReadDestination(
 		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
 	}
 
+	if requestDto.Pagination.SortBy != nil {
+		if requestDto.Pagination.SortBy.String() == "destinationId" {
+			sortBy, _ := valueObject.NewPaginationSortBy("ID")
+			requestDto.Pagination.SortBy = &sortBy
+		}
+	}
 	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
 		dbQuery, requestDto.Pagination,
 	)
@@ -166,6 +172,12 @@ func (repo *BackupQueryRepo) ReadJob(
 		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
 	}
 
+	if requestDto.Pagination.SortBy != nil {
+		if requestDto.Pagination.SortBy.String() == "jobId" {
+			sortBy, _ := valueObject.NewPaginationSortBy("ID")
+			requestDto.Pagination.SortBy = &sortBy
+		}
+	}
 	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
 		dbQuery, requestDto.Pagination,
 	)
@@ -271,6 +283,12 @@ func (repo *BackupQueryRepo) ReadTask(
 		dbQuery = dbQuery.Where("created_at > ?", requestDto.CreatedAfterAt.GetAsGoTime())
 	}
 
+	if requestDto.Pagination.SortBy != nil {
+		if requestDto.Pagination.SortBy.String() == "taskId" {
+			sortBy, _ := valueObject.NewPaginationSortBy("ID")
+			requestDto.Pagination.SortBy = &sortBy
+		}
+	}
 	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
 		dbQuery, requestDto.Pagination,
 	)
