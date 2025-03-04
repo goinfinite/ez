@@ -69,8 +69,10 @@ document.addEventListener("alpine:init", () => {
 
   Alpine.data("backupTaskArchives", () => ({
     taskArchiveEntity: {},
+    restoreTaskArchive: {},
     resetPrimaryState() {
       this.taskArchiveEntity = {};
+      this.restoreTaskArchive = {};
     },
     updateTaskArchiveEntity(taskArchiveId) {
       this.taskArchiveEntity = JSON.parse(
@@ -80,6 +82,17 @@ document.addEventListener("alpine:init", () => {
     },
     init() {
       this.resetPrimaryState();
+    },
+
+    isRestoreTaskArchiveModalOpen: false,
+    openRestoreTaskArchiveModal(archiveId) {
+      this.resetPrimaryState();
+      this.updateTaskArchiveEntity(archiveId);
+      this.restoreTaskArchive = { archiveId: archiveId };
+      this.isRestoreTaskArchiveModalOpen = true;
+    },
+    closeRestoreTaskArchiveModal() {
+      this.isRestoreTaskArchiveModalOpen = false;
     },
 
     isDeleteTaskArchiveModalOpen: false,

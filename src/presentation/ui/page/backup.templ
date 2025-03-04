@@ -150,7 +150,7 @@ templ RestoreBackupTaskForm() {
 	)
 	<!-- RestoreBackupTaskForm -->
 	<form
-		id="create-backup-task-archive"
+		id="restore-backup-task"
 		hx-post="/api/v1/backup/task/restore/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
@@ -228,13 +228,13 @@ templ RestoreBackupTaskForm() {
 					InputType:     "number",
 					Id:            "timeoutSecs",
 					Label:         "Timeout (seconds)",
-					BindValuePath: "createTaskArchive.timeoutSecs",
+					BindValuePath: "restoreTask.timeoutSecs",
 					IsRequired:    false,
 				})
 			</div>
 		}
 		@componentForm.SubmitButton(
-			"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
+			"Restore Task", "ph-check-fat", "closeRestoreTaskModal()", false,
 		)
 	</form>
 }
@@ -491,6 +491,58 @@ templ BackupTasksTable(
 	</div>
 }
 
+templ RestoreBackupTaskArchiveForm() {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The restore process will be performed in the background.",
+	)
+	<!-- RestoreBackupTaskArchiveForm -->
+	<form
+		id="restore-backup-task-archive"
+		hx-post="/api/v1/backup/task/restore/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="archiveId" x-bind:value="restoreTaskArchive.archiveId"/>
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldReplaceExistingContainers",
+			"<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
+			"restoreTaskArchive.shouldReplaceExistingContainers", "",
+		)
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldRestoreMappings",
+			"Try to restore the container's original mappings instead of using the container exposed ports.",
+			"restoreTaskArchive.shouldRestoreMappings", "",
+		)
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="w-full">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "timeoutSecs",
+					Label:         "Timeout (seconds)",
+					BindValuePath: "restoreTaskArchive.timeoutSecs",
+					IsRequired:    false,
+				})
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Restore Task Archive", "ph-check-fat", "closeRestoreTaskArchiveModal()", false,
+		)
+	</form>
+}
+
+templ RestoreBackupTaskArchiveModal() {
+	<!-- RestoreBackupTaskArchiveModal -->
+	@componentStructural.RegularModal(
+		"Restore Backup Task Archive", "isRestoreTaskArchiveModalOpen",
+		"closeRestoreTaskArchiveModal()", "restoreTaskArchive.archiveId",
+	) {
+		@RestoreBackupTaskArchiveForm()
+	}
+}
+
 templ BackupTaskArchivesTable(
 	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
 	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
@@ -561,6 +613,17 @@ templ BackupTaskArchivesTable(
 									TooltipPosition: "left",
 								})
 								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "restore-task-archive",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-clock-clockwise",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "openRestoreTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
+									TooltipText:     "Restore",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "top",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
 									Id:              "delete-task-archive",
 									Shape:           componentStructural.IconButtonShapeCircular,
 									Icon:            "ph-trash",
@@ -617,6 +680,7 @@ templ BackupTasks(
 	</div>
 	<div x-data="backupTaskArchives">
 		@BackupTaskArchivesTable(readTaskArchivesRequest, readTaskArchivesResponse)
+		@RestoreBackupTaskArchiveModal()
 		@componentStructural.DeleteModal(
 			"isDeleteTaskArchiveModalOpen", "closeDeleteTaskArchiveModal()", "deleteTaskArchive()",
 			"delete-task-archive", "", "taskArchiveEntity.archiveId",
