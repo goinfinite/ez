@@ -12,10 +12,12 @@ import componentStructural "github.com/goinfinite/ez/src/presentation/ui/compone
 templ BackupIndex(
 	readTasksRequest dto.ReadBackupTasksRequest,
 	readTasksResponse dto.ReadBackupTasksResponse,
-	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
+	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 	readJobsRequest dto.ReadBackupJobsRequest,
 	readJobsResponse dto.ReadBackupJobsResponse,
-	readBackupDestinationsResponse BackupDestinationModifiedResponseDto,
+	readDestinationsRequest dto.ReadBackupDestinationsRequest,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
 	<!-- BackupIndex JavaScript -->
 	<script type="text/javascript" src="/assets/local-states/page/backup.js"></script>
@@ -31,13 +33,16 @@ templ BackupIndex(
 		)
 		<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] p-4">
 			<div x-show="backupFeatureTabSelected === 'tasks'">
-				@BackupTasks(readTasksRequest, readTasksResponse, readBackupTaskArchivesResponse)
+				@BackupTasks(
+					readTasksRequest, readTasksResponse,
+					readTaskArchivesRequest, readTaskArchivesResponse,
+				)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'jobs'">
 				@BackupJobs(readJobsRequest, readJobsResponse)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'destinations'">
-				@BackupDestinations(readBackupDestinationsResponse)
+				@BackupDestinations(readDestinationsRequest, readDestinationsResponse)
 			</div>
 		</div>
 	</div>
@@ -285,7 +290,10 @@ templ BackupTasksTable(
 	</div>
 }
 
-templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse) {
+templ BackupTaskArchivesTable(
+	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
+	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+) {
 	<!-- Backup Task Archives Table -->
 	<div
 		id="backup-task-archives-table"
@@ -294,8 +302,14 @@ templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskA
 		hx-select="#backup-task-archives-table"
 		hx-target="#backup-task-archives-table"
 		hx-swap="outerHTML transition:true"
-		@update:backup-task-archives-pagination="reloadBackupTaskArchivesTable()"
 	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"backupTaskArchives", "/backup/", "#backup-task-archives-table",
+				readTaskArchivesRequest, readTaskArchivesResponse.Pagination,
+				entity.BackupJob{},
+			)
+		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
 		>
@@ -309,7 +323,7 @@ templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskA
 				</tr>
 			</thead>
 			<tbody>
-				for _, backupTaskArchiveEntity := range readBackupTaskArchivesResponse.Archives {
+				for _, backupTaskArchiveEntity := range readTaskArchivesResponse.Archives {
 					@templ.JSONScript(
 						"backupTaskArchiveEntity_"+backupTaskArchiveEntity.ArchiveId.String(),
 						backupTaskArchiveEntity,
@@ -360,27 +374,21 @@ templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskA
 						</td>
 					</tr>
 				}
-				if len(readBackupTaskArchivesResponse.Archives) == 0 {
+				if len(readTaskArchivesResponse.Archives) == 0 {
 					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 						<td class="px-6 py-4" colspan="12">No task archives found.</td>
 					</tr>
 				}
 			</tbody>
 		</table>
-		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			//@componentStructural.Pagination(
-			//	"backupTaskArchives",
-			//	readBackupTaskArchivesResponse.Pagination, "backupTaskArchivesPagination.pageNumber",
-			//	"backupTaskArchivesPagination.itemsPerPage",
-			//)
-		</div>
 	</div>
 }
 
 templ BackupTasks(
 	readTasksRequest dto.ReadBackupTasksRequest,
 	readTasksResponse dto.ReadBackupTasksResponse,
-	readBackupTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
+	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 ) {
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
@@ -400,7 +408,7 @@ templ BackupTasks(
 			"ph-box-arrow-down",
 		)
 	</div>
-	@BackupTaskArchivesTable(readBackupTaskArchivesResponse)
+	@BackupTaskArchivesTable(readTaskArchivesRequest, readTaskArchivesResponse)
 	<p class="mt-2 text-xs">
 		Note: archive files are automatically deleted after 24h to preserve storage space.
 	</p>
@@ -679,13 +687,6 @@ templ BackupJobsTable(
 				}
 			</tbody>
 		</table>
-		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			//@componentStructural.Pagination(
-			//	"backupJobs",
-			//	readJobsResponse.Pagination, "backupJobsPagination.pageNumber",
-			//	"backupJobsPagination.itemsPerPage",
-			//)
-		</div>
 	</div>
 }
 
@@ -703,7 +704,10 @@ templ BackupJobs(
 	@BackupJobsTable(readJobsRequest, readJobsResponse)
 }
 
-templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResponseDto) {
+templ BackupDestinationsTable(
+	readDestinationsRequest dto.ReadBackupDestinationsRequest,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
+) {
 	<!-- Backup Destinations Table -->
 	<div
 		id="backup-destinations-table"
@@ -712,11 +716,13 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 		hx-select="#backup-destinations-table"
 		hx-target="#backup-destinations-table"
 		hx-swap="outerHTML transition:true"
-		@update:backup-destinations-pagination="reloadBackupDestinationsTable()"
-		@update:backup-destinations-record-filters="reloadBackupDestinationsTable()"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			//@componentStructural.RecordFilters("backupDestinations", "backupDestinationsFilters")
+			@componentStructural.ReadRequestSettingsBar(
+				"backupDestinations", "/backup/", "#backup-destinations-table",
+				readDestinationsRequest, readDestinationsResponse.Pagination,
+				BackupDestinationUnifiedEntity{},
+			)
 		</div>
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
@@ -730,7 +736,7 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 				</tr>
 			</thead>
 			<tbody>
-				for _, destinationEntity := range destinationsResponse.Destinations {
+				for _, destinationEntity := range readDestinationsResponse.Destinations {
 					<!-- Backup Destination Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript(
@@ -1018,21 +1024,13 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 						</td>
 					</tr>
 				}
-				if len(destinationsResponse.Destinations) == 0 {
+				if len(readDestinationsResponse.Destinations) == 0 {
 					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 						<td class="px-3 py-2" colspan="12">No backup destinations created yet.</td>
 					</tr>
 				}
 			</tbody>
 		</table>
-		<div class="bg-ez-800 border-t border-neutral-500 border-opacity-90 p-3">
-			//@componentStructural.Pagination(
-			//	"backupDestinations",
-			//	destinationsResponse.Pagination,
-			//	"backupDestinationsPagination.pageNumber",
-			//	"backupDestinationsPagination.itemsPerPage",
-			//)
-		</div>
 	</div>
 }
 
@@ -1051,7 +1049,10 @@ type BackupDestinationModifiedResponseDto struct {
 	Pagination   dto.Pagination
 }
 
-templ BackupDestinations(destinationsResponse BackupDestinationModifiedResponseDto) {
+templ BackupDestinations(
+	readDestinationsRequest dto.ReadBackupDestinationsRequest,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
+) {
 	<div class="mb-4">
 		@componentStructural.PageSubHeading(
 			"Destinations",
@@ -1059,5 +1060,5 @@ templ BackupDestinations(destinationsResponse BackupDestinationModifiedResponseD
 			"ph-barn",
 		)
 	</div>
-	@BackupDestinationsTable(destinationsResponse)
+	@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
 }

@@ -37,81 +37,83 @@ func NewBackupService(
 	}
 }
 
-func (service *BackupService) ReadDestination(input map[string]interface{}) ServiceOutput {
+func (service *BackupService) ReadDestinationRequestFactory(
+	serviceInput map[string]interface{},
+) (readRequestDto dto.ReadBackupDestinationsRequest, err error) {
 	var destinationIdPtr *valueObject.BackupDestinationId
-	if input["destinationId"] != nil {
-		destinationId, err := valueObject.NewBackupDestinationId(input["destinationId"])
+	if serviceInput["destinationId"] != nil {
+		destinationId, err := valueObject.NewBackupDestinationId(serviceInput["destinationId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		destinationIdPtr = &destinationId
 	}
 
 	var accountIdPtr *valueObject.AccountId
-	if input["accountId"] != nil {
-		accountId, err := valueObject.NewAccountId(input["accountId"])
+	if serviceInput["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(serviceInput["accountId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		accountIdPtr = &accountId
 	}
 
 	var destinationNamePtr *valueObject.BackupDestinationName
-	if input["destinationName"] != nil {
-		destinationName, err := valueObject.NewBackupDestinationName(input["destinationName"])
+	if serviceInput["destinationName"] != nil {
+		destinationName, err := valueObject.NewBackupDestinationName(serviceInput["destinationName"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		destinationNamePtr = &destinationName
 	}
 
 	var destinationTypePtr *valueObject.BackupDestinationType
-	if input["destinationType"] != nil {
-		destinationType, err := valueObject.NewBackupDestinationType(input["destinationType"])
+	if serviceInput["destinationType"] != nil {
+		destinationType, err := valueObject.NewBackupDestinationType(serviceInput["destinationType"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		destinationTypePtr = &destinationType
 	}
 
 	var objectStorageProviderPtr *valueObject.ObjectStorageProvider
-	if input["objectStorageProvider"] != nil {
-		objectStorageProvider, err := valueObject.NewObjectStorageProvider(input["objectStorageProvider"])
+	if serviceInput["objectStorageProvider"] != nil {
+		objectStorageProvider, err := valueObject.NewObjectStorageProvider(serviceInput["objectStorageProvider"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		objectStorageProviderPtr = &objectStorageProvider
 	}
 
 	var remoteHostnamePtr *valueObject.Fqdn
-	if input["remoteHostname"] != nil {
-		remoteHostname, err := valueObject.NewFqdn(input["remoteHostname"])
+	if serviceInput["remoteHostname"] != nil {
+		remoteHostname, err := valueObject.NewFqdn(serviceInput["remoteHostname"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		remoteHostnamePtr = &remoteHostname
 	}
 
 	var remoteHostTypePtr *valueObject.BackupDestinationRemoteHostType
-	if input["remoteHostType"] != nil {
-		remoteHostType, err := valueObject.NewBackupDestinationRemoteHostType(input["remoteHostType"])
+	if serviceInput["remoteHostType"] != nil {
+		remoteHostType, err := valueObject.NewBackupDestinationRemoteHostType(serviceInput["remoteHostType"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		remoteHostTypePtr = &remoteHostType
 	}
 
 	timeParamNames := []string{"createdBeforeAt", "createdAfterAt"}
-	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, serviceInput)
 
 	requestPagination, err := serviceHelper.PaginationParser(
-		input, useCase.BackupDestinationsDefaultPagination,
+		serviceInput, useCase.BackupDestinationsDefaultPagination,
 	)
 	if err != nil {
-		return NewServiceOutput(UserError, err)
+		return readRequestDto, err
 	}
 
-	requestDto := dto.ReadBackupDestinationsRequest{
+	return dto.ReadBackupDestinationsRequest{
 		Pagination:            requestPagination,
 		DestinationId:         destinationIdPtr,
 		AccountId:             accountIdPtr,
@@ -122,9 +124,16 @@ func (service *BackupService) ReadDestination(input map[string]interface{}) Serv
 		RemoteHostname:        remoteHostnamePtr,
 		CreatedBeforeAt:       timeParamPtrs["createdBeforeAt"],
 		CreatedAfterAt:        timeParamPtrs["createdAfterAt"],
+	}, nil
+}
+
+func (service *BackupService) ReadDestination(input map[string]interface{}) ServiceOutput {
+	readRequestDto, err := service.ReadDestinationRequestFactory(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
-	responseDto, err := useCase.ReadBackupDestinations(service.backupQueryRepo, requestDto)
+	responseDto, err := useCase.ReadBackupDestinations(service.backupQueryRepo, readRequestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -1691,57 +1700,66 @@ func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOu
 	return NewServiceOutput(Success, "BackupTaskDeleted")
 }
 
-func (service *BackupService) ReadTaskArchive(
-	input map[string]interface{},
-	requestHostname *string,
-) ServiceOutput {
+func (service *BackupService) ReadTaskArchiveRequestFactory(
+	serviceInput map[string]interface{},
+) (readRequestDto dto.ReadBackupTaskArchivesRequest, err error) {
 	var archiveIdPtr *valueObject.BackupTaskArchiveId
-	if input["archiveId"] != nil {
-		archiveId, err := valueObject.NewBackupTaskArchiveId(input["archiveId"])
+	if serviceInput["archiveId"] != nil {
+		archiveId, err := valueObject.NewBackupTaskArchiveId(serviceInput["archiveId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		archiveIdPtr = &archiveId
 	}
 
 	var accountIdPtr *valueObject.AccountId
-	if input["accountId"] != nil {
-		accountId, err := valueObject.NewAccountId(input["accountId"])
+	if serviceInput["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(serviceInput["accountId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		accountIdPtr = &accountId
 	}
 
 	var taskIdPtr *valueObject.BackupTaskId
-	if input["taskId"] != nil {
-		taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+	if serviceInput["taskId"] != nil {
+		taskId, err := valueObject.NewBackupTaskId(serviceInput["taskId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+			return readRequestDto, err
 		}
 		taskIdPtr = &taskId
 	}
 
 	timeParamNames := []string{"createdBeforeAt", "createdAfterAt"}
-	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, serviceInput)
 
 	requestPagination, err := serviceHelper.PaginationParser(
-		input, useCase.BackupTaskArchivesDefaultPagination,
+		serviceInput, useCase.BackupTaskArchivesDefaultPagination,
 	)
 	if err != nil {
-		return NewServiceOutput(UserError, err)
+		return readRequestDto, err
 	}
 
-	requestDto := dto.ReadBackupTaskArchivesRequest{
+	return dto.ReadBackupTaskArchivesRequest{
 		Pagination:      requestPagination,
 		ArchiveId:       archiveIdPtr,
 		AccountId:       accountIdPtr,
 		TaskId:          taskIdPtr,
 		CreatedBeforeAt: timeParamPtrs["createdBeforeAt"],
 		CreatedAfterAt:  timeParamPtrs["createdAfterAt"],
+	}, nil
+}
+
+func (service *BackupService) ReadTaskArchive(
+	input map[string]interface{},
+	requestHostname *string,
+) ServiceOutput {
+	readRequestDto, err := service.ReadTaskArchiveRequestFactory(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
 	}
 
-	responseDto, err := useCase.ReadBackupTaskArchives(service.backupQueryRepo, requestDto)
+	responseDto, err := useCase.ReadBackupTaskArchives(service.backupQueryRepo, readRequestDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}

@@ -12,24 +12,24 @@ type BackupDestinationBase struct {
 	AccountId                         valueObject.AccountId                     `json:"accountId"`
 	AccountUsername                   valueObject.UnixUsername                  `json:"accountUsername"`
 	DestinationName                   valueObject.BackupDestinationName         `json:"destinationName"`
-	DestinationDescription            *valueObject.BackupDestinationDescription `json:"destinationDescription,omitempty"`
+	DestinationDescription            *valueObject.BackupDestinationDescription `json:"destinationDescription"`
 	DestinationType                   valueObject.BackupDestinationType         `json:"destinationType"`
 	DestinationPath                   valueObject.UnixFilePath                  `json:"destinationPath"`
-	MinLocalStorageFreePercent        *uint8                                    `json:"minLocalStorageFreePercent,omitempty"`
-	MaxDestinationStorageUsagePercent *uint8                                    `json:"maxDestinationStorageUsagePercent,omitempty"`
+	MinLocalStorageFreePercent        *uint8                                    `json:"minLocalStorageFreePercent"`
+	MaxDestinationStorageUsagePercent *uint8                                    `json:"maxDestinationStorageUsagePercent"`
 	EncryptionKey                     valueObject.Password                      `json:"-"`
-	TotalSpaceUsageBytes              *valueObject.Byte                         `json:"totalSpaceUsageBytes,omitempty"`
-	TotalSpaceUsagePercent            *uint8                                    `json:"totalSpaceUsagePercent,omitempty"`
+	TotalSpaceUsageBytes              *valueObject.Byte                         `json:"totalSpaceUsageBytes"`
+	TotalSpaceUsagePercent            *uint8                                    `json:"totalSpaceUsagePercent"`
 	CreatedAt                         valueObject.UnixTime                      `json:"createdAt"`
 	UpdatedAt                         valueObject.UnixTime                      `json:"updatedAt"`
 }
 
 type BackupDestinationRemoteBase struct {
 	BackupDestinationBase
-	MaxConcurrentConnections    *uint16           `json:"maxConcurrentConnections,omitempty"`
-	DownloadBytesSecRateLimit   *valueObject.Byte `json:"downloadBytesSecRateLimit,omitempty"`
-	UploadBytesSecRateLimit     *valueObject.Byte `json:"uploadBytesSecRateLimit,omitempty"`
-	SkipCertificateVerification *bool             `json:"skipCertificateVerification,omitempty"`
+	MaxConcurrentConnections    *uint16           `json:"maxConcurrentConnections"`
+	DownloadBytesSecRateLimit   *valueObject.Byte `json:"downloadBytesSecRateLimit"`
+	UploadBytesSecRateLimit     *valueObject.Byte `json:"uploadBytesSecRateLimit"`
+	SkipCertificateVerification *bool             `json:"skipCertificateVerification"`
 }
 
 type BackupDestinationLocal struct {
@@ -38,22 +38,22 @@ type BackupDestinationLocal struct {
 
 type BackupDestinationObjectStorage struct {
 	BackupDestinationRemoteBase
-	ObjectStorageProvider                *valueObject.ObjectStorageProvider                `json:"objectStorageProvider,omitempty"`
-	ObjectStorageProviderRegion          *valueObject.ObjectStorageProviderRegion          `json:"objectStorageProviderRegion,omitempty"`
-	ObjectStorageProviderAccessKeyId     *valueObject.ObjectStorageProviderAccessKeyId     `json:"objectStorageProviderAccessKeyId,omitempty"`
+	ObjectStorageProvider                *valueObject.ObjectStorageProvider                `json:"objectStorageProvider"`
+	ObjectStorageProviderRegion          *valueObject.ObjectStorageProviderRegion          `json:"objectStorageProviderRegion"`
+	ObjectStorageProviderAccessKeyId     *valueObject.ObjectStorageProviderAccessKeyId     `json:"objectStorageProviderAccessKeyId"`
 	ObjectStorageProviderSecretAccessKey *valueObject.ObjectStorageProviderSecretAccessKey `json:"-"`
-	ObjectStorageEndpointUrl             *valueObject.Url                                  `json:"objectStorageEndpointUrl,omitempty"`
-	ObjectStorageBucketName              *valueObject.ObjectStorageBucketName              `json:"objectStorageBucketName,omitempty"`
+	ObjectStorageEndpointUrl             *valueObject.Url                                  `json:"objectStorageEndpointUrl"`
+	ObjectStorageBucketName              *valueObject.ObjectStorageBucketName              `json:"objectStorageBucketName"`
 }
 
 type BackupDestinationRemoteHost struct {
 	BackupDestinationRemoteBase
-	RemoteHostType                  *valueObject.BackupDestinationRemoteHostType `json:"remoteHostType,omitempty"`
-	RemoteHostname                  *valueObject.NetworkHost                     `json:"remoteHostname,omitempty"`
-	RemoteHostNetworkPort           *valueObject.NetworkPort                     `json:"remoteHostNetworkPort,omitempty"`
-	RemoteHostUsername              *valueObject.UnixUsername                    `json:"remoteHostUsername,omitempty"`
+	RemoteHostType                  *valueObject.BackupDestinationRemoteHostType `json:"remoteHostType"`
+	RemoteHostname                  *valueObject.NetworkHost                     `json:"remoteHostname"`
+	RemoteHostNetworkPort           *valueObject.NetworkPort                     `json:"remoteHostNetworkPort"`
+	RemoteHostUsername              *valueObject.UnixUsername                    `json:"remoteHostUsername"`
 	RemoteHostPassword              *valueObject.Password                        `json:"-"`
-	RemoteHostPrivateKeyFilePath    *valueObject.UnixFilePath                    `json:"remoteHostPrivateKeyFilePath,omitempty"`
-	RemoteHostConnectionTimeoutSecs *valueObject.TimeDuration                    `json:"remoteHostConnectionTimeoutSecs,omitempty"`
-	RemoteHostConnectionRetrySecs   *valueObject.TimeDuration                    `json:"remoteHostConnectionRetrySecs,omitempty"`
+	RemoteHostPrivateKeyFilePath    *valueObject.UnixFilePath                    `json:"remoteHostPrivateKeyFilePath"`
+	RemoteHostConnectionTimeoutSecs *valueObject.TimeDuration                    `json:"remoteHostConnectionTimeoutSecs"`
+	RemoteHostConnectionRetrySecs   *valueObject.TimeDuration                    `json:"remoteHostConnectionRetrySecs"`
 }

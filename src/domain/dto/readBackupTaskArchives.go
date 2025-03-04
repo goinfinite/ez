@@ -7,11 +7,11 @@ import (
 
 type ReadBackupTaskArchivesRequest struct {
 	Pagination      Pagination                       `json:"pagination"`
-	ArchiveId       *valueObject.BackupTaskArchiveId `json:"archiveId,omitempty"`
-	AccountId       *valueObject.AccountId           `json:"accountId,omitempty"`
-	TaskId          *valueObject.BackupTaskId        `json:"taskId,omitempty"`
-	CreatedBeforeAt *valueObject.UnixTime            `json:"createdBeforeAt,omitempty"`
-	CreatedAfterAt  *valueObject.UnixTime            `json:"createdAfterAt,omitempty"`
+	ArchiveId       *valueObject.BackupTaskArchiveId `json:"archiveId"`
+	AccountId       *valueObject.AccountId           `json:"accountId"`
+	TaskId          *valueObject.BackupTaskId        `json:"taskId"`
+	CreatedBeforeAt *valueObject.UnixTime            `json:"createdBeforeAt"`
+	CreatedAfterAt  *valueObject.UnixTime            `json:"createdAfterAt"`
 }
 
 type ReadBackupTaskArchivesResponse struct {
