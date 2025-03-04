@@ -1,25 +1,29 @@
 package componentStructural
 
 import "github.com/goinfinite/ez/src/domain/dto"
+import "github.com/goinfinite/ez/src/presentation/ui/component/form"
+import "github.com/goinfinite/ez/src/domain/valueObject"
 
 templ ReadRequestSettingsBar(
-	componentId, uiEndpoint, recordsDisplayElementId string,
+	entityName, uiEndpoint, recordsDisplayElementId string,
 	readRequestDto interface{},
 	responsePaginationDto dto.Pagination,
+	entityStruct interface{},
 ) {
-	@templ.JSONScript(componentId+"ReadRequestDto", readRequestDto)
-	@templ.JSONScript(componentId+"PaginationDto", responsePaginationDto)
+	@templ.JSONScript(entityName+"ReadRequestDto", readRequestDto)
+	@templ.JSONScript(entityName+"PaginationDto", responsePaginationDto)
+	@templ.JSONScript(entityName+"Struct", entityStruct)
 	<script type="text/javascript" src="/assets/local-states/component/structural/readRequestSettingsBar.js"></script>
 	@templ.JSFuncCall(
-		"InitReadRequestSettingsLocalState", componentId, uiEndpoint, recordsDisplayElementId,
+		"InitReadRequestSettingsLocalState", entityName, uiEndpoint, recordsDisplayElementId,
 	)
 	<div
 		class="flex flex-row items-center justify-between"
-		x-data={ componentId + "ReadRequestSettings" }
+		x-data={ entityName + "ReadRequestSettings" }
 	>
 		<!-- RecordFilters -->
 		<div class="flex flex-row items-center justify-start gap-1.5">
-			<div class="flex flex-row flex-wrap items-center gap-2">
+			<div class="flex basis-3/4 flex-row flex-wrap items-center gap-2">
 				<template x-for={ "(filterKey, filterIndex) in Object.keys(filters)" }>
 					<!-- FilterField -->
 					<div
@@ -93,8 +97,53 @@ templ ReadRequestSettingsBar(
 				clear all
 			</button>
 		</div>
-		@Pagination(
-			componentId, responsePaginationDto, "pagination.pageNumber", "pagination.itemsPerPage",
-		)
+		<div class="flex basis-1/4 flex-row items-center justify-evenly gap-3">
+			@Pagination(
+				entityName, responsePaginationDto, "pagination.pageNumber", "pagination.itemsPerPage",
+			)
+			<!-- SortBy -->
+			<div class="w-24">
+				@componentForm.SelectInputClientSideOptions(
+					componentForm.SelectInputClientSideOptionsDto{
+						Id:                    "sortBy",
+						Label:                 "sort by",
+						SelectedBindValuePath: "pagination.sortBy",
+						OptionsBindValuePath:  "entityFieldKeys",
+						DenseMode:             true,
+					},
+				)
+			</div>
+			<!-- SortDirection -->
+			if responsePaginationDto.SortDirection != nil {
+				switch *responsePaginationDto.SortDirection {
+					case valueObject.PaginationSortDirectionAsc:
+						@IconButtonWithTooltip(IconButtonWithTooltipDto{
+							Id:              "sortDirection",
+							Shape:           IconButtonShapeSquare,
+							Size:            "sm",
+							Icon:            "ph-sort-ascending",
+							BackgroundColor: "ez-100",
+							HoverColor:      "ez-500",
+							OnClick:         "pagination.sortDirection = 'desc'",
+							TooltipText:     "sort descending",
+							TooltipColor:    "ez-500",
+							TooltipPosition: "top",
+						})
+					case valueObject.PaginationSortDirectionDesc:
+						@IconButtonWithTooltip(IconButtonWithTooltipDto{
+							Id:              "sortDirection",
+							Shape:           IconButtonShapeSquare,
+							Size:            "sm",
+							Icon:            "ph-sort-descending",
+							BackgroundColor: "ez-100",
+							HoverColor:      "ez-500",
+							OnClick:         "pagination.sortDirection = 'asc'",
+							TooltipText:     "sort ascending",
+							TooltipColor:    "ez-500",
+							TooltipPosition: "top",
+						})
+				}
+			}
+		</div>
 	</div>
 }

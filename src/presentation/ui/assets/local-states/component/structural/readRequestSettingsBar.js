@@ -7,6 +7,7 @@ function InitReadRequestSettingsLocalState(
     Alpine.data(componentId + "ReadRequestSettings", () => ({
       pagination: {},
       filters: {},
+      entityFieldKeys: [],
 
       resetState() {
         const readRequestDto = JSON.parse(
@@ -23,6 +24,10 @@ function InitReadRequestSettingsLocalState(
         this.pagination = JSON.parse(
           document.getElementById(componentId + "PaginationDto").textContent
         );
+        const entityFields = JSON.parse(
+          document.getElementById(componentId + "Struct").textContent
+        );
+        this.entityFieldKeys = Object.keys(entityFields);
       },
 
       readQueryParams() {
