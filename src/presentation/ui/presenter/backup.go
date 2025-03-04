@@ -200,6 +200,8 @@ func (presenter *BackupPresenter) ReadDestinations(
 		)
 	}
 
+	readResponseDto.Pagination = originalDestinationsResponseDto.Pagination
+
 	return readRequestDto, readResponseDto
 }
 
