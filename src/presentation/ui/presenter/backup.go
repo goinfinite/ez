@@ -69,9 +69,9 @@ func (presenter *BackupPresenter) ReadTaskArchives(
 	echoContext echo.Context,
 	backupService *service.BackupService,
 ) (readRequestDto dto.ReadBackupTaskArchivesRequest, readResponseDto dto.ReadBackupTaskArchivesResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "backupArchives", "id")
+	paginationMap := uiHelper.PaginationParser(echoContext, "backupTaskArchives", "id")
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "backupArchives", dto.ReadBackupTaskArchivesRequest{},
+		echoContext, "backupTaskArchives", dto.ReadBackupTaskArchivesRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
