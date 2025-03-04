@@ -89,7 +89,7 @@ templ SelectInputClientSideOptions(inputDto SelectInputClientSideOptionsDto) {
 				name={ inputDto.Id }
 			}
 			if inputDto.SelectedBindValuePath != "" {
-				x-model:value={ inputDto.SelectedBindValuePath }
+				x-model={ inputDto.SelectedBindValuePath }
 			}
 			if inputDto.Label != "" {
 				placeholder={ inputDto.Label }
@@ -113,7 +113,7 @@ templ SelectInputClientSideOptions(inputDto SelectInputClientSideOptionsDto) {
 				<option
 					class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90"
 					x-text="selectableOption"
-					x-model:value="selectableOption"
+					:selected={ inputDto.SelectedBindValuePath + " === selectableOption" }
 				></option>
 			</template>
 		</select>
