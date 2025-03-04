@@ -143,6 +143,112 @@ templ CreateBackupTaskArchiveModal() {
 	}
 }
 
+templ RestoreBackupTaskForm() {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The restore process will be performed in the background.",
+	)
+	<!-- RestoreBackupTaskForm -->
+	<form
+		id="create-backup-task-archive"
+		hx-post="/api/v1/backup/task/archive/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="taskId" x-bind:value="restoreTask.taskId"/>
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldReplaceExistingContainers",
+			"<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
+			"restoreTask.shouldReplaceExistingContainers", "",
+		)
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldRestoreMappings",
+			"Try to restore the container's original mappings instead of using the container exposed ports.",
+			"restoreTask.shouldRestoreMappings", "",
+		)
+		<div class="bg-ez-500 space-y-5.5 rounded-md p-4">
+			<div>
+				<h3 class="font-bold">Filter Backups</h3>
+				<p class="text-xs">
+					Select which accountIds and containerIds to include or exclude from the restore operation. Leave unselected to include all.
+				</p>
+			</div>
+			<div class="flex flex-row gap-4">
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerAccountIds",
+							Label:                    "ContainerAccountIds",
+							SelectedBindValuePath:    "restoreTask.containerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerIds",
+							Label:                    "ContainerIds",
+							SelectedBindValuePath:    "restoreTask.containerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerAccountIds",
+							Label:                    "ExceptContainerAccountIds",
+							SelectedBindValuePath:    "restoreTask.exceptContainerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerIds",
+							Label:                    "ExceptContainerIds",
+							SelectedBindValuePath:    "restoreTask.exceptContainerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+			</div>
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="w-full">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "timeoutSecs",
+					Label:         "Timeout (seconds)",
+					BindValuePath: "createTaskArchive.timeoutSecs",
+					IsRequired:    false,
+				})
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
+		)
+	</form>
+}
+
+templ RestoreBackupTaskModal() {
+	<!-- RestoreBackupTaskModal -->
+	@componentStructural.RegularModal(
+		"Restore Backup Task", "isRestoreTaskModalOpen",
+		"closeRestoreTaskModal()", "restoreTask.taskId",
+	) {
+		@RestoreBackupTaskForm()
+	}
+}
+
 templ BackupTasksTable(
 	readTasksRequest dto.ReadBackupTasksRequest,
 	readTasksResponse dto.ReadBackupTasksResponse,
@@ -495,6 +601,7 @@ templ BackupTasks(
 	<div x-data="backupTasks">
 		@BackupTasksTable(readTasksRequest, readTasksResponse)
 		@CreateBackupTaskArchiveModal()
+		@RestoreBackupTaskModal()
 	</div>
 	<br/>
 	<div class="mb-4">

@@ -8,9 +8,11 @@ document.addEventListener("alpine:init", () => {
     // Primary State
     taskEntity: {},
     createTaskArchive: {},
+    restoreTask: {},
     resetPrimaryState() {
       this.taskEntity = {};
       this.createTaskArchive = {};
+      this.restoreTask = {};
     },
     updateTaskEntity(taskId) {
       this.taskEntity = JSON.parse(
@@ -23,21 +25,25 @@ document.addEventListener("alpine:init", () => {
 
     // Auxiliary State
     isCreateTaskArchiveModalOpen: false,
-
     openCreateTaskArchiveModal(taskId) {
       this.resetPrimaryState();
       this.updateTaskEntity(taskId);
-      this.createTaskArchive = {
-        taskId: taskId,
-        containerAccountIds: [],
-        containerIds: [],
-        exceptContainerAccountIds: [],
-        exceptContainerIds: [],
-      };
+      this.createTaskArchive = { taskId: taskId };
       this.isCreateTaskArchiveModalOpen = true;
     },
     closeCreateTaskArchiveModal() {
       this.isCreateTaskArchiveModalOpen = false;
+    },
+
+    isRestoreTaskModalOpen: false,
+    openRestoreTaskModal(taskId) {
+      this.resetPrimaryState();
+      this.updateTaskEntity(taskId);
+      this.restoreTask = { taskId: taskId };
+      this.isRestoreTaskModalOpen = true;
+    },
+    closeRestoreTaskModal() {
+      this.isRestoreTaskModalOpen = false;
     },
   }));
 });
