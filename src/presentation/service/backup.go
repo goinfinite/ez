@@ -1516,11 +1516,11 @@ func (service *BackupService) RestoreTask(
 		}
 	}
 
-	timeoutSeconds := useCase.RestoreBackupTaskDefaultTimeoutSecs
-	if input["timeoutSeconds"] != nil {
-		timeoutSeconds, err = voHelper.InterfaceToUint32(input["timeoutSeconds"])
+	timeoutSecs := useCase.RestoreBackupTaskDefaultTimeoutSecs
+	if input["timeoutSecs"] != nil {
+		timeoutSecs, err = voHelper.InterfaceToUint32(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSeconds"))
+			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
 		}
 	}
 
@@ -1578,7 +1578,7 @@ func (service *BackupService) RestoreTask(
 		cliParams := []string{
 			"--should-replace-existing-containers", strconv.FormatBool(shouldReplaceExistingContainers),
 			"--should-restore-mappings", strconv.FormatBool(shouldRestoreMappings),
-			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
+			"--timeout-secs", strconv.Itoa(int(timeoutSecs)),
 		}
 		if taskIdPtr != nil {
 			cliParams = append(cliParams, "--task-id", taskIdPtr.String())
@@ -1613,7 +1613,7 @@ func (service *BackupService) RestoreTask(
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
-			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+			taskName, taskCmd, taskTags, &timeoutSecs, nil,
 		)
 
 		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
@@ -1626,7 +1626,7 @@ func (service *BackupService) RestoreTask(
 
 	requestRestoreDto := dto.NewRestoreBackupTaskRequest(
 		taskIdPtr, archiveIdPtr, &shouldReplaceExistingContainers, &shouldRestoreMappings,
-		&timeoutSeconds, containerAccountIds, containerIds, exceptContainerAccountIds,
+		&timeoutSecs, containerAccountIds, containerIds, exceptContainerAccountIds,
 		exceptContainerIds, operatorAccountId, operatorIpAddress,
 	)
 
@@ -1808,11 +1808,11 @@ func (service *BackupService) CreateTaskArchive(
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	timeoutSeconds := useCase.CreateBackupTaskArchiveDefaultTimeoutSecs
-	if input["timeoutSeconds"] != nil {
-		timeoutSeconds, err = voHelper.InterfaceToUint32(input["timeoutSeconds"])
+	timeoutSecs := useCase.CreateBackupTaskArchiveDefaultTimeoutSecs
+	if input["timeoutSecs"] != nil {
+		timeoutSecs, err = voHelper.InterfaceToUint32(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSeconds"))
+			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
 		}
 	}
 
@@ -1870,7 +1870,7 @@ func (service *BackupService) CreateTaskArchive(
 		cliParams := []string{
 			"--task-id", taskId.String(),
 			"--operator-account-id", operatorAccountId.String(),
-			"--timeout-secs", strconv.Itoa(int(timeoutSeconds)),
+			"--timeout-secs", strconv.Itoa(int(timeoutSecs)),
 		}
 		for _, accountId := range containerAccountIds {
 			cliParams = append(cliParams, "--container-account-ids", accountId.String())
@@ -1894,7 +1894,7 @@ func (service *BackupService) CreateTaskArchive(
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
-			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+			taskName, taskCmd, taskTags, &timeoutSecs, nil,
 		)
 
 		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
@@ -1906,7 +1906,7 @@ func (service *BackupService) CreateTaskArchive(
 	}
 
 	createDto := dto.NewCreateBackupTaskArchive(
-		taskId, &timeoutSeconds, containerAccountIds, containerIds, exceptContainerAccountIds,
+		taskId, &timeoutSecs, containerAccountIds, containerIds, exceptContainerAccountIds,
 		exceptContainerIds, operatorAccountId, operatorIpAddress,
 	)
 
