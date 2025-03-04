@@ -25,6 +25,36 @@ templ IconButtonWithTooltip(inputDto IconButtonWithTooltipDto) {
 		if inputDto.Shape == IconButtonShapeSquare {
 			{{ radiusRoundness = "rounded-sm" }}
 		}
+		{{ buttonPadding := "p-2" }}
+		switch inputDto.Size {
+			case "xs":
+				{{ buttonPadding = "p-0.5" }}
+			case "sm":
+				{{ buttonPadding = "p-1" }}
+			case "lg":
+				{{ buttonPadding = "p-3" }}
+			case "xl":
+				{{ buttonPadding = "p-4" }}
+			case "2xl":
+				{{ buttonPadding = "p-5" }}
+			case "3xl":
+				{{ buttonPadding = "p-6" }}
+		}
+		{{ iconSize := "text-xl" }}
+		switch inputDto.Size {
+			case "xs":
+				{{ iconSize = "text-sm" }}
+			case "sm":
+				{{ iconSize = "text-md" }}
+			case "lg":
+				{{ iconSize = "text-2xl" }}
+			case "xl":
+				{{ iconSize = "text-3xl" }}
+			case "2xl":
+				{{ iconSize = "text-4xl" }}
+			case "3xl":
+				{{ iconSize = "text-5xl" }}
+		}
 		<button
 			if inputDto.Id != "" {
 				id={ inputDto.Id }
@@ -33,9 +63,9 @@ templ IconButtonWithTooltip(inputDto IconButtonWithTooltipDto) {
 			if inputDto.OnClick != "" {
 				@click={ inputDto.OnClick }
 			}
-			class={ "bg-" + inputDto.BackgroundColor + " hover:bg-" + inputDto.HoverColor + " h-9 w-9 leading-none " + radiusRoundness }
+			class={ "bg-" + inputDto.BackgroundColor + " hover:bg-" + inputDto.HoverColor + " " + buttonPadding + " leading-none " + radiusRoundness }
 		>
-			<i class={ "text-xl ph-bold " + inputDto.Icon }></i>
+			<i class={ iconSize + " ph-bold " + inputDto.Icon }></i>
 		</button>
 		if inputDto.TooltipText != "" {
 			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + inputDto.TooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
