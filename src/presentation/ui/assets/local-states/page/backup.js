@@ -25,15 +25,18 @@ document.addEventListener("alpine:init", () => {
     isCreateTaskArchiveModalOpen: false,
 
     openCreateTaskArchiveModal(taskId) {
+      this.resetPrimaryState();
       this.updateTaskEntity(taskId);
       this.createTaskArchive = {
         taskId: taskId,
         containerAccountIds: [],
+        containerIds: [],
+        exceptContainerAccountIds: [],
+        exceptContainerIds: [],
       };
       this.isCreateTaskArchiveModalOpen = true;
     },
     closeCreateTaskArchiveModal() {
-      this.resetPrimaryState();
       this.isCreateTaskArchiveModalOpen = false;
     },
   }));

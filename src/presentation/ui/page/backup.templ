@@ -50,6 +50,10 @@ templ BackupIndex(
 }
 
 templ CreateBackupTaskArchiveForm() {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The archive will be created in the background.",
+	)
 	<!-- CreateBackupTaskArchiveForm -->
 	<form
 		id="create-backup-task-archive"
@@ -57,35 +61,76 @@ templ CreateBackupTaskArchiveForm() {
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
 	>
-		<div class="flex flex-col space-y-6">
-			<input type="hidden" name="taskId" x-bind:value="createTaskArchive.taskId"/>
-			@componentForm.MultiSelectInputClientSideOptions(
-				componentForm.MultiSelectInputClientSideOptionsDto{
-					Id:                       "containerAccountIds",
-					Label:                    "Container Account Ids",
-					SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
-					OptionsBindValuePath:     "taskEntity.containerAccountIds",
-					IsRequired:               false,
-					ShouldIncludeBlankOption: false,
-				},
-			)
-			// ContainerAccountIds (MultiSelect)
-			// ContainerIds (MultiSelect)
-			// ExceptContainerAccountIds (MultiSelect)
-			// ExceptContainerIds (MultiSelect)
-			// TimeoutSecs (Advanced Settings)
-			@componentForm.SubmitButton(
-				"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
-			)
+		<input type="hidden" name="taskId" x-bind:value="createTaskArchive.taskId"/>
+		<div class="bg-ez-500 space-y-5.5 rounded-md p-4">
+			<div>
+				<h3 class="font-bold">Filter Backups</h3>
+				<p class="text-xs">Select which accountIds and containerIds to include or exclude from the archive.</p>
+			</div>
+			<div class="flex flex-row gap-4">
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerAccountIds",
+							Label:                    "ContainerAccountIds",
+							SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerIds",
+							Label:                    "ContainerIds",
+							SelectedBindValuePath:    "createTaskArchive.containerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerAccountIds",
+							Label:                    "ExceptContainerAccountIds",
+							SelectedBindValuePath:    "createTaskArchive.exceptContainerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerIds",
+							Label:                    "ExceptContainerIds",
+							SelectedBindValuePath:    "createTaskArchive.exceptContainerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+			</div>
 		</div>
-	</form>
-	<div class="mt-2">
-		@componentStructural.Alert(
-			componentStructural.AlertTypeInfo,
-			"This is an asynchronous operation. The archive will be created in the background.",
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="w-full">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "timeoutSecs",
+					Label:         "Timeout (seconds)",
+					BindValuePath: "createTaskArchive.timeoutSecs",
+					IsRequired:    false,
+				})
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
 		)
-	</div>
+	</form>
 }
 
 templ CreateBackupTaskArchiveModal() {
