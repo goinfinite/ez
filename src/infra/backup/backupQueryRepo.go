@@ -508,6 +508,10 @@ func (repo *BackupQueryRepo) ReadTaskArchive(
 	})
 
 	pagesTotal := uint32(itemsTotal / uint64(requestDto.Pagination.ItemsPerPage))
+	if pagesTotal == 0 && itemsTotal > 0 {
+		pagesTotal = 1
+	}
+
 	responsePagination := requestDto.Pagination
 	responsePagination.PagesTotal = &pagesTotal
 	responsePagination.ItemsTotal = &itemsTotal
