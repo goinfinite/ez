@@ -18,33 +18,6 @@ type RestoreBackupTaskRequest struct {
 	OperatorIpAddress               valueObject.IpAddress            `json:"-"`
 }
 
-func NewRestoreBackupTaskRequest(
-	taskId *valueObject.BackupTaskId,
-	archiveId *valueObject.BackupTaskArchiveId,
-	shouldReplaceExistingContainers, shouldRestoreMappings *bool,
-	timeoutSecs *uint32,
-	containerAccountIds []valueObject.AccountId,
-	containerIds []valueObject.ContainerId,
-	exceptContainerAccountIds []valueObject.AccountId,
-	exceptContainerIds []valueObject.ContainerId,
-	operatorAccountId valueObject.AccountId,
-	operatorIpAddress valueObject.IpAddress,
-) RestoreBackupTaskRequest {
-	return RestoreBackupTaskRequest{
-		TaskId:                          taskId,
-		ArchiveId:                       archiveId,
-		ShouldReplaceExistingContainers: shouldReplaceExistingContainers,
-		ShouldRestoreMappings:           shouldRestoreMappings,
-		TimeoutSecs:                     timeoutSecs,
-		ContainerAccountIds:             containerAccountIds,
-		ContainerIds:                    containerIds,
-		ExceptContainerAccountIds:       exceptContainerAccountIds,
-		ExceptContainerIds:              exceptContainerIds,
-		OperatorAccountId:               operatorAccountId,
-		OperatorIpAddress:               operatorIpAddress,
-	}
-}
-
 type RestoreBackupTaskResponse struct {
 	SuccessfulContainerIds  []valueObject.ContainerId      `json:"successfulContainerIds"`
 	FailedContainerImageIds []valueObject.ContainerImageId `json:"failedContainerImageIds"`

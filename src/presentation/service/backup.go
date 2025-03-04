@@ -1624,29 +1624,37 @@ func (service *BackupService) RestoreTask(
 		return NewServiceOutput(Created, "BackupTaskRestoreScheduled")
 	}
 
-	requestRestoreDto := dto.NewRestoreBackupTaskRequest(
-		taskIdPtr, archiveIdPtr, &shouldReplaceExistingContainers, &shouldRestoreMappings,
-		&timeoutSecs, containerAccountIds, containerIds, exceptContainerAccountIds,
-		exceptContainerIds, operatorAccountId, operatorIpAddress,
-	)
+	restoreRequestDto := dto.RestoreBackupTaskRequest{
+		TaskId:                          taskIdPtr,
+		ArchiveId:                       archiveIdPtr,
+		ShouldReplaceExistingContainers: &shouldReplaceExistingContainers,
+		ShouldRestoreMappings:           &shouldRestoreMappings,
+		TimeoutSecs:                     &timeoutSecs,
+		ContainerAccountIds:             containerAccountIds,
+		ContainerIds:                    containerIds,
+		ExceptContainerAccountIds:       exceptContainerAccountIds,
+		ExceptContainerIds:              exceptContainerIds,
+		OperatorAccountId:               operatorAccountId,
+		OperatorIpAddress:               operatorIpAddress,
+	}
 
-	responseRestoreDto, err := useCase.RestoreBackupTask(
+	restoreResponseDto, err := useCase.RestoreBackupTask(
 		service.backupQueryRepo, service.backupCmdRepo,
-		service.activityRecordCmdRepo, requestRestoreDto,
+		service.activityRecordCmdRepo, restoreRequestDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
 	responseStatusEnum := Success
-	if len(responseRestoreDto.FailedContainerImageIds) > 0 {
+	if len(restoreResponseDto.FailedContainerImageIds) > 0 {
 		responseStatusEnum = MultiStatus
 	}
-	if len(responseRestoreDto.SuccessfulContainerIds) == 0 {
+	if len(restoreResponseDto.SuccessfulContainerIds) == 0 {
 		responseStatusEnum = InfraError
 	}
 
-	return NewServiceOutput(responseStatusEnum, responseRestoreDto)
+	return NewServiceOutput(responseStatusEnum, restoreResponseDto)
 }
 
 func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOutput {
