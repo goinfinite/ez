@@ -18,6 +18,7 @@ type BackupTask struct {
 	RetentionStrategy      string   `gorm:"not null"`
 	BackupSchedule         string   `gorm:"not null"`
 	TimeoutSecs            uint64   `gorm:"not null"`
+	ContainerAccountIds    []string `gorm:"serializer:json"`
 	SuccessfulContainerIds []string `gorm:"serializer:json"`
 	FailedContainerIds     []string `gorm:"serializer:json"`
 	ExecutionOutput        *string
@@ -37,7 +38,7 @@ func NewBackupTask(
 	id, accountId, jobId, destinationId uint64,
 	taskStatus, retentionStrategy, backupSchedule string,
 	timeoutSecs uint64,
-	successfulContainerIds, failedContainerIds []string,
+	containerAccountIds, successfulContainerIds, failedContainerIds []string,
 	executionOutput *string,
 	sizeBytes *uint64,
 	startedAt, finishedAt *time.Time,
@@ -51,6 +52,7 @@ func NewBackupTask(
 		RetentionStrategy:      retentionStrategy,
 		BackupSchedule:         backupSchedule,
 		TimeoutSecs:            timeoutSecs,
+		ContainerAccountIds:    containerAccountIds,
 		SuccessfulContainerIds: successfulContainerIds,
 		FailedContainerIds:     failedContainerIds,
 		ExecutionOutput:        executionOutput,
@@ -108,6 +110,16 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 	timeoutSecs, err := valueObject.NewTimeDuration(model.TimeoutSecs)
 	if err != nil {
 		return taskEntity, err
+	}
+
+	containerAccountIds := []valueObject.AccountId{}
+	for _, rawAccountId := range model.ContainerAccountIds {
+		accountId, err := valueObject.NewAccountId(rawAccountId)
+		if err != nil {
+			slog.Debug(err.Error(), slog.String("accountId", rawAccountId))
+			continue
+		}
+		containerAccountIds = append(containerAccountIds, accountId)
 	}
 
 	successfulContainerIds := []valueObject.ContainerId{}
@@ -171,7 +183,7 @@ func (model BackupTask) ToEntity() (taskEntity entity.BackupTask, err error) {
 
 	return entity.NewBackupTask(
 		taskId, accountId, accountUsername, jobId, destinationId, taskStatus, retentionStrategy,
-		backupSchedule, timeoutSecs, successfulContainerIds, failedContainerIds,
+		backupSchedule, timeoutSecs, containerAccountIds, successfulContainerIds, failedContainerIds,
 		executionOutputPtr, sizeBytesPtr, startedAtPtr, finishedAtPtr, elapsedSecsPtr,
 		valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
 		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),

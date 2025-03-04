@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/user"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -631,6 +632,7 @@ type BackupTaskRunDetails struct {
 	TaskId                 valueObject.BackupTaskId
 	DestinationEntity      entity.IBackupDestination
 	ExecutionOutput        string
+	ContainerAccountIds    []string
 	SuccessfulContainerIds []string
 	FailedContainerIds     []string
 	SizeBytes              uint64
@@ -693,6 +695,7 @@ func (repo *BackupCmdRepo) backupTaskRunDetailsFactory(
 			TaskId:                 taskId,
 			DestinationEntity:      destinationEntity,
 			ExecutionOutput:        "",
+			ContainerAccountIds:    []string{},
 			SuccessfulContainerIds: []string{},
 			FailedContainerIds:     []string{},
 			SizeBytes:              0,
@@ -1052,6 +1055,12 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		return taskRunDetails
 	}
 
+	accountIdStr := containerWithMetrics.AccountId.String()
+	if !slices.Contains(taskRunDetails.ContainerAccountIds, accountIdStr) {
+		taskRunDetails.ContainerAccountIds = append(
+			taskRunDetails.ContainerAccountIds, containerWithMetrics.AccountId.String(),
+		)
+	}
 	taskRunDetails.SuccessfulContainerIds = append(
 		taskRunDetails.SuccessfulContainerIds, containerIdStr,
 	)
@@ -1207,6 +1216,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		taskModelUpdated := dbModel.BackupTask{
 			TaskStatus:             taskStatus,
 			ExecutionOutput:        &combinedExecutionOutput,
+			ContainerAccountIds:    taskRunDetails.ContainerAccountIds,
 			SuccessfulContainerIds: taskRunDetails.SuccessfulContainerIds,
 			FailedContainerIds:     combinedFailedContainerIds,
 			SizeBytes:              &taskRunDetails.SizeBytes,
