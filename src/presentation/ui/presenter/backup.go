@@ -37,6 +37,7 @@ func (presenter *BackupPresenter) ReadTasks(
 	backupService *service.BackupService,
 ) (readRequestDto dto.ReadBackupTasksRequest, readResponseDto dto.ReadBackupTasksResponse) {
 	paginationMap := uiHelper.PaginationParser(echoContext, "backupTasks", "id")
+	paginationMap["sortDirection"] = "desc"
 	requestParamsMap := uiHelper.ReadRequestParser(
 		echoContext, "backupTasks", dto.ReadBackupTasksRequest{},
 	)
@@ -69,7 +70,8 @@ func (presenter *BackupPresenter) ReadTaskArchives(
 	echoContext echo.Context,
 	backupService *service.BackupService,
 ) (readRequestDto dto.ReadBackupTaskArchivesRequest, readResponseDto dto.ReadBackupTaskArchivesResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "backupTaskArchives", "id")
+	paginationMap := uiHelper.PaginationParser(echoContext, "backupTaskArchives", "createdAt")
+	paginationMap["sortDirection"] = "desc"
 	requestParamsMap := uiHelper.ReadRequestParser(
 		echoContext, "backupTaskArchives", dto.ReadBackupTaskArchivesRequest{},
 	)
