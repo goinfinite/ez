@@ -77,7 +77,7 @@ templ ReadRequestSettingsBar(
 			<button
 				type="button"
 				class="flex h-7 flex-row items-center rounded-md bg-cyan-900 px-2 text-sm leading-none hover:bg-cyan-700"
-				@click={ "reloadRecords()" }
+				@click={ "reloadRecordsDisplay()" }
 				x-show={ "Object.values(filters).some((value) => value !== '')" }
 			>
 				<i class="ph-duotone ph-funnel text-md mr-1 align-middle"></i>
@@ -86,7 +86,7 @@ templ ReadRequestSettingsBar(
 			<button
 				type="button"
 				class="flex h-7 flex-row items-center rounded-md bg-yellow-900 px-2 text-sm leading-none hover:bg-yellow-700"
-				@click={ "Object.keys(filters).forEach((filterKey) => { filters[filterKey] = '' }); reloadRecords()" }
+				@click={ "Object.keys(filters).forEach((filterKey) => { filters[filterKey] = '' }); reloadRecordsDisplay()" }
 				x-show={ "Object.values(filters).some((value) => value !== '')" }
 			>
 				<i class="ph-duotone ph-broom text-md mr-1 align-middle"></i>
