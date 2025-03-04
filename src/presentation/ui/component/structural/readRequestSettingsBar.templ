@@ -97,7 +97,7 @@ templ ReadRequestSettingsBar(
 				clear all
 			</button>
 		</div>
-		<div class="flex basis-1/4 flex-row items-center justify-evenly gap-3">
+		<div class="flex basis-1/4 flex-row items-center justify-evenly gap-1.5">
 			@Pagination(
 				entityName, responsePaginationDto, "pagination.pageNumber", "pagination.itemsPerPage",
 			)
@@ -120,10 +120,10 @@ templ ReadRequestSettingsBar(
 						@IconButtonWithTooltip(IconButtonWithTooltipDto{
 							Id:              "sortDirection",
 							Shape:           IconButtonShapeSquare,
-							Size:            "sm",
+							Size:            "md",
 							Icon:            "ph-sort-ascending",
-							BackgroundColor: "ez-100",
-							HoverColor:      "ez-500",
+							BackgroundColor: "ez-400",
+							HoverColor:      "ez-200",
 							OnClick:         "pagination.sortDirection = 'desc'",
 							TooltipText:     "sort descending",
 							TooltipColor:    "ez-500",
@@ -133,10 +133,10 @@ templ ReadRequestSettingsBar(
 						@IconButtonWithTooltip(IconButtonWithTooltipDto{
 							Id:              "sortDirection",
 							Shape:           IconButtonShapeSquare,
-							Size:            "sm",
+							Size:            "md",
 							Icon:            "ph-sort-descending",
-							BackgroundColor: "ez-100",
-							HoverColor:      "ez-500",
+							BackgroundColor: "ez-400",
+							HoverColor:      "ez-200",
 							OnClick:         "pagination.sortDirection = 'asc'",
 							TooltipText:     "sort ascending",
 							TooltipColor:    "ez-500",

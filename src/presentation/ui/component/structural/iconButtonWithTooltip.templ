@@ -31,14 +31,16 @@ templ IconButtonWithTooltip(inputDto IconButtonWithTooltipDto) {
 				{{ buttonPadding = "p-0.5" }}
 			case "sm":
 				{{ buttonPadding = "p-1" }}
+			case "md":
+				{{ buttonPadding = "p-1.5" }}
 			case "lg":
-				{{ buttonPadding = "p-3" }}
+				{{ buttonPadding = "p-2" }}
 			case "xl":
-				{{ buttonPadding = "p-4" }}
+				{{ buttonPadding = "p-2.5" }}
 			case "2xl":
-				{{ buttonPadding = "p-5" }}
+				{{ buttonPadding = "p-3" }}
 			case "3xl":
-				{{ buttonPadding = "p-6" }}
+				{{ buttonPadding = "p-4" }}
 		}
 		{{ iconSize := "text-xl" }}
 		switch inputDto.Size {
@@ -46,6 +48,8 @@ templ IconButtonWithTooltip(inputDto IconButtonWithTooltipDto) {
 				{{ iconSize = "text-sm" }}
 			case "sm":
 				{{ iconSize = "text-md" }}
+			case "md":
+				{{ iconSize = "text-lg" }}
 			case "lg":
 				{{ iconSize = "text-2xl" }}
 			case "xl":
