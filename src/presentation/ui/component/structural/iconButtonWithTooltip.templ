@@ -5,46 +5,56 @@ const (
 	IconButtonShapeSquare   = "square"
 )
 
-templ IconButtonWithTooltip(
-	id, shape, icon, defaultColor, hoverColor, onClick string,
-	tooltipText, tooltipColor, tooltipPosition string,
-) {
+type IconButtonWithTooltipDto struct {
+	Id              string
+	Shape           string
+	Size            string
+	Icon            string
+	BackgroundColor string
+	HoverColor      string
+	OnClick         string
+	TooltipText     string
+	TooltipColor    string
+	TooltipPosition string
+}
+
+templ IconButtonWithTooltip(inputDto IconButtonWithTooltipDto) {
 	<!-- IconButtonWithTooltip -->
 	<div class="group relative">
 		{{ radiusRoundness := "rounded-full" }}
-		if shape == IconButtonShapeSquare {
+		if inputDto.Shape == IconButtonShapeSquare {
 			{{ radiusRoundness = "rounded-sm" }}
 		}
 		<button
-			if id != "" {
-				id={ id }
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
 			}
 			type="button"
-			if onClick != "" {
-				@click={ onClick }
+			if inputDto.OnClick != "" {
+				@click={ inputDto.OnClick }
 			}
-			class={ "bg-" + defaultColor + " hover:bg-" + hoverColor + " h-9 w-9 leading-none " + radiusRoundness }
+			class={ "bg-" + inputDto.BackgroundColor + " hover:bg-" + inputDto.HoverColor + " h-9 w-9 leading-none " + radiusRoundness }
 		>
-			<i class={ "text-xl ph-bold " + icon }></i>
+			<i class={ "text-xl ph-bold " + inputDto.Icon }></i>
 		</button>
-		if tooltipText != "" {
-			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + tooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
-			switch tooltipPosition {
+		if inputDto.TooltipText != "" {
+			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + inputDto.TooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
+			switch inputDto.TooltipPosition {
 				case "top":
 					<div class={ tooltipBaseClass + " bottom-full mb-1.5 group-hover:-translate-y-0.5 left-1/2 -translate-x-1/2" }>
-						{ tooltipText }
+						{ inputDto.TooltipText }
 					</div>
 				case "bottom":
 					<div class={ tooltipBaseClass + " top-full mt-1.5 group-hover:translate-y-0.5 left-1/2 -translate-x-1/2" }>
-						{ tooltipText }
+						{ inputDto.TooltipText }
 					</div>
 				case "left":
 					<div class={ tooltipBaseClass + " right-full mr-1.5 group-hover:translate-x-0.5 top-1/2 -translate-y-1/2" }>
-						{ tooltipText }
+						{ inputDto.TooltipText }
 					</div>
 				case "right":
 					<div class={ tooltipBaseClass + " left-full ml-1.5 group-hover:-translate-x-0.5 top-1/2 -translate-y-1/2" }>
-						{ tooltipText }
+						{ inputDto.TooltipText }
 					</div>
 			}
 		}

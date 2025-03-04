@@ -60,6 +60,7 @@ templ BackupTasksTable(
 			@componentStructural.ReadRequestSettingsBar(
 				"backupTasks", "/backup/", "#backup-tasks-table",
 				readTasksRequest, readTasksResponse.Pagination,
+				entity.BackupTask{},
 			)
 		</div>
 		<table
@@ -236,24 +237,39 @@ templ BackupTasksTable(
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
 								if backupTaskEntity.TaskStatus == valueObject.BackupTaskStatusCompleted {
-									@componentStructural.IconButtonWithTooltip(
-										"create-task-archive", componentStructural.IconButtonShapeCircular,
-										"ph-file-zip", "ez-300", "ez-200",
-										"openCreateTaskArchiveModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Create Archive", "ez-300", "left",
-									)
-									@componentStructural.IconButtonWithTooltip(
-										"restore-task", componentStructural.IconButtonShapeCircular,
-										"ph-clock-clockwise", "ez-300", "ez-200",
-										"openRestoreTaskModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Restore", "ez-300", "left",
-									)
-									@componentStructural.IconButtonWithTooltip(
-										"delete-task", componentStructural.IconButtonShapeCircular,
-										"ph-trash", "red-900", "red-700",
-										"openDeleteTaskModal('"+backupTaskEntity.TaskId.String()+"')",
-										"Delete", "red-700", "left",
-									)
+									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+										Id:              "create-task-archive",
+										Shape:           componentStructural.IconButtonShapeCircular,
+										Icon:            "ph-file-zip",
+										BackgroundColor: "ez-300",
+										HoverColor:      "ez-200",
+										OnClick:         "openCreateTaskArchiveModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:     "Create Archive",
+										TooltipColor:    "ez-300",
+										TooltipPosition: "left",
+									})
+									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+										Id:              "restore-task",
+										Shape:           componentStructural.IconButtonShapeCircular,
+										Icon:            "ph-clock-clockwise",
+										BackgroundColor: "ez-300",
+										HoverColor:      "ez-200",
+										OnClick:         "openRestoreTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:     "Restore",
+										TooltipColor:    "ez-300",
+										TooltipPosition: "left",
+									})
+									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+										Id:              "delete-task",
+										Shape:           componentStructural.IconButtonShapeCircular,
+										Icon:            "ph-trash",
+										BackgroundColor: "red-900",
+										HoverColor:      "red-700",
+										OnClick:         "openDeleteTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:     "Delete",
+										TooltipColor:    "red-700",
+										TooltipPosition: "left",
+									})
 								}
 							</div>
 						</td>
@@ -318,18 +334,28 @@ templ BackupTaskArchivesTable(readBackupTaskArchivesResponse dto.ReadBackupTaskA
 						</td>
 						<td class="w-[15%] p-2">
 							<div class="flex flex-wrap items-center justify-center gap-1">
-								@componentStructural.IconButtonWithTooltip(
-									"download-task-archive", componentStructural.IconButtonShapeCircular,
-									"ph-download", "ez-300", "ez-200",
-									"window.open('"+backupTaskArchiveEntity.DownloadUrl.String()+"')",
-									"Download", "ez-300", "left",
-								)
-								@componentStructural.IconButtonWithTooltip(
-									"delete-task-archive", componentStructural.IconButtonShapeCircular,
-									"ph-trash", "red-900", "red-700",
-									"openDeleteTaskArchiveModal('"+backupTaskArchiveEntity.ArchiveId.String()+"')",
-									"Delete", "red-700", "right",
-								)
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "download-task-archive",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-download",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "window.open('" + backupTaskArchiveEntity.DownloadUrl.String() + "')",
+									TooltipText:     "Download",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "delete-task-archive",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-trash",
+									BackgroundColor: "red-900",
+									HoverColor:      "red-700",
+									OnClick:         "openDeleteTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
+									TooltipText:     "Delete",
+									TooltipColor:    "red-700",
+									TooltipPosition: "right",
+								})
 							</div>
 						</td>
 					</tr>
@@ -397,6 +423,7 @@ templ BackupJobsTable(
 			@componentStructural.ReadRequestSettingsBar(
 				"backupJobs", "/backup/", "#backup-jobs-table",
 				readJobsRequest, readJobsResponse.Pagination,
+				entity.BackupJob{},
 			)
 		</div>
 		<table
@@ -608,24 +635,39 @@ templ BackupJobsTable(
 						</td>
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
-								@componentStructural.IconButtonWithTooltip(
-									"run-job", componentStructural.IconButtonShapeCircular,
-									"ph-queue", "cyan-900", "cyan-700",
-									"openRunJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Run Job Now", "cyan-700", "left",
-								)
-								@componentStructural.IconButtonWithTooltip(
-									"update-job", componentStructural.IconButtonShapeCircular,
-									"ph-pencil", "ez-300", "ez-200",
-									"openUpdateJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Update", "ez-300", "left",
-								)
-								@componentStructural.IconButtonWithTooltip(
-									"delete-job", componentStructural.IconButtonShapeCircular,
-									"ph-trash", "red-900", "red-700",
-									"openDeleteJobModal('"+backupJobEntity.JobId.String()+"')",
-									"Delete", "red-700", "left",
-								)
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "run-job",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-queue",
+									BackgroundColor: "cyan-900",
+									HoverColor:      "cyan-700",
+									OnClick:         "openRunJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:     "Run Job Now",
+									TooltipColor:    "cyan-700",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "update-job",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-pencil",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "openUpdateJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:     "Update",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "delete-job",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-trash",
+									BackgroundColor: "red-900",
+									HoverColor:      "red-700",
+									OnClick:         "openDeleteJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:     "Delete",
+									TooltipColor:    "red-700",
+									TooltipPosition: "left",
+								})
 							</div>
 						</td>
 					</tr>
@@ -950,18 +992,28 @@ templ BackupDestinationsTable(destinationsResponse BackupDestinationModifiedResp
 						</td>
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
-								@componentStructural.IconButtonWithTooltip(
-									"update-destination", componentStructural.IconButtonShapeCircular,
-									"ph-pencil", "ez-300", "ez-200",
-									"openUpdateDestinationModal('"+destinationEntity.DestinationId.String()+"')",
-									"Update", "ez-300", "left",
-								)
-								@componentStructural.IconButtonWithTooltip(
-									"delete-destination", componentStructural.IconButtonShapeCircular,
-									"ph-trash", "red-900", "red-700",
-									"openDeleteDestinationModal('"+destinationEntity.DestinationId.String()+"')",
-									"Delete", "red-700", "left",
-								)
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "update-destination",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-pencil",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "openUpdateDestinationModal('" + destinationEntity.DestinationId.String() + "')",
+									TooltipText:     "Update",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "delete-destination",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-trash",
+									BackgroundColor: "red-900",
+									HoverColor:      "red-700",
+									OnClick:         "openDeleteDestinationModal('" + destinationEntity.DestinationId.String() + "')",
+									TooltipText:     "Delete",
+									TooltipColor:    "red-700",
+									TooltipPosition: "left",
+								})
 							</div>
 						</td>
 					</tr>
