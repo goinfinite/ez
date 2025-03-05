@@ -27,6 +27,7 @@ templ CronCustomScheduleInput(bindModelPath string) {
 	<div
 		x-data="{ cronSchedule: { minute: '*', hour: '*', day: '*', month: '*', weekday: '*' } }"
 		x-effect={ bindModelPath + " = cronSchedule.minute+' '+cronSchedule.hour+' '+cronSchedule.day+' '+cronSchedule.month+' '+cronSchedule.weekday" }
+		class="-mt-4"
 	>
 		<div class="flex flex-row items-center justify-evenly">
 			for _, customSchedulePart := range []string{"minute", "hour", "day", "month", "weekday"} {
