@@ -23,25 +23,98 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 		x-on:submit="$store.main.refreshScheduledTasksPopover()"
 		class="flex flex-col space-y-4"
 	>
+		@componentForm.TextArea("jobDescription", "Description", "createJob.jobDescription")
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/2">
+				BackupSchedule (CronSchedule)
+			</div>
+			<div class="w-1/2">
+				RetentionStrategy (Select)
+			</div>
+		</div>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/2">
+				DestinationIds (MultiSelect)
+			</div>
+			<div class="w-1/2">
+				MaxTaskRetentionDays (Number)
+				<br/>
+				MaxTaskRetentionCount (Number)
+			</div>
+		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="border-ez-300 space-y-5.5 rounded-md border-2 border-dashed p-4">
+				<div>
+					<h3 class="font-bold">Filter Backups</h3>
+					<p class="text-xs">Select which accountIds and containerIds to include or exclude from the backup.</p>
+				</div>
+				<div class="flex flex-row gap-4">
+					<div class="w-1/2 space-y-5 rounded-md">
+						@componentForm.MultiSelectInputClientSideOptions(
+							componentForm.MultiSelectInputClientSideOptionsDto{
+								Id:                       "containerAccountIds",
+								Label:                    "ContainerAccountIds",
+								SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
+								OptionsBindValuePath:     "taskEntity.containerAccountIds",
+								IsRequired:               false,
+								ShouldIncludeBlankOption: false,
+							},
+						)
+						@componentForm.MultiSelectInputClientSideOptions(
+							componentForm.MultiSelectInputClientSideOptionsDto{
+								Id:                       "containerIds",
+								Label:                    "ContainerIds",
+								SelectedBindValuePath:    "createTaskArchive.containerIds",
+								OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+								IsRequired:               false,
+								ShouldIncludeBlankOption: false,
+							},
+						)
+					</div>
+					<div class="w-1/2 space-y-5 rounded-md">
+						@componentForm.MultiSelectInputClientSideOptions(
+							componentForm.MultiSelectInputClientSideOptionsDto{
+								Id:                       "exceptContainerAccountIds",
+								Label:                    "ExceptContainerAccountIds",
+								SelectedBindValuePath:    "createTaskArchive.exceptContainerAccountIds",
+								OptionsBindValuePath:     "taskEntity.containerAccountIds",
+								IsRequired:               false,
+								ShouldIncludeBlankOption: false,
+							},
+						)
+						@componentForm.MultiSelectInputClientSideOptions(
+							componentForm.MultiSelectInputClientSideOptionsDto{
+								Id:                       "exceptContainerIds",
+								Label:                    "ExceptContainerIds",
+								SelectedBindValuePath:    "createTaskArchive.exceptContainerIds",
+								OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+								IsRequired:               false,
+								ShouldIncludeBlankOption: false,
+							},
+						)
+					</div>
+				</div>
+			</div>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
 					@componentForm.SelectInputWithLabelValuePair(
-						"accountId", "Account", "createJob.accountId",
+						"accountId", "Account (Job Owner)", "createJob.accountId",
 						createDto.AccountSelectLabelValuePairs, true,
 					)
 				</div>
+				<div class="w-1/2">
+					ArchiveCompressionFormat (Select)
+				</div>
+			</div>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					TimeoutSecs (Number)
+				</div>
+				<div class="w-1/2">
+					MaxConcurrentCpuCores (Number)
+				</div>
 			</div>
 		}
-		// JobDescription (TextArea)
-		// DestinationIds (MultiSelect)
-		// RetentionStrategy (Select)
-		// BackupSchedule (CronSchedule)
-		// ArchiveCompressionFormat (Select)
-		// TimeoutSecs (Number)
-		// MaxTaskRetentionCount (Number)
-		// MaxTaskRetentionDays (Number)
-		// MaxConcurrentCpuCores (Number)
 		// ContainerAccountIds (MultiSelect)
 		// ContainerIds (MultiSelect)
 		// ExceptContainerAccountIds (MultiSelect)
