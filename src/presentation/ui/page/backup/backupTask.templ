@@ -1,0 +1,654 @@
+package pageBackup
+
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/presentation/ui/component/form"
+	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
+	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"github.com/goinfinite/ez/src/presentation/ui/helper"
+	"strconv"
+)
+
+templ CreateBackupTaskArchiveForm() {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The archive will be created in the background.",
+	)
+	<!-- CreateBackupTaskArchiveForm -->
+	<form
+		id="create-backup-task-archive"
+		hx-post="/api/v1/backup/task/archive/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="taskId" x-bind:value="createTaskArchive.taskId"/>
+		<div class="bg-ez-500 space-y-5.5 rounded-md p-4">
+			<div>
+				<h3 class="font-bold">Filter Backups</h3>
+				<p class="text-xs">Select which accountIds and containerIds to include or exclude from the archive.</p>
+			</div>
+			<div class="flex flex-row gap-4">
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerAccountIds",
+							Label:                    "ContainerAccountIds",
+							SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerIds",
+							Label:                    "ContainerIds",
+							SelectedBindValuePath:    "createTaskArchive.containerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerAccountIds",
+							Label:                    "ExceptContainerAccountIds",
+							SelectedBindValuePath:    "createTaskArchive.exceptContainerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerIds",
+							Label:                    "ExceptContainerIds",
+							SelectedBindValuePath:    "createTaskArchive.exceptContainerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+			</div>
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="w-full">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "timeoutSecs",
+					Label:         "Timeout (seconds)",
+					BindValuePath: "createTaskArchive.timeoutSecs",
+					IsRequired:    false,
+				})
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
+		)
+	</form>
+}
+
+templ CreateBackupTaskArchiveModal() {
+	<!-- CreateBackupTaskArchiveModal -->
+	@componentStructural.RegularModal(
+		"Create Backup Task Archive", "isCreateTaskArchiveModalOpen",
+		"closeCreateTaskArchiveModal()", "",
+	) {
+		@CreateBackupTaskArchiveForm()
+	}
+}
+
+templ RestoreBackupTaskForm() {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The restore process will be performed in the background.",
+	)
+	<!-- RestoreBackupTaskForm -->
+	<form
+		id="restore-backup-task"
+		hx-post="/api/v1/backup/task/restore/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="taskId" x-bind:value="restoreTask.taskId"/>
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldReplaceExistingContainers",
+			"<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
+			"restoreTask.shouldReplaceExistingContainers", "",
+		)
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldRestoreMappings",
+			"Try to restore the container's original mappings instead of using the container exposed ports.",
+			"restoreTask.shouldRestoreMappings", "",
+		)
+		<div class="bg-ez-500 space-y-5.5 rounded-md p-4">
+			<div>
+				<h3 class="font-bold">Filter Backups</h3>
+				<p class="text-xs">
+					Select which accountIds and containerIds to include or exclude from the restore operation. Leave unselected to include all.
+				</p>
+			</div>
+			<div class="flex flex-row gap-4">
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerAccountIds",
+							Label:                    "ContainerAccountIds",
+							SelectedBindValuePath:    "restoreTask.containerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "containerIds",
+							Label:                    "ContainerIds",
+							SelectedBindValuePath:    "restoreTask.containerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+				<div class="w-1/2 space-y-5 rounded-md">
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerAccountIds",
+							Label:                    "ExceptContainerAccountIds",
+							SelectedBindValuePath:    "restoreTask.exceptContainerAccountIds",
+							OptionsBindValuePath:     "taskEntity.containerAccountIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+					@componentForm.MultiSelectInputClientSideOptions(
+						componentForm.MultiSelectInputClientSideOptionsDto{
+							Id:                       "exceptContainerIds",
+							Label:                    "ExceptContainerIds",
+							SelectedBindValuePath:    "restoreTask.exceptContainerIds",
+							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
+							IsRequired:               false,
+							ShouldIncludeBlankOption: false,
+						},
+					)
+				</div>
+			</div>
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="w-full">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "timeoutSecs",
+					Label:         "Timeout (seconds)",
+					BindValuePath: "restoreTask.timeoutSecs",
+					IsRequired:    false,
+				})
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Restore Task", "ph-check-fat", "closeRestoreTaskModal()", false,
+		)
+	</form>
+}
+
+templ RestoreBackupTaskModal() {
+	<!-- RestoreBackupTaskModal -->
+	@componentStructural.RegularModal(
+		"Restore Backup Task", "isRestoreTaskModalOpen",
+		"closeRestoreTaskModal()", "restoreTask.taskId",
+	) {
+		@RestoreBackupTaskForm()
+	}
+}
+
+templ BackupTasksTable(
+	readTasksRequest dto.ReadBackupTasksRequest,
+	readTasksResponse dto.ReadBackupTasksResponse,
+) {
+	<!-- Backup Tasks Table -->
+	<div
+		id="backup-tasks-table"
+		hx-get="/backup/"
+		hx-trigger="delete:backup-task from:window delay:500ms"
+		hx-select="#backup-tasks-table"
+		hx-target="#backup-tasks-table"
+		hx-swap="outerHTML transition:true"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"backupTasks", "/backup/", "#backup-tasks-table",
+				readTasksRequest, readTasksResponse.Pagination,
+				entity.BackupTask{},
+			)
+		</div>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[22.5%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[42.5%] overflow-x-hidden py-3">Results</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%]"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, backupTaskEntity := range readTasksResponse.Tasks {
+					<!-- Backup Task Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						@templ.JSONScript("backupTaskEntity_"+backupTaskEntity.TaskId.String(), backupTaskEntity)
+						<td class="w-[5%] overflow-x-hidden px-3 py-2">
+							{ backupTaskEntity.TaskId.String() }
+						</td>
+						<td class="w-[22.5%] overflow-x-hidden p-3">
+							{{ statusColor := "ez-200" }}
+							{{ statusIcon := "ph-check-circle" }}
+							switch backupTaskEntity.TaskStatus {
+								case valueObject.BackupTaskStatusCompleted:
+									{{ statusColor = "emerald-900" }}
+									{{ statusIcon = "ph-check-circle" }}
+								case valueObject.BackupTaskStatusPartial:
+									{{ statusColor = "amber-500" }}
+									{{ statusIcon = "ph-warning" }}
+								case valueObject.BackupTaskStatusFailed:
+									{{ statusColor = "red-900" }}
+									{{ statusIcon = "ph-x-circle" }}
+								case valueObject.BackupTaskStatusExecuting:
+									{{ statusColor = "cyan-800" }}
+									{{ statusIcon = "ph-hourglass" }}
+							}
+							@componentMisc.Tag(
+								statusIcon, "", backupTaskEntity.TaskStatus.String(), statusColor,
+							)
+							<table class="mt-2 w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Started At
+										</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ uiHelper.FormatPointer(backupTaskEntity.StartedAt) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Finished At
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(backupTaskEntity.FinishedAt) }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Elapsed Time
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ uiHelper.FormatPointer(backupTaskEntity.ElapsedSecs) }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td class="w-[42.5%] space-y-3 overflow-x-hidden px-6 py-3 text-xs">
+							<p>
+								<span class="text-[10px] font-bold uppercase">Total Size:</span>
+								{ uiHelper.FormatPointer(backupTaskEntity.SizeBytes) }
+							</p>
+							<div x-data="{ isExpanded: false }">
+								<table class="w-full rounded-md ring-2 ring-neutral-50/5">
+									<thead class="bg-neutral-950/20 text-[10px] uppercase">
+										<tr class="border-b-2 border-neutral-50/5 text-center">
+											<th class="w-[50%] rounded-tl-md border-r-2 border-neutral-50/5 p-1">
+												Successful ContainerIds
+											</th>
+											<th class="w-[50%] rounded-tr-md p-1">Failed ContainerIds</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="border-r-2 border-neutral-50/5">
+												for containerIndex, containerId := range backupTaskEntity.SuccessfulContainerIds {
+													<p x-show={ "isExpanded || " + strconv.Itoa(containerIndex) + " < 3" }>
+														{ containerId.String() } <i class="ph-duotone ph-check-square"></i>
+													</p>
+												}
+											</td>
+											<td>
+												for containerIndex, containerId := range backupTaskEntity.FailedContainerIds {
+													<p x-show={ "isExpanded || " + strconv.Itoa(containerIndex) + " < 3" }>
+														{ containerId.String() } <i class="ph-duotone ph-x-square text-red-700"></i>
+													</p>
+												}
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								if len(backupTaskEntity.FailedContainerIds) > 3 || len(backupTaskEntity.SuccessfulContainerIds) > 3 {
+									<button
+										x-on:click="isExpanded = !isExpanded"
+										class="flex w-full items-center justify-center rounded-b-md bg-neutral-50/5 py-1.5 text-center text-[8px] text-neutral-200 hover:bg-opacity-20"
+									>
+										<i x-show="isExpanded" class="ph-bold ph-caret-double-up"></i>
+										<i x-show="!isExpanded" class="ph-bold ph-caret-double-down"></i>
+									</button>
+								}
+							</div>
+							<div>
+								<p class="text-[10px] font-bold uppercase">Execution Output</p>
+								<p class="rounded-md bg-neutral-950/10 p-1 font-mono text-neutral-50">
+									{ uiHelper.FormatPointer(backupTaskEntity.ExecutionOutput) }
+								</p>
+							</div>
+						</td>
+						<td class="w-[20%] space-y-2 overflow-x-hidden p-3">
+							@componentMisc.Tag(
+								"ph-user", "",
+								backupTaskEntity.AccountUsername.String()+" <small>("+backupTaskEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
+							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											JobId
+										</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ backupTaskEntity.JobId.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											DestinationId
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.DestinationId.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											RetentionStrategy
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.RetentionStrategy.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Schedule
+										</td>
+										<td class="px-2 py-1">
+											{ backupTaskEntity.BackupSchedule.String() }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Timeout
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ backupTaskEntity.TimeoutSecs.StringWithSuffix() }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td class="w-[10%]">
+							<div class="flex flex-col items-center justify-center gap-2">
+								if backupTaskEntity.TaskStatus == valueObject.BackupTaskStatusCompleted {
+									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+										Id:              "create-task-archive",
+										Shape:           componentStructural.IconButtonShapeCircular,
+										Icon:            "ph-file-zip",
+										BackgroundColor: "ez-300",
+										HoverColor:      "ez-200",
+										OnClick:         "openCreateTaskArchiveModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:     "Create Archive",
+										TooltipColor:    "ez-300",
+										TooltipPosition: "left",
+									})
+									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+										Id:              "restore-task",
+										Shape:           componentStructural.IconButtonShapeCircular,
+										Icon:            "ph-clock-clockwise",
+										BackgroundColor: "ez-300",
+										HoverColor:      "ez-200",
+										OnClick:         "openRestoreTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:     "Restore",
+										TooltipColor:    "ez-300",
+										TooltipPosition: "left",
+									})
+									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+										Id:              "delete-task",
+										Shape:           componentStructural.IconButtonShapeCircular,
+										Icon:            "ph-trash",
+										BackgroundColor: "red-900",
+										HoverColor:      "red-700",
+										OnClick:         "openDeleteTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:     "Delete",
+										TooltipColor:    "red-700",
+										TooltipPosition: "left",
+									})
+								}
+							</div>
+						</td>
+					</tr>
+				}
+				if len(readTasksResponse.Tasks) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No backup tasks created yet.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ RestoreBackupTaskArchiveForm() {
+	@componentStructural.Alert(
+		componentStructural.AlertTypeInfo,
+		"This is an asynchronous operation. The restore process will be performed in the background.",
+	)
+	<!-- RestoreBackupTaskArchiveForm -->
+	<form
+		id="restore-backup-task-archive"
+		hx-post="/api/v1/backup/task/restore/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="archiveId" x-bind:value="restoreTaskArchive.archiveId"/>
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldReplaceExistingContainers",
+			"<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
+			"restoreTaskArchive.shouldReplaceExistingContainers", "",
+		)
+		@componentForm.CheckboxInputSwitchToggle(
+			"shouldRestoreMappings",
+			"Try to restore the container's original mappings instead of using the container exposed ports.",
+			"restoreTaskArchive.shouldRestoreMappings", "",
+		)
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="w-full">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "timeoutSecs",
+					Label:         "Timeout (seconds)",
+					BindValuePath: "restoreTaskArchive.timeoutSecs",
+					IsRequired:    false,
+				})
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Restore Task Archive", "ph-check-fat", "closeRestoreTaskArchiveModal()", false,
+		)
+	</form>
+}
+
+templ RestoreBackupTaskArchiveModal() {
+	<!-- RestoreBackupTaskArchiveModal -->
+	@componentStructural.RegularModal(
+		"Restore Backup Task Archive", "isRestoreTaskArchiveModalOpen",
+		"closeRestoreTaskArchiveModal()", "restoreTaskArchive.archiveId",
+	) {
+		@RestoreBackupTaskArchiveForm()
+	}
+}
+
+templ BackupTaskArchivesTable(
+	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
+	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+) {
+	<!-- Backup Task Archives Table -->
+	<div
+		id="backup-task-archives-table"
+		hx-get="/backup/"
+		hx-trigger="delete:backup-task-archive from:window delay:500ms"
+		hx-select="#backup-task-archives-table"
+		hx-target="#backup-task-archives-table"
+		hx-swap="outerHTML transition:true"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"backupTaskArchives", "/backup/", "#backup-task-archives-table",
+				readTaskArchivesRequest, readTaskArchivesResponse.Pagination,
+				entity.BackupTaskArchive{},
+			)
+		</div>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-left">
+					<th scope="col" class="w-[50%] p-3">File Path</th>
+					<th scope="col" class="w-[15%] p-3">Archive Id</th>
+					<th scope="col" class="w-[10%] p-3">Size</th>
+					<th scope="col" class="w-[10%] p-3">Created At</th>
+					<th scope="col" class="w-[15%] p-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, backupTaskArchiveEntity := range readTaskArchivesResponse.Archives {
+					@templ.JSONScript(
+						"backupTaskArchiveEntity_"+backupTaskArchiveEntity.ArchiveId.String(),
+						backupTaskArchiveEntity,
+					)
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-sm">
+						<td class="w-[50%] px-3 py-2">
+							{ backupTaskArchiveEntity.UnixFilePath.String() }
+						</td>
+						<td class="w-[15%] space-y-1 p-3">
+							<p>{ backupTaskArchiveEntity.ArchiveId.String() }</p>
+							@componentMisc.Tag(
+								"ph-user", "",
+								backupTaskArchiveEntity.AccountUsername.String()+" <small>("+backupTaskArchiveEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
+						</td>
+						<td class="w-[10%] p-3">
+							{ backupTaskArchiveEntity.SizeBytes.StringWithSuffix() }
+						</td>
+						<td class="w-[10%] p-3">
+							{ backupTaskArchiveEntity.CreatedAt.ReadAsRfcDate() }
+						</td>
+						<td class="w-[15%] p-2">
+							<div class="flex flex-wrap items-center justify-center gap-1">
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "download-task-archive",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-download",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "window.open('" + backupTaskArchiveEntity.DownloadUrl.String() + "')",
+									TooltipText:     "Download",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "restore-task-archive",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-clock-clockwise",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "openRestoreTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
+									TooltipText:     "Restore",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "top",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "delete-task-archive",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-trash",
+									BackgroundColor: "red-900",
+									HoverColor:      "red-700",
+									OnClick:         "openDeleteTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
+									TooltipText:     "Delete",
+									TooltipColor:    "red-700",
+									TooltipPosition: "right",
+								})
+							</div>
+						</td>
+					</tr>
+				}
+				if len(readTaskArchivesResponse.Archives) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-6 py-4" colspan="12">No task archives found.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ BackupTasks(
+	readTasksRequest dto.ReadBackupTasksRequest,
+	readTasksResponse dto.ReadBackupTasksResponse,
+	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
+	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+) {
+	<div class="mb-4">
+		@componentStructural.PageSubHeading(
+			"Tasks",
+			"Manage and monitor individual backup operations, including tracking status, downloading, restoring, or deleting tasks.",
+			"ph-package",
+		)
+	</div>
+	<div x-data="backupTasks">
+		@BackupTasksTable(readTasksRequest, readTasksResponse)
+		@CreateBackupTaskArchiveModal()
+		@RestoreBackupTaskModal()
+		@componentStructural.DeleteModal(
+			"isDeleteTaskModalOpen", "closeDeleteTaskModal()", "deleteTask()",
+			"delete-task", "", "taskEntity.taskId",
+		)
+	</div>
+	<br/>
+	<div class="mb-4">
+		@componentStructural.PageSubHeading(
+			"Tasks Archives",
+			"Access and manage compressed files of completed backup tasks, with options to download or delete archives.",
+			"ph-box-arrow-down",
+		)
+	</div>
+	<div x-data="backupTaskArchives">
+		@BackupTaskArchivesTable(readTaskArchivesRequest, readTaskArchivesResponse)
+		@RestoreBackupTaskArchiveModal()
+		@componentStructural.DeleteModal(
+			"isDeleteTaskArchiveModalOpen", "closeDeleteTaskArchiveModal()", "deleteTaskArchive()",
+			"delete-task-archive", "", "taskArchiveEntity.archiveId",
+		)
+		<p class="mt-2 text-xs">
+			Note: archive files are automatically deleted after 24h to preserve storage space.
+		</p>
+	</div>
+}
