@@ -1,7 +1,9 @@
 document.addEventListener("alpine:init", () => {
+  backupApiBaseEndpoint = "/api/v1/backup";
+
   Alpine.data("backupIndex", () => ({
     // Primary States
-    backupFeatureTabSelected: "tasks",
+    backupFeatureTabSelected: "jobs",
   }));
 
   Alpine.data("backupTasks", () => ({
@@ -57,9 +59,13 @@ document.addEventListener("alpine:init", () => {
     },
     deleteTask() {
       htmx
-        .ajax("DELETE", "/api/v1/backup/tasks/" + this.taskEntity.id + "/", {
-          swap: "none",
-        })
+        .ajax(
+          "DELETE",
+          backupApiBaseEndpoint + "/task/" + this.taskEntity.taskId + "/",
+          {
+            swap: "none",
+          }
+        )
         .then(() => {
           this.$dispatch("delete:backup-task");
         });
@@ -108,13 +114,98 @@ document.addEventListener("alpine:init", () => {
       htmx
         .ajax(
           "DELETE",
-          "/api/v1/backup/task/archive/" + this.taskArchiveEntity.id + "/",
+          backupApiBaseEndpoint +
+            "/task/archive/" +
+            this.taskArchiveEntity.archiveId +
+            "/",
           { swap: "none" }
         )
         .then(() => {
           this.$dispatch("delete:backup-task-archive");
         });
       this.closeDeleteTaskArchiveModal();
+    },
+  }));
+
+  Alpine.data("backupJobs", () => ({
+    // Primary State
+    jobEntity: {},
+    resetPrimaryState() {
+      this.jobEntity = {};
+    },
+    updateJobEntity(jobId) {
+      this.jobEntity = JSON.parse(
+        document.getElementById("backupJobEntity_" + jobId).textContent
+      );
+    },
+    init() {
+      this.resetPrimaryState();
+    },
+
+    // Auxiliary State
+    jobApiEndpoint: backupApiBaseEndpoint + "/job",
+    isRunJobModalOpen: false,
+    openRunJobModal(jobId) {
+      this.resetPrimaryState();
+      this.updateJobEntity(jobId);
+      this.isRunJobModalOpen = true;
+    },
+    closeRunJobModal() {
+      this.isRunJobModalOpen = false;
+    },
+    runJob() {
+      htmx.ajax(
+        "POST",
+        this.jobApiEndpoint +
+          "/" +
+          this.jobEntity.accountId +
+          "/" +
+          this.jobEntity.jobId +
+          "/run/",
+        {
+          swap: "none",
+        }
+      );
+      this.closeRunJobModal();
+    },
+
+    isUpdateJobModalOpen: false,
+    openUpdateJobModal(jobId) {
+      this.resetPrimaryState();
+      this.updateJobEntity(jobId);
+      this.isUpdateJobModalOpen = true;
+    },
+    closeUpdateJobModal() {
+      this.isUpdateJobModalOpen = false;
+    },
+
+    isDeleteJobModalOpen: false,
+    openDeleteJobModal(jobId) {
+      this.resetPrimaryState();
+      this.updateJobEntity(jobId);
+      this.isDeleteJobModalOpen = true;
+    },
+    closeDeleteJobModal() {
+      this.isDeleteJobModalOpen = false;
+    },
+    deleteJob() {
+      htmx
+        .ajax(
+          "DELETE",
+          this.jobApiEndpoint +
+            "/" +
+            this.jobEntity.accountId +
+            "/" +
+            this.jobEntity.jobId +
+            "/",
+          {
+            swap: "none",
+          }
+        )
+        .then(() => {
+          this.$dispatch("delete:backup-job");
+        });
+      this.closeDeleteJobModal();
     },
   }));
 });

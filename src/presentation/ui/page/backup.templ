@@ -691,6 +691,18 @@ templ BackupTasks(
 	</div>
 }
 
+templ CreateBackupJobForm() {
+}
+
+templ CreateBackupJobModal() {
+}
+
+templ UpdateBackupJobForm() {
+}
+
+templ UpdateBackupJobModal() {
+}
+
 templ BackupJobsTable(
 	readJobsRequest dto.ReadBackupJobsRequest,
 	readJobsResponse dto.ReadBackupJobsResponse,
@@ -978,7 +990,21 @@ templ BackupJobs(
 			"ph-factory",
 		)
 	</div>
-	@BackupJobsTable(readJobsRequest, readJobsResponse)
+	<div x-data="backupJobs">
+		@BackupJobsTable(readJobsRequest, readJobsResponse)
+		@CreateBackupJobModal()
+		@componentStructural.ConfirmationModal(
+			"Run Job Now", "ph-queue",
+			"Are you sure you want to run this job?<br /><small>Depending on the job's settings, this operation may take a while and use significant resources.</small>",
+			"isRunJobModalOpen", "runJob()",
+			componentStructural.ConfirmationTypeInfo,
+		)
+		@UpdateBackupJobModal()
+		@componentStructural.DeleteModal(
+			"isDeleteJobModalOpen", "closeDeleteJobModal()", "deleteJob()",
+			"delete-job", "", "jobEntity.jobId",
+		)
+	</div>
 }
 
 templ BackupDestinationsTable(
