@@ -1,0 +1,369 @@
+package pageBackup
+
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
+	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"github.com/goinfinite/ez/src/presentation/ui/helper"
+)
+
+templ BackupDestinationsTable(
+	readDestinationsRequest dto.ReadBackupDestinationsRequest,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
+) {
+	<!-- Backup Destinations Table -->
+	<div
+		id="backup-destinations-table"
+		hx-get="/backup/"
+		hx-trigger="create:backup-destination from:window delay:500ms, update:backup-destination from:window delay:500ms, delete:backup-destination from:window delay:500ms"
+		hx-select="#backup-destinations-table"
+		hx-target="#backup-destinations-table"
+		hx-swap="outerHTML transition:true"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"backupDestinations", "/backup/", "#backup-destinations-table",
+				readDestinationsRequest, readDestinationsResponse.Pagination,
+				BackupDestinationUnifiedEntity{},
+			)
+		</div>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[25%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[45%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%] py-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, destinationEntity := range readDestinationsResponse.Destinations {
+					<!-- Backup Destination Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						@templ.JSONScript(
+							"backupDestinationEntity_"+destinationEntity.DestinationId.String(),
+							destinationEntity,
+						)
+						<td class="w-[20%] space-y-2 text-clip px-3 py-2 text-left">
+							<p>
+								{ destinationEntity.DestinationName.String() }
+								<span class="font-bold">
+									<span class="text-xs">#</span>{ destinationEntity.DestinationId.String() }
+								</span>
+							</p>
+							@componentMisc.Tag(
+								"ph-user", "",
+								destinationEntity.AccountUsername.String()+" <small>("+destinationEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
+							{{ destinationTypeIcon := "ph-house-line" }}
+							{{ destinationTypeColor := "zinc-700" }}
+							switch destinationEntity.DestinationType {
+								case valueObject.BackupDestinationTypeRemoteHost:
+									{{ destinationTypeIcon = "ph-hard-drives" }}
+									{{ destinationTypeColor = "cyan-700" }}
+								case valueObject.BackupDestinationTypeObjectStorage:
+									{{ destinationTypeIcon = "ph-cube" }}
+									{{ destinationTypeColor = "yellow-700" }}
+							}
+							{{ destinationTypeText := destinationEntity.DestinationType.String() }}
+							if destinationEntity.DestinationType == valueObject.BackupDestinationTypeRemoteHost {
+								{{ destinationTypeText += " <small class='font-italic'>(" + destinationEntity.RemoteHostType.String() + ")</small>" }}
+							}
+							@componentMisc.Tag(
+								destinationTypeIcon, "", destinationTypeText, destinationTypeColor,
+							)
+							@componentMisc.Tag(
+								"ph-folder-open", "",
+								destinationEntity.DestinationPath.String(), destinationTypeColor,
+							)
+							<p class="text-xs">
+								{ uiHelper.FormatPointer(destinationEntity.DestinationDescription) }
+							</p>
+						</td>
+						<td class="w-[25%] overflow-x-hidden p-3">
+							<table class="mt-2 w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Total Space Usage
+										</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ uiHelper.FormatPointer(destinationEntity.TotalSpaceUsageBytes) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Total Space Usage (%)
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(destinationEntity.TotalSpaceUsagePercent) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Updated At
+										</td>
+										<td class="px-2 py-1">
+											{ destinationEntity.UpdatedAt.ReadAsRfcDate() }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Created At
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ destinationEntity.CreatedAt.ReadAsRfcDate() }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td class="w-[45%] space-y-4 overflow-x-hidden p-3 text-left">
+							<div>
+								<p class="mb-2 text-[10px] font-bold uppercase">
+									Storage
+								</p>
+								<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+									<tbody>
+										<tr class="border-y-2 border-neutral-50/5">
+											<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Min Free Local Storage (%)
+											</td>
+											<td class="px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.MinLocalStorageFreePercent) }
+											</td>
+										</tr>
+										<tr>
+											<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+												Max Destination Storage Usage (%)
+											</td>
+											<td class="rounded-br-md px-2 py-1">
+												{ uiHelper.FormatPointer(destinationEntity.MaxDestinationStorageUsagePercent) }
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							{{ isRemoteDestination := destinationEntity.DestinationType == valueObject.BackupDestinationTypeObjectStorage || destinationEntity.DestinationType == valueObject.BackupDestinationTypeRemoteHost }}
+							if isRemoteDestination {
+								<div>
+									<p class="mb-2 text-[10px] font-bold uppercase">
+										Network
+									</p>
+									<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+										<tbody>
+											<tr class="border-b-2 border-neutral-50/5">
+												<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Max
+												</td>
+												<td class="rounded-tr-md p-0 text-[10px] leading-5">
+													<table class="w-full table-auto text-center">
+														<tr>
+															<td class="bg-neutral-50/10 px-2 py-1">
+																Concurrent Connections
+															</td>
+															<td class="px-2 py-1">
+																{ uiHelper.FormatPointer(destinationEntity.MaxConcurrentConnections) }
+															</td>
+															<td class="bg-neutral-50/10 px-2 py-1">
+																Download Bytes
+															</td>
+															<td class="px-2 py-1">
+																{ uiHelper.FormatPointer(destinationEntity.DownloadBytesSecRateLimit) }
+															</td>
+															<td class="bg-neutral-50/10 px-2 py-1">
+																Upload Bytes
+															</td>
+															<td class="px-2 py-1">
+																{ uiHelper.FormatPointer(destinationEntity.UploadBytesSecRateLimit) }
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											<tr>
+												<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Skip Cert Verification
+												</td>
+												<td class="rounded-br-md px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.SkipCertificateVerification) }
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							}
+							if destinationEntity.DestinationType == valueObject.BackupDestinationTypeObjectStorage {
+								<div>
+									<p class="mb-2 text-[10px] font-bold uppercase">
+										Object Storage
+									</p>
+									<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+										<tbody>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Provider Name
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.ObjectStorageProvider) }
+												</td>
+											</tr>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Region
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.ObjectStorageProviderRegion) }
+												</td>
+											</tr>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Access Key Id
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.ObjectStorageProviderAccessKeyId) }
+												</td>
+											</tr>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Endpoint Url
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.ObjectStorageEndpointUrl) }
+												</td>
+											</tr>
+											<tr>
+												<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Bucket Name
+												</td>
+												<td class="rounded-br-md px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.ObjectStorageBucketName) }
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							}
+							if destinationEntity.DestinationType == valueObject.BackupDestinationTypeRemoteHost {
+								<div>
+									<p class="mb-2 text-[10px] font-bold uppercase">
+										Remote Host
+									</p>
+									<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+										<tbody>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Hostname
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.RemoteHostname) }:{ uiHelper.FormatPointer(destinationEntity.RemoteHostNetworkPort) }
+												</td>
+											</tr>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Username
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.RemoteHostUsername) }
+												</td>
+											</tr>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Private Key File Path
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.RemoteHostPrivateKeyFilePath) }
+												</td>
+											</tr>
+											<tr class="border-y-2 border-neutral-50/5">
+												<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Connection Timeout
+												</td>
+												<td class="px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.RemoteHostConnectionTimeoutSecs) }
+												</td>
+											</tr>
+											<tr>
+												<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+													Connection Retry Time
+												</td>
+												<td class="rounded-br-md px-2 py-1">
+													{ uiHelper.FormatPointer(destinationEntity.RemoteHostConnectionRetrySecs) }
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							}
+						</td>
+						<td class="w-[10%]">
+							<div class="flex flex-col items-center justify-center gap-2">
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "update-destination",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-pencil",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "openUpdateDestinationModal('" + destinationEntity.DestinationId.String() + "')",
+									TooltipText:     "Update",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "delete-destination",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-trash",
+									BackgroundColor: "red-900",
+									HoverColor:      "red-700",
+									OnClick:         "openDeleteDestinationModal('" + destinationEntity.DestinationId.String() + "')",
+									TooltipText:     "Delete",
+									TooltipColor:    "red-700",
+									TooltipPosition: "left",
+								})
+							</div>
+						</td>
+					</tr>
+				}
+				if len(readDestinationsResponse.Destinations) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No backup destinations created yet.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+// Couldn't find how to ignore the duplicated json tags warning via "lint:" directive.
+// For the time being, we'll have to live with the warning.
+type BackupDestinationUnifiedEntity struct {
+	entity.BackupDestinationBase
+	entity.BackupDestinationRemoteBase
+	entity.BackupDestinationLocal
+	entity.BackupDestinationObjectStorage
+	entity.BackupDestinationRemoteHost
+}
+
+type BackupDestinationModifiedResponseDto struct {
+	Destinations []BackupDestinationUnifiedEntity
+	Pagination   dto.Pagination
+}
+
+templ BackupDestinations(
+	readDestinationsRequest dto.ReadBackupDestinationsRequest,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
+) {
+	<div class="mb-4">
+		@componentStructural.PageSubHeading(
+			"Destinations",
+			"Manage local, remote and object storage destinations to be used on backup jobs.",
+			"ph-barn",
+		)
+	</div>
+	@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
+}

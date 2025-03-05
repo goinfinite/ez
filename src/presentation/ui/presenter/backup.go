@@ -146,7 +146,10 @@ func (presenter *BackupPresenter) ReadJobs(
 func (presenter *BackupPresenter) ReadDestinations(
 	echoContext echo.Context,
 	backupService *service.BackupService,
-) (readRequestDto dto.ReadBackupDestinationsRequest, readResponseDto page.BackupDestinationModifiedResponseDto) {
+) (
+	readRequestDto dto.ReadBackupDestinationsRequest,
+	readResponseDto pageBackup.BackupDestinationModifiedResponseDto,
+) {
 	paginationMap := uiHelper.PaginationParser(echoContext, "backupDestinations", "id")
 	requestParamsMap := uiHelper.ReadRequestParser(
 		echoContext, "backupDestinations", dto.ReadBackupDestinationsRequest{},
@@ -177,22 +180,22 @@ func (presenter *BackupPresenter) ReadDestinations(
 	}
 
 	for _, iDestinationEntity := range originalDestinationsResponseDto.Destinations {
-		destinationUnifiedEntity := page.BackupDestinationUnifiedEntity{}
+		destinationUnifiedEntity := pageBackup.BackupDestinationUnifiedEntity{}
 
 		switch destinationEntity := iDestinationEntity.(type) {
 		case entity.BackupDestinationLocal:
-			destinationUnifiedEntity = page.BackupDestinationUnifiedEntity{
+			destinationUnifiedEntity = pageBackup.BackupDestinationUnifiedEntity{
 				BackupDestinationBase:  destinationEntity.BackupDestinationBase,
 				BackupDestinationLocal: destinationEntity,
 			}
 		case entity.BackupDestinationObjectStorage:
-			destinationUnifiedEntity = page.BackupDestinationUnifiedEntity{
+			destinationUnifiedEntity = pageBackup.BackupDestinationUnifiedEntity{
 				BackupDestinationBase:          destinationEntity.BackupDestinationBase,
 				BackupDestinationRemoteBase:    destinationEntity.BackupDestinationRemoteBase,
 				BackupDestinationObjectStorage: destinationEntity,
 			}
 		case entity.BackupDestinationRemoteHost:
-			destinationUnifiedEntity = page.BackupDestinationUnifiedEntity{
+			destinationUnifiedEntity = pageBackup.BackupDestinationUnifiedEntity{
 				BackupDestinationBase:       destinationEntity.BackupDestinationBase,
 				BackupDestinationRemoteBase: destinationEntity.BackupDestinationRemoteBase,
 				BackupDestinationRemoteHost: destinationEntity,
