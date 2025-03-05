@@ -1,0 +1,36 @@
+package componentForm
+
+import "github.com/goinfinite/ez/src/domain/valueObject"
+
+func transformCompressionFormatsIntoSelectPairs() []SelectLabelValuePair {
+	selectLabelValuePairs := []SelectLabelValuePair{}
+
+	valueLabelMap := map[string]string{
+		"br":   `Brotli (Ratio: ★★☆ / Speed: ★★☆) (recommended)`,
+		"gzip": `Gzip (Ratio: ★☆☆ / Speed: ★★☆)`,
+		"xz":   `XZ (Ratio: ★★★ / Speed: ★☆☆)`,
+		"zip":  `Zip (Ratio: ★☆☆ / Speed: ★☆☆)`,
+		"tar":  `Tarball (Ratio: ☆☆☆ / Speed: ★★★)`,
+	}
+
+	for _, compressionFormat := range valueObject.ValidCompressionFormats {
+		selectLabelValuePair := SelectLabelValuePair{
+			Label: compressionFormat,
+			Value: compressionFormat,
+		}
+		if _, exists := valueLabelMap[compressionFormat]; exists {
+			selectLabelValuePair.Label = valueLabelMap[compressionFormat]
+		}
+
+		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+	}
+
+	return selectLabelValuePairs
+}
+
+templ CompressionFormatSelectInput(id, bindValuePath string) {
+	@SelectInputWithLabelValuePair(
+		id, "Compression Format", bindValuePath,
+		transformCompressionFormatsIntoSelectPairs(), false,
+	)
+}
