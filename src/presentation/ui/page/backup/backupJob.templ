@@ -1,0 +1,377 @@
+package pageBackup
+
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/presentation/ui/component/form"
+	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
+	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"github.com/goinfinite/ez/src/presentation/ui/helper"
+)
+
+type CreateBackupJobModalDto struct {
+	AccountSelectLabelValuePairs []componentForm.SelectLabelValuePair
+}
+
+templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
+	<!-- CreateBackupJobForm -->
+	<form
+		id="create-backup-job"
+		hx-post="/api/v1/backup/job/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		class="flex flex-col space-y-4"
+	>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					@componentForm.SelectInputWithLabelValuePair(
+						"accountId", "Account", "createJob.accountId",
+						createDto.AccountSelectLabelValuePairs, true,
+					)
+				</div>
+			</div>
+		}
+		// JobDescription (TextArea)
+		// DestinationIds (MultiSelect)
+		// RetentionStrategy (Select)
+		// BackupSchedule (CronSchedule)
+		// ArchiveCompressionFormat (Select)
+		// TimeoutSecs (Number)
+		// MaxTaskRetentionCount (Number)
+		// MaxTaskRetentionDays (Number)
+		// MaxConcurrentCpuCores (Number)
+		// ContainerAccountIds (MultiSelect)
+		// ContainerIds (MultiSelect)
+		// ExceptContainerAccountIds (MultiSelect)
+		// ExceptContainerIds (MultiSelect)
+	</form>
+}
+
+templ CreateBackupJobModal(createDto CreateBackupJobModalDto) {
+	<!-- CreateBackupJobModal -->
+	@componentStructural.RegularModal(
+		"Create Backup Job", "isCreateJobModalOpen", "closeCreateJobModal()", "",
+	) {
+		@CreateBackupJobForm(createDto)
+	}
+}
+
+templ UpdateBackupJobForm() {
+}
+
+templ UpdateBackupJobModal() {
+}
+
+templ BackupJobsTable(
+	readJobsRequest dto.ReadBackupJobsRequest,
+	readJobsResponse dto.ReadBackupJobsResponse,
+) {
+	<!-- Backup Jobs Table -->
+	<div
+		id="backup-jobs-table"
+		hx-get="/backup/"
+		hx-trigger="create:backup-job from:window delay:500ms, update:backup-job from:window delay:500ms, delete:backup-job from:window delay:500ms"
+		hx-select="#backup-jobs-table"
+		hx-target="#backup-jobs-table"
+		hx-swap="outerHTML transition:true"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"backupJobs", "/backup/", "#backup-jobs-table",
+				readJobsRequest, readJobsResponse.Pagination,
+				entity.BackupJob{},
+			)
+		</div>
+		<table
+			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
+		>
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3">Id</th>
+					<th scope="col" class="w-[25%] overflow-x-hidden py-3">Status</th>
+					<th scope="col" class="w-[45%] overflow-x-hidden py-3">Settings</th>
+					<th scope="col" class="w-[10%] py-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, backupJobEntity := range readJobsResponse.Jobs {
+					<!-- Backup Job Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						@templ.JSONScript("backupJobEntity_"+backupJobEntity.JobId.String(), backupJobEntity)
+						<td class="w-[20%] space-y-2 text-clip px-3 py-2 text-left">
+							<p class="font-bold">
+								<span class="text-xs">#</span>{ backupJobEntity.JobId.String() }
+							</p>
+							@componentMisc.Tag(
+								"ph-user", "",
+								backupJobEntity.AccountUsername.String()+" <small>("+backupJobEntity.AccountId.String()+")</small>",
+								"ez-200",
+							)
+							<p class="text-xs">
+								{ uiHelper.FormatPointer(backupJobEntity.JobDescription) }
+							</p>
+						</td>
+						<td class="w-[25%] overflow-x-hidden p-3">
+							{{ statusText := "enabled" }}
+							{{ statusColor := "ez-200" }}
+							{{ statusIcon := "ph-check-circle" }}
+							if !backupJobEntity.JobStatus {
+								{{ statusText = "disabled" }}
+								{{ statusColor = "red-900" }}
+								{{ statusIcon = "ph-x-circle" }}
+							}
+							@componentMisc.Tag(statusIcon, "", statusText, statusColor)
+							<table class="mt-2 w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr>
+										<td class="rounded-tl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Tasks Count
+										</td>
+										<td class="rounded-tr-md px-2 py-1">
+											{ uiHelper.FormatPointer(backupJobEntity.TasksCount) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Total Space Usage
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(backupJobEntity.TotalSpaceUsageBytes) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Last Run At
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(backupJobEntity.LastRunAt) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Last Run Status
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(backupJobEntity.LastRunStatus) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Next Run At
+										</td>
+										<td class="px-2 py-1">
+											{ uiHelper.FormatPointer(backupJobEntity.NextRunAt) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Updated At
+										</td>
+										<td class="px-2 py-1">
+											{ backupJobEntity.UpdatedAt.ReadAsRfcDate() }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Created At
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ backupJobEntity.CreatedAt.ReadAsRfcDate() }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td class="w-[45%] overflow-x-hidden p-3">
+							<table class="w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5">
+								<tbody>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											DestinationIds
+										</td>
+										<td class="px-2 py-1">
+											{ templ.JSONString(backupJobEntity.DestinationIds) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Retention Strategy
+										</td>
+										<td class="px-2 py-1">
+											{ backupJobEntity.RetentionStrategy.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Schedule
+										</td>
+										<td class="px-2 py-1">
+											{ backupJobEntity.BackupSchedule.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Archive Compression Format
+										</td>
+										<td class="px-2 py-1">
+											{ backupJobEntity.ArchiveCompressionFormat.String() }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Max
+										</td>
+										<td class="p-0">
+											<table class="w-full table-auto text-center">
+												<tr>
+													<td class="bg-neutral-50/10 px-2 py-1">
+														Tasks Count
+													</td>
+													<td class="px-2 py-1">
+														{ uiHelper.FormatPointer(backupJobEntity.MaxTaskRetentionCount) }
+													</td>
+													<td class="bg-neutral-50/10 px-2 py-1">
+														Retention Days
+													</td>
+													<td class="px-2 py-1">
+														{ uiHelper.FormatPointer(backupJobEntity.MaxTaskRetentionDays) }
+													</td>
+													<td class="bg-neutral-50/10 px-2 py-1">
+														CPUs
+													</td>
+													<td class="px-2 py-1">
+														{ uiHelper.FormatPointer(backupJobEntity.MaxConcurrentCpuCores) }
+													</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											ContainerAccountIds
+										</td>
+										<td class="text-clip px-2 py-1">
+											{ templ.JSONString(backupJobEntity.ContainerAccountIds) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											ContainerIds
+										</td>
+										<td class="text-clip px-2 py-1">
+											{ templ.JSONString(backupJobEntity.ContainerIds) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Except ContainerAccountIds
+										</td>
+										<td class="text-clip px-2 py-1">
+											{ templ.JSONString(backupJobEntity.ExceptContainerAccountIds) }
+										</td>
+									</tr>
+									<tr class="border-y-2 border-neutral-50/5">
+										<td class="border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Except ContainerIds
+										</td>
+										<td class="text-clip px-2 py-1">
+											{ templ.JSONString(backupJobEntity.ExceptContainerIds) }
+										</td>
+									</tr>
+									<tr>
+										<td class="rounded-bl-md border-r-2 border-neutral-50/5 bg-neutral-950/20 px-2 py-1">
+											Timeout
+										</td>
+										<td class="rounded-br-md px-2 py-1">
+											{ backupJobEntity.TimeoutSecs.StringWithSuffix() }
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td class="w-[10%]">
+							<div class="flex flex-col items-center justify-center gap-2">
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "run-job",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-queue",
+									BackgroundColor: "cyan-900",
+									HoverColor:      "cyan-700",
+									OnClick:         "openRunJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:     "Run Job Now",
+									TooltipColor:    "cyan-700",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "update-job",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-pencil",
+									BackgroundColor: "ez-300",
+									HoverColor:      "ez-200",
+									OnClick:         "openUpdateJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:     "Update",
+									TooltipColor:    "ez-300",
+									TooltipPosition: "left",
+								})
+								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
+									Id:              "delete-job",
+									Shape:           componentStructural.IconButtonShapeCircular,
+									Icon:            "ph-trash",
+									BackgroundColor: "red-900",
+									HoverColor:      "red-700",
+									OnClick:         "openDeleteJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:     "Delete",
+									TooltipColor:    "red-700",
+									TooltipPosition: "left",
+								})
+							</div>
+						</td>
+					</tr>
+				}
+				if len(readJobsResponse.Jobs) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No backup jobs created yet.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ BackupJobs(
+	readJobsRequest dto.ReadBackupJobsRequest,
+	readJobsResponse dto.ReadBackupJobsResponse,
+	createJobModalDto CreateBackupJobModalDto,
+) {
+	<div x-data="backupJobs">
+		<div class="mb-4 flex flex-row items-center justify-between">
+			<div class="min-w-2/3">
+				@componentStructural.PageSubHeading(
+					"Jobs",
+					"View and manage scheduled backup jobs, including creating, editing, or deleting jobs.",
+					"ph-factory",
+				)
+			</div>
+			<div>
+				@componentForm.SubmitButton(
+					"Create Job", "ph-plus-square", "openCreateJobModal()", false,
+				)
+			</div>
+		</div>
+		@BackupJobsTable(readJobsRequest, readJobsResponse)
+		@CreateBackupJobModal(createJobModalDto)
+		@componentStructural.ConfirmationModal(
+			"Run Job Now", "ph-queue",
+			"Are you sure you want to run this job?<br /><small>Depending on the job's settings, this operation may take a while and use significant resources.</small>",
+			"isRunJobModalOpen", "runJob()",
+			componentStructural.ConfirmationTypeInfo,
+		)
+		@UpdateBackupJobModal()
+		@componentStructural.DeleteModal(
+			"isDeleteJobModalOpen", "closeDeleteJobModal()", "deleteJob()",
+			"delete-job", "", "jobEntity.jobId",
+		)
+	</div>
+}

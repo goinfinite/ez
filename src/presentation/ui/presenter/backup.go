@@ -11,6 +11,7 @@ import (
 	"github.com/goinfinite/ez/src/presentation/service"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
+	pageBackup "github.com/goinfinite/ez/src/presentation/ui/page/backup"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 	"github.com/labstack/echo/v4"
 )
@@ -221,7 +222,7 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	accountSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
-	createJobModalDto := page.CreateBackupJobModalDto{
+	createJobModalDto := pageBackup.CreateBackupJobModalDto{
 		AccountSelectLabelValuePairs: accountSelectPairs,
 	}
 
