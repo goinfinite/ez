@@ -486,11 +486,9 @@ templ TakeContainerSnapshotForm(
 			</div>
 			<div x-show="shouldCreateArchive">
 				@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-					<div class="w-full">
-						@CompressionFormatSelectInput(
-							"archiveCompressionFormat", "archiveCompressionFormat",
-						)
-					</div>
+					@CompressionFormatSelectInput(
+						"archiveCompressionFormat", "archiveCompressionFormat",
+					)
 				}
 			</div>
 			@componentForm.SubmitButton(

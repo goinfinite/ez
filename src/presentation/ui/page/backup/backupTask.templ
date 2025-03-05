@@ -79,15 +79,13 @@ templ CreateBackupTaskArchiveForm() {
 			</div>
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="w-full">
-				@componentForm.InputField(componentForm.InputFieldDto{
-					InputType:     "number",
-					Id:            "timeoutSecs",
-					Label:         "Timeout (seconds)",
-					BindValuePath: "createTaskArchive.timeoutSecs",
-					IsRequired:    false,
-				})
-			</div>
+			@componentForm.InputField(componentForm.InputFieldDto{
+				InputType:     "number",
+				Id:            "timeoutSecs",
+				Label:         "Timeout (seconds)",
+				BindValuePath: "createTaskArchive.timeoutSecs",
+				IsRequired:    false,
+			})
 		}
 		@componentForm.SubmitButton(
 			"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
@@ -185,15 +183,13 @@ templ RestoreBackupTaskForm() {
 			</div>
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="w-full">
-				@componentForm.InputField(componentForm.InputFieldDto{
-					InputType:     "number",
-					Id:            "timeoutSecs",
-					Label:         "Timeout (seconds)",
-					BindValuePath: "restoreTask.timeoutSecs",
-					IsRequired:    false,
-				})
-			</div>
+			@componentForm.InputField(componentForm.InputFieldDto{
+				InputType:     "number",
+				Id:            "timeoutSecs",
+				Label:         "Timeout (seconds)",
+				BindValuePath: "restoreTask.timeoutSecs",
+				IsRequired:    false,
+			})
 		}
 		@componentForm.SubmitButton(
 			"Restore Task", "ph-check-fat", "closeRestoreTaskModal()", false,
@@ -479,15 +475,13 @@ templ RestoreBackupTaskArchiveForm() {
 			"restoreTaskArchive.shouldRestoreMappings", "",
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="w-full">
-				@componentForm.InputField(componentForm.InputFieldDto{
-					InputType:     "number",
-					Id:            "timeoutSecs",
-					Label:         "Timeout (seconds)",
-					BindValuePath: "restoreTaskArchive.timeoutSecs",
-					IsRequired:    false,
-				})
-			</div>
+			@componentForm.InputField(componentForm.InputFieldDto{
+				InputType:     "number",
+				Id:            "timeoutSecs",
+				Label:         "Timeout (seconds)",
+				BindValuePath: "restoreTaskArchive.timeoutSecs",
+				IsRequired:    false,
+			})
 		}
 		@componentForm.SubmitButton(
 			"Restore Task Archive", "ph-check-fat", "closeRestoreTaskArchiveModal()", false,

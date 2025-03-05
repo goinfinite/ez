@@ -810,52 +810,50 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			createDto.ContainerProfileSearchableItems,
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="flex w-full flex-col gap-6">
-				@componentForm.InputField(componentForm.InputFieldDto{
-					InputType: "text", Id: "entrypoint", Label: "Entrypoint",
-					BindValuePath: "container.entrypoint",
-				})
-				<div class="flex flex-row items-center gap-6">
-					<div class="basis-1/2">
-						@componentForm.SelectInputWithLabelValuePair(
-							"accountId", "Account", "container.accountId",
-							createDto.AccountSelectLabelValuePairs, true,
-						)
-					</div>
-					<div class="basis-1/2">
-						@componentForm.SelectInput(componentForm.SelectInputDto{
-							Id: "restartPolicy", Label: "Restart Policy",
-							BindValuePath: "container.restartPolicy",
-							Options:       valueObject.ValidContainerRestartPolicies,
-						})
-					</div>
+			@componentForm.InputField(componentForm.InputFieldDto{
+				InputType: "text", Id: "entrypoint", Label: "Entrypoint",
+				BindValuePath: "container.entrypoint",
+			})
+			<div class="flex flex-row items-center gap-6">
+				<div class="basis-1/2">
+					@componentForm.SelectInputWithLabelValuePair(
+						"accountId", "Account", "container.accountId",
+						createDto.AccountSelectLabelValuePairs, true,
+					)
 				</div>
-				@componentForm.MultiColumnRepeatableFieldset(
-					"envs", "Environment Variables", "", "container.envs", []componentForm.RepeatableField{
-						{InputType: "text", Id: "key", Label: "Key"},
-						{InputType: "text", Id: "value", Label: "Value"},
-					},
-				)
-				@componentForm.MultiColumnRepeatableFieldset(
-					"portBindings", "Port Bindings", "Configure which ports are exposed to the outside world. You may select just the 'Service Name' to use the standard ports. Be aware that once deployed, you cannot change the port arrangements.",
-					"container.portBindings", []componentForm.RepeatableField{
-						{
-							InputType: "select",
-							Id:        "serviceName",
-							Label:     "Service Name",
-							Options:   valueObject.ReadPortBindingsServiceNames(),
-						},
-						{InputType: "text", Id: "publicPort", Label: "Public Port"},
-						{InputType: "text", Id: "containerPort", Label: "Container Port"},
-						{
-							InputType: "select",
-							Id:        "protocol",
-							Label:     "Protocol",
-							Options:   valueObject.ValidNetworkProtocols,
-						},
-					},
-				)
+				<div class="basis-1/2">
+					@componentForm.SelectInput(componentForm.SelectInputDto{
+						Id: "restartPolicy", Label: "Restart Policy",
+						BindValuePath: "container.restartPolicy",
+						Options:       valueObject.ValidContainerRestartPolicies,
+					})
+				</div>
 			</div>
+			@componentForm.MultiColumnRepeatableFieldset(
+				"envs", "Environment Variables", "", "container.envs", []componentForm.RepeatableField{
+					{InputType: "text", Id: "key", Label: "Key"},
+					{InputType: "text", Id: "value", Label: "Value"},
+				},
+			)
+			@componentForm.MultiColumnRepeatableFieldset(
+				"portBindings", "Port Bindings", "Configure which ports are exposed to the outside world. You may select just the 'Service Name' to use the standard ports. Be aware that once deployed, you cannot change the port arrangements.",
+				"container.portBindings", []componentForm.RepeatableField{
+					{
+						InputType: "select",
+						Id:        "serviceName",
+						Label:     "Service Name",
+						Options:   valueObject.ReadPortBindingsServiceNames(),
+					},
+					{InputType: "text", Id: "publicPort", Label: "Public Port"},
+					{InputType: "text", Id: "containerPort", Label: "Container Port"},
+					{
+						InputType: "select",
+						Id:        "protocol",
+						Label:     "Protocol",
+						Options:   valueObject.ValidNetworkProtocols,
+					},
+				},
+			)
 		}
 		@componentForm.SubmitButton("Create", "ph-check-fat", "", false)
 	</form>

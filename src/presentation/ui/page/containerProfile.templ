@@ -496,56 +496,54 @@ templ ContainerProfileForm(action string) {
 			</div>
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="space-y-5.5">
-				@componentForm.SelectInput(componentForm.SelectInputDto{
-					Id: "scalingPolicy", Label: "Scaling Policy",
-					BindValuePath: "containerProfile.scalingPolicy",
-					Options:       valueObject.ValidScalingPolicies,
-				})
-				<div class="flex flex-row space-x-6">
-					<div class="basis-1/2">
-						<template x-if="isScalingPolicyConn">
-							@componentForm.NumberRangeInputField(
-								"scalingThreshold", "Connections Threshold",
-								"conn(s)", "1", "1000", "10",
-								"containerProfile.scalingThreshold",
-							)
-						</template>
-						<template x-if="!isScalingPolicyConn">
-							@componentForm.NumberRangeInputField(
-								"scalingThreshold", "Resource Usage Threshold",
-								"%", "0", "100", "1",
-								"containerProfile.scalingThreshold",
-							)
-						</template>
-					</div>
-					<div class="basis-1/2">
+			@componentForm.SelectInput(componentForm.SelectInputDto{
+				Id: "scalingPolicy", Label: "Scaling Policy",
+				BindValuePath: "containerProfile.scalingPolicy",
+				Options:       valueObject.ValidScalingPolicies,
+			})
+			<div class="flex flex-row space-x-6">
+				<div class="basis-1/2">
+					<template x-if="isScalingPolicyConn">
 						@componentForm.NumberRangeInputField(
-							"hostMinCapacityPercent", "Minimum Free Host Capacity",
+							"scalingThreshold", "Connections Threshold",
+							"conn(s)", "1", "1000", "10",
+							"containerProfile.scalingThreshold",
+						)
+					</template>
+					<template x-if="!isScalingPolicyConn">
+						@componentForm.NumberRangeInputField(
+							"scalingThreshold", "Resource Usage Threshold",
 							"%", "0", "100", "1",
-							"containerProfile.hostMinCapacityPercent",
+							"containerProfile.scalingThreshold",
 						)
-					</div>
+					</template>
 				</div>
-				<div class="flex flex-row space-x-6">
-					<div class="basis-1/2">
-						@componentForm.DualNumberRangeInputField(
-							"Scaling Max Duration", "scalingMaxDurationHoursSelector",
-							"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
-							"containerProfile.scalingMaxDurationHours",
-							"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
-							"containerProfile.scalingMaxDurationMinutes",
-						)
-					</div>
-					<div class="basis-1/2">
-						@componentForm.DualNumberRangeInputField(
-							"Scaling Interval", "scalingIntervalHoursSelector",
-							"scalingIntervalHours", "hour(s)", "1", "24", "1",
-							"containerProfile.scalingIntervalHours",
-							"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
-							"containerProfile.scalingIntervalMinutes",
-						)
-					</div>
+				<div class="basis-1/2">
+					@componentForm.NumberRangeInputField(
+						"hostMinCapacityPercent", "Minimum Free Host Capacity",
+						"%", "0", "100", "1",
+						"containerProfile.hostMinCapacityPercent",
+					)
+				</div>
+			</div>
+			<div class="flex flex-row space-x-6">
+				<div class="basis-1/2">
+					@componentForm.DualNumberRangeInputField(
+						"Scaling Max Duration", "scalingMaxDurationHoursSelector",
+						"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
+						"containerProfile.scalingMaxDurationHours",
+						"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
+						"containerProfile.scalingMaxDurationMinutes",
+					)
+				</div>
+				<div class="basis-1/2">
+					@componentForm.DualNumberRangeInputField(
+						"Scaling Interval", "scalingIntervalHoursSelector",
+						"scalingIntervalHours", "hour(s)", "1", "24", "1",
+						"containerProfile.scalingIntervalHours",
+						"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
+						"containerProfile.scalingIntervalMinutes",
+					)
 				</div>
 			</div>
 		}
