@@ -108,36 +108,6 @@ func (presenter *OverviewPresenter) readContainerProfileSearchableItems() []comp
 	return searchableSelectItems
 }
 
-func (presenter *OverviewPresenter) readAccountSelectLabelValuePairs() []componentForm.SelectLabelValuePair {
-	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
-
-	accountService := service.NewAccountService(
-		presenter.persistentDbSvc, presenter.trailDbSvc,
-	)
-
-	readAccountsServiceOutput := accountService.Read()
-	if readAccountsServiceOutput.Status != service.Success {
-		slog.Debug("ReadAccountsFailure")
-		return nil
-	}
-
-	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
-	if !assertOk {
-		slog.Debug("AssertAccountsFailure")
-		return nil
-	}
-
-	for _, accountEntity := range accountEntities {
-		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: accountEntity.Username.String(),
-			Value: accountEntity.Id.String(),
-		}
-		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
-	}
-
-	return selectLabelValuePairs
-}
-
 func (presenter *OverviewPresenter) transformContainerSummariesIntoSearchableItems(
 	containerSummaries []componentContainer.ContainerSummary,
 ) []componentForm.SearchableSelectItem {
@@ -198,13 +168,17 @@ func (presenter *OverviewPresenter) ReadCreateContainerModalDto(
 		}
 	}
 
+	accountSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
 	return page.CreateContainerModalDto{
 		AppMarketplaceCarouselItems:       appCarouselItems,
 		FrameworkMarketplaceCarouselItems: frameworkCarouselItems,
 		StackMarketplaceCarouselItems:     stackCarouselItems,
 		ContainerImageSearchableItems:     presenter.readContainerImageSearchableItems(),
 		ContainerProfileSearchableItems:   presenter.readContainerProfileSearchableItems(),
-		AccountSelectLabelValuePairs:      presenter.readAccountSelectLabelValuePairs(),
+		AccountSelectLabelValuePairs:      accountSelectPairs,
 		ContainerSummarySearchableItems: presenter.transformContainerSummariesIntoSearchableItems(
 			containerSummaries,
 		),

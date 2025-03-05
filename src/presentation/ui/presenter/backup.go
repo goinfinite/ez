@@ -11,6 +11,7 @@ import (
 	"github.com/goinfinite/ez/src/presentation/service"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
+	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 	"github.com/labstack/echo/v4"
 )
 
@@ -213,14 +214,23 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	)
 
 	tasksReadRequestDto, tasksReadResponseDto := presenter.ReadTasks(c, backupService)
+
 	archivesReadRequestDto, archivesReadResponseDto := presenter.ReadTaskArchives(c, backupService)
+
 	jobsReadRequestDto, jobsReadResponseDto := presenter.ReadJobs(c, backupService)
+	accountSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+	createJobModalDto := page.CreateBackupJobModalDto{
+		AccountSelectLabelValuePairs: accountSelectPairs,
+	}
+
 	destinationsReadRequestDto, destinationsReadResponseDto := presenter.ReadDestinations(c, backupService)
 
 	pageContent := page.BackupIndex(
 		tasksReadRequestDto, tasksReadResponseDto,
 		archivesReadRequestDto, archivesReadResponseDto,
-		jobsReadRequestDto, jobsReadResponseDto,
+		jobsReadRequestDto, jobsReadResponseDto, createJobModalDto,
 		destinationsReadRequestDto, destinationsReadResponseDto,
 	)
 
