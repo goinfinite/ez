@@ -10,7 +10,6 @@ import (
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
-	"github.com/goinfinite/ez/src/presentation/ui/page"
 	pageBackup "github.com/goinfinite/ez/src/presentation/ui/page/backup"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 	"github.com/labstack/echo/v4"
@@ -231,7 +230,7 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 
 	destinationsReadRequestDto, destinationsReadResponseDto := presenter.ReadDestinations(c, backupService)
 
-	pageContent := page.BackupIndex(
+	pageContent := pageBackup.BackupIndex(
 		tasksReadRequestDto, tasksReadResponseDto,
 		archivesReadRequestDto, archivesReadResponseDto,
 		jobsReadRequestDto, jobsReadResponseDto, createJobModalDto,

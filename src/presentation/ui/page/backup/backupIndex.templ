@@ -1,14 +1,9 @@
-package page
+package pageBackup
 
-import "github.com/goinfinite/ez/src/domain/dto"
-import "github.com/goinfinite/ez/src/presentation/ui/component/form"
-import "github.com/goinfinite/ez/src/presentation/ui/page/backup"
-
-import componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
-
-type CreateBackupJobModalDto struct {
-	AccountSelectLabelValuePairs []componentForm.SelectLabelValuePair
-}
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
+)
 
 templ BackupIndex(
 	readTasksRequest dto.ReadBackupTasksRequest,
@@ -17,9 +12,9 @@ templ BackupIndex(
 	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 	readJobsRequest dto.ReadBackupJobsRequest,
 	readJobsResponse dto.ReadBackupJobsResponse,
-	createJobModalDto pageBackup.CreateBackupJobModalDto,
+	createJobModalDto CreateBackupJobModalDto,
 	readDestinationsRequest dto.ReadBackupDestinationsRequest,
-	readDestinationsResponse pageBackup.BackupDestinationModifiedResponseDto,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
 	<!-- BackupIndex JavaScript -->
 	<script type="text/javascript" src="/assets/local-states/page/backup.js"></script>
@@ -35,16 +30,16 @@ templ BackupIndex(
 		)
 		<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] p-4">
 			<div x-show="backupFeatureTabSelected === 'tasks'">
-				@pageBackup.BackupTasks(
+				@BackupTasks(
 					readTasksRequest, readTasksResponse,
 					readTaskArchivesRequest, readTaskArchivesResponse,
 				)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'jobs'">
-				@pageBackup.BackupJobs(readJobsRequest, readJobsResponse, createJobModalDto)
+				@BackupJobs(readJobsRequest, readJobsResponse, createJobModalDto)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'destinations'">
-				@pageBackup.BackupDestinations(readDestinationsRequest, readDestinationsResponse)
+				@BackupDestinations(readDestinationsRequest, readDestinationsResponse)
 			</div>
 		</div>
 	</div>
