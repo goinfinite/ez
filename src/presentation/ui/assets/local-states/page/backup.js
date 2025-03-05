@@ -130,8 +130,10 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("backupJobs", () => ({
     // Primary State
     jobEntity: {},
+    createJob: {},
     resetPrimaryState() {
       this.jobEntity = {};
+      this.createJob = {};
     },
     updateJobEntity(jobId) {
       this.jobEntity = JSON.parse(
@@ -167,6 +169,15 @@ document.addEventListener("alpine:init", () => {
         }
       );
       this.closeRunJobModal();
+    },
+
+    isCreateJobModalOpen: false,
+    openCreateJobModal() {
+      this.resetPrimaryState();
+      this.isCreateJobModalOpen = true;
+    },
+    closeCreateJobModal() {
+      this.isCreateJobModalOpen = false;
     },
 
     isUpdateJobModalOpen: false,
