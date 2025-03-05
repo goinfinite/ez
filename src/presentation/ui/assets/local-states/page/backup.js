@@ -133,7 +133,9 @@ document.addEventListener("alpine:init", () => {
     createJob: {},
     resetPrimaryState() {
       this.jobEntity = {};
-      this.createJob = {};
+      this.createJob = {
+        archiveCompressionFormat: "br",
+      };
     },
     updateJobEntity(jobId) {
       this.jobEntity = JSON.parse(
