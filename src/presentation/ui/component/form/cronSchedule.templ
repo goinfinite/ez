@@ -1,10 +1,8 @@
-package componentCron
-
-import "github.com/goinfinite/ez/src/presentation/ui/component/form"
+package componentForm
 
 templ CronPredefinedInput(bindModelPath string) {
-	@componentForm.SelectInputWithLabelValuePair(
-		"", "Predefined Schedule", bindModelPath, []componentForm.SelectLabelValuePair{
+	@SelectInputWithLabelValuePair(
+		"", "Predefined Schedule", bindModelPath, []SelectLabelValuePair{
 			{Label: "Hourly", Value: "@hourly"},
 			{Label: "Every 3 hours", Value: "0 */3 * * *"},
 			{Label: "Every 6 hours", Value: "0 */6 * * *"},
@@ -39,9 +37,9 @@ templ CronCustomScheduleInput(bindModelPath string) {
 			}
 		</div>
 		<div class="mt-6 grid grid-cols-2 gap-4">
-			@componentForm.DualSelectInputWithLabelValueInputField(
+			@DualSelectInputWithLabelValueInputField(
 				"text", "", "Minute", "xs", "cronSchedule['minute']",
-				[]componentForm.SelectLabelValuePair{
+				[]SelectLabelValuePair{
 					{Label: "Custom", Value: ""},
 					{Label: "At minute 0", Value: "0"},
 					{Label: "At minute 5", Value: "5"},
@@ -57,9 +55,9 @@ templ CronCustomScheduleInput(bindModelPath string) {
 					{Label: "Every 45 minutes", Value: "*/45"},
 				},
 			)
-			@componentForm.DualSelectInputWithLabelValueInputField(
+			@DualSelectInputWithLabelValueInputField(
 				"text", "", "Hour", "xs", "cronSchedule['hour']",
-				[]componentForm.SelectLabelValuePair{
+				[]SelectLabelValuePair{
 					{Label: "Custom", Value: ""},
 					{Label: "Every hour", Value: "*"},
 					{Label: "Every 2 hour", Value: "*/2"},
@@ -73,9 +71,9 @@ templ CronCustomScheduleInput(bindModelPath string) {
 					{Label: "At 18h00 (6h00 PM)", Value: "18"},
 				},
 			)
-			@componentForm.DualSelectInputWithLabelValueInputField(
+			@DualSelectInputWithLabelValueInputField(
 				"text", "", "Day", "xs", "cronSchedule['day']",
-				[]componentForm.SelectLabelValuePair{
+				[]SelectLabelValuePair{
 					{Label: "Custom", Value: ""},
 					{Label: "Every day", Value: "*"},
 					{Label: "Weekly", Value: "*/7"},
@@ -90,9 +88,9 @@ templ CronCustomScheduleInput(bindModelPath string) {
 					{Label: "At day 30", Value: "30"},
 				},
 			)
-			@componentForm.DualSelectInputWithLabelValueInputField(
+			@DualSelectInputWithLabelValueInputField(
 				"text", "", "Month", "xs", "cronSchedule['month']",
-				[]componentForm.SelectLabelValuePair{
+				[]SelectLabelValuePair{
 					{Label: "Custom", Value: ""},
 					{Label: "Every month", Value: "*"},
 					{Label: "Every 2 months", Value: "*/2"},
@@ -112,9 +110,9 @@ templ CronCustomScheduleInput(bindModelPath string) {
 					{Label: "December", Value: "12"},
 				},
 			)
-			@componentForm.DualSelectInputWithLabelValueInputField(
+			@DualSelectInputWithLabelValueInputField(
 				"text", "", "Week Day", "xs", "cronSchedule['weekday']",
-				[]componentForm.SelectLabelValuePair{
+				[]SelectLabelValuePair{
 					{Label: "Custom", Value: ""},
 					{Label: "Every day", Value: "*"},
 					{Label: "Monday to Friday", Value: "1-5"},
@@ -138,8 +136,8 @@ templ CronScheduleInput(id, bindModelPath string) {
 		class="flex flex-col gap-4 rounded-lg border-2 border-dashed border-neutral-50/5 p-2"
 	>
 		<div class="flex flex-row gap-4">
-			@componentForm.RadioInput("", "Predefined", "predefined", "selectedScheduleType")
-			@componentForm.RadioInput("", "Custom", "custom", "selectedScheduleType")
+			@RadioInput("", "Predefined", "predefined", "selectedScheduleType")
+			@RadioInput("", "Custom", "custom", "selectedScheduleType")
 		</div>
 		<input
 			if id != "" {

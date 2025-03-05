@@ -3,7 +3,6 @@ package pageBackup
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
-	"github.com/goinfinite/ez/src/presentation/ui/component/cron"
 	"github.com/goinfinite/ez/src/presentation/ui/component/form"
 	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
@@ -26,7 +25,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 	>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/2">
-				@componentCron.CronScheduleInput("backupSchedule", "createJob.backupSchedule")
+				@componentForm.CronScheduleInput("backupSchedule", "createJob.backupSchedule")
 			</div>
 			<div class="w-1/2">
 				RetentionStrategy (Select)
