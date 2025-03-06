@@ -146,18 +146,18 @@ func labelValuePairsValueExtractor(options []SelectLabelValuePair) []string {
 templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValuePairDto) {
 	<!-- MultiSelectInputWithLabelValuePair -->
 	<div class="relative w-full">
-		{{ selectInputSize := "p-1.5 text-sm" }}
+		{{ selectInputSize := "p-2 text-sm" }}
 		switch inputDto.Size {
 			case "xs":
-				{{ selectInputSize = "p-1 text-xs" }}
+				{{ selectInputSize = "p-1.5 text-xs" }}
 			case "sm":
-				{{ selectInputSize = "p-1.5 text-sm" }}
+				{{ selectInputSize = "p-2 text-sm" }}
 			case "md":
-				{{ selectInputSize = "p-2 text-md" }}
+				{{ selectInputSize = "p-2.5 text-md" }}
 			case "lg":
-				{{ selectInputSize = "p-2.5 text-lg" }}
+				{{ selectInputSize = "p-3 text-lg" }}
 			case "xl":
-				{{ selectInputSize = "p-3 text-xl" }}
+				{{ selectInputSize = "p-3.5 text-xl" }}
 		}
 		<div class={ "bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative w-full appearance-none rounded-md border " + selectInputSize + " text-neutral-100 placeholder-transparent outline-none transition-all overflow-y-scroll h-24 flex flex-col gap-0.5" }>
 			for _, option := range inputDto.Options {
@@ -169,7 +169,7 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 						class="ph-duotone text-xl"
 						:class={ inputDto.SelectedBindValuePath + `.includes("` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
 					></i>
-					{ option.Label }
+					<span class="truncate">{ option.Label }</span>
 				</div>
 			}
 		</div>
