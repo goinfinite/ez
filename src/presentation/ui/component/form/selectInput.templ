@@ -157,6 +157,19 @@ type SelectInputWithLabelValuePairDto struct {
 templ SelectInputWithLabelValuePair(inputDto SelectInputWithLabelValuePairDto) {
 	<!-- SelectInputWithLabelValuePair -->
 	<div class="relative w-full">
+		{{ selectInputSize := "px-3 text-sm" }}
+		switch inputDto.Size {
+			case "xs":
+				{{ selectInputSize = "px-2 text-xs" }}
+			case "sm":
+				{{ selectInputSize = "px-2.5 text-sm" }}
+			case "md":
+				{{ selectInputSize = "px-3 text-sm" }}
+			case "lg":
+				{{ selectInputSize = "px-3.5 text-sm" }}
+			case "xl":
+				{{ selectInputSize = "px-4 text-sm" }}
+		}
 		<select
 			id={ inputDto.Id }
 			name={ inputDto.Id }
@@ -164,7 +177,7 @@ templ SelectInputWithLabelValuePair(inputDto SelectInputWithLabelValuePairDto) {
 				x-model:value={ inputDto.SelectedBindValuePath }
 			}
 			placeholder={ inputDto.Label }
-			class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			class={ "bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full appearance-none rounded-md border " + selectInputSize + " text-neutral-100 placeholder-transparent outline-none transition-all" }
 		>
 			if inputDto.ShouldIncludeBlankOption {
 				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value="">--</option>

@@ -32,6 +32,7 @@ templ CompressionFormatSelectInput(id, bindValuePath string) {
 	@SelectInputWithLabelValuePair(SelectInputWithLabelValuePairDto{
 		Id:                    id,
 		Label:                 "Compression Format",
+		Size:                  "xs",
 		SelectedBindValuePath: bindValuePath,
 		Options:               transformCompressionFormatsIntoSelectPairs(),
 	})
