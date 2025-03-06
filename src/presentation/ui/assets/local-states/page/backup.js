@@ -139,6 +139,8 @@ document.addEventListener("alpine:init", () => {
         archiveCompressionFormat: "br",
         containerAccountIds: [],
         exceptContainerAccountIds: [],
+        containerIds: [],
+        exceptContainerIds: [],
       };
     },
     updateJobEntity(jobId) {
