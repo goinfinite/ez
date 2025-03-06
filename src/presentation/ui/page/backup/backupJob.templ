@@ -3,6 +3,7 @@ package pageBackup
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/presentation/ui/component/form"
 	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
@@ -33,13 +34,29 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">
-				RetentionStrategy (Select)
+				@componentForm.SelectInput(componentForm.SelectInputDto{
+					Id: "retentionStrategy", Label: "Retention Strategy",
+					BindValuePath: "createJob.retentionStrategy",
+					Options:       []string{valueObject.BackupRetentionStrategyFull.String()},
+				})
 			</div>
 			<div class="w-1/3">
-				MaxTaskRetentionDays (Number)
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "maxTaskRetentionDays",
+					Label:         "Max Task Retention Days",
+					BindValuePath: "createJob.maxTaskRetentionDays",
+					IsRequired:    false,
+				})
 			</div>
 			<div class="w-1/3">
-				MaxTaskRetentionCount (Number)
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "maxTaskRetentionCount",
+					Label:         "Max Task Retention Count",
+					BindValuePath: "createJob.maxTaskRetentionCount",
+					IsRequired:    false,
+				})
 			</div>
 		</div>
 		<div class="-mb-2">
@@ -113,10 +130,22 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					TimeoutSecs (Number)
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "number",
+						Id:            "timeoutSecs",
+						Label:         "Timeout (seconds)",
+						BindValuePath: "createJob.timeoutSecs",
+						IsRequired:    false,
+					})
 				</div>
 				<div class="w-1/2">
-					MaxConcurrentCpuCores (Number)
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "number",
+						Id:            "maxConcurrentCpuCores",
+						Label:         "Max Concurrent CPU Cores",
+						BindValuePath: "createJob.maxConcurrentCpuCores",
+						IsRequired:    false,
+					})
 				</div>
 			</div>
 		}
