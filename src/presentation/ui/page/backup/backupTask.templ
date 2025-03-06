@@ -33,46 +33,42 @@ templ CreateBackupTaskArchiveForm() {
 			</div>
 			<div class="flex flex-row gap-4">
 				<div class="w-1/2 space-y-5 rounded-md">
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "containerAccountIds",
-							Label:                    "ContainerAccountIds",
-							SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
-							OptionsBindValuePath:     "taskEntity.containerAccountIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "containerAccountIds",
+							Label:                 "ContainerAccountIds",
+							SelectedBindValuePath: "createTaskArchive.containerAccountIds",
+							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							IsRequired:            false,
 						},
 					)
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "containerIds",
-							Label:                    "ContainerIds",
-							SelectedBindValuePath:    "createTaskArchive.containerIds",
-							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "containerIds",
+							Label:                 "ContainerIds",
+							SelectedBindValuePath: "createTaskArchive.containerIds",
+							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							IsRequired:            false,
 						},
 					)
 				</div>
 				<div class="w-1/2 space-y-5 rounded-md">
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "exceptContainerAccountIds",
-							Label:                    "ExceptContainerAccountIds",
-							SelectedBindValuePath:    "createTaskArchive.exceptContainerAccountIds",
-							OptionsBindValuePath:     "taskEntity.containerAccountIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "exceptContainerAccountIds",
+							Label:                 "ExceptContainerAccountIds",
+							SelectedBindValuePath: "createTaskArchive.exceptContainerAccountIds",
+							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							IsRequired:            false,
 						},
 					)
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "exceptContainerIds",
-							Label:                    "ExceptContainerIds",
-							SelectedBindValuePath:    "createTaskArchive.exceptContainerIds",
-							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "exceptContainerIds",
+							Label:                 "ExceptContainerIds",
+							SelectedBindValuePath: "createTaskArchive.exceptContainerIds",
+							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							IsRequired:            false,
 						},
 					)
 				</div>
@@ -137,46 +133,42 @@ templ RestoreBackupTaskForm() {
 			</div>
 			<div class="flex flex-row gap-4">
 				<div class="w-1/2 space-y-5 rounded-md">
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "containerAccountIds",
-							Label:                    "ContainerAccountIds",
-							SelectedBindValuePath:    "restoreTask.containerAccountIds",
-							OptionsBindValuePath:     "taskEntity.containerAccountIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "containerAccountIds",
+							Label:                 "ContainerAccountIds",
+							SelectedBindValuePath: "restoreTask.containerAccountIds",
+							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							IsRequired:            false,
 						},
 					)
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "containerIds",
-							Label:                    "ContainerIds",
-							SelectedBindValuePath:    "restoreTask.containerIds",
-							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "containerIds",
+							Label:                 "ContainerIds",
+							SelectedBindValuePath: "restoreTask.containerIds",
+							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							IsRequired:            false,
 						},
 					)
 				</div>
 				<div class="w-1/2 space-y-5 rounded-md">
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "exceptContainerAccountIds",
-							Label:                    "ExceptContainerAccountIds",
-							SelectedBindValuePath:    "restoreTask.exceptContainerAccountIds",
-							OptionsBindValuePath:     "taskEntity.containerAccountIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "exceptContainerAccountIds",
+							Label:                 "ExceptContainerAccountIds",
+							SelectedBindValuePath: "restoreTask.exceptContainerAccountIds",
+							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							IsRequired:            false,
 						},
 					)
-					@componentForm.MultiSelectInputClientSideOptions(
-						componentForm.MultiSelectInputClientSideOptionsDto{
-							Id:                       "exceptContainerIds",
-							Label:                    "ExceptContainerIds",
-							SelectedBindValuePath:    "restoreTask.exceptContainerIds",
-							OptionsBindValuePath:     "taskEntity.successfulContainerIds",
-							IsRequired:               false,
-							ShouldIncludeBlankOption: false,
+					@componentForm.MultiSelectInputWithLabelValuePair(
+						componentForm.MultiSelectInputWithLabelValuePairDto{
+							Id:                    "exceptContainerIds",
+							Label:                 "ExceptContainerIds",
+							SelectedBindValuePath: "restoreTask.exceptContainerIds",
+							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							IsRequired:            false,
 						},
 					)
 				</div>

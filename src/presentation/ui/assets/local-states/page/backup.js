@@ -13,8 +13,18 @@ document.addEventListener("alpine:init", () => {
     restoreTask: {},
     resetPrimaryState() {
       this.taskEntity = {};
-      this.createTaskArchive = {};
-      this.restoreTask = {};
+      this.createTaskArchive = {
+        containerAccountIds: [],
+        exceptContainerAccountIds: [],
+        containerIds: [],
+        exceptContainerIds: [],
+      };
+      this.restoreTask = {
+        containerAccountIds: [],
+        exceptContainerAccountIds: [],
+        containerIds: [],
+        exceptContainerIds: [],
+      };
     },
     updateTaskEntity(taskId) {
       this.taskEntity = JSON.parse(
@@ -30,7 +40,7 @@ document.addEventListener("alpine:init", () => {
     openCreateTaskArchiveModal(taskId) {
       this.resetPrimaryState();
       this.updateTaskEntity(taskId);
-      this.createTaskArchive = { taskId: taskId };
+      this.createTaskArchive.taskId = taskId;
       this.isCreateTaskArchiveModalOpen = true;
     },
     closeCreateTaskArchiveModal() {
@@ -41,7 +51,7 @@ document.addEventListener("alpine:init", () => {
     openRestoreTaskModal(taskId) {
       this.resetPrimaryState();
       this.updateTaskEntity(taskId);
-      this.restoreTask = { taskId: taskId };
+      this.restoreTask.taskId = taskId;
       this.isRestoreTaskModalOpen = true;
     },
     closeRestoreTaskModal() {
@@ -78,7 +88,12 @@ document.addEventListener("alpine:init", () => {
     restoreTaskArchive: {},
     resetPrimaryState() {
       this.taskArchiveEntity = {};
-      this.restoreTaskArchive = {};
+      this.restoreTaskArchive = {
+        containerAccountIds: [],
+        exceptContainerAccountIds: [],
+        containerIds: [],
+        exceptContainerIds: [],
+      };
     },
     updateTaskArchiveEntity(taskArchiveId) {
       this.taskArchiveEntity = JSON.parse(
@@ -94,7 +109,7 @@ document.addEventListener("alpine:init", () => {
     openRestoreTaskArchiveModal(archiveId) {
       this.resetPrimaryState();
       this.updateTaskArchiveEntity(archiveId);
-      this.restoreTaskArchive = { archiveId: archiveId };
+      this.restoreTaskArchive.archiveId = archiveId;
       this.isRestoreTaskArchiveModalOpen = true;
     },
     closeRestoreTaskArchiveModal() {
