@@ -31,7 +31,7 @@ func ReadAccountSelectLabelValuePairs(
 
 	for _, accountEntity := range accountEntities {
 		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: accountEntity.Username.String(),
+			Label: accountEntity.Username.String() + " (#" + accountEntity.Id.String() + ")",
 			Value: accountEntity.Id.String(),
 		}
 		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
