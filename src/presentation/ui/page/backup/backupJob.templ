@@ -76,14 +76,12 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				</div>
 				<div class="flex flex-row gap-4">
 					<div class="w-1/2 space-y-5 rounded-md">
-						@componentForm.MultiSelectInputClientSideOptions(
-							componentForm.MultiSelectInputClientSideOptionsDto{
-								Id:                       "containerAccountIds",
-								Label:                    "ContainerAccountIds",
-								SelectedBindValuePath:    "createTaskArchive.containerAccountIds",
-								OptionsBindValuePath:     "taskEntity.containerAccountIds",
-								IsRequired:               false,
-								ShouldIncludeBlankOption: false,
+						@componentForm.MultiSelectInputWithLabelValuePair(
+							componentForm.MultiSelectInputWithLabelValuePairDto{
+								Id:                    "containerAccountIds",
+								Label:                 "AccountIds",
+								SelectedBindValuePath: "createJob.containerAccountIds",
+								Options:               createDto.AccountSelectLabelValuePairs,
 							},
 						)
 						@componentForm.MultiSelectInputClientSideOptions(
@@ -98,14 +96,12 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 						)
 					</div>
 					<div class="w-1/2 space-y-5 rounded-md">
-						@componentForm.MultiSelectInputClientSideOptions(
-							componentForm.MultiSelectInputClientSideOptionsDto{
-								Id:                       "exceptContainerAccountIds",
-								Label:                    "ExceptContainerAccountIds",
-								SelectedBindValuePath:    "createTaskArchive.exceptContainerAccountIds",
-								OptionsBindValuePath:     "taskEntity.containerAccountIds",
-								IsRequired:               false,
-								ShouldIncludeBlankOption: false,
+						@componentForm.MultiSelectInputWithLabelValuePair(
+							componentForm.MultiSelectInputWithLabelValuePairDto{
+								Id:                    "exceptContainerAccountIds",
+								Label:                 "ExceptAccountIds",
+								SelectedBindValuePath: "createJob.exceptContainerAccountIds",
+								Options:               createDto.AccountSelectLabelValuePairs,
 							},
 						)
 						@componentForm.MultiSelectInputClientSideOptions(

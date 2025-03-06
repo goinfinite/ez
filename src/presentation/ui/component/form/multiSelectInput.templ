@@ -126,3 +126,60 @@ templ MultiSelectInputClientSideOptions(inputDto MultiSelectInputClientSideOptio
 		</div>
 	</div>
 }
+
+type MultiSelectInputWithLabelValuePairDto struct {
+	Id                    string
+	Label                 string
+	Size                  string
+	SelectedBindValuePath string
+	Options               []SelectLabelValuePair
+}
+
+templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValuePairDto) {
+	<!-- MultiSelectInputWithLabelValuePair -->
+	<div class="relative w-full">
+		{{ selectInputSize := "p-1.5 text-sm" }}
+		switch inputDto.Size {
+			case "xs":
+				{{ selectInputSize = "p-1 text-xs" }}
+			case "sm":
+				{{ selectInputSize = "p-1.5 text-sm" }}
+			case "md":
+				{{ selectInputSize = "p-2 text-md" }}
+			case "lg":
+				{{ selectInputSize = "p-2.5 text-lg" }}
+			case "xl":
+				{{ selectInputSize = "p-3 text-xl" }}
+		}
+		<div class={ "bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative w-full appearance-none rounded-md border " + selectInputSize + " text-neutral-100 placeholder-transparent outline-none transition-all overflow-y-scroll h-24 flex flex-col gap-0.5" }>
+			for _, option := range inputDto.Options {
+				<div
+					class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
+					@click={ "if (!" + inputDto.SelectedBindValuePath + ".includes('" + option.Value + "')) { " + inputDto.SelectedBindValuePath + ".push('" + option.Value + "'); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item !== '" + option.Value + "'); }" }
+				>
+					<i
+						class="ph-duotone text-xl"
+						:class={ inputDto.SelectedBindValuePath + `.includes("` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
+					></i>
+					{ option.Label }
+				</div>
+			}
+		</div>
+		if inputDto.Label != "" {
+			<label
+				if inputDto.Id != "" {
+					for={ inputDto.Id }
+				}
+				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+			>
+				{ inputDto.Label }
+			</label>
+		}
+		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
+			<i
+				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ inputDto.SelectedBindValuePath + " = []" }
+			></i>
+		</div>
+	</div>
+}

@@ -137,6 +137,8 @@ document.addEventListener("alpine:init", () => {
         backupSchedule: "0 0 * * *",
         retentionStrategy: "full",
         archiveCompressionFormat: "br",
+        containerAccountIds: [],
+        exceptContainerAccountIds: [],
       };
     },
     updateJobEntity(jobId) {
