@@ -134,6 +134,8 @@ document.addEventListener("alpine:init", () => {
     resetPrimaryState() {
       this.jobEntity = {};
       this.createJob = {
+        backupSchedule: "0 0 * * *",
+        retentionStrategy: "full",
         archiveCompressionFormat: "br",
       };
     },

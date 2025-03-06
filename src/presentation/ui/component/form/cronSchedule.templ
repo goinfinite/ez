@@ -23,7 +23,7 @@ templ CronPredefinedInput(bindModelPath string) {
 
 templ CronCustomScheduleInput(bindModelPath string) {
 	<div
-		x-data="{ cronSchedule: { minute: '*', hour: '*', day: '*', month: '*', weekday: '*' } }"
+		x-data="{ cronSchedule: { minute: '0', hour: '0', day: '*', month: '*', weekday: '*' } }"
 		x-effect={ bindModelPath + " = cronSchedule.minute+' '+cronSchedule.hour+' '+cronSchedule.day+' '+cronSchedule.month+' '+cronSchedule.weekday" }
 		class="-mt-4"
 	>
