@@ -10,7 +10,7 @@ type BackupJob struct {
 	JobId                     valueObject.BackupJobId             `json:"jobId"`
 	AccountId                 valueObject.AccountId               `json:"accountId"`
 	AccountUsername           valueObject.UnixUsername            `json:"accountUsername"`
-	JobStatus                 bool                                `json:"jobsStatus"`
+	JobStatus                 bool                                `json:"jobStatus"`
 	JobDescription            *valueObject.BackupJobDescription   `json:"jobDescription"`
 	DestinationIds            []valueObject.BackupDestinationId   `json:"destinationIds"`
 	RetentionStrategy         valueObject.BackupRetentionStrategy `json:"retentionStrategy"`
