@@ -133,6 +133,7 @@ type MultiSelectInputWithLabelValuePairDto struct {
 	Size                  string
 	SelectedBindValuePath string
 	Options               []SelectLabelValuePair
+	IsRequired            bool
 }
 
 func labelValuePairsValueExtractor(options []SelectLabelValuePair) []string {
@@ -181,6 +182,9 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 			>
 				{ inputDto.Label }
+				if inputDto.IsRequired {
+					<span class="text-red-700">*</span>
+				}
 			</label>
 		}
 		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
