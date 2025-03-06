@@ -135,6 +135,7 @@ document.addEventListener("alpine:init", () => {
       this.jobEntity = {};
       this.createJob = {
         backupSchedule: "0 0 * * *",
+        destinationIds: [],
         retentionStrategy: "full",
         archiveCompressionFormat: "br",
         containerAccountIds: [],

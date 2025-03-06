@@ -227,9 +227,13 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	containerSelectPairs := presenterHelper.ReadContainerSelectLabelValuePairs(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
+	backupDestinationSelectPairs := presenterHelper.ReadBackupDestinationSelectLabelValuePairs(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
 	createJobModalDto := pageBackup.CreateBackupJobModalDto{
-		AccountSelectLabelValuePairs:   accountSelectPairs,
-		ContainerSelectLabelValuePairs: containerSelectPairs,
+		AccountSelectLabelValuePairs:           accountSelectPairs,
+		ContainerSelectLabelValuePairs:         containerSelectPairs,
+		BackupDestinationSelectLabelValuePairs: backupDestinationSelectPairs,
 	}
 
 	destinationsReadRequestDto, destinationsReadResponseDto := presenter.ReadDestinations(c, backupService)

@@ -11,8 +11,9 @@ import (
 )
 
 type CreateBackupJobModalDto struct {
-	AccountSelectLabelValuePairs   []componentForm.SelectLabelValuePair
-	ContainerSelectLabelValuePairs []componentForm.SelectLabelValuePair
+	AccountSelectLabelValuePairs           []componentForm.SelectLabelValuePair
+	ContainerSelectLabelValuePairs         []componentForm.SelectLabelValuePair
+	BackupDestinationSelectLabelValuePairs []componentForm.SelectLabelValuePair
 }
 
 templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
@@ -30,21 +31,25 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				@componentForm.CronScheduleInput("backupSchedule", "createJob.backupSchedule")
 			</div>
 			<div class="w-1/2">
-				@componentForm.MultiSelectInput(componentForm.MultiSelectInputDto{
-					Id:                    "destinationIds",
-					Label:                 "DestinationIds",
-					SelectedBindValuePath: "createJob.destinationIds",
-					Options:               []string{},
-					IsRequired:            true,
-				})
+				@componentForm.MultiSelectInputWithLabelValuePair(
+					componentForm.MultiSelectInputWithLabelValuePairDto{
+						Id:                    "destinationIds",
+						Label:                 "DestinationIds",
+						SelectedBindValuePath: "createJob.destinationIds",
+						Options:               createDto.BackupDestinationSelectLabelValuePairs,
+						IsRequired:            true,
+					},
+				)
 			</div>
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">
 				@componentForm.SelectInput(componentForm.SelectInputDto{
-					Id: "retentionStrategy", Label: "Retention Strategy",
+					Id:            "retentionStrategy",
+					Label:         "Retention Strategy",
 					BindValuePath: "createJob.retentionStrategy",
 					Options:       []string{valueObject.BackupRetentionStrategyFull.String()},
+					IsRequired:    true,
 				})
 			</div>
 			<div class="w-1/3">
