@@ -29,7 +29,13 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				@componentForm.CronScheduleInput("backupSchedule", "createJob.backupSchedule")
 			</div>
 			<div class="w-1/2">
-				DestinationIds (MultiSelect)
+				@componentForm.MultiSelectInput(componentForm.MultiSelectInputDto{
+					Id:                    "destinationIds",
+					Label:                 "DestinationIds",
+					SelectedBindValuePath: "createJob.destinationIds",
+					Options:               []string{},
+					IsRequired:            true,
+				})
 			</div>
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
