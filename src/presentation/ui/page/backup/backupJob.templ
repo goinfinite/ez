@@ -118,9 +118,12 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
 					@componentForm.SelectInputWithLabelValuePair(
-						"accountId", "Account (Job Owner)", "createJob.accountId",
-						createDto.AccountSelectLabelValuePairs, true,
-					)
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "accountId",
+							Label:                 "Account (Job Owner)",
+							SelectedBindValuePath: "createJob.accountId",
+							Options:               createDto.AccountSelectLabelValuePairs,
+						})
 				</div>
 				<div class="w-1/2">
 					@componentForm.CompressionFormatSelectInput(

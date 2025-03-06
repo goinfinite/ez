@@ -817,8 +817,12 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			<div class="flex flex-row items-center gap-6">
 				<div class="basis-1/2">
 					@componentForm.SelectInputWithLabelValuePair(
-						"accountId", "Account", "container.accountId",
-						createDto.AccountSelectLabelValuePairs, true,
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "accountId",
+							Label:                 "Account",
+							SelectedBindValuePath: "container.accountId",
+							Options:               createDto.AccountSelectLabelValuePairs,
+						},
 					)
 				</div>
 				<div class="basis-1/2">

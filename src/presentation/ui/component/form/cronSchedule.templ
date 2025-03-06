@@ -1,8 +1,10 @@
 package componentForm
 
 templ CronPredefinedInput(bindModelPath string) {
-	@SelectInputWithLabelValuePair(
-		"", "Predefined Schedule", bindModelPath, []SelectLabelValuePair{
+	@SelectInputWithLabelValuePair(SelectInputWithLabelValuePairDto{
+		Label:                 "Predefined Schedule",
+		SelectedBindValuePath: bindModelPath,
+		Options: []SelectLabelValuePair{
 			{Label: "Hourly", Value: "@hourly"},
 			{Label: "Every 3 hours", Value: "0 */3 * * *"},
 			{Label: "Every 6 hours", Value: "0 */6 * * *"},
@@ -17,7 +19,7 @@ templ CronPredefinedInput(bindModelPath string) {
 			{Label: "Monthly", Value: "@monthly"},
 			{Label: "Annually", Value: "@annually"},
 			{Label: "On Reboot", Value: "@reboot"},
-		}, false,
+		}},
 	)
 }
 

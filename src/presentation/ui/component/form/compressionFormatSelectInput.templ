@@ -29,8 +29,10 @@ func transformCompressionFormatsIntoSelectPairs() []SelectLabelValuePair {
 }
 
 templ CompressionFormatSelectInput(id, bindValuePath string) {
-	@SelectInputWithLabelValuePair(
-		id, "Compression Format", bindValuePath,
-		transformCompressionFormatsIntoSelectPairs(), false,
-	)
+	@SelectInputWithLabelValuePair(SelectInputWithLabelValuePairDto{
+		Id:                    id,
+		Label:                 "Compression Format",
+		SelectedBindValuePath: bindValuePath,
+		Options:               transformCompressionFormatsIntoSelectPairs(),
+	})
 }
