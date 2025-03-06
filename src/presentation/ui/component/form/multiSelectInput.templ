@@ -135,6 +135,14 @@ type MultiSelectInputWithLabelValuePairDto struct {
 	Options               []SelectLabelValuePair
 }
 
+func labelValuePairsValueExtractor(options []SelectLabelValuePair) []string {
+	var values []string
+	for _, option := range options {
+		values = append(values, option.Value)
+	}
+	return values
+}
+
 templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValuePairDto) {
 	<!-- MultiSelectInputWithLabelValuePair -->
 	<div class="relative w-full">
@@ -176,6 +184,11 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 			</label>
 		}
 		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
+			{{ labelValuePairsValuesStr, _ := templ.JSONString(labelValuePairsValueExtractor(inputDto.Options)) }}
+			<i
+				class="ph-bold ph-list-checks bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ inputDto.SelectedBindValuePath + " = " + labelValuePairsValuesStr }
+			></i>
 			<i
 				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
 				@click.prevent={ inputDto.SelectedBindValuePath + " = []" }
