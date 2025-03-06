@@ -23,7 +23,6 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 		hx-post="/api/v1/backup/job/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		x-on:submit="$store.main.refreshScheduledTasksPopover()"
 		class="flex flex-col gap-4"
 	>
 		<div class="flex w-full flex-row items-center gap-6">
@@ -175,10 +174,145 @@ templ CreateBackupJobModal(createDto CreateBackupJobModalDto) {
 	}
 }
 
-templ UpdateBackupJobForm() {
+templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
+	<!-- UpdateBackupJobForm -->
+	<form
+		id="update-backup-job"
+		hx-put="/api/v1/backup/job/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		class="flex flex-col gap-4"
+	>
+		<input type="hidden" name="jobId" x-bind:value="jobEntity.jobId"/>
+		<input type="hidden" name="accountId" x-bind:value="jobEntity.accountId"/>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/2">
+				@componentForm.CronScheduleInput("backupSchedule", "jobEntity.backupSchedule")
+			</div>
+			<div class="w-1/2">
+				@componentForm.MultiSelectInputWithLabelValuePair(
+					componentForm.MultiSelectInputWithLabelValuePairDto{
+						Id:                    "destinationIds",
+						Label:                 "DestinationIds",
+						SelectedBindValuePath: "jobEntity.destinationIds",
+						Options:               createDto.BackupDestinationSelectLabelValuePairs,
+						IsRequired:            true,
+					},
+				)
+			</div>
+		</div>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/3">
+				@componentForm.CheckboxInputSwitchToggle(
+					"jobStatus", "Status", "jobEntity.jobStatus", "",
+				)
+			</div>
+			<div class="w-1/3">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "maxTaskRetentionDays",
+					Label:         "Max Task Retention Days",
+					BindValuePath: "jobEntity.maxTaskRetentionDays",
+					IsRequired:    false,
+				})
+			</div>
+			<div class="w-1/3">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "maxTaskRetentionCount",
+					Label:         "Max Task Retention Count",
+					BindValuePath: "jobEntity.maxTaskRetentionCount",
+					IsRequired:    false,
+				})
+			</div>
+		</div>
+		<div class="-mb-2">
+			@componentForm.TextArea("jobDescription", "Description", "jobEntity.jobDescription")
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="border-ez-300 space-y-5.5 rounded-md border-2 border-dashed p-4">
+				<div>
+					<h3 class="font-bold">Filter Backups</h3>
+					<p class="text-xs">
+						Select which accountIds and containerIds to include or exclude from the backup.
+						<br/>
+						Leave empty to include all accountIds and containerIds.
+					</p>
+				</div>
+				<div class="grid grid-cols-2 gap-4">
+					<div class="space-y-5 rounded-md">
+						@componentForm.MultiSelectInputWithLabelValuePair(
+							componentForm.MultiSelectInputWithLabelValuePairDto{
+								Id:                    "containerAccountIds",
+								Label:                 "AccountIds",
+								SelectedBindValuePath: "jobEntity.containerAccountIds",
+								Options:               createDto.AccountSelectLabelValuePairs,
+							},
+						)
+						@componentForm.MultiSelectInputWithLabelValuePair(
+							componentForm.MultiSelectInputWithLabelValuePairDto{
+								Id:                    "containerIds",
+								Label:                 "ContainerIds",
+								SelectedBindValuePath: "jobEntity.containerIds",
+								Options:               createDto.ContainerSelectLabelValuePairs,
+							},
+						)
+					</div>
+					<div class="space-y-5 rounded-md">
+						@componentForm.MultiSelectInputWithLabelValuePair(
+							componentForm.MultiSelectInputWithLabelValuePairDto{
+								Id:                    "exceptContainerAccountIds",
+								Label:                 "ExceptAccountIds",
+								SelectedBindValuePath: "jobEntity.exceptContainerAccountIds",
+								Options:               createDto.AccountSelectLabelValuePairs,
+							},
+						)
+						@componentForm.MultiSelectInputWithLabelValuePair(
+							componentForm.MultiSelectInputWithLabelValuePairDto{
+								Id:                    "exceptContainerIds",
+								Label:                 "ExceptContainerIds",
+								SelectedBindValuePath: "jobEntity.exceptContainerIds",
+								Options:               createDto.ContainerSelectLabelValuePairs,
+							},
+						)
+					</div>
+				</div>
+			</div>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "number",
+						Id:            "timeoutSecs",
+						Label:         "Timeout (seconds)",
+						BindValuePath: "jobEntity.timeoutSecs",
+						IsRequired:    false,
+					})
+				</div>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "number",
+						Id:            "maxConcurrentCpuCores",
+						Label:         "Max Concurrent CPU Cores",
+						BindValuePath: "jobEntity.maxConcurrentCpuCores",
+						IsRequired:    false,
+					})
+				</div>
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Update Backup Job", "ph-check-fat", "closeUpdateJobModal()", false,
+		)
+	</form>
 }
 
-templ UpdateBackupJobModal() {
+templ UpdateBackupJobModal(createDto CreateBackupJobModalDto) {
+	<!-- UpdateBackupJobModal -->
+	@componentStructural.RegularModal(
+		"Update Backup Job", "isUpdateJobModalOpen",
+		"closeUpdateJobModal()", "jobEntity.JobId",
+	) {
+		@UpdateBackupJobForm(createDto)
+	}
 }
 
 templ BackupJobsTable(
@@ -485,7 +619,7 @@ templ BackupJobs(
 			"isRunJobModalOpen", "runJob()",
 			componentStructural.ConfirmationTypeInfo,
 		)
-		@UpdateBackupJobModal()
+		@UpdateBackupJobModal(createJobModalDto)
 		@componentStructural.DeleteModal(
 			"isDeleteJobModalOpen", "closeDeleteJobModal()", "deleteJob()",
 			"delete-job", "", "jobEntity.jobId",

@@ -147,7 +147,13 @@ document.addEventListener("alpine:init", () => {
     jobEntity: {},
     createJob: {},
     resetPrimaryState() {
-      this.jobEntity = {};
+      this.jobEntity = {
+        destinationIds: [],
+        containerAccountIds: [],
+        exceptContainerAccountIds: [],
+        containerIds: [],
+        exceptContainerIds: [],
+      };
       this.createJob = {
         backupSchedule: "0 0 * * *",
         destinationIds: [],
