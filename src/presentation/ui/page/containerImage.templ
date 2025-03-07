@@ -442,17 +442,17 @@ templ TakeContainerSnapshotForm(
 					Note: the container's owner account must have enough quota to store the snapshot image (and/or archive).
 				</p>
 			</div>
-			@componentForm.CheckboxInputSwitchToggle(
-				"shouldCreateArchive",
-				"Also create an archive after the snapshot is taken.",
-				"shouldCreateArchive", "",
-			)
+			@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+				Id:            "shouldCreateArchive",
+				Label:         "Also create an archive after the snapshot is taken.",
+				BindModelPath: "containerSnapshot.shouldCreateArchive",
+			})
 			<div x-show="shouldCreateArchive">
-				@componentForm.CheckboxInputSwitchToggle(
-					"shouldDiscardImage",
-					"Discard the snapshot image after the archive is created (keep the archive only).",
-					"shouldDiscardImage", "",
-				)
+				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+					Id:            "shouldDiscardImage",
+					Label:         "Discard the snapshot image after the archive is created (keep the archive only).",
+					BindModelPath: "containerSnapshot.shouldDiscardImage",
+				})
 			</div>
 			<div x-show="shouldCreateArchive">
 				@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {

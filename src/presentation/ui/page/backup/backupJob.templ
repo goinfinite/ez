@@ -203,9 +203,11 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">
-				@componentForm.CheckboxInputSwitchToggle(
-					"jobStatus", "Status", "jobEntity.jobStatus", "",
-				)
+				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+					Id:            "jobStatus",
+					Label:         "Status",
+					BindModelPath: "jobEntity.jobStatus",
+				})
 			</div>
 			<div class="w-1/3">
 				@componentForm.InputField(componentForm.InputFieldDto{

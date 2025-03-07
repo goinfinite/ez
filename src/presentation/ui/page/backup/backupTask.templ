@@ -114,16 +114,16 @@ templ RestoreBackupTaskForm() {
 		class="flex flex-col space-y-4"
 	>
 		<input type="hidden" name="taskId" x-bind:value="restoreTask.taskId"/>
-		@componentForm.CheckboxInputSwitchToggle(
-			"shouldReplaceExistingContainers",
-			"<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
-			"restoreTask.shouldReplaceExistingContainers", "",
-		)
-		@componentForm.CheckboxInputSwitchToggle(
-			"shouldRestoreMappings",
-			"Try to restore the container's original mappings instead of using the container exposed ports.",
-			"restoreTask.shouldRestoreMappings", "",
-		)
+		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+			Id:            "shouldReplaceExistingContainers",
+			Label:         "<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
+			BindModelPath: "restoreTask.shouldReplaceExistingContainers",
+		})
+		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+			Id:            "shouldRestoreMappings",
+			Label:         "Try to restore the container's original mappings instead of using the container exposed ports.",
+			BindModelPath: "restoreTask.shouldRestoreMappings",
+		})
 		<div class="bg-ez-500 space-y-5.5 rounded-md p-4">
 			<div>
 				<h3 class="font-bold">Filter Backups</h3>
@@ -456,16 +456,16 @@ templ RestoreBackupTaskArchiveForm() {
 		class="flex flex-col space-y-4"
 	>
 		<input type="hidden" name="archiveId" x-bind:value="restoreTaskArchive.archiveId"/>
-		@componentForm.CheckboxInputSwitchToggle(
-			"shouldReplaceExistingContainers",
-			"<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
-			"restoreTaskArchive.shouldReplaceExistingContainers", "",
-		)
-		@componentForm.CheckboxInputSwitchToggle(
-			"shouldRestoreMappings",
-			"Try to restore the container's original mappings instead of using the container exposed ports.",
-			"restoreTaskArchive.shouldRestoreMappings", "",
-		)
+		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+			Id:            "shouldReplaceExistingContainers",
+			Label:         "<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
+			BindModelPath: "restoreTaskArchive.shouldReplaceExistingContainers",
+		})
+		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+			Id:            "shouldRestoreMappings",
+			Label:         "Try to restore the container's original mappings instead of using the container exposed ports.",
+			BindModelPath: "restoreTaskArchive.shouldRestoreMappings",
+		})
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldDto{
 				InputType:     "number",

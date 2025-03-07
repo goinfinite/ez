@@ -786,11 +786,11 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					"archiveImageFile", ".tar, .gzip, .zip, .xz or .br",
 					".tar,.gzip,.zip,.xz,.br", false,
 				)
-				@componentForm.CheckboxInputSwitchToggle(
-					"useImageExposedPorts",
-					"Map the image's exposed ports (if any) as \"Port Bindings\".",
-					"container.useImageExposedPorts", "",
-				)
+				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+					Id:            "useImageExposedPorts",
+					Label:         "Map the image's exposed ports (if any) as \"Port Bindings\".",
+					BindModelPath: "container.useImageExposedPorts",
+				})
 			</div>
 			<div>
 				<input
