@@ -100,11 +100,11 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 			for _, option := range inputDto.Options {
 				<div
 					class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
-					@click={ "if (!" + inputDto.SelectedBindValuePath + ".includes('" + option.Value + "')) { " + inputDto.SelectedBindValuePath + ".push('" + option.Value + "'); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item !== '" + option.Value + "'); }" }
+					@click={ "if (!" + inputDto.SelectedBindValuePath + ".some((item) => item == `" + option.Value + "`)) { " + inputDto.SelectedBindValuePath + ".push(`" + option.Value + "`); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item != `" + option.Value + "`); }" }
 				>
 					<i
 						class="ph-duotone text-xl"
-						:class={ inputDto.SelectedBindValuePath + `.includes("` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
+						:class={ inputDto.SelectedBindValuePath + `.some((item) => item == "` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
 					></i>
 					<span class="truncate">{ option.Label }</span>
 				</div>
@@ -113,11 +113,11 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 				<template x-for={ "selectableOption in " + inputDto.OptionsBindValuePath }>
 					<div
 						class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
-						@click={ "if (!" + inputDto.SelectedBindValuePath + ".includes(selectableOption)) { " + inputDto.SelectedBindValuePath + ".push(selectableOption); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item !== selectableOption); }" }
+						@click={ "if (!" + inputDto.SelectedBindValuePath + ".some((item) => item == selectableOption)) { " + inputDto.SelectedBindValuePath + ".push(selectableOption); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item != selectableOption); }" }
 					>
 						<i
 							class="ph-duotone text-xl"
-							:class={ inputDto.SelectedBindValuePath + `.includes(selectableOption) ? "ph-check-square text-infinite-500" : "ph-square"` }
+							:class={ inputDto.SelectedBindValuePath + `.some((item) => item == selectableOption) ? "ph-check-square text-infinite-500" : "ph-square"` }
 						></i>
 						<span class="truncate" x-text="selectableOption"></span>
 					</div>
