@@ -1,32 +1,39 @@
 package componentForm
 
-templ RadioInput(id, label, bindValue, bindModelPath string) {
+type RadioInputDto struct {
+	Id            string
+	Label         string
+	BindValue     string
+	BindModelPath string
+}
+
+templ RadioInput(inputDto RadioInputDto) {
 	<!-- RadioInput -->
 	<div
 		class="hover:text-infinite-500 inline-flex items-center text-neutral-100"
-		@click={ bindModelPath + ` = "` + bindValue + `"` }
+		@click={ inputDto.BindModelPath + ` = "` + inputDto.BindValue + `"` }
 	>
 		<label class="relative flex cursor-pointer items-center rounded-full p-1">
 			<input
 				type="radio"
-				if id != "" {
-					id={ id }
-					name={ id }
+				if inputDto.Id != "" {
+					id={ inputDto.Id }
+					name={ inputDto.Id }
 				}
-				value={ bindValue }
-				x-model={ bindModelPath }
+				value={ inputDto.BindValue }
+				x-model={ inputDto.BindModelPath }
 				class="hidden"
 			/>
 			<i
 				class="ph-duotone text-xl"
-				:class={ `String(` + bindModelPath + `) == "` + bindValue + `" ? "ph-check-circle text-infinite-500" : "ph-circle"` }
+				:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle text-infinite-500" : "ph-circle"` }
 			></i>
 		</label>
 		<label
 			class="cursor-pointer text-sm"
-			:class={ `String(` + bindModelPath + `) == "` + bindValue + `" && "text-infinite-500 font-bold"` }
+			:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
 		>
-			{ label }
+			{ inputDto.Label }
 		</label>
 	</div>
 }

@@ -202,15 +202,20 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
-			<div class="w-1/3">
-				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
-					Id:            "jobStatus",
-					Label:         "Job Status:",
-					LabelPosition: componentForm.SwitchToggleLabelPositionLeft,
-					Shape:         componentForm.SwitchToggleShapeSquare,
-					Size:          componentForm.SwitchToggleSizeXl,
-					BindModelPath: "jobEntity.jobStatus",
-				})
+			<div class="flex w-1/3 flex-row gap-2 text-sm">
+				<p class="font-bold">Job Status:</p>
+				<div class="flex flex-row gap-2">
+					@componentForm.RadioInput(componentForm.RadioInputDto{
+						Label:         "Enabled",
+						BindValue:     "true",
+						BindModelPath: "jobEntity.jobStatus",
+					})
+					@componentForm.RadioInput(componentForm.RadioInputDto{
+						Label:         "Disabled",
+						BindValue:     "false",
+						BindModelPath: "jobEntity.jobStatus",
+					})
+				</div>
 			</div>
 			<div class="w-1/3">
 				@componentForm.InputField(componentForm.InputFieldDto{

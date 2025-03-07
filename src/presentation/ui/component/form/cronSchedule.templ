@@ -138,8 +138,16 @@ templ CronScheduleInput(id, bindModelPath string) {
 		class="flex flex-col gap-4 rounded-lg border-2 border-dashed border-neutral-50/5 p-2"
 	>
 		<div class="flex flex-row gap-4">
-			@RadioInput("", "Predefined", "predefined", "selectedScheduleType")
-			@RadioInput("", "Custom", "custom", "selectedScheduleType")
+			@RadioInput(RadioInputDto{
+				Label:         "Predefined",
+				BindValue:     "predefined",
+				BindModelPath: "selectedScheduleType",
+			})
+			@RadioInput(RadioInputDto{
+				Label:         "Custom",
+				BindValue:     "custom",
+				BindModelPath: "selectedScheduleType",
+			})
 		</div>
 		<input
 			if id != "" {

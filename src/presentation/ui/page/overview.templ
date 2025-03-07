@@ -716,9 +716,11 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			<div class="flex items-center space-x-3 text-sm">
 				<div>Source: </div>
 				for _, sourceOption := range []string{"Marketplace", "URL", "Existing Container", "Local Image", "Upload Image"} {
-					@componentForm.RadioInput(
-						"", sourceOption, sourceOption, "createContainerSourceSelectedOption",
-					)
+					@componentForm.RadioInput(componentForm.RadioInputDto{
+						Label:         sourceOption,
+						BindValue:     sourceOption,
+						BindModelPath: "createContainerSourceSelectedOption",
+					})
 				}
 			</div>
 			<div
