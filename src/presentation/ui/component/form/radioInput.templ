@@ -1,8 +1,17 @@
 package componentForm
 
+const (
+	RadioInputSizeXs = "xs"
+	RadioInputSizeSm = "sm"
+	RadioInputSizeMd = "md"
+	RadioInputSizeLg = "lg"
+	RadioInputSizeXl = "xl"
+)
+
 type RadioInputDto struct {
 	Id            string
 	Label         string
+	Size          string
 	BindValue     string
 	BindModelPath string
 }
@@ -24,13 +33,39 @@ templ RadioInput(inputDto RadioInputDto) {
 				x-model={ inputDto.BindModelPath }
 				class="hidden"
 			/>
+			{{ iconSize := "text-xl" }}
+			switch inputDto.Size {
+				case RadioInputSizeXs:
+					{{ iconSize = "text-lg" }}
+				case RadioInputSizeSm:
+					{{ iconSize = "text-xl" }}
+				case RadioInputSizeMd:
+					{{ iconSize = "text-2xl" }}
+				case RadioInputSizeLg:
+					{{ iconSize = "text-3xl" }}
+				case RadioInputSizeXl:
+					{{ iconSize = "text-4xl" }}
+			}
 			<i
-				class="ph-duotone text-xl"
+				class={ "ph-duotone " + iconSize }
 				:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle text-infinite-500" : "ph-circle"` }
 			></i>
 		</label>
+		{{ labelTextSize := "text-sm" }}
+		switch inputDto.Size {
+			case RadioInputSizeXs:
+				{{ labelTextSize = "text-xs" }}
+			case RadioInputSizeSm:
+				{{ labelTextSize = "text-sm" }}
+			case RadioInputSizeMd:
+				{{ labelTextSize = "text-base" }}
+			case RadioInputSizeLg:
+				{{ labelTextSize = "text-lg" }}
+			case RadioInputSizeXl:
+				{{ labelTextSize = "text-xl" }}
+		}
 		<label
-			class="cursor-pointer text-sm"
+			class={ "cursor-pointer " + labelTextSize }
 			:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
 		>
 			{ inputDto.Label }
