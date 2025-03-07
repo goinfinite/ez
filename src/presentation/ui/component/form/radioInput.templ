@@ -9,23 +9,22 @@ templ RadioInput(id, label, bindValue, bindModelPath string) {
 		<label class="relative flex cursor-pointer items-center rounded-full p-1">
 			<input
 				type="radio"
-				name={ id }
+				if id != "" {
+					id={ id }
+					name={ id }
+				}
 				value={ bindValue }
 				x-model={ bindModelPath }
 				class="hidden"
 			/>
 			<i
-				x-show={ bindModelPath + ` !== "` + bindValue + `"` }
-				class="ph-duotone ph-circle text-xl"
-			></i>
-			<i
-				x-show={ bindModelPath + ` === "` + bindValue + `"` }
-				class="ph-duotone ph-check-circle text-infinite-500 text-xl"
+				class="ph-duotone text-xl"
+				:class={ `String(` + bindModelPath + `) == "` + bindValue + `" ? "ph-check-circle text-infinite-500" : "ph-circle"` }
 			></i>
 		</label>
 		<label
 			class="cursor-pointer text-sm"
-			:class={ bindModelPath + " === '" + bindValue + "' && 'text-infinite-500 font-bold'" }
+			:class={ `String(` + bindModelPath + `) == "` + bindValue + `" && "text-infinite-500 font-bold"` }
 		>
 			{ label }
 		</label>
