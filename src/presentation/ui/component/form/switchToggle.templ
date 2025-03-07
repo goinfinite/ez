@@ -5,6 +5,11 @@ const (
 	SwitchToggleLabelPositionRight = "right"
 	SwitchToggleShapeCircular      = "circular"
 	SwitchToggleShapeSquare        = "square"
+	SwitchToggleSizeXs             = "xs"
+	SwitchToggleSizeSm             = "sm"
+	SwitchToggleSizeMd             = "md"
+	SwitchToggleSizeLg             = "lg"
+	SwitchToggleSizeXl             = "xl"
 )
 
 // Note: "bindModelPath" may be an array (in which case the "customValue" will be
@@ -15,6 +20,7 @@ type SwitchToggleDto struct {
 	Label         string
 	LabelPosition string
 	Shape         string
+	Size          string
 	BindModelPath string
 	CustomValue   string
 }
@@ -40,7 +46,33 @@ templ SwitchToggle(inputDto SwitchToggleDto) {
 		if inputDto.Shape == SwitchToggleShapeSquare {
 			{{ radiusRoundness = "rounded-md" }}
 		}
-		<div class={ "peer-checked:bg-infinite-500 bg-ez-100 peer relative h-6 w-11 " + radiusRoundness + " after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:" + radiusRoundness + " after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" }></div>
+		{{ checkboxSize := "h-6 w-11" }}
+		switch inputDto.Size {
+			case SwitchToggleSizeXs:
+				{{ checkboxSize = "h-4 w-8" }}
+			case SwitchToggleSizeSm:
+				{{ checkboxSize = "h-5 w-9" }}
+			case SwitchToggleSizeMd:
+				{{ checkboxSize = "h-6 w-11" }}
+			case SwitchToggleSizeLg:
+				{{ checkboxSize = "h-7 w-13" }}
+			case SwitchToggleSizeXl:
+				{{ checkboxSize = "h-8 w-15" }}
+		}
+		{{ checkdotSize := "after:h-5 after:w-5" }}
+		switch inputDto.Size {
+			case SwitchToggleSizeXs:
+				{{ checkdotSize = "after:h-3 after:w-3" }}
+			case SwitchToggleSizeSm:
+				{{ checkdotSize = "after:h-4 after:w-4" }}
+			case SwitchToggleSizeMd:
+				{{ checkdotSize = "after:h-5 after:w-5" }}
+			case SwitchToggleSizeLg:
+				{{ checkdotSize = "after:h-6 after:w-6" }}
+			case SwitchToggleSizeXl:
+				{{ checkdotSize = "after:h-7 after:w-7" }}
+		}
+		<div class={ "peer-checked:bg-infinite-500 bg-ez-100 peer relative " + checkboxSize + " " + radiusRoundness + " after:absolute after:start-[2px] " + checkdotSize + " after:top-0.5 after:" + radiusRoundness + " after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" }></div>
 		if inputDto.LabelPosition == SwitchToggleLabelPositionRight {
 			<span class="ml-2 text-sm text-neutral-100">
 				@templ.Raw(inputDto.Label)
