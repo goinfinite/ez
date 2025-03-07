@@ -206,7 +206,8 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 					Id:            "jobStatus",
 					Label:         "Job Status:",
-					LabelPosition: "left",
+					LabelPosition: componentForm.SwitchToggleLabelPositionLeft,
+					Shape:         componentForm.SwitchToggleShapeSquare,
 					BindModelPath: "jobEntity.jobStatus",
 				})
 			</div>

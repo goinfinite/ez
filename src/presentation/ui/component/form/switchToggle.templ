@@ -1,5 +1,12 @@
 package componentForm
 
+const (
+	SwitchToggleLabelPositionLeft  = "left"
+	SwitchToggleLabelPositionRight = "right"
+	SwitchToggleShapeCircular      = "circular"
+	SwitchToggleShapeSquare        = "square"
+)
+
 // Note: "bindModelPath" may be an array (in which case the "customValue" will be
 // pushed into the array) OR "bindModelPath" may be just a boolean state (in which
 // case the "customValue" is not necessary and will be ignored).
@@ -7,6 +14,7 @@ type SwitchToggleDto struct {
 	Id            string
 	Label         string
 	LabelPosition string
+	Shape         string
 	BindModelPath string
 	CustomValue   string
 }
@@ -23,13 +31,17 @@ templ SwitchToggle(inputDto SwitchToggleDto) {
 			}
 			class="peer sr-only"
 		/>
-		if inputDto.LabelPosition == "left" {
+		if inputDto.LabelPosition == SwitchToggleLabelPositionLeft {
 			<span class="mr-2 text-sm text-neutral-100">
 				@templ.Raw(inputDto.Label)
 			</span>
 		}
-		<div class="peer-checked:bg-infinite-500 bg-ez-100 peer relative h-6 w-11 rounded-full after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-		if inputDto.LabelPosition == "right" {
+		{{ radiusRoundness := "rounded-full" }}
+		if inputDto.Shape == SwitchToggleShapeSquare {
+			{{ radiusRoundness = "rounded-md" }}
+		}
+		<div class={ "peer-checked:bg-infinite-500 bg-ez-100 peer relative h-6 w-11 " + radiusRoundness + " after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:" + radiusRoundness + " after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" }></div>
+		if inputDto.LabelPosition == SwitchToggleLabelPositionRight {
 			<span class="ml-2 text-sm text-neutral-100">
 				@templ.Raw(inputDto.Label)
 			</span>
