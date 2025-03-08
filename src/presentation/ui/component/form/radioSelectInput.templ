@@ -1,16 +1,26 @@
 package componentForm
 
 type RadioSelectInputDto struct {
-	Label   string
-	Options []RadioInputDto
+	Id            string
+	Label         string
+	BindModelPath string
+	Options       []RadioInputDto
 }
 
 templ RadioSelectInput(inputDto RadioSelectInputDto) {
 	<div class="border-ez-200 border-1 bg-ez-300 flex h-10 flex-col rounded-md px-2">
+		if inputDto.Id != "" && inputDto.BindModelPath != "" {
+			<input
+				type="hidden"
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+				x-model:value={ inputDto.BindModelPath }
+			/>
+		}
 		<p class="from-ez-300 via-ez-300 -mt-2.5 mb-1 w-fit cursor-text bg-gradient-to-t via-50% to-transparent to-50% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80">
 			{ inputDto.Label }
 		</p>
-		<div class="flex flex-row gap-1">
+		<div class="flex flex-row gap-1.5">
 			for _, option := range inputDto.Options {
 				@RadioInput(option)
 			}

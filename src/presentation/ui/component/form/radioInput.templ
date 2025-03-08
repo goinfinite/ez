@@ -39,16 +39,16 @@ templ RadioInput(inputDto RadioInputDto) {
 			class={ "flex flex-row gap-1 cursor-pointer items-center " + labelTextSize }
 			:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
 		>
-			<input
-				type="radio"
-				if inputDto.Id != "" {
+			if inputDto.Id != "" {
+				<input
+					type="radio"
 					id={ inputDto.Id }
 					name={ inputDto.Id }
-				}
-				value={ inputDto.BindValue }
-				x-model={ inputDto.BindModelPath }
-				class="hidden"
-			/>
+					value={ inputDto.BindValue }
+					x-model={ inputDto.BindModelPath }
+					class="hidden"
+				/>
+			}
 			{{ iconSize := "text-xl" }}
 			switch inputDto.Size {
 				case RadioInputSizeXs:
