@@ -346,34 +346,279 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 	>
 		<input type="hidden" name="destinationId" x-bind:value="destinationEntity.destinationId"/>
 		<input type="hidden" name="accountId" x-bind:value="destinationEntity.accountId"/>
-		<div class="flex w-full flex-row items-center gap-6">
-			<div class="w-1/2"></div>
-			<div class="w-1/2"></div>
-		</div>
-		<div class="flex w-full flex-row items-center gap-6">
-			<div class="w-1/3"></div>
-			<div class="w-1/3"></div>
-		</div>
+		@componentForm.InputField(componentForm.InputFieldDto{
+			InputType:     "text",
+			Id:            "destinationName",
+			Label:         "Name",
+			BindValuePath: "destinationEntity.destinationName",
+		})
 		<div class="-mb-2">
-			@componentForm.TextArea("destinationDescription", "Description", "destinationEntity.destinationDescription")
+			@componentForm.TextArea(
+				"destinationDescription", "Description",
+				"destinationEntity.destinationDescription",
+			)
 		</div>
-		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/3">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "text",
+					Id:            "destinationPath",
+					Label:         "Destination Path",
+					BindValuePath: "destinationEntity.destinationPath",
+				})
+			</div>
+			<div class="w-1/3">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "minLocalStorageFreePercent",
+					Label:         "Min Free Local Storage (%)",
+					BindValuePath: "destinationEntity.minLocalStorageFreePercent",
+				})
+			</div>
+			<div class="w-1/3">
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "maxDestinationStorageUsagePercent",
+					Label:         "Max Dest. Storage Usage (%)",
+					BindValuePath: "destinationEntity.maxDestinationStorageUsagePercent",
+				})
+			</div>
+		</div>
+		{{ isRemoteHostDestination := `destinationEntity.destinationType == "` + valueObject.BackupDestinationTypeRemoteHost.String() + `"` }}
+		{{ isObjectStorageDestination := `destinationEntity.destinationType == "` + valueObject.BackupDestinationTypeObjectStorage.String() + `"` }}
+		{{ isRemoteDestination := isRemoteHostDestination + ` || ` + isObjectStorageDestination }}
+		<template x-if={ isRemoteHostDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					@componentForm.SelectInputWithLabelValuePair(
-						componentForm.SelectInputWithLabelValuePairDto{
-							Id:                    "accountId",
-							Label:                 "Account (Destination Owner)",
-							SelectedBindValuePath: "destinationEntity.accountId",
-							Options:               createDto.AccountSelectLabelValuePairs,
-						})
+					@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
+						Label: "Remote Host Type",
+						Options: []componentForm.RadioInputDto{
+							{
+								Label:         "SFTP (recommended)",
+								BindValue:     valueObject.BackupDestinationRemoteHostTypeSftp.String(),
+								BindModelPath: "destinationEntity.remoteHostType",
+							},
+							{
+								Label:         "FTP (insecure)",
+								BindValue:     valueObject.BackupDestinationRemoteHostTypeFtp.String(),
+								BindModelPath: "destinationEntity.remoteHostType",
+							},
+						},
+					})
 				</div>
-				<div class="w-1/2"></div>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "remoteHostname",
+						Label:         "Server Hostname",
+						BindValuePath: "destinationEntity.remoteHostname",
+						IsRequired:    true,
+					})
+				</div>
 			</div>
+		</template>
+		<template x-if={ isRemoteHostDestination }>
+			<div
+				class="flex w-full flex-row items-center gap-6"
+			>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "remoteHostUsername",
+						Label:         "Username",
+						BindValuePath: "destinationEntity.remoteHostUsername",
+						IsRequired:    true,
+					})
+				</div>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "password",
+						Id:            "remoteHostPassword",
+						Label:         "Password",
+						BindValuePath: "destinationEntity.remoteHostPassword",
+					})
+				</div>
+			</div>
+		</template>
+		<template x-if={ isRemoteHostDestination }>
+			<div
+				class="flex w-full flex-row items-center gap-6"
+			>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "number",
+						Id:            "remoteHostNetworkPort",
+						Label:         "Server Port",
+						BindValuePath: "destinationEntity.remoteHostNetworkPort",
+					})
+				</div>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "remoteHostPrivateKeyFilePath",
+						Label:         "Private Key File Path",
+						BindValuePath: "destinationEntity.remoteHostPrivateKeyFilePath",
+					})
+				</div>
+			</div>
+		</template>
+		<template x-if={ isObjectStorageDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
-				<div class="w-1/2"></div>
-				<div class="w-1/2"></div>
+				<div class="w-1/2">
+					@componentForm.SelectInput(componentForm.SelectInputDto{
+						Id:            "objectStorageProvider",
+						Label:         "Object Storage Provider",
+						BindValuePath: "destinationEntity.objectStorageProvider",
+						Options:       valueObject.ObjectStorageProviderStrList,
+					})
+				</div>
+				<div class="w-1/2">
+					<template x-if="destinationEntity.objectStorageProvider == 'custom'">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "text",
+							Id:            "objectStorageEndpointUrl",
+							Label:         "Endpoint Url",
+							BindValuePath: "destinationEntity.objectStorageEndpointUrl",
+						})
+					</template>
+					<template x-if="destinationEntity.objectStorageProvider != 'custom'">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "text",
+							Id:            "objectStorageProviderRegion",
+							Label:         "Region",
+							BindValuePath: "destinationEntity.objectStorageProviderRegion",
+						})
+					</template>
+				</div>
 			</div>
+		</template>
+		<template x-if={ isObjectStorageDestination }>
+			@componentForm.InputField(componentForm.InputFieldDto{
+				InputType:     "text",
+				Id:            "objectStorageBucketName",
+				Label:         "Bucket Name",
+				BindValuePath: "destinationEntity.objectStorageBucketName",
+			})
+		</template>
+		<template x-if={ isObjectStorageDestination }>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "objectStorageProviderAccessKeyId",
+						Label:         "Access Key Id",
+						BindValuePath: "destinationEntity.objectStorageProviderAccessKeyId",
+					})
+				</div>
+				<div class="w-1/2">
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "password",
+						Id:            "objectStorageProviderSecretAccessKey",
+						Label:         "Secret Access Key",
+						BindValuePath: "destinationEntity.objectStorageProviderSecretAccessKey",
+					})
+				</div>
+			</div>
+		</template>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			@componentForm.SelectInputWithLabelValuePair(
+				componentForm.SelectInputWithLabelValuePairDto{
+					Id:                    "accountId",
+					Label:                 "Account (Destination Owner)",
+					SelectedBindValuePath: "destinationEntity.accountId",
+					Options:               createDto.AccountSelectLabelValuePairs,
+				})
+			<template x-if={ isRemoteDestination }>
+				<div class="flex w-full flex-row items-center gap-6">
+					<div class="w-1/2">
+						@componentForm.SelectInputWithLabelValuePair(
+							componentForm.SelectInputWithLabelValuePairDto{
+								Id:                    "downloadBytesSecRateLimit",
+								Label:                 "Download Rate Limit (bytes/sec)",
+								SelectedBindValuePath: "destinationEntity.downloadBytesSecRateLimit",
+								Options: []componentForm.SelectLabelValuePair{
+									{Label: "Unlimited", Value: ""},
+									{Label: "1 MiB/s", Value: "1048576"},
+									{Label: "5 MiB/s", Value: "5242880"},
+									{Label: "10 MiB/s", Value: "10485760"},
+									{Label: "50 MiB/s", Value: "52428800"},
+									{Label: "100 MiB/s", Value: "104857600"},
+									{Label: "200 MiB/s", Value: "209715200"},
+									{Label: "500 MiB/s", Value: "524288000"},
+									{Label: "1 GiB/s", Value: "1048576000"},
+								},
+							})
+					</div>
+					<div class="w-1/2">
+						@componentForm.SelectInputWithLabelValuePair(
+							componentForm.SelectInputWithLabelValuePairDto{
+								Id:                    "uploadBytesSecRateLimit",
+								Label:                 "Upload Rate Limit (bytes/sec)",
+								SelectedBindValuePath: "destinationEntity.uploadBytesSecRateLimit",
+								Options: []componentForm.SelectLabelValuePair{
+									{Label: "Unlimited", Value: ""},
+									{Label: "1 MiB/s", Value: "1048576"},
+									{Label: "5 MiB/s", Value: "5242880"},
+									{Label: "10 MiB/s", Value: "10485760"},
+									{Label: "50 MiB/s", Value: "52428800"},
+									{Label: "100 MiB/s", Value: "104857600"},
+									{Label: "200 MiB/s", Value: "209715200"},
+									{Label: "500 MiB/s", Value: "524288000"},
+									{Label: "1 GiB/s", Value: "1048576000"},
+								},
+							})
+					</div>
+				</div>
+			</template>
+			<template x-if={ isRemoteDestination }>
+				<div class="flex w-full flex-row items-center gap-6">
+					<div class="w-1/2">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "number",
+							Id:            "maxConcurrentConnections",
+							Label:         "Max Concurrent Connections",
+							BindValuePath: "destinationEntity.maxConcurrentConnections",
+						})
+					</div>
+					<div class="w-1/2">
+						@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
+							Label: "Skip Certificate Verification",
+							Options: []componentForm.RadioInputDto{
+								{
+									Label:         "Yes",
+									BindValue:     "true",
+									BindModelPath: "destinationEntity.skipCertificateVerification",
+								},
+								{
+									Label:         "No",
+									BindValue:     "false",
+									BindModelPath: "destinationEntity.skipCertificateVerification",
+								},
+							},
+						})
+					</div>
+				</div>
+			</template>
+			<template x-if={ isRemoteHostDestination }>
+				<div class="flex w-full flex-row items-center gap-6">
+					<div class="w-1/2">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "number",
+							Id:            "remoteHostConnectionTimeoutSecs",
+							Label:         "Connection Timeout (secs)",
+							BindValuePath: "destinationEntity.remoteHostConnectionTimeoutSecs",
+						})
+					</div>
+					<div class="w-1/2">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "number",
+							Id:            "remoteHostConnectionRetrySecs",
+							Label:         "Connection Retry Time (secs)",
+							BindValuePath: "destinationEntity.remoteHostConnectionRetrySecs",
+						})
+					</div>
+				</div>
+			</template>
 		}
 		@componentForm.SubmitButton(
 			"Update Backup Destination", "ph-check-fat", "closeUpdateDestinationModal()", false,
