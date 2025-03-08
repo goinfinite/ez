@@ -453,13 +453,13 @@ templ TakeContainerSnapshotForm(
 			@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 				Id:            "shouldCreateArchive",
 				Label:         "Also create an archive after the snapshot is taken.",
-				BindModelPath: "containerSnapshot.shouldCreateArchive",
+				BindModelPath: "shouldCreateArchive",
 			})
 			<div x-show="shouldCreateArchive">
 				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 					Id:            "shouldDiscardImage",
 					Label:         "Discard the snapshot image after the archive is created (keep the archive only).",
-					BindModelPath: "containerSnapshot.shouldDiscardImage",
+					BindModelPath: "shouldDiscardImage",
 				})
 			</div>
 			<div x-show="shouldCreateArchive">
