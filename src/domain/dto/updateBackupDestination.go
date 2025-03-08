@@ -9,7 +9,6 @@ type UpdateBackupDestination struct {
 	AccountId                            valueObject.AccountId                             `json:"accountId"`
 	DestinationName                      *valueObject.BackupDestinationName                `json:"destinationName"`
 	DestinationDescription               *valueObject.BackupDestinationDescription         `json:"destinationDescription"`
-	DestinationType                      *valueObject.BackupDestinationType                `json:"destinationType,omitempty"`
 	DestinationPath                      *valueObject.UnixFilePath                         `json:"destinationPath,omitempty"`
 	MinLocalStorageFreePercent           *uint8                                            `json:"minLocalStorageFreePercent,omitempty"`
 	MaxDestinationStorageUsagePercent    *uint8                                            `json:"maxDestinationStorageUsagePercent,omitempty"`

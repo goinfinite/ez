@@ -492,15 +492,6 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		destinationDescriptionPtr = &destinationDescription
 	}
 
-	var destinationTypePtr *valueObject.BackupDestinationType
-	if input["destinationType"] != nil {
-		destinationType, err := valueObject.NewBackupDestinationType(input["destinationType"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
-		}
-		destinationTypePtr = &destinationType
-	}
-
 	var destinationPathPtr *valueObject.UnixFilePath
 	if input["destinationPath"] != nil {
 		destinationPath, err := valueObject.NewUnixFilePath(input["destinationPath"])
@@ -743,7 +734,6 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 		AccountId:                            accountId,
 		DestinationName:                      destinationNamePtr,
 		DestinationDescription:               destinationDescriptionPtr,
-		DestinationType:                      destinationTypePtr,
 		DestinationPath:                      destinationPathPtr,
 		MinLocalStorageFreePercent:           minLocalStorageFreePercentPtr,
 		MaxDestinationStorageUsagePercent:    maxDestinationStorageUsagePercentPtr,

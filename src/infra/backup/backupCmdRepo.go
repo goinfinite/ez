@@ -217,10 +217,6 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		updateMap["description"] = updateDto.DestinationDescription.String()
 	}
 
-	if updateDto.DestinationType != nil {
-		updateMap["type"] = updateDto.DestinationType.String()
-	}
-
 	if updateDto.DestinationPath != nil {
 		updateMap["path"] = updateDto.DestinationPath.String()
 	}

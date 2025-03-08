@@ -290,7 +290,7 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 	var minLocalStorageFreePercentUint8, maxDestinationStorageUsagePercentUint8 uint8
 	var maxConcurrentConnectionsUint16 uint16
 	var downloadBytesSecRateLimitUint64, uploadBytesSecRateLimitUint64 uint64
-	var destinationNameStr, destinationDescriptionStr, destinationTypeStr, destinationPathStr string
+	var destinationNameStr, destinationDescriptionStr, destinationPathStr string
 	var skipCertificateVerificationBoolStr string
 	var objectStorageProviderStr, objectStorageProviderRegionStr, objectStorageProviderAccessKeyIdStr string
 	var objectStorageProviderSecretAccessKeyStr, objectStorageEndpointUrlStr, objectStorageBucketNameStr string
@@ -311,9 +311,6 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 
 			if destinationNameStr != "" {
 				requestBody["destinationName"] = destinationNameStr
-			}
-			if destinationTypeStr != "" {
-				requestBody["destinationType"] = destinationTypeStr
 			}
 			if destinationDescriptionStr != "" {
 				requestBody["destinationDescription"] = destinationDescriptionStr
@@ -394,9 +391,6 @@ func (controller *BackupController) UpdateDestination() *cobra.Command {
 	)
 	cmd.Flags().StringVarP(
 		&destinationDescriptionStr, "destination-description", "D", "", "BackupDestinationDescription",
-	)
-	cmd.Flags().StringVarP(
-		&destinationTypeStr, "destination-type", "t", "", "BackupDestinationType (object-storage|remote-host|local)",
 	)
 	cmd.Flags().StringVarP(
 		&destinationPathStr, "destination-path", "p", "", "BackupDestinationPath",
