@@ -124,6 +124,16 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 				</template>
 			}
 		</div>
+		<input
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+			}
+			class="hidden"
+			if inputDto.SelectedBindValuePath != "" {
+				x-model:value={ inputDto.SelectedBindValuePath }
+			}
+		/>
 		if inputDto.Label != "" {
 			<label
 				if inputDto.Id != "" {
