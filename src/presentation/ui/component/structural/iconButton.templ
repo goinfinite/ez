@@ -1,0 +1,68 @@
+package componentStructural
+
+const (
+	IconButtonSizeXs = "xs"
+	IconButtonSizeSm = "sm"
+	IconButtonSizeMd = "md"
+	IconButtonSizeLg = "lg"
+	IconButtonSizeXl = "xl"
+)
+
+type IconButtonDto struct {
+	Label                string
+	Icon                 string
+	BackgroundColor      string
+	HoverBackgroundColor string
+	TextColor            string
+	HoverTextColor       string
+	Size                 string
+	OnClick              string
+	IsSubmit             bool
+}
+
+templ IconButton(inputDto IconButtonDto) {
+	{{ backgroundColor := "bg-infinite-500 hover:bg-infinite-300" }}
+	{{ textColor := "text-neutral-50" }}
+	{{ backgroundSize := "p-2 text-base gap-1" }}
+	switch inputDto.Size {
+		case IconButtonSizeXs:
+			{{ backgroundSize = "p-1 text-sm gap-1" }}
+		case IconButtonSizeSm:
+			{{ backgroundSize = "p-1.5 text-base gap-1.5" }}
+		case IconButtonSizeMd:
+			{{ backgroundSize = "p-2 text-lg gap-2" }}
+		case IconButtonSizeLg:
+			{{ backgroundSize = "p-2.5 text-xl gap-2.5" }}
+		case IconButtonSizeXl:
+			{{ backgroundSize = "p-3 text-2xl gap-3" }}
+	}
+	{{ iconSize := "text-xl" }}
+	switch inputDto.Size {
+		case IconButtonSizeXs:
+			{{ iconSize = "text-xs" }}
+		case IconButtonSizeSm:
+			{{ iconSize = "text-sm" }}
+		case IconButtonSizeMd:
+			{{ iconSize = "text-base" }}
+		case IconButtonSizeLg:
+			{{ iconSize = "text-lg" }}
+		case IconButtonSizeXl:
+			{{ iconSize = "text-xl" }}
+	}
+	<button
+		if inputDto.IsSubmit {
+			type="submit"
+		}
+		if inputDto.OnClick != "" {
+			@click={ inputDto.OnClick }
+		}
+		class={ backgroundSize + " " + backgroundColor + " " + textColor + " rounded-md border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
+	>
+		if inputDto.Icon != "" {
+			<i class={ "ph-duotone " + inputDto.Icon + " " + iconSize }></i>
+		}
+		if inputDto.Label != "" {
+			{ inputDto.Label }
+		}
+	</button>
+}
