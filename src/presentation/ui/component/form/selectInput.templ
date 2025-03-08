@@ -171,8 +171,10 @@ templ SelectInputWithLabelValuePair(inputDto SelectInputWithLabelValuePairDto) {
 				{{ selectInputSize = "px-4 text-xl" }}
 		}
 		<select
-			id={ inputDto.Id }
-			name={ inputDto.Id }
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+			}
 			if inputDto.SelectedBindValuePath != "" {
 				x-model:value={ inputDto.SelectedBindValuePath }
 			}
@@ -193,7 +195,9 @@ templ SelectInputWithLabelValuePair(inputDto SelectInputWithLabelValuePairDto) {
 		</select>
 		if inputDto.Label != "" {
 			<label
-				for={ inputDto.Id }
+				if inputDto.Id != "" {
+					for={ inputDto.Id }
+				}
 				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 			>
 				{ inputDto.Label }
