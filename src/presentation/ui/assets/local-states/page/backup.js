@@ -2,8 +2,7 @@ document.addEventListener("alpine:init", () => {
   backupApiBaseEndpoint = "/api/v1/backup";
 
   Alpine.data("backupIndex", () => ({
-    // Primary States
-    backupFeatureTabSelected: "destinations",
+    backupFeatureTabSelected: "tasks",
   }));
 
   Alpine.data("backupTasks", () => ({
