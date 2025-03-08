@@ -516,9 +516,11 @@ templ OverviewIndex(
 		</div>
 		<div id="containers" class="card w-full" x-data="containers">
 			<div class="-mt-15 float-right mb-5 w-fit">
-				@componentForm.SubmitButton(
-					"Create Container", "ph-plus-square", "openCreateContainerModal()", false,
-				)
+				@componentStructural.IconButton(componentStructural.IconButtonDto{
+					Label:   "Create Container",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateContainerModal()",
+				})
 			</div>
 			@ContainersTable(containersResponseDto, containerIdSummariesMap)
 			@CreateContainerModal(createContainerDto)
@@ -703,7 +705,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		hx-post="/api/v1/container/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		@submit="closeCreateContainerModal(); $store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeCreateContainerModal(); $store.main.refreshScheduledTasksPopover()"
 		enctype="multipart/form-data"
 		class="space-y-4"
 	>
@@ -861,7 +863,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				},
 			)
 		}
-		@componentForm.SubmitButton("Create", "ph-check-fat", "", false)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Create",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -927,6 +932,7 @@ templ UpdateContainerForm(
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="space-y-4"
+		x-on:submit="closeUpdateContainerModal()"
 	>
 		<input type="hidden" name="containerId" x-bind:value="container.id"/>
 		<input type="hidden" name="accountId" x-bind:value="container.accountId"/>
@@ -934,7 +940,10 @@ templ UpdateContainerForm(
 			"profileId", "Profile", "container.profileId",
 			containerProfileSearchableItems,
 		)
-		@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateContainerModal()", false)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Update",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 

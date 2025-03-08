@@ -24,6 +24,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="flex flex-col gap-4"
+		x-on:submit="closeCreateJobModal()"
 	>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/2">
@@ -159,9 +160,10 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				</div>
 			</div>
 		}
-		@componentForm.SubmitButton(
-			"Create Backup Job", "ph-check-fat", "closeCreateJobModal()", false,
-		)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Create Backup Job",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -182,6 +184,7 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="flex flex-col gap-5"
+		x-on:submit="closeUpdateJobModal()"
 	>
 		<input type="hidden" name="jobId" x-bind:value="jobEntity.jobId"/>
 		<input type="hidden" name="accountId" x-bind:value="jobEntity.accountId"/>
@@ -313,9 +316,10 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 				</div>
 			</div>
 		}
-		@componentForm.SubmitButton(
-			"Update Backup Job", "ph-check-fat", "closeUpdateJobModal()", false,
-		)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Update Job",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -621,9 +625,11 @@ templ BackupJobs(
 				)
 			</div>
 			<div>
-				@componentForm.SubmitButton(
-					"Create Job", "ph-plus-square", "openCreateJobModal()", false,
-				)
+				@componentStructural.IconButton(componentStructural.IconButtonDto{
+					Label:   "Create Job",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateJobModal()",
+				})
 			</div>
 		</div>
 		@BackupJobsTable(readJobsRequest, readJobsResponse)

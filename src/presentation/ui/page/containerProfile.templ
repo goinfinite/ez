@@ -152,9 +152,11 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 					"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
 					"$store.main.textualViewSelector",
 				)
-				@componentForm.SubmitButton(
-					"Create Container Profile", "ph-plus-square", "openCreateModal()", false,
-				)
+				@componentStructural.IconButton(componentStructural.IconButtonDto{
+					Label:   "Create Container Profile",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateModal()",
+				})
 			</div>
 		</div>
 		<div id="profiles-tables" class="card w-full">
@@ -423,9 +425,11 @@ templ ContainerProfileForm(action string) {
 	<form
 		if action == "create" {
 			hx-post="/api/v1/container/profile/"
+			x-on:submit="closeCreateModal()"
 		}
 		if action == "update" {
 			hx-put="/api/v1/container/profile/"
+			x-on:submit="closeUpdateModal()"
 		}
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
@@ -547,12 +551,14 @@ templ ContainerProfileForm(action string) {
 				</div>
 			</div>
 		}
-		switch action {
-			case "create":
-				@componentForm.SubmitButton("Create", "ph-check-fat", "closeCreateModal()", false)
-			case "update":
-				@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+		{{ buttonLabel := "Create" }}
+		if action == "update" {
+			{{ buttonLabel = "Update" }}
 		}
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: buttonLabel,
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 

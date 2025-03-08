@@ -22,7 +22,7 @@ templ CreateBackupTaskArchiveForm() {
 		hx-post="/api/v1/backup/task/archive/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeCreateTaskArchiveModal(); $store.main.refreshScheduledTasksPopover()"
 		class="flex flex-col space-y-4"
 	>
 		<input type="hidden" name="taskId" x-bind:value="createTaskArchive.taskId"/>
@@ -83,9 +83,10 @@ templ CreateBackupTaskArchiveForm() {
 				IsRequired:    false,
 			})
 		}
-		@componentForm.SubmitButton(
-			"Create Task Archive", "ph-check-fat", "closeCreateTaskArchiveModal()", false,
-		)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Create Task Archive",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -110,7 +111,7 @@ templ RestoreBackupTaskForm() {
 		hx-post="/api/v1/backup/task/restore/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeRestoreTaskModal(); $store.main.refreshScheduledTasksPopover()"
 		class="flex flex-col space-y-4"
 	>
 		<input type="hidden" name="taskId" x-bind:value="restoreTask.taskId"/>
@@ -183,9 +184,10 @@ templ RestoreBackupTaskForm() {
 				IsRequired:    false,
 			})
 		}
-		@componentForm.SubmitButton(
-			"Restore Task", "ph-check-fat", "closeRestoreTaskModal()", false,
-		)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Restore Task",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -453,7 +455,7 @@ templ RestoreBackupTaskArchiveForm() {
 		hx-post="/api/v1/backup/task/restore/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeRestoreTaskArchiveModal(); $store.main.refreshScheduledTasksPopover()"
 		class="flex flex-col space-y-4"
 	>
 		<input type="hidden" name="archiveId" x-bind:value="restoreTaskArchive.archiveId"/>
@@ -476,9 +478,10 @@ templ RestoreBackupTaskArchiveForm() {
 				IsRequired:    false,
 			})
 		}
-		@componentForm.SubmitButton(
-			"Restore Task Archive", "ph-check-fat", "closeRestoreTaskArchiveModal()", false,
-		)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Restore Task Archive",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 

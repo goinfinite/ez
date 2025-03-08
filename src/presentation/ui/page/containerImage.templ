@@ -176,12 +176,16 @@ templ ContainerImageIndex(
 					)
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
-					@componentForm.SubmitButton(
-						"Import Container Image", "ph-upload", "openImportImageModal()", false,
-					)
-					@componentForm.SubmitButton(
-						"Take Container Snapshot", "ph-camera", "openTakeSnapshotModal()", false,
-					)
+					@componentStructural.IconButton(componentStructural.IconButtonDto{
+						Label:   "Import Container Image",
+						Icon:    "ph-upload",
+						OnClick: "openImportImageModal()",
+					})
+					@componentStructural.IconButton(componentStructural.IconButtonDto{
+						Label:   "Take Container Snapshot",
+						Icon:    "ph-camera",
+						OnClick: "openTakeSnapshotModal()",
+					})
 				</div>
 			</div>
 			@ContainerImagesTable(imagesEntities, accountIdEntityMap)
@@ -366,6 +370,7 @@ templ ImportContainerImageForm(
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		enctype="multipart/form-data"
+		x-on:submit="closeImportImageModal()"
 	>
 		<div class="flex flex-col space-y-6">
 			@componentForm.SelectInputWithLabelValuePair(
@@ -378,7 +383,10 @@ templ ImportContainerImageForm(
 			@componentForm.Dropzone(
 				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br", true,
 			)
-			@componentForm.SubmitButton("Import", "ph-check-fat", "closeImportImageModal()", false)
+			@componentStructural.IconButton(componentStructural.IconButtonDto{
+				Label: "Import",
+				Icon:  "ph-check-fat",
+			})
 		</div>
 	</form>
 }
@@ -430,7 +438,7 @@ templ TakeContainerSnapshotForm(
 		hx-post="/api/v1/container/image/snapshot/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeTakeSnapshotModal(); $store.main.refreshScheduledTasksPopover()"
 	>
 		<div class="flex flex-col space-y-6">
 			<div>
@@ -461,9 +469,10 @@ templ TakeContainerSnapshotForm(
 					)
 				}
 			</div>
-			@componentForm.SubmitButton(
-				"Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false,
-			)
+			@componentStructural.IconButton(componentStructural.IconButtonDto{
+				Label: "Take Snapshot",
+				Icon:  "ph-check-fat",
+			})
 		</div>
 	</form>
 	<div class="mt-2">

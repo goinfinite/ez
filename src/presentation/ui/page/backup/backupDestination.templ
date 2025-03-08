@@ -324,7 +324,10 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 			</template>
 		}
-		@componentForm.SubmitButton("Create Backup Destination", "ph-check-fat", "", false)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Create Destination",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -345,6 +348,7 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="flex flex-col gap-5"
+		x-on:submit="closeUpdateDestinationModal()"
 	>
 		<input type="hidden" name="destinationId" x-bind:value="destinationEntity.destinationId"/>
 		<input type="hidden" name="accountId" x-bind:value="destinationEntity.accountId"/>
@@ -622,9 +626,10 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 			</template>
 		}
-		@componentForm.SubmitButton(
-			"Update Backup Destination", "ph-check-fat", "closeUpdateDestinationModal()", false,
-		)
+		@componentStructural.IconButton(componentStructural.IconButtonDto{
+			Label: "Update Destination",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -1005,9 +1010,11 @@ templ BackupDestinations(
 				)
 			</div>
 			<div>
-				@componentForm.SubmitButton(
-					"Create Destination", "ph-plus-square", "openCreateDestinationModal()", false,
-				)
+				@componentStructural.IconButton(componentStructural.IconButtonDto{
+					Label:   "Create Destination",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateDestinationModal()",
+				})
 			</div>
 		</div>
 		@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
