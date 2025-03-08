@@ -33,6 +33,7 @@ templ ReadRequestSettingsBar(
 					>
 						<div class="relative w-full">
 							<select
+								:id={ "'" + entityName + "FilterKey-' + selectedFilterKey" }
 								x-model="selectedFilterKey"
 								x-init={ "$watch('selectedFilterKey', (newFilterKey, oldFilterKey) => { if (newFilterKey !== oldFilterKey) { filters[oldFilterKey] = '';filters[newFilterKey] = ' '} })" }
 								placeholder="filter"
@@ -48,7 +49,7 @@ templ ReadRequestSettingsBar(
 								</template>
 							</select>
 							<label
-								:for="selectedFilterKey"
+								:for={ "'" + entityName + "FilterKey-' + selectedFilterKey" }
 								class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 							>
 								filter
@@ -57,6 +58,7 @@ templ ReadRequestSettingsBar(
 						</div>
 						<div class="flex w-full flex-row items-center gap-1.5">
 							<input
+								:id={ "'" + entityName + "FilterValue-' + selectedFilterKey" }
 								type="text"
 								x-model:value={ "filters[selectedFilterKey]" }
 								class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-7.5 min-w-38 peer relative w-full rounded-md border px-1.5 text-[13px] text-neutral-100 placeholder-transparent outline-none transition-all"
