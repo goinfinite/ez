@@ -28,7 +28,26 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				DestinationName
 			</div>
 			<div class="w-1/2">
-				DestinationType
+				@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
+					Label: "Destination Type",
+					Options: []componentForm.RadioInputDto{
+						{
+							Label:         "Local",
+							BindValue:     valueObject.BackupDestinationTypeLocal.String(),
+							BindModelPath: "createDestination.destinationType",
+						},
+						{
+							Label:         "Remote Host",
+							BindValue:     valueObject.BackupDestinationTypeRemoteHost.String(),
+							BindModelPath: "createDestination.destinationType",
+						},
+						{
+							Label:         "Object Storage",
+							BindValue:     valueObject.BackupDestinationTypeObjectStorage.String(),
+							BindModelPath: "createDestination.destinationType",
+						},
+					},
+				})
 			</div>
 		</div>
 		<div class="-mb-2">

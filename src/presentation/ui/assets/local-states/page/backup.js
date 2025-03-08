@@ -254,10 +254,11 @@ document.addEventListener("alpine:init", () => {
     // Primary State
     destinationEntity: {},
     createDestination: {},
-
     resetPrimaryState() {
       this.destinationEntity = {};
-      this.createJob = {};
+      this.createDestination = {
+        destinationType: "local",
+      };
     },
     updateDestinationEntity(destinationId) {
       this.destinationEntity = JSON.parse(

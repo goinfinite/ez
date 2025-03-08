@@ -202,24 +202,24 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
-			<div class="border-ez-200 border-1 bg-ez-300 flex w-1/3 flex-col rounded-md py-1 pl-1">
-				<p class="from-ez-300 via-ez-300 -mt-3.5 w-fit cursor-text bg-gradient-to-t via-50% to-transparent to-50% px-1.5 text-[12px] font-bold text-neutral-50 text-opacity-80">
-					Job Status
-				</p>
-				<div class="flex flex-row gap-2">
-					@componentForm.RadioInput(componentForm.RadioInputDto{
-						Label:         "enabled",
-						Size:          componentForm.RadioInputSizeSm,
-						BindValue:     "true",
-						BindModelPath: "jobEntity.jobStatus",
-					})
-					@componentForm.RadioInput(componentForm.RadioInputDto{
-						Label:         "disabled",
-						Size:          componentForm.RadioInputSizeSm,
-						BindValue:     "false",
-						BindModelPath: "jobEntity.jobStatus",
-					})
-				</div>
+			<div class="w-1/3">
+				@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
+					Label: "Job Status",
+					Options: []componentForm.RadioInputDto{
+						{
+							Label:         "enabled",
+							Size:          componentForm.RadioInputSizeSm,
+							BindValue:     "true",
+							BindModelPath: "jobEntity.jobStatus",
+						},
+						{
+							Label:         "disabled",
+							Size:          componentForm.RadioInputSizeSm,
+							BindValue:     "false",
+							BindModelPath: "jobEntity.jobStatus",
+						},
+					},
+				})
 			</div>
 			<div class="w-1/3">
 				@componentForm.InputField(componentForm.InputFieldDto{
