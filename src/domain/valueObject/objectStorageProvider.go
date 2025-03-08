@@ -10,6 +10,7 @@ import (
 type ObjectStorageProvider string
 
 const (
+	ObjectStorageProviderCustom       ObjectStorageProvider = "custom"
 	ObjectStorageProviderAkamai       ObjectStorageProvider = "akamai"
 	ObjectStorageProviderAws          ObjectStorageProvider = "aws"
 	ObjectStorageProviderAzure        ObjectStorageProvider = "azure"
@@ -20,8 +21,21 @@ const (
 	ObjectStorageProviderLinode       ObjectStorageProvider = "linode"
 	ObjectStorageProviderMagalu       ObjectStorageProvider = "magalu"
 	ObjectStorageProviderWasabi       ObjectStorageProvider = "wasabi"
-	ObjectStorageProviderCustom       ObjectStorageProvider = "custom"
 )
+
+var ObjectStorageProviderStrList = []string{
+	ObjectStorageProviderCustom.String(),
+	ObjectStorageProviderAkamai.String(),
+	ObjectStorageProviderAws.String(),
+	ObjectStorageProviderAzure.String(),
+	ObjectStorageProviderBackblaze.String(),
+	ObjectStorageProviderCloudFlare.String(),
+	ObjectStorageProviderDigitalOcean.String(),
+	ObjectStorageProviderGoogleCloud.String(),
+	ObjectStorageProviderLinode.String(),
+	ObjectStorageProviderMagalu.String(),
+	ObjectStorageProviderWasabi.String(),
+}
 
 func NewObjectStorageProvider(value interface{}) (
 	provider ObjectStorageProvider, err error,
