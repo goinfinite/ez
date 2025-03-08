@@ -56,7 +56,7 @@ templ IconButton(inputDto IconButtonDto) {
 		if inputDto.OnClick != "" {
 			@click={ inputDto.OnClick }
 		}
-		class={ backgroundSize + " " + backgroundColor + " " + textColor + " rounded-md border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
+		class={ backgroundSize + " " + backgroundColor + " " + textColor + " justify-center w-full rounded-md border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
 	>
 		if inputDto.Icon != "" {
 			<i class={ "ph-duotone " + inputDto.Icon + " " + iconSize }></i>
