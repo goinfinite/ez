@@ -25,7 +25,12 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 	>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/2">
-				DestinationName
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "text",
+					Id:            "destinationName",
+					Label:         "Name",
+					BindValuePath: "createDestination.destinationName",
+				})
 			</div>
 			<div class="w-1/2">
 				@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
@@ -55,13 +60,28 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">
-				DestinationPath
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "text",
+					Id:            "destinationPath",
+					Label:         "Destination Path",
+					BindValuePath: "createDestination.destinationPath",
+				})
 			</div>
 			<div class="w-1/3">
-				MinLocalStorageFreePercent
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "minLocalStorageFreePercent",
+					Label:         "Min Free Local Storage (%)",
+					BindValuePath: "createDestination.minLocalStorageFreePercent",
+				})
 			</div>
 			<div class="w-1/3">
-				MaxDestinationStorageUsagePercent
+				@componentForm.InputField(componentForm.InputFieldDto{
+					InputType:     "number",
+					Id:            "maxDestinationStorageUsagePercent",
+					Label:         "Max Dest. Storage Usage (%)",
+					BindValuePath: "createDestination.maxDestinationStorageUsagePercent",
+				})
 			</div>
 		</div>
 		{{ isRemoteHostDestination := `createDestination.destinationType == "` + valueObject.BackupDestinationTypeRemoteHost.String() + `"` }}
@@ -70,56 +90,133 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		<template x-if={ isRemoteHostDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					RemoteHostType
+					@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
+						Label: "Remote Host Type",
+						Options: []componentForm.RadioInputDto{
+							{
+								Label:         "SFTP (recommended)",
+								BindValue:     valueObject.BackupDestinationRemoteHostTypeSftp.String(),
+								BindModelPath: "createDestination.remoteHostType",
+							},
+							{
+								Label:         "FTP (insecure)",
+								BindValue:     valueObject.BackupDestinationRemoteHostTypeFtp.String(),
+								BindModelPath: "createDestination.remoteHostType",
+							},
+						},
+					})
 				</div>
 				<div class="w-1/2">
-					RemoteHostname
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "remoteHostname",
+						Label:         "Server Hostname",
+						BindValuePath: "createDestination.remoteHostname",
+						IsRequired:    true,
+					})
 				</div>
 			</div>
+		</template>
+		<template x-if={ isRemoteHostDestination }>
 			<div
 				class="flex w-full flex-row items-center gap-6"
 			>
 				<div class="w-1/2">
-					RemoteHostUsername
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "remoteHostUsername",
+						Label:         "Username",
+						BindValuePath: "createDestination.remoteHostUsername",
+						IsRequired:    true,
+					})
 				</div>
 				<div class="w-1/2">
-					RemoteHostPassword
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "password",
+						Id:            "remoteHostPassword",
+						Label:         "Password",
+						BindValuePath: "createDestination.remoteHostPassword",
+					})
 				</div>
 			</div>
+		</template>
+		<template x-if={ isRemoteHostDestination }>
 			<div
 				class="flex w-full flex-row items-center gap-6"
 			>
 				<div class="w-1/2">
-					RemoteHostNetworkPort
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "number",
+						Id:            "remoteHostNetworkPort",
+						Label:         "Server Port",
+						BindValuePath: "createDestination.remoteHostNetworkPort",
+					})
 				</div>
 				<div class="w-1/2">
-					RemoteHostPrivateKeyFilePath
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "remoteHostPrivateKeyFilePath",
+						Label:         "Private Key File Path",
+						BindValuePath: "createDestination.remoteHostPrivateKeyFilePath",
+					})
 				</div>
 			</div>
 		</template>
 		<template x-if={ isObjectStorageDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					ObjectStorageProvider
+					@componentForm.SelectInput(componentForm.SelectInputDto{
+						Id:            "objectStorageProvider",
+						Label:         "Object Storage Provider",
+						BindValuePath: "createDestination.objectStorageProvider",
+						Options:       valueObject.ObjectStorageProviderStrList,
+					})
 				</div>
 				<div class="w-1/2">
-					ObjectStorageProviderRegion
+					<template x-if="createDestination.objectStorageProvider == 'custom'">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "text",
+							Id:            "objectStorageEndpointUrl",
+							Label:         "Endpoint Url",
+							BindValuePath: "createDestination.objectStorageEndpointUrl",
+						})
+					</template>
+					<template x-if="createDestination.objectStorageProvider != 'custom'">
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "text",
+							Id:            "objectStorageProviderRegion",
+							Label:         "Region",
+							BindValuePath: "createDestination.objectStorageProviderRegion",
+						})
+					</template>
 				</div>
 			</div>
+		</template>
+		<template x-if={ isObjectStorageDestination }>
+			@componentForm.InputField(componentForm.InputFieldDto{
+				InputType:     "text",
+				Id:            "objectStorageBucketName",
+				Label:         "Bucket Name",
+				BindValuePath: "createDestination.objectStorageBucketName",
+			})
+		</template>
+		<template x-if={ isObjectStorageDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					ObjectStorageProviderAccessKeyId
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "text",
+						Id:            "objectStorageProviderAccessKeyId",
+						Label:         "Access Key Id",
+						BindValuePath: "createDestination.objectStorageProviderAccessKeyId",
+					})
 				</div>
 				<div class="w-1/2">
-					ObjectStorageProviderSecretAccessKey
-				</div>
-			</div>
-			<div class="flex w-full flex-row items-center gap-6">
-				<div class="w-1/2">
-					ObjectStorageEndpointUrl
-				</div>
-				<div class="w-1/2">
-					ObjectStorageBucketName
+					@componentForm.InputField(componentForm.InputFieldDto{
+						InputType:     "password",
+						Id:            "objectStorageProviderSecretAccessKey",
+						Label:         "Secret Access Key",
+						BindValuePath: "createDestination.objectStorageProviderSecretAccessKey",
+					})
 				</div>
 			</div>
 		</template>
@@ -134,28 +231,91 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			<template x-if={ isRemoteDestination }>
 				<div class="flex w-full flex-row items-center gap-6">
 					<div class="w-1/2">
-						DownloadBytesSecRateLimit
+						@componentForm.SelectInputWithLabelValuePair(
+							componentForm.SelectInputWithLabelValuePairDto{
+								Id:                    "downloadBytesSecRateLimit",
+								Label:                 "Download Rate Limit (bytes/sec)",
+								SelectedBindValuePath: "createDestination.downloadBytesSecRateLimit",
+								Options: []componentForm.SelectLabelValuePair{
+									{Label: "Unlimited", Value: ""},
+									{Label: "1 MiB/s", Value: "1048576"},
+									{Label: "5 MiB/s", Value: "5242880"},
+									{Label: "10 MiB/s", Value: "10485760"},
+									{Label: "50 MiB/s", Value: "52428800"},
+									{Label: "100 MiB/s", Value: "104857600"},
+									{Label: "200 MiB/s", Value: "209715200"},
+									{Label: "500 MiB/s", Value: "524288000"},
+									{Label: "1 GiB/s", Value: "1048576000"},
+								},
+							})
 					</div>
 					<div class="w-1/2">
-						UploadBytesSecRateLimit
+						@componentForm.SelectInputWithLabelValuePair(
+							componentForm.SelectInputWithLabelValuePairDto{
+								Id:                    "uploadBytesSecRateLimit",
+								Label:                 "Upload Rate Limit (bytes/sec)",
+								SelectedBindValuePath: "createDestination.uploadBytesSecRateLimit",
+								Options: []componentForm.SelectLabelValuePair{
+									{Label: "Unlimited", Value: ""},
+									{Label: "1 MiB/s", Value: "1048576"},
+									{Label: "5 MiB/s", Value: "5242880"},
+									{Label: "10 MiB/s", Value: "10485760"},
+									{Label: "50 MiB/s", Value: "52428800"},
+									{Label: "100 MiB/s", Value: "104857600"},
+									{Label: "200 MiB/s", Value: "209715200"},
+									{Label: "500 MiB/s", Value: "524288000"},
+									{Label: "1 GiB/s", Value: "1048576000"},
+								},
+							})
 					</div>
 				</div>
+			</template>
+			<template x-if={ isRemoteDestination }>
 				<div class="flex w-full flex-row items-center gap-6">
 					<div class="w-1/2">
-						MaxConcurrentConnections
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "number",
+							Id:            "maxConcurrentConnections",
+							Label:         "Max Concurrent Connections",
+							BindValuePath: "createDestination.maxConcurrentConnections",
+						})
 					</div>
 					<div class="w-1/2">
-						SkipCertificateVerification
+						@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
+							Label: "Skip Certificate Verification",
+							Options: []componentForm.RadioInputDto{
+								{
+									Label:         "Yes",
+									BindValue:     "true",
+									BindModelPath: "createDestination.skipCertificateVerification",
+								},
+								{
+									Label:         "No",
+									BindValue:     "false",
+									BindModelPath: "createDestination.skipCertificateVerification",
+								},
+							},
+						})
 					</div>
 				</div>
 			</template>
 			<template x-if={ isRemoteHostDestination }>
 				<div class="flex w-full flex-row items-center gap-6">
 					<div class="w-1/2">
-						RemoteHostConnectionTimeoutSecs
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "number",
+							Id:            "remoteHostConnectionTimeoutSecs",
+							Label:         "Connection Timeout (secs)",
+							BindValuePath: "createDestination.remoteHostConnectionTimeoutSecs",
+						})
 					</div>
 					<div class="w-1/2">
-						RemoteHostConnectionRetrySecs
+						@componentForm.InputField(componentForm.InputFieldDto{
+							InputType:     "number",
+							Id:            "remoteHostConnectionRetrySecs",
+							Label:         "Connection Retry Time (secs)",
+							BindValuePath: "createDestination.remoteHostConnectionRetrySecs",
+						})
 					</div>
 				</div>
 			</template>

@@ -258,6 +258,8 @@ document.addEventListener("alpine:init", () => {
       this.destinationEntity = {};
       this.createDestination = {
         destinationType: "local",
+        destinationPath: "/",
+        objectStorageProvider: "custom",
       };
     },
     updateDestinationEntity(destinationId) {
