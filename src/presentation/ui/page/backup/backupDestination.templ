@@ -22,6 +22,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="flex flex-col gap-4"
+		x-on:submit="closeCreateDestinationModal()"
 	>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/2">
@@ -30,11 +31,14 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					Id:            "destinationName",
 					Label:         "Name",
 					BindValuePath: "createDestination.destinationName",
+					IsRequired:    true,
 				})
 			</div>
 			<div class="w-1/2">
 				@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
-					Label: "Destination Type",
+					Id:            "destinationType",
+					Label:         "Destination Type",
+					BindModelPath: "createDestination.destinationType",
 					Options: []componentForm.RadioInputDto{
 						{
 							Label:         "Local",
@@ -320,9 +324,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 			</template>
 		}
-		@componentForm.SubmitButton(
-			"Create Backup Destination", "ph-check-fat", "closeCreateDestinationModal()", false,
-		)
+		@componentForm.SubmitButton("Create Backup Destination", "ph-check-fat", "", false)
 	</form>
 }
 
