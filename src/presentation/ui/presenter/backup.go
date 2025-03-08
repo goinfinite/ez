@@ -237,12 +237,15 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 	}
 
 	destinationsReadRequestDto, destinationsReadResponseDto := presenter.ReadDestinations(c, backupService)
+	createDestinationModalDto := pageBackup.CreateBackupDestinationModalDto{
+		AccountSelectLabelValuePairs: accountSelectPairs,
+	}
 
 	pageContent := pageBackup.BackupIndex(
 		tasksReadRequestDto, tasksReadResponseDto,
 		archivesReadRequestDto, archivesReadResponseDto,
 		jobsReadRequestDto, jobsReadResponseDto, createJobModalDto,
-		destinationsReadRequestDto, destinationsReadResponseDto,
+		destinationsReadRequestDto, destinationsReadResponseDto, createDestinationModalDto,
 	)
 
 	return uiHelper.Render(c, pageContent, http.StatusOK)

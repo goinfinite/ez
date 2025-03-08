@@ -15,6 +15,7 @@ templ BackupIndex(
 	createJobModalDto CreateBackupJobModalDto,
 	readDestinationsRequest dto.ReadBackupDestinationsRequest,
 	readDestinationsResponse BackupDestinationModifiedResponseDto,
+	createDestinationModalDto CreateBackupDestinationModalDto,
 ) {
 	<!-- BackupIndex JavaScript -->
 	<script type="text/javascript" src="/assets/local-states/page/backup.js"></script>
@@ -39,7 +40,9 @@ templ BackupIndex(
 				@BackupJobs(readJobsRequest, readJobsResponse, createJobModalDto)
 			</div>
 			<div x-show="backupFeatureTabSelected === 'destinations'">
-				@BackupDestinations(readDestinationsRequest, readDestinationsResponse)
+				@BackupDestinations(
+					readDestinationsRequest, readDestinationsResponse, createDestinationModalDto,
+				)
 			</div>
 		</div>
 	</div>

@@ -10,6 +10,120 @@ import (
 	"github.com/goinfinite/ez/src/presentation/ui/helper"
 )
 
+type CreateBackupDestinationModalDto struct {
+	AccountSelectLabelValuePairs []componentForm.SelectLabelValuePair
+}
+
+templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
+	<!-- CreateBackupDestinationForm -->
+	<form
+		id="create-backup-destination"
+		hx-post="/api/v1/backup/destination/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		class="flex flex-col gap-4"
+	>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/2"></div>
+			<div class="w-1/2"></div>
+		</div>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/3"></div>
+			<div class="w-1/3"></div>
+			<div class="w-1/3"></div>
+		</div>
+		<div class="-mb-2">
+			@componentForm.TextArea("destinationDescription", "Description", "createDestination.destinationDescription")
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					@componentForm.SelectInputWithLabelValuePair(
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "accountId",
+							Label:                 "Account (Destination Owner)",
+							SelectedBindValuePath: "createDestination.accountId",
+							Options:               createDto.AccountSelectLabelValuePairs,
+						})
+				</div>
+				<div class="w-1/2"></div>
+			</div>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2"></div>
+				<div class="w-1/2"></div>
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Create Backup Destination", "ph-check-fat", "closeCreateDestinationModal()", false,
+		)
+	</form>
+}
+
+templ CreateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
+	<!-- CreateBackupDestinationModal -->
+	@componentStructural.RegularModal(
+		"Create Backup Destination", "isCreateDestinationModalOpen", "closeCreateDestinationModal()", "",
+	) {
+		@CreateBackupDestinationForm(createDto)
+	}
+}
+
+templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
+	<!-- UpdateBackupDestinationForm -->
+	<form
+		id="update-backup-destination"
+		hx-put="/api/v1/backup/destination/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		class="flex flex-col gap-5"
+	>
+		<input type="hidden" name="destinationId" x-bind:value="destinationEntity.destinationId"/>
+		<input type="hidden" name="accountId" x-bind:value="destinationEntity.accountId"/>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/2"></div>
+			<div class="w-1/2"></div>
+		</div>
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/3"></div>
+			<div class="w-1/3"></div>
+		</div>
+		<div class="-mb-2">
+			@componentForm.TextArea("destinationDescription", "Description", "destinationEntity.destinationDescription")
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					@componentForm.SelectInputWithLabelValuePair(
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "accountId",
+							Label:                 "Account (Destination Owner)",
+							SelectedBindValuePath: "destinationEntity.accountId",
+							Options:               createDto.AccountSelectLabelValuePairs,
+						})
+				</div>
+				<div class="w-1/2"></div>
+			</div>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2"></div>
+				<div class="w-1/2"></div>
+			</div>
+		}
+		@componentForm.SubmitButton(
+			"Update Backup Destination", "ph-check-fat", "closeUpdateDestinationModal()", false,
+		)
+	</form>
+}
+
+templ UpdateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
+	<!-- UpdateBackupDestinationModal -->
+	@componentStructural.RegularModal(
+		"Update Backup Destination", "isUpdateDestinationModalOpen",
+		"closeUpdateDestinationModal()", "destinationEntity.DestinationId",
+	) {
+		@UpdateBackupDestinationForm(createDto)
+	}
+}
+
 templ BackupDestinationsTable(
 	readDestinationsRequest dto.ReadBackupDestinationsRequest,
 	readDestinationsResponse BackupDestinationModifiedResponseDto,
@@ -359,6 +473,7 @@ type BackupDestinationModifiedResponseDto struct {
 templ BackupDestinations(
 	readDestinationsRequest dto.ReadBackupDestinationsRequest,
 	readDestinationsResponse BackupDestinationModifiedResponseDto,
+	createDestinationModalDto CreateBackupDestinationModalDto,
 ) {
 	<div x-data="backupDestinations">
 		<div class="mb-4 flex flex-row items-center justify-between">
@@ -376,5 +491,11 @@ templ BackupDestinations(
 			</div>
 		</div>
 		@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
+		@CreateBackupDestinationModal(createDestinationModalDto)
+		@UpdateBackupDestinationModal(createDestinationModalDto)
+		@componentStructural.DeleteModal(
+			"isDeleteDestinationModalOpen", "closeDeleteDestinationModal()", "deleteDestination()",
+			"delete-destination", "", "destinationEntity.destinationId",
+		)
 	</div>
 }
