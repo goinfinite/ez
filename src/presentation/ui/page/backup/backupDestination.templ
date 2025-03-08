@@ -4,6 +4,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/presentation/ui/component/form"
 	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
 	"github.com/goinfinite/ez/src/presentation/ui/helper"
@@ -14,17 +15,18 @@ templ BackupDestinationsTable(
 	readDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
 	<!-- Backup Destinations Table -->
+	{{ destinationsTableId := "backup-destinations-table" }}
 	<div
-		id="backup-destinations-table"
+		id={ destinationsTableId }
 		hx-get="/backup/"
-		hx-trigger="create:backup-destination from:window delay:500ms, update:backup-destination from:window delay:500ms, delete:backup-destination from:window delay:500ms"
-		hx-select="#backup-destinations-table"
-		hx-target="#backup-destinations-table"
+		hx-trigger="submit from:form delay:500ms, delete:backup-destination from:window delay:500ms"
+		hx-select={ "#" + destinationsTableId }
+		hx-target={ "#" + destinationsTableId }
 		hx-swap="outerHTML transition:true"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.ReadRequestSettingsBar(
-				"backupDestinations", "/backup/", "#backup-destinations-table",
+				"backupDestinations", "/backup/", "#"+destinationsTableId,
 				readDestinationsRequest, readDestinationsResponse.Pagination,
 				BackupDestinationUnifiedEntity{},
 			)
@@ -358,12 +360,21 @@ templ BackupDestinations(
 	readDestinationsRequest dto.ReadBackupDestinationsRequest,
 	readDestinationsResponse BackupDestinationModifiedResponseDto,
 ) {
-	<div class="mb-4">
-		@componentStructural.PageSubHeading(
-			"Destinations",
-			"Manage local, remote and object storage destinations to be used on backup jobs.",
-			"ph-barn",
-		)
+	<div x-data="backupDestinations">
+		<div class="mb-4 flex flex-row items-center justify-between">
+			<div class="min-w-2/3">
+				@componentStructural.PageSubHeading(
+					"Destinations",
+					"Manage local, remote and object storage destinations to be used on backup jobs.",
+					"ph-barn",
+				)
+			</div>
+			<div>
+				@componentForm.SubmitButton(
+					"Create Destination", "ph-plus-square", "openCreateDestinationModal()", false,
+				)
+			</div>
+		</div>
+		@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
 	</div>
-	@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
 }
