@@ -241,27 +241,27 @@ templ ContainerImageArchivesTable(
 					</td>
 					<td class="px-3 py-2">{ archiveEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
-						@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-							Id:              "download-archive",
-							Shape:           componentStructural.IconButtonShapeCircular,
-							Icon:            "ph-download",
-							BackgroundColor: "ez-300",
-							HoverColor:      "ez-200",
-							OnClick:         "window.open('" + archiveEntity.DownloadUrl.String() + "')",
-							TooltipText:     "Download Archive",
-							TooltipColor:    "ez-300",
-							TooltipPosition: "bottom",
+						@componentStructural.IconButton(componentStructural.IconButtonDto{
+							Id:                   "download-archive",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-download",
+							BackgroundColor:      "ez-300",
+							HoverBackgroundColor: "ez-200",
+							OnClick:              "window.open('" + archiveEntity.DownloadUrl.String() + "')",
+							TooltipText:          "Download Archive",
+							TooltipColor:         "ez-300",
+							TooltipPosition:      "bottom",
 						})
-						@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-							Id:              "delete-archive",
-							Shape:           componentStructural.IconButtonShapeCircular,
-							Icon:            "ph-trash",
-							BackgroundColor: "red-900",
-							HoverColor:      "red-700",
-							OnClick:         "openDeleteArchiveModal('" + archiveEntity.AccountId.String() + "','" + archiveEntity.ImageId.String() + "')",
-							TooltipText:     "Delete Archive",
-							TooltipColor:    "red-700",
-							TooltipPosition: "bottom",
+						@componentStructural.IconButton(componentStructural.IconButtonDto{
+							Id:                   "delete-archive",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-trash",
+							BackgroundColor:      "red-900",
+							HoverBackgroundColor: "red-700",
+							OnClick:              "openDeleteArchiveModal('" + archiveEntity.AccountId.String() + "','" + archiveEntity.ImageId.String() + "')",
+							TooltipText:          "Delete Archive",
+							TooltipColor:         "red-700",
+							TooltipPosition:      "bottom",
 						})
 					</td>
 				</tr>
@@ -327,27 +327,27 @@ templ ContainerImagesTable(
 					</td>
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
-						@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-							Id:              "archive-image",
-							Shape:           componentStructural.IconButtonShapeCircular,
-							Icon:            "ph-file-zip",
-							BackgroundColor: "ez-300",
-							HoverColor:      "ez-200",
-							OnClick:         "archiveImage('" + imageEntity.AccountId.String() + "','" + imageEntity.Id.String() + "')",
-							TooltipText:     "Archive/Compress Image",
-							TooltipColor:    "ez-300",
-							TooltipPosition: "bottom",
+						@componentStructural.IconButton(componentStructural.IconButtonDto{
+							Id:                   "archive-image",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-file-zip",
+							BackgroundColor:      "ez-300",
+							HoverBackgroundColor: "ez-200",
+							OnClick:              "archiveImage('" + imageEntity.AccountId.String() + "','" + imageEntity.Id.String() + "')",
+							TooltipText:          "Archive/Compress Image",
+							TooltipColor:         "ez-300",
+							TooltipPosition:      "bottom",
 						})
-						@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-							Id:              "delete-image",
-							Shape:           componentStructural.IconButtonShapeCircular,
-							Icon:            "ph-trash",
-							BackgroundColor: "red-900",
-							HoverColor:      "red-700",
-							OnClick:         "openDeleteImageModal('" + imageEntity.AccountId.String() + "','" + imageEntity.Id.String() + "')",
-							TooltipText:     "Delete Image",
-							TooltipColor:    "red-700",
-							TooltipPosition: "bottom",
+						@componentStructural.IconButton(componentStructural.IconButtonDto{
+							Id:                   "delete-image",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-trash",
+							BackgroundColor:      "red-900",
+							HoverBackgroundColor: "red-700",
+							OnClick:              "openDeleteImageModal('" + imageEntity.AccountId.String() + "','" + imageEntity.Id.String() + "')",
+							TooltipText:          "Delete Image",
+							TooltipColor:         "red-700",
+							TooltipPosition:      "bottom",
 						})
 					</td>
 				</tr>

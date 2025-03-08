@@ -122,30 +122,30 @@ templ ReadRequestSettingsBar(
 			if responsePaginationDto.SortDirection != nil {
 				switch *responsePaginationDto.SortDirection {
 					case valueObject.PaginationSortDirectionAsc:
-						@IconButtonWithTooltip(IconButtonWithTooltipDto{
-							Id:              entityName + "SortDirection",
-							Shape:           IconButtonShapeSquare,
-							Size:            "md",
-							Icon:            "ph-sort-ascending",
-							BackgroundColor: "ez-400",
-							HoverColor:      "ez-200",
-							OnClick:         "pagination.sortDirection = 'desc'",
-							TooltipText:     "sort descending",
-							TooltipColor:    "ez-500",
-							TooltipPosition: "top",
+						@IconButton(IconButtonDto{
+							Id:                   entityName + "SortDirection",
+							Shape:                IconButtonShapeSquare,
+							Size:                 "md",
+							Icon:                 "ph-sort-ascending",
+							BackgroundColor:      "ez-400",
+							HoverBackgroundColor: "ez-200",
+							OnClick:              "pagination.sortDirection = 'desc'",
+							TooltipText:          "sort descending",
+							TooltipColor:         "ez-500",
+							TooltipPosition:      "top",
 						})
 					case valueObject.PaginationSortDirectionDesc:
-						@IconButtonWithTooltip(IconButtonWithTooltipDto{
-							Id:              entityName + "SortDirection",
-							Shape:           IconButtonShapeSquare,
-							Size:            "md",
-							Icon:            "ph-sort-descending",
-							BackgroundColor: "ez-400",
-							HoverColor:      "ez-200",
-							OnClick:         "pagination.sortDirection = 'asc'",
-							TooltipText:     "sort ascending",
-							TooltipColor:    "ez-500",
-							TooltipPosition: "top",
+						@IconButton(IconButtonDto{
+							Id:                   entityName + "SortDirection",
+							Shape:                IconButtonShapeSquare,
+							Size:                 "md",
+							Icon:                 "ph-sort-descending",
+							BackgroundColor:      "ez-400",
+							HoverBackgroundColor: "ez-200",
+							OnClick:              "pagination.sortDirection = 'asc'",
+							TooltipText:          "sort ascending",
+							TooltipColor:         "ez-500",
+							TooltipPosition:      "top",
 						})
 				}
 			}

@@ -563,38 +563,38 @@ templ BackupJobsTable(
 						</td>
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "run-job",
-									Shape:           componentStructural.IconButtonShapeCircular,
-									Icon:            "ph-queue",
-									BackgroundColor: "cyan-900",
-									HoverColor:      "cyan-700",
-									OnClick:         "openRunJobModal('" + backupJobEntity.JobId.String() + "')",
-									TooltipText:     "Run Job Now",
-									TooltipColor:    "cyan-700",
-									TooltipPosition: "left",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "run-job",
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-queue",
+									BackgroundColor:      "cyan-900",
+									HoverBackgroundColor: "cyan-700",
+									OnClick:              "openRunJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:          "Run Job Now",
+									TooltipColor:         "cyan-700",
+									TooltipPosition:      "left",
 								})
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "update-job",
-									Shape:           componentStructural.IconButtonShapeCircular,
-									Icon:            "ph-pencil",
-									BackgroundColor: "ez-300",
-									HoverColor:      "ez-200",
-									OnClick:         "openUpdateJobModal('" + backupJobEntity.JobId.String() + "')",
-									TooltipText:     "Update",
-									TooltipColor:    "ez-300",
-									TooltipPosition: "left",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "update-job",
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-pencil",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openUpdateJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:          "Update",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "left",
 								})
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "delete-job",
-									Shape:           componentStructural.IconButtonShapeCircular,
-									Icon:            "ph-trash",
-									BackgroundColor: "red-900",
-									HoverColor:      "red-700",
-									OnClick:         "openDeleteJobModal('" + backupJobEntity.JobId.String() + "')",
-									TooltipText:     "Delete",
-									TooltipColor:    "red-700",
-									TooltipPosition: "left",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "delete-job",
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-900",
+									HoverBackgroundColor: "red-700",
+									OnClick:              "openDeleteJobModal('" + backupJobEntity.JobId.String() + "')",
+									TooltipText:          "Delete",
+									TooltipColor:         "red-700",
+									TooltipPosition:      "left",
 								})
 							</div>
 						</td>

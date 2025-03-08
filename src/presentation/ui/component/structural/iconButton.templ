@@ -1,68 +1,113 @@
 package componentStructural
 
 const (
-	IconButtonSizeXs = "xs"
-	IconButtonSizeSm = "sm"
-	IconButtonSizeMd = "md"
-	IconButtonSizeLg = "lg"
-	IconButtonSizeXl = "xl"
+	IconButtonSizeXs        = "xs"
+	IconButtonSizeSm        = "sm"
+	IconButtonSizeMd        = "md"
+	IconButtonSizeLg        = "lg"
+	IconButtonSizeXl        = "xl"
+	IconButtonShapeCircular = "circular"
+	IconButtonShapeSquare   = "square"
 )
 
 type IconButtonDto struct {
+	Id                   string
 	Label                string
 	Icon                 string
 	BackgroundColor      string
 	HoverBackgroundColor string
 	TextColor            string
 	HoverTextColor       string
+	Shape                string
 	Size                 string
 	OnClick              string
+	TooltipText          string
+	TooltipColor         string
+	TooltipPosition      string
 	IsSubmit             bool
 }
 
 templ IconButton(inputDto IconButtonDto) {
-	{{ backgroundColor := "bg-infinite-500 hover:bg-infinite-300" }}
-	{{ textColor := "text-neutral-50" }}
-	{{ backgroundSize := "p-2 text-base gap-1" }}
-	switch inputDto.Size {
-		case IconButtonSizeXs:
-			{{ backgroundSize = "p-1 text-sm gap-1" }}
-		case IconButtonSizeSm:
-			{{ backgroundSize = "p-1.5 text-base gap-1.5" }}
-		case IconButtonSizeMd:
-			{{ backgroundSize = "p-2 text-lg gap-2" }}
-		case IconButtonSizeLg:
-			{{ backgroundSize = "p-2.5 text-xl gap-2.5" }}
-		case IconButtonSizeXl:
-			{{ backgroundSize = "p-3 text-2xl gap-3" }}
-	}
-	{{ iconSize := "text-xl" }}
-	switch inputDto.Size {
-		case IconButtonSizeXs:
-			{{ iconSize = "text-xs" }}
-		case IconButtonSizeSm:
-			{{ iconSize = "text-sm" }}
-		case IconButtonSizeMd:
-			{{ iconSize = "text-base" }}
-		case IconButtonSizeLg:
-			{{ iconSize = "text-lg" }}
-		case IconButtonSizeXl:
-			{{ iconSize = "text-xl" }}
-	}
-	<button
-		if inputDto.IsSubmit {
-			type="submit"
+	<!-- IconButton -->
+	<div class="group relative">
+		{{ backgroundColor := "bg-infinite-500" }}
+		if inputDto.BackgroundColor != "" {
+			{{ backgroundColor = "bg-" + inputDto.BackgroundColor }}
 		}
-		if inputDto.OnClick != "" {
-			@click={ inputDto.OnClick }
+		{{ backgroundHoverColor := "hover:bg-infinite-300" }}
+		if inputDto.HoverBackgroundColor != "" {
+			{{ backgroundHoverColor = "hover:bg-" + inputDto.HoverBackgroundColor }}
 		}
-		class={ backgroundSize + " " + backgroundColor + " " + textColor + " justify-center w-full rounded-md border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
-	>
-		if inputDto.Icon != "" {
-			<i class={ "ph-duotone " + inputDto.Icon + " " + iconSize }></i>
+		{{ textColor := "text-neutral-50" }}
+		{{ radiusRoundness := "rounded-md" }}
+		if inputDto.Shape == IconButtonShapeCircular {
+			{{ radiusRoundness = "rounded-full" }}
 		}
-		if inputDto.Label != "" {
-			{ inputDto.Label }
+		{{ backgroundSize := "p-2 text-base gap-1" }}
+		switch inputDto.Size {
+			case IconButtonSizeXs:
+				{{ backgroundSize = "p-1 text-sm gap-1" }}
+			case IconButtonSizeSm:
+				{{ backgroundSize = "p-1.5 text-base gap-1.5" }}
+			case IconButtonSizeMd:
+				{{ backgroundSize = "p-2 text-lg gap-2" }}
+			case IconButtonSizeLg:
+				{{ backgroundSize = "p-2.5 text-xl gap-2.5" }}
+			case IconButtonSizeXl:
+				{{ backgroundSize = "p-3 text-2xl gap-3" }}
 		}
-	</button>
+		{{ iconSize := "text-xl" }}
+		switch inputDto.Size {
+			case IconButtonSizeXs:
+				{{ iconSize = "text-xs" }}
+			case IconButtonSizeSm:
+				{{ iconSize = "text-sm" }}
+			case IconButtonSizeMd:
+				{{ iconSize = "text-base" }}
+			case IconButtonSizeLg:
+				{{ iconSize = "text-lg" }}
+			case IconButtonSizeXl:
+				{{ iconSize = "text-xl" }}
+		}
+		<button
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+			}
+			if inputDto.IsSubmit {
+				type="submit"
+			}
+			if inputDto.OnClick != "" {
+				@click={ inputDto.OnClick }
+			}
+			class={ backgroundSize + " " + backgroundColor + " " + backgroundHoverColor + " " + textColor + " " + radiusRoundness + " justify-center w-full border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
+		>
+			if inputDto.Icon != "" {
+				<i class={ "ph-duotone " + inputDto.Icon + " " + iconSize }></i>
+			}
+			if inputDto.Label != "" {
+				{ inputDto.Label }
+			}
+		</button>
+		if inputDto.TooltipText != "" {
+			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + inputDto.TooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
+			switch inputDto.TooltipPosition {
+				case "top":
+					<div class={ tooltipBaseClass + " bottom-full mb-1.5 group-hover:-translate-y-0.5 left-1/2 -translate-x-1/2" }>
+						{ inputDto.TooltipText }
+					</div>
+				case "bottom":
+					<div class={ tooltipBaseClass + " top-full mt-1.5 group-hover:translate-y-0.5 left-1/2 -translate-x-1/2" }>
+						{ inputDto.TooltipText }
+					</div>
+				case "left":
+					<div class={ tooltipBaseClass + " right-full mr-1.5 group-hover:translate-x-0.5 top-1/2 -translate-y-1/2" }>
+						{ inputDto.TooltipText }
+					</div>
+				case "right":
+					<div class={ tooltipBaseClass + " left-full ml-1.5 group-hover:-translate-x-0.5 top-1/2 -translate-y-1/2" }>
+						{ inputDto.TooltipText }
+					</div>
+			}
+		}
+	</div>
 }

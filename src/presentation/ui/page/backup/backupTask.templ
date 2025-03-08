@@ -396,38 +396,38 @@ templ BackupTasksTable(
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
 								if backupTaskEntity.TaskStatus == valueObject.BackupTaskStatusCompleted {
-									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-										Id:              "create-task-archive",
-										Shape:           componentStructural.IconButtonShapeCircular,
-										Icon:            "ph-file-zip",
-										BackgroundColor: "ez-300",
-										HoverColor:      "ez-200",
-										OnClick:         "openCreateTaskArchiveModal('" + backupTaskEntity.TaskId.String() + "')",
-										TooltipText:     "Create Archive",
-										TooltipColor:    "ez-300",
-										TooltipPosition: "left",
+									@componentStructural.IconButton(componentStructural.IconButtonDto{
+										Id:                   "create-task-archive",
+										Shape:                componentStructural.IconButtonShapeCircular,
+										Icon:                 "ph-file-zip",
+										BackgroundColor:      "ez-300",
+										HoverBackgroundColor: "ez-200",
+										OnClick:              "openCreateTaskArchiveModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:          "Create Archive",
+										TooltipColor:         "ez-300",
+										TooltipPosition:      "left",
 									})
-									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-										Id:              "restore-task",
-										Shape:           componentStructural.IconButtonShapeCircular,
-										Icon:            "ph-clock-clockwise",
-										BackgroundColor: "ez-300",
-										HoverColor:      "ez-200",
-										OnClick:         "openRestoreTaskModal('" + backupTaskEntity.TaskId.String() + "')",
-										TooltipText:     "Restore",
-										TooltipColor:    "ez-300",
-										TooltipPosition: "left",
+									@componentStructural.IconButton(componentStructural.IconButtonDto{
+										Id:                   "restore-task",
+										Shape:                componentStructural.IconButtonShapeCircular,
+										Icon:                 "ph-clock-clockwise",
+										BackgroundColor:      "ez-300",
+										HoverBackgroundColor: "ez-200",
+										OnClick:              "openRestoreTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:          "Restore",
+										TooltipColor:         "ez-300",
+										TooltipPosition:      "left",
 									})
-									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-										Id:              "delete-task",
-										Shape:           componentStructural.IconButtonShapeCircular,
-										Icon:            "ph-trash",
-										BackgroundColor: "red-900",
-										HoverColor:      "red-700",
-										OnClick:         "openDeleteTaskModal('" + backupTaskEntity.TaskId.String() + "')",
-										TooltipText:     "Delete",
-										TooltipColor:    "red-700",
-										TooltipPosition: "left",
+									@componentStructural.IconButton(componentStructural.IconButtonDto{
+										Id:                   "delete-task",
+										Shape:                componentStructural.IconButtonShapeCircular,
+										Icon:                 "ph-trash",
+										BackgroundColor:      "red-900",
+										HoverBackgroundColor: "red-700",
+										OnClick:              "openDeleteTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:          "Delete",
+										TooltipColor:         "red-700",
+										TooltipPosition:      "left",
 									})
 								}
 							</div>
@@ -554,38 +554,38 @@ templ BackupTaskArchivesTable(
 						</td>
 						<td class="w-[15%] p-2">
 							<div class="flex flex-wrap items-center justify-center gap-1">
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "download-task-archive",
-									Shape:           componentStructural.IconButtonShapeCircular,
-									Icon:            "ph-download",
-									BackgroundColor: "ez-300",
-									HoverColor:      "ez-200",
-									OnClick:         "window.open('" + backupTaskArchiveEntity.DownloadUrl.String() + "')",
-									TooltipText:     "Download",
-									TooltipColor:    "ez-300",
-									TooltipPosition: "left",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "download-task-archive",
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-download",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "window.open('" + backupTaskArchiveEntity.DownloadUrl.String() + "')",
+									TooltipText:          "Download",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "left",
 								})
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "restore-task-archive",
-									Shape:           componentStructural.IconButtonShapeCircular,
-									Icon:            "ph-clock-clockwise",
-									BackgroundColor: "ez-300",
-									HoverColor:      "ez-200",
-									OnClick:         "openRestoreTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
-									TooltipText:     "Restore",
-									TooltipColor:    "ez-300",
-									TooltipPosition: "top",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "restore-task-archive",
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-clock-clockwise",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openRestoreTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
+									TooltipText:          "Restore",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "top",
 								})
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "delete-task-archive",
-									Shape:           componentStructural.IconButtonShapeCircular,
-									Icon:            "ph-trash",
-									BackgroundColor: "red-900",
-									HoverColor:      "red-700",
-									OnClick:         "openDeleteTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
-									TooltipText:     "Delete",
-									TooltipColor:    "red-700",
-									TooltipPosition: "right",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "delete-task-archive",
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-900",
+									HoverBackgroundColor: "red-700",
+									OnClick:              "openDeleteTaskArchiveModal('" + backupTaskArchiveEntity.ArchiveId.String() + "')",
+									TooltipText:          "Delete",
+									TooltipColor:         "red-700",
+									TooltipPosition:      "right",
 								})
 							</div>
 						</td>

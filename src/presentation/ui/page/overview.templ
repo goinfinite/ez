@@ -621,63 +621,63 @@ templ ContainersTable(
 						</td>
 						<td class="w-[10%] px-3 py-2">
 							<div class="flex flex-wrap items-center gap-1">
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "restart-container",
-									Shape:           componentStructural.IconButtonShapeSquare,
-									Icon:            "ph-arrows-clockwise",
-									BackgroundColor: "ez-300",
-									HoverColor:      "ez-200",
-									OnClick:         "openRestartContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
-									TooltipText:     "Restart",
-									TooltipColor:    "ez-300",
-									TooltipPosition: "top",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "restart-container",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-arrows-clockwise",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openRestartContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
+									TooltipText:          "Restart",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "top",
 								})
 								if containerEntity.Status {
-									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-										Id:              "toggle-container-status",
-										Shape:           componentStructural.IconButtonShapeSquare,
-										Icon:            "ph-lightning-slash",
-										BackgroundColor: "yellow-900",
-										HoverColor:      "yellow-700",
-										OnClick:         "openShutdownContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
-										TooltipText:     "Power Off",
-										TooltipColor:    "yellow-700",
-										TooltipPosition: "top",
+									@componentStructural.IconButton(componentStructural.IconButtonDto{
+										Id:                   "toggle-container-status",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-lightning-slash",
+										BackgroundColor:      "yellow-900",
+										HoverBackgroundColor: "yellow-700",
+										OnClick:              "openShutdownContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
+										TooltipText:          "Power Off",
+										TooltipColor:         "yellow-700",
+										TooltipPosition:      "top",
 									})
 								} else {
-									@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-										Id:              "toggle-container-status",
-										Shape:           componentStructural.IconButtonShapeSquare,
-										Icon:            "ph-lightning",
-										BackgroundColor: "cyan-900",
-										HoverColor:      "cyan-700",
-										OnClick:         "powerOnContainer('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
-										TooltipText:     "Power On",
-										TooltipColor:    "cyan-700",
-										TooltipPosition: "top",
+									@componentStructural.IconButton(componentStructural.IconButtonDto{
+										Id:                   "toggle-container-status",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-lightning",
+										BackgroundColor:      "cyan-900",
+										HoverBackgroundColor: "cyan-700",
+										OnClick:              "powerOnContainer('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
+										TooltipText:          "Power On",
+										TooltipColor:         "cyan-700",
+										TooltipPosition:      "top",
 									})
 								}
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "update-container",
-									Shape:           componentStructural.IconButtonShapeSquare,
-									Icon:            "ph-gear",
-									BackgroundColor: "ez-300",
-									HoverColor:      "ez-200",
-									OnClick:         "openUpdateContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "','" + containerEntity.ProfileId.String() + "')",
-									TooltipText:     "Update",
-									TooltipColor:    "ez-300",
-									TooltipPosition: "bottom",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "update-container",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-gear",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openUpdateContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "','" + containerEntity.ProfileId.String() + "')",
+									TooltipText:          "Update",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "bottom",
 								})
-								@componentStructural.IconButtonWithTooltip(componentStructural.IconButtonWithTooltipDto{
-									Id:              "delete-container",
-									Shape:           componentStructural.IconButtonShapeSquare,
-									Icon:            "ph-trash",
-									BackgroundColor: "red-900",
-									HoverColor:      "red-700",
-									OnClick:         "openDeleteContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "','" + containerEntity.Hostname.String() + "')",
-									TooltipText:     "Delete",
-									TooltipColor:    "red-700",
-									TooltipPosition: "bottom",
+								@componentStructural.IconButton(componentStructural.IconButtonDto{
+									Id:                   "delete-container",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-900",
+									HoverBackgroundColor: "red-700",
+									OnClick:              "openDeleteContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "','" + containerEntity.Hostname.String() + "')",
+									TooltipText:          "Delete",
+									TooltipColor:         "red-700",
+									TooltipPosition:      "bottom",
 								})
 							</div>
 						</td>
