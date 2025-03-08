@@ -24,34 +24,122 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		class="flex flex-col gap-4"
 	>
 		<div class="flex w-full flex-row items-center gap-6">
-			<div class="w-1/2"></div>
-			<div class="w-1/2"></div>
-		</div>
-		<div class="flex w-full flex-row items-center gap-6">
-			<div class="w-1/3"></div>
-			<div class="w-1/3"></div>
-			<div class="w-1/3"></div>
+			<div class="w-1/2">
+				DestinationName
+			</div>
+			<div class="w-1/2">
+				DestinationType
+			</div>
 		</div>
 		<div class="-mb-2">
 			@componentForm.TextArea("destinationDescription", "Description", "createDestination.destinationDescription")
 		</div>
-		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+		<div class="flex w-full flex-row items-center gap-6">
+			<div class="w-1/3">
+				DestinationPath
+			</div>
+			<div class="w-1/3">
+				MinLocalStorageFreePercent
+			</div>
+			<div class="w-1/3">
+				MaxDestinationStorageUsagePercent
+			</div>
+		</div>
+		{{ isRemoteHostDestination := `createDestination.destinationType == "` + valueObject.BackupDestinationTypeRemoteHost.String() + `"` }}
+		{{ isObjectStorageDestination := `createDestination.destinationType == "` + valueObject.BackupDestinationTypeObjectStorage.String() + `"` }}
+		{{ isRemoteDestination := isRemoteHostDestination + ` || ` + isObjectStorageDestination }}
+		<template x-if={ isRemoteHostDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					@componentForm.SelectInputWithLabelValuePair(
-						componentForm.SelectInputWithLabelValuePairDto{
-							Id:                    "accountId",
-							Label:                 "Account (Destination Owner)",
-							SelectedBindValuePath: "createDestination.accountId",
-							Options:               createDto.AccountSelectLabelValuePairs,
-						})
+					RemoteHostType
 				</div>
-				<div class="w-1/2"></div>
+				<div class="w-1/2">
+					RemoteHostname
+				</div>
+			</div>
+			<div
+				class="flex w-full flex-row items-center gap-6"
+			>
+				<div class="w-1/2">
+					RemoteHostUsername
+				</div>
+				<div class="w-1/2">
+					RemoteHostPassword
+				</div>
+			</div>
+			<div
+				class="flex w-full flex-row items-center gap-6"
+			>
+				<div class="w-1/2">
+					RemoteHostNetworkPort
+				</div>
+				<div class="w-1/2">
+					RemoteHostPrivateKeyFilePath
+				</div>
+			</div>
+		</template>
+		<template x-if={ isObjectStorageDestination }>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					ObjectStorageProvider
+				</div>
+				<div class="w-1/2">
+					ObjectStorageProviderRegion
+				</div>
 			</div>
 			<div class="flex w-full flex-row items-center gap-6">
-				<div class="w-1/2"></div>
-				<div class="w-1/2"></div>
+				<div class="w-1/2">
+					ObjectStorageProviderAccessKeyId
+				</div>
+				<div class="w-1/2">
+					ObjectStorageProviderSecretAccessKey
+				</div>
 			</div>
+			<div class="flex w-full flex-row items-center gap-6">
+				<div class="w-1/2">
+					ObjectStorageEndpointUrl
+				</div>
+				<div class="w-1/2">
+					ObjectStorageBucketName
+				</div>
+			</div>
+		</template>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			@componentForm.SelectInputWithLabelValuePair(
+				componentForm.SelectInputWithLabelValuePairDto{
+					Id:                    "accountId",
+					Label:                 "Account (Destination Owner)",
+					SelectedBindValuePath: "createDestination.accountId",
+					Options:               createDto.AccountSelectLabelValuePairs,
+				})
+			<template x-if={ isRemoteDestination }>
+				<div class="flex w-full flex-row items-center gap-6">
+					<div class="w-1/2">
+						DownloadBytesSecRateLimit
+					</div>
+					<div class="w-1/2">
+						UploadBytesSecRateLimit
+					</div>
+				</div>
+				<div class="flex w-full flex-row items-center gap-6">
+					<div class="w-1/2">
+						MaxConcurrentConnections
+					</div>
+					<div class="w-1/2">
+						SkipCertificateVerification
+					</div>
+				</div>
+			</template>
+			<template x-if={ isRemoteHostDestination }>
+				<div class="flex w-full flex-row items-center gap-6">
+					<div class="w-1/2">
+						RemoteHostConnectionTimeoutSecs
+					</div>
+					<div class="w-1/2">
+						RemoteHostConnectionRetrySecs
+					</div>
+				</div>
+			</template>
 		}
 		@componentForm.SubmitButton(
 			"Create Backup Destination", "ph-check-fat", "closeCreateDestinationModal()", false,
