@@ -22,7 +22,23 @@ templ RadioInput(inputDto RadioInputDto) {
 		class="hover:text-infinite-500 inline-flex items-center text-neutral-100"
 		@click={ inputDto.BindModelPath + ` = "` + inputDto.BindValue + `"` }
 	>
-		<label class="relative flex cursor-pointer items-center rounded-full p-1">
+		{{ labelTextSize := "text-sm" }}
+		switch inputDto.Size {
+			case RadioInputSizeXs:
+				{{ labelTextSize = "text-xs" }}
+			case RadioInputSizeSm:
+				{{ labelTextSize = "text-sm" }}
+			case RadioInputSizeMd:
+				{{ labelTextSize = "text-base" }}
+			case RadioInputSizeLg:
+				{{ labelTextSize = "text-lg" }}
+			case RadioInputSizeXl:
+				{{ labelTextSize = "text-xl" }}
+		}
+		<label
+			class={ "flex flex-row gap-1 cursor-pointer items-center " + labelTextSize }
+			:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
+		>
 			<input
 				type="radio"
 				if inputDto.Id != "" {
@@ -48,26 +64,8 @@ templ RadioInput(inputDto RadioInputDto) {
 			}
 			<i
 				class={ "ph-duotone " + iconSize }
-				:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle text-infinite-500" : "ph-circle"` }
+				:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle" : "ph-circle"` }
 			></i>
-		</label>
-		{{ labelTextSize := "text-sm" }}
-		switch inputDto.Size {
-			case RadioInputSizeXs:
-				{{ labelTextSize = "text-xs" }}
-			case RadioInputSizeSm:
-				{{ labelTextSize = "text-sm" }}
-			case RadioInputSizeMd:
-				{{ labelTextSize = "text-base" }}
-			case RadioInputSizeLg:
-				{{ labelTextSize = "text-lg" }}
-			case RadioInputSizeXl:
-				{{ labelTextSize = "text-xl" }}
-		}
-		<label
-			class={ "cursor-pointer " + labelTextSize }
-			:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
-		>
 			{ inputDto.Label }
 		</label>
 	</div>
