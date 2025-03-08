@@ -204,17 +204,18 @@ templ BackupTasksTable(
 	readTasksResponse dto.ReadBackupTasksResponse,
 ) {
 	<!-- Backup Tasks Table -->
+	{{ tasksTableId := "backup-tasks-table" }}
 	<div
-		id="backup-tasks-table"
+		id={ tasksTableId }
 		hx-get="/backup/"
 		hx-trigger="delete:backup-task from:window delay:500ms"
-		hx-select="#backup-tasks-table"
-		hx-target="#backup-tasks-table"
+		hx-select={ "#" + tasksTableId }
+		hx-target={ "#" + tasksTableId }
 		hx-swap="outerHTML transition:true"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.ReadRequestSettingsBar(
-				"backupTasks", "/backup/", "#backup-tasks-table",
+				"backupTasks", "/backup/", "#"+tasksTableId,
 				readTasksRequest, readTasksResponse.Pagination,
 				entity.BackupTask{},
 			)
@@ -496,17 +497,18 @@ templ BackupTaskArchivesTable(
 	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
 ) {
 	<!-- Backup Task Archives Table -->
+	{{ taskArchivesTableId := "backup-task-archives-table" }}
 	<div
-		id="backup-task-archives-table"
+		id={ taskArchivesTableId }
 		hx-get="/backup/"
 		hx-trigger="delete:backup-task-archive from:window delay:500ms"
-		hx-select="#backup-task-archives-table"
-		hx-target="#backup-task-archives-table"
+		hx-select={ "#" + taskArchivesTableId }
+		hx-target={ "#" + taskArchivesTableId }
 		hx-swap="outerHTML transition:true"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.ReadRequestSettingsBar(
-				"backupTaskArchives", "/backup/", "#backup-task-archives-table",
+				"backupTaskArchives", "/backup/", "#"+taskArchivesTableId,
 				readTaskArchivesRequest, readTaskArchivesResponse.Pagination,
 				entity.BackupTaskArchive{},
 			)

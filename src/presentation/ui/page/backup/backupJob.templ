@@ -334,17 +334,18 @@ templ BackupJobsTable(
 	readJobsResponse dto.ReadBackupJobsResponse,
 ) {
 	<!-- Backup Jobs Table -->
+	{{ jobsTableId := "backup-jobs-table" }}
 	<div
-		id="backup-jobs-table"
+		id={ jobsTableId }
 		hx-get="/backup/"
-		hx-trigger="create:backup-job from:window delay:500ms, update:backup-job from:window delay:500ms, delete:backup-job from:window delay:500ms"
-		hx-select="#backup-jobs-table"
-		hx-target="#backup-jobs-table"
+		hx-trigger="submit from:form delay:500ms, delete:backup-job from:window delay:500ms"
+		hx-select={ "#" + jobsTableId }
+		hx-target={ "#" + jobsTableId }
 		hx-swap="outerHTML transition:true"
 	>
 		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
 			@componentStructural.ReadRequestSettingsBar(
-				"backupJobs", "/backup/", "#backup-jobs-table",
+				"backupJobs", "/backup/", "#"+jobsTableId,
 				readJobsRequest, readJobsResponse.Pagination,
 				entity.BackupJob{},
 			)
