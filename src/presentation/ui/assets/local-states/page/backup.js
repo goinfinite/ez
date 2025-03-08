@@ -3,7 +3,7 @@ document.addEventListener("alpine:init", () => {
 
   Alpine.data("backupIndex", () => ({
     // Primary States
-    backupFeatureTabSelected: "jobs",
+    backupFeatureTabSelected: "destinations",
   }));
 
   Alpine.data("backupTasks", () => ({
@@ -247,6 +247,76 @@ document.addEventListener("alpine:init", () => {
           this.$dispatch("delete:backup-job");
         });
       this.closeDeleteJobModal();
+    },
+  }));
+
+  Alpine.data("backupDestinations", () => ({
+    // Primary State
+    destinationEntity: {},
+    createDestination: {},
+
+    resetPrimaryState() {
+      this.destinationEntity = {};
+      this.createJob = {};
+    },
+    updateDestinationEntity(destinationId) {
+      this.destinationEntity = JSON.parse(
+        document.getElementById("backupDestinationEntity_" + destinationId)
+          .textContent
+      );
+    },
+    init() {
+      this.resetPrimaryState();
+    },
+
+    // Auxiliary State
+    destinationApiEndpoint: backupApiBaseEndpoint + "/destination",
+    isCreateDestinationModalOpen: false,
+    openCreateDestinationModal() {
+      this.resetPrimaryState();
+      this.isCreateDestinationModalOpen = true;
+    },
+    closeCreateDestinationModal() {
+      this.isCreateDestinationModalOpen = false;
+    },
+
+    isUpdateDestinationModalOpen: false,
+    openUpdateDestinationModal(destinationId) {
+      this.resetPrimaryState();
+      this.updateDestinationEntity(destinationId);
+      this.isUpdateDestinationModalOpen = true;
+    },
+    closeUpdateDestinationModal() {
+      this.isUpdateDestinationModalOpen = false;
+    },
+
+    isDeleteDestinationModalOpen: false,
+    openDeleteDestinationModal(destinationId) {
+      this.resetPrimaryState();
+      this.updateDestinationEntity(destinationId);
+      this.isDeleteDestinationModalOpen = true;
+    },
+    closeDeleteDestinationModal() {
+      this.isDeleteDestinationModalOpen = false;
+    },
+    deleteDestination() {
+      htmx
+        .ajax(
+          "DELETE",
+          this.destinationApiEndpoint +
+            "/" +
+            this.destinationEntity.accountId +
+            "/" +
+            this.destinationEntity.destinationId +
+            "/",
+          {
+            swap: "none",
+          }
+        )
+        .then(() => {
+          this.$dispatch("delete:backup-destination");
+        });
+      this.closeDeleteDestinationModal();
     },
   }));
 });
