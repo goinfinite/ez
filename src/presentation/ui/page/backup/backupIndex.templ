@@ -3,6 +3,7 @@ package pageBackup
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"github.com/goinfinite/ez/src/presentation/ui/envs"
 )
 
 templ BackupIndex(
@@ -18,7 +19,7 @@ templ BackupIndex(
 	createDestinationModalDto CreateBackupDestinationModalDto,
 ) {
 	<!-- BackupIndex JavaScript -->
-	<script type="text/javascript" src="/assets/local-states/page/backup.js"></script>
+	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/backup.js" }></script>
 	<!-- BackupIndex HTML -->
 	<div x-data="backupIndex">
 		@componentStructural.HorizontalTabHeader(

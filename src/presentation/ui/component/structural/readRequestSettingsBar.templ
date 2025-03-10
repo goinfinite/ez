@@ -3,6 +3,7 @@ package componentStructural
 import "github.com/goinfinite/ez/src/domain/dto"
 import "github.com/goinfinite/ez/src/presentation/ui/component/form"
 import "github.com/goinfinite/ez/src/domain/valueObject"
+import "github.com/goinfinite/ez/src/presentation/ui/envs"
 
 templ ReadRequestSettingsBar(
 	entityName, uiEndpoint, recordsDisplayElementId string,
@@ -13,7 +14,7 @@ templ ReadRequestSettingsBar(
 	@templ.JSONScript(entityName+"ReadRequestDto", readRequestDto)
 	@templ.JSONScript(entityName+"PaginationDto", responsePaginationDto)
 	@templ.JSONScript(entityName+"Struct", entityStruct)
-	<script type="text/javascript" src="/assets/local-states/component/structural/readRequestSettingsBar.js"></script>
+	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/component/structural/readRequestSettingsBar.js" }></script>
 	@templ.JSFuncCall(
 		"InitReadRequestSettingsLocalState", entityName, uiEndpoint, recordsDisplayElementId,
 	)

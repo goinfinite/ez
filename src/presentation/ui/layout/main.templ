@@ -3,6 +3,7 @@ package layout
 import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	componentUtil "github.com/goinfinite/ez/src/presentation/ui/component/util"
+	"github.com/goinfinite/ez/src/presentation/ui/envs"
 	"os"
 )
 
@@ -69,6 +70,6 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			@FooterSkeleton()
 			@componentUtil.Toast()
 		</body>
-		<script type="text/javascript" src="/assets/global-states/main.js"></script>
+		<script type="text/javascript" src={ uiEnvs.GlobalStateAssetsPath + "/layout/main.js" }></script>
 	</html>
 }
