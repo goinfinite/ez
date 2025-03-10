@@ -176,12 +176,12 @@ templ ContainerImageIndex(
 					)
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
-					@componentStructural.IconButton(componentStructural.IconButtonDto{
+					@componentStructural.IconButton(componentStructural.IconButtonSettings{
 						Label:   "Import Container Image",
 						Icon:    "ph-upload",
 						OnClick: "openImportImageModal()",
 					})
-					@componentStructural.IconButton(componentStructural.IconButtonDto{
+					@componentStructural.IconButton(componentStructural.IconButtonSettings{
 						Label:   "Take Container Snapshot",
 						Icon:    "ph-camera",
 						OnClick: "openTakeSnapshotModal()",
@@ -241,7 +241,7 @@ templ ContainerImageArchivesTable(
 					</td>
 					<td class="px-3 py-2">{ archiveEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
-						@componentStructural.IconButton(componentStructural.IconButtonDto{
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
 							Id:                   "download-archive",
 							Shape:                componentStructural.IconButtonShapeCircular,
 							Icon:                 "ph-download",
@@ -252,7 +252,7 @@ templ ContainerImageArchivesTable(
 							TooltipColor:         "ez-300",
 							TooltipPosition:      "bottom",
 						})
-						@componentStructural.IconButton(componentStructural.IconButtonDto{
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
 							Id:                   "delete-archive",
 							Shape:                componentStructural.IconButtonShapeCircular,
 							Icon:                 "ph-trash",
@@ -327,7 +327,7 @@ templ ContainerImagesTable(
 					</td>
 					<td class="px-6 py-4">{ imageEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
-						@componentStructural.IconButton(componentStructural.IconButtonDto{
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
 							Id:                   "archive-image",
 							Shape:                componentStructural.IconButtonShapeCircular,
 							Icon:                 "ph-file-zip",
@@ -338,7 +338,7 @@ templ ContainerImagesTable(
 							TooltipColor:         "ez-300",
 							TooltipPosition:      "bottom",
 						})
-						@componentStructural.IconButton(componentStructural.IconButtonDto{
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
 							Id:                   "delete-image",
 							Shape:                componentStructural.IconButtonShapeCircular,
 							Icon:                 "ph-trash",
@@ -383,7 +383,7 @@ templ ImportContainerImageForm(
 			@componentForm.Dropzone(
 				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br", true,
 			)
-			@componentStructural.IconButton(componentStructural.IconButtonDto{
+			@componentStructural.IconButton(componentStructural.IconButtonSettings{
 				Label: "Import",
 				Icon:  "ph-check-fat",
 			})
@@ -469,7 +469,7 @@ templ TakeContainerSnapshotForm(
 					)
 				}
 			</div>
-			@componentStructural.IconButton(componentStructural.IconButtonDto{
+			@componentStructural.IconButton(componentStructural.IconButtonSettings{
 				Label: "Take Snapshot",
 				Icon:  "ph-check-fat",
 			})

@@ -122,7 +122,7 @@ templ ReadRequestSettingsBar(
 			if responsePaginationDto.SortDirection != nil {
 				switch *responsePaginationDto.SortDirection {
 					case valueObject.PaginationSortDirectionAsc:
-						@IconButton(IconButtonDto{
+						@IconButton(IconButtonSettings{
 							Id:                   entityName + "SortDirection",
 							Shape:                IconButtonShapeSquare,
 							Size:                 "md",
@@ -135,7 +135,7 @@ templ ReadRequestSettingsBar(
 							TooltipPosition:      "top",
 						})
 					case valueObject.PaginationSortDirectionDesc:
-						@IconButton(IconButtonDto{
+						@IconButton(IconButtonSettings{
 							Id:                   entityName + "SortDirection",
 							Shape:                IconButtonShapeSquare,
 							Size:                 "md",

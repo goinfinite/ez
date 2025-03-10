@@ -10,7 +10,7 @@ const (
 	IconButtonShapeSquare   = "square"
 )
 
-type IconButtonDto struct {
+type IconButtonSettings struct {
 	Id                   string
 	Label                string
 	Icon                 string
@@ -27,24 +27,24 @@ type IconButtonDto struct {
 	IsSubmit             bool
 }
 
-templ IconButton(inputDto IconButtonDto) {
+templ IconButton(inputSettings IconButtonSettings) {
 	<!-- IconButton -->
-	<div class="group relative">
+	<div class="group relative w-full">
 		{{ backgroundColor := "bg-infinite-500" }}
-		if inputDto.BackgroundColor != "" {
-			{{ backgroundColor = "bg-" + inputDto.BackgroundColor }}
+		if inputSettings.BackgroundColor != "" {
+			{{ backgroundColor = "bg-" + inputSettings.BackgroundColor }}
 		}
 		{{ backgroundHoverColor := "hover:bg-infinite-300" }}
-		if inputDto.HoverBackgroundColor != "" {
-			{{ backgroundHoverColor = "hover:bg-" + inputDto.HoverBackgroundColor }}
+		if inputSettings.HoverBackgroundColor != "" {
+			{{ backgroundHoverColor = "hover:bg-" + inputSettings.HoverBackgroundColor }}
 		}
 		{{ textColor := "text-neutral-50" }}
 		{{ radiusRoundness := "rounded-md" }}
-		if inputDto.Shape == IconButtonShapeCircular {
+		if inputSettings.Shape == IconButtonShapeCircular {
 			{{ radiusRoundness = "rounded-full" }}
 		}
 		{{ backgroundSize := "p-2 text-base gap-1" }}
-		switch inputDto.Size {
+		switch inputSettings.Size {
 			case IconButtonSizeXs:
 				{{ backgroundSize = "p-1 text-sm gap-1" }}
 			case IconButtonSizeSm:
@@ -57,7 +57,7 @@ templ IconButton(inputDto IconButtonDto) {
 				{{ backgroundSize = "p-3 text-2xl gap-3" }}
 		}
 		{{ iconSize := "text-xl" }}
-		switch inputDto.Size {
+		switch inputSettings.Size {
 			case IconButtonSizeXs:
 				{{ iconSize = "text-xs" }}
 			case IconButtonSizeSm:
@@ -70,42 +70,42 @@ templ IconButton(inputDto IconButtonDto) {
 				{{ iconSize = "text-xl" }}
 		}
 		<button
-			if inputDto.Id != "" {
-				id={ inputDto.Id }
+			if inputSettings.Id != "" {
+				id={ inputSettings.Id }
 			}
-			if inputDto.IsSubmit {
+			if inputSettings.IsSubmit {
 				type="submit"
 			}
-			if inputDto.OnClick != "" {
-				@click={ inputDto.OnClick }
+			if inputSettings.OnClick != "" {
+				@click={ inputSettings.OnClick }
 			}
 			class={ backgroundSize + " " + backgroundColor + " " + backgroundHoverColor + " " + textColor + " " + radiusRoundness + " justify-center w-full border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
 		>
-			if inputDto.Icon != "" {
-				<i class={ "ph-duotone " + inputDto.Icon + " " + iconSize }></i>
+			if inputSettings.Icon != "" {
+				<i class={ "ph-duotone " + inputSettings.Icon + " " + iconSize }></i>
 			}
-			if inputDto.Label != "" {
-				{ inputDto.Label }
+			if inputSettings.Label != "" {
+				{ inputSettings.Label }
 			}
 		</button>
-		if inputDto.TooltipText != "" {
-			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + inputDto.TooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
-			switch inputDto.TooltipPosition {
+		if inputSettings.TooltipText != "" {
+			{{ tooltipBaseClass := "absolute hidden transition-all duration-300 group-hover:flex transform w-fit p-1.5 bg-" + inputSettings.TooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg" }}
+			switch inputSettings.TooltipPosition {
 				case "top":
 					<div class={ tooltipBaseClass + " bottom-full mb-1.5 group-hover:-translate-y-0.5 left-1/2 -translate-x-1/2" }>
-						{ inputDto.TooltipText }
+						{ inputSettings.TooltipText }
 					</div>
 				case "bottom":
 					<div class={ tooltipBaseClass + " top-full mt-1.5 group-hover:translate-y-0.5 left-1/2 -translate-x-1/2" }>
-						{ inputDto.TooltipText }
+						{ inputSettings.TooltipText }
 					</div>
 				case "left":
 					<div class={ tooltipBaseClass + " right-full mr-1.5 group-hover:translate-x-0.5 top-1/2 -translate-y-1/2" }>
-						{ inputDto.TooltipText }
+						{ inputSettings.TooltipText }
 					</div>
 				case "right":
 					<div class={ tooltipBaseClass + " left-full ml-1.5 group-hover:-translate-x-0.5 top-1/2 -translate-y-1/2" }>
-						{ inputDto.TooltipText }
+						{ inputSettings.TooltipText }
 					</div>
 			}
 		}

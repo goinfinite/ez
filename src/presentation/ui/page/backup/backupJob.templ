@@ -160,7 +160,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				</div>
 			</div>
 		}
-		@componentStructural.IconButton(componentStructural.IconButtonDto{
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
 			Label: "Create Backup Job",
 			Icon:  "ph-check-fat",
 		})
@@ -316,7 +316,7 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 				</div>
 			</div>
 		}
-		@componentStructural.IconButton(componentStructural.IconButtonDto{
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
 			Label: "Update Job",
 			Icon:  "ph-check-fat",
 		})
@@ -563,7 +563,7 @@ templ BackupJobsTable(
 						</td>
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
-								@componentStructural.IconButton(componentStructural.IconButtonDto{
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
 									Id:                   "run-job",
 									Shape:                componentStructural.IconButtonShapeCircular,
 									Icon:                 "ph-queue",
@@ -574,7 +574,7 @@ templ BackupJobsTable(
 									TooltipColor:         "cyan-700",
 									TooltipPosition:      "left",
 								})
-								@componentStructural.IconButton(componentStructural.IconButtonDto{
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
 									Id:                   "update-job",
 									Shape:                componentStructural.IconButtonShapeCircular,
 									Icon:                 "ph-pencil",
@@ -585,7 +585,7 @@ templ BackupJobsTable(
 									TooltipColor:         "ez-300",
 									TooltipPosition:      "left",
 								})
-								@componentStructural.IconButton(componentStructural.IconButtonDto{
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
 									Id:                   "delete-job",
 									Shape:                componentStructural.IconButtonShapeCircular,
 									Icon:                 "ph-trash",
@@ -625,7 +625,7 @@ templ BackupJobs(
 				)
 			</div>
 			<div>
-				@componentStructural.IconButton(componentStructural.IconButtonDto{
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
 					Label:   "Create Job",
 					Icon:    "ph-plus-square",
 					OnClick: "openCreateJobModal()",

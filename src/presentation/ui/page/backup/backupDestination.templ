@@ -324,7 +324,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 			</template>
 		}
-		@componentStructural.IconButton(componentStructural.IconButtonDto{
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
 			Label: "Create Destination",
 			Icon:  "ph-check-fat",
 		})
@@ -626,7 +626,7 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 			</template>
 		}
-		@componentStructural.IconButton(componentStructural.IconButtonDto{
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
 			Label: "Update Destination",
 			Icon:  "ph-check-fat",
 		})
@@ -944,7 +944,7 @@ templ BackupDestinationsTable(
 						</td>
 						<td class="w-[10%]">
 							<div class="flex flex-col items-center justify-center gap-2">
-								@componentStructural.IconButton(componentStructural.IconButtonDto{
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
 									Id:                   "update-destination",
 									Shape:                componentStructural.IconButtonShapeCircular,
 									Icon:                 "ph-pencil",
@@ -955,7 +955,7 @@ templ BackupDestinationsTable(
 									TooltipColor:         "ez-300",
 									TooltipPosition:      "left",
 								})
-								@componentStructural.IconButton(componentStructural.IconButtonDto{
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
 									Id:                   "delete-destination",
 									Shape:                componentStructural.IconButtonShapeCircular,
 									Icon:                 "ph-trash",
@@ -1010,7 +1010,7 @@ templ BackupDestinations(
 				)
 			</div>
 			<div>
-				@componentStructural.IconButton(componentStructural.IconButtonDto{
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
 					Label:   "Create Destination",
 					Icon:    "ph-plus-square",
 					OnClick: "openCreateDestinationModal()",

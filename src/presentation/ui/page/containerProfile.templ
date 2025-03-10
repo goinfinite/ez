@@ -152,7 +152,7 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 					"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
 					"$store.main.textualViewSelector",
 				)
-				@componentStructural.IconButton(componentStructural.IconButtonDto{
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
 					Label:   "Create Container Profile",
 					Icon:    "ph-plus-square",
 					OnClick: "openCreateModal()",
@@ -555,7 +555,7 @@ templ ContainerProfileForm(action string) {
 		if action == "update" {
 			{{ buttonLabel = "Update" }}
 		}
-		@componentStructural.IconButton(componentStructural.IconButtonDto{
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
 			Label: buttonLabel,
 			Icon:  "ph-check-fat",
 		})
