@@ -48,28 +48,43 @@ window.__unocss = {
 };
 
 document.addEventListener("alpine:init", () => {
-  async function jsonAjax(method, url, payload) {
+  async function jsonAjax(method, url, payload, shouldDisplayToast = true) {
     const loadingOverlayElement = document.getElementById("loading-overlay");
     loadingOverlayElement.classList.add("htmx-request");
 
-    return await fetch(url, {
-      method: method,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        loadingOverlayElement.classList.remove("htmx-request");
-        return response.json();
-      })
-      .then((parsedResponse) => {
+    try {
+      const requestSettings = {
+        method: method,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      };
+      if (Object.keys(payload).length > 0) {
+        requestSettings.body = JSON.stringify(payload);
+      }
+      const response = await fetch(url, requestSettings);
+      const parsedResponse = await response.json();
+
+      loadingOverlayElement.classList.remove("htmx-request");
+
+      if (!response.ok) {
+        throw new Error(parsedResponse.body);
+      }
+
+      if (shouldDisplayToast) {
         Alpine.store("toast").displayToast(parsedResponse.body, "success");
-      })
-      .catch((parsedResponse) => {
-        Alpine.store("toast").displayToast(parsedResponse.body, "danger");
-      });
+      }
+      return parsedResponse.body;
+    } catch (error) {
+      loadingOverlayElement.classList.remove("htmx-request");
+
+      if (shouldDisplayToast) {
+        Alpine.store("toast").displayToast(error.message, "danger");
+        return;
+      }
+      throw error;
+    }
   }
 
   function createRandomPassword() {
