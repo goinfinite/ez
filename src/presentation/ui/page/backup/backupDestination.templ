@@ -57,10 +57,11 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			</div>
 		</div>
 		<div class="-mb-2">
-			@componentForm.TextArea(
-				"destinationDescription", "Description",
-				"createDestinationPayload.destinationDescription",
-			)
+			@componentForm.TextArea(componentForm.TextAreaSettings{
+				Id:            "destinationDescription",
+				Label:         "Description",
+				BindModelPath: "createDestinationPayload.destinationDescription",
+			})
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">
@@ -331,6 +332,19 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 	</form>
 }
 
+templ NewDestinationEncryptionKeyModalContent() {
+	<!-- NewDestinationEncryptionKeyModalContent -->
+	@componentForm.TextArea(componentForm.TextAreaSettings{
+		Label:         "Encryption Key",
+		BindModelPath: "destinationEntity.encryptionKey",
+		IsReadOnly:    true,
+	})
+	@componentStructural.Alert(
+		componentStructural.AlertTypeWarning,
+		"This encryption key will be used to encrypt the backup data on the destination. Please save it securely, as you will not be able to retrieve the backup if the key is lost.",
+	)
+}
+
 templ CreateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
 	<!-- CreateBackupDestinationModal -->
 	@componentStructural.RegularModal(
@@ -359,10 +373,11 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			BindValuePath: "destinationEntity.destinationName",
 		})
 		<div class="-mb-2">
-			@componentForm.TextArea(
-				"destinationDescription", "Description",
-				"destinationEntity.destinationDescription",
-			)
+			@componentForm.TextArea(componentForm.TextAreaSettings{
+				Id:            "destinationDescription",
+				Label:         "Description",
+				BindModelPath: "destinationEntity.destinationDescription",
+			})
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">

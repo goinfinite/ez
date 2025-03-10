@@ -1,37 +1,44 @@
 package componentForm
 
-templ TextArea(id, label, bindValuePath string) {
+type TextAreaSettings struct {
+	Id            string
+	Label         string
+	BindModelPath string
+	IsReadOnly    bool
+}
+
+templ TextArea(inputSettings TextAreaSettings) {
 	<!-- TextArea -->
 	<div class="relative w-full">
 		<textarea
-			if id != "" {
-				id={ id }
-				name={ id }
+			if inputSettings.Id != "" {
+				id={ inputSettings.Id }
+				name={ inputSettings.Id }
 			}
-			if bindValuePath != "" {
-				x-model:value={ bindValuePath }
+			if inputSettings.BindModelPath != "" {
+				x-model:value={ inputSettings.BindModelPath }
 			}
-			placeholder={ label }
+			placeholder={ inputSettings.Label }
 			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 min-h-24 peer relative w-full rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
 		></textarea>
-		if label != "" {
+		if inputSettings.Label != "" {
 			<label
-				if id != "" {
-					for={ id }
+				if inputSettings.Id != "" {
+					for={ inputSettings.Id }
 				}
 				class="from-ez-300 via-ez-300 z-1 absolute -top-2 left-1.5 cursor-text bg-gradient-to-t via-50% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 			>
-				{ label }
+				{ inputSettings.Label }
 			</label>
 		}
 		<div class="text-md absolute right-1.5 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
 			<i
 				class="ph-bold ph-clipboard-text bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ "navigator.clipboard.writeText(" + bindValuePath + ")" }
+				@click.prevent={ "navigator.clipboard.writeText(" + inputSettings.BindModelPath + ")" }
 			></i>
 			<i
 				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ bindValuePath + " = ''" }
+				@click.prevent={ inputSettings.BindModelPath + " = ''" }
 			></i>
 		</div>
 	</div>

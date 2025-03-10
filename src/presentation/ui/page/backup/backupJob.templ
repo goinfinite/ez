@@ -72,7 +72,11 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 		</div>
 		<div class="-mb-2">
-			@componentForm.TextArea("jobDescription", "Description", "createJob.jobDescription")
+			@componentForm.TextArea(componentForm.TextAreaSettings{
+				Id:            "jobDescription",
+				Label:         "Description",
+				BindModelPath: "createJob.jobDescription",
+			})
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			<div class="border-ez-300 space-y-5.5 rounded-md border-2 border-dashed p-4">
@@ -244,7 +248,11 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 		</div>
 		<div class="-mb-2">
-			@componentForm.TextArea("jobDescription", "Description", "jobEntity.jobDescription")
+			@componentForm.TextArea(componentForm.TextAreaSettings{
+				Id:            "jobDescription",
+				Label:         "Description",
+				BindModelPath: "jobEntity.jobDescription",
+			})
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			<div class="border-ez-300 space-y-5.5 rounded-md border-2 border-dashed p-4">

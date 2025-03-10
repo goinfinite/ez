@@ -803,7 +803,10 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					name="launchScript"
 					x-model="btoa(container.launchScript)"
 				/>
-				@componentForm.TextArea("", "Launch Script", "container.launchScript")
+				@componentForm.TextArea(componentForm.TextAreaSettings{
+					Label:         "Launch Script",
+					BindModelPath: "container.launchScript",
+				})
 				<p class="-mt-0.5 px-1.5 text-[11px] text-neutral-50 text-opacity-50">
 					Optional; one command per line. Executed only on initial container deployment, useful to install dependencies and configure the environment.
 				</p>
