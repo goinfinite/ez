@@ -24,12 +24,17 @@ type IconButtonSettings struct {
 	TooltipText          string
 	TooltipColor         string
 	TooltipPosition      string
+	IsFullWidth          bool
 	IsSubmit             bool
 }
 
 templ IconButton(inputSettings IconButtonSettings) {
 	<!-- IconButton -->
-	<div class="group relative w-full">
+	{{ buttonWidth := "" }}
+	if inputSettings.IsFullWidth {
+		{{ buttonWidth = " w-full" }}
+	}
+	<div class={ "group relative" + buttonWidth }>
 		{{ backgroundColor := "bg-infinite-500" }}
 		if inputSettings.BackgroundColor != "" {
 			{{ backgroundColor = "bg-" + inputSettings.BackgroundColor }}
