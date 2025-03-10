@@ -18,11 +18,8 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 	<!-- CreateBackupDestinationForm -->
 	<form
 		id="create-backup-destination"
-		hx-post="/api/v1/backup/destination/"
-		hx-indicator="#loading-overlay"
-		hx-swap="none"
 		class="flex flex-col gap-4"
-		x-on:submit="closeCreateDestinationModal()"
+		x-on:submit.prevent="createDestination()"
 	>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/2">
@@ -30,7 +27,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					InputType:     "text",
 					Id:            "destinationName",
 					Label:         "Name",
-					BindValuePath: "createDestination.destinationName",
+					BindValuePath: "createDestinationPayload.destinationName",
 					IsRequired:    true,
 				})
 			</div>
@@ -38,29 +35,32 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				@componentForm.RadioSelectInput(componentForm.RadioSelectInputDto{
 					Id:            "destinationType",
 					Label:         "Destination Type",
-					BindModelPath: "createDestination.destinationType",
+					BindModelPath: "createDestinationPayload.destinationType",
 					Options: []componentForm.RadioInputDto{
 						{
 							Label:         "Local",
 							BindValue:     valueObject.BackupDestinationTypeLocal.String(),
-							BindModelPath: "createDestination.destinationType",
+							BindModelPath: "createDestinationPayload.destinationType",
 						},
 						{
 							Label:         "Remote Host",
 							BindValue:     valueObject.BackupDestinationTypeRemoteHost.String(),
-							BindModelPath: "createDestination.destinationType",
+							BindModelPath: "createDestinationPayload.destinationType",
 						},
 						{
 							Label:         "Object Storage",
 							BindValue:     valueObject.BackupDestinationTypeObjectStorage.String(),
-							BindModelPath: "createDestination.destinationType",
+							BindModelPath: "createDestinationPayload.destinationType",
 						},
 					},
 				})
 			</div>
 		</div>
 		<div class="-mb-2">
-			@componentForm.TextArea("destinationDescription", "Description", "createDestination.destinationDescription")
+			@componentForm.TextArea(
+				"destinationDescription", "Description",
+				"createDestinationPayload.destinationDescription",
+			)
 		</div>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/3">
@@ -68,7 +68,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					InputType:     "text",
 					Id:            "destinationPath",
 					Label:         "Destination Path",
-					BindValuePath: "createDestination.destinationPath",
+					BindValuePath: "createDestinationPayload.destinationPath",
 				})
 			</div>
 			<div class="w-1/3">
@@ -76,7 +76,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					InputType:     "number",
 					Id:            "minLocalStorageFreePercent",
 					Label:         "Min Free Local Storage (%)",
-					BindValuePath: "createDestination.minLocalStorageFreePercent",
+					BindValuePath: "createDestinationPayload.minLocalStorageFreePercent",
 				})
 			</div>
 			<div class="w-1/3">
@@ -84,12 +84,12 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					InputType:     "number",
 					Id:            "maxDestinationStorageUsagePercent",
 					Label:         "Max Dest. Storage Usage (%)",
-					BindValuePath: "createDestination.maxDestinationStorageUsagePercent",
+					BindValuePath: "createDestinationPayload.maxDestinationStorageUsagePercent",
 				})
 			</div>
 		</div>
-		{{ isRemoteHostDestination := `createDestination.destinationType == "` + valueObject.BackupDestinationTypeRemoteHost.String() + `"` }}
-		{{ isObjectStorageDestination := `createDestination.destinationType == "` + valueObject.BackupDestinationTypeObjectStorage.String() + `"` }}
+		{{ isRemoteHostDestination := `createDestinationPayload.destinationType == "` + valueObject.BackupDestinationTypeRemoteHost.String() + `"` }}
+		{{ isObjectStorageDestination := `createDestinationPayload.destinationType == "` + valueObject.BackupDestinationTypeObjectStorage.String() + `"` }}
 		{{ isRemoteDestination := isRemoteHostDestination + ` || ` + isObjectStorageDestination }}
 		<template x-if={ isRemoteHostDestination }>
 			<div class="flex w-full flex-row items-center gap-6">
@@ -100,12 +100,12 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							{
 								Label:         "SFTP (recommended)",
 								BindValue:     valueObject.BackupDestinationRemoteHostTypeSftp.String(),
-								BindModelPath: "createDestination.remoteHostType",
+								BindModelPath: "createDestinationPayload.remoteHostType",
 							},
 							{
 								Label:         "FTP (insecure)",
 								BindValue:     valueObject.BackupDestinationRemoteHostTypeFtp.String(),
-								BindModelPath: "createDestination.remoteHostType",
+								BindModelPath: "createDestinationPayload.remoteHostType",
 							},
 						},
 					})
@@ -115,7 +115,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "text",
 						Id:            "remoteHostname",
 						Label:         "Server Hostname",
-						BindValuePath: "createDestination.remoteHostname",
+						BindValuePath: "createDestinationPayload.remoteHostname",
 						IsRequired:    true,
 					})
 				</div>
@@ -130,7 +130,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "text",
 						Id:            "remoteHostUsername",
 						Label:         "Username",
-						BindValuePath: "createDestination.remoteHostUsername",
+						BindValuePath: "createDestinationPayload.remoteHostUsername",
 						IsRequired:    true,
 					})
 				</div>
@@ -139,7 +139,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "password",
 						Id:            "remoteHostPassword",
 						Label:         "Password",
-						BindValuePath: "createDestination.remoteHostPassword",
+						BindValuePath: "createDestinationPayload.remoteHostPassword",
 					})
 				</div>
 			</div>
@@ -153,7 +153,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "number",
 						Id:            "remoteHostNetworkPort",
 						Label:         "Server Port",
-						BindValuePath: "createDestination.remoteHostNetworkPort",
+						BindValuePath: "createDestinationPayload.remoteHostNetworkPort",
 					})
 				</div>
 				<div class="w-1/2">
@@ -161,7 +161,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "text",
 						Id:            "remoteHostPrivateKeyFilePath",
 						Label:         "Private Key File Path",
-						BindValuePath: "createDestination.remoteHostPrivateKeyFilePath",
+						BindValuePath: "createDestinationPayload.remoteHostPrivateKeyFilePath",
 					})
 				</div>
 			</div>
@@ -172,25 +172,25 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					@componentForm.SelectInput(componentForm.SelectInputDto{
 						Id:            "objectStorageProvider",
 						Label:         "Object Storage Provider",
-						BindValuePath: "createDestination.objectStorageProvider",
+						BindValuePath: "createDestinationPayload.objectStorageProvider",
 						Options:       valueObject.ObjectStorageProviderStrList,
 					})
 				</div>
 				<div class="w-1/2">
-					<template x-if="createDestination.objectStorageProvider == 'custom'">
+					<template x-if="createDestinationPayload.objectStorageProvider == 'custom'">
 						@componentForm.InputField(componentForm.InputFieldDto{
 							InputType:     "text",
 							Id:            "objectStorageEndpointUrl",
 							Label:         "Endpoint Url",
-							BindValuePath: "createDestination.objectStorageEndpointUrl",
+							BindValuePath: "createDestinationPayload.objectStorageEndpointUrl",
 						})
 					</template>
-					<template x-if="createDestination.objectStorageProvider != 'custom'">
+					<template x-if="createDestinationPayload.objectStorageProvider != 'custom'">
 						@componentForm.InputField(componentForm.InputFieldDto{
 							InputType:     "text",
 							Id:            "objectStorageProviderRegion",
 							Label:         "Region",
-							BindValuePath: "createDestination.objectStorageProviderRegion",
+							BindValuePath: "createDestinationPayload.objectStorageProviderRegion",
 						})
 					</template>
 				</div>
@@ -201,7 +201,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				InputType:     "text",
 				Id:            "objectStorageBucketName",
 				Label:         "Bucket Name",
-				BindValuePath: "createDestination.objectStorageBucketName",
+				BindValuePath: "createDestinationPayload.objectStorageBucketName",
 			})
 		</template>
 		<template x-if={ isObjectStorageDestination }>
@@ -211,7 +211,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "text",
 						Id:            "objectStorageProviderAccessKeyId",
 						Label:         "Access Key Id",
-						BindValuePath: "createDestination.objectStorageProviderAccessKeyId",
+						BindValuePath: "createDestinationPayload.objectStorageProviderAccessKeyId",
 					})
 				</div>
 				<div class="w-1/2">
@@ -219,7 +219,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						InputType:     "password",
 						Id:            "objectStorageProviderSecretAccessKey",
 						Label:         "Secret Access Key",
-						BindValuePath: "createDestination.objectStorageProviderSecretAccessKey",
+						BindValuePath: "createDestinationPayload.objectStorageProviderSecretAccessKey",
 					})
 				</div>
 			</div>
@@ -229,7 +229,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				componentForm.SelectInputWithLabelValuePairDto{
 					Id:                    "accountId",
 					Label:                 "Account (Destination Owner)",
-					SelectedBindValuePath: "createDestination.accountId",
+					SelectedBindValuePath: "createDestinationPayload.accountId",
 					Options:               createDto.AccountSelectLabelValuePairs,
 				})
 			<template x-if={ isRemoteDestination }>
@@ -239,7 +239,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							componentForm.SelectInputWithLabelValuePairDto{
 								Id:                    "downloadBytesSecRateLimit",
 								Label:                 "Download Rate Limit (bytes/sec)",
-								SelectedBindValuePath: "createDestination.downloadBytesSecRateLimit",
+								SelectedBindValuePath: "createDestinationPayload.downloadBytesSecRateLimit",
 								Options: []componentForm.SelectLabelValuePair{
 									{Label: "Unlimited", Value: ""},
 									{Label: "1 MiB/s", Value: "1048576"},
@@ -258,7 +258,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							componentForm.SelectInputWithLabelValuePairDto{
 								Id:                    "uploadBytesSecRateLimit",
 								Label:                 "Upload Rate Limit (bytes/sec)",
-								SelectedBindValuePath: "createDestination.uploadBytesSecRateLimit",
+								SelectedBindValuePath: "createDestinationPayload.uploadBytesSecRateLimit",
 								Options: []componentForm.SelectLabelValuePair{
 									{Label: "Unlimited", Value: ""},
 									{Label: "1 MiB/s", Value: "1048576"},
@@ -281,7 +281,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							InputType:     "number",
 							Id:            "maxConcurrentConnections",
 							Label:         "Max Concurrent Connections",
-							BindValuePath: "createDestination.maxConcurrentConnections",
+							BindValuePath: "createDestinationPayload.maxConcurrentConnections",
 						})
 					</div>
 					<div class="w-1/2">
@@ -291,12 +291,12 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 								{
 									Label:         "Yes",
 									BindValue:     "true",
-									BindModelPath: "createDestination.skipCertificateVerification",
+									BindModelPath: "createDestinationPayload.skipCertificateVerification",
 								},
 								{
 									Label:         "No",
 									BindValue:     "false",
-									BindModelPath: "createDestination.skipCertificateVerification",
+									BindModelPath: "createDestinationPayload.skipCertificateVerification",
 								},
 							},
 						})
@@ -310,7 +310,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							InputType:     "number",
 							Id:            "remoteHostConnectionTimeoutSecs",
 							Label:         "Connection Timeout (secs)",
-							BindValuePath: "createDestination.remoteHostConnectionTimeoutSecs",
+							BindValuePath: "createDestinationPayload.remoteHostConnectionTimeoutSecs",
 						})
 					</div>
 					<div class="w-1/2">
@@ -318,7 +318,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							InputType:     "number",
 							Id:            "remoteHostConnectionRetrySecs",
 							Label:         "Connection Retry Time (secs)",
-							BindValuePath: "createDestination.remoteHostConnectionRetrySecs",
+							BindValuePath: "createDestinationPayload.remoteHostConnectionRetrySecs",
 						})
 					</div>
 				</div>
@@ -652,7 +652,7 @@ templ BackupDestinationsTable(
 	<div
 		id={ destinationsTableId }
 		hx-get="/backup/"
-		hx-trigger="submit from:form delay:500ms, delete:backup-destination from:window delay:500ms"
+		hx-trigger="create:backup-destination from:window delay:500ms, submit from:form delay:500ms, delete:backup-destination from:window delay:500ms"
 		hx-select={ "#" + destinationsTableId }
 		hx-target={ "#" + destinationsTableId }
 		hx-swap="outerHTML transition:true"

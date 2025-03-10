@@ -252,10 +252,10 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("backupDestinations", () => ({
     // Primary State
     destinationEntity: {},
-    createDestination: {},
+    createDestinationPayload: {},
     resetPrimaryState() {
       this.destinationEntity = {};
-      this.createDestination = {
+      this.createDestinationPayload = {
         destinationType: "local",
         destinationPath: "/",
         objectStorageProvider: "custom",
@@ -280,6 +280,42 @@ document.addEventListener("alpine:init", () => {
     },
     closeCreateDestinationModal() {
       this.isCreateDestinationModalOpen = false;
+    },
+    newlyCreatedDestinationEncryptionKey: "",
+    isNewlyDestinationEncryptionKeyModalOpen: false,
+    openNewlyDestinationEncryptionKeyModal() {
+      if (this.newlyCreatedDestinationEncryptionKey === "") {
+        return;
+      }
+      this.isNewlyDestinationEncryptionKeyModalOpen = true;
+    },
+    closeNewlyDestinationEncryptionKeyModal() {
+      this.newlyCreatedDestinationEncryption = "";
+      this.isNewlyDestinationEncryptionKeyModalOpen = false;
+      this.$dispatch("create:backup-destination");
+    },
+    createDestination() {
+      this.closeCreateDestinationModal();
+
+      const shouldDisplayToast = false;
+      Infinite.JsonAjax(
+        "POST",
+        this.destinationApiEndpoint + "/",
+        this.createDestinationPayload,
+        shouldDisplayToast
+      )
+        .then((responseBody) => {
+          if (responseBody.encryptionKey === undefined) {
+            throw new Error("DestinationEncryptionKeyNotFound");
+          }
+
+          this.newlyCreatedDestinationEncryptionKey =
+            responseBody.encryptionKey;
+          this.openNewlyDestinationEncryptionKeyModal();
+        })
+        .catch((error) => {
+          Alpine.store("toast").displayToast(error.message, "danger");
+        });
     },
 
     isUpdateDestinationModalOpen: false,
