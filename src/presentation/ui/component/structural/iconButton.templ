@@ -44,6 +44,13 @@ templ IconButton(inputSettings IconButtonSettings) {
 			{{ backgroundHoverColor = "hover:bg-" + inputSettings.HoverBackgroundColor }}
 		}
 		{{ textColor := "text-neutral-50" }}
+		if inputSettings.TextColor != "" {
+			{{ textColor = "text-" + inputSettings.TextColor }}
+		}
+		{{ hoverTextColor := "hover:text-neutral-200" }}
+		if inputSettings.HoverTextColor != "" {
+			{{ hoverTextColor = "hover:text-" + inputSettings.HoverTextColor }}
+		}
 		{{ radiusRoundness := "rounded-md" }}
 		if inputSettings.Shape == IconButtonShapeCircular {
 			{{ radiusRoundness = "rounded-full" }}
@@ -53,13 +60,13 @@ templ IconButton(inputSettings IconButtonSettings) {
 			case IconButtonSizeXs:
 				{{ backgroundSize = "p-1 text-sm gap-1" }}
 			case IconButtonSizeSm:
-				{{ backgroundSize = "p-1.5 text-base gap-1.5" }}
+				{{ backgroundSize = "p-2 text-base gap-1" }}
 			case IconButtonSizeMd:
-				{{ backgroundSize = "p-2 text-lg gap-2" }}
+				{{ backgroundSize = "p-3 text-lg gap-2" }}
 			case IconButtonSizeLg:
-				{{ backgroundSize = "p-2.5 text-xl gap-2.5" }}
+				{{ backgroundSize = "p-3.5 text-xl gap-2.5" }}
 			case IconButtonSizeXl:
-				{{ backgroundSize = "p-3 text-2xl gap-3" }}
+				{{ backgroundSize = "p-4 text-2xl gap-3" }}
 		}
 		{{ iconSize := "text-xl" }}
 		switch inputSettings.Size {
@@ -84,7 +91,7 @@ templ IconButton(inputSettings IconButtonSettings) {
 			if inputSettings.OnClick != "" {
 				@click={ inputSettings.OnClick }
 			}
-			class={ backgroundSize + " " + backgroundColor + " " + backgroundHoverColor + " " + textColor + " " + radiusRoundness + " justify-center w-full border-none text-center font-bold lowercase flex flex-row items-center leading-none" }
+			class={ backgroundSize + " " + backgroundColor + " " + backgroundHoverColor + " " + textColor + " " + hoverTextColor + " " + radiusRoundness + " justify-center w-full border-none text-center font-bold lowercase flex flex-row items-center leading-none transition-all" }
 		>
 			if inputSettings.Icon != "" {
 				<i class={ "ph-duotone " + inputSettings.Icon + " " + iconSize }></i>
