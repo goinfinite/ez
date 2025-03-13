@@ -192,7 +192,7 @@ func (service *BackupService) CreateDestination(
 			input["minLocalStorageFreePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMinLocalStorageFreePercent"))
+			return NewServiceOutput(UserError, "InvalidMinLocalStorageFreePercent")
 		}
 		minLocalStorageFreePercentPtr = &minLocalStorageFreePercent
 	}
@@ -203,7 +203,7 @@ func (service *BackupService) CreateDestination(
 			input["maxDestinationStorageUsagePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxDestinationStorageUsagePercent"))
+			return NewServiceOutput(UserError, "InvalidMaxDestinationStorageUsagePercent")
 		}
 		maxDestinationStorageUsagePercentPtr = &maxDestinationStorageUsagePercent
 	}
@@ -214,7 +214,7 @@ func (service *BackupService) CreateDestination(
 			input["maxConcurrentConnections"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentConnections"))
+			return NewServiceOutput(UserError, "InvalidMaxConcurrentConnections")
 		}
 		maxConcurrentConnectionsPtr = &maxConcurrentConnections
 	}
@@ -225,7 +225,7 @@ func (service *BackupService) CreateDestination(
 			input["downloadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidDownloadBytesSecRateLimit"))
+			return NewServiceOutput(UserError, "InvalidDownloadBytesSecRateLimit")
 		}
 		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
 	}
@@ -236,7 +236,7 @@ func (service *BackupService) CreateDestination(
 			input["uploadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidUploadBytesSecRateLimit"))
+			return NewServiceOutput(UserError, "InvalidUploadBytesSecRateLimit")
 		}
 		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
 	}
@@ -247,7 +247,7 @@ func (service *BackupService) CreateDestination(
 			input["skipCertificateVerification"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidSkipCertificateVerification"))
+			return NewServiceOutput(UserError, "InvalidSkipCertificateVerification")
 		}
 		skipCertificateVerificationPtr = &skipCertificateVerification
 	}
@@ -300,7 +300,7 @@ func (service *BackupService) CreateDestination(
 	if input["objectStorageEndpointUrl"] != nil {
 		objectStorageEndpointUrl, err := valueObject.NewUrl(input["objectStorageEndpointUrl"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidObjectStorageEndpointUrl"))
+			return NewServiceOutput(UserError, "InvalidObjectStorageEndpointUrl")
 		}
 		objectStorageEndpointUrlPtr = &objectStorageEndpointUrl
 	}
@@ -371,7 +371,7 @@ func (service *BackupService) CreateDestination(
 			input["remoteHostPrivateKeyFilePath"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostPrivateKeyFilePath"))
+			return NewServiceOutput(UserError, "InvalidRemoteHostPrivateKeyFilePath")
 		}
 		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 	}
@@ -382,7 +382,7 @@ func (service *BackupService) CreateDestination(
 			input["remoteHostConnectionTimeoutSecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionTimeoutSecs"))
+			return NewServiceOutput(UserError, "InvalidRemoteHostConnectionTimeoutSecs")
 		}
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
@@ -393,7 +393,7 @@ func (service *BackupService) CreateDestination(
 			input["remoteHostConnectionRetrySecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionRetrySecs"))
+			return NewServiceOutput(UserError, "InvalidRemoteHostConnectionRetrySecs")
 		}
 		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
 	}
@@ -507,7 +507,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["minLocalStorageFreePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMinLocalStorageFreePercent"))
+			return NewServiceOutput(UserError, "InvalidMinLocalStorageFreePercent")
 		}
 		minLocalStorageFreePercentPtr = &minLocalStorageFreePercent
 	}
@@ -518,7 +518,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["maxDestinationStorageUsagePercent"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxDestinationStorageUsagePercent"))
+			return NewServiceOutput(UserError, "InvalidMaxDestinationStorageUsagePercent")
 		}
 		maxDestinationStorageUsagePercentPtr = &maxDestinationStorageUsagePercent
 	}
@@ -529,7 +529,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["maxConcurrentConnections"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentConnections"))
+			return NewServiceOutput(UserError, "InvalidMaxConcurrentConnections")
 		}
 		maxConcurrentConnectionsPtr = &maxConcurrentConnections
 	}
@@ -540,7 +540,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["downloadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidDownloadBytesSecRateLimit"))
+			return NewServiceOutput(UserError, "InvalidDownloadBytesSecRateLimit")
 		}
 		downloadBytesSecRateLimitPtr = &downloadBytesSecRateLimit
 	}
@@ -551,7 +551,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["uploadBytesSecRateLimit"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidUploadBytesSecRateLimit"))
+			return NewServiceOutput(UserError, "InvalidUploadBytesSecRateLimit")
 		}
 		uploadBytesSecRateLimitPtr = &uploadBytesSecRateLimit
 	}
@@ -562,7 +562,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["skipCertificateVerification"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidSkipCertificateVerification"))
+			return NewServiceOutput(UserError, "InvalidSkipCertificateVerification")
 		}
 		skipCertificateVerificationPtr = &skipCertificateVerification
 	}
@@ -615,7 +615,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 	if input["objectStorageEndpointUrl"] != nil {
 		objectStorageEndpointUrl, err := valueObject.NewUrl(input["objectStorageEndpointUrl"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidObjectStorageEndpointUrl"))
+			return NewServiceOutput(UserError, "InvalidObjectStorageEndpointUrl")
 		}
 		objectStorageEndpointUrlPtr = &objectStorageEndpointUrl
 	}
@@ -686,7 +686,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["remoteHostPrivateKeyFilePath"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostPrivateKeyFilePath"))
+			return NewServiceOutput(UserError, "InvalidRemoteHostPrivateKeyFilePath")
 		}
 		remoteHostPrivateKeyFilePathPtr = &remoteHostPrivateKeyFilePath
 	}
@@ -697,7 +697,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["remoteHostConnectionTimeoutSecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionTimeoutSecs"))
+			return NewServiceOutput(UserError, "InvalidRemoteHostConnectionTimeoutSecs")
 		}
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
@@ -708,7 +708,7 @@ func (service *BackupService) UpdateDestination(input map[string]interface{}) Se
 			input["remoteHostConnectionRetrySecs"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidRemoteHostConnectionRetrySecs"))
+			return NewServiceOutput(UserError, "InvalidRemoteHostConnectionRetrySecs")
 		}
 		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
 	}
@@ -954,7 +954,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 
 	destinationIds, assertOk := input["destinationIds"].([]valueObject.BackupDestinationId)
 	if !assertOk {
-		return NewServiceOutput(UserError, errors.New("InvalidDestinationIds"))
+		return NewServiceOutput(UserError, "InvalidDestinationIds")
 	}
 
 	backupSchedule, err := valueObject.NewCronSchedule(input["backupSchedule"])
@@ -988,7 +988,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["timeoutSecs"] != nil {
 		timeoutSecs, err := valueObject.NewTimeDuration(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
+			return NewServiceOutput(UserError, "InvalidTimeoutSecs")
 		}
 		timeoutSecsPtr = &timeoutSecs
 	}
@@ -999,7 +999,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 			input["maxTaskRetentionCount"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionCount"))
+			return NewServiceOutput(UserError, "InvalidMaxTaskRetentionCount")
 		}
 		maxTaskRetentionCountPtr = &maxTaskRetentionCount
 	}
@@ -1008,7 +1008,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["maxTaskRetentionDays"] != nil {
 		maxTaskRetentionDays, err := voHelper.InterfaceToUint16(input["maxTaskRetentionDays"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionDays"))
+			return NewServiceOutput(UserError, "InvalidMaxTaskRetentionDays")
 		}
 		maxTaskRetentionDaysPtr = &maxTaskRetentionDays
 	}
@@ -1017,7 +1017,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["maxConcurrentCpuCores"] != nil {
 		maxConcurrentCpuCores, err := voHelper.InterfaceToUint16(input["maxConcurrentCpuCores"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentCpuCores"))
+			return NewServiceOutput(UserError, "InvalidMaxConcurrentCpuCores")
 		}
 		maxConcurrentCpuCoresPtr = &maxConcurrentCpuCores
 	}
@@ -1026,7 +1026,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["containerAccountIds"] != nil {
 		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidContainerAccountIds"))
+			return NewServiceOutput(UserError, "InvalidContainerAccountIds")
 		}
 	}
 
@@ -1034,7 +1034,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["containerIds"] != nil {
 		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+			return NewServiceOutput(UserError, "InvalidContainerIds")
 		}
 	}
 
@@ -1042,7 +1042,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["exceptContainerAccountIds"] != nil {
 		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerAccountIds")
 		}
 	}
 
@@ -1050,7 +1050,7 @@ func (service *BackupService) CreateJob(input map[string]interface{}) ServiceOut
 	if input["exceptContainerIds"] != nil {
 		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerIds")
 		}
 	}
 
@@ -1110,7 +1110,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["jobStatus"] != nil {
 		jobStatus, err := voHelper.InterfaceToBool(input["jobStatus"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidJobStatus"))
+			return NewServiceOutput(UserError, "InvalidJobStatus")
 		}
 		jobStatusPtr = &jobStatus
 	}
@@ -1129,7 +1129,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["destinationIds"] != nil {
 		destinationIds, assertOk = input["destinationIds"].([]valueObject.BackupDestinationId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidDestinationIds"))
+			return NewServiceOutput(UserError, "InvalidDestinationIds")
 		}
 	}
 
@@ -1146,7 +1146,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["timeoutSecs"] != nil {
 		timeoutSecs, err := valueObject.NewTimeDuration(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
+			return NewServiceOutput(UserError, "InvalidTimeoutSecs")
 		}
 		timeoutSecsPtr = &timeoutSecs
 	}
@@ -1157,7 +1157,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 			input["maxTaskRetentionCount"],
 		)
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionCount"))
+			return NewServiceOutput(UserError, "InvalidMaxTaskRetentionCount")
 		}
 		maxTaskRetentionCountPtr = &maxTaskRetentionCount
 	}
@@ -1166,7 +1166,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["maxTaskRetentionDays"] != nil {
 		maxTaskRetentionDays, err := voHelper.InterfaceToUint16(input["maxTaskRetentionDays"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxTaskRetentionDays"))
+			return NewServiceOutput(UserError, "InvalidMaxTaskRetentionDays")
 		}
 		maxTaskRetentionDaysPtr = &maxTaskRetentionDays
 	}
@@ -1175,7 +1175,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["maxConcurrentCpuCores"] != nil {
 		maxConcurrentCpuCores, err := voHelper.InterfaceToUint16(input["maxConcurrentCpuCores"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidMaxConcurrentCpuCores"))
+			return NewServiceOutput(UserError, "InvalidMaxConcurrentCpuCores")
 		}
 		maxConcurrentCpuCoresPtr = &maxConcurrentCpuCores
 	}
@@ -1184,7 +1184,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["containerAccountIds"] != nil {
 		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidContainerAccountIds"))
+			return NewServiceOutput(UserError, "InvalidContainerAccountIds")
 		}
 	}
 
@@ -1192,7 +1192,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["containerIds"] != nil {
 		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+			return NewServiceOutput(UserError, "InvalidContainerIds")
 		}
 	}
 
@@ -1200,7 +1200,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["exceptContainerAccountIds"] != nil {
 		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerAccountIds")
 		}
 	}
 
@@ -1208,7 +1208,7 @@ func (service *BackupService) UpdateJob(input map[string]interface{}) ServiceOut
 	if input["exceptContainerIds"] != nil {
 		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerIds")
 		}
 	}
 
@@ -1454,7 +1454,7 @@ func (service *BackupService) ReadTaskRequestFactory(
 func (service *BackupService) ReadTask(input map[string]interface{}) ServiceOutput {
 	readRequestDto, err := service.ReadTaskRequestFactory(input)
 	if err != nil {
-		return NewServiceOutput(UserError, err)
+		return NewServiceOutput(UserError, err.Error())
 	}
 
 	responseDto, err := useCase.ReadBackupTasks(service.backupQueryRepo, readRequestDto)
@@ -1510,7 +1510,7 @@ func (service *BackupService) RestoreTask(
 	if input["timeoutSecs"] != nil {
 		timeoutSecs, err = voHelper.InterfaceToUint32(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
+			return NewServiceOutput(UserError, "InvalidTimeoutSecs")
 		}
 	}
 
@@ -1519,7 +1519,7 @@ func (service *BackupService) RestoreTask(
 	if input["containerAccountIds"] != nil {
 		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidAccountIds"))
+			return NewServiceOutput(UserError, "InvalidAccountIds")
 		}
 	}
 
@@ -1527,7 +1527,7 @@ func (service *BackupService) RestoreTask(
 	if input["containerIds"] != nil {
 		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+			return NewServiceOutput(UserError, "InvalidContainerIds")
 		}
 	}
 
@@ -1535,7 +1535,7 @@ func (service *BackupService) RestoreTask(
 	if input["exceptContainerAccountIds"] != nil {
 		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerAccountIds")
 		}
 	}
 
@@ -1543,7 +1543,7 @@ func (service *BackupService) RestoreTask(
 	if input["exceptContainerIds"] != nil {
 		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerIds")
 		}
 	}
 
@@ -1810,7 +1810,7 @@ func (service *BackupService) CreateTaskArchive(
 	if input["timeoutSecs"] != nil {
 		timeoutSecs, err = voHelper.InterfaceToUint32(input["timeoutSecs"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidTimeoutSecs"))
+			return NewServiceOutput(UserError, "InvalidTimeoutSecs")
 		}
 	}
 
@@ -1819,7 +1819,7 @@ func (service *BackupService) CreateTaskArchive(
 	if input["containerAccountIds"] != nil {
 		containerAccountIds, assertOk = input["containerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidAccountIds"))
+			return NewServiceOutput(UserError, "InvalidAccountIds")
 		}
 	}
 
@@ -1827,7 +1827,7 @@ func (service *BackupService) CreateTaskArchive(
 	if input["containerIds"] != nil {
 		containerIds, assertOk = input["containerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidContainerIds"))
+			return NewServiceOutput(UserError, "InvalidContainerIds")
 		}
 	}
 
@@ -1835,7 +1835,7 @@ func (service *BackupService) CreateTaskArchive(
 	if input["exceptContainerAccountIds"] != nil {
 		exceptContainerAccountIds, assertOk = input["exceptContainerAccountIds"].([]valueObject.AccountId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerAccountIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerAccountIds")
 		}
 	}
 
@@ -1843,7 +1843,7 @@ func (service *BackupService) CreateTaskArchive(
 	if input["exceptContainerIds"] != nil {
 		exceptContainerIds, assertOk = input["exceptContainerIds"].([]valueObject.ContainerId)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidExceptContainerIds"))
+			return NewServiceOutput(UserError, "InvalidExceptContainerIds")
 		}
 	}
 

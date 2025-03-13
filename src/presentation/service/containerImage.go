@@ -244,7 +244,7 @@ func (service *ContainerImageService) ReadArchives(
 		input, useCase.BackupTaskArchivesDefaultPagination,
 	)
 	if err != nil {
-		return NewServiceOutput(UserError, err)
+		return NewServiceOutput(UserError, err.Error())
 	}
 
 	requestDto := dto.ReadContainerImageArchivesRequest{

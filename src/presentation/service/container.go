@@ -153,7 +153,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 		timeParam, err := valueObject.NewUnixTime(input[timeParamName])
 		if err != nil {
 			capitalParamName := cases.Title(language.English).String(timeParamName)
-			return NewServiceOutput(UserError, errors.New("Invalid"+capitalParamName))
+			return NewServiceOutput(UserError, "Invalid"+capitalParamName)
 		}
 
 		switch timeParamName {
@@ -176,7 +176,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["withMetrics"] != nil {
 		withMetrics, err := voHelper.InterfaceToBool(input["withMetrics"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidWithMetrics"))
+			return NewServiceOutput(UserError, "InvalidWithMetrics")
 		}
 		withMetricsPtr = &withMetrics
 	}
@@ -185,7 +185,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["pageNumber"] != nil {
 		pageNumber, err := voHelper.InterfaceToUint32(input["pageNumber"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidPageNumber"))
+			return NewServiceOutput(UserError, "InvalidPageNumber")
 		}
 		paginationDto.PageNumber = pageNumber
 	}
@@ -193,7 +193,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["itemsPerPage"] != nil {
 		itemsPerPage, err := voHelper.InterfaceToUint16(input["itemsPerPage"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidItemsPerPage"))
+			return NewServiceOutput(UserError, "InvalidItemsPerPage")
 		}
 		paginationDto.ItemsPerPage = itemsPerPage
 	}
@@ -201,7 +201,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["sortBy"] != nil {
 		sortBy, err := valueObject.NewPaginationSortBy(input["sortBy"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.SortBy = &sortBy
 	}
@@ -209,7 +209,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["sortDirection"] != nil {
 		sortDirection, err := valueObject.NewPaginationSortDirection(input["sortDirection"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.SortDirection = &sortDirection
 	}
@@ -217,7 +217,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["lastSeenId"] != nil {
 		lastSeenId, err := valueObject.NewPaginationLastSeenId(input["lastSeenId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.LastSeenId = &lastSeenId
 	}
