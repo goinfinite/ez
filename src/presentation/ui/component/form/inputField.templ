@@ -13,14 +13,17 @@ templ InputField(inputSettings InputFieldSettings) {
 	<!-- InputField -->
 	<fieldset class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40">
 		if inputSettings.Label != "" {
-			<legend class="ml-1.5 px-1 text-xs font-bold text-neutral-50/80">
+			<legend
+				class="ml-1.5 px-1 text-xs font-bold text-neutral-50/80 transition-opacity"
+				:class={ inputSettings.BindValuePath + ` == '' && 'opacity-0 !p-0 w-0 h-3.5'` }
+			>
 				{ inputSettings.Label }
 				if inputSettings.IsRequired {
 					<span class="text-red-700">*</span>
 				}
 			</legend>
 		}
-		{{ inputClasses := "w-full bg-transparent text-neutral-100 placeholder-transparent outline-none px-2 pb-2 text-sm" }}
+		{{ inputClasses := "w-full bg-transparent text-neutral-100 placeholder-text-neutral-50 placeholder-text-opacity-80 outline-none px-2 pb-2 text-sm transition-all" }}
 		if inputSettings.IsReadOnly {
 			{{ inputClasses += " text-neutral-400 cursor-not-allowed" }}
 		}
