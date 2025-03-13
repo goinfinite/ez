@@ -709,7 +709,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		enctype="multipart/form-data"
 		class="space-y-4"
 	>
-		@componentForm.InputField(componentForm.InputFieldDto{
+		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType: "text", Id: "hostname", Label: "Hostname",
 			BindValuePath: "container.hostname", IsRequired: true,
 		})
@@ -817,7 +817,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			createDto.ContainerProfileSearchableItems,
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			@componentForm.InputField(componentForm.InputFieldDto{
+			@componentForm.InputField(componentForm.InputFieldSettings{
 				InputType: "text", Id: "entrypoint", Label: "Entrypoint",
 				BindValuePath: "container.entrypoint",
 			})
@@ -1084,23 +1084,47 @@ templ ResourceUsageCharts() {
 
 templ SystemInformation() {
 	<div class="bg-ez-800 mt-4 grid grid-cols-3 gap-4 rounded-md p-4">
-		@componentForm.InputFieldReadOnly(
-			"text", "hostname", "Server Hostname", "sysInfo.serverHostname",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "cpuModel", "CPU", "sysInfo.cpuModel",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "memoryRamGibibytes", "Memory (RAM)", "sysInfo.memoryRamGibibytes",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "publicIpAddress", "Public IP Address", "sysInfo.publicIpAddress",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "privateIpAddress", "Private IP Address", "sysInfo.privateIpAddress",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "uptimeRelativeStr", "Server Uptime", "sysInfo.uptimeRelative",
-		)
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "serverHostname",
+			Label:         "Server Hostname",
+			BindValuePath: "sysInfo.serverHostname",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "cpuModel",
+			Label:         "CPU",
+			BindValuePath: "sysInfo.cpuModel",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "memoryRamGibibytes",
+			Label:         "Memory (RAM)",
+			BindValuePath: "sysInfo.memoryRamGibibytes",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "publicIpAddress",
+			Label:         "Public IP Address",
+			BindValuePath: "sysInfo.publicIpAddress",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "privateIpAddress",
+			Label:         "Private IP Address",
+			BindValuePath: "sysInfo.privateIpAddress",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "uptimeRelativeStr",
+			Label:         "Server Uptime",
+			BindValuePath: "sysInfo.uptimeRelative",
+			IsReadOnly:    true,
+		})
 	</div>
 }

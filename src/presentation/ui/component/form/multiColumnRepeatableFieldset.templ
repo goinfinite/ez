@@ -119,7 +119,7 @@ templ MultiColumnRepeatableFieldset(
 							Options: repeatableField.Options,
 						})
 					case "text":
-						@InputField(InputFieldDto{
+						@InputField(InputFieldSettings{
 							InputType: repeatableField.InputType, Label: repeatableField.Label,
 							BindValuePath: "newFieldset['" + repeatableField.Id + "']",
 						})
