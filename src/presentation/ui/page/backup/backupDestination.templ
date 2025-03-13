@@ -332,25 +332,40 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 	</form>
 }
 
-templ NewDestinationEncryptionKeyModalContent() {
-	<!-- NewDestinationEncryptionKeyModalContent -->
+templ CreateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
+	<!-- CreateBackupDestinationModal -->
+	@componentStructural.RegularModal(
+		"Create Backup Destination", "isCreateDestinationModalOpen",
+		"closeCreateDestinationModal()", "",
+	) {
+		@CreateBackupDestinationForm(createDto)
+	}
+}
+
+templ NewlyDestinationEncryptionKeyModalContent() {
+	<!-- NewlyDestinationEncryptionKeyModalContent -->
+	<p>The destination has been created successfully!</p>
+	<p class="my-4">
+		Here is the encryption key that will be used to encrypt the backups:
+	</p>
 	@componentForm.TextArea(componentForm.TextAreaSettings{
 		Label:         "Encryption Key",
-		BindModelPath: "destinationEntity.encryptionKey",
+		BindModelPath: "newlyCreatedDestinationEncryptionKey",
 		IsReadOnly:    true,
 	})
 	@componentStructural.Alert(
 		componentStructural.AlertTypeWarning,
-		"This encryption key will be used to encrypt the backup data on the destination. Please save it securely, as you will not be able to retrieve the backup if the key is lost.",
+		"Please save it securely, as you will not be able to retrieve the backups manually if the key is lost and the server is unavailable.",
 	)
 }
 
-templ CreateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
-	<!-- CreateBackupDestinationModal -->
+templ NewlyDestinationEncryptionKeyModal() {
+	<!-- NewlyDestinationEncryptionKeyModal -->
 	@componentStructural.RegularModal(
-		"Create Backup Destination", "isCreateDestinationModalOpen", "closeCreateDestinationModal()", "",
+		"Backup Destination Encrypt Key", "isNewlyDestinationEncryptionKeyModalOpen",
+		"closeNewlyDestinationEncryptionKeyModal()", "",
 	) {
-		@CreateBackupDestinationForm(createDto)
+		@NewlyDestinationEncryptionKeyModalContent()
 	}
 }
 
@@ -1034,6 +1049,7 @@ templ BackupDestinations(
 		</div>
 		@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
 		@CreateBackupDestinationModal(createDestinationModalDto)
+		@NewlyDestinationEncryptionKeyModal()
 		@UpdateBackupDestinationModal(createDestinationModalDto)
 		@componentStructural.DeleteModal(
 			"isDeleteDestinationModalOpen", "closeDeleteDestinationModal()", "deleteDestination()",

@@ -290,7 +290,7 @@ document.addEventListener("alpine:init", () => {
       this.isNewlyDestinationEncryptionKeyModalOpen = true;
     },
     closeNewlyDestinationEncryptionKeyModal() {
-      this.newlyCreatedDestinationEncryption = "";
+      this.newlyCreatedDestinationEncryptionKey = "";
       this.isNewlyDestinationEncryptionKeyModalOpen = false;
       this.$dispatch("create:backup-destination");
     },
