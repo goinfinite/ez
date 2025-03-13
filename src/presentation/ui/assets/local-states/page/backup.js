@@ -144,7 +144,7 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("backupJobs", () => ({
     // Primary State
     jobEntity: {},
-    createJob: {},
+    createJobPayload: {},
     resetPrimaryState() {
       this.jobEntity = {
         destinationIds: [],
@@ -153,7 +153,7 @@ document.addEventListener("alpine:init", () => {
         containerIds: [],
         exceptContainerIds: [],
       };
-      this.createJob = {
+      this.createJobPayload = {
         backupSchedule: "0 0 * * *",
         destinationIds: [],
         retentionStrategy: "full",

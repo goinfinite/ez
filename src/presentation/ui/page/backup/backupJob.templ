@@ -28,14 +28,14 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 	>
 		<div class="flex w-full flex-row items-center gap-6">
 			<div class="w-1/2">
-				@componentForm.CronScheduleInput("backupSchedule", "createJob.backupSchedule")
+				@componentForm.CronScheduleInput("backupSchedule", "createJobPayload.backupSchedule")
 			</div>
 			<div class="w-1/2">
 				@componentForm.MultiSelectInputWithLabelValuePair(
 					componentForm.MultiSelectInputWithLabelValuePairDto{
 						Id:                    "destinationIds",
 						Label:                 "DestinationIds",
-						SelectedModelBindPath: "createJob.destinationIds",
+						SelectedModelBindPath: "createJobPayload.destinationIds",
 						Options:               createDto.BackupDestinationSelectLabelValuePairs,
 						IsRequired:            true,
 					},
@@ -47,7 +47,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				@componentForm.SelectInput(componentForm.SelectInputDto{
 					Id:            "retentionStrategy",
 					Label:         "Retention Strategy",
-					ModelBindPath: "createJob.retentionStrategy",
+					ModelBindPath: "createJobPayload.retentionStrategy",
 					Options:       []string{valueObject.BackupRetentionStrategyFull.String()},
 					IsRequired:    true,
 				})
@@ -57,7 +57,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 					InputType:     "number",
 					Id:            "maxTaskRetentionDays",
 					Label:         "Max Task Retention Days",
-					ModelBindPath: "createJob.maxTaskRetentionDays",
+					ModelBindPath: "createJobPayload.maxTaskRetentionDays",
 					IsRequired:    false,
 				})
 			</div>
@@ -66,7 +66,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 					InputType:     "number",
 					Id:            "maxTaskRetentionCount",
 					Label:         "Max Task Retention Count",
-					ModelBindPath: "createJob.maxTaskRetentionCount",
+					ModelBindPath: "createJobPayload.maxTaskRetentionCount",
 					IsRequired:    false,
 				})
 			</div>
@@ -75,7 +75,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 			@componentForm.TextArea(componentForm.TextAreaSettings{
 				Id:            "jobDescription",
 				Label:         "Description",
-				ModelBindPath: "createJob.jobDescription",
+				ModelBindPath: "createJobPayload.jobDescription",
 			})
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
@@ -94,7 +94,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 							componentForm.MultiSelectInputWithLabelValuePairDto{
 								Id:                    "containerAccountIds",
 								Label:                 "AccountIds",
-								SelectedModelBindPath: "createJob.containerAccountIds",
+								SelectedModelBindPath: "createJobPayload.containerAccountIds",
 								Options:               createDto.AccountSelectLabelValuePairs,
 							},
 						)
@@ -102,7 +102,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 							componentForm.MultiSelectInputWithLabelValuePairDto{
 								Id:                    "containerIds",
 								Label:                 "ContainerIds",
-								SelectedModelBindPath: "createJob.containerIds",
+								SelectedModelBindPath: "createJobPayload.containerIds",
 								Options:               createDto.ContainerSelectLabelValuePairs,
 							},
 						)
@@ -112,7 +112,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 							componentForm.MultiSelectInputWithLabelValuePairDto{
 								Id:                    "exceptContainerAccountIds",
 								Label:                 "ExceptAccountIds",
-								SelectedModelBindPath: "createJob.exceptContainerAccountIds",
+								SelectedModelBindPath: "createJobPayload.exceptContainerAccountIds",
 								Options:               createDto.AccountSelectLabelValuePairs,
 							},
 						)
@@ -120,7 +120,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 							componentForm.MultiSelectInputWithLabelValuePairDto{
 								Id:                    "exceptContainerIds",
 								Label:                 "ExceptContainerIds",
-								SelectedModelBindPath: "createJob.exceptContainerIds",
+								SelectedModelBindPath: "createJobPayload.exceptContainerIds",
 								Options:               createDto.ContainerSelectLabelValuePairs,
 							},
 						)
@@ -133,13 +133,13 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 						componentForm.SelectInputWithLabelValuePairDto{
 							Id:                    "accountId",
 							Label:                 "Account (Job Owner)",
-							SelectedModelBindPath: "createJob.accountId",
+							SelectedModelBindPath: "createJobPayload.accountId",
 							Options:               createDto.AccountSelectLabelValuePairs,
 						})
 				</div>
 				<div class="w-1/2">
 					@componentForm.CompressionFormatSelectInput(
-						"archiveCompressionFormat", "createJob.archiveCompressionFormat",
+						"archiveCompressionFormat", "createJobPayload.archiveCompressionFormat",
 					)
 				</div>
 			</div>
@@ -149,7 +149,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 						componentForm.SelectInputWithLabelValuePairDto{
 							Id:                    "timeoutSecs",
 							Label:                 "Timeout",
-							SelectedModelBindPath: "createJob.timeoutSecs",
+							SelectedModelBindPath: "createJobPayload.timeoutSecs",
 							Options: []componentForm.SelectLabelValuePair{
 								{Label: "1 Hour", Value: "3600"},
 								{Label: "3 Hours", Value: "10800"},
@@ -169,7 +169,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 						InputType:     "number",
 						Id:            "maxConcurrentCpuCores",
 						Label:         "Max Concurrent CPU Cores",
-						ModelBindPath: "createJob.maxConcurrentCpuCores",
+						ModelBindPath: "createJobPayload.maxConcurrentCpuCores",
 						IsRequired:    false,
 					})
 				</div>
