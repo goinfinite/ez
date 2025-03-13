@@ -113,8 +113,8 @@ templ ReadRequestSettingsBar(
 					componentForm.SelectInputClientSideOptionsDto{
 						Id:                    entityName + "SortBy",
 						Label:                 "sort by",
-						SelectedBindValuePath: "pagination.sortBy",
-						OptionsBindValuePath:  "entityFieldKeys",
+						SelectedModelBindPath: "pagination.sortBy",
+						OptionsModelBindPath:  "entityFieldKeys",
 						DenseMode:             true,
 					},
 				)

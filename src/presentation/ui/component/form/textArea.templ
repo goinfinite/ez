@@ -3,7 +3,7 @@ package componentForm
 type TextAreaSettings struct {
 	Id            string
 	Label         string
-	BindModelPath string
+	ModelBindPath string
 	IsReadOnly    bool
 }
 
@@ -15,8 +15,8 @@ templ TextArea(inputSettings TextAreaSettings) {
 				id={ inputSettings.Id }
 				name={ inputSettings.Id }
 			}
-			if inputSettings.BindModelPath != "" {
-				x-model:value={ inputSettings.BindModelPath }
+			if inputSettings.ModelBindPath != "" {
+				x-model:value={ inputSettings.ModelBindPath }
 			}
 			placeholder={ inputSettings.Label }
 			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 min-h-24 peer relative w-full rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
@@ -34,11 +34,11 @@ templ TextArea(inputSettings TextAreaSettings) {
 		<div class="text-md absolute right-1.5 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
 			<i
 				class="ph-bold ph-clipboard-text bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ "navigator.clipboard.writeText(" + inputSettings.BindModelPath + ")" }
+				@click.prevent={ "navigator.clipboard.writeText(" + inputSettings.ModelBindPath + ")" }
 			></i>
 			<i
 				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ inputSettings.BindModelPath + " = ''" }
+				@click.prevent={ inputSettings.ModelBindPath + " = ''" }
 			></i>
 		</div>
 	</div>

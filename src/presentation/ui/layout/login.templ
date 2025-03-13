@@ -84,7 +84,7 @@ templ Login() {
 						InputType:     "text",
 						Id:            "username",
 						Label:         "Username",
-						BindValuePath: "username",
+						ModelBindPath: "username",
 					})
 					@componentForm.PasswordInput("password", "Password", "password", false, false)
 					@componentStructural.IconButton(componentStructural.IconButtonSettings{

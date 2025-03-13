@@ -41,7 +41,7 @@ func readPaginationPageNumbers(paginationDto dto.Pagination) []int {
 templ Pagination(
 	componentId string,
 	paginationDto dto.Pagination,
-	selectedPageNumberBindValuePath, selectedItemsPerPageBindValuePath string,
+	selectedPageNumberModelBindPath, selectedItemsPerPageModelBindPath string,
 ) {
 	<!-- Pagination -->
 	<div class="flex flex-row items-center justify-items-stretch">
@@ -49,14 +49,14 @@ templ Pagination(
 			if paginationDto.PageNumber > 0 {
 				<a
 					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px] leading-tight"
-					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)-1) + "; $dispatch('update:" + componentId + "-pagination')" }
+					@click={ selectedPageNumberModelBindPath + " = " + strconv.Itoa(int(paginationDto.PageNumber)-1) + "; $dispatch('update:" + componentId + "-pagination')" }
 				>
 					<i class="ph-bold ph-caret-double-left"></i>
 				</a>
 			}
 			for pageNumber := range readPaginationPageNumbers(paginationDto) {
 				<a
-					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(pageNumber) + "; $dispatch('update:" + componentId + "-pagination')" }
+					@click={ selectedPageNumberModelBindPath + " = " + strconv.Itoa(pageNumber) + "; $dispatch('update:" + componentId + "-pagination')" }
 					if pageNumber == int(paginationDto.PageNumber) {
 						class="border-1 border-ez-400 bg-ez-400 hover:bg-ez-200 cursor-pointer rounded-sm px-1.5 py-1 text-xs font-bold"
 					} else {
@@ -69,7 +69,7 @@ templ Pagination(
 			if paginationDto.PagesTotal != nil && paginationDto.PageNumber < *paginationDto.PagesTotal-1 {
 				<a
 					class="hover:bg-ez-200 h-5 cursor-pointer rounded-sm p-1 text-[10px] leading-tight"
-					@click={ selectedPageNumberBindValuePath + " = " + strconv.Itoa(int(paginationDto.PageNumber)+1) + "; $dispatch('update:" + componentId + "-pagination')" }
+					@click={ selectedPageNumberModelBindPath + " = " + strconv.Itoa(int(paginationDto.PageNumber)+1) + "; $dispatch('update:" + componentId + "-pagination')" }
 				>
 					<i class="ph-bold ph-caret-double-right"></i>
 				</a>
@@ -80,7 +80,7 @@ templ Pagination(
 				componentForm.SelectInputDto{
 					Id:                componentId + "ItemsPerPage",
 					Label:             "per page",
-					BindValuePath:     selectedItemsPerPageBindValuePath,
+					ModelBindPath:     selectedItemsPerPageModelBindPath,
 					Options:           []string{"5", "10", "30", "50"},
 					DenseMode:         true,
 					DispatchEventName: "update:" + componentId + "-pagination",

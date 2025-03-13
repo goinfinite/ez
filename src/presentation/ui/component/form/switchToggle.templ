@@ -21,7 +21,7 @@ type SwitchToggleDto struct {
 	LabelPosition string
 	Shape         string
 	Size          string
-	BindModelPath string
+	ModelBindPath string
 	CustomValue   string
 }
 
@@ -31,7 +31,7 @@ templ SwitchToggle(inputDto SwitchToggleDto) {
 		<input
 			type="checkbox"
 			name={ inputDto.Id }
-			x-model={ inputDto.BindModelPath }
+			x-model={ inputDto.ModelBindPath }
 			if inputDto.CustomValue != "" {
 				value={ inputDto.CustomValue }
 			}

@@ -28,12 +28,12 @@ func transformCompressionFormatsIntoSelectPairs() []SelectLabelValuePair {
 	return selectLabelValuePairs
 }
 
-templ CompressionFormatSelectInput(id, bindValuePath string) {
+templ CompressionFormatSelectInput(id, modelBindPath string) {
 	@SelectInputWithLabelValuePair(SelectInputWithLabelValuePairDto{
 		Id:                    id,
 		Label:                 "Compression Format",
 		Size:                  "xs",
-		SelectedBindValuePath: bindValuePath,
+		SelectedModelBindPath: modelBindPath,
 		Options:               transformCompressionFormatsIntoSelectPairs(),
 	})
 }

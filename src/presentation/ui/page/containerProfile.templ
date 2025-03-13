@@ -441,7 +441,7 @@ templ ContainerProfileForm(action string) {
 		}
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType: "text", Id: "name", Label: "Profile Name",
-			BindValuePath: "containerProfile.name", IsRequired: true,
+			ModelBindPath: "containerProfile.name", IsRequired: true,
 		})
 		<div class="flex flex-row gap-4">
 			<div class="space-y-5.5 bg-ez-500 w-1/2 rounded-md p-4">
@@ -502,7 +502,7 @@ templ ContainerProfileForm(action string) {
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.SelectInput(componentForm.SelectInputDto{
 				Id: "scalingPolicy", Label: "Scaling Policy",
-				BindValuePath: "containerProfile.scalingPolicy",
+				ModelBindPath: "containerProfile.scalingPolicy",
 				Options:       valueObject.ValidScalingPolicies,
 			})
 			<div class="flex flex-row space-x-6">

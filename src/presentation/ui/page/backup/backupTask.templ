@@ -37,8 +37,8 @@ templ CreateBackupTaskArchiveForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "containerAccountIds",
 							Label:                 "ContainerAccountIds",
-							SelectedBindValuePath: "createTaskArchive.containerAccountIds",
-							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							SelectedModelBindPath: "createTaskArchive.containerAccountIds",
+							OptionsModelBindPath:  "taskEntity.containerAccountIds",
 							IsRequired:            false,
 						},
 					)
@@ -46,8 +46,8 @@ templ CreateBackupTaskArchiveForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "containerIds",
 							Label:                 "ContainerIds",
-							SelectedBindValuePath: "createTaskArchive.containerIds",
-							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							SelectedModelBindPath: "createTaskArchive.containerIds",
+							OptionsModelBindPath:  "taskEntity.successfulContainerIds",
 							IsRequired:            false,
 						},
 					)
@@ -57,8 +57,8 @@ templ CreateBackupTaskArchiveForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "exceptContainerAccountIds",
 							Label:                 "ExceptContainerAccountIds",
-							SelectedBindValuePath: "createTaskArchive.exceptContainerAccountIds",
-							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							SelectedModelBindPath: "createTaskArchive.exceptContainerAccountIds",
+							OptionsModelBindPath:  "taskEntity.containerAccountIds",
 							IsRequired:            false,
 						},
 					)
@@ -66,8 +66,8 @@ templ CreateBackupTaskArchiveForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "exceptContainerIds",
 							Label:                 "ExceptContainerIds",
-							SelectedBindValuePath: "createTaskArchive.exceptContainerIds",
-							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							SelectedModelBindPath: "createTaskArchive.exceptContainerIds",
+							OptionsModelBindPath:  "taskEntity.successfulContainerIds",
 							IsRequired:            false,
 						},
 					)
@@ -79,7 +79,7 @@ templ CreateBackupTaskArchiveForm() {
 				InputType:     "number",
 				Id:            "timeoutSecs",
 				Label:         "Timeout (seconds)",
-				BindValuePath: "createTaskArchive.timeoutSecs",
+				ModelBindPath: "createTaskArchive.timeoutSecs",
 				IsRequired:    false,
 			})
 		}
@@ -118,12 +118,12 @@ templ RestoreBackupTaskForm() {
 		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 			Id:            "shouldReplaceExistingContainers",
 			Label:         "<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
-			BindModelPath: "restoreTask.shouldReplaceExistingContainers",
+			ModelBindPath: "restoreTask.shouldReplaceExistingContainers",
 		})
 		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 			Id:            "shouldRestoreMappings",
 			Label:         "Try to restore the container's original mappings instead of using the container exposed ports.",
-			BindModelPath: "restoreTask.shouldRestoreMappings",
+			ModelBindPath: "restoreTask.shouldRestoreMappings",
 		})
 		<div class="bg-ez-500 space-y-5.5 rounded-md p-4">
 			<div>
@@ -138,8 +138,8 @@ templ RestoreBackupTaskForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "containerAccountIds",
 							Label:                 "ContainerAccountIds",
-							SelectedBindValuePath: "restoreTask.containerAccountIds",
-							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							SelectedModelBindPath: "restoreTask.containerAccountIds",
+							OptionsModelBindPath:  "taskEntity.containerAccountIds",
 							IsRequired:            false,
 						},
 					)
@@ -147,8 +147,8 @@ templ RestoreBackupTaskForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "containerIds",
 							Label:                 "ContainerIds",
-							SelectedBindValuePath: "restoreTask.containerIds",
-							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							SelectedModelBindPath: "restoreTask.containerIds",
+							OptionsModelBindPath:  "taskEntity.successfulContainerIds",
 							IsRequired:            false,
 						},
 					)
@@ -158,8 +158,8 @@ templ RestoreBackupTaskForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "exceptContainerAccountIds",
 							Label:                 "ExceptContainerAccountIds",
-							SelectedBindValuePath: "restoreTask.exceptContainerAccountIds",
-							OptionsBindValuePath:  "taskEntity.containerAccountIds",
+							SelectedModelBindPath: "restoreTask.exceptContainerAccountIds",
+							OptionsModelBindPath:  "taskEntity.containerAccountIds",
 							IsRequired:            false,
 						},
 					)
@@ -167,8 +167,8 @@ templ RestoreBackupTaskForm() {
 						componentForm.MultiSelectInputWithLabelValuePairDto{
 							Id:                    "exceptContainerIds",
 							Label:                 "ExceptContainerIds",
-							SelectedBindValuePath: "restoreTask.exceptContainerIds",
-							OptionsBindValuePath:  "taskEntity.successfulContainerIds",
+							SelectedModelBindPath: "restoreTask.exceptContainerIds",
+							OptionsModelBindPath:  "taskEntity.successfulContainerIds",
 							IsRequired:            false,
 						},
 					)
@@ -180,7 +180,7 @@ templ RestoreBackupTaskForm() {
 				InputType:     "number",
 				Id:            "timeoutSecs",
 				Label:         "Timeout (seconds)",
-				BindValuePath: "restoreTask.timeoutSecs",
+				ModelBindPath: "restoreTask.timeoutSecs",
 				IsRequired:    false,
 			})
 		}
@@ -462,19 +462,19 @@ templ RestoreBackupTaskArchiveForm() {
 		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 			Id:            "shouldReplaceExistingContainers",
 			Label:         "<small class='text-amber-500'>(CAUTION)</small> If container already exists, delete and replace it with the restored one.",
-			BindModelPath: "restoreTaskArchive.shouldReplaceExistingContainers",
+			ModelBindPath: "restoreTaskArchive.shouldReplaceExistingContainers",
 		})
 		@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 			Id:            "shouldRestoreMappings",
 			Label:         "Try to restore the container's original mappings instead of using the container exposed ports.",
-			BindModelPath: "restoreTaskArchive.shouldRestoreMappings",
+			ModelBindPath: "restoreTaskArchive.shouldRestoreMappings",
 		})
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
 				InputType:     "number",
 				Id:            "timeoutSecs",
 				Label:         "Timeout (seconds)",
-				BindValuePath: "restoreTaskArchive.timeoutSecs",
+				ModelBindPath: "restoreTaskArchive.timeoutSecs",
 				IsRequired:    false,
 			})
 		}

@@ -3,7 +3,7 @@ package componentForm
 type MultiSelectInputDto struct {
 	Id                       string
 	Label                    string
-	SelectedBindValuePath    string
+	SelectedModelBindPath    string
 	Options                  []string
 	IsRequired               bool
 	ShouldIncludeBlankOption bool
@@ -18,8 +18,8 @@ templ MultiSelectInput(inputDto MultiSelectInputDto) {
 				id={ inputDto.Id }
 				name={ inputDto.Id }
 			}
-			if inputDto.SelectedBindValuePath != "" {
-				x-model={ inputDto.SelectedBindValuePath }
+			if inputDto.SelectedModelBindPath != "" {
+				x-model={ inputDto.SelectedModelBindPath }
 			}
 			if inputDto.Label != "" {
 				placeholder={ inputDto.Label }
@@ -56,7 +56,7 @@ templ MultiSelectInput(inputDto MultiSelectInputDto) {
 		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
 			<i
 				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ inputDto.SelectedBindValuePath + " = []" }
+				@click.prevent={ inputDto.SelectedModelBindPath + " = []" }
 			></i>
 		</div>
 	</div>
@@ -66,9 +66,9 @@ type MultiSelectInputWithLabelValuePairDto struct {
 	Id                    string
 	Label                 string
 	Size                  string
-	SelectedBindValuePath string
+	SelectedModelBindPath string
 	Options               []SelectLabelValuePair
-	OptionsBindValuePath  string
+	OptionsModelBindPath  string
 	IsRequired            bool
 }
 
@@ -100,24 +100,24 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 			for _, option := range inputDto.Options {
 				<div
 					class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
-					@click={ "if (!" + inputDto.SelectedBindValuePath + ".some((item) => item == `" + option.Value + "`)) { " + inputDto.SelectedBindValuePath + ".push(`" + option.Value + "`); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item != `" + option.Value + "`); }" }
+					@click={ "if (!" + inputDto.SelectedModelBindPath + ".some((item) => item == `" + option.Value + "`)) { " + inputDto.SelectedModelBindPath + ".push(`" + option.Value + "`); } else { " + inputDto.SelectedModelBindPath + " = " + inputDto.SelectedModelBindPath + ".filter((item) => item != `" + option.Value + "`); }" }
 				>
 					<i
 						class="ph-duotone text-xl"
-						:class={ inputDto.SelectedBindValuePath + `.some((item) => item == "` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
+						:class={ inputDto.SelectedModelBindPath + `.some((item) => item == "` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
 					></i>
 					<span class="truncate">{ option.Label }</span>
 				</div>
 			}
-			if inputDto.OptionsBindValuePath != "" {
-				<template x-for={ "selectableOption in " + inputDto.OptionsBindValuePath }>
+			if inputDto.OptionsModelBindPath != "" {
+				<template x-for={ "selectableOption in " + inputDto.OptionsModelBindPath }>
 					<div
 						class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
-						@click={ "if (!" + inputDto.SelectedBindValuePath + ".some((item) => item == selectableOption)) { " + inputDto.SelectedBindValuePath + ".push(selectableOption); } else { " + inputDto.SelectedBindValuePath + " = " + inputDto.SelectedBindValuePath + ".filter((item) => item != selectableOption); }" }
+						@click={ "if (!" + inputDto.SelectedModelBindPath + ".some((item) => item == selectableOption)) { " + inputDto.SelectedModelBindPath + ".push(selectableOption); } else { " + inputDto.SelectedModelBindPath + " = " + inputDto.SelectedModelBindPath + ".filter((item) => item != selectableOption); }" }
 					>
 						<i
 							class="ph-duotone text-xl"
-							:class={ inputDto.SelectedBindValuePath + `.some((item) => item == selectableOption) ? "ph-check-square text-infinite-500" : "ph-square"` }
+							:class={ inputDto.SelectedModelBindPath + `.some((item) => item == selectableOption) ? "ph-check-square text-infinite-500" : "ph-square"` }
 						></i>
 						<span class="truncate" x-text="selectableOption"></span>
 					</div>
@@ -130,8 +130,8 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 				name={ inputDto.Id }
 			}
 			class="hidden"
-			if inputDto.SelectedBindValuePath != "" {
-				x-model:value={ inputDto.SelectedBindValuePath }
+			if inputDto.SelectedModelBindPath != "" {
+				x-model:value={ inputDto.SelectedModelBindPath }
 			}
 		/>
 		if inputDto.Label != "" {
@@ -148,10 +148,10 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 			</label>
 		}
 		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
-			{{ selectAllOnClick := inputDto.SelectedBindValuePath + " = " + inputDto.OptionsBindValuePath }}
-			if inputDto.OptionsBindValuePath == "" {
+			{{ selectAllOnClick := inputDto.SelectedModelBindPath + " = " + inputDto.OptionsModelBindPath }}
+			if inputDto.OptionsModelBindPath == "" {
 				{{ labelValuePairsValuesStr, _ := templ.JSONString(labelValuePairsValueExtractor(inputDto.Options)) }}
-				{{ selectAllOnClick = inputDto.SelectedBindValuePath + " = " + labelValuePairsValuesStr }}
+				{{ selectAllOnClick = inputDto.SelectedModelBindPath + " = " + labelValuePairsValuesStr }}
 			}
 			<i
 				class="ph-bold ph-list-checks bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
@@ -159,7 +159,7 @@ templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValue
 			></i>
 			<i
 				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ inputDto.SelectedBindValuePath + " = []" }
+				@click.prevent={ inputDto.SelectedModelBindPath + " = []" }
 			></i>
 		</div>
 	</div>

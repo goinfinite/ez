@@ -1,7 +1,7 @@
 package componentForm
 
 templ NumberRangeInputField(
-	id, label, unitSuffix, min, max, step, bindValuePath string,
+	id, label, unitSuffix, min, max, step, modelBindPath string,
 ) {
 	<div>
 		if label != "" {
@@ -14,7 +14,7 @@ templ NumberRangeInputField(
 					type="number"
 					class="hover:border-ez-100 bg-ez-300 border-ez-200 focus-visible:border-ez-50 peer relative block w-full rounded-md border p-2.5 text-sm text-neutral-50 placeholder-neutral-400 outline-none duration-300"
 					placeholder="0"
-					x-model:value={ bindValuePath }
+					x-model:value={ modelBindPath }
 				/>
 				if unitSuffix != "" {
 					<span class="absolute right-2 text-[10px] text-neutral-400 hover:hidden peer-hover:hidden">{ unitSuffix }</span>
@@ -27,7 +27,7 @@ templ NumberRangeInputField(
 					min={ min }
 					max={ max }
 					step={ step }
-					x-model:value={ bindValuePath }
+					x-model:value={ modelBindPath }
 					class="h-2 w-full cursor-pointer appearance-none rounded-sm bg-transparent bg-opacity-50 bg-gradient-to-r from-emerald-300/50 via-amber-300/50 to-red-600/50 accent-neutral-200 hover:from-emerald-300/75 hover:via-amber-300/75 hover:to-red-600/75 hover:accent-white focus:outline-none active:from-emerald-300/75 active:via-amber-300/75 active:to-red-600/75 active:accent-white"
 				/>
 				<span class="float-left text-xs text-neutral-400">{ min }</span>

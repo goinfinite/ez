@@ -3,7 +3,7 @@ package componentForm
 templ CronPredefinedInput(bindModelPath string) {
 	@SelectInputWithLabelValuePair(SelectInputWithLabelValuePairDto{
 		Label:                 "Predefined Schedule",
-		SelectedBindValuePath: bindModelPath,
+		SelectedModelBindPath: bindModelPath,
 		Options: []SelectLabelValuePair{
 			{Label: "Hourly", Value: "@hourly"},
 			{Label: "Every 3 hours", Value: "0 */3 * * *"},
@@ -141,12 +141,12 @@ templ CronScheduleInput(id, bindModelPath string) {
 			@RadioInput(RadioInputDto{
 				Label:         "Predefined",
 				BindValue:     "predefined",
-				BindModelPath: "selectedScheduleType",
+				ModelBindPath: "selectedScheduleType",
 			})
 			@RadioInput(RadioInputDto{
 				Label:         "Custom",
 				BindValue:     "custom",
-				BindModelPath: "selectedScheduleType",
+				ModelBindPath: "selectedScheduleType",
 			})
 		</div>
 		<input

@@ -711,7 +711,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 	>
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType: "text", Id: "hostname", Label: "Hostname",
-			BindValuePath: "container.hostname", IsRequired: true,
+			ModelBindPath: "container.hostname", IsRequired: true,
 		})
 		<!-- ContainerSource & LaunchScript -->
 		<div class="border-ez-200 flex flex-col gap-4 rounded-md border p-3">
@@ -721,7 +721,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					@componentForm.RadioInput(componentForm.RadioInputDto{
 						Label:         sourceOption,
 						BindValue:     sourceOption,
-						BindModelPath: "createContainerSourceSelectedOption",
+						ModelBindPath: "createContainerSourceSelectedOption",
 					})
 				}
 			</div>
@@ -793,7 +793,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
 					Id:            "useImageExposedPorts",
 					Label:         "Map the image's exposed ports (if any) as \"Port Bindings\".",
-					BindModelPath: "container.useImageExposedPorts",
+					ModelBindPath: "container.useImageExposedPorts",
 				})
 			</div>
 			<div>
@@ -805,7 +805,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				/>
 				@componentForm.TextArea(componentForm.TextAreaSettings{
 					Label:         "Launch Script",
-					BindModelPath: "container.launchScript",
+					ModelBindPath: "container.launchScript",
 				})
 				<p class="-mt-0.5 px-1.5 text-[11px] text-neutral-50 text-opacity-50">
 					Optional; one command per line. Executed only on initial container deployment, useful to install dependencies and configure the environment.
@@ -819,7 +819,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
 				InputType: "text", Id: "entrypoint", Label: "Entrypoint",
-				BindValuePath: "container.entrypoint",
+				ModelBindPath: "container.entrypoint",
 			})
 			<div class="flex flex-row items-center gap-6">
 				<div class="basis-1/2">
@@ -827,7 +827,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 						componentForm.SelectInputWithLabelValuePairDto{
 							Id:                    "accountId",
 							Label:                 "Account",
-							SelectedBindValuePath: "container.accountId",
+							SelectedModelBindPath: "container.accountId",
 							Options:               createDto.AccountSelectLabelValuePairs,
 						},
 					)
@@ -835,7 +835,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				<div class="basis-1/2">
 					@componentForm.SelectInput(componentForm.SelectInputDto{
 						Id: "restartPolicy", Label: "Restart Policy",
-						BindValuePath: "container.restartPolicy",
+						ModelBindPath: "container.restartPolicy",
 						Options:       valueObject.ValidContainerRestartPolicies,
 					})
 				</div>
@@ -1088,42 +1088,42 @@ templ SystemInformation() {
 			InputType:     "text",
 			Id:            "serverHostname",
 			Label:         "Server Hostname",
-			BindValuePath: "sysInfo.serverHostname",
+			ModelBindPath: "sysInfo.serverHostname",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
 			Id:            "cpuModel",
 			Label:         "CPU",
-			BindValuePath: "sysInfo.cpuModel",
+			ModelBindPath: "sysInfo.cpuModel",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
 			Id:            "memoryRamGibibytes",
 			Label:         "Memory (RAM)",
-			BindValuePath: "sysInfo.memoryRamGibibytes",
+			ModelBindPath: "sysInfo.memoryRamGibibytes",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
 			Id:            "publicIpAddress",
 			Label:         "Public IP Address",
-			BindValuePath: "sysInfo.publicIpAddress",
+			ModelBindPath: "sysInfo.publicIpAddress",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
 			Id:            "privateIpAddress",
 			Label:         "Private IP Address",
-			BindValuePath: "sysInfo.privateIpAddress",
+			ModelBindPath: "sysInfo.privateIpAddress",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
 			Id:            "uptimeRelativeStr",
 			Label:         "Server Uptime",
-			BindValuePath: "sysInfo.uptimeRelative",
+			ModelBindPath: "sysInfo.uptimeRelative",
 			IsReadOnly:    true,
 		})
 	</div>

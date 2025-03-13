@@ -13,14 +13,14 @@ type RadioInputDto struct {
 	Label         string
 	Size          string
 	BindValue     string
-	BindModelPath string
+	ModelBindPath string
 }
 
 templ RadioInput(inputDto RadioInputDto) {
 	<!-- RadioInput -->
 	<div
 		class="hover:text-infinite-500 inline-flex items-center text-neutral-100"
-		@click={ inputDto.BindModelPath + ` = "` + inputDto.BindValue + `"` }
+		@click={ inputDto.ModelBindPath + ` = "` + inputDto.BindValue + `"` }
 	>
 		{{ labelTextSize := "text-sm" }}
 		switch inputDto.Size {
@@ -37,7 +37,7 @@ templ RadioInput(inputDto RadioInputDto) {
 		}
 		<label
 			class={ "flex flex-row gap-1 cursor-pointer items-center " + labelTextSize }
-			:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
+			:class={ `String(` + inputDto.ModelBindPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
 		>
 			if inputDto.Id != "" {
 				<input
@@ -45,7 +45,7 @@ templ RadioInput(inputDto RadioInputDto) {
 					id={ inputDto.Id }
 					name={ inputDto.Id }
 					value={ inputDto.BindValue }
-					x-model={ inputDto.BindModelPath }
+					x-model={ inputDto.ModelBindPath }
 					class="hidden"
 				/>
 			}
@@ -64,7 +64,7 @@ templ RadioInput(inputDto RadioInputDto) {
 			}
 			<i
 				class={ "ph-duotone " + iconSize }
-				:class={ `String(` + inputDto.BindModelPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle" : "ph-circle"` }
+				:class={ `String(` + inputDto.ModelBindPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle" : "ph-circle"` }
 			></i>
 			{ inputDto.Label }
 		</label>

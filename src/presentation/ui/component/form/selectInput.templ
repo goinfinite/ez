@@ -5,7 +5,7 @@ import componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/mis
 type SelectInputDto struct {
 	Id                       string
 	Label                    string
-	BindValuePath            string
+	ModelBindPath            string
 	Options                  []string
 	IsRequired               bool
 	DenseMode                bool
@@ -21,8 +21,8 @@ templ SelectInput(inputDto SelectInputDto) {
 				id={ inputDto.Id }
 				name={ inputDto.Id }
 			}
-			if inputDto.BindValuePath != "" {
-				x-model:value={ inputDto.BindValuePath }
+			if inputDto.ModelBindPath != "" {
+				x-model:value={ inputDto.ModelBindPath }
 			}
 			if inputDto.Label != "" {
 				placeholder={ inputDto.Label }
@@ -72,8 +72,8 @@ templ SelectInput(inputDto SelectInputDto) {
 type SelectInputClientSideOptionsDto struct {
 	Id                       string
 	Label                    string
-	SelectedBindValuePath    string
-	OptionsBindValuePath     string
+	SelectedModelBindPath    string
+	OptionsModelBindPath     string
 	IsRequired               bool
 	DenseMode                bool
 	ShouldIncludeBlankOption bool
@@ -88,8 +88,8 @@ templ SelectInputClientSideOptions(inputDto SelectInputClientSideOptionsDto) {
 				id={ inputDto.Id }
 				name={ inputDto.Id }
 			}
-			if inputDto.SelectedBindValuePath != "" {
-				x-model={ inputDto.SelectedBindValuePath }
+			if inputDto.SelectedModelBindPath != "" {
+				x-model={ inputDto.SelectedModelBindPath }
 			}
 			if inputDto.Label != "" {
 				placeholder={ inputDto.Label }
@@ -109,11 +109,11 @@ templ SelectInputClientSideOptions(inputDto SelectInputClientSideOptionsDto) {
 			if inputDto.ShouldIncludeBlankOption {
 				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value></option>
 			}
-			<template x-for={ "selectableOption in " + inputDto.OptionsBindValuePath }>
+			<template x-for={ "selectableOption in " + inputDto.OptionsModelBindPath }>
 				<option
 					class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90"
 					x-text="selectableOption"
-					:selected={ inputDto.SelectedBindValuePath + " === selectableOption" }
+					:selected={ inputDto.SelectedModelBindPath + " === selectableOption" }
 				></option>
 			</template>
 		</select>
@@ -149,7 +149,7 @@ type SelectInputWithLabelValuePairDto struct {
 	Id                       string
 	Label                    string
 	Size                     string
-	SelectedBindValuePath    string
+	SelectedModelBindPath    string
 	Options                  []SelectLabelValuePair
 	ShouldIncludeBlankOption bool
 }
@@ -175,8 +175,8 @@ templ SelectInputWithLabelValuePair(inputDto SelectInputWithLabelValuePairDto) {
 				id={ inputDto.Id }
 				name={ inputDto.Id }
 			}
-			if inputDto.SelectedBindValuePath != "" {
-				x-model:value={ inputDto.SelectedBindValuePath }
+			if inputDto.SelectedModelBindPath != "" {
+				x-model:value={ inputDto.SelectedModelBindPath }
 			}
 			placeholder={ inputDto.Label }
 			class={ "bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full appearance-none rounded-md border " + selectInputSize + " text-neutral-100 placeholder-transparent outline-none transition-all" }
@@ -282,7 +282,7 @@ func readSearchableSelectItemLabel(item SearchableSelectItem) templ.Component {
 }
 
 templ SearchableSelectInput(
-	id, label, bindValuePath string,
+	id, label, modelBindPath string,
 	searchableItems []SearchableSelectItem,
 ) {
 	<!-- SearchableSelectInput JavaScript -->
@@ -292,9 +292,9 @@ templ SearchableSelectInput(
 	<div
 		x-data={ id + "SearchableSelect" }
 		class="relative flex flex-col items-center"
-		x-init.debounce.300ms={ "$watch('" + bindValuePath + "', (newValue, prevValue) => { if (newValue !== prevValue) { setSelectedItem(newValue); } })" }
+		x-init.debounce.300ms={ "$watch('" + modelBindPath + "', (newValue, prevValue) => { if (newValue !== prevValue) { setSelectedItem(newValue); } })" }
 	>
-		<input type="hidden" id={ id } name={ id } x-model:value={ bindValuePath }/>
+		<input type="hidden" id={ id } name={ id } x-model:value={ modelBindPath }/>
 		<div
 			@click.away="closeDropdown()"
 			class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 relative flex h-10 w-full appearance-none rounded-md border px-3 text-sm text-neutral-100 outline-none transition-all"
@@ -316,7 +316,7 @@ templ SearchableSelectInput(
 			}
 			<i
 				x-show="userInput !== ''"
-				@click.prevent={ "resetState(); " + bindValuePath + " = ''" }
+				@click.prevent={ "resetState(); " + modelBindPath + " = ''" }
 				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
 			></i>
 			<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
@@ -330,7 +330,7 @@ templ SearchableSelectInput(
 					<div
 						x-show={ "filteredItems.has('" + searchableItem.Value + "')" }
 						class="hover:bg-ez-700 cursor-pointer p-2"
-						@click={ "setSelectedItem('" + searchableItem.Value + "'); " + bindValuePath + " = '" + searchableItem.Value + "'" }
+						@click={ "setSelectedItem('" + searchableItem.Value + "'); " + modelBindPath + " = '" + searchableItem.Value + "'" }
 					>
 						@readSearchableSelectItemLabel(searchableItem)
 					</div>
@@ -399,7 +399,7 @@ script RemoteSearchableSelectInputLocalState(id, remoteApiUrl, searchableQuery s
 }
 
 templ RemoteSearchableSelectInput(
-	id, label, bindValuePath, remoteApiUrl, searchableQuery, selectableKey string,
+	id, label, modelBindPath, remoteApiUrl, searchableQuery, selectableKey string,
 	tagKeys []string,
 ) {
 	<!-- RemoteSearchableSelectInput JavaScript -->
@@ -417,8 +417,8 @@ templ RemoteSearchableSelectInput(
 				id={ id }
 				name={ id }
 				placeholder={ label }
-				x-model:value.debounce.300ms={ bindValuePath }
-				@input.debounce.300ms={ "userInput = " + bindValuePath + "; updateSearchableItems()" }
+				x-model:value.debounce.300ms={ modelBindPath }
+				@input.debounce.300ms={ "userInput = " + modelBindPath + "; updateSearchableItems()" }
 				@mousedown="openDropdown()"
 				class="peer w-full appearance-none bg-transparent placeholder-transparent outline-none"
 			/>
@@ -430,8 +430,8 @@ templ RemoteSearchableSelectInput(
 				</label>
 			}
 			<i
-				x-show={ bindValuePath + ".length > 0" }
-				@click.prevent={ "resetState(); " + bindValuePath + " = ''" }
+				x-show={ modelBindPath + ".length > 0" }
+				@click.prevent={ "resetState(); " + modelBindPath + " = ''" }
 				class="ph-bold ph-x-circle right-7.5 absolute top-2.5 cursor-pointer text-xl text-neutral-200 hover:text-neutral-50"
 			></i>
 			<i class="ph-bold ph-caret-down pointer-events-none absolute right-2.5 top-3.5 text-sm"></i>
@@ -444,7 +444,7 @@ templ RemoteSearchableSelectInput(
 				<template x-for="selectableItem in searchableItems">
 					<div
 						class="hover:bg-ez-700 flex cursor-pointer flex-col gap-2 p-3.5"
-						@click={ "selectableKeyValue = selectableItem['" + selectableKey + "']; setSelectedItem(selectableKeyValue); " + bindValuePath + " = selectableKeyValue" }
+						@click={ "selectableKeyValue = selectableItem['" + selectableKey + "']; setSelectedItem(selectableKeyValue); " + modelBindPath + " = selectableKeyValue" }
 					>
 						<div>
 							<strong x-text={ "selectableItem['" + selectableKey + "']" }></strong>
