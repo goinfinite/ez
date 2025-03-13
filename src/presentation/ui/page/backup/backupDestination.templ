@@ -344,25 +344,27 @@ templ CreateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
 
 templ NewlyDestinationEncryptionKeyModalContent() {
 	<!-- NewlyDestinationEncryptionKeyModalContent -->
-	<p>The backup destination has been created successfully!</p>
-	<p class="my-4">
-		Here is the encryption key that will be used to encrypt the backups:
-	</p>
-	@componentForm.InputField(componentForm.InputFieldSettings{
-		Label:         "Encryption Key",
-		ModelBindPath: "newlyCreatedDestinationEncryptionKey",
-		IsReadOnly:    true,
-	})
-	@componentStructural.Alert(
-		componentStructural.AlertTypeWarning,
-		"Please save it securely, as you will not be able to retrieve the backups manually if the key is lost and the server is unavailable.",
-	)
+	<div class="space-y-3">
+		<p>The backup destination has been created successfully!</p>
+		<p class="text-sm">
+			The backups will be encrypted with the following key:
+		</p>
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			Label:         "Encryption Key",
+			ModelBindPath: "newlyCreatedDestinationEncryptionKey",
+			IsReadOnly:    true,
+		})
+		@componentStructural.Alert(
+			componentStructural.AlertTypeWarning,
+			"Please save it securely, as you will not be able to retrieve the backups manually if the key is lost and the server is unavailable.",
+		)
+	</div>
 }
 
 templ NewlyDestinationEncryptionKeyModal() {
 	<!-- NewlyDestinationEncryptionKeyModal -->
 	@componentStructural.RegularModal(
-		"Backup Destination Encrypt Key", "isNewlyDestinationEncryptionKeyModalOpen",
+		"Save The Encryption Key Securely", "isNewlyDestinationEncryptionKeyModalOpen",
 		"closeNewlyDestinationEncryptionKeyModal()", "",
 	) {
 		@NewlyDestinationEncryptionKeyModalContent()
