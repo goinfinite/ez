@@ -10,10 +10,10 @@ func StringSliceValueObjectParser[TypedObject any](
 	rawInputValues any,
 	valueObjectConstructor func(any) (TypedObject, error),
 ) []TypedObject {
-	resultObjects := make([]TypedObject, 0)
+	parsedObjects := make([]TypedObject, 0)
 
 	if rawInputValues == nil {
-		return resultObjects
+		return parsedObjects
 	}
 
 	rawReflectedSlice := make([]interface{}, 0)
@@ -22,8 +22,13 @@ func StringSliceValueObjectParser[TypedObject any](
 	rawInputValuesKind := reflectedRawValues.Kind()
 	switch rawInputValuesKind {
 	case reflect.String:
-		rawInputValues = strings.Split(reflectedRawValues.String(), ";")
-		for _, rawValue := range rawInputValues.([]string) {
+		reflectedRawValuesStr := reflectedRawValues.String()
+		rawSeparatedValues := strings.Split(reflectedRawValuesStr, ";")
+		if len(rawSeparatedValues) <= 1 {
+			rawSeparatedValues = strings.Split(reflectedRawValuesStr, ",")
+		}
+
+		for _, rawValue := range rawSeparatedValues {
 			rawReflectedSlice = append(rawReflectedSlice, rawValue)
 		}
 	case reflect.Slice:
@@ -43,8 +48,8 @@ func StringSliceValueObjectParser[TypedObject any](
 			continue
 		}
 
-		resultObjects = append(resultObjects, valueObject)
+		parsedObjects = append(parsedObjects, valueObject)
 	}
 
-	return resultObjects
+	return parsedObjects
 }
