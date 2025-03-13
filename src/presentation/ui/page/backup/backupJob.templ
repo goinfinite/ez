@@ -145,13 +145,24 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:     "number",
-						Id:            "timeoutSecs",
-						Label:         "Timeout (seconds)",
-						ModelBindPath: "createJob.timeoutSecs",
-						IsRequired:    false,
-					})
+					@componentForm.SelectInputWithLabelValuePair(
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "timeoutSecs",
+							Label:                 "Timeout",
+							SelectedModelBindPath: "createJob.timeoutSecs",
+							Options: []componentForm.SelectLabelValuePair{
+								{Label: "1 Hour", Value: "3600"},
+								{Label: "3 Hours", Value: "10800"},
+								{Label: "6 Hours", Value: "21600"},
+								{Label: "12 Hours", Value: "43200"},
+								{Label: "18 Hours", Value: "64800"},
+								{Label: "1 Day", Value: "86400"},
+								{Label: "2 Days", Value: "172800"},
+								{Label: "4 Days", Value: "259200"},
+								{Label: "7 Days", Value: "345600"},
+							},
+							ShouldIncludeBlankOption: true,
+						})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
@@ -305,13 +316,24 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 			</div>
 			<div class="flex w-full flex-row items-center gap-6">
 				<div class="w-1/2">
-					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:     "number",
-						Id:            "timeoutSecs",
-						Label:         "Timeout (seconds)",
-						ModelBindPath: "jobEntity.timeoutSecs",
-						IsRequired:    false,
-					})
+					@componentForm.SelectInputWithLabelValuePair(
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "timeoutSecs",
+							Label:                 "Timeout",
+							SelectedModelBindPath: "jobEntity.timeoutSecs",
+							Options: []componentForm.SelectLabelValuePair{
+								{Label: "1 Hour", Value: "3600"},
+								{Label: "3 Hours", Value: "10800"},
+								{Label: "6 Hours", Value: "21600"},
+								{Label: "12 Hours", Value: "43200"},
+								{Label: "18 Hours", Value: "64800"},
+								{Label: "1 Day", Value: "86400"},
+								{Label: "2 Days", Value: "172800"},
+								{Label: "4 Days", Value: "259200"},
+								{Label: "7 Days", Value: "345600"},
+							},
+							ShouldIncludeBlankOption: true,
+						})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
