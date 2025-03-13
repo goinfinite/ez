@@ -1,73 +1,47 @@
 package componentForm
 
-type InputFieldDto struct {
+type InputFieldSettings struct {
 	InputType     string
 	Id            string
 	Label         string
 	BindValuePath string
 	IsRequired    bool
-	DenseMode     bool
+	IsReadOnly    bool
 }
 
-templ InputField(inputDto InputFieldDto) {
+templ InputField(inputSettings InputFieldSettings) {
 	<!-- InputField -->
-	<div class="relative w-full">
-		<input
-			type={ inputDto.InputType }
-			if inputDto.Id != "" {
-				id={ inputDto.Id }
-				name={ inputDto.Id }
-			}
-			x-model:value={ inputDto.BindValuePath }
-			autocomplete="off"
-			if inputDto.Label != "" {
-				placeholder={ inputDto.Label }
-			}
-			if inputDto.IsRequired {
-				required
-			}
-			if inputDto.DenseMode {
-				class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 h-7.5 peer relative w-full rounded-md border px-1.5 text-[13px] text-neutral-100 placeholder-transparent outline-none transition-all"
-			} else {
-				class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full rounded-md border px-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
-			}
-		/>
-		if inputDto.Label != "" {
-			<label
-				if inputDto.Id != "" {
-					for={ inputDto.Id }
-				}
-				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-50% to-transparent to-50% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
-			>
-				{ inputDto.Label }
-				if inputDto.IsRequired {
+	<fieldset class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40">
+		if inputSettings.Label != "" {
+			<legend class="ml-1.5 px-1 text-xs font-bold text-neutral-50/80">
+				{ inputSettings.Label }
+				if inputSettings.IsRequired {
 					<span class="text-red-700">*</span>
 				}
-			</label>
+			</legend>
 		}
-	</div>
-}
-
-templ InputFieldReadOnly(
-	inputType, id, label, bindValuePath string,
-) {
-	<!-- InputFieldReadOnly -->
-	<div class="relative w-full">
+		{{ inputClasses := "w-full bg-transparent text-neutral-100 placeholder-transparent outline-none px-2 pb-2 text-sm" }}
+		if inputSettings.IsReadOnly {
+			{{ inputClasses += " text-neutral-400 cursor-not-allowed" }}
+		}
 		<input
-			type={ inputType }
-			id={ id }
-			name={ id }
-			x-model:value={ bindValuePath }
-			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 peer relative h-10 w-full cursor-default rounded-md border px-3 text-sm text-neutral-400 placeholder-transparent outline-none transition-all"
-			readonly
+			type={ inputSettings.InputType }
+			if inputSettings.Id != "" {
+				id={ inputSettings.Id }
+				name={ inputSettings.Id }
+			}
+			x-model:value={ inputSettings.BindValuePath }
+			autocomplete="off"
+			if inputSettings.Label != "" {
+				placeholder={ inputSettings.Label }
+			}
+			if inputSettings.IsRequired {
+				required
+			}
+			class={ inputClasses }
+			if inputSettings.IsReadOnly {
+				readonly
+			}
 		/>
-		if label != "" {
-			<label
-				for={ id }
-				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-50% to-transparent to-50% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
-			>
-				{ label }
-			</label>
-		}
-	</div>
+	</fieldset>
 }
