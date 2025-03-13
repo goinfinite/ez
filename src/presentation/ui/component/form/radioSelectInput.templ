@@ -8,7 +8,7 @@ type RadioSelectInputDto struct {
 }
 
 templ RadioSelectInput(inputDto RadioSelectInputDto) {
-	<div class="border-ez-200 border-1 bg-ez-300 flex h-10 flex-col rounded-md px-2">
+	<div class="border-ez-200 border-1 bg-ez-300 mt-2 flex h-10 flex-col rounded-md px-2">
 		if inputDto.Id != "" && inputDto.BindModelPath != "" {
 			<input
 				type="hidden"

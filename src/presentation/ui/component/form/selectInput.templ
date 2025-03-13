@@ -15,7 +15,7 @@ type SelectInputDto struct {
 
 templ SelectInput(inputDto SelectInputDto) {
 	<!-- SelectInput -->
-	<div class="relative w-full">
+	<div class="relative mt-1.5 w-full">
 		<select
 			if inputDto.Id != "" {
 				id={ inputDto.Id }
@@ -82,7 +82,7 @@ type SelectInputClientSideOptionsDto struct {
 
 templ SelectInputClientSideOptions(inputDto SelectInputClientSideOptionsDto) {
 	<!-- SelectInputClientSideOptions -->
-	<div class="relative w-full">
+	<div class="relative mt-1.5 w-full">
 		<select
 			if inputDto.Id != "" {
 				id={ inputDto.Id }
@@ -156,7 +156,7 @@ type SelectInputWithLabelValuePairDto struct {
 
 templ SelectInputWithLabelValuePair(inputDto SelectInputWithLabelValuePairDto) {
 	<!-- SelectInputWithLabelValuePair -->
-	<div class="relative w-full">
+	<div class="relative mt-1.5 w-full">
 		{{ selectInputSize := "px-3 text-sm" }}
 		switch inputDto.Size {
 			case "xs":
