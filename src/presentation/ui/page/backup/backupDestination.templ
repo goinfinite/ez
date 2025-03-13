@@ -665,7 +665,7 @@ templ UpdateBackupDestinationModal(createDto CreateBackupDestinationModalDto) {
 	<!-- UpdateBackupDestinationModal -->
 	@componentStructural.RegularModal(
 		"Update Backup Destination", "isUpdateDestinationModalOpen",
-		"closeUpdateDestinationModal()", "destinationEntity.DestinationId",
+		"closeUpdateDestinationModal()", "destinationEntity.destinationId",
 	) {
 		@UpdateBackupDestinationForm(createDto)
 	}
