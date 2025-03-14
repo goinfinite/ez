@@ -1575,6 +1575,64 @@ func (repo *BackupCmdRepo) RestoreTask(
 	return responseRestoreDto, nil
 }
 
+func (repo *BackupCmdRepo) killJobPid(
+	jobId valueObject.BackupJobId,
+	elapsedSecs uint64,
+) error {
+	elapsedSecsStr := strconv.Itoa(int(elapsedSecs))
+
+	jobPid, err := infraHelper.RunCmdWithSubShell(
+		`ps -e -o "pid,etimes,cmd:128" --sort=etimes --no-headers |` +
+			` awk '/backup job run/ && /--job-id ` + jobId.String() + `/ &&` +
+			` $2 >= ` + elapsedSecsStr + ` {print $1; exit}'`,
+	)
+	if err != nil || len(jobPid) == 0 {
+		return errors.New("BackupJobPidNotFound")
+	}
+
+	_, err = infraHelper.RunCmd("kill", "-9", jobPid)
+	return err
+}
+
+func (repo *BackupCmdRepo) UpdateTask(updateDto dto.UpdateBackupTask) error {
+	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
+		dto.ReadBackupTasksRequest{TaskId: &updateDto.TaskId},
+	)
+	if err != nil {
+		return errors.New("ReadBackupTaskFailed: " + err.Error())
+	}
+
+	if updateDto.TaskStatus == nil {
+		return nil
+	}
+
+	elapsedSecs := uint64(0)
+	if taskEntity.StartedAt != nil {
+		startedAt := taskEntity.StartedAt.GetAsGoTime()
+		elapsedSecs = uint64(time.Since(startedAt).Seconds())
+	}
+
+	if *updateDto.TaskStatus == valueObject.BackupTaskStatusCancelled {
+		err = repo.killJobPid(taskEntity.JobId, elapsedSecs)
+		if err != nil {
+			slog.Debug("KillJobPidFailed", slog.String("error", err.Error()))
+		}
+	}
+
+	finishedAt := time.Now()
+
+	taskUpdatedModel := dbModel.BackupTask{
+		ID:          taskEntity.TaskId.Uint64(),
+		TaskStatus:  updateDto.TaskStatus.String(),
+		ElapsedSecs: &elapsedSecs,
+		FinishedAt:  &finishedAt,
+	}
+
+	return repo.persistentDbSvc.Handler.Model(&dbModel.BackupTask{}).
+		Where("id = ?", taskEntity.TaskId.Uint64()).
+		Updates(&taskUpdatedModel).Error
+}
+
 func (repo *BackupCmdRepo) DeleteTask(deleteDto dto.DeleteBackupTask) error {
 	taskEntity, err := repo.backupQueryRepo.ReadFirstTask(
 		dto.ReadBackupTasksRequest{TaskId: &deleteDto.TaskId},

@@ -147,6 +147,23 @@ func TestBackupCmdRepo(t *testing.T) {
 		}
 	})
 
+	t.Run("UpdateBackupTask", func(t *testing.T) {
+		taskEntity, err := backupQueryRepo.ReadFirstTask(dto.ReadBackupTasksRequest{})
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+			return
+		}
+
+		taskStatus := valueObject.BackupTaskStatusCancelled
+		err = backupCmdRepo.UpdateTask(dto.UpdateBackupTask{
+			TaskId:     taskEntity.TaskId,
+			TaskStatus: &taskStatus,
+		})
+		if err != nil {
+			t.Errorf("ExpectedNoErrorButGot: %v", err)
+		}
+	})
+
 	t.Run("DeleteBackupTask", func(t *testing.T) {
 		taskEntity, err := backupQueryRepo.ReadFirstTask(dto.ReadBackupTasksRequest{})
 		if err != nil {
