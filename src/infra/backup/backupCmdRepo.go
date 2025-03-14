@@ -1579,18 +1579,47 @@ func (repo *BackupCmdRepo) killJobPid(
 	jobId valueObject.BackupJobId,
 	elapsedSecs uint64,
 ) error {
+	elapsedSecsSafetyMargin := uint64(60)
+	if elapsedSecs > elapsedSecsSafetyMargin {
+		elapsedSecs -= elapsedSecsSafetyMargin
+	}
 	elapsedSecsStr := strconv.Itoa(int(elapsedSecs))
 
-	jobPid, err := infraHelper.RunCmdWithSubShell(
-		`ps -e -o "pid,etimes,cmd:128" --sort=etimes --no-headers |` +
-			` awk '/backup job run/ && /--job-id ` + jobId.String() + `/ &&` +
-			` $2 >= ` + elapsedSecsStr + ` {print $1; exit}'`,
-	)
-	if err != nil || len(jobPid) == 0 {
-		return errors.New("BackupJobPidNotFound")
+	findJobPidsCmd := `ps -e -o "pid,etimes,cmd:128" --sort=etimes --no-headers |` +
+		` awk '/backup job run/ && /--job-id ` + jobId.String() + `/ &&` +
+		` $2 >= ` + elapsedSecsStr + ` {print $1}'`
+
+	rawJobPidsOutput, err := infraHelper.RunCmdWithSubShell(findJobPidsCmd)
+	if err != nil {
+		return errors.New("FindBackupJobPidError: " + err.Error())
 	}
 
-	_, err = infraHelper.RunCmd("kill", "-9", jobPid)
+	if len(rawJobPidsOutput) == 0 {
+		return errors.New("BackupJobPidsNotFound")
+	}
+
+	rawJobPidsOutputSlice := strings.Split(rawJobPidsOutput, "\n")
+
+	jobPidsStrSlice := []string{}
+	for _, rawJobPidStr := range rawJobPidsOutputSlice {
+		rawJobPidStr = strings.TrimSpace(rawJobPidStr)
+		if len(rawJobPidStr) == 0 {
+			continue
+		}
+
+		jobPidInt, err := strconv.Atoi(rawJobPidStr)
+		if err != nil {
+			continue
+		}
+
+		jobPidsStrSlice = append(jobPidsStrSlice, strconv.Itoa(jobPidInt))
+	}
+
+	if len(jobPidsStrSlice) == 0 {
+		return errors.New("ValidBackupJobPidsNotFound")
+	}
+
+	_, err = infraHelper.RunCmdWithSubShell("kill -9 " + strings.Join(jobPidsStrSlice, " "))
 	return err
 }
 
