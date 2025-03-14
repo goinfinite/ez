@@ -335,12 +335,14 @@ templ BackupTasksTable(
 									</button>
 								}
 							</div>
-							<div>
-								<p class="text-[10px] font-bold uppercase">Execution Output</p>
-								<p class="rounded-md bg-neutral-950/10 p-1 font-mono text-neutral-50">
-									{ uiHelper.FormatPointer(backupTaskEntity.ExecutionOutput) }
-								</p>
-							</div>
+							@componentForm.TextArea(componentForm.TextAreaSettings{
+								Id:         "taskExecutionOutput_" + backupTaskEntity.TaskId.String(),
+								Label:      "Execution Output",
+								Value:      uiHelper.FormatPointer(backupTaskEntity.ExecutionOutput),
+								Size:       componentForm.TextAreaSizeXs,
+								IsCode:     true,
+								IsReadOnly: true,
+							})
 						</td>
 						<td class="w-[20%] space-y-2 overflow-x-hidden p-3">
 							@componentMisc.Tag(
