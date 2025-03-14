@@ -1,9 +1,20 @@
 package componentForm
 
+const (
+	TextAreaSizeXs = "xs"
+	TextAreaSizeSm = "sm"
+	TextAreaSizeMd = "md"
+	TextAreaSizeLg = "lg"
+	TextAreaSizeXl = "xl"
+)
+
 type TextAreaSettings struct {
 	Id            string
 	Label         string
+	Size          string
 	ModelBindPath string
+	Value         string
+	IsCode        bool
 	IsReadOnly    bool
 	IsRequired    bool
 }
@@ -13,8 +24,10 @@ templ TextArea(inputSettings TextAreaSettings) {
 	<fieldset class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40">
 		if inputSettings.Label != "" {
 			<legend
-				class="ml-1.5 px-1 text-xs font-bold text-neutral-50/80 transition-opacity"
-				:class={ `!` + inputSettings.ModelBindPath + ` && 'opacity-0 !p-0 w-0 h-3.5'` }
+				class="ml-1.5 px-1 text-left text-xs font-bold text-neutral-50/80 transition-opacity"
+				if inputSettings.ModelBindPath != "" {
+					:class={ `!` + inputSettings.ModelBindPath + ` && 'opacity-0 !p-0 w-0 h-3.5'` }
+				}
 			>
 				{ inputSettings.Label }
 				if inputSettings.IsRequired {
@@ -22,32 +35,59 @@ templ TextArea(inputSettings TextAreaSettings) {
 				}
 			</legend>
 		}
-		{{ textAreaClasses := "w-full h-24 resize-none bg-transparent text-neutral-100 placeholder-text-neutral-50 placeholder-text-opacity-80 outline-none pl-2 pr-9 text-sm transition-all peer overflow-y-scroll" }}
+		{{ textAreaClasses := "h-24 text-base" }}
+		switch inputSettings.Size {
+			case TextAreaSizeXs:
+				{{ textAreaClasses = "h-12 text-xs" }}
+			case TextAreaSizeSm:
+				{{ textAreaClasses = "h-16 text-sm" }}
+			case TextAreaSizeMd:
+				{{ textAreaClasses = "h-24 text-base" }}
+			case TextAreaSizeLg:
+				{{ textAreaClasses = "h-32 text-lg" }}
+			case TextAreaSizeXl:
+				{{ textAreaClasses = "h-40 text-xl" }}
+		}
+		{{ textAreaClasses += " placeholder-text-neutral-50 placeholder-text-opacity-80 peer w-full resize-none overflow-y-scroll bg-transparent pl-2 pr-9 text-sm text-neutral-100 outline-none transition-all" }}
 		{{ textAreaClasses += " [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50" }}
 		if inputSettings.IsReadOnly {
 			{{ textAreaClasses += " text-neutral-400 cursor-not-allowed" }}
+		}
+		if inputSettings.IsCode {
+			{{ textAreaClasses += " font-mono" }}
 		}
 		<textarea
 			if inputSettings.Id != "" {
 				id={ inputSettings.Id }
 				name={ inputSettings.Id }
+				x-ref={ inputSettings.Id }
 			}
 			if inputSettings.ModelBindPath != "" {
 				x-model:value={ inputSettings.ModelBindPath }
 			}
 			placeholder={ inputSettings.Label }
 			class={ textAreaClasses }
-		></textarea>
+		>
+			{ inputSettings.Value }
+		</textarea>
 		<div class="text-md absolute right-5 top-0 hidden flex-col gap-1.5 transition-all hover:flex active:flex peer-hover:flex">
 			{{ floatingIconsClasses := "ph-bold border-1 active:bg-infinite-500 cursor-pointer rounded-md border-neutral-50/10 bg-neutral-50/5 p-1 text-neutral-100 hover:border-neutral-50/40 hover:bg-neutral-50/20" }}
 			<i
 				class={ floatingIconsClasses + " ph-clipboard-text" }
-				@click.prevent={ "navigator.clipboard.writeText(" + inputSettings.ModelBindPath + ")" }
+				if inputSettings.ModelBindPath != "" {
+					@click.prevent={ "navigator.clipboard.writeText(" + inputSettings.ModelBindPath + ")" }
+				} else {
+					if inputSettings.Id != "" {
+						@click.prevent={ "$refs." + inputSettings.Id + ".select(); document.execCommand('copy')" }
+					}
+				}
 			></i>
-			<i
-				class={ floatingIconsClasses + " ph-x-circle" }
-				@click.prevent={ inputSettings.ModelBindPath + " = ''" }
-			></i>
+			if inputSettings.ModelBindPath != "" {
+				<i
+					class={ floatingIconsClasses + " ph-x-circle" }
+					@click.prevent={ inputSettings.ModelBindPath + " = ''" }
+				></i>
+			}
 		</div>
 	</fieldset>
 }
