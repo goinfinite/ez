@@ -899,6 +899,28 @@ func (controller *BackupController) ReadTask() *cobra.Command {
 	return cmd
 }
 
+func (controller *BackupController) UpdateTask() *cobra.Command {
+	var taskIdUint uint64
+
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "UpdateBackupTask",
+		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{
+				"taskId": taskIdUint,
+			}
+
+			cliHelper.ServiceResponseWrapper(
+				controller.backupService.UpdateTask(requestBody),
+			)
+		},
+	}
+
+	cmd.Flags().Uint64VarP(&taskIdUint, "task-id", "t", 0, "BackupTaskId")
+	cmd.MarkFlagRequired("task-id")
+	return cmd
+}
+
 func (controller *BackupController) RestoreTask() *cobra.Command {
 	var taskIdUint, operatorAccountIdUint uint64
 	var archiveIdStr string

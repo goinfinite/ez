@@ -303,7 +303,7 @@ definitions:
       sortBy:
         type: string
       sortDirection:
-        type: string
+        $ref: '#/definitions/valueObject.PaginationSortDirection'
     type: object
   dto.ReadBackupDestinationsResponse:
     properties:
@@ -432,8 +432,6 @@ definitions:
         type: string
       destinationPath:
         type: string
-      destinationType:
-        $ref: '#/definitions/valueObject.BackupDestinationType'
       downloadBytesSecRateLimit:
         type: integer
       maxConcurrentConnections:
@@ -516,6 +514,13 @@ definitions:
       timeoutSecs:
         type: integer
     type: object
+  dto.UpdateBackupTask:
+    properties:
+      jobId:
+        type: integer
+      taskStatus:
+        $ref: '#/definitions/valueObject.BackupTaskStatus'
+    type: object
   dto.UpdateContainer:
     properties:
       accountId:
@@ -591,6 +596,8 @@ definitions:
     properties:
       accountId:
         type: integer
+      accountUsername:
+        type: string
       archiveCompressionFormat:
         $ref: '#/definitions/valueObject.CompressionFormat'
       backupSchedule:
@@ -621,7 +628,7 @@ definitions:
         type: string
       jobId:
         type: integer
-      jobsStatus:
+      jobStatus:
         type: boolean
       lastRunAt:
         type: integer
@@ -650,8 +657,14 @@ definitions:
     properties:
       accountId:
         type: integer
+      accountUsername:
+        type: string
       backupSchedule:
         type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
       createdAt:
         type: integer
       destinationId:
@@ -1058,12 +1071,16 @@ definitions:
     - failed
     - executing
     - partial
+    - canceled
+    - cancelled
     type: string
     x-enum-varnames:
     - BackupTaskStatusCompleted
     - BackupTaskStatusFailed
     - BackupTaskStatusExecuting
     - BackupTaskStatusPartial
+    - BackupTaskStatusCanceled
+    - BackupTaskStatusCancelled
   valueObject.CompressionFormat:
     enum:
     - tar
@@ -1177,6 +1194,7 @@ definitions:
     type: object
   valueObject.ObjectStorageProvider:
     enum:
+    - custom
     - akamai
     - aws
     - azure
@@ -1187,9 +1205,9 @@ definitions:
     - linode
     - magalu
     - wasabi
-    - custom
     type: string
     x-enum-varnames:
+    - ObjectStorageProviderCustom
     - ObjectStorageProviderAkamai
     - ObjectStorageProviderAws
     - ObjectStorageProviderAzure
@@ -1200,7 +1218,14 @@ definitions:
     - ObjectStorageProviderLinode
     - ObjectStorageProviderMagalu
     - ObjectStorageProviderWasabi
-    - ObjectStorageProviderCustom
+  valueObject.PaginationSortDirection:
+    enum:
+    - asc
+    - desc
+    type: string
+    x-enum-varnames:
+    - PaginationSortDirectionAsc
+    - PaginationSortDirectionDesc
   valueObject.PortBinding:
     properties:
       containerPort:
@@ -1811,6 +1836,29 @@ paths:
       security:
       - Bearer: []
       summary: ReadBackupTasks
+      tags:
+      - backup
+    put:
+      consumes:
+      - application/json
+      description: Update a backup task.
+      parameters:
+      - description: UpdateBackupTask
+        in: body
+        name: updateBackupTaskDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBackupTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupTaskUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateBackupTask
       tags:
       - backup
   /v1/backup/task/{taskId}/:

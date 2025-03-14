@@ -1647,6 +1647,58 @@ func (service *BackupService) RestoreTask(
 	return NewServiceOutput(responseStatusEnum, restoreResponseDto)
 }
 
+func (service *BackupService) UpdateTask(input map[string]interface{}) ServiceOutput {
+	requiredParams := []string{"taskId"}
+	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	taskId, err := valueObject.NewBackupTaskId(input["taskId"])
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	operatorAccountId := LocalOperatorAccountId
+	if input["operatorAccountId"] != nil {
+		operatorAccountId, err = valueObject.NewAccountId(input["operatorAccountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	operatorIpAddress := LocalOperatorIpAddress
+	if input["operatorIpAddress"] != nil {
+		operatorIpAddress, err = valueObject.NewIpAddress(input["operatorIpAddress"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+	}
+
+	var taskStatusPtr *valueObject.BackupTaskStatus
+	if input["taskStatus"] != nil {
+		taskStatus, err := valueObject.NewBackupTaskStatus(input["taskStatus"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		taskStatusPtr = &taskStatus
+	}
+
+	updateDto := dto.NewUpdateBackupTask(
+		taskId, taskStatusPtr, operatorAccountId, operatorIpAddress,
+	)
+
+	err = useCase.UpdateBackupTask(
+		service.backupQueryRepo, service.backupCmdRepo,
+		service.activityRecordCmdRepo, updateDto,
+	)
+	if err != nil {
+		return NewServiceOutput(InfraError, err.Error())
+	}
+
+	return NewServiceOutput(Success, "BackupTaskUpdated")
+}
+
 func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOutput {
 	requiredParams := []string{"taskId"}
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)

@@ -880,6 +880,43 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a backup task.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "UpdateBackupTask",
+                "parameters": [
+                    {
+                        "description": "UpdateBackupTask",
+                        "name": "updateBackupTaskDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBackupTask"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
             }
         },
         "/v1/backup/task/archive/": {
@@ -3278,7 +3315,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sortDirection": {
-                    "type": "string"
+                    "$ref": "#/definitions/valueObject.PaginationSortDirection"
                 }
             }
         },
@@ -3477,9 +3514,6 @@ const docTemplate = `{
                 "destinationPath": {
                     "type": "string"
                 },
-                "destinationType": {
-                    "$ref": "#/definitions/valueObject.BackupDestinationType"
-                },
                 "downloadBytesSecRateLimit": {
                     "type": "integer"
                 },
@@ -3604,6 +3638,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateBackupTask": {
+            "type": "object",
+            "properties": {
+                "jobId": {
+                    "type": "integer"
+                },
+                "taskStatus": {
+                    "$ref": "#/definitions/valueObject.BackupTaskStatus"
+                }
+            }
+        },
         "dto.UpdateContainer": {
             "type": "object",
             "properties": {
@@ -3719,6 +3764,9 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "accountUsername": {
+                    "type": "string"
+                },
                 "archiveCompressionFormat": {
                     "$ref": "#/definitions/valueObject.CompressionFormat"
                 },
@@ -3764,7 +3812,7 @@ const docTemplate = `{
                 "jobId": {
                     "type": "integer"
                 },
-                "jobsStatus": {
+                "jobStatus": {
                     "type": "boolean"
                 },
                 "lastRunAt": {
@@ -3808,8 +3856,17 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "accountUsername": {
+                    "type": "string"
+                },
                 "backupSchedule": {
                     "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "createdAt": {
                     "type": "integer"
@@ -4419,13 +4476,17 @@ const docTemplate = `{
                 "completed",
                 "failed",
                 "executing",
-                "partial"
+                "partial",
+                "canceled",
+                "cancelled"
             ],
             "x-enum-varnames": [
                 "BackupTaskStatusCompleted",
                 "BackupTaskStatusFailed",
                 "BackupTaskStatusExecuting",
-                "BackupTaskStatusPartial"
+                "BackupTaskStatusPartial",
+                "BackupTaskStatusCanceled",
+                "BackupTaskStatusCancelled"
             ]
         },
         "valueObject.CompressionFormat": {
@@ -4596,6 +4657,7 @@ const docTemplate = `{
         "valueObject.ObjectStorageProvider": {
             "type": "string",
             "enum": [
+                "custom",
                 "akamai",
                 "aws",
                 "azure",
@@ -4605,10 +4667,10 @@ const docTemplate = `{
                 "google-cloud",
                 "linode",
                 "magalu",
-                "wasabi",
-                "custom"
+                "wasabi"
             ],
             "x-enum-varnames": [
+                "ObjectStorageProviderCustom",
                 "ObjectStorageProviderAkamai",
                 "ObjectStorageProviderAws",
                 "ObjectStorageProviderAzure",
@@ -4618,8 +4680,18 @@ const docTemplate = `{
                 "ObjectStorageProviderGoogleCloud",
                 "ObjectStorageProviderLinode",
                 "ObjectStorageProviderMagalu",
-                "ObjectStorageProviderWasabi",
-                "ObjectStorageProviderCustom"
+                "ObjectStorageProviderWasabi"
+            ]
+        },
+        "valueObject.PaginationSortDirection": {
+            "type": "string",
+            "enum": [
+                "asc",
+                "desc"
+            ],
+            "x-enum-varnames": [
+                "PaginationSortDirectionAsc",
+                "PaginationSortDirectionDesc"
             ]
         },
         "valueObject.PortBinding": {

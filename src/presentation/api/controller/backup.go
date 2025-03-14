@@ -403,6 +403,27 @@ func (controller *BackupController) ReadTask(c echo.Context) error {
 	)
 }
 
+// UpdateBackupTask	 godoc
+// @Summary      UpdateBackupTask
+// @Description  Update a backup task.
+// @Tags         backup
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        updateBackupTaskDto 	  body    dto.UpdateBackupTask  true  "UpdateBackupTask"
+// @Success      200 {object} object{} "BackupTaskUpdated"
+// @Router       /v1/backup/task/ [put]
+func (controller *BackupController) UpdateTask(c echo.Context) error {
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.backupService.UpdateTask(requestBody),
+	)
+}
+
 // RestoreBackupTask	godoc
 // @Summary      RestoreBackupTask
 // @Description  Schedule a backup task restoration.
