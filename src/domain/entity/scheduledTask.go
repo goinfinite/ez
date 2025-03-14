@@ -8,13 +8,13 @@ type ScheduledTask struct {
 	Status      valueObject.ScheduledTaskStatus  `json:"status"`
 	Command     valueObject.UnixCommand          `json:"command"`
 	Tags        []valueObject.ScheduledTaskTag   `json:"tags"`
-	TimeoutSecs *uint32                          `json:"timeoutSecs"`
+	TimeoutSecs *valueObject.TimeDuration        `json:"timeoutSecs"`
 	RunAt       *valueObject.UnixTime            `json:"runAt"`
 	Output      *valueObject.ScheduledTaskOutput `json:"output"`
 	Error       *valueObject.ScheduledTaskOutput `json:"err"`
 	StartedAt   *valueObject.UnixTime            `json:"startedAt"`
 	FinishedAt  *valueObject.UnixTime            `json:"finishedAt"`
-	ElapsedSecs *uint32                          `json:"elapsedSecs"`
+	ElapsedSecs *valueObject.TimeDuration        `json:"elapsedSecs"`
 	CreatedAt   valueObject.UnixTime             `json:"createdAt"`
 	UpdatedAt   valueObject.UnixTime             `json:"updatedAt"`
 }
@@ -25,11 +25,11 @@ func NewScheduledTask(
 	status valueObject.ScheduledTaskStatus,
 	command valueObject.UnixCommand,
 	tags []valueObject.ScheduledTaskTag,
-	timeoutSecs *uint32,
+	timeoutSecs *valueObject.TimeDuration,
 	runAt *valueObject.UnixTime,
 	output, err *valueObject.ScheduledTaskOutput,
 	startedAt, finishedAt *valueObject.UnixTime,
-	elapsedSecs *uint32,
+	elapsedSecs *valueObject.TimeDuration,
 	createdAt, updatedAt valueObject.UnixTime,
 ) ScheduledTask {
 	return ScheduledTask{

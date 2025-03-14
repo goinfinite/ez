@@ -13,13 +13,13 @@ type ScheduledTask struct {
 	Status      string `gorm:"not null,index"`
 	Command     string `gorm:"not null"`
 	Tags        []ScheduledTaskTag
-	TimeoutSecs *uint32
+	TimeoutSecs *uint64
 	RunAt       *time.Time
 	Output      *string
 	Error       *string
 	StartedAt   *time.Time
 	FinishedAt  *time.Time
-	ElapsedSecs *uint32
+	ElapsedSecs *uint64
 	CreatedAt   time.Time `gorm:"not null"`
 	UpdatedAt   time.Time `gorm:"not null"`
 }
@@ -32,11 +32,11 @@ func NewScheduledTask(
 	id uint64,
 	name, status, command string,
 	tags []ScheduledTaskTag,
-	timeoutSecs *uint32,
+	timeoutSecs *uint64,
 	runAt *time.Time,
 	output, err *string,
 	startedAt, finishedAt *time.Time,
-	elapsedSecs *uint32,
+	elapsedSecs *uint64,
 ) ScheduledTask {
 	model := ScheduledTask{
 		Name:        name,
@@ -89,6 +89,15 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 		tags = append(tags, tag)
 	}
 
+	var timeoutSecsPtr *valueObject.TimeDuration
+	if model.TimeoutSecs != nil {
+		timeoutSecs, err := valueObject.NewTimeDuration(*model.TimeoutSecs)
+		if err != nil {
+			return taskEntity, err
+		}
+		timeoutSecsPtr = &timeoutSecs
+	}
+
 	var runAtPtr *valueObject.UnixTime
 	if model.RunAt != nil {
 		runAt := valueObject.NewUnixTimeWithGoTime(*model.RunAt)
@@ -125,11 +134,20 @@ func (model ScheduledTask) ToEntity() (taskEntity entity.ScheduledTask, err erro
 		finishedAtPtr = &finishedAt
 	}
 
+	var elapsedSecsPtr *valueObject.TimeDuration
+	if model.ElapsedSecs != nil {
+		elapsedSecs, err := valueObject.NewTimeDuration(*model.ElapsedSecs)
+		if err != nil {
+			return taskEntity, err
+		}
+		elapsedSecsPtr = &elapsedSecs
+	}
+
 	createdAt := valueObject.NewUnixTimeWithGoTime(model.CreatedAt)
 	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewScheduledTask(
-		id, name, status, command, tags, model.TimeoutSecs, runAtPtr, outputPtr,
-		taskErrorPtr, startedAtPtr, finishedAtPtr, model.ElapsedSecs, createdAt, updatedAt,
+		id, name, status, command, tags, timeoutSecsPtr, runAtPtr, outputPtr,
+		taskErrorPtr, startedAtPtr, finishedAtPtr, elapsedSecsPtr, createdAt, updatedAt,
 	), nil
 }

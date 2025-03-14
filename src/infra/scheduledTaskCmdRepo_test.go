@@ -21,7 +21,7 @@ func TestScheduledTaskCmdRepo(t *testing.T) {
 		command, _ := valueObject.NewUnixCommand(infraEnvs.InfiniteEzBinary + " account get")
 		containerTag, _ := valueObject.NewScheduledTaskTag("account")
 		tags := []valueObject.ScheduledTaskTag{containerTag}
-		timeoutSecs := uint32(60)
+		timeoutSecs := valueObject.TimeDuration(60)
 		runAt := valueObject.NewUnixTimeNow()
 
 		createDto := dto.NewCreateScheduledTask(

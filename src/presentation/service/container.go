@@ -505,9 +505,10 @@ func (service *ContainerService) Create(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("container")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		taskTimeoutSecs := valueObject.TimeDuration(uint64(timeoutSeconds))
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
-			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,
 		)
 
 		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)

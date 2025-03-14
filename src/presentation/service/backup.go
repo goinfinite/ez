@@ -1356,7 +1356,7 @@ func (service *BackupService) RunJob(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("backup")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		taskTimeoutSecs := uint32(useCase.BackupJobDefaultTimeoutSecs)
+		taskTimeoutSecs := useCase.BackupJobDefaultTimeoutSecs
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,
@@ -1632,9 +1632,10 @@ func (service *BackupService) RestoreTask(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("backup")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		taskTimeoutSecs := valueObject.TimeDuration(uint64(timeoutSecs))
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
-			taskName, taskCmd, taskTags, &timeoutSecs, nil,
+			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,
 		)
 
 		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
@@ -1973,9 +1974,10 @@ func (service *BackupService) CreateTaskArchive(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("backup")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		taskTimeoutSecs := valueObject.TimeDuration(uint64(timeoutSecs))
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
-			taskName, taskCmd, taskTags, &timeoutSecs, nil,
+			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,
 		)
 
 		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
