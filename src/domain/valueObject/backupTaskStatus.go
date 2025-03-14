@@ -14,6 +14,8 @@ const (
 	BackupTaskStatusFailed    BackupTaskStatus = "failed"
 	BackupTaskStatusExecuting BackupTaskStatus = "executing"
 	BackupTaskStatusPartial   BackupTaskStatus = "partial"
+	BackupTaskStatusCanceled  BackupTaskStatus = "canceled"
+	BackupTaskStatusCancelled BackupTaskStatus = "cancelled"
 )
 
 func NewBackupTaskStatus(value interface{}) (
@@ -28,8 +30,10 @@ func NewBackupTaskStatus(value interface{}) (
 	stringValueVo := BackupTaskStatus(stringValue)
 	switch stringValueVo {
 	case BackupTaskStatusCompleted, BackupTaskStatusFailed,
-		BackupTaskStatusExecuting, BackupTaskStatusPartial:
+		BackupTaskStatusExecuting, BackupTaskStatusPartial, BackupTaskStatusCancelled:
 		return stringValueVo, nil
+	case BackupTaskStatusCanceled:
+		return BackupTaskStatusCancelled, nil
 	default:
 		return taskStatus, errors.New("InvalidBackupTaskStatus")
 	}
