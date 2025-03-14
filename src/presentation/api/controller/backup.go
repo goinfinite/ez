@@ -419,6 +419,13 @@ func (controller *BackupController) UpdateTask(c echo.Context) error {
 		return err
 	}
 
+	if requestBody["taskId"] == nil && requestBody["id"] != nil {
+		requestBody["taskId"] = requestBody["id"]
+	}
+	if requestBody["taskStatus"] == nil && requestBody["status"] != nil {
+		requestBody["taskStatus"] = requestBody["status"]
+	}
+
 	return apiHelper.ServiceResponseWrapper(
 		c, controller.backupService.UpdateTask(requestBody),
 	)
