@@ -1,4 +1,4 @@
-package uiHelper
+package presenterHelper
 
 import (
 	"github.com/a-h/templ"

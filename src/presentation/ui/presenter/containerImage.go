@@ -14,7 +14,6 @@ import (
 	"github.com/goinfinite/ez/src/presentation/service"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
-	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 )
@@ -130,5 +129,5 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		imageEntities, readArchivesResponseDto.Archives, accountIdEntityMap,
 		accountsSelectPairs, containerSummariesSearchableItems,
 	)
-	return uiHelper.Render(c, pageContent, http.StatusOK)
+	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

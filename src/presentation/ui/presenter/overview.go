@@ -14,7 +14,6 @@ import (
 	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
-	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 	"github.com/labstack/echo/v4"
@@ -309,5 +308,5 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) (err error) {
 		containersResponseDto, containerIdSummariesMap, createContainerModalDto,
 	)
 
-	return uiHelper.Render(c, pageContent, http.StatusOK)
+	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

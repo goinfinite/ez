@@ -248,5 +248,5 @@ func (presenter *BackupPresenter) Handler(c echo.Context) (err error) {
 		destinationsReadRequestDto, destinationsReadResponseDto, createDestinationModalDto,
 	)
 
-	return uiHelper.Render(c, pageContent, http.StatusOK)
+	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }
