@@ -80,6 +80,27 @@ document.addEventListener("alpine:init", () => {
         });
       this.closeDeleteTaskModal();
     },
+
+    isCancelTaskModalOpen: false,
+    openCancelTaskModal(taskId) {
+      this.resetPrimaryState();
+      this.updateTaskEntity(taskId);
+      this.isCancelTaskModalOpen = true;
+    },
+    closeCancelTaskModal() {
+      this.isCancelTaskModalOpen = false;
+    },
+    cancelTask() {
+      htmx
+        .ajax("PUT", backupApiBaseEndpoint + "/task/", {
+          values: { taskId: this.taskEntity.taskId, taskStatus: "cancelled" },
+          swap: "none",
+        })
+        .then(() => {
+          this.$dispatch("cancel:backup-task");
+        });
+      this.closeCancelTaskModal();
+    },
   }));
 
   Alpine.data("backupTaskArchives", () => ({

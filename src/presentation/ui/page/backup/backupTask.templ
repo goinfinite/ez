@@ -210,7 +210,7 @@ templ BackupTasksTable(
 	<div
 		id={ tasksTableId }
 		hx-get="/backup/"
-		hx-trigger="delete:backup-task from:window delay:500ms"
+		hx-trigger="delete:backup-task from:window delay:500ms, cancel:backup-task from:window delay:500ms"
 		hx-select={ "#" + tasksTableId }
 		hx-target={ "#" + tasksTableId }
 		hx-swap="outerHTML transition:true"
@@ -418,6 +418,8 @@ templ BackupTasksTable(
 										TooltipColor:         "ez-300",
 										TooltipPosition:      "left",
 									})
+								}
+								if backupTaskEntity.TaskStatus != valueObject.BackupTaskStatusExecuting {
 									@componentStructural.IconButton(componentStructural.IconButtonSettings{
 										Id:                   "delete-task",
 										Shape:                componentStructural.IconButtonShapeCircular,
@@ -427,6 +429,19 @@ templ BackupTasksTable(
 										OnClick:              "openDeleteTaskModal('" + backupTaskEntity.TaskId.String() + "')",
 										TooltipText:          "Delete",
 										TooltipColor:         "red-700",
+										TooltipPosition:      "left",
+									})
+								}
+								if backupTaskEntity.TaskStatus == valueObject.BackupTaskStatusExecuting {
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "cancel-task",
+										Shape:                componentStructural.IconButtonShapeCircular,
+										Icon:                 "ph-hand-palm",
+										BackgroundColor:      "yellow-900",
+										HoverBackgroundColor: "yellow-700",
+										OnClick:              "openCancelTaskModal('" + backupTaskEntity.TaskId.String() + "')",
+										TooltipText:          "Cancel",
+										TooltipColor:         "yellow-700",
 										TooltipPosition:      "left",
 									})
 								}
@@ -621,6 +636,12 @@ templ BackupTasks(
 		@componentStructural.DeleteModal(
 			"isDeleteTaskModalOpen", "closeDeleteTaskModal()", "deleteTask()",
 			"delete-task", "", "taskEntity.taskId",
+		)
+		@componentStructural.ConfirmationModal(
+			"Cancel Task", "ph-hand-palm",
+			"Are you sure you want to cancel this task? This action cannot be undone.",
+			"isCancelTaskModalOpen", "cancelTask()",
+			componentStructural.ConfirmationTypeWarning,
 		)
 	</div>
 	<br/>
