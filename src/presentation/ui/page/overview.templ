@@ -806,6 +806,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 				@componentForm.TextArea(componentForm.TextAreaSettings{
 					Label:         "Launch Script",
 					ModelBindPath: "container.launchScript",
+					IsCode:        true,
 				})
 				<p class="mt-1 px-1.5 text-[11px] text-neutral-50/50">
 					Optional; one command per line. Executed only on initial container deployment, useful to install dependencies and configure the environment.
