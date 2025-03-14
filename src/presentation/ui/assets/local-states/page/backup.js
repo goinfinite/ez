@@ -206,18 +206,22 @@ document.addEventListener("alpine:init", () => {
       this.isRunJobModalOpen = false;
     },
     runJob() {
-      htmx.ajax(
-        "POST",
-        this.jobApiEndpoint +
-          "/" +
-          this.jobEntity.accountId +
-          "/" +
-          this.jobEntity.jobId +
-          "/run/",
-        {
-          swap: "none",
-        }
-      );
+      htmx
+        .ajax(
+          "POST",
+          this.jobApiEndpoint +
+            "/" +
+            this.jobEntity.accountId +
+            "/" +
+            this.jobEntity.jobId +
+            "/run/",
+          {
+            swap: "none",
+          }
+        )
+        .then(() => {
+          this.$store.main.refreshScheduledTasksPopover();
+        });
       this.closeRunJobModal();
     },
 

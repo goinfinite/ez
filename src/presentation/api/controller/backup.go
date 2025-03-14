@@ -350,7 +350,7 @@ func (controller *BackupController) RunJob(c echo.Context) error {
 	}
 
 	return apiHelper.ServiceResponseWrapper(
-		c, controller.backupService.RunJob(requestBody),
+		c, controller.backupService.RunJob(requestBody, true),
 	)
 }
 

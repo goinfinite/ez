@@ -815,7 +815,7 @@ func (controller *BackupController) RunJob() *cobra.Command {
 			}
 
 			cliHelper.ServiceResponseWrapper(
-				controller.backupService.RunJob(requestBody),
+				controller.backupService.RunJob(requestBody, false),
 			)
 		},
 	}

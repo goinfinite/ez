@@ -1305,7 +1305,10 @@ func (service *BackupService) DeleteJob(input map[string]interface{}) ServiceOut
 	return NewServiceOutput(Success, "BackupJobDeleted")
 }
 
-func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput {
+func (service *BackupService) RunJob(
+	input map[string]interface{},
+	shouldSchedule bool,
+) ServiceOutput {
 	requiredParams := []string{"jobId", "accountId"}
 
 	err := serviceHelper.RequiredParamsInspector(input, requiredParams)
@@ -1339,6 +1342,34 @@ func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput
 		}
 	}
 
+	if shouldSchedule {
+		cliCmd := infraEnvs.InfiniteEzBinary + " backup job run"
+		cliParams := []string{
+			"--account-id", accountId.String(),
+			"--job-id", jobId.String(),
+		}
+
+		cliCmd = cliCmd + " " + strings.Join(cliParams, " ")
+
+		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
+		taskName, _ := valueObject.NewScheduledTaskName("RunBackupJob")
+		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
+		taskTag, _ := valueObject.NewScheduledTaskTag("backup")
+		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		taskTimeoutSecs := uint32(useCase.BackupJobDefaultTimeoutSecs)
+
+		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
+			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,
+		)
+
+		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
+		if err != nil {
+			return NewServiceOutput(InfraError, err.Error())
+		}
+
+		return NewServiceOutput(Created, "BackupJobRunScheduled")
+	}
+
 	runDto := dto.NewRunBackupJob(jobId, accountId, operatorAccountId, operatorIpAddress)
 
 	err = useCase.RunBackupJob(
@@ -1349,7 +1380,7 @@ func (service *BackupService) RunJob(input map[string]interface{}) ServiceOutput
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "BackupTaskCreated")
+	return NewServiceOutput(Created, "BackupJobRunCompleted")
 }
 
 func (service *BackupService) ReadTaskRequestFactory(
