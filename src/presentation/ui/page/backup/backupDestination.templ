@@ -18,7 +18,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 	<!-- CreateBackupDestinationForm -->
 	<form
 		id="create-backup-destination"
-		class="flex flex-col gap-4"
+		class="flex flex-col gap-3"
 		x-on:submit.prevent="createDestination()"
 	>
 		<div class="flex w-full flex-row items-center gap-5">
@@ -56,13 +56,11 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				})
 			</div>
 		</div>
-		<div class="-mb-2">
-			@componentForm.TextArea(componentForm.TextAreaSettings{
-				Id:            "destinationDescription",
-				Label:         "Description",
-				ModelBindPath: "createDestinationPayload.destinationDescription",
-			})
-		</div>
+		@componentForm.TextArea(componentForm.TextAreaSettings{
+			Id:            "destinationDescription",
+			Label:         "Description",
+			ModelBindPath: "createDestinationPayload.destinationDescription",
+		})
 		<div class="flex w-full flex-row items-center gap-5">
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{
@@ -374,7 +372,7 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		hx-put="/api/v1/backup/destination/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		class="flex flex-col gap-5"
+		class="flex flex-col gap-3"
 		x-on:submit="closeUpdateDestinationModal()"
 	>
 		<input type="hidden" name="destinationId" x-bind:value="destinationEntity.destinationId"/>
@@ -385,13 +383,11 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			Label:         "Name",
 			ModelBindPath: "destinationEntity.destinationName",
 		})
-		<div class="-mb-2">
-			@componentForm.TextArea(componentForm.TextAreaSettings{
-				Id:            "destinationDescription",
-				Label:         "Description",
-				ModelBindPath: "destinationEntity.destinationDescription",
-			})
-		</div>
+		@componentForm.TextArea(componentForm.TextAreaSettings{
+			Id:            "destinationDescription",
+			Label:         "Description",
+			ModelBindPath: "destinationEntity.destinationDescription",
+		})
 		<div class="flex w-full flex-row items-center gap-5">
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{

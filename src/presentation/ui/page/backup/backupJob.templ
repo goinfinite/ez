@@ -23,7 +23,7 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 		hx-post="/api/v1/backup/job/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		class="flex flex-col gap-4"
+		class="flex flex-col gap-3"
 		x-on:submit="closeCreateJobModal()"
 	>
 		<div class="flex w-full flex-row items-center gap-6">
@@ -71,13 +71,11 @@ templ CreateBackupJobForm(createDto CreateBackupJobModalDto) {
 				})
 			</div>
 		</div>
-		<div class="-mb-2">
-			@componentForm.TextArea(componentForm.TextAreaSettings{
-				Id:            "jobDescription",
-				Label:         "Description",
-				ModelBindPath: "createJobPayload.jobDescription",
-			})
-		</div>
+		@componentForm.TextArea(componentForm.TextAreaSettings{
+			Id:            "jobDescription",
+			Label:         "Description",
+			ModelBindPath: "createJobPayload.jobDescription",
+		})
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			<div class="border-ez-300 space-y-5.5 rounded-md border-2 border-dashed p-4">
 				<div>
@@ -198,7 +196,7 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 		hx-put="/api/v1/backup/job/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		class="flex flex-col gap-5"
+		class="flex flex-col gap-3"
 		x-on:submit="closeUpdateJobModal()"
 	>
 		<input type="hidden" name="jobId" x-bind:value="jobEntity.jobId"/>
@@ -258,13 +256,11 @@ templ UpdateBackupJobForm(createDto CreateBackupJobModalDto) {
 				})
 			</div>
 		</div>
-		<div class="-mb-2">
-			@componentForm.TextArea(componentForm.TextAreaSettings{
-				Id:            "jobDescription",
-				Label:         "Description",
-				ModelBindPath: "jobEntity.jobDescription",
-			})
-		</div>
+		@componentForm.TextArea(componentForm.TextAreaSettings{
+			Id:            "jobDescription",
+			Label:         "Description",
+			ModelBindPath: "jobEntity.jobDescription",
+		})
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			<div class="border-ez-300 space-y-5.5 rounded-md border-2 border-dashed p-4">
 				<div>
