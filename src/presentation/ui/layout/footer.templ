@@ -1,10 +1,11 @@
 package layout
 
 import (
-	"fmt"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
+	"github.com/goinfinite/ez/src/presentation/ui/component/form"
 	componentMisc "github.com/goinfinite/ez/src/presentation/ui/component/misc"
+	"github.com/goinfinite/ez/src/presentation/ui/helper"
 )
 
 templ FooterSkeleton() {
@@ -50,9 +51,9 @@ templ ScheduledTasksPopover(
 	<div
 		x-cloak
 		x-show="$store.main.displayScheduledTasksPopover"
-		class="bg-ez-400 w-100 max-h-100 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-y-auto rounded-t-md text-sm text-neutral-50 shadow-xl transition-all duration-300 ease-in-out"
+		class="bg-ez-400 w-100 max-h-100 border-1 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-y-auto rounded-t-md border-b-0 border-neutral-50/5 text-sm text-neutral-50 shadow-2xl transition-all duration-300 ease-in-out"
 	>
-		<div class="bg-ez-300 flex items-center justify-between rounded-t-md p-2.5">
+		<div class="flex items-center justify-between rounded-t-md bg-neutral-50/5 p-2.5">
 			<div class="text-base font-bold">Scheduled Tasks</div>
 			<div class="text-base font-bold">
 				<i
@@ -61,129 +62,133 @@ templ ScheduledTasksPopover(
 				></i>
 			</div>
 		</div>
-		<div class="flex justify-center overflow-x-hidden px-1.5 py-2">
-			if len(scheduledTasksEntities) == 0 {
-				<div class="text-center text-neutral-50">No scheduled tasks.</div>
-			}
-			<table class="table-auto border-collapse rounded-md">
-				<tbody>
-					for _, scheduledTask := range scheduledTasksEntities {
-						<tr
-							class="even:bg-ez-500 even:hover:bg-ez-300 hover:bg-ez-300 group cursor-pointer rounded-md border-b border-neutral-500 border-opacity-30 last:border-b-0"
-							x-data="{ isExpanded: false }"
-							@click="isExpanded = !isExpanded"
-							:class="{ 'bg-ez-300': isExpanded }"
-						>
-							<td class="p-1.5" :class="{ 'w-0 opacity-0': isExpanded }">
-								<i class={ "text-xl ph-duotone " + scheduledTaskStatusToIcon(scheduledTask.Status) }></i>
-							</td>
-							<td class="w-85 px-1 py-2" :class="{ 'w-95': isExpanded }">
-								{ scheduledTask.Name.String() } <small>#{ scheduledTask.Id.String() }</small>
-								if scheduledTask.ElapsedSecs != nil {
-									<small>({ fmt.Sprintf("%d", *scheduledTask.ElapsedSecs) }s)</small>
-								}
-								<i
-									class="ph-bold text-md float-right opacity-0 transition-all duration-300 group-hover:opacity-80"
-									:class="{ 'ph-arrows-in-simple': isExpanded, 'ph-arrows-out-simple': !isExpanded }"
-								></i>
-								<div x-show="!isExpanded">
-									if scheduledTask.Output != nil {
-										<p class="max-w-80 bg-ez-900 truncate rounded-md bg-opacity-50 px-1 text-[10px] text-neutral-50">
-											{ scheduledTask.Output.String() }
-										</p>
-									}
-									if scheduledTask.Error != nil {
-										<p class="max-w-80 truncate rounded-md bg-red-500 bg-opacity-30 px-1 text-[10px] text-neutral-50">
-											{ scheduledTask.Error.String() }
-										</p>
-									}
-								</div>
-								<div class="max-w-85 space-y-2 text-[10px]" x-show="isExpanded">
-									<div class="max-w-80 text-wrap break-words">
-										<p class="font-bold">Command</p>
-										<p class="max-w-80 bg-ez-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
-											{ scheduledTask.Command.String() }
-										</p>
-									</div>
-									<div class="max-w-80 text-wrap break-words">
-										<p class="font-bold">Outputs</p>
-										if scheduledTask.Output != nil {
-											<p class="max-w-80 bg-ez-900 rounded-md bg-opacity-50 px-1 font-mono text-neutral-50">
-												{ scheduledTask.Output.String() }
-											</p>
-										}
-										if scheduledTask.Error != nil {
-											<p class="max-w-80 rounded-md bg-red-500 bg-opacity-30 px-1 text-neutral-50">
-												{ scheduledTask.Error.String() }
-											</p>
-										}
-									</div>
-									<div class="max-w-80">
-										<p class="font-bold">Timings</p>
-										<table>
-											<tbody>
-												<thead class="bg-ez-600">
-													<th class="text-left">CreatedAt</th>
-													<th class="bg-ez-500 text-left">StartedAt</th>
-													<th class="text-left">FinishedAt</th>
-												</thead>
-												<tr>
-													<td class="text-wrap break-words p-1">
-														{ scheduledTask.CreatedAt.ReadAsRfcDate() }
-													</td>
-													<td class="bg-ez-400 text-wrap break-words p-1">
-														if scheduledTask.StartedAt != nil {
-															{ scheduledTask.StartedAt.ReadAsRfcDate() }
-														} else {
-															-
-														}
-													</td>
-													<td class="text-wrap break-words p-1">
-														if scheduledTask.FinishedAt != nil {
-															{ scheduledTask.FinishedAt.ReadAsRfcDate() }
-														} else {
-															-
-														}
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-									<div class="space-x-2">
-										if scheduledTask.Status.String() == "pending" {
-											<button
-												hx-put="/api/v1/scheduled-task/"
-												hx-vals={ "{\"taskId\": " + scheduledTask.Id.String() + ", \"status\": \"cancelled\"}" }
-												hx-trigger="click"
-												hx-swap="none"
-												@click="$dispatch('refresh:footer')"
-												class="rounded-md border-none bg-red-800 bg-opacity-60 px-2 py-1 text-center text-sm font-bold lowercase leading-none hover:bg-opacity-80"
-											>
-												<i class="ph-bold ph-hand-palm mr-0.5 align-middle"></i>
-												Cancel
-											</button>
-										} else {
-											if scheduledTask.Status.String() != "running" {
-												<button
-													hx-put="/api/v1/scheduled-task/"
-													hx-vals={ "{\"taskId\": " + scheduledTask.Id.String() + ", \"status\": \"pending\"}" }
-													hx-trigger="click"
-													hx-swap="none"
-													@click="$dispatch('refresh:footer')"
-													class="rounded-md border-none bg-amber-700 bg-opacity-60 px-2 py-1 text-center text-sm font-bold lowercase leading-none hover:bg-opacity-80"
-												>
-													<i class="ph-bold ph-repeat mr-0.5 align-middle"></i>
-													Run Again
-												</button>
-											}
-										}
-									</div>
-								</div>
-							</td>
-						</tr>
+		if len(scheduledTasksEntities) == 0 {
+			<div class="text-center text-neutral-50">No scheduled tasks.</div>
+		}
+		<div class="flex w-full flex-col gap-1 px-2.5 py-1.5">
+			for taskEntityIndex, taskEntity := range scheduledTasksEntities {
+				<div
+					x-data="{ isExpanded: false }"
+					@click="isExpanded = !isExpanded"
+					class="group flex cursor-pointer flex-row items-center justify-evenly gap-0.5 rounded-md p-1 hover:bg-neutral-50/5"
+					if taskEntityIndex%2 != 0 {
+						:class="{ 'bg-neutral-950/20': true }"
 					}
-				</tbody>
-			</table>
+					:class="{'bg-neutral-950/20 hover:bg-neutral-950/20': isExpanded}"
+				>
+					<div class="text-center align-middle" x-show="!isExpanded">
+						<i class={ "text-opacity-80 text-xl ph-duotone " + scheduledTaskStatusToIcon(taskEntity.Status) }></i>
+					</div>
+					<div class="w-[90%] py-1.5" :class="{ 'w-full p-2.5': isExpanded }">
+						{ taskEntity.Name.String() } <small class="font-bold">#{ taskEntity.Id.String() }</small>
+						if taskEntity.ElapsedSecs != nil {
+							<small>({ uiHelper.FormatPointer(taskEntity.ElapsedSecs) })</small>
+						}
+						<i
+							class="ph-bold text-md float-right opacity-0 transition-all duration-300 group-hover:opacity-80"
+							:class="{ 'ph-arrows-in-simple': isExpanded, 'ph-arrows-out-simple': !isExpanded }"
+						></i>
+						<div x-show="!isExpanded">
+							if taskEntity.Output != nil {
+								<p class="truncate rounded-md bg-neutral-950/20 px-1 text-[10px] text-neutral-100/90">
+									{ taskEntity.Output.String() }
+								</p>
+							}
+							if taskEntity.Error != nil {
+								<p class="truncate rounded-md bg-red-500/20 px-1 text-[10px] text-neutral-100/90">
+									{ taskEntity.Error.String() }
+								</p>
+							}
+						</div>
+						<div class="max-w-85 space-y-2 text-[10px]" x-show="isExpanded">
+							@componentForm.TextArea(componentForm.TextAreaSettings{
+								Id:         "taskCmd_" + taskEntity.Id.String(),
+								Label:      "Command",
+								Value:      taskEntity.Command.String(),
+								Size:       componentForm.TextAreaSizeXs,
+								IsCode:     true,
+								IsReadOnly: true,
+							})
+							@componentForm.TextArea(componentForm.TextAreaSettings{
+								Id:         "taskOutput_" + taskEntity.Id.String(),
+								Label:      "Output",
+								Value:      uiHelper.FormatPointer(taskEntity.Output),
+								Size:       componentForm.TextAreaSizeXs,
+								IsCode:     true,
+								IsReadOnly: true,
+							})
+							@componentForm.TextArea(componentForm.TextAreaSettings{
+								Id:         "taskError_" + taskEntity.Id.String(),
+								Label:      "Error",
+								Value:      uiHelper.FormatPointer(taskEntity.Error),
+								Size:       componentForm.TextAreaSizeXs,
+								IsCode:     true,
+								IsReadOnly: true,
+							})
+							<div class="max-w-80">
+								<p class="font-bold">Timings</p>
+								<table>
+									<tbody>
+										<thead class="bg-ez-600">
+											<th class="text-left">CreatedAt</th>
+											<th class="bg-ez-500 text-left">StartedAt</th>
+											<th class="text-left">FinishedAt</th>
+										</thead>
+										<tr>
+											<td class="text-wrap break-words p-1">
+												{ taskEntity.CreatedAt.ReadAsRfcDate() }
+											</td>
+											<td class="bg-ez-400 text-wrap break-words p-1">
+												if taskEntity.StartedAt != nil {
+													{ taskEntity.StartedAt.ReadAsRfcDate() }
+												} else {
+													-
+												}
+											</td>
+											<td class="text-wrap break-words p-1">
+												if taskEntity.FinishedAt != nil {
+													{ taskEntity.FinishedAt.ReadAsRfcDate() }
+												} else {
+													-
+												}
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="space-x-2">
+								if taskEntity.Status.String() == "pending" {
+									<button
+										hx-put="/api/v1/scheduled-task/"
+										hx-vals={ "{\"taskId\": " + taskEntity.Id.String() + ", \"status\": \"cancelled\"}" }
+										hx-trigger="click"
+										hx-swap="none"
+										@click="$dispatch('refresh:footer')"
+										class="rounded-md border-none bg-red-800 bg-opacity-60 px-2 py-1 text-center text-sm font-bold lowercase leading-none hover:bg-opacity-80"
+									>
+										<i class="ph-bold ph-hand-palm mr-0.5 align-middle"></i>
+										Cancel
+									</button>
+								} else {
+									if taskEntity.Status.String() != "running" {
+										<button
+											hx-put="/api/v1/scheduled-task/"
+											hx-vals={ "{\"taskId\": " + taskEntity.Id.String() + ", \"status\": \"pending\"}" }
+											hx-trigger="click"
+											hx-swap="none"
+											@click="$dispatch('refresh:footer')"
+											class="rounded-md border-none bg-amber-700 bg-opacity-60 px-2 py-1 text-center text-sm font-bold lowercase leading-none hover:bg-opacity-80"
+										>
+											<i class="ph-bold ph-repeat mr-0.5 align-middle"></i>
+											Run Again
+										</button>
+									}
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+			}
 		</div>
 	</div>
 }
