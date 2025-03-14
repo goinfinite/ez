@@ -67,14 +67,15 @@ templ ScheduledTasksPopover(
 		}
 		<div class="flex w-full flex-col gap-1 px-2.5 py-1.5">
 			for taskEntityIndex, taskEntity := range scheduledTasksEntities {
+				{{ rowClasses := "group flex cursor-pointer flex-row items-center justify-evenly gap-0.5 rounded-md p-1" }}
+				if taskEntityIndex%2 != 0 {
+					{{ rowClasses += " bg-neutral-950/20" }}
+				}
 				<div
 					x-data="{ isExpanded: false }"
 					@click="isExpanded = !isExpanded"
-					class="group flex cursor-pointer flex-row items-center justify-evenly gap-0.5 rounded-md p-1 hover:bg-neutral-50/5"
-					if taskEntityIndex%2 != 0 {
-						:class="{ 'bg-neutral-950/20': true }"
-					}
-					:class="{'bg-neutral-950/20 hover:bg-neutral-950/20': isExpanded}"
+					class={ rowClasses }
+					:class="isExpanded ? 'bg-neutral-950/20' : 'hover:bg-neutral-50/5'"
 				>
 					<div class="text-center align-middle" x-show="!isExpanded">
 						<i class={ "text-opacity-80 text-xl ph-duotone " + scheduledTaskStatusToIcon(taskEntity.Status) }></i>
@@ -125,32 +126,24 @@ templ ScheduledTasksPopover(
 								IsCode:     true,
 								IsReadOnly: true,
 							})
-							<div class="max-w-80">
+							<div class="p-2">
 								<p class="font-bold">Timings</p>
 								<table>
 									<tbody>
-										<thead class="bg-ez-600">
+										<thead class="bg-neutral-50/10">
 											<th class="text-left">CreatedAt</th>
-											<th class="bg-ez-500 text-left">StartedAt</th>
+											<th class="bg-neutral-950/20 text-left">StartedAt</th>
 											<th class="text-left">FinishedAt</th>
 										</thead>
 										<tr>
 											<td class="text-wrap break-words p-1">
-												{ taskEntity.CreatedAt.ReadAsRfcDate() }
+												{ uiHelper.FormatPointer(&taskEntity.CreatedAt) }
 											</td>
-											<td class="bg-ez-400 text-wrap break-words p-1">
-												if taskEntity.StartedAt != nil {
-													{ taskEntity.StartedAt.ReadAsRfcDate() }
-												} else {
-													-
-												}
+											<td class="text-wrap break-words bg-neutral-950/20 p-1">
+												{ uiHelper.FormatPointer(taskEntity.StartedAt) }
 											</td>
 											<td class="text-wrap break-words p-1">
-												if taskEntity.FinishedAt != nil {
-													{ taskEntity.FinishedAt.ReadAsRfcDate() }
-												} else {
-													-
-												}
+												{ uiHelper.FormatPointer(taskEntity.FinishedAt) }
 											</td>
 										</tr>
 									</tbody>
@@ -210,7 +203,7 @@ templ Footer(
 	<footer
 		id="footer"
 		hx-get="/fragment/footer"
-		hx-trigger="every 20s, refresh:footer from:window delay:200ms"
+		hx-trigger="every 120s, refresh:footer from:window delay:200ms"
 		hx-target="this"
 		hx-swap="outerHTML"
 		class="bg-ez-800 border-ez-400 h-8.5 z-2 fixed bottom-0 flex w-full items-center justify-end border-t-2 px-3 text-sm transition-all duration-300 ease-in-out"
