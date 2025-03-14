@@ -400,7 +400,7 @@ func (repo *BackupCmdRepo) CreateJob(
 		retentionStrategy = *createDto.RetentionStrategy
 	}
 
-	timeoutSecs := valueObject.TimeDuration(uint64(48 * 60 * 60))
+	timeoutSecs := useCase.BackupJobDefaultTimeoutSecs
 	if createDto.TimeoutSecs != nil {
 		timeoutSecs = *createDto.TimeoutSecs
 	}

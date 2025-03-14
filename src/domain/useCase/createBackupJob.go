@@ -6,7 +6,10 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
+
+const BackupJobDefaultTimeoutSecs = valueObject.TimeDuration(24 * 60 * 60)
 
 func CreateBackupJob(
 	backupCmdRepo repository.BackupCmdRepo,
