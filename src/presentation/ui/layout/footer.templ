@@ -53,11 +53,20 @@ templ ScheduledTasksPopover(
 		x-show="$store.main.displayScheduledTasksPopover"
 		class="bg-ez-400 w-100 border-1 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-hidden rounded-t-md border-b-0 border-neutral-50/5 text-sm text-neutral-50 shadow-2xl transition-all duration-300 ease-in-out"
 	>
-		<div class="flex items-center justify-between rounded-t-md bg-neutral-50/5 p-2.5">
-			<div class="text-base font-bold">Scheduled Tasks</div>
-			<div class="text-base font-bold">
+		<div
+			class="flex items-center justify-between rounded-t-md bg-neutral-50/5 p-2.5 text-base font-bold"
+		>
+			<div>Scheduled Tasks</div>
+			<div class="flex flex-row gap-2">
 				<i
-					class="ph-bold ph-minus cursor-pointer"
+					x-data="{ isRefreshVisible: false, isRefreshSpinning: false }"
+					x-init="setTimeout(() => isRefreshVisible = true, 2000)"
+					@click="isRefreshSpinning = true; $dispatch('refresh:footer')"
+					class="ph-bold ph-arrows-clockwise border-1 active:bg-infinite-500 cursor-pointer rounded-lg border-transparent bg-transparent p-1 transition-opacity duration-1000 hover:border-neutral-50/40 hover:bg-neutral-50/20"
+					:class="{ 'animate-spin !border-0 !bg-transparent': isRefreshSpinning, 'opacity-0': !isRefreshVisible }"
+				></i>
+				<i
+					class="ph-bold ph-minus border-1 active:bg-infinite-500 cursor-pointer rounded-lg border-transparent bg-transparent p-1 hover:border-neutral-50/40 hover:bg-neutral-50/20"
 					@click="$store.main.toggleScheduledTasksPopover()"
 				></i>
 			</div>
