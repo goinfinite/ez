@@ -40,23 +40,23 @@ templ TextArea(inputSettings TextAreaSettings) {
 			</legend>
 		}
 		{{ textAreaClasses := "h-24 text-base" }}
-		{{ isExpandedClasses := "h-40" }}
+		{{ isExpandedClasses := "h-72" }}
 		switch inputSettings.Size {
 			case TextAreaSizeXs:
 				{{ textAreaClasses = "h-12 text-xs" }}
-				{{ isExpandedClasses = "h-24" }}
+				{{ isExpandedClasses = "h-36" }}
 			case TextAreaSizeSm:
 				{{ textAreaClasses = "h-18 text-sm" }}
-				{{ isExpandedClasses = "h-36" }}
+				{{ isExpandedClasses = "h-54" }}
 			case TextAreaSizeMd:
 				{{ textAreaClasses = "h-24 text-base" }}
-				{{ isExpandedClasses = "h-48" }}
+				{{ isExpandedClasses = "h-72" }}
 			case TextAreaSizeLg:
 				{{ textAreaClasses = "h-30 text-lg" }}
-				{{ isExpandedClasses = "h-60" }}
+				{{ isExpandedClasses = "h-90" }}
 			case TextAreaSizeXl:
 				{{ textAreaClasses = "h-36 text-xl" }}
-				{{ isExpandedClasses = "h-72" }}
+				{{ isExpandedClasses = "h-108" }}
 		}
 		{{ textAreaClasses += " placeholder-text-neutral-50 placeholder-text-opacity-80 peer w-full resize-none overflow-y-scroll bg-transparent pl-2 pr-9 text-sm text-neutral-100 outline-none transition-all" }}
 		{{ textAreaClasses += " [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50" }}
