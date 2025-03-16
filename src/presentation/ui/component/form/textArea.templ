@@ -21,7 +21,11 @@ type TextAreaSettings struct {
 
 templ TextArea(inputSettings TextAreaSettings) {
 	<!-- TextArea -->
-	<fieldset class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40">
+	<fieldset
+		class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40"
+		x-data="{ isExpanded: false }"
+		@click.away="isExpanded = false"
+	>
 		if inputSettings.Label != "" {
 			<legend
 				class="ml-1.5 px-1 text-left text-xs font-bold text-neutral-50/80 transition-opacity"
@@ -36,17 +40,23 @@ templ TextArea(inputSettings TextAreaSettings) {
 			</legend>
 		}
 		{{ textAreaClasses := "h-24 text-base" }}
+		{{ isExpandedClasses := "h-40" }}
 		switch inputSettings.Size {
 			case TextAreaSizeXs:
 				{{ textAreaClasses = "h-12 text-xs" }}
+				{{ isExpandedClasses = "h-24" }}
 			case TextAreaSizeSm:
-				{{ textAreaClasses = "h-16 text-sm" }}
+				{{ textAreaClasses = "h-18 text-sm" }}
+				{{ isExpandedClasses = "h-36" }}
 			case TextAreaSizeMd:
 				{{ textAreaClasses = "h-24 text-base" }}
+				{{ isExpandedClasses = "h-48" }}
 			case TextAreaSizeLg:
-				{{ textAreaClasses = "h-32 text-lg" }}
+				{{ textAreaClasses = "h-30 text-lg" }}
+				{{ isExpandedClasses = "h-60" }}
 			case TextAreaSizeXl:
-				{{ textAreaClasses = "h-40 text-xl" }}
+				{{ textAreaClasses = "h-36 text-xl" }}
+				{{ isExpandedClasses = "h-72" }}
 		}
 		{{ textAreaClasses += " placeholder-text-neutral-50 placeholder-text-opacity-80 peer w-full resize-none overflow-y-scroll bg-transparent pl-2 pr-9 text-sm text-neutral-100 outline-none transition-all" }}
 		{{ textAreaClasses += " [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50" }}
@@ -67,11 +77,17 @@ templ TextArea(inputSettings TextAreaSettings) {
 			}
 			placeholder={ inputSettings.Label }
 			class={ textAreaClasses }
+			:class={ "isExpanded && '" + isExpandedClasses + "'" }
 		>
 			{ inputSettings.Value }
 		</textarea>
 		<div class="text-md absolute right-5 top-0 hidden flex-col gap-1.5 transition-all hover:flex active:flex peer-hover:flex">
 			{{ floatingIconsClasses := "ph-bold border-1 active:bg-infinite-500 cursor-pointer rounded-md border-neutral-50/10 bg-neutral-50/5 p-1 text-neutral-100 hover:border-neutral-50/40 hover:bg-neutral-50/20" }}
+			<i
+				class={ floatingIconsClasses }
+				:class="isExpanded ? 'ph-arrows-in' : 'ph-arrows-out'"
+				@click.prevent="isExpanded = !isExpanded"
+			></i>
 			<i
 				class={ floatingIconsClasses + " ph-clipboard-text" }
 				if inputSettings.ModelBindPath != "" {
