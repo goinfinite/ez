@@ -72,24 +72,25 @@ templ ScheduledTasksPopover(
 					{{ rowClasses += " bg-neutral-950/20" }}
 				}
 				<div
-					x-data="{ isExpanded: false }"
-					@click="isExpanded = !isExpanded"
 					class={ rowClasses }
-					:class="isExpanded ? 'bg-neutral-950/20' : 'hover:bg-neutral-50/5'"
+					:class="isScheduledTaskExpanded ? 'bg-neutral-950/20' : 'hover:bg-neutral-50/5'"
+					x-data="{ isScheduledTaskExpanded: false }"
+					@click="if (!isScheduledTaskExpanded) { isScheduledTaskExpanded = true }"
 				>
-					<div class="text-center align-middle" x-show="!isExpanded">
+					<div class="text-center align-middle" x-show="!isScheduledTaskExpanded">
 						<i class={ "text-opacity-80 text-xl ph-duotone " + scheduledTaskStatusToIcon(taskEntity.Status) }></i>
 					</div>
-					<div class="w-[90%] py-1.5" :class="{ 'w-full p-2.5': isExpanded }">
+					<div class="w-[90%] py-1.5" :class="{ 'w-full p-2.5': isScheduledTaskExpanded }">
 						{ taskEntity.Name.String() } <small class="font-bold">#{ taskEntity.Id.String() }</small>
 						if taskEntity.ElapsedSecs != nil {
 							<small>({ uiHelper.FormatPointer(taskEntity.ElapsedSecs) })</small>
 						}
 						<i
-							class="ph-bold text-md float-right opacity-0 transition-all duration-300 group-hover:opacity-80"
-							:class="{ 'ph-arrows-in-simple': isExpanded, 'ph-arrows-out-simple': !isExpanded }"
+							class="ph-bold border-1 active:bg-infinite-500 float-right cursor-pointer rounded-lg border-neutral-50/10 bg-neutral-50/5 p-1 text-xs text-neutral-100 opacity-0 transition-all hover:border-neutral-50/40 hover:bg-neutral-50/20 group-hover:opacity-90"
+							:class="isScheduledTaskExpanded ? 'ph-arrows-in' : 'ph-arrows-out'"
+							@click.stop="isScheduledTaskExpanded = !isScheduledTaskExpanded"
 						></i>
-						<div x-show="!isExpanded">
+						<div x-show="!isScheduledTaskExpanded">
 							if taskEntity.Output != nil {
 								<p class="truncate rounded-md bg-neutral-950/20 px-1 text-[10px] text-neutral-100/90">
 									{ taskEntity.Output.String() }
@@ -101,7 +102,7 @@ templ ScheduledTasksPopover(
 								</p>
 							}
 						</div>
-						<div class="max-w-85 space-y-2 text-[10px]" x-show="isExpanded">
+						<div class="max-w-85 space-y-2 text-[10px]" x-show="isScheduledTaskExpanded">
 							@componentForm.TextArea(componentForm.TextAreaSettings{
 								Id:         "taskCmd_" + taskEntity.Id.String(),
 								Label:      "Command",
