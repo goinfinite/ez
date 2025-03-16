@@ -177,14 +177,16 @@ templ ContainerImageIndex(
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
 					@componentStructural.IconButton(componentStructural.IconButtonSettings{
-						Label:   "Import Container Image",
-						Icon:    "ph-upload",
-						OnClick: "openImportImageModal()",
+						Label:       "Import Container Image",
+						Icon:        "ph-upload",
+						OnClick:     "openImportImageModal()",
+						IsFullWidth: true,
 					})
 					@componentStructural.IconButton(componentStructural.IconButtonSettings{
-						Label:   "Take Container Snapshot",
-						Icon:    "ph-camera",
-						OnClick: "openTakeSnapshotModal()",
+						Label:       "Take Container Snapshot",
+						Icon:        "ph-camera",
+						OnClick:     "openTakeSnapshotModal()",
+						IsFullWidth: true,
 					})
 				</div>
 			</div>
