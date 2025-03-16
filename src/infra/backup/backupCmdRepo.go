@@ -827,8 +827,11 @@ func (repo *BackupCmdRepo) createContainerArchive(
 		DestinationPath: &jobTmpDir,
 	}
 	archiveFile, err = containerImageCmdRepo.CreateArchive(createArchiveDto)
+	imageIdErrorTag := "[imageId: " + snapshotImageId.String() + "] "
 	if err != nil {
-		return archiveFile, errors.New("CreateArchiveFailed: " + err.Error())
+		return archiveFile, errors.New(
+			imageIdErrorTag + "CreateArchiveFailed: " + err.Error(),
+		)
 	}
 
 	deleteSnapshotDto := dto.DeleteContainerImage{
@@ -837,7 +840,9 @@ func (repo *BackupCmdRepo) createContainerArchive(
 	}
 	err = containerImageCmdRepo.Delete(deleteSnapshotDto)
 	if err != nil {
-		return archiveFile, errors.New("DeleteSnapshotImageFailed: " + err.Error())
+		return archiveFile, errors.New(
+			imageIdErrorTag + "DeleteSnapshotImageFailed: " + err.Error(),
+		)
 	}
 
 	return archiveFile, nil
