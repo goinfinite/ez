@@ -23,8 +23,8 @@ templ TextArea(inputSettings TextAreaSettings) {
 	<!-- TextArea -->
 	<fieldset
 		class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40"
-		x-data="{ isExpanded: false }"
-		@click.away="isExpanded = false"
+		x-data="{ isTextAreaExpanded: false }"
+		@click.away="isTextAreaExpanded = false"
 	>
 		if inputSettings.Label != "" {
 			<legend
@@ -77,7 +77,7 @@ templ TextArea(inputSettings TextAreaSettings) {
 			}
 			placeholder={ inputSettings.Label }
 			class={ textAreaClasses }
-			:class={ "isExpanded && '" + isExpandedClasses + "'" }
+			:class={ "isTextAreaExpanded && '" + isExpandedClasses + "'" }
 		>
 			{ inputSettings.Value }
 		</textarea>
@@ -85,8 +85,8 @@ templ TextArea(inputSettings TextAreaSettings) {
 			{{ floatingIconsClasses := "ph-bold border-1 active:bg-infinite-500 cursor-pointer rounded-md border-neutral-50/10 bg-neutral-50/5 p-1 text-neutral-100 hover:border-neutral-50/40 hover:bg-neutral-50/20" }}
 			<i
 				class={ floatingIconsClasses }
-				:class="isExpanded ? 'ph-arrows-in' : 'ph-arrows-out'"
-				@click.prevent="isExpanded = !isExpanded"
+				:class="isTextAreaExpanded ? 'ph-arrows-in' : 'ph-arrows-out'"
+				@click.prevent="isTextAreaExpanded = !isTextAreaExpanded"
 			></i>
 			<i
 				class={ floatingIconsClasses + " ph-clipboard-text" }
