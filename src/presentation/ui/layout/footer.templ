@@ -51,7 +51,7 @@ templ ScheduledTasksPopover(
 	<div
 		x-cloak
 		x-show="$store.main.displayScheduledTasksPopover"
-		class="bg-ez-400 w-100 max-h-100 border-1 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-y-auto rounded-t-md border-b-0 border-neutral-50/5 text-sm text-neutral-50 shadow-2xl transition-all duration-300 ease-in-out"
+		class="bg-ez-400 w-100 border-1 absolute bottom-full z-10 mt-2 -translate-x-1/2 transform overflow-hidden rounded-t-md border-b-0 border-neutral-50/5 text-sm text-neutral-50 shadow-2xl transition-all duration-300 ease-in-out"
 	>
 		<div class="flex items-center justify-between rounded-t-md bg-neutral-50/5 p-2.5">
 			<div class="text-base font-bold">Scheduled Tasks</div>
@@ -65,7 +65,7 @@ templ ScheduledTasksPopover(
 		if len(scheduledTasksEntities) == 0 {
 			<div class="text-center text-neutral-50">No scheduled tasks.</div>
 		}
-		<div class="flex w-full flex-col gap-1 px-2.5 py-1.5">
+		<div class="flex max-h-96 w-full flex-col gap-1 overflow-y-auto overflow-x-hidden px-2.5 py-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar]:w-3">
 			for taskEntityIndex, taskEntity := range scheduledTasksEntities {
 				{{ rowClasses := "group flex cursor-pointer flex-row items-center justify-evenly gap-0.5 rounded-md p-1" }}
 				if taskEntityIndex%2 != 0 {
