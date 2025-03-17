@@ -637,10 +637,15 @@ templ BackupTasks(
 		@BackupTasksTable(readTasksRequest, readTasksResponse)
 		@CreateBackupTaskArchiveModal()
 		@RestoreBackupTaskModal()
-		@componentStructural.DeleteModal(
-			"isDeleteTaskModalOpen", "closeDeleteTaskModal()", "deleteTask()",
-			"delete-task", "", "taskEntity.taskId",
-		)
+		@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+			Title:             `Are you sure you want to delete #<span x-text="taskEntity.taskId"></span>?`,
+			TitleIcon:         "ph-warning",
+			TitleIconPosition: componentStructural.ConfirmationTitleIconPositionTop,
+			Description:       componentStructural.ConfirmationDescriptionDelete,
+			ConfirmationType:  componentStructural.ConfirmationTypeDanger,
+			IsOpenState:       "isDeleteTaskModalOpen",
+			ConfirmFunction:   "deleteTask()",
+		})
 		@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
 			Title:            "Cancel Task",
 			TitleIcon:        "ph-hand-palm",
