@@ -1,5 +1,7 @@
 package componentStructural
 
+import "github.com/goinfinite/ez/src/presentation/ui/component/form"
+
 templ RegularModal(
 	title, isOpenState, closeModalFunction, elementIdStatePath string,
 ) {
@@ -108,6 +110,11 @@ templ DeleteModal(
 	</div>
 }
 
+type ConfirmationCheckboxSettings struct {
+	Label              string
+	IsCheckedStatePath string
+}
+
 const (
 	ConfirmationTitleIconPositionTop  = "top"
 	ConfirmationTitleIconPositionLeft = "left"
@@ -130,6 +137,7 @@ type ConfirmationModalSettings struct {
 	CancelButtonLabel  string
 	ConfirmFunction    string
 	ConfirmButtonLabel string
+	Checkboxes         []ConfirmationCheckboxSettings
 }
 
 templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
@@ -145,7 +153,7 @@ templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
 		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
 	>
 		<div class="relative mx-auto mt-[5%] max-w-2xl rounded-md drop-shadow-xl">
-			{{ modalContentClasses := "flex flex-col rounded-md p-8 gap-4.5" }}
+			{{ modalContentClasses := "flex flex-col rounded-md p-8 gap-5" }}
 			switch inputSettings.ConfirmationType {
 				case ConfirmationTypeInfo:
 					{{ modalContentClasses += " bg-cyan-900" }}
@@ -161,26 +169,38 @@ templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
 					@click={ inputSettings.IsOpenState + " = false" }
 					class="ph-bold ph-x-square opacity-85 right-7.5 top-7.5 absolute cursor-pointer text-3xl hover:opacity-100 active:opacity-100"
 				></i>
-				if inputSettings.TitleIconPosition == ConfirmationTitleIconPositionTop {
-					<div class="h-18 w-18 mx-auto flex items-center justify-center rounded-full bg-neutral-50/20 text-center text-5xl">
-						<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-neutral-50" }></i>
-					</div>
-					<h3 class="text-center text-2xl font-bold">
-						@templ.Raw(inputSettings.Title)
-					</h3>
-				} else {
-					<h3 class="flex flex-row items-center justify-center gap-2 leading-relaxed">
-						if inputSettings.TitleIcon != "" {
-							<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-4xl text-neutral-100" }></i>
-						}
-						<span class="text-2xl font-bold">
+				<div class="flex flex-col gap-2">
+					if inputSettings.TitleIconPosition == ConfirmationTitleIconPositionTop {
+						<div class="h-18 w-18 mx-auto flex items-center justify-center rounded-full bg-neutral-50/20 text-center text-5xl">
+							<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-neutral-50" }></i>
+						</div>
+						<h3 class="text-center text-2xl font-bold">
 							@templ.Raw(inputSettings.Title)
-						</span>
-					</h3>
+						</h3>
+					} else {
+						<h3 class="flex flex-row items-center justify-center gap-2 leading-relaxed">
+							if inputSettings.TitleIcon != "" {
+								<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-4xl text-neutral-100" }></i>
+							}
+							<span class="text-2xl font-bold">
+								@templ.Raw(inputSettings.Title)
+							</span>
+						</h3>
+					}
+					<p class="text-center">
+						@templ.Raw(inputSettings.Description)
+					</p>
+				</div>
+				if len(inputSettings.Checkboxes) > 0 {
+					<div class="flex flex-col gap-2 rounded-lg border-2 border-dashed border-neutral-50/20 p-4">
+						for _, checkboxSettings := range inputSettings.Checkboxes {
+							@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+								Label:         checkboxSettings.Label,
+								ModelBindPath: checkboxSettings.IsCheckedStatePath,
+							})
+						}
+					</div>
 				}
-				<p class="text-center">
-					@templ.Raw(inputSettings.Description)
-				</p>
 				<div class="grid grid-cols-2 gap-4">
 					{{ cancelButtonLabel := "no, do not proceed." }}
 					if inputSettings.CancelButtonLabel != "" {
@@ -196,7 +216,7 @@ templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
 					@IconButton(IconButtonSettings{
 						Label:                cancelButtonLabel,
 						BackgroundColor:      "neutral-300/90",
-						HoverBackgroundColor: "neutral-200",
+						HoverBackgroundColor: "neutral-100",
 						TextColor:            "neutral-950",
 						HoverTextColor:       "neutral-950",
 						OnClick:              cancelFunction,
@@ -209,9 +229,9 @@ templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
 					}
 					@IconButton(IconButtonSettings{
 						Label:                confirmButtonLabel,
-						BackgroundColor:      "neutral-950/40",
-						HoverBackgroundColor: "neutral-950/60",
-						TextColor:            "white",
+						BackgroundColor:      "neutral-950/50",
+						HoverBackgroundColor: "neutral-950/90",
+						TextColor:            "neutral-50",
 						OnClick:              inputSettings.ConfirmFunction,
 						Size:                 IconButtonSizeMd,
 						IsFullWidth:          true,
