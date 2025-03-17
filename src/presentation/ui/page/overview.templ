@@ -525,18 +525,22 @@ templ OverviewIndex(
 			@ContainersTable(containersResponseDto, containerIdSummariesMap)
 			@CreateContainerModal(createContainerDto)
 			@UpdateContainerModal(createContainerDto.ContainerProfileSearchableItems)
-			@componentStructural.ConfirmationModal(
-				"Power Off Container", "ph-lightning-slash",
-				"Are you sure you want to power off this container?<br />The container won't be accessible until powered back on.",
-				"isShutdownContainerModalOpen", "shutdownContainer()",
-				componentStructural.ConfirmationTypeWarning,
-			)
-			@componentStructural.ConfirmationModal(
-				"Restart Container", "ph-arrows-clockwise",
-				"Are you sure you want to restart this container?<br />The container will be stopped and started again.",
-				"isRestartContainerModalOpen", "restartContainer()",
-				componentStructural.ConfirmationTypeWarning,
-			)
+			@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+				Title:            "Power Off Container",
+				TitleIcon:        "ph-lightning-slash",
+				Description:      "Are you sure you want to power off this container?<br />The container won't be accessible until powered back on.",
+				ConfirmationType: componentStructural.ConfirmationTypeWarning,
+				IsOpenState:      "isShutdownContainerModalOpen",
+				ConfirmFunction:  "shutdownContainer()",
+			})
+			@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+				Title:            "Restart Container",
+				TitleIcon:        "ph-arrows-clockwise",
+				Description:      "Are you sure you want to restart this container?<br />The container will be stopped and started again.",
+				ConfirmationType: componentStructural.ConfirmationTypeWarning,
+				IsOpenState:      "isRestartContainerModalOpen",
+				ConfirmFunction:  "restartContainer()",
+			})
 			@componentStructural.DeleteModal(
 				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
 				"delete-container", "container.hostname", "container.id",

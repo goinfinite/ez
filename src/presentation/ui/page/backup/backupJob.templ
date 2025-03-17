@@ -662,12 +662,14 @@ templ BackupJobs(
 		</div>
 		@BackupJobsTable(readJobsRequest, readJobsResponse)
 		@CreateBackupJobModal(createJobModalDto)
-		@componentStructural.ConfirmationModal(
-			"Run Job Now", "ph-queue",
-			"Are you sure you want to run this job?<br /><small>Depending on the job's settings, this operation may take a while and use significant resources.</small>",
-			"isRunJobModalOpen", "runJob()",
-			componentStructural.ConfirmationTypeInfo,
-		)
+		@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+			Title:            "Run Job Now",
+			TitleIcon:        "ph-queue",
+			Description:      "Are you sure you want to run this job?<br /><small>Depending on the job's settings, this operation may take a while and use significant resources.</small>",
+			ConfirmationType: componentStructural.ConfirmationTypeInfo,
+			IsOpenState:      "isRunJobModalOpen",
+			ConfirmFunction:  "runJob()",
+		})
 		@UpdateBackupJobModal(createJobModalDto)
 		@componentStructural.DeleteModal(
 			"isDeleteJobModalOpen", "closeDeleteJobModal()", "deleteJob()",

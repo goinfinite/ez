@@ -641,12 +641,14 @@ templ BackupTasks(
 			"isDeleteTaskModalOpen", "closeDeleteTaskModal()", "deleteTask()",
 			"delete-task", "", "taskEntity.taskId",
 		)
-		@componentStructural.ConfirmationModal(
-			"Cancel Task", "ph-hand-palm",
-			"Are you sure you want to cancel this task? This action cannot be undone.",
-			"isCancelTaskModalOpen", "cancelTask()",
-			componentStructural.ConfirmationTypeWarning,
-		)
+		@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+			Title:            "Cancel Task",
+			TitleIcon:        "ph-hand-palm",
+			Description:      "Are you sure you want to cancel this task? This action cannot be undone.",
+			ConfirmationType: componentStructural.ConfirmationTypeWarning,
+			IsOpenState:      "isCancelTaskModalOpen",
+			ConfirmFunction:  "cancelTask()",
+		})
 	</div>
 	<br/>
 	<div class="mb-4">
