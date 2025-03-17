@@ -58,23 +58,26 @@ document.addEventListener("alpine:init", () => {
     },
 
     isDeleteTaskModalOpen: false,
+    shouldDiscardFiles: false,
     openDeleteTaskModal(taskId) {
       this.resetPrimaryState();
       this.updateTaskEntity(taskId);
+      this.shouldDiscardFiles = false;
       this.isDeleteTaskModalOpen = true;
     },
     closeDeleteTaskModal() {
       this.isDeleteTaskModalOpen = false;
     },
     deleteTask() {
+      let deleteEndpoint =
+        backupApiBaseEndpoint + "/task/" + this.taskEntity.taskId + "/";
+      if (this.shouldDiscardFiles) {
+        deleteEndpoint += "?shouldDiscardFiles=true";
+      }
       htmx
-        .ajax(
-          "DELETE",
-          backupApiBaseEndpoint + "/task/" + this.taskEntity.taskId + "/",
-          {
-            swap: "none",
-          }
-        )
+        .ajax("DELETE", deleteEndpoint, {
+          swap: "none",
+        })
         .then(() => {
           this.$dispatch("delete:backup-task");
         });
