@@ -111,10 +111,9 @@ templ DeleteModal(
 const (
 	ConfirmationDescriptionDelete = "This process cannot be undone. This will permanently delete the element."
 
-	ConfirmationTypeInfo     = "info"
-	ConfirmationTypeWarning  = "warning"
-	ConfirmationTypeDanger   = "danger"
-	ConfirmationTypeCritical = "critical"
+	ConfirmationTypeInfo    = "info"
+	ConfirmationTypeWarning = "warning"
+	ConfirmationTypeDanger  = "danger"
 )
 
 type ConfirmationModalSettings struct {
@@ -139,40 +138,51 @@ templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
 		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
 	>
 		<div class="relative mx-auto mt-[5%] max-w-2xl rounded-md drop-shadow-xl">
-			<div
-				if inputSettings.ConfirmationType == ConfirmationTypeInfo {
-					class="flex flex-col rounded-md bg-sky-900 p-8"
-				} else {
-					class="flex flex-col rounded-md bg-yellow-900 p-8"
-				}
-			>
+			{{ modalContentClasses := "flex flex-col rounded-md p-8 gap-5" }}
+			switch inputSettings.ConfirmationType {
+				case ConfirmationTypeInfo:
+					{{ modalContentClasses += " bg-cyan-900" }}
+				case ConfirmationTypeWarning:
+					{{ modalContentClasses += " bg-yellow-900" }}
+				case ConfirmationTypeDanger:
+					{{ modalContentClasses += " bg-red-900" }}
+				default:
+					{{ modalContentClasses += " bg-zinc-900" }}
+			}
+			<div class={ modalContentClasses }>
 				<i
 					@click={ inputSettings.IsOpenState + " = false" }
 					class="ph-bold ph-x-square opacity-85 right-7.5 top-7.5 absolute cursor-pointer text-3xl hover:opacity-100 active:opacity-100"
 				></i>
-				<h3 class="my-3 flex flex-row items-center justify-center gap-2 leading-relaxed">
+				<h3 class="flex flex-row items-center justify-center gap-2 leading-relaxed">
 					<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-4xl text-neutral-100" }></i>
 					<span class="text-2xl font-bold">
 						@templ.Raw(inputSettings.Title)
 					</span>
 				</h3>
-				<p class="mb-6 text-center">
+				<p class="text-center">
 					@templ.Raw(inputSettings.Description)
 				</p>
-				<div class="flex flex-row gap-4">
-					<button
-						@click={ inputSettings.IsOpenState + " = false" }
-						class="w-full rounded-md bg-transparent p-3 text-center text-base lowercase leading-none text-neutral-50 ring-1 ring-neutral-50 transition-all hover:bg-neutral-50 hover:text-neutral-950"
-					>
-						No, do not proceed.
-					</button>
-					<button
-						type="submit"
-						@click={ inputSettings.ConfirmFunction }
-						class="w-full rounded-md border-none bg-neutral-950 bg-opacity-50 p-3 text-center text-base font-bold lowercase leading-none text-neutral-50 transition-all hover:bg-opacity-75"
-					>
-						Yes, Proceed!
-					</button>
+				<div class="grid grid-cols-2 gap-4">
+					@IconButton(IconButtonSettings{
+						Label:                "no, do not proceed.",
+						BackgroundColor:      "neutral-300/90",
+						HoverBackgroundColor: "neutral-200",
+						TextColor:            "neutral-950",
+						HoverTextColor:       "neutral-950",
+						OnClick:              inputSettings.IsOpenState + " = false",
+						Size:                 IconButtonSizeMd,
+						IsFullWidth:          true,
+					})
+					@IconButton(IconButtonSettings{
+						Label:                "yes, proceed!",
+						BackgroundColor:      "neutral-950/40",
+						HoverBackgroundColor: "neutral-950/60",
+						TextColor:            "white",
+						OnClick:              inputSettings.ConfirmFunction,
+						Size:                 IconButtonSizeMd,
+						IsFullWidth:          true,
+					})
 				</div>
 			</div>
 		</div>
