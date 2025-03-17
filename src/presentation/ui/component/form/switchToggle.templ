@@ -72,7 +72,7 @@ templ SwitchToggle(inputDto SwitchToggleDto) {
 			case SwitchToggleSizeXl:
 				{{ checkdotSize = "after:h-7 after:w-7" }}
 		}
-		<div class={ "peer-checked:bg-infinite-500 bg-ez-100 peer relative " + checkboxSize + " " + radiusRoundness + " after:absolute after:start-[2px] " + checkdotSize + " after:top-0.5 after:" + radiusRoundness + " after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" }></div>
+		<div class={ "peer-checked:bg-infinite-500 bg-neutral-50/20 peer relative " + checkboxSize + " " + radiusRoundness + " after:absolute after:start-[2px] " + checkdotSize + " after:top-0.5 after:" + radiusRoundness + " after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" }></div>
 		if inputDto.LabelPosition != SwitchToggleLabelPositionLeft {
 			<span class="ml-2 text-sm text-neutral-100">
 				@templ.Raw(inputDto.Label)
