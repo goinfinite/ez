@@ -35,7 +35,7 @@ func PaginationParser(
 		}
 	}
 
-	itemNameSortDirectionStr := "asc"
+	itemNameSortDirectionStr := valueObject.PaginationSortDirectionAsc.String()
 	if echoContext.QueryParam(itemName+"SortDirection") != "" {
 		itemNameSortDirection, err := valueObject.NewPaginationSortDirection(
 			echoContext.QueryParam(itemName + "SortDirection"),
