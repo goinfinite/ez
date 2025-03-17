@@ -577,16 +577,20 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 }
 
 func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
-	readContainersRequestDto := dto.ReadContainersRequest{
-		Pagination:  useCase.ContainersDefaultPagination,
+	containerEntity, err := repo.containerQueryRepo.ReadFirst(dto.ReadContainersRequest{
 		ContainerId: []valueObject.ContainerId{deleteDto.ContainerId},
+	})
+	if err != nil {
+		return errors.New("ReadContainerError: " + err.Error())
 	}
 
-	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)
-	if err != nil || len(readContainersResponseDto.Containers) == 0 {
-		return err
+	containerIdStr := deleteDto.ContainerId.String()
+	_, err = infraHelper.RunCmdAsUser(
+		deleteDto.AccountId, "podman", "rm", "--force", containerIdStr,
+	)
+	if err != nil {
+		return errors.New("DeletePodmanContainerError: " + err.Error())
 	}
-	containerEntity := readContainersResponseDto.Containers[0]
 
 	containerName := repo.containerNameFactory(containerEntity.Hostname)
 	systemdUnitName := repo.containerSystemdUnitNameFactory(containerName)
@@ -604,12 +608,12 @@ func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
 		"systemctl", "--user", "show", "-P", "FragmentPath", systemdUnitName,
 	)
 	if err != nil {
-		return errors.New("GetSystemdUnitFilePathError: " + err.Error())
+		return errors.New("ReadSystemdUnitFilePathError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdAsUser(deleteDto.AccountId, "rm", "-f", unitFilePath)
 	if err != nil {
-		return errors.New("RemoveSystemdUnitFileError: " + err.Error())
+		return errors.New("DeleteSystemdUnitFileError: " + err.Error())
 	}
 
 	_, err = infraHelper.RunCmdAsUser(
@@ -619,21 +623,13 @@ func (repo *ContainerCmdRepo) Delete(deleteDto dto.DeleteContainer) error {
 		return errors.New("SystemdDaemonReloadError: " + err.Error())
 	}
 
-	containerIdStr := deleteDto.ContainerId.String()
-	_, err = infraHelper.RunCmdAsUser(
-		deleteDto.AccountId, "podman", "rm", "--force", containerIdStr,
-	)
-	if err != nil {
-		return errors.New("RemoveContainerError: " + err.Error())
-	}
-
 	portBindingModel := dbModel.ContainerPortBinding{}
 	deleteResult := repo.persistentDbSvc.Handler.Delete(
 		portBindingModel,
 		"container_id = ?", containerIdStr,
 	)
 	if deleteResult.Error != nil {
-		return err
+		return errors.New("DeletePortBindingsError: " + deleteResult.Error.Error())
 	}
 
 	containerModel := dbModel.Container{ID: containerIdStr}
