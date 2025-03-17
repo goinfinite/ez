@@ -7,6 +7,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
@@ -37,10 +38,13 @@ func (presenter *BackupPresenter) ReadTasks(
 	echoContext echo.Context,
 	backupService *service.BackupService,
 ) (readRequestDto dto.ReadBackupTasksRequest, readResponseDto dto.ReadBackupTasksResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "backupTasks", "id")
-	paginationMap["sortDirection"] = "desc"
+	entityNamePrefix := "backupTasks"
+	paginationMap := uiHelper.PaginationParser(echoContext, entityNamePrefix, "id")
+	if echoContext.QueryParam(entityNamePrefix+"SortDirection") == "" {
+		paginationMap["sortDirection"] = valueObject.PaginationSortDirectionDesc.String()
+	}
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "backupTasks", dto.ReadBackupTasksRequest{},
+		echoContext, entityNamePrefix, dto.ReadBackupTasksRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
@@ -71,10 +75,13 @@ func (presenter *BackupPresenter) ReadTaskArchives(
 	echoContext echo.Context,
 	backupService *service.BackupService,
 ) (readRequestDto dto.ReadBackupTaskArchivesRequest, readResponseDto dto.ReadBackupTaskArchivesResponse) {
-	paginationMap := uiHelper.PaginationParser(echoContext, "backupTaskArchives", "createdAt")
-	paginationMap["sortDirection"] = "desc"
+	entityNamePrefix := "backupTaskArchives"
+	paginationMap := uiHelper.PaginationParser(echoContext, entityNamePrefix, "createdAt")
+	if echoContext.QueryParam(entityNamePrefix+"SortDirection") == "" {
+		paginationMap["sortDirection"] = valueObject.PaginationSortDirectionDesc.String()
+	}
 	requestParamsMap := uiHelper.ReadRequestParser(
-		echoContext, "backupTaskArchives", dto.ReadBackupTaskArchivesRequest{},
+		echoContext, entityNamePrefix, dto.ReadBackupTaskArchivesRequest{},
 	)
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
