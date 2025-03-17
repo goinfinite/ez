@@ -645,6 +645,12 @@ templ BackupTasks(
 			ConfirmationType:  componentStructural.ConfirmationTypeDanger,
 			IsOpenState:       "isDeleteTaskModalOpen",
 			ConfirmFunction:   "deleteTask()",
+			Checkboxes: []componentStructural.ConfirmationCheckboxSettings{
+				{
+					Label:              "Also delete all files associated with this task on the destination.",
+					IsCheckedStatePath: "shouldDiscardFiles",
+				},
+			},
 		})
 		@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
 			Title:            "Cancel Task",
