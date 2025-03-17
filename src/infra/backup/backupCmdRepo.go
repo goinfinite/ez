@@ -791,18 +791,22 @@ func (repo *BackupCmdRepo) sharedTaskFailRegister(
 
 	if accountId != nil {
 		accountIdStr := accountId.String()
-		tagIdentifier = "[" + accountIdStr + "] "
+		tagIdentifier = "[accountId/" + accountIdStr + "] "
 		slogAttrs = append(slogAttrs, "accountId", accountIdStr)
 	}
 
 	if containerId != nil {
 		containerIdStr := containerId.String()
-		tagIdentifier += "[" + containerIdStr + "] "
-		*failedContainerIdsPtr = append(*failedContainerIdsPtr, containerIdStr)
+		tagIdentifier += "[containerId/" + containerIdStr + "] "
+		if failedContainerIdsPtr != nil {
+			*failedContainerIdsPtr = append(*failedContainerIdsPtr, containerIdStr)
+		}
 		slogAttrs = append(slogAttrs, "containerId", containerIdStr)
 	}
 
-	*executionOutputPtr += tagIdentifier + error.Error() + "\n"
+	if executionOutputPtr != nil {
+		*executionOutputPtr += tagIdentifier + error.Error() + "\n"
+	}
 	slog.Debug(error.Error(), slogAttrs...)
 }
 
@@ -827,7 +831,7 @@ func (repo *BackupCmdRepo) createContainerArchive(
 		DestinationPath: &jobTmpDir,
 	}
 	archiveFile, err = containerImageCmdRepo.CreateArchive(createArchiveDto)
-	imageIdErrorTag := "[imageId: " + snapshotImageId.String() + "] "
+	imageIdErrorTag := "[imageId/" + snapshotImageId.String() + "] "
 	if err != nil {
 		return archiveFile, errors.New(
 			imageIdErrorTag + "CreateArchiveFailed: " + err.Error(),
@@ -840,9 +844,11 @@ func (repo *BackupCmdRepo) createContainerArchive(
 	}
 	err = containerImageCmdRepo.Delete(deleteSnapshotDto)
 	if err != nil {
-		return archiveFile, errors.New(
-			imageIdErrorTag + "DeleteSnapshotImageFailed: " + err.Error(),
-		)
+		if !strings.Contains(err.Error(), "image is in use") {
+			return archiveFile, errors.New(
+				imageIdErrorTag + "DeleteSnapshotImageFailed: " + err.Error(),
+			)
+		}
 	}
 
 	return archiveFile, nil
