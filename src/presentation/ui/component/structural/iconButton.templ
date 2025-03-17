@@ -55,18 +55,18 @@ templ IconButton(inputSettings IconButtonSettings) {
 		if inputSettings.Shape == IconButtonShapeCircular {
 			{{ radiusRoundness = "rounded-full" }}
 		}
-		{{ backgroundSize := "p-2 text-base gap-1" }}
+		{{ backgroundSize := "p-2 text-base gap-2" }}
 		switch inputSettings.Size {
 			case IconButtonSizeXs:
-				{{ backgroundSize = "p-1 text-sm gap-1" }}
+				{{ backgroundSize = "p-1 text-sm gap-1.5" }}
 			case IconButtonSizeSm:
-				{{ backgroundSize = "p-2 text-base gap-1" }}
+				{{ backgroundSize = "p-2 text-base gap-2" }}
 			case IconButtonSizeMd:
-				{{ backgroundSize = "p-3 text-lg gap-2" }}
+				{{ backgroundSize = "p-2.5 text-lg gap-2.5" }}
 			case IconButtonSizeLg:
-				{{ backgroundSize = "p-3.5 text-xl gap-2.5" }}
+				{{ backgroundSize = "p-3 text-xl gap-3" }}
 			case IconButtonSizeXl:
-				{{ backgroundSize = "p-4 text-2xl gap-3" }}
+				{{ backgroundSize = "p-3.5 text-2xl gap-3.5" }}
 		}
 		{{ iconSize := "text-xl" }}
 		switch inputSettings.Size {
@@ -75,7 +75,7 @@ templ IconButton(inputSettings IconButtonSettings) {
 			case IconButtonSizeSm:
 				{{ iconSize = "text-sm" }}
 			case IconButtonSizeMd:
-				{{ iconSize = "text-base" }}
+				{{ iconSize = "text-md" }}
 			case IconButtonSizeLg:
 				{{ iconSize = "text-lg" }}
 			case IconButtonSizeXl:
