@@ -1049,6 +1049,75 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 	return taskRunDetails
 }
 
+type BackupAccountContainersResponse struct {
+	ExecOutputStr      string
+	FailedContainerIds []valueObject.ContainerId
+}
+
+func (repo *BackupCmdRepo) backupAccountContainers(
+	accountCmdRepo *infra.AccountCmdRepo,
+	containerImageCmdRepo *infra.ContainerImageCmdRepo,
+	preTaskAccountEntity entity.Account,
+	containerWithMetricsSlice []dto.ContainerWithMetrics,
+	failedExecPrefix string,
+	jobTmpDir valueObject.UnixFilePath,
+	taskIdRunDetailsMap map[valueObject.BackupTaskId]BackupTaskRunDetails,
+) (backupResponse BackupAccountContainersResponse) {
+	localProcExecOutputStr := ""
+	localProcFailedContainerIds := []valueObject.ContainerId{}
+
+	for _, containerWithMetrics := range containerWithMetricsSlice {
+		containerIdStr := containerWithMetrics.Id.String()
+		failedContainerExecPrefix := failedExecPrefix + "[containerId/" + containerIdStr + "] "
+
+		err := repo.accountStorageAllocator(
+			accountCmdRepo, containerWithMetrics, preTaskAccountEntity,
+		)
+		if err != nil {
+			localProcExecOutputStr += failedContainerExecPrefix +
+				"AccountStorageAllocatorFailed: " + err.Error() + "\n"
+			localProcFailedContainerIds = append(
+				localProcFailedContainerIds, containerWithMetrics.Id,
+			)
+			continue
+		}
+
+		archiveEntity, err := repo.createContainerArchive(
+			containerImageCmdRepo, containerWithMetrics, jobTmpDir,
+		)
+		if err != nil {
+			localProcExecOutputStr += failedContainerExecPrefix +
+				"CreateContainerArchiveFailed: " + err.Error() + "\n"
+			localProcFailedContainerIds = append(
+				localProcFailedContainerIds, containerWithMetrics.Id,
+			)
+			continue
+		}
+
+		for taskId, preUploadTaskRunDetails := range taskIdRunDetailsMap {
+			externalProcTaskRunDetails := repo.uploadContainerArchive(
+				preUploadTaskRunDetails, containerWithMetrics, archiveEntity,
+			)
+			taskIdRunDetailsMap[taskId] = externalProcTaskRunDetails
+		}
+
+		err = containerImageCmdRepo.DeleteArchive(archiveEntity)
+		if err != nil {
+			slog.Debug(
+				"DeleteContainerArchiveFailed",
+				slog.String("containerId", containerWithMetrics.Id.String()),
+				slog.String("error", err.Error()),
+			)
+			continue
+		}
+	}
+
+	return BackupAccountContainersResponse{
+		ExecOutputStr:      localProcExecOutputStr,
+		FailedContainerIds: localProcFailedContainerIds,
+	}
+}
+
 func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	err := repo.userDataWatermarkLimitValidator()
 	if err != nil {
@@ -1097,6 +1166,9 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	localProcExecOutputStr := ""
 	localProcFailedContainerIds := []valueObject.ContainerId{}
 
+	remainingTaskTime := time.Duration(jobEntity.TimeoutSecs.Int64())
+	accContainersBackupResponseChannel := make(chan BackupAccountContainersResponse)
+
 	for accountId, containerWithMetricsSlice := range accountIdContainerWithMetricsMap {
 		failedExecPrefix := "[accountId/" + accountId.String() + "] "
 
@@ -1107,49 +1179,23 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 			continue
 		}
 
-		for _, containerWithMetrics := range containerWithMetricsSlice {
-			failedContainerExecPrefix := failedExecPrefix + "[containerId/" + containerWithMetrics.Id.String() + "] "
-
-			err = repo.accountStorageAllocator(
-				accountCmdRepo, containerWithMetrics, preTaskAccountEntity,
+		go func() {
+			accContainersBackupResponse := repo.backupAccountContainers(
+				accountCmdRepo, containerImageCmdRepo, preTaskAccountEntity, containerWithMetricsSlice,
+				failedExecPrefix, jobTmpDir, taskIdRunDetailsMap,
 			)
-			if err != nil {
-				localProcExecOutputStr += failedContainerExecPrefix +
-					"AccountStorageAllocatorFailed: " + err.Error() + "\n"
-				localProcFailedContainerIds = append(
-					localProcFailedContainerIds, containerWithMetrics.Id,
-				)
-				continue
-			}
+			accContainersBackupResponseChannel <- accContainersBackupResponse
+		}()
 
-			archiveEntity, err := repo.createContainerArchive(
-				containerImageCmdRepo, containerWithMetrics, jobTmpDir,
+		select {
+		case accContainersBackupResponse := <-accContainersBackupResponseChannel:
+			localProcExecOutputStr += accContainersBackupResponse.ExecOutputStr
+			localProcFailedContainerIds = append(
+				localProcFailedContainerIds,
+				accContainersBackupResponse.FailedContainerIds...,
 			)
-			if err != nil {
-				localProcExecOutputStr += failedContainerExecPrefix +
-					"CreateContainerArchiveFailed: " + err.Error() + "\n"
-				localProcFailedContainerIds = append(
-					localProcFailedContainerIds, containerWithMetrics.Id,
-				)
-				continue
-			}
-
-			for taskId, preUploadTaskRunDetails := range taskIdRunDetailsMap {
-				externalProcTaskRunDetails := repo.uploadContainerArchive(
-					preUploadTaskRunDetails, containerWithMetrics, archiveEntity,
-				)
-				taskIdRunDetailsMap[taskId] = externalProcTaskRunDetails
-			}
-
-			err = containerImageCmdRepo.DeleteArchive(archiveEntity)
-			if err != nil {
-				slog.Debug(
-					"DeleteContainerArchiveFailed",
-					slog.String("containerId", containerWithMetrics.Id.String()),
-					slog.String("error", err.Error()),
-				)
-				continue
-			}
+		case <-time.After(remainingTaskTime * time.Second):
+			localProcExecOutputStr += "BackupTaskTimeout\n"
 		}
 
 		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
