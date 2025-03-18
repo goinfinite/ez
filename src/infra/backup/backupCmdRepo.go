@@ -1059,11 +1059,12 @@ func (repo *BackupCmdRepo) backupAccountContainers(
 	containerImageCmdRepo *infra.ContainerImageCmdRepo,
 	preTaskAccountEntity entity.Account,
 	containerWithMetricsSlice []dto.ContainerWithMetrics,
-	failedExecPrefix string,
 	jobTmpDir valueObject.UnixFilePath,
 	taskIdRunDetailsMap map[valueObject.BackupTaskId]BackupTaskRunDetails,
 ) (backupResponse BackupAccountContainersResponse) {
-	localProcExecOutputStr := ""
+	failedExecPrefix := "[accountId/" + preTaskAccountEntity.Id.String() + "] "
+
+	localProcExecOutput := ""
 	localProcFailedContainerIds := []valueObject.ContainerId{}
 
 	for _, containerWithMetrics := range containerWithMetricsSlice {
@@ -1074,7 +1075,7 @@ func (repo *BackupCmdRepo) backupAccountContainers(
 			accountCmdRepo, containerWithMetrics, preTaskAccountEntity,
 		)
 		if err != nil {
-			localProcExecOutputStr += failedContainerExecPrefix +
+			localProcExecOutput += failedContainerExecPrefix +
 				"AccountStorageAllocatorFailed: " + err.Error() + "\n"
 			localProcFailedContainerIds = append(
 				localProcFailedContainerIds, containerWithMetrics.Id,
@@ -1086,7 +1087,7 @@ func (repo *BackupCmdRepo) backupAccountContainers(
 			containerImageCmdRepo, containerWithMetrics, jobTmpDir,
 		)
 		if err != nil {
-			localProcExecOutputStr += failedContainerExecPrefix +
+			localProcExecOutput += failedContainerExecPrefix +
 				"CreateContainerArchiveFailed: " + err.Error() + "\n"
 			localProcFailedContainerIds = append(
 				localProcFailedContainerIds, containerWithMetrics.Id,
@@ -1113,22 +1114,23 @@ func (repo *BackupCmdRepo) backupAccountContainers(
 	}
 
 	return BackupAccountContainersResponse{
-		ExecOutputStr:      localProcExecOutputStr,
+		ExecOutputStr:      localProcExecOutput,
 		FailedContainerIds: localProcFailedContainerIds,
 	}
 }
 
 func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
+	jobStartedAt := time.Now()
+
 	err := repo.userDataWatermarkLimitValidator()
 	if err != nil {
 		return err
 	}
 
-	requestJobDto := dto.ReadBackupJobsRequest{
+	jobEntity, err := repo.backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
 		AccountId: &runDto.AccountId,
 		JobId:     &runDto.JobId,
-	}
-	jobEntity, err := repo.backupQueryRepo.ReadFirstJob(requestJobDto)
+	})
 	if err != nil {
 		return errors.New("ReadBackupJobFailed: " + err.Error())
 	}
@@ -1163,45 +1165,53 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(repo.persistentDbSvc)
 
-	localProcExecOutputStr := ""
+	var localProcExecOutput strings.Builder
 	localProcFailedContainerIds := []valueObject.ContainerId{}
 
-	remainingTaskTime := time.Duration(jobEntity.TimeoutSecs.Int64())
+	remainingJobRunTime := time.Duration(jobEntity.TimeoutSecs.Int64())
 	accContainersBackupResponseChannel := make(chan BackupAccountContainersResponse)
 
 	for accountId, containerWithMetricsSlice := range accountIdContainerWithMetricsMap {
-		failedExecPrefix := "[accountId/" + accountId.String() + "] "
+		var localProcExecOutputWriteStr = func(message string) {
+			localProcExecOutput.WriteString(
+				"[accountId/" + accountId.String() + "] " + message + "\n",
+			)
+		}
 
 		preTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
-			localProcExecOutputStr += failedExecPrefix +
-				"ReadPreTaskAccountEntityFailed: " + err.Error() + "\n"
+			localProcExecOutputWriteStr("ReadPreTaskAccountEntityFailed: " + err.Error())
 			continue
 		}
 
+		accContainersBackupStartedAt := time.Now()
 		go func() {
 			accContainersBackupResponse := repo.backupAccountContainers(
-				accountCmdRepo, containerImageCmdRepo, preTaskAccountEntity, containerWithMetricsSlice,
-				failedExecPrefix, jobTmpDir, taskIdRunDetailsMap,
+				accountCmdRepo, containerImageCmdRepo, preTaskAccountEntity,
+				containerWithMetricsSlice, jobTmpDir, taskIdRunDetailsMap,
 			)
 			accContainersBackupResponseChannel <- accContainersBackupResponse
 		}()
 
 		select {
 		case accContainersBackupResponse := <-accContainersBackupResponseChannel:
-			localProcExecOutputStr += accContainersBackupResponse.ExecOutputStr
+			localProcExecOutput.WriteString(accContainersBackupResponse.ExecOutputStr)
 			localProcFailedContainerIds = append(
 				localProcFailedContainerIds,
 				accContainersBackupResponse.FailedContainerIds...,
 			)
-		case <-time.After(remainingTaskTime * time.Second):
-			localProcExecOutputStr += "BackupTaskTimeout\n"
+		case <-time.After(remainingJobRunTime * time.Second):
+			localProcExecOutputWriteStr("BackupTaskTimeout")
+		}
+
+		remainingJobRunTime -= time.Since(accContainersBackupStartedAt)
+		if remainingJobRunTime <= 0 {
+			break
 		}
 
 		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
-			localProcExecOutputStr += failedExecPrefix +
-				"ReadPostTaskAccountEntityFailed: " + err.Error() + "\n"
+			localProcExecOutputWriteStr("ReadPostTaskAccountEntityFailed: " + err.Error())
 			continue
 		}
 
@@ -1230,24 +1240,30 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 
 	for taskId, externalProcTaskRunDetails := range taskIdRunDetailsMap {
 		combinedExecutionOutput := externalProcTaskRunDetails.ExecutionOutput
+		localProcExecOutputStr := localProcExecOutput.String()
 		if len(localProcExecOutputStr) > 0 {
-			combinedExecutionOutput = localProcExecOutputStr + "\n" + externalProcTaskRunDetails.ExecutionOutput
+			combinedExecutionOutput = localProcExecOutputStr + "\n" +
+				externalProcTaskRunDetails.ExecutionOutput
 		}
 
 		combinedFailedContainerIds := append(
 			externalProcTaskRunDetails.FailedContainerIds, localProcFailedContainerIdsStr...,
 		)
 
-		taskStatus := valueObject.BackupTaskStatusCompleted.String()
+		taskStatus := valueObject.BackupTaskStatusCompleted
 		if len(combinedFailedContainerIds) > 0 {
-			taskStatus = valueObject.BackupTaskStatusPartial.String()
+			taskStatus = valueObject.BackupTaskStatusPartial
 		}
 		if len(externalProcTaskRunDetails.SuccessfulContainerIds) == 0 {
-			taskStatus = valueObject.BackupTaskStatusFailed.String()
+			taskStatus = valueObject.BackupTaskStatusFailed
+		}
+
+		if externalProcTaskRunDetails.StartedAt == externalProcTaskRunDetails.FinishedAt {
+			externalProcTaskRunDetails.ElapsedSecs = uint64(time.Since(jobStartedAt).Seconds())
 		}
 
 		taskModelUpdated := dbModel.BackupTask{
-			TaskStatus:             taskStatus,
+			TaskStatus:             taskStatus.String(),
 			ExecutionOutput:        &combinedExecutionOutput,
 			ContainerAccountIds:    externalProcTaskRunDetails.ContainerAccountIds,
 			SuccessfulContainerIds: externalProcTaskRunDetails.SuccessfulContainerIds,
