@@ -1259,6 +1259,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		}
 
 		if externalProcTaskRunDetails.StartedAt == externalProcTaskRunDetails.FinishedAt {
+			externalProcTaskRunDetails.FinishedAt = time.Now()
 			externalProcTaskRunDetails.ElapsedSecs = uint64(time.Since(jobStartedAt).Seconds())
 		}
 
