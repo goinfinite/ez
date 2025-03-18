@@ -22,6 +22,10 @@ func (vo TimeDuration) Uint64() uint64 {
 	return uint64(vo)
 }
 
+func (vo TimeDuration) Int64() int64 {
+	return int64(vo)
+}
+
 func (vo TimeDuration) String() string {
 	return strconv.FormatUint(uint64(vo), 10)
 }
