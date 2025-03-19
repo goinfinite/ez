@@ -2,6 +2,7 @@ package useCase
 
 import (
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/goinfinite/ez/src/domain/dto"
@@ -37,6 +38,12 @@ func deleteAncientBackupTasks(
 		if err != nil {
 			continue
 		}
+
+		slog.Debug(
+			"AncientBackupTaskDeleted",
+			slog.String("taskId", taskEntity.TaskId.String()),
+			slog.String("taskCreatedAt", taskEntity.CreatedAt.ReadAsRfcDate()),
+		)
 	}
 
 	return nil
@@ -99,6 +106,12 @@ func BackupJobHousekeeper(
 		if err != nil {
 			return errors.New("DeleteOldestTaskInfraError: " + err.Error())
 		}
+
+		slog.Debug(
+			"OldestBackupTaskDeleted",
+			slog.String("taskId", firstTaskEntity.TaskId.String()),
+			slog.String("taskCreatedAt", firstTaskEntity.CreatedAt.ReadAsRfcDate()),
+		)
 	}
 
 	return nil
