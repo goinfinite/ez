@@ -519,6 +519,29 @@ func (repo *BackupCmdRepo) UpdateJob(
 		jobUpdatedModel.ExceptContainerIds = exceptContainerIds
 	}
 
+	if updateDto.TasksCount != nil {
+		jobUpdatedModel.TasksCount = *updateDto.TasksCount
+	}
+
+	if updateDto.TotalSpaceUsageBytes != nil {
+		jobUpdatedModel.TotalSpaceUsageBytes = updateDto.TotalSpaceUsageBytes.Uint64()
+	}
+
+	if updateDto.LastRunAt != nil {
+		lastRunAtTime := updateDto.LastRunAt.GetAsGoTime()
+		jobUpdatedModel.LastRunAt = &lastRunAtTime
+	}
+
+	if updateDto.LastRunStatus != nil {
+		lastRunStatusStr := updateDto.LastRunStatus.String()
+		jobUpdatedModel.LastRunStatus = &lastRunStatusStr
+	}
+
+	if updateDto.NextRunAt != nil {
+		nextRunAtTime := updateDto.NextRunAt.GetAsGoTime()
+		jobUpdatedModel.NextRunAt = &nextRunAtTime
+	}
+
 	err := repo.persistentDbSvc.Handler.
 		Model(&dbModel.BackupJob{}).
 		Where("id = ?", updateDto.JobId.Uint64()).
