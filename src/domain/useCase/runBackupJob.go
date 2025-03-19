@@ -27,7 +27,7 @@ func RunBackupJob(
 	)
 	if err != nil {
 		slog.Error(
-			"BackupJobHousekeeperError",
+			"PreRunBackupJobHousekeeperError",
 			slog.String("error", err.Error()),
 			slog.String("jobId", runDto.JobId.String()),
 		)
@@ -93,6 +93,17 @@ func RunBackupJob(
 	if err != nil {
 		slog.Error(
 			"UpdateBackupJobStatsInfraError",
+			slog.String("error", err.Error()),
+			slog.String("jobId", runDto.JobId.String()),
+		)
+	}
+
+	err = BackupJobHousekeeper(
+		backupQueryRepo, backupCmdRepo, activityRecordCmdRepo, runDto.JobId,
+	)
+	if err != nil {
+		slog.Error(
+			"PostRunBackupJobHousekeeperError",
 			slog.String("error", err.Error()),
 			slog.String("jobId", runDto.JobId.String()),
 		)
