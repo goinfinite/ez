@@ -428,7 +428,7 @@ templ BackupJobsTable(
 											Tasks Count
 										</td>
 										<td class="rounded-tr-md px-2 py-1">
-											{ uiHelper.FormatPointer(backupJobEntity.TasksCount) }
+											{ uiHelper.FormatPointer(&backupJobEntity.TasksCount) }
 										</td>
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
@@ -436,7 +436,7 @@ templ BackupJobsTable(
 											Total Space Usage
 										</td>
 										<td class="px-2 py-1">
-											{ uiHelper.FormatPointer(backupJobEntity.TotalSpaceUsageBytes) }
+											{ uiHelper.FormatPointer(&backupJobEntity.TotalSpaceUsageBytes) }
 										</td>
 									</tr>
 									<tr class="border-y-2 border-neutral-50/5">
