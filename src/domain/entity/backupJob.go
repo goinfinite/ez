@@ -24,8 +24,8 @@ type BackupJob struct {
 	ContainerIds              []valueObject.ContainerId           `json:"containerIds"`
 	ExceptContainerAccountIds []valueObject.AccountId             `json:"exceptContainerAccountIds"`
 	ExceptContainerIds        []valueObject.ContainerId           `json:"exceptContainerIds"`
-	TasksCount                *uint16                             `json:"tasksCount"`
-	TotalSpaceUsageBytes      *valueObject.Byte                   `json:"totalSpaceUsageBytes"`
+	TasksCount                uint16                              `json:"tasksCount"`
+	TotalSpaceUsageBytes      valueObject.Byte                    `json:"totalSpaceUsageBytes"`
 	LastRunAt                 *valueObject.UnixTime               `json:"lastRunAt"`
 	LastRunStatus             *valueObject.BackupTaskStatus       `json:"lastRunStatus"`
 	NextRunAt                 *valueObject.UnixTime               `json:"nextRunAt"`
@@ -49,8 +49,8 @@ func NewBackupJob(
 	containerIds []valueObject.ContainerId,
 	exceptContainerAccountIds []valueObject.AccountId,
 	exceptContainerIds []valueObject.ContainerId,
-	tasksCount *uint16,
-	totalSpaceUsageBytes *valueObject.Byte,
+	tasksCount uint16,
+	totalSpaceUsageBytes valueObject.Byte,
 	lastRunAt *valueObject.UnixTime,
 	lastRunStatus *valueObject.BackupTaskStatus,
 	nextRunAt *valueObject.UnixTime,

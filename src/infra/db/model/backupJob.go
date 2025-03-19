@@ -25,8 +25,8 @@ type BackupJob struct {
 	ContainerIds              []string `gorm:"serializer:json"`
 	ExceptContainerAccountIds []uint64 `gorm:"serializer:json"`
 	ExceptContainerIds        []string `gorm:"serializer:json"`
-	TasksCount                *uint16
-	TotalSpaceUsageBytes      *uint64
+	TasksCount                uint16   `gorm:"not null,default:0"`
+	TotalSpaceUsageBytes      uint64   `gorm:"not null,default:0"`
 	LastRunAt                 *time.Time
 	LastRunStatus             *string
 	NextRunAt                 *time.Time
@@ -163,13 +163,9 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 		exceptContainerIds = append(exceptContainerIds, exceptContainerId)
 	}
 
-	var totalSpaceUsageBytesPtr *valueObject.Byte
-	if model.TotalSpaceUsageBytes != nil {
-		totalSpaceUsageBytes, err := valueObject.NewByte(*model.TotalSpaceUsageBytes)
-		if err != nil {
-			return jobEntity, err
-		}
-		totalSpaceUsageBytesPtr = &totalSpaceUsageBytes
+	totalSpaceUsageBytes, err := valueObject.NewByte(model.TotalSpaceUsageBytes)
+	if err != nil {
+		return jobEntity, err
 	}
 
 	var lastRunAtPtr *valueObject.UnixTime
@@ -199,7 +195,7 @@ func (model BackupJob) ToEntity() (jobEntity entity.BackupJob, err error) {
 		model.MaxTaskRetentionCount, model.MaxTaskRetentionDays,
 		model.MaxConcurrentCpuCores, containerAccountIds, containerIds,
 		exceptContainerAccountIds, exceptContainerIds, model.TasksCount,
-		totalSpaceUsageBytesPtr, lastRunAtPtr, lastRunStatusPtr,
+		totalSpaceUsageBytes, lastRunAtPtr, lastRunStatusPtr,
 		nextRunAtPtr, valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
 		valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
 	)
