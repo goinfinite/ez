@@ -72,12 +72,12 @@ func RunBackupJob(
 			continue
 		}
 
+		lastRunStatus = taskEntity.TaskStatus
+
 		if taskEntity.SizeBytes == nil {
 			continue
 		}
 		totalUsageBytes += *taskEntity.SizeBytes
-
-		lastRunStatus = taskEntity.TaskStatus
 	}
 
 	newTasksCount := jobEntity.TasksCount + uint16(len(taskIds))
