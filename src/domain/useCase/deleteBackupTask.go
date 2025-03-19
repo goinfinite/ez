@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func DeleteBackupTask(
@@ -46,10 +47,17 @@ func DeleteBackupTask(
 		return nil
 	}
 
-	newJobTasksCount := jobEntity.TasksCount - 1
+	newJobTasksCount := uint16(0)
+	if jobEntity.TasksCount > 0 {
+		newJobTasksCount = jobEntity.TasksCount - 1
+	}
+
 	newJobTotalSpaceUsageBytes := jobEntity.TotalSpaceUsageBytes
 	if taskEntity.SizeBytes != nil {
 		newJobTotalSpaceUsageBytes -= *taskEntity.SizeBytes
+	}
+	if newJobTotalSpaceUsageBytes < 0 {
+		newJobTotalSpaceUsageBytes = valueObject.Byte(0)
 	}
 
 	err = backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
