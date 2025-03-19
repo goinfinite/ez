@@ -109,7 +109,7 @@ func TestBackupCmdRepo(t *testing.T) {
 			AccountId: accountId,
 		}
 
-		err := backupCmdRepo.RunJob(runDto)
+		_, err := backupCmdRepo.RunJob(runDto)
 		if err != nil {
 			t.Errorf("ExpectedNoErrorButGot: %v", err)
 		}

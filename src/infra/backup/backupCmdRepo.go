@@ -1119,12 +1119,14 @@ func (repo *BackupCmdRepo) backupAccountContainers(
 	}
 }
 
-func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
+func (repo *BackupCmdRepo) RunJob(
+	runDto dto.RunBackupJob,
+) (taskIds []valueObject.BackupTaskId, err error) {
 	jobStartedAt := time.Now()
 
-	err := repo.userDataWatermarkLimitValidator()
+	err = repo.userDataWatermarkLimitValidator()
 	if err != nil {
-		return err
+		return taskIds, err
 	}
 
 	jobEntity, err := repo.backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
@@ -1132,19 +1134,19 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		JobId:     &runDto.JobId,
 	})
 	if err != nil {
-		return errors.New("ReadBackupJobFailed: " + err.Error())
+		return taskIds, errors.New("ReadBackupJobFailed: " + err.Error())
 	}
 
 	accountIdContainerWithMetricsMap, err := repo.readAccountsContainersWithMetrics(jobEntity)
 	if err != nil {
-		return errors.New("ReadAccountContainersFailed: " + err.Error())
+		return taskIds, errors.New("ReadAccountContainersFailed: " + err.Error())
 	}
 
 	taskIdRunDetailsMap := repo.backupTaskRunDetailsFactory(
 		jobEntity, runDto.OperatorAccountId,
 	)
 	if len(taskIdRunDetailsMap) == 0 {
-		return errors.New("NoBackupTasksCreated")
+		return taskIds, errors.New("NoBackupTasksCreated")
 	}
 
 	rawJobTmpDir := fmt.Sprintf(
@@ -1153,12 +1155,12 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	)
 	jobTmpDir, err := valueObject.NewUnixFilePath(rawJobTmpDir)
 	if err != nil {
-		return errors.New("ValidateBackupJobTmpDirFailed: " + err.Error())
+		return taskIds, errors.New("ValidateBackupJobTmpDirFailed: " + err.Error())
 	}
 
 	err = repo.createJobTmpDir(jobTmpDir)
 	if err != nil {
-		return errors.New("CreateBackupJobTmpDirFailed: " + err.Error())
+		return taskIds, errors.New("CreateBackupJobTmpDirFailed: " + err.Error())
 	}
 
 	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
@@ -1239,6 +1241,8 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 	}
 
 	for taskId, externalProcTaskRunDetails := range taskIdRunDetailsMap {
+		taskIds = append(taskIds, taskId)
+
 		combinedExecutionOutput := externalProcTaskRunDetails.ExecutionOutput
 		localProcExecOutputStr := localProcExecOutput.String()
 		if len(localProcExecOutputStr) > 0 {
@@ -1285,7 +1289,7 @@ func (repo *BackupCmdRepo) RunJob(runDto dto.RunBackupJob) error {
 		}
 	}
 
-	return nil
+	return taskIds, nil
 }
 
 func (repo *BackupCmdRepo) toggleNobodyUserSession(sessionStatus bool) error {
