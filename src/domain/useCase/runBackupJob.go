@@ -12,6 +12,7 @@ import (
 func RunBackupJob(
 	backupQueryRepo repository.BackupQueryRepo,
 	backupCmdRepo repository.BackupCmdRepo,
+	cronQueryRepo repository.CronQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	runDto dto.RunBackupJob,
 ) error {
@@ -81,14 +82,21 @@ func RunBackupJob(
 	}
 
 	newTasksCount := jobEntity.TasksCount + uint16(len(taskIds))
+
 	lastRunAt := valueObject.NewUnixTimeNow()
+	var nextRunAtPtr *valueObject.UnixTime
+	nextRunAt, err := cronQueryRepo.ReadNextRun(jobEntity.BackupSchedule)
+	if err == nil {
+		nextRunAtPtr = &nextRunAt
+	}
 
 	err = backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
 		JobId:                runDto.JobId,
 		TasksCount:           &newTasksCount,
+		TotalSpaceUsageBytes: &totalUsageBytes,
 		LastRunAt:            &lastRunAt,
 		LastRunStatus:        &lastRunStatus,
-		TotalSpaceUsageBytes: &totalUsageBytes,
+		NextRunAt:            nextRunAtPtr,
 	})
 	if err != nil {
 		slog.Error(

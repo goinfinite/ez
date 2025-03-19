@@ -12,6 +12,7 @@ import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra"
 	backupInfra "github.com/goinfinite/ez/src/infra/backup"
+	cronInfra "github.com/goinfinite/ez/src/infra/cron"
 	"github.com/goinfinite/ez/src/infra/db"
 	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
@@ -1373,7 +1374,7 @@ func (service *BackupService) RunJob(
 	runDto := dto.NewRunBackupJob(jobId, accountId, operatorAccountId, operatorIpAddress)
 
 	err = useCase.RunBackupJob(
-		service.backupQueryRepo, service.backupCmdRepo,
+		service.backupQueryRepo, service.backupCmdRepo, &cronInfra.CronQueryRepo{},
 		service.activityRecordCmdRepo, runDto,
 	)
 	if err != nil {
