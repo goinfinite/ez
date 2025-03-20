@@ -882,7 +882,7 @@ func (repo *BackupCmdRepo) readTaskRemotePath(
 }
 
 func (repo *BackupCmdRepo) backupBinaryCliFactory(
-	destinationIEntity entity.IBackupDestination,
+	iDestinationEntity entity.IBackupDestination,
 ) (string, error) {
 	unencryptedDestEnvPrefix := "RCLONE_CONFIG_RAWDEST"
 	encryptedDestEnvPrefix := "RCLONE_CONFIG_ENCDEST"
@@ -890,7 +890,7 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 	var backupBinaryEnvs []string
 
 	var encryptionKey valueObject.Password
-	switch destinationEntity := destinationIEntity.(type) {
+	switch destinationEntity := iDestinationEntity.(type) {
 	case entity.BackupDestinationLocal:
 		backupBinaryEnvs = []string{
 			unencryptedDestEnvPrefix + "_TYPE=local",
@@ -945,6 +945,7 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 				destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
 		}
 		encryptionKey = destinationEntity.EncryptionKey
+
 	default:
 		return "", errors.New("InvalidBackupDestinationType")
 	}
@@ -961,13 +962,16 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 		encryptedDestEnvPrefix+"_FILENAME_ENCRYPTION=off",
 		encryptedDestEnvPrefix+"_PASSWORD="+encryptionKeyObscured.String(),
 	)
+
 	unencryptedDestPathStr := ""
-	switch destinationEntity := destinationIEntity.(type) {
+	switch destinationEntity := iDestinationEntity.(type) {
 	case entity.BackupDestinationLocal:
 		unencryptedDestPathStr = destinationEntity.DestinationPath.String()
+
 	case entity.BackupDestinationObjectStorage:
 		unencryptedDestPathStr += destinationEntity.ObjectStorageBucketName.String() +
 			destinationEntity.DestinationPath.String()
+
 	case entity.BackupDestinationRemoteHost:
 		unencryptedDestPathStr = destinationEntity.DestinationPath.String()
 		if unencryptedDestPathStr == "/" {
@@ -990,11 +994,23 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 ) BackupTaskRunDetails {
 	containerIdStr := containerWithMetrics.Id.String()
 
-	var backupBinaryFlags []string
-	switch taskRunDetails.DestinationEntity.(type) {
+	backupBinaryFlags := []string{}
+	maxConcurrentConnections := uint16(2)
+	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.MaxConcurrentConnections != nil {
+			maxConcurrentConnections = *destinationEntity.MaxConcurrentConnections
+		}
 	case entity.BackupDestinationObjectStorage:
 		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
+		if destinationEntity.MaxConcurrentConnections != nil {
+			maxConcurrentConnections = *destinationEntity.MaxConcurrentConnections
+		}
 	}
+	backupBinaryFlags = append(
+		backupBinaryFlags,
+		"--transfers="+strconv.Itoa(int(maxConcurrentConnections)),
+	)
 
 	archiveFileExtStr := ".tar.br"
 	archiveFileExt, err := archiveEntity.UnixFilePath.ReadCompoundFileExtension()
@@ -1019,10 +1035,7 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 		)
 		return taskRunDetails
 	}
-	backupBinaryCmd := backupBinaryCli
-	if len(backupBinaryFlags) > 0 {
-		backupBinaryCmd += " " + strings.Join(backupBinaryFlags, " ")
-	}
+	backupBinaryCmd := backupBinaryCli + " " + strings.Join(backupBinaryFlags, " ")
 	backupBinaryCmd += " copyto " + archiveEntity.UnixFilePath.String() + " " + destPathStr
 
 	_, err = infraHelper.RunCmdAsUserWithSubShell(
@@ -1260,8 +1273,6 @@ func (repo *BackupCmdRepo) RunJob(
 	if err != nil {
 		return taskIds, errors.New("CreateBackupJobTmpDirFailed: " + err.Error())
 	}
-
-	// TODO: If destination is local, check if MaxDestinationSpaceUsageBytes is exceeded
 
 	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
