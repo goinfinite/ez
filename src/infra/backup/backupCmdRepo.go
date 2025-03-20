@@ -996,21 +996,36 @@ func (repo *BackupCmdRepo) uploadContainerArchive(
 
 	backupBinaryFlags := []string{}
 	maxConcurrentConnections := uint16(2)
+	var uploadBytesSecRateLimitPtr *valueObject.Byte
 	switch destinationEntity := taskRunDetails.DestinationEntity.(type) {
 	case entity.BackupDestinationRemoteHost:
 		if destinationEntity.MaxConcurrentConnections != nil {
 			maxConcurrentConnections = *destinationEntity.MaxConcurrentConnections
+		}
+
+		if destinationEntity.UploadBytesSecRateLimit != nil {
+			uploadBytesSecRateLimitPtr = destinationEntity.UploadBytesSecRateLimit
 		}
 	case entity.BackupDestinationObjectStorage:
 		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
 		if destinationEntity.MaxConcurrentConnections != nil {
 			maxConcurrentConnections = *destinationEntity.MaxConcurrentConnections
 		}
+
+		if destinationEntity.UploadBytesSecRateLimit != nil {
+			uploadBytesSecRateLimitPtr = destinationEntity.UploadBytesSecRateLimit
+		}
 	}
 	backupBinaryFlags = append(
 		backupBinaryFlags,
 		"--transfers="+strconv.Itoa(int(maxConcurrentConnections)),
 	)
+	if uploadBytesSecRateLimitPtr != nil {
+		backupBinaryFlags = append(
+			backupBinaryFlags,
+			"--bwlimit="+uploadBytesSecRateLimitPtr.String()+"B",
+		)
+	}
 
 	archiveFileExtStr := ".tar.br"
 	archiveFileExt, err := archiveEntity.UnixFilePath.ReadCompoundFileExtension()
@@ -2027,7 +2042,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("InsufficientUserDataDirectoryFreeSpace")
 	}
 
-	destinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
+	iDestinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
 		dto.ReadBackupDestinationsRequest{DestinationId: &taskEntity.DestinationId}, true,
 	)
 	if err != nil {
@@ -2036,7 +2051,7 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 
 	necessaryFreeStorageBytes = 0
 	containerArchiveEntities, err := repo.readRemoteContainerArchives(
-		taskEntity, destinationEntity, createDto.ContainerAccountIds, createDto.ContainerIds,
+		taskEntity, iDestinationEntity, createDto.ContainerAccountIds, createDto.ContainerIds,
 		createDto.ExceptContainerAccountIds, createDto.ExceptContainerIds,
 	)
 	if err != nil {
@@ -2094,12 +2109,46 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 		return archiveId, errors.New("MakeArchiveTaskDirFailed: " + err.Error())
 	}
 
-	backupBinaryCli, err := repo.backupBinaryCliFactory(destinationEntity)
+	backupBinaryFlags := []string{}
+	maxConcurrentConnections := uint16(2)
+	var downloadBytesSecRateLimitPtr *valueObject.Byte
+	switch destinationEntity := iDestinationEntity.(type) {
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.MaxConcurrentConnections != nil {
+			maxConcurrentConnections = *destinationEntity.MaxConcurrentConnections
+		}
+
+		if destinationEntity.DownloadBytesSecRateLimit != nil {
+			downloadBytesSecRateLimitPtr = destinationEntity.DownloadBytesSecRateLimit
+		}
+	case entity.BackupDestinationObjectStorage:
+		backupBinaryFlags = append(backupBinaryFlags, "--s3-no-check-bucket")
+		if destinationEntity.MaxConcurrentConnections != nil {
+			maxConcurrentConnections = *destinationEntity.MaxConcurrentConnections
+		}
+
+		if destinationEntity.DownloadBytesSecRateLimit != nil {
+			downloadBytesSecRateLimitPtr = destinationEntity.DownloadBytesSecRateLimit
+		}
+	}
+	backupBinaryFlags = append(
+		backupBinaryFlags,
+		"--transfers="+strconv.Itoa(int(maxConcurrentConnections)),
+	)
+	if downloadBytesSecRateLimitPtr != nil {
+		backupBinaryFlags = append(
+			backupBinaryFlags,
+			"--bwlimit="+downloadBytesSecRateLimitPtr.String()+"B",
+		)
+	}
+
+	backupBinaryCli, err := repo.backupBinaryCliFactory(iDestinationEntity)
 	if err != nil {
 		return archiveId, errors.New("BackupCliFactoryFailed: " + err.Error())
 	}
+	backupBinaryCli += " " + strings.Join(backupBinaryFlags, " ")
 
-	taskRemotePathStr := repo.readTaskRemotePath(destinationEntity, taskEntity.TaskId)
+	taskRemotePathStr := repo.readTaskRemotePath(iDestinationEntity, taskEntity.TaskId)
 
 	for _, containerArchiveEntity := range containerArchiveEntities {
 		archiveFilePath := containerArchiveEntity.UnixFilePath
