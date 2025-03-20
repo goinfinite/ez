@@ -688,7 +688,7 @@ templ BackupDestinationsTable(
 				BackupDestinationUnifiedEntity{},
 			)
 		</div>
-		{{ innerTableClasses := "w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5 [&>tbody>tr:first-child>td:first-child]:rounded-tl-md [&>tbody>tr:first-child>td:last-child]:rounded-tr-md [&>tbody>tr:last-child>td:first-child]:rounded-bl-md [&>tbody>tr:last-child>td:last-child]:rounded-br-md [&>tbody>tr>td]:px-2 [&>tbody>tr>td]:py-1 [&>tbody>tr]:border-y-2 [&>tbody>tr]:border-neutral-50/5 [&>tbody>tr:first-child]:border-y-0 [&>tbody>tr:last-child]:border-y-0" }}
+		{{ innerTableClasses := "w-full rounded-md text-left text-[11px] ring-2 ring-neutral-50/5 [&>tbody>tr:first-child>td:first-child]:rounded-tl-md [&>tbody>tr:first-child>td:last-child]:rounded-tr-md [&>tbody>tr:last-child>td:first-child]:rounded-bl-md [&>tbody>tr:last-child>td:last-child]:rounded-br-md [&>tbody>tr>td]:px-2 [&>tbody>tr>td]:py-1 [&>tbody>tr]:border-y-2 [&>tbody>tr]:border-neutral-50/5 [&>tbody>tr:first-child]:border-y-0 [&>tbody>tr:last-child]:border-b-0" }}
 		{{ innerTdTitledBaseClasses := "border-r-2 border-neutral-50/5 bg-neutral-950/20" }}
 		<table
 			class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out"
@@ -820,7 +820,7 @@ templ BackupDestinationsTable(
 									</p>
 									<table class={ innerTableClasses }>
 										<tbody>
-											<tr class="!border-b-2 border-neutral-50/5">
+											<tr>
 												<td class={ innerTdTitledBaseClasses }>
 													Max
 												</td>
