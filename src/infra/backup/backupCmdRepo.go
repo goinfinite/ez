@@ -591,20 +591,6 @@ func (repo *BackupCmdRepo) readUserDataStats() (disk.UsageStat, error) {
 	return *userDataDirectoryStats, nil
 }
 
-func (repo *BackupCmdRepo) userDataWatermarkLimitValidator() error {
-	userDataDirectoryWatermarkLimitPercent := float64(92)
-	userDataDirectoryStats, err := repo.readUserDataStats()
-	if err != nil {
-		return err
-	}
-
-	if userDataDirectoryStats.UsedPercent >= userDataDirectoryWatermarkLimitPercent {
-		return errors.New("UserDataDirectoryUsageExceedsWatermarkLimit")
-	}
-
-	return nil
-}
-
 func (repo *BackupCmdRepo) readAccountsContainersWithMetrics(
 	jobEntity entity.BackupJob,
 ) (map[valueObject.AccountId][]dto.ContainerWithMetrics, error) {
@@ -1142,15 +1128,98 @@ func (repo *BackupCmdRepo) backupAccountContainers(
 	}
 }
 
+func (repo *BackupCmdRepo) backupDestinationFreeSpaceValidator(
+	jobEntity entity.BackupJob,
+) (destinationIdsWithEnoughFreeSpace []valueObject.BackupDestinationId) {
+	defaultMinFreeSpacePercent := uint8(5)
+
+	userDataDirectoryStats, err := repo.readUserDataStats()
+	if err != nil {
+		slog.Debug(
+			"ReadUserDataStatsFailed",
+			slog.String("method", "FreeSpaceValidator"),
+			slog.String("error", err.Error()),
+		)
+		return destinationIdsWithEnoughFreeSpace
+	}
+
+	for _, destinationId := range jobEntity.DestinationIds {
+		iDestinationEntity, err := repo.backupQueryRepo.ReadFirstDestination(
+			dto.ReadBackupDestinationsRequest{DestinationId: &destinationId}, false,
+		)
+		if err != nil {
+			slog.Debug(
+				"ReadBackupDestinationFailed",
+				slog.String("method", "FreeSpaceValidator"),
+				slog.String("error", err.Error()),
+				slog.String("destinationId", destinationId.String()),
+			)
+			continue
+		}
+
+		desiredMinLocalFreeSpacePercent := defaultMinFreeSpacePercent
+		var minLocalFreeSpacePercentPtr *uint8
+		var maxDestinationStorageUsagePercentPtr *uint8
+		var destinationPath valueObject.UnixFilePath
+
+		switch destinationEntity := iDestinationEntity.(type) {
+		case entity.BackupDestinationLocal:
+			minLocalFreeSpacePercentPtr = destinationEntity.MinLocalStorageFreePercent
+			maxDestinationStorageUsagePercentPtr = destinationEntity.MaxDestinationStorageUsagePercent
+			destinationPath = destinationEntity.DestinationPath
+		case entity.BackupDestinationRemoteHost:
+			minLocalFreeSpacePercentPtr = destinationEntity.MinLocalStorageFreePercent
+		case entity.BackupDestinationObjectStorage:
+			minLocalFreeSpacePercentPtr = destinationEntity.MinLocalStorageFreePercent
+		}
+		if minLocalFreeSpacePercentPtr != nil {
+			desiredMinLocalFreeSpacePercent = *minLocalFreeSpacePercentPtr
+		}
+
+		maxLocalSpaceUsagePercent := float64(100 - desiredMinLocalFreeSpacePercent)
+		if userDataDirectoryStats.UsedPercent >= maxLocalSpaceUsagePercent {
+			slog.Debug(
+				"UserDataDirectorySpaceUsageExceeded",
+				slog.Uint64("usedPercent", uint64(userDataDirectoryStats.UsedPercent)),
+				slog.String("destinationId", destinationId.String()),
+			)
+			continue
+		}
+
+		if maxDestinationStorageUsagePercentPtr == nil {
+			destinationIdsWithEnoughFreeSpace = append(destinationIdsWithEnoughFreeSpace, destinationId)
+			continue
+		}
+
+		localDestinationDirectoryDiskStats, err := disk.Usage(destinationPath.String())
+		if err != nil || localDestinationDirectoryDiskStats == nil {
+			slog.Debug(
+				"ReadDestinationDirectoryPathDiskStatsFailed",
+				slog.String("destinationPath", destinationPath.String()),
+				slog.String("destinationId", destinationId.String()),
+			)
+			continue
+		}
+
+		if uint8(localDestinationDirectoryDiskStats.UsedPercent) >= *maxDestinationStorageUsagePercentPtr {
+			slog.Error(
+				"DestinationDirectorySpaceUsageExceeded",
+				slog.Uint64("usedPercent", uint64(localDestinationDirectoryDiskStats.UsedPercent)),
+				slog.String("destinationId", destinationId.String()),
+			)
+			continue
+		}
+
+		destinationIdsWithEnoughFreeSpace = append(destinationIdsWithEnoughFreeSpace, destinationId)
+	}
+
+	return destinationIdsWithEnoughFreeSpace
+}
+
 func (repo *BackupCmdRepo) RunJob(
 	runDto dto.RunBackupJob,
 ) (taskIds []valueObject.BackupTaskId, err error) {
 	jobStartedAt := time.Now()
-
-	err = repo.userDataWatermarkLimitValidator()
-	if err != nil {
-		return taskIds, err
-	}
 
 	jobEntity, err := repo.backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
 		AccountId: &runDto.AccountId,
@@ -1159,6 +1228,12 @@ func (repo *BackupCmdRepo) RunJob(
 	if err != nil {
 		return taskIds, errors.New("ReadBackupJobFailed: " + err.Error())
 	}
+
+	destinationIdsWithEnoughFreeSpace := repo.backupDestinationFreeSpaceValidator(jobEntity)
+	if len(destinationIdsWithEnoughFreeSpace) == 0 {
+		return taskIds, errors.New("NoBackupDestinationsWithEnoughFreeSpace")
+	}
+	jobEntity.DestinationIds = destinationIdsWithEnoughFreeSpace
 
 	accountIdContainerWithMetricsMap, err := repo.readAccountsContainersWithMetrics(jobEntity)
 	if err != nil {
@@ -1185,6 +1260,8 @@ func (repo *BackupCmdRepo) RunJob(
 	if err != nil {
 		return taskIds, errors.New("CreateBackupJobTmpDirFailed: " + err.Error())
 	}
+
+	// TODO: If destination is local, check if MaxDestinationSpaceUsageBytes is exceeded
 
 	accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
 	accountCmdRepo := infra.NewAccountCmdRepo(repo.persistentDbSvc)
