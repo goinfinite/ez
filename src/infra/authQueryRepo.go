@@ -15,6 +15,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	errSessionTokenExpired          = errors.New("SessionTokenExpired")
+	errSessionTokenSignatureInvalid = errors.New("SessionTokenSignatureInvalid")
+	errSessionTokenParseError       = errors.New("SessionTokenParseError")
+	errSessionTokenClaimsUnreadable = errors.New("SessionTokenClaimsUnreadable")
+)
+
 type AuthQueryRepo struct {
 	persistentDbSvc *db.PersistentDatabaseService
 }
@@ -56,16 +63,19 @@ func (repo *AuthQueryRepo) getSessionTokenClaims(
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 	if err != nil {
-		if err.(*jwt.ValidationError).Errors == jwt.ValidationErrorExpired {
-			return claims, errors.New("SessionTokenExpired")
+		switch errorEnum := err.(*jwt.ValidationError).Errors; errorEnum {
+		case jwt.ValidationErrorExpired:
+			return claims, errSessionTokenExpired
+		case jwt.ValidationErrorSignatureInvalid:
+			return claims, errSessionTokenSignatureInvalid
+		default:
+			return claims, errSessionTokenParseError
 		}
-
-		return claims, errors.New("SessionTokenParseError: " + err.Error())
 	}
 
 	claims, areClaimsReadable := parsedToken.Claims.(jwt.MapClaims)
 	if !areClaimsReadable {
-		return claims, errors.New("SessionTokenClaimsUnreadable")
+		return claims, errSessionTokenClaimsUnreadable
 	}
 
 	return claims, nil
@@ -146,7 +156,8 @@ func (repo *AuthQueryRepo) ReadAccessTokenDetails(
 ) (tokenDetails dto.AccessTokenDetails, err error) {
 	sessionTokenClaims, err := repo.getSessionTokenClaims(token)
 	if err != nil {
-		if err.Error() == "SessionTokenExpired" {
+		isLikelyApiKey := err == errSessionTokenParseError
+		if !isLikelyApiKey {
 			return tokenDetails, err
 		}
 

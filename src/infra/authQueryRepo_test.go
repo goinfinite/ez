@@ -76,4 +76,24 @@ func TestAuthQueryRepo(t *testing.T) {
 			t.Error(err)
 		}
 	})
+
+	t.Run("InvalidAccountApiKey", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
+		apiKey, err := accountCmdRepo.UpdateApiKey(accountId)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		rawTamperedApiKey := apiKey.String() + "tampered"
+		tamperedApiKey, err := valueObject.NewAccessTokenValue(rawTamperedApiKey)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		_, err = authQueryRepo.ReadAccessTokenDetails(tamperedApiKey)
+		if err == nil {
+			t.Error("TamperedApiKeyShouldBeInvalid")
+		}
+	})
 }
