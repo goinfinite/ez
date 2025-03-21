@@ -35,7 +35,7 @@ func (uc *DeleteBackupTask) updateBackupDestinationStats(
 		dto.ReadBackupDestinationsRequest{DestinationId: &destinationId}, false,
 	)
 	if err != nil {
-		return errors.New("BackupDestinationNotFound")
+		return errors.New("ReadBackupDestinationInfraError: " + err.Error())
 	}
 
 	newDestinationTasksCount := uint16(0)
@@ -57,7 +57,7 @@ func (uc *DeleteBackupTask) updateBackupDestinationStats(
 		TotalSpaceUsageBytes: &newDestinationTotalSpaceUsageBytes,
 	})
 	if err != nil {
-		return errors.New("UpdateBackupDestinationStatsInfraError: " + err.Error())
+		return errors.New("UpdateBackupDestinationInfraError: " + err.Error())
 	}
 
 	return nil
@@ -71,13 +71,7 @@ func (uc *DeleteBackupTask) updateBackupJobStats(
 		dto.ReadBackupJobsRequest{JobId: &jobId},
 	)
 	if err != nil {
-		slog.Error(
-			"ReadBackupJobInfraError",
-			slog.String("method", "updateBackupJobStats"),
-			slog.String("jobId", jobId.String()),
-			slog.String("error", err.Error()),
-		)
-		return nil
+		return errors.New("ReadBackupJobInfraError: " + err.Error())
 	}
 
 	newJobTasksCount := uint16(0)
@@ -99,21 +93,7 @@ func (uc *DeleteBackupTask) updateBackupJobStats(
 		TotalSpaceUsageBytes: &newJobTotalSpaceUsageBytes,
 	})
 	if err != nil {
-		slog.Error(
-			"UpdateBackupJobInfraError",
-			slog.String("method", "updateBackupJobStats"),
-			slog.String("jobId", jobId.String()),
-			slog.String("error", err.Error()),
-		)
-		return nil
-	}
-
-	for _, destinationId := range jobEntity.DestinationIds {
-		err = uc.updateBackupDestinationStats(destinationId, taskSizeBytes)
-		if err != nil {
-			slog.Error(err.Error(), slog.String("destinationId", destinationId.String()))
-			continue
-		}
+		return errors.New("UpdateBackupJobInfraError: " + err.Error())
 	}
 
 	return nil
@@ -140,5 +120,25 @@ func (uc *DeleteBackupTask) Execute(deleteDto dto.DeleteBackupTask) error {
 	NewCreateSecurityActivityRecord(uc.activityRecordCmdRepo).
 		DeleteBackupTask(deleteDto, taskEntity.AccountId)
 
-	return uc.updateBackupJobStats(taskEntity.JobId, taskEntity.SizeBytes)
+	err = uc.updateBackupJobStats(taskEntity.JobId, taskEntity.SizeBytes)
+	if err != nil {
+		slog.Error(
+			"UpdateBackupJobStatsError",
+			slog.String("error", err.Error()),
+			slog.String("jobId", taskEntity.JobId.String()),
+		)
+	}
+
+	err = uc.updateBackupDestinationStats(
+		taskEntity.DestinationId, taskEntity.SizeBytes,
+	)
+	if err != nil {
+		slog.Error(
+			"UpdateBackupDestinationStatsError",
+			slog.String("error", err.Error()),
+			slog.String("destinationId", taskEntity.DestinationId.String()),
+		)
+	}
+
+	return nil
 }
