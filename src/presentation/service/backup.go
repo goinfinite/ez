@@ -1372,11 +1372,12 @@ func (service *BackupService) RunJob(
 	}
 
 	runDto := dto.NewRunBackupJob(jobId, accountId, operatorAccountId, operatorIpAddress)
-
-	err = useCase.RunBackupJob(
-		service.backupQueryRepo, service.backupCmdRepo, &cronInfra.CronQueryRepo{},
-		service.activityRecordCmdRepo, runDto,
+	runBackupJobUseCase := useCase.NewRunBackupJob(
+		service.backupQueryRepo, service.backupCmdRepo,
+		&cronInfra.CronQueryRepo{}, service.activityRecordCmdRepo,
 	)
+
+	err = runBackupJobUseCase.Execute(runDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}

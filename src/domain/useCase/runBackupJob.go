@@ -9,14 +9,29 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-func RunBackupJob(
+type RunBackupJob struct {
+	backupQueryRepo       repository.BackupQueryRepo
+	backupCmdRepo         repository.BackupCmdRepo
+	cronQueryRepo         repository.CronQueryRepo
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo
+}
+
+func NewRunBackupJob(
 	backupQueryRepo repository.BackupQueryRepo,
 	backupCmdRepo repository.BackupCmdRepo,
 	cronQueryRepo repository.CronQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	runDto dto.RunBackupJob,
-) error {
-	jobEntity, err := backupQueryRepo.ReadFirstJob(
+) *RunBackupJob {
+	return &RunBackupJob{
+		backupQueryRepo:       backupQueryRepo,
+		backupCmdRepo:         backupCmdRepo,
+		cronQueryRepo:         cronQueryRepo,
+		activityRecordCmdRepo: activityRecordCmdRepo,
+	}
+}
+
+func (uc *RunBackupJob) Execute(runDto dto.RunBackupJob) error {
+	jobEntity, err := uc.backupQueryRepo.ReadFirstJob(
 		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
 	)
 	if err != nil {
@@ -24,7 +39,7 @@ func RunBackupJob(
 	}
 
 	backupHousekeeper := NewBackupHousekeeper(
-		backupQueryRepo, backupCmdRepo, activityRecordCmdRepo,
+		uc.backupQueryRepo, uc.backupCmdRepo, uc.activityRecordCmdRepo,
 	)
 	err = backupHousekeeper.CleanJobTasks(runDto.JobId)
 	if err != nil {
@@ -35,7 +50,7 @@ func RunBackupJob(
 		)
 	}
 
-	taskIds, err := backupCmdRepo.RunJob(runDto)
+	taskIds, err := uc.backupCmdRepo.RunJob(runDto)
 	if err != nil {
 		slog.Error(
 			"RunBackupJobInfraError",
@@ -45,9 +60,9 @@ func RunBackupJob(
 		return errors.New("RunBackupJobInfraError")
 	}
 
-	NewCreateSecurityActivityRecord(activityRecordCmdRepo).RunBackupJob(runDto)
+	NewCreateSecurityActivityRecord(uc.activityRecordCmdRepo).RunBackupJob(runDto)
 
-	jobEntity, err = backupQueryRepo.ReadFirstJob(
+	jobEntity, err = uc.backupQueryRepo.ReadFirstJob(
 		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
 	)
 	if err != nil {
@@ -62,7 +77,7 @@ func RunBackupJob(
 	totalUsageBytes := jobEntity.TotalSpaceUsageBytes
 	lastRunStatus := valueObject.BackupTaskStatusCompleted
 	for _, taskId := range taskIds {
-		taskEntity, err := backupQueryRepo.ReadFirstTask(
+		taskEntity, err := uc.backupQueryRepo.ReadFirstTask(
 			dto.ReadBackupTasksRequest{TaskId: &taskId},
 		)
 		if err != nil {
@@ -86,12 +101,12 @@ func RunBackupJob(
 
 	lastRunAt := valueObject.NewUnixTimeNow()
 	var nextRunAtPtr *valueObject.UnixTime
-	nextRunAt, err := cronQueryRepo.ReadNextRun(jobEntity.BackupSchedule)
+	nextRunAt, err := uc.cronQueryRepo.ReadNextRun(jobEntity.BackupSchedule)
 	if err == nil {
 		nextRunAtPtr = &nextRunAt
 	}
 
-	err = backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
+	err = uc.backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
 		JobId:                runDto.JobId,
 		TasksCount:           &newTasksCount,
 		TotalSpaceUsageBytes: &totalUsageBytes,
