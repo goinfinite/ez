@@ -30,48 +30,15 @@ func NewRunBackupJob(
 	}
 }
 
-func (uc *RunBackupJob) Execute(runDto dto.RunBackupJob) error {
+func (uc *RunBackupJob) updateBackupJobStats(
+	jobId valueObject.BackupJobId,
+	taskIds []valueObject.BackupTaskId,
+) error {
 	jobEntity, err := uc.backupQueryRepo.ReadFirstJob(
-		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
+		dto.ReadBackupJobsRequest{JobId: &jobId},
 	)
 	if err != nil {
-		return errors.New("BackupJobNotFound")
-	}
-
-	backupHousekeeper := NewBackupHousekeeper(
-		uc.backupQueryRepo, uc.backupCmdRepo, uc.activityRecordCmdRepo,
-	)
-	err = backupHousekeeper.CleanJobTasks(runDto.JobId)
-	if err != nil {
-		slog.Error(
-			"PreRunBackupJobHousekeeperError",
-			slog.String("error", err.Error()),
-			slog.String("jobId", runDto.JobId.String()),
-		)
-	}
-
-	taskIds, err := uc.backupCmdRepo.RunJob(runDto)
-	if err != nil {
-		slog.Error(
-			"RunBackupJobInfraError",
-			slog.String("error", err.Error()),
-			slog.String("jobId", runDto.JobId.String()),
-		)
-		return errors.New("RunBackupJobInfraError")
-	}
-
-	NewCreateSecurityActivityRecord(uc.activityRecordCmdRepo).RunBackupJob(runDto)
-
-	jobEntity, err = uc.backupQueryRepo.ReadFirstJob(
-		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
-	)
-	if err != nil {
-		slog.Error(
-			"ReloadBackupJobInfraError",
-			slog.String("error", err.Error()),
-			slog.String("jobId", runDto.JobId.String()),
-		)
-		return nil
+		return errors.New("ReadBackupJobInfraError")
 	}
 
 	totalUsageBytes := jobEntity.TotalSpaceUsageBytes
@@ -107,7 +74,7 @@ func (uc *RunBackupJob) Execute(runDto dto.RunBackupJob) error {
 	}
 
 	err = uc.backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
-		JobId:                runDto.JobId,
+		JobId:                jobId,
 		TasksCount:           &newTasksCount,
 		TotalSpaceUsageBytes: &totalUsageBytes,
 		LastRunAt:            &lastRunAt,
@@ -115,11 +82,52 @@ func (uc *RunBackupJob) Execute(runDto dto.RunBackupJob) error {
 		NextRunAt:            nextRunAtPtr,
 	})
 	if err != nil {
+		return errors.New("UpdateBackupJobStatsInfraError: " + err.Error())
+	}
+
+	return nil
+}
+
+func (uc *RunBackupJob) Execute(runDto dto.RunBackupJob) error {
+	_, err := uc.backupQueryRepo.ReadFirstJob(
+		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
+	)
+	if err != nil {
+		return errors.New("BackupJobNotFound")
+	}
+
+	backupHousekeeper := NewBackupHousekeeper(
+		uc.backupQueryRepo, uc.backupCmdRepo, uc.activityRecordCmdRepo,
+	)
+	err = backupHousekeeper.CleanJobTasks(runDto.JobId)
+	if err != nil {
 		slog.Error(
-			"UpdateBackupJobStatsInfraError",
+			"PreRunBackupJobHousekeeperError",
 			slog.String("error", err.Error()),
 			slog.String("jobId", runDto.JobId.String()),
 		)
+	}
+
+	taskIds, err := uc.backupCmdRepo.RunJob(runDto)
+	if err != nil {
+		slog.Error(
+			"RunBackupJobInfraError",
+			slog.String("error", err.Error()),
+			slog.String("jobId", runDto.JobId.String()),
+		)
+		return errors.New("RunBackupJobInfraError")
+	}
+
+	NewCreateSecurityActivityRecord(uc.activityRecordCmdRepo).RunBackupJob(runDto)
+
+	err = uc.updateBackupJobStats(runDto.JobId, taskIds)
+	if err != nil {
+		slog.Error(
+			"UpdateBackupJobStatsError",
+			slog.String("error", err.Error()),
+			slog.String("jobId", runDto.JobId.String()),
+		)
+		return nil
 	}
 
 	err = backupHousekeeper.CleanJobTasks(runDto.JobId)
