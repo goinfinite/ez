@@ -16,16 +16,17 @@ func RunBackupJob(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	runDto dto.RunBackupJob,
 ) error {
-	jobEntity, err := backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
-		JobId: &runDto.JobId,
-	})
+	jobEntity, err := backupQueryRepo.ReadFirstJob(
+		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
+	)
 	if err != nil {
 		return errors.New("BackupJobNotFound")
 	}
 
-	err = BackupJobHousekeeper(
-		backupQueryRepo, backupCmdRepo, activityRecordCmdRepo, runDto.JobId,
+	backupHousekeeper := NewBackupHousekeeper(
+		backupQueryRepo, backupCmdRepo, activityRecordCmdRepo,
 	)
+	err = backupHousekeeper.CleanJobTasks(runDto.JobId)
 	if err != nil {
 		slog.Error(
 			"PreRunBackupJobHousekeeperError",
@@ -46,9 +47,9 @@ func RunBackupJob(
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).RunBackupJob(runDto)
 
-	jobEntity, err = backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
-		JobId: &runDto.JobId,
-	})
+	jobEntity, err = backupQueryRepo.ReadFirstJob(
+		dto.ReadBackupJobsRequest{JobId: &runDto.JobId},
+	)
 	if err != nil {
 		slog.Error(
 			"ReloadBackupJobInfraError",
@@ -61,9 +62,9 @@ func RunBackupJob(
 	totalUsageBytes := jobEntity.TotalSpaceUsageBytes
 	lastRunStatus := valueObject.BackupTaskStatusCompleted
 	for _, taskId := range taskIds {
-		taskEntity, err := backupQueryRepo.ReadFirstTask(dto.ReadBackupTasksRequest{
-			TaskId: &taskId,
-		})
+		taskEntity, err := backupQueryRepo.ReadFirstTask(
+			dto.ReadBackupTasksRequest{TaskId: &taskId},
+		)
 		if err != nil {
 			slog.Error(
 				"ReadBackupTaskInfraError",
@@ -106,9 +107,7 @@ func RunBackupJob(
 		)
 	}
 
-	err = BackupJobHousekeeper(
-		backupQueryRepo, backupCmdRepo, activityRecordCmdRepo, runDto.JobId,
-	)
+	err = backupHousekeeper.CleanJobTasks(runDto.JobId)
 	if err != nil {
 		slog.Error(
 			"PostRunBackupJobHousekeeperError",

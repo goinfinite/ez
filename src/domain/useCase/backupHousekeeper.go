@@ -10,14 +10,33 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-func deleteAncientBackupTasks(
-	backupCmdRepo repository.BackupCmdRepo,
+type BackupHousekeeper struct {
+	backupQueryRepo       repository.BackupQueryRepo
+	backupCmdRepo         repository.BackupCmdRepo
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo
+	deleteBackupTask      *DeleteBackupTask
+}
+
+func NewBackupHousekeeper(
 	backupQueryRepo repository.BackupQueryRepo,
+	backupCmdRepo repository.BackupCmdRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
+) *BackupHousekeeper {
+	return &BackupHousekeeper{
+		backupQueryRepo:       backupQueryRepo,
+		backupCmdRepo:         backupCmdRepo,
+		activityRecordCmdRepo: activityRecordCmdRepo,
+		deleteBackupTask: NewDeleteBackupTask(
+			backupQueryRepo, backupCmdRepo, activityRecordCmdRepo,
+		),
+	}
+}
+
+func (uc *BackupHousekeeper) deleteAncientBackupTasks(
 	jobId valueObject.BackupJobId,
 	lastValidDay valueObject.UnixTime,
 ) error {
-	readAncientTaskResponse, err := backupQueryRepo.ReadTask(dto.ReadBackupTasksRequest{
+	readAncientTaskResponse, err := uc.backupQueryRepo.ReadTask(dto.ReadBackupTasksRequest{
 		JobId:           &jobId,
 		CreatedBeforeAt: &lastValidDay,
 	})
@@ -26,15 +45,12 @@ func deleteAncientBackupTasks(
 	}
 
 	for _, taskEntity := range readAncientTaskResponse.Tasks {
-		err = DeleteBackupTask(
-			backupQueryRepo, backupCmdRepo, activityRecordCmdRepo,
-			dto.DeleteBackupTask{
-				TaskId:             taskEntity.TaskId,
-				ShouldDiscardFiles: true,
-				OperatorAccountId:  valueObject.SystemAccountId,
-				OperatorIpAddress:  valueObject.SystemIpAddress,
-			},
-		)
+		err = uc.deleteBackupTask.Execute(dto.DeleteBackupTask{
+			TaskId:             taskEntity.TaskId,
+			ShouldDiscardFiles: true,
+			OperatorAccountId:  valueObject.SystemAccountId,
+			OperatorIpAddress:  valueObject.SystemIpAddress,
+		})
 		if err != nil {
 			continue
 		}
@@ -49,13 +65,8 @@ func deleteAncientBackupTasks(
 	return nil
 }
 
-func BackupJobHousekeeper(
-	backupQueryRepo repository.BackupQueryRepo,
-	backupCmdRepo repository.BackupCmdRepo,
-	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	jobId valueObject.BackupJobId,
-) error {
-	jobEntity, err := backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
+func (uc *BackupHousekeeper) CleanJobTasks(jobId valueObject.BackupJobId) error {
+	jobEntity, err := uc.backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
 		JobId: &jobId,
 	})
 	if err != nil {
@@ -67,9 +78,7 @@ func BackupJobHousekeeper(
 	)
 
 	if jobEntity.MaxTaskRetentionDays != nil {
-		err = deleteAncientBackupTasks(
-			backupCmdRepo, backupQueryRepo, activityRecordCmdRepo, jobEntity.JobId, lastValidDay,
-		)
+		err = uc.deleteAncientBackupTasks(jobEntity.JobId, lastValidDay)
 		if err != nil {
 			return errors.New("DeleteAncientTaskError: " + err.Error())
 		}
@@ -79,30 +88,27 @@ func BackupJobHousekeeper(
 		return nil
 	}
 
-	jobEntity, err = backupQueryRepo.ReadFirstJob(dto.ReadBackupJobsRequest{
-		JobId: &jobId,
-	})
+	jobEntity, err = uc.backupQueryRepo.ReadFirstJob(
+		dto.ReadBackupJobsRequest{JobId: &jobId},
+	)
 	if err != nil {
 		return errors.New("ReloadBackupJobEntityError: " + err.Error())
 	}
 
 	if jobEntity.TasksCount > *jobEntity.MaxTaskRetentionCount {
-		firstTaskEntity, err := backupQueryRepo.ReadFirstTask(
+		firstTaskEntity, err := uc.backupQueryRepo.ReadFirstTask(
 			dto.ReadBackupTasksRequest{JobId: &jobEntity.JobId},
 		)
 		if err != nil {
 			return errors.New("BackupTaskNotFound: " + err.Error())
 		}
 
-		err = DeleteBackupTask(
-			backupQueryRepo, backupCmdRepo, activityRecordCmdRepo,
-			dto.DeleteBackupTask{
-				TaskId:             firstTaskEntity.TaskId,
-				ShouldDiscardFiles: true,
-				OperatorAccountId:  valueObject.SystemAccountId,
-				OperatorIpAddress:  valueObject.SystemIpAddress,
-			},
-		)
+		err = uc.deleteBackupTask.Execute(dto.DeleteBackupTask{
+			TaskId:             firstTaskEntity.TaskId,
+			ShouldDiscardFiles: true,
+			OperatorAccountId:  valueObject.SystemAccountId,
+			OperatorIpAddress:  valueObject.SystemIpAddress,
+		})
 		if err != nil {
 			return errors.New("DeleteOldestTaskInfraError: " + err.Error())
 		}

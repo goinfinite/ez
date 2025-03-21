@@ -9,42 +9,38 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-func DeleteBackupTask(
+type DeleteBackupTask struct {
+	backupQueryRepo       repository.BackupQueryRepo
+	backupCmdRepo         repository.BackupCmdRepo
+	activityRecordCmdRepo repository.ActivityRecordCmdRepo
+}
+
+func NewDeleteBackupTask(
 	backupQueryRepo repository.BackupQueryRepo,
 	backupCmdRepo repository.BackupCmdRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	deleteDto dto.DeleteBackupTask,
+) *DeleteBackupTask {
+	return &DeleteBackupTask{
+		backupQueryRepo:       backupQueryRepo,
+		backupCmdRepo:         backupCmdRepo,
+		activityRecordCmdRepo: activityRecordCmdRepo,
+	}
+}
+
+func (uc *DeleteBackupTask) updateBackupJobStats(
+	jobId valueObject.BackupJobId,
+	taskSizeBytes *valueObject.Byte,
 ) error {
-	taskEntity, err := backupQueryRepo.ReadFirstTask(
-		dto.ReadBackupTasksRequest{TaskId: &deleteDto.TaskId},
-	)
-	if err != nil {
-		return errors.New("BackupTaskNotFound")
-	}
-
-	err = backupCmdRepo.DeleteTask(deleteDto)
-	if err != nil {
-		slog.Error(
-			"DeleteBackupTaskInfraError",
-			slog.String("error", err.Error()),
-			slog.String("taskId", taskEntity.TaskId.String()),
-		)
-		return errors.New("DeleteBackupTaskError")
-	}
-
-	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		DeleteBackupTask(deleteDto, taskEntity.AccountId)
-
-	jobEntity, err := backupQueryRepo.ReadFirstJob(
-		dto.ReadBackupJobsRequest{JobId: &taskEntity.JobId},
+	jobEntity, err := uc.backupQueryRepo.ReadFirstJob(
+		dto.ReadBackupJobsRequest{JobId: &jobId},
 	)
 	if err != nil {
 		slog.Error(
 			"BackupJobNotFound",
 			slog.String("error", err.Error()),
-			slog.String("jobId", taskEntity.JobId.String()),
+			slog.String("jobId", jobId.String()),
 		)
-		return nil
+		return errors.New("BackupJobNotFound")
 	}
 
 	newJobTasksCount := uint16(0)
@@ -53,15 +49,15 @@ func DeleteBackupTask(
 	}
 
 	newJobTotalSpaceUsageBytes := jobEntity.TotalSpaceUsageBytes
-	if taskEntity.SizeBytes != nil {
-		newJobTotalSpaceUsageBytes -= *taskEntity.SizeBytes
+	if taskSizeBytes != nil {
+		newJobTotalSpaceUsageBytes -= *taskSizeBytes
 	}
 	if newJobTotalSpaceUsageBytes < 0 {
 		newJobTotalSpaceUsageBytes = valueObject.Byte(0)
 	}
 
-	err = backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
-		JobId:                taskEntity.JobId,
+	err = uc.backupCmdRepo.UpdateJob(dto.UpdateBackupJob{
+		JobId:                jobId,
 		TasksCount:           &newJobTasksCount,
 		TotalSpaceUsageBytes: &newJobTotalSpaceUsageBytes,
 	})
@@ -71,4 +67,28 @@ func DeleteBackupTask(
 	}
 
 	return nil
+}
+
+func (uc *DeleteBackupTask) Execute(deleteDto dto.DeleteBackupTask) error {
+	taskEntity, err := uc.backupQueryRepo.ReadFirstTask(
+		dto.ReadBackupTasksRequest{TaskId: &deleteDto.TaskId},
+	)
+	if err != nil {
+		return errors.New("BackupTaskNotFound")
+	}
+
+	err = uc.backupCmdRepo.DeleteTask(deleteDto)
+	if err != nil {
+		slog.Error(
+			"DeleteBackupTaskInfraError",
+			slog.String("error", err.Error()),
+			slog.String("taskId", taskEntity.TaskId.String()),
+		)
+		return errors.New("DeleteBackupTaskError")
+	}
+
+	NewCreateSecurityActivityRecord(uc.activityRecordCmdRepo).
+		DeleteBackupTask(deleteDto, taskEntity.AccountId)
+
+	return uc.updateBackupJobStats(taskEntity.JobId, taskEntity.SizeBytes)
 }

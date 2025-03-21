@@ -1772,10 +1772,10 @@ func (service *BackupService) DeleteTask(input map[string]interface{}) ServiceOu
 		taskId, shouldDiscardFiles, operatorAccountId, operatorIpAddress,
 	)
 
-	err = useCase.DeleteBackupTask(
-		service.backupQueryRepo, service.backupCmdRepo,
-		service.activityRecordCmdRepo, deleteDto,
+	deleteBackupTaskUseCase := useCase.NewDeleteBackupTask(
+		service.backupQueryRepo, service.backupCmdRepo, service.activityRecordCmdRepo,
 	)
+	err = deleteBackupTaskUseCase.Execute(deleteDto)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
