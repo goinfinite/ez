@@ -18,8 +18,8 @@ type BackupDestinationBase struct {
 	MinLocalStorageFreePercent        *uint8                                    `json:"minLocalStorageFreePercent"`
 	MaxDestinationStorageUsagePercent *uint8                                    `json:"maxDestinationStorageUsagePercent"`
 	EncryptionKey                     valueObject.Password                      `json:"-"`
-	TotalSpaceUsageBytes              *valueObject.Byte                         `json:"totalSpaceUsageBytes"`
-	TotalSpaceUsagePercent            *uint8                                    `json:"totalSpaceUsagePercent"`
+	TasksCount                        uint16                                    `json:"tasksCount"`
+	TotalSpaceUsageBytes              valueObject.Byte                          `json:"totalSpaceUsageBytes"`
 	CreatedAt                         valueObject.UnixTime                      `json:"createdAt"`
 	UpdatedAt                         valueObject.UnixTime                      `json:"updatedAt"`
 }

@@ -20,8 +20,8 @@ type BackupDestination struct {
 	MinLocalStorageFreePercent           *uint8
 	MaxDestinationStorageUsagePercent    *uint8
 	EncryptionKey                        string `gorm:"not null"`
-	TotalSpaceUsageBytes                 *uint64
-	TotalSpaceUsagePercent               *uint8
+	TasksCount                           uint16 `gorm:"not null,default:0"`
+	TotalSpaceUsageBytes                 uint64 `gorm:"not null,default:0"`
 	MaxConcurrentConnections             *uint16
 	DownloadBytesSecRateLimit            *uint64
 	UploadBytesSecRateLimit              *uint64
@@ -38,8 +38,8 @@ type BackupDestination struct {
 	RemoteHostUsername                   *string
 	RemoteHostPassword                   *string
 	RemoteHostPrivateKeyFilePath         *string
-	RemoteHostConnectionTimeoutSecs      *uint16
-	RemoteHostConnectionRetrySecs        *uint16
+	RemoteHostConnectionTimeoutSecs      *uint64
+	RemoteHostConnectionRetrySecs        *uint64
 	CreatedAt                            time.Time `gorm:"not null"`
 	UpdatedAt                            time.Time `gorm:"not null"`
 }
@@ -60,7 +60,8 @@ func NewBackupDestination(
 	objectStorageProvider, objectStorageProviderRegion, objectStorageProviderAccessKeyId,
 	objectStorageProviderSecretAccessKey, objectStorageEndpointUrl, objectStorageBucketName,
 	remoteHostType, remoteHostname, remoteHostUsername, remoteHostPassword, remoteHostPrivateKeyFilePath *string,
-	remoteHostNetworkPort, remoteHostConnectionTimeoutSecs, remoteHostConnectionRetrySecs *uint16,
+	remoteHostNetworkPort *uint16,
+	remoteHostConnectionTimeoutSecs, remoteHostConnectionRetrySecs *uint64,
 ) BackupDestination {
 	destinationModel := BackupDestination{
 		ID:                                   id,
@@ -143,13 +144,9 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		maxDestinationStorageUsagePercentPtr = model.MaxDestinationStorageUsagePercent
 	}
 
-	var totalSpaceUsageBytesPtr *valueObject.Byte
-	if model.TotalSpaceUsageBytes != nil {
-		totalSpaceUsageBytes, err := valueObject.NewByte(*model.TotalSpaceUsageBytes)
-		if err != nil {
-			return destinationEntity, err
-		}
-		totalSpaceUsageBytesPtr = &totalSpaceUsageBytes
+	totalSpaceUsageBytes, err := valueObject.NewByte(model.TotalSpaceUsageBytes)
+	if err != nil {
+		return destinationEntity, err
 	}
 
 	destinationType, err := valueObject.NewBackupDestinationType(model.Type)
@@ -182,8 +179,8 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 		DestinationPath:                   destinationPath,
 		MinLocalStorageFreePercent:        minLocalStorageFreePercentPtr,
 		MaxDestinationStorageUsagePercent: maxDestinationStorageUsagePercentPtr,
-		TotalSpaceUsageBytes:              totalSpaceUsageBytesPtr,
-		TotalSpaceUsagePercent:            model.TotalSpaceUsagePercent,
+		TasksCount:                        model.TasksCount,
+		TotalSpaceUsageBytes:              totalSpaceUsageBytes,
 		CreatedAt:                         valueObject.NewUnixTimeWithGoTime(model.CreatedAt),
 		UpdatedAt:                         valueObject.NewUnixTimeWithGoTime(model.UpdatedAt),
 	}

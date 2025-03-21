@@ -159,15 +159,15 @@ func (repo *BackupCmdRepo) CreateDestination(
 		remoteHostNetworkPortPtr = &remoteHostNetworkPort
 	}
 
-	var remoteHostConnectionTimeoutSecsPtr *uint16
+	var remoteHostConnectionTimeoutSecsPtr *uint64
 	if createDto.RemoteHostConnectionTimeoutSecs != nil {
-		remoteHostConnectionTimeoutSecs := uint16(createDto.RemoteHostConnectionTimeoutSecs.Uint64())
+		remoteHostConnectionTimeoutSecs := createDto.RemoteHostConnectionTimeoutSecs.Uint64()
 		remoteHostConnectionTimeoutSecsPtr = &remoteHostConnectionTimeoutSecs
 	}
 
-	var remoteHostConnectionRetrySecsPtr *uint16
+	var remoteHostConnectionRetrySecsPtr *uint64
 	if createDto.RemoteHostConnectionRetrySecs != nil {
-		remoteHostConnectionRetrySecs := uint16(createDto.RemoteHostConnectionRetrySecs.Uint64())
+		remoteHostConnectionRetrySecs := createDto.RemoteHostConnectionRetrySecs.Uint64()
 		remoteHostConnectionRetrySecsPtr = &remoteHostConnectionRetrySecs
 	}
 
@@ -205,64 +205,66 @@ func (repo *BackupCmdRepo) CreateDestination(
 func (repo *BackupCmdRepo) UpdateDestination(
 	updateDto dto.UpdateBackupDestination,
 ) error {
-	updateMap := map[string]interface{}{
-		"account_id": updateDto.AccountId.Uint64(),
+	destinationUpdatedModel := dbModel.BackupDestination{
+		AccountID: updateDto.AccountId.Uint64(),
 	}
 
 	if updateDto.DestinationName != nil {
-		updateMap["name"] = updateDto.DestinationName.String()
+		destinationUpdatedModel.Name = updateDto.DestinationName.String()
 	}
 
 	if updateDto.DestinationDescription != nil {
-		updateMap["description"] = updateDto.DestinationDescription.String()
+		destinationDescriptionStr := updateDto.DestinationDescription.String()
+		destinationUpdatedModel.Description = &destinationDescriptionStr
 	}
 
 	if updateDto.DestinationPath != nil {
-		updateMap["path"] = updateDto.DestinationPath.String()
+		destinationUpdatedModel.Path = updateDto.DestinationPath.String()
 	}
 
 	if updateDto.MinLocalStorageFreePercent != nil {
-		updateMap["min_local_storage_free_percent"] = *updateDto.MinLocalStorageFreePercent
+		destinationUpdatedModel.MinLocalStorageFreePercent = updateDto.MinLocalStorageFreePercent
 	}
 
 	if updateDto.MaxDestinationStorageUsagePercent != nil {
-		updateMap["max_destination_storage_usage_percent"] = *updateDto.MaxDestinationStorageUsagePercent
+		destinationUpdatedModel.MaxDestinationStorageUsagePercent = updateDto.MaxDestinationStorageUsagePercent
 	}
 
 	if updateDto.MaxConcurrentConnections != nil {
-		updateMap["max_concurrent_connections"] = *updateDto.MaxConcurrentConnections
+		destinationUpdatedModel.MaxConcurrentConnections = updateDto.MaxConcurrentConnections
+	}
+
+	if updateDto.TasksCount != nil {
+		destinationUpdatedModel.TasksCount = *updateDto.TasksCount
 	}
 
 	if updateDto.TotalSpaceUsageBytes != nil {
-		updateMap["total_space_usage_bytes"] = updateDto.TotalSpaceUsageBytes.Uint64()
-	}
-
-	if updateDto.TotalSpaceUsagePercent != nil {
-		updateMap["total_space_usage_percent"] = *updateDto.TotalSpaceUsagePercent
+		destinationUpdatedModel.TotalSpaceUsageBytes = updateDto.TotalSpaceUsageBytes.Uint64()
 	}
 
 	if updateDto.DownloadBytesSecRateLimit != nil {
-		updateMap["download_bytes_sec_rate_limit"] = updateDto.DownloadBytesSecRateLimit.Uint64()
+		downloadBytesSecRateLimitUint := updateDto.DownloadBytesSecRateLimit.Uint64()
+		destinationUpdatedModel.DownloadBytesSecRateLimit = &downloadBytesSecRateLimitUint
 	}
 
 	if updateDto.UploadBytesSecRateLimit != nil {
-		updateMap["upload_bytes_sec_rate_limit"] = updateDto.UploadBytesSecRateLimit.Uint64()
-	}
-
-	if updateDto.SkipCertificateVerification != nil {
-		updateMap["skip_certificate_verification"] = *updateDto.SkipCertificateVerification
+		uploadBytesSecRateLimitUint := updateDto.UploadBytesSecRateLimit.Uint64()
+		destinationUpdatedModel.UploadBytesSecRateLimit = &uploadBytesSecRateLimitUint
 	}
 
 	if updateDto.ObjectStorageProvider != nil {
-		updateMap["object_storage_provider"] = updateDto.ObjectStorageProvider.String()
+		objectStorageProviderStr := updateDto.ObjectStorageProvider.String()
+		destinationUpdatedModel.ObjectStorageProvider = &objectStorageProviderStr
 	}
 
 	if updateDto.ObjectStorageProviderRegion != nil {
-		updateMap["object_storage_provider_region"] = updateDto.ObjectStorageProviderRegion.String()
+		objectStorageProviderRegionStr := updateDto.ObjectStorageProviderRegion.String()
+		destinationUpdatedModel.ObjectStorageProviderRegion = &objectStorageProviderRegionStr
 	}
 
 	if updateDto.ObjectStorageProviderAccessKeyId != nil {
-		updateMap["object_storage_provider_access_key_id"] = updateDto.ObjectStorageProviderAccessKeyId.String()
+		objectStorageProviderAccessKeyIdStr := updateDto.ObjectStorageProviderAccessKeyId.String()
+		destinationUpdatedModel.ObjectStorageProviderAccessKeyId = &objectStorageProviderAccessKeyIdStr
 	}
 
 	dbEncryptSecret := os.Getenv("BACKUP_KEYS_SECRET")
@@ -277,31 +279,37 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		if err != nil {
 			return errors.New("EncryptProviderSecretAccessKeyFailed: " + err.Error())
 		}
-		updateMap["object_storage_provider_secret_access_key"] = encryptedProviderSecretAccessKey
+		destinationUpdatedModel.ObjectStorageProviderSecretAccessKey = &encryptedProviderSecretAccessKey
 	}
 
 	if updateDto.ObjectStorageEndpointUrl != nil {
-		updateMap["object_storage_endpoint_url"] = updateDto.ObjectStorageEndpointUrl.String()
+		objectStorageEndpointUrlStr := updateDto.ObjectStorageEndpointUrl.String()
+		destinationUpdatedModel.ObjectStorageEndpointUrl = &objectStorageEndpointUrlStr
 	}
 
 	if updateDto.ObjectStorageBucketName != nil {
-		updateMap["object_storage_bucket_name"] = updateDto.ObjectStorageBucketName.String()
+		objectStorageBucketNameStr := updateDto.ObjectStorageBucketName.String()
+		destinationUpdatedModel.ObjectStorageBucketName = &objectStorageBucketNameStr
 	}
 
 	if updateDto.RemoteHostType != nil {
-		updateMap["remote_host_type"] = updateDto.RemoteHostType.String()
+		remoteHostTypeStr := updateDto.RemoteHostType.String()
+		destinationUpdatedModel.RemoteHostType = &remoteHostTypeStr
 	}
 
 	if updateDto.RemoteHostname != nil {
-		updateMap["remote_hostname"] = updateDto.RemoteHostname.String()
+		remoteHostnameStr := updateDto.RemoteHostname.String()
+		destinationUpdatedModel.RemoteHostname = &remoteHostnameStr
 	}
 
 	if updateDto.RemoteHostNetworkPort != nil {
-		updateMap["remote_host_network_port"] = updateDto.RemoteHostNetworkPort.Uint16()
+		remoteHostNetworkPortUint := updateDto.RemoteHostNetworkPort.Uint16()
+		destinationUpdatedModel.RemoteHostNetworkPort = &remoteHostNetworkPortUint
 	}
 
 	if updateDto.RemoteHostUsername != nil {
-		updateMap["remote_host_username"] = updateDto.RemoteHostUsername.String()
+		remoteHostUsernameStr := updateDto.RemoteHostUsername.String()
+		destinationUpdatedModel.RemoteHostUsername = &remoteHostUsernameStr
 	}
 
 	if updateDto.RemoteHostPassword != nil {
@@ -311,25 +319,45 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		if err != nil {
 			return errors.New("EncryptPasswordFailed: " + err.Error())
 		}
-		updateMap["remote_host_password"] = encryptedPassword
+		destinationUpdatedModel.RemoteHostPassword = &encryptedPassword
 	}
 
 	if updateDto.RemoteHostPrivateKeyFilePath != nil {
-		updateMap["remote_host_private_key_file_path"] = updateDto.RemoteHostPrivateKeyFilePath.String()
+		remoteHostPrivateKeyFilePathStr := updateDto.RemoteHostPrivateKeyFilePath.String()
+		destinationUpdatedModel.RemoteHostPrivateKeyFilePath = &remoteHostPrivateKeyFilePathStr
 	}
 
 	if updateDto.RemoteHostConnectionTimeoutSecs != nil {
-		updateMap["remote_host_connection_timeout_secs"] = uint16(updateDto.RemoteHostConnectionTimeoutSecs.Uint64())
+		remoteHostConnectionTimeoutSecsUint := updateDto.RemoteHostConnectionTimeoutSecs.Uint64()
+		destinationUpdatedModel.RemoteHostConnectionTimeoutSecs = &remoteHostConnectionTimeoutSecsUint
 	}
 
 	if updateDto.RemoteHostConnectionRetrySecs != nil {
-		updateMap["remote_host_connection_retry_secs"] = uint16(updateDto.RemoteHostConnectionRetrySecs.Uint64())
+		remoteHostConnectionRetrySecsUint := updateDto.RemoteHostConnectionRetrySecs.Uint64()
+		destinationUpdatedModel.RemoteHostConnectionRetrySecs = &remoteHostConnectionRetrySecsUint
+	}
+
+	err := repo.persistentDbSvc.Handler.
+		Model(&dbModel.BackupDestination{}).
+		Where("id = ?", updateDto.DestinationId.Uint64()).
+		Updates(&destinationUpdatedModel).Error
+	if err != nil {
+		return err
+	}
+
+	boolUpdateMap := map[string]interface{}{}
+	if updateDto.SkipCertificateVerification != nil {
+		boolUpdateMap["skip_certificate_verification"] = *updateDto.SkipCertificateVerification
+	}
+
+	if len(boolUpdateMap) == 0 {
+		return nil
 	}
 
 	return repo.persistentDbSvc.Handler.
 		Model(&dbModel.BackupDestination{}).
 		Where("id = ?", updateDto.DestinationId.Uint64()).
-		Updates(updateMap).Error
+		Updates(boolUpdateMap).Error
 }
 
 func (repo *BackupCmdRepo) DeleteDestination(

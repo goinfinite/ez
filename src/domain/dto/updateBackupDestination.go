@@ -13,8 +13,6 @@ type UpdateBackupDestination struct {
 	MinLocalStorageFreePercent           *uint8                                            `json:"minLocalStorageFreePercent,omitempty"`
 	MaxDestinationStorageUsagePercent    *uint8                                            `json:"maxDestinationStorageUsagePercent,omitempty"`
 	MaxConcurrentConnections             *uint16                                           `json:"maxConcurrentConnections,omitempty"`
-	TotalSpaceUsageBytes                 *valueObject.Byte                                 `json:"-"`
-	TotalSpaceUsagePercent               *uint8                                            `json:"-"`
 	DownloadBytesSecRateLimit            *valueObject.Byte                                 `json:"downloadBytesSecRateLimit,omitempty"`
 	UploadBytesSecRateLimit              *valueObject.Byte                                 `json:"uploadBytesSecRateLimit,omitempty"`
 	SkipCertificateVerification          *bool                                             `json:"skipCertificateVerification,omitempty"`
@@ -32,6 +30,8 @@ type UpdateBackupDestination struct {
 	RemoteHostPrivateKeyFilePath         *valueObject.UnixFilePath                         `json:"remoteHostPrivateKeyFilePath,omitempty"`
 	RemoteHostConnectionTimeoutSecs      *valueObject.TimeDuration                         `json:"remoteHostConnectionTimeoutSecs,omitempty"`
 	RemoteHostConnectionRetrySecs        *valueObject.TimeDuration                         `json:"remoteHostConnectionRetrySecs,omitempty"`
+	TasksCount                           *uint16                                           `json:"-"`
+	TotalSpaceUsageBytes                 *valueObject.Byte                                 `json:"-"`
 	OperatorAccountId                    valueObject.AccountId                             `json:"-"`
 	OperatorIpAddress                    valueObject.IpAddress                             `json:"-"`
 }

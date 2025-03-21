@@ -751,10 +751,10 @@ templ BackupDestinationsTable(
 								<tbody>
 									<tr>
 										<td class={ innerTdTitledBaseClasses }>
-											Total Space Usage
+											Tasks Count
 										</td>
 										<td>
-											{ uiHelper.FormatPointer(destinationEntity.TotalSpaceUsageBytes) }
+											{ uiHelper.FormatPointer(&destinationEntity.TasksCount) }
 										</td>
 									</tr>
 									<tr>
@@ -762,7 +762,7 @@ templ BackupDestinationsTable(
 											Total Space Usage (%)
 										</td>
 										<td>
-											{ uiHelper.FormatPointer(destinationEntity.TotalSpaceUsagePercent) }
+											{ uiHelper.FormatPointer(&destinationEntity.TotalSpaceUsageBytes) }
 										</td>
 									</tr>
 									<tr>
