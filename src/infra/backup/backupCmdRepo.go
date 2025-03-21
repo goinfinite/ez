@@ -1360,11 +1360,6 @@ func (repo *BackupCmdRepo) RunJob(
 			localProcExecOutputWriteStr("BackupTaskTimeout")
 		}
 
-		remainingJobRunTime -= time.Since(accContainersBackupStartedAt)
-		if remainingJobRunTime <= 0 {
-			break
-		}
-
 		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
 		if err != nil {
 			localProcExecOutputWriteStr("ReadPostTaskAccountEntityFailed: " + err.Error())
@@ -1381,6 +1376,11 @@ func (repo *BackupCmdRepo) RunJob(
 				)
 				continue
 			}
+		}
+
+		remainingJobRunTime -= time.Since(accContainersBackupStartedAt)
+		if remainingJobRunTime <= 0 {
+			break
 		}
 	}
 
