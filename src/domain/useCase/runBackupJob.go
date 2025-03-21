@@ -30,6 +30,42 @@ func NewRunBackupJob(
 	}
 }
 
+func (uc *RunBackupJob) updateBackupDestinationStats(
+	destinationId valueObject.BackupDestinationId,
+	taskSizeBytes *valueObject.Byte,
+) error {
+	iDestinationEntity, err := uc.backupQueryRepo.ReadFirstDestination(
+		dto.ReadBackupDestinationsRequest{DestinationId: &destinationId}, false,
+	)
+	if err != nil {
+		return errors.New("ReadBackupDestinationInfraError: " + err.Error())
+	}
+
+	newDestinationTasksCount := uint16(0)
+	if iDestinationEntity.ReadTasksCount() > 0 {
+		newDestinationTasksCount = iDestinationEntity.ReadTasksCount() + 1
+	}
+
+	newDestinationTotalSpaceUsageBytes := iDestinationEntity.ReadTotalSpaceUsageBytes()
+	if taskSizeBytes != nil {
+		newDestinationTotalSpaceUsageBytes += *taskSizeBytes
+	}
+	if newDestinationTotalSpaceUsageBytes < 0 {
+		newDestinationTotalSpaceUsageBytes = valueObject.Byte(0)
+	}
+
+	err = uc.backupCmdRepo.UpdateDestination(dto.UpdateBackupDestination{
+		DestinationId:        destinationId,
+		TasksCount:           &newDestinationTasksCount,
+		TotalSpaceUsageBytes: &newDestinationTotalSpaceUsageBytes,
+	})
+	if err != nil {
+		return errors.New("UpdateBackupDestinationInfraError: " + err.Error())
+	}
+
+	return nil
+}
+
 func (uc *RunBackupJob) updateBackupJobStats(
 	jobId valueObject.BackupJobId,
 	taskIds []valueObject.BackupTaskId,
@@ -57,6 +93,18 @@ func (uc *RunBackupJob) updateBackupJobStats(
 		}
 
 		lastRunStatus = taskEntity.TaskStatus
+
+		err = uc.updateBackupDestinationStats(
+			taskEntity.DestinationId, taskEntity.SizeBytes,
+		)
+		if err != nil {
+			slog.Error(
+				"UpdateBackupDestinationStatsError",
+				slog.String("error", err.Error()),
+				slog.String("taskId", taskId.String()),
+				slog.String("destinationId", taskEntity.DestinationId.String()),
+			)
+		}
 
 		if taskEntity.SizeBytes == nil {
 			continue
