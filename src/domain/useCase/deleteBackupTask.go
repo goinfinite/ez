@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	"github.com/goinfinite/ez/src/domain/dto"
-	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/repository"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
@@ -40,32 +39,16 @@ func (uc *DeleteBackupTask) updateBackupDestinationStats(
 	}
 
 	newDestinationTasksCount := uint16(0)
-	newDestinationTotalSpaceUsageBytes := valueObject.Byte(0)
-	switch destinationEntity := iDestinationEntity.(type) {
-	case entity.BackupDestinationLocal:
-		if destinationEntity.TasksCount > 0 {
-			newDestinationTasksCount = destinationEntity.TasksCount - 1
-		}
-		newDestinationTotalSpaceUsageBytes = destinationEntity.TotalSpaceUsageBytes
-		if taskSizeBytes != nil {
-			newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
-		}
-	case entity.BackupDestinationRemoteHost:
-		if destinationEntity.TasksCount > 0 {
-			newDestinationTasksCount = destinationEntity.TasksCount - 1
-		}
-		newDestinationTotalSpaceUsageBytes = destinationEntity.TotalSpaceUsageBytes
-		if taskSizeBytes != nil {
-			newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
-		}
-	case entity.BackupDestinationObjectStorage:
-		if destinationEntity.TasksCount > 0 {
-			newDestinationTasksCount = destinationEntity.TasksCount - 1
-		}
-		newDestinationTotalSpaceUsageBytes = destinationEntity.TotalSpaceUsageBytes
-		if taskSizeBytes != nil {
-			newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
-		}
+	if iDestinationEntity.ReadTasksCount() > 0 {
+		newDestinationTasksCount = iDestinationEntity.ReadTasksCount() - 1
+	}
+
+	newDestinationTotalSpaceUsageBytes := iDestinationEntity.ReadTotalSpaceUsageBytes()
+	if taskSizeBytes != nil {
+		newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
+	}
+	if newDestinationTotalSpaceUsageBytes < 0 {
+		newDestinationTotalSpaceUsageBytes = valueObject.Byte(0)
 	}
 
 	err = uc.backupCmdRepo.UpdateDestination(dto.UpdateBackupDestination{

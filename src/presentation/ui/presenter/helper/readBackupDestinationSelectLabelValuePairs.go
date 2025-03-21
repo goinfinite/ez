@@ -4,8 +4,6 @@ import (
 	"log/slog"
 
 	"github.com/goinfinite/ez/src/domain/dto"
-	"github.com/goinfinite/ez/src/domain/entity"
-	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
@@ -34,29 +32,11 @@ func ReadBackupDestinationSelectLabelValuePairs(
 	}
 
 	for _, iDestinationEntity := range readResponseDto.Destinations {
-		var destinationName valueObject.BackupDestinationName
-		var destinationId valueObject.BackupDestinationId
-		var destinationType valueObject.BackupDestinationType
-
-		switch destinationEntity := iDestinationEntity.(type) {
-		case entity.BackupDestinationLocal:
-			destinationName = destinationEntity.DestinationName
-			destinationId = destinationEntity.DestinationId
-			destinationType = destinationEntity.DestinationType
-		case entity.BackupDestinationObjectStorage:
-			destinationName = destinationEntity.DestinationName
-			destinationId = destinationEntity.DestinationId
-			destinationType = destinationEntity.DestinationType
-		case entity.BackupDestinationRemoteHost:
-			destinationName = destinationEntity.DestinationName
-			destinationId = destinationEntity.DestinationId
-			destinationType = destinationEntity.DestinationType
-		}
 		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: destinationName.String() +
-				" (#" + destinationId.String() +
-				" - " + destinationType.String() + ")",
-			Value: destinationId.String(),
+			Label: iDestinationEntity.ReadDestinationName().String() +
+				" (#" + iDestinationEntity.ReadDestinationId().String() +
+				" - " + iDestinationEntity.ReadDestinationType().String() + ")",
+			Value: iDestinationEntity.ReadDestinationId().String(),
 		}
 		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
 	}

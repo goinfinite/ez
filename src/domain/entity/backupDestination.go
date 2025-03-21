@@ -5,6 +5,20 @@ import (
 )
 
 type IBackupDestination interface {
+	ReadDestinationId() valueObject.BackupDestinationId
+	ReadAccountId() valueObject.AccountId
+	ReadAccountUsername() valueObject.UnixUsername
+	ReadDestinationName() valueObject.BackupDestinationName
+	ReadDestinationDescription() *valueObject.BackupDestinationDescription
+	ReadDestinationType() valueObject.BackupDestinationType
+	ReadDestinationPath() valueObject.UnixFilePath
+	ReadMinLocalStorageFreePercent() *uint8
+	ReadMaxDestinationStorageUsagePercent() *uint8
+	ReadEncryptionKey() valueObject.Password
+	ReadTasksCount() uint16
+	ReadTotalSpaceUsageBytes() valueObject.Byte
+	ReadCreatedAt() valueObject.UnixTime
+	ReadUpdatedAt() valueObject.UnixTime
 }
 
 type BackupDestinationBase struct {
@@ -22,6 +36,62 @@ type BackupDestinationBase struct {
 	TotalSpaceUsageBytes              valueObject.Byte                          `json:"totalSpaceUsageBytes"`
 	CreatedAt                         valueObject.UnixTime                      `json:"createdAt"`
 	UpdatedAt                         valueObject.UnixTime                      `json:"updatedAt"`
+}
+
+func (entity BackupDestinationBase) ReadDestinationId() valueObject.BackupDestinationId {
+	return entity.DestinationId
+}
+
+func (entity BackupDestinationBase) ReadAccountId() valueObject.AccountId {
+	return entity.AccountId
+}
+
+func (entity BackupDestinationBase) ReadAccountUsername() valueObject.UnixUsername {
+	return entity.AccountUsername
+}
+
+func (entity BackupDestinationBase) ReadDestinationName() valueObject.BackupDestinationName {
+	return entity.DestinationName
+}
+
+func (entity BackupDestinationBase) ReadDestinationDescription() *valueObject.BackupDestinationDescription {
+	return entity.DestinationDescription
+}
+
+func (entity BackupDestinationBase) ReadDestinationType() valueObject.BackupDestinationType {
+	return entity.DestinationType
+}
+
+func (entity BackupDestinationBase) ReadDestinationPath() valueObject.UnixFilePath {
+	return entity.DestinationPath
+}
+
+func (entity BackupDestinationBase) ReadMinLocalStorageFreePercent() *uint8 {
+	return entity.MinLocalStorageFreePercent
+}
+
+func (entity BackupDestinationBase) ReadMaxDestinationStorageUsagePercent() *uint8 {
+	return entity.MaxDestinationStorageUsagePercent
+}
+
+func (entity BackupDestinationBase) ReadEncryptionKey() valueObject.Password {
+	return entity.EncryptionKey
+}
+
+func (entity BackupDestinationBase) ReadTasksCount() uint16 {
+	return entity.TasksCount
+}
+
+func (entity BackupDestinationBase) ReadTotalSpaceUsageBytes() valueObject.Byte {
+	return entity.TotalSpaceUsageBytes
+}
+
+func (entity BackupDestinationBase) ReadCreatedAt() valueObject.UnixTime {
+	return entity.CreatedAt
+}
+
+func (entity BackupDestinationBase) ReadUpdatedAt() valueObject.UnixTime {
+	return entity.UpdatedAt
 }
 
 type BackupDestinationRemoteBase struct {
