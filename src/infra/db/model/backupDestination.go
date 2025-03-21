@@ -156,7 +156,7 @@ func (model BackupDestination) ToEntity(withSecrets bool) (
 
 	dbEncryptSecret := os.Getenv("BACKUP_KEYS_SECRET")
 	if dbEncryptSecret == "" {
-		return destinationId, errors.New("BackupKeysSecretMissing")
+		return destinationEntity, errors.New("BackupKeysSecretMissing")
 	}
 	decryptedEncryptionKey, err := infraHelper.DecryptStr(
 		dbEncryptSecret, model.EncryptionKey,
