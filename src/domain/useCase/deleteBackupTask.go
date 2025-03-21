@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/repository"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
@@ -27,6 +28,58 @@ func NewDeleteBackupTask(
 	}
 }
 
+func (uc *DeleteBackupTask) updateBackupDestinationStats(
+	destinationId valueObject.BackupDestinationId,
+	taskSizeBytes *valueObject.Byte,
+) error {
+	iDestinationEntity, err := uc.backupQueryRepo.ReadFirstDestination(
+		dto.ReadBackupDestinationsRequest{DestinationId: &destinationId}, false,
+	)
+	if err != nil {
+		return errors.New("BackupDestinationNotFound")
+	}
+
+	newDestinationTasksCount := uint16(0)
+	newDestinationTotalSpaceUsageBytes := valueObject.Byte(0)
+	switch destinationEntity := iDestinationEntity.(type) {
+	case entity.BackupDestinationLocal:
+		if destinationEntity.TasksCount > 0 {
+			newDestinationTasksCount = destinationEntity.TasksCount - 1
+		}
+		newDestinationTotalSpaceUsageBytes = destinationEntity.TotalSpaceUsageBytes
+		if taskSizeBytes != nil {
+			newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
+		}
+	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.TasksCount > 0 {
+			newDestinationTasksCount = destinationEntity.TasksCount - 1
+		}
+		newDestinationTotalSpaceUsageBytes = destinationEntity.TotalSpaceUsageBytes
+		if taskSizeBytes != nil {
+			newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
+		}
+	case entity.BackupDestinationObjectStorage:
+		if destinationEntity.TasksCount > 0 {
+			newDestinationTasksCount = destinationEntity.TasksCount - 1
+		}
+		newDestinationTotalSpaceUsageBytes = destinationEntity.TotalSpaceUsageBytes
+		if taskSizeBytes != nil {
+			newDestinationTotalSpaceUsageBytes -= *taskSizeBytes
+		}
+	}
+
+	err = uc.backupCmdRepo.UpdateDestination(dto.UpdateBackupDestination{
+		DestinationId:        destinationId,
+		TasksCount:           &newDestinationTasksCount,
+		TotalSpaceUsageBytes: &newDestinationTotalSpaceUsageBytes,
+	})
+	if err != nil {
+		return errors.New("UpdateBackupDestinationStatsInfraError: " + err.Error())
+	}
+
+	return nil
+}
+
 func (uc *DeleteBackupTask) updateBackupJobStats(
 	jobId valueObject.BackupJobId,
 	taskSizeBytes *valueObject.Byte,
@@ -36,11 +89,12 @@ func (uc *DeleteBackupTask) updateBackupJobStats(
 	)
 	if err != nil {
 		slog.Error(
-			"BackupJobNotFound",
-			slog.String("error", err.Error()),
+			"ReadBackupJobInfraError",
+			slog.String("method", "updateBackupJobStats"),
 			slog.String("jobId", jobId.String()),
+			slog.String("error", err.Error()),
 		)
-		return errors.New("BackupJobNotFound")
+		return nil
 	}
 
 	newJobTasksCount := uint16(0)
@@ -62,8 +116,21 @@ func (uc *DeleteBackupTask) updateBackupJobStats(
 		TotalSpaceUsageBytes: &newJobTotalSpaceUsageBytes,
 	})
 	if err != nil {
-		slog.Error("UpdateBackupJobStatsInfraError", slog.String("error", err.Error()))
-		return errors.New("UpdateBackupJobStatsInfraError")
+		slog.Error(
+			"UpdateBackupJobInfraError",
+			slog.String("method", "updateBackupJobStats"),
+			slog.String("jobId", jobId.String()),
+			slog.String("error", err.Error()),
+		)
+		return nil
+	}
+
+	for _, destinationId := range jobEntity.DestinationIds {
+		err = uc.updateBackupDestinationStats(destinationId, taskSizeBytes)
+		if err != nil {
+			slog.Error(err.Error(), slog.String("destinationId", destinationId.String()))
+			continue
+		}
 	}
 
 	return nil
