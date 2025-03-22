@@ -1002,10 +1002,15 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 			case valueObject.ObjectStorageProviderWasabi:
 				providerNameStr = "Wasabi"
 			}
+			regionParamName := "REGION"
+			if strings.Contains(destinationEntity.ObjectStorageProviderRegion.String(), ".") {
+				regionParamName = "ENDPOINT"
+			}
+
 			backupBinaryEnvs = append(
 				backupBinaryEnvs,
 				unencryptedDestEnvPrefix+"_PROVIDER="+providerNameStr,
-				unencryptedDestEnvPrefix+"_REGION="+
+				unencryptedDestEnvPrefix+"_"+regionParamName+"="+
 					destinationEntity.ObjectStorageProviderRegion.String(),
 			)
 		}
