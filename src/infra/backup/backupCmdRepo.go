@@ -1004,6 +1004,8 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 				providerNameStr = "Magalu"
 			case valueObject.ObjectStorageProviderWasabi:
 				providerNameStr = "Wasabi"
+				wasabiEndpoint, _ := valueObject.NewUrl("https://s3.wasabisys.com")
+				destinationEntity.ObjectStorageEndpointUrl = &wasabiEndpoint
 			}
 			regionParamName := "REGION"
 			if strings.Contains(destinationEntity.ObjectStorageProviderRegion.String(), ".") {
