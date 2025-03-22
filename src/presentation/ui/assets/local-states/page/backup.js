@@ -281,6 +281,7 @@ document.addEventListener("alpine:init", () => {
     // Primary State
     destinationEntity: {},
     createDestinationPayload: {},
+    objectStorageProviderRegions: {},
     resetPrimaryState() {
       this.destinationEntity = {};
       this.createDestinationPayload = {
@@ -288,6 +289,9 @@ document.addEventListener("alpine:init", () => {
         destinationPath: "/",
         objectStorageProvider: "custom",
       };
+      this.objectStorageProviderRegions = JSON.parse(
+        document.getElementById("objectStorageProviderRegions").textContent
+      );
     },
     updateDestinationEntity(destinationId) {
       this.destinationEntity = JSON.parse(

@@ -173,11 +173,11 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 						})
 					</template>
 					<template x-if="createDestinationPayload.objectStorageProvider != 'custom'">
-						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:     "text",
-							Id:            "objectStorageProviderRegion",
-							Label:         "Region",
-							ModelBindPath: "createDestinationPayload.objectStorageProviderRegion",
+						@componentForm.SelectInputClientSideOptions(componentForm.SelectInputClientSideOptionsDto{
+							Id:                    "objectStorageProviderRegion",
+							Label:                 "Region",
+							SelectedModelBindPath: "createDestinationPayload.objectStorageProviderRegion",
+							OptionsModelBindPath:  "objectStorageProviderRegions[createDestinationPayload.objectStorageProvider]",
 						})
 					</template>
 				</div>
@@ -1045,6 +1045,9 @@ templ BackupDestinations(
 				})
 			</div>
 		</div>
+		@templ.JSONScript(
+			"objectStorageProviderRegions", valueObject.KnownObjectStorageProviderRegions,
+		)
 		@BackupDestinationsTable(readDestinationsRequest, readDestinationsResponse)
 		@CreateBackupDestinationModal(createDestinationModalDto)
 		@NewlyDestinationEncryptionKeyModal()
