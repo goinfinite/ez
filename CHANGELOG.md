@@ -1,7 +1,7 @@
 # Changelog
 
 ```log
-0.1.0 - 2025/X/X
+0.1.0 - 2025/03/24
 feat: backups
 fix: entrypoint parsing bug on create container
 
