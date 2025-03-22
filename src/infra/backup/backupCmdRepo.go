@@ -917,6 +917,7 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 	var backupBinaryEnvs []string
 
 	var encryptionKey valueObject.Password
+	shouldSkipCertificateVerification := false
 	switch destinationEntity := iDestinationEntity.(type) {
 	case entity.BackupDestinationLocal:
 		backupBinaryEnvs = []string{
@@ -924,6 +925,10 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 		}
 		encryptionKey = destinationEntity.EncryptionKey
 	case entity.BackupDestinationRemoteHost:
+		if destinationEntity.SkipCertificateVerification != nil {
+			shouldSkipCertificateVerification = *destinationEntity.SkipCertificateVerification
+		}
+
 		remoteHostTypeStr := "sftp"
 		if destinationEntity.RemoteHostType != nil {
 			remoteHostTypeStr = destinationEntity.RemoteHostType.String()
@@ -961,6 +966,10 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 		}
 
 	case entity.BackupDestinationObjectStorage:
+		if destinationEntity.SkipCertificateVerification != nil {
+			shouldSkipCertificateVerification = *destinationEntity.SkipCertificateVerification
+		}
+
 		backupBinaryEnvs = []string{
 			unencryptedDestEnvPrefix + "_TYPE=s3",
 			unencryptedDestEnvPrefix + "_PROVIDER=Custom",
@@ -1008,6 +1017,9 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 	backupBinaryEnvs = append(
 		backupBinaryEnvs, encryptedDestEnvPrefix+"_REMOTE=rawdest:"+unencryptedDestPathStr,
 	)
+	if shouldSkipCertificateVerification {
+		backupBinaryEnvs = append(backupBinaryEnvs, "RCLONE_CONFIG_NO_CHECK_CERTIFICATE=true")
+	}
 
 	backupCliWithEnvs := strings.Join(backupBinaryEnvs, " ") + " rclone"
 
