@@ -978,7 +978,8 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 				destinationEntity.ObjectStorageProviderSecretAccessKey.String(),
 		}
 
-		if destinationEntity.ObjectStorageProvider != nil {
+		if destinationEntity.ObjectStorageProvider != nil &&
+			*destinationEntity.ObjectStorageProvider != valueObject.ObjectStorageProviderCustom {
 			isCloudFlareProvider := *destinationEntity.ObjectStorageProvider == valueObject.ObjectStorageProviderCloudFlare
 			if destinationEntity.ObjectStorageProviderRegion == nil && !isCloudFlareProvider {
 				return "", errors.New("ObjectStorageProviderRegionMissing")
