@@ -582,7 +582,7 @@ func (repo *BackupCmdRepo) UpdateJob(
 		zeroableFieldsUpdateMap["total_space_usage_bytes"] = updateDto.TotalSpaceUsageBytes.Uint64()
 	}
 
-	if len(zeroableFieldsUpdateMap) == 0 {
+	if len(zeroableFieldsUpdateMap) > 0 {
 		err = repo.persistentDbSvc.Handler.
 			Model(&dbModel.BackupJob{}).
 			Where("id = ?", updateDto.JobId.Uint64()).
