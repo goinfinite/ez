@@ -972,14 +972,53 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 
 		backupBinaryEnvs = []string{
 			unencryptedDestEnvPrefix + "_TYPE=s3",
-			unencryptedDestEnvPrefix + "_PROVIDER=Custom",
 			unencryptedDestEnvPrefix + "_ACCESS_KEY_ID=" +
 				destinationEntity.ObjectStorageProviderAccessKeyId.String(),
 			unencryptedDestEnvPrefix + "_SECRET_ACCESS_KEY=" +
 				destinationEntity.ObjectStorageProviderSecretAccessKey.String(),
-			unencryptedDestEnvPrefix + "_ENDPOINT=" +
-				destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
 		}
+
+		if destinationEntity.ObjectStorageProvider != nil {
+			if destinationEntity.ObjectStorageProviderRegion == nil {
+				return "", errors.New("ObjectStorageProviderRegionMissing")
+			}
+
+			providerNameStr := destinationEntity.ObjectStorageProvider.String()
+			switch *destinationEntity.ObjectStorageProvider {
+			case valueObject.ObjectStorageProviderAkamai, valueObject.ObjectStorageProviderLinode:
+				providerNameStr = "Linode"
+			case valueObject.ObjectStorageProviderAlibaba:
+				providerNameStr = "Alibaba"
+			case valueObject.ObjectStorageProviderAws:
+				providerNameStr = "AWS"
+			case valueObject.ObjectStorageProviderCloudFlare, valueObject.ObjectStorageProviderR2:
+				providerNameStr = "Cloudflare"
+			case valueObject.ObjectStorageProviderDigitalOcean:
+				providerNameStr = "DigitalOcean"
+			case valueObject.ObjectStorageProviderGoogleCloud:
+				providerNameStr = "GCS"
+			case valueObject.ObjectStorageProviderMagalu:
+				providerNameStr = "Magalu"
+			case valueObject.ObjectStorageProviderWasabi:
+				providerNameStr = "Wasabi"
+			}
+			backupBinaryEnvs = append(
+				backupBinaryEnvs,
+				unencryptedDestEnvPrefix+"_PROVIDER="+providerNameStr,
+				unencryptedDestEnvPrefix+"_REGION="+
+					destinationEntity.ObjectStorageProviderRegion.String(),
+			)
+		}
+
+		if destinationEntity.ObjectStorageEndpointUrl != nil {
+			backupBinaryEnvs = append(
+				backupBinaryEnvs,
+				unencryptedDestEnvPrefix+"_PROVIDER=Custom",
+				unencryptedDestEnvPrefix+"_ENDPOINT="+
+					destinationEntity.ObjectStorageEndpointUrl.WithoutSchema(),
+			)
+		}
+
 		encryptionKey = destinationEntity.EncryptionKey
 
 	default:
