@@ -25,7 +25,6 @@ const (
 
 var ObjectStorageProviderStrList = []string{
 	ObjectStorageProviderCustom.String(),
-	ObjectStorageProviderAkamai.String(),
 	ObjectStorageProviderAlibaba.String(),
 	ObjectStorageProviderAws.String(),
 	ObjectStorageProviderCloudFlare.String(),
@@ -33,7 +32,6 @@ var ObjectStorageProviderStrList = []string{
 	ObjectStorageProviderGoogleCloud.String(),
 	ObjectStorageProviderLinode.String(),
 	ObjectStorageProviderMagalu.String(),
-	ObjectStorageProviderR2.String(),
 	ObjectStorageProviderWasabi.String(),
 }
 
