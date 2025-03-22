@@ -64,8 +64,24 @@ func (repo *BackupQueryRepo) ReadDestination(
 	}
 
 	if requestDto.Pagination.SortBy != nil {
-		if requestDto.Pagination.SortBy.String() == "destinationId" {
-			sortBy, _ := valueObject.NewPaginationSortBy("ID")
+		sortByStr := requestDto.Pagination.SortBy.String()
+		switch sortByStr {
+		case "destinationId", "id":
+			sortByStr = "ID"
+		case "destinationName":
+			sortByStr = "Name"
+		case "destinationType":
+			sortByStr = "Type"
+		case "destinationDescription":
+			sortByStr = "Description"
+		case "destinationPath":
+			sortByStr = "Path"
+		case "accountUsername":
+			sortByStr = "AccountId"
+		}
+
+		sortBy, err := valueObject.NewPaginationSortBy(sortByStr)
+		if err == nil {
 			requestDto.Pagination.SortBy = &sortBy
 		}
 	}
@@ -79,7 +95,9 @@ func (repo *BackupQueryRepo) ReadDestination(
 	backupDestinationModels := []dbModel.BackupDestination{}
 	err = paginatedDbQuery.Find(&backupDestinationModels).Error
 	if err != nil {
-		return responseDto, errors.New("FindBackupDestinationsError: " + err.Error())
+		if !strings.Contains(err.Error(), "no such column") {
+			return responseDto, errors.New("FindBackupDestinationsError: " + err.Error())
+		}
 	}
 
 	backupDestinationEntities := []entity.IBackupDestination{}
