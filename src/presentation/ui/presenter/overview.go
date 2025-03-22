@@ -11,9 +11,9 @@ import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
+	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
-	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 	"github.com/labstack/echo/v4"
@@ -107,36 +107,6 @@ func (presenter *OverviewPresenter) readContainerProfileSearchableItems() []comp
 	return searchableSelectItems
 }
 
-func (presenter *OverviewPresenter) readAccountSelectLabelValuePairs() []componentForm.SelectLabelValuePair {
-	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
-
-	accountService := service.NewAccountService(
-		presenter.persistentDbSvc, presenter.trailDbSvc,
-	)
-
-	readAccountsServiceOutput := accountService.Read()
-	if readAccountsServiceOutput.Status != service.Success {
-		slog.Debug("ReadAccountsFailure")
-		return nil
-	}
-
-	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
-	if !assertOk {
-		slog.Debug("AssertAccountsFailure")
-		return nil
-	}
-
-	for _, accountEntity := range accountEntities {
-		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: accountEntity.Username.String(),
-			Value: accountEntity.Id.String(),
-		}
-		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
-	}
-
-	return selectLabelValuePairs
-}
-
 func (presenter *OverviewPresenter) transformContainerSummariesIntoSearchableItems(
 	containerSummaries []componentContainer.ContainerSummary,
 ) []componentForm.SearchableSelectItem {
@@ -197,13 +167,17 @@ func (presenter *OverviewPresenter) ReadCreateContainerModalDto(
 		}
 	}
 
+	accountSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
 	return page.CreateContainerModalDto{
 		AppMarketplaceCarouselItems:       appCarouselItems,
 		FrameworkMarketplaceCarouselItems: frameworkCarouselItems,
 		StackMarketplaceCarouselItems:     stackCarouselItems,
 		ContainerImageSearchableItems:     presenter.readContainerImageSearchableItems(),
 		ContainerProfileSearchableItems:   presenter.readContainerProfileSearchableItems(),
-		AccountSelectLabelValuePairs:      presenter.readAccountSelectLabelValuePairs(),
+		AccountSelectLabelValuePairs:      accountSelectPairs,
 		ContainerSummarySearchableItems: presenter.transformContainerSummariesIntoSearchableItems(
 			containerSummaries,
 		),
@@ -260,11 +234,15 @@ func (presenter *OverviewPresenter) ReadContainers(c echo.Context) (
 	}
 
 	if c.QueryParam("containersContainerId") != "" {
-		readContainersRequestBody["containerId"] = c.QueryParam("containersContainerId")
+		readContainersRequestBody["containerId"] = sharedHelper.StringSliceValueObjectParser(
+			readContainersRequestBody["containerId"], valueObject.NewContainerId,
+		)
 	}
 
 	if c.QueryParam("containersAccountId") != "" {
-		readContainersRequestBody["containerAccountId"] = c.QueryParam("containersAccountId")
+		readContainersRequestBody["containerAccountId"] = sharedHelper.StringSliceValueObjectParser(
+			readContainersRequestBody["containerAccountId"], valueObject.NewAccountId,
+		)
 	}
 
 	if c.QueryParam("containersHostname") != "" {
@@ -297,7 +275,7 @@ func (presenter *OverviewPresenter) ReadContainers(c echo.Context) (
 
 	readContainersServiceOutput := containerService.Read(readContainersRequestBody)
 	if readContainersServiceOutput.Status != service.Success {
-		slog.Debug("ReadContainersFailure")
+		slog.Debug("ReadContainersFailure: %v", readContainersServiceOutput.Body)
 		return responseDto
 	}
 
@@ -330,5 +308,5 @@ func (presenter *OverviewPresenter) Handler(c echo.Context) (err error) {
 		containersResponseDto, containerIdSummariesMap, createContainerModalDto,
 	)
 
-	return uiHelper.Render(c, pageContent, http.StatusOK)
+	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

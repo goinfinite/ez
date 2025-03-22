@@ -7,13 +7,13 @@ import (
 
 	"net/http"
 
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	componentContainer "github.com/goinfinite/ez/src/presentation/ui/component/container"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
-	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 )
@@ -87,15 +87,17 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	readArchiveFilesServiceOutput := containerImageService.ReadArchiveFiles(&c.Request().Host)
-	if readArchiveFilesServiceOutput.Status != service.Success {
-		slog.Debug("ReadArchiveFilesFailure")
+	readArchivesServiceOutput := containerImageService.ReadArchives(
+		map[string]interface{}{}, &c.Request().Host,
+	)
+	if readArchivesServiceOutput.Status != service.Success {
+		slog.Debug("ReadArchivesFailure")
 		return nil
 	}
 
-	archiveFileEntities, assertOk := readArchiveFilesServiceOutput.Body.([]entity.ContainerImageArchiveFile)
+	readArchivesResponseDto, assertOk := readArchivesServiceOutput.Body.(dto.ReadContainerImageArchivesResponse)
 	if !assertOk {
-		slog.Debug("AssertArchiveFilesFailure")
+		slog.Debug("AssertArchivesFailure")
 		return nil
 	}
 
@@ -124,8 +126,8 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 	containerSummariesSearchableItems := presenter.transformContainerSummariesIntoSearchableItems()
 
 	pageContent := page.ContainerImageIndex(
-		imageEntities, archiveFileEntities, accountIdEntityMap,
+		imageEntities, readArchivesResponseDto.Archives, accountIdEntityMap,
 		accountsSelectPairs, containerSummariesSearchableItems,
 	)
-	return uiHelper.Render(c, pageContent, http.StatusOK)
+	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

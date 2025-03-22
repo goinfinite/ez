@@ -8,8 +8,8 @@ import (
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
-	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
+	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 )
 
 type ContainerProfilePresenter struct {
@@ -39,5 +39,5 @@ func (presenter *ContainerProfilePresenter) Handler(c echo.Context) error {
 	}
 
 	pageContent := page.ContainerProfileIndex(profileEntities)
-	return uiHelper.Render(c, pageContent, http.StatusOK)
+	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

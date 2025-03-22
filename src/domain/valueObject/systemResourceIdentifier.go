@@ -87,6 +87,36 @@ func NewMappingTargetSri(
 	)
 }
 
+func NewBackupDestinationSri(
+	accountId AccountId,
+	backupDestinationId BackupDestinationId,
+) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupDestination/" + backupDestinationId.String(),
+	)
+}
+
+func NewBackupJobSri(accountId AccountId, backupJobId BackupJobId) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupJob/" + backupJobId.String(),
+	)
+}
+
+func NewBackupTaskSri(accountId AccountId, backupTaskId BackupTaskId) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupTask/" + backupTaskId.String(),
+	)
+}
+
+func NewBackupTaskArchiveSri(
+	accountId AccountId,
+	backupTaskArchiveId BackupTaskArchiveId,
+) SystemResourceIdentifier {
+	return NewSystemResourceIdentifierIgnoreError(
+		"sri://" + accountId.String() + ":backupTaskArchive/" + backupTaskArchiveId.String(),
+	)
+}
+
 func (vo SystemResourceIdentifier) String() string {
 	return string(vo)
 }

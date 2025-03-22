@@ -116,7 +116,7 @@ server {
 func (repo *ContainerProxyCmdRepo) Create(containerId valueObject.ContainerId) error {
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:  useCase.ContainersDefaultPagination,
-		ContainerId: &containerId,
+		ContainerId: []valueObject.ContainerId{containerId},
 	}
 
 	readContainersResponseDto, err := repo.containerQueryRepo.Read(readContainersRequestDto)

@@ -12,9 +12,9 @@ import (
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
+	dbHelper "github.com/goinfinite/ez/src/infra/db/helper"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
-	"github.com/iancoleman/strcase"
 )
 
 type ContainerQueryRepo struct {
@@ -40,9 +40,6 @@ func (repo *ContainerQueryRepo) containerMetricFactory(
 	rawContainerId, assertOk := metricsInfo["ContainerID"].(string)
 	if !assertOk {
 		return containerMetrics, errors.New("ContainerIdNotFound")
-	}
-	if len(rawContainerId) > 12 {
-		rawContainerId = rawContainerId[:12]
 	}
 	containerId, err := valueObject.NewContainerId(rawContainerId)
 	if err != nil {
@@ -261,12 +258,6 @@ func (repo *ContainerQueryRepo) Read(
 	requestDto dto.ReadContainersRequest,
 ) (responseDto dto.ReadContainersResponse, err error) {
 	containerModel := dbModel.Container{}
-	if requestDto.ContainerId != nil {
-		containerModel.ID = requestDto.ContainerId.String()
-	}
-	if requestDto.ContainerAccountId != nil {
-		containerModel.AccountID = requestDto.ContainerAccountId.Uint64()
-	}
 	if requestDto.ContainerHostname != nil {
 		containerModel.Hostname = requestDto.ContainerHostname.String()
 	}
@@ -306,11 +297,20 @@ func (repo *ContainerQueryRepo) Read(
 		containerModel.Envs = &envs
 	}
 
-	dbQuery := repo.persistentDbSvc.Handler.
-		Model(&containerModel).
-		Where(&containerModel).
-		Preload("PortBindings")
-
+	dbQuery := repo.persistentDbSvc.Handler.Model(&containerModel).
+		Where(&containerModel).Preload("PortBindings")
+	if len(requestDto.ContainerId) > 0 {
+		dbQuery = dbQuery.Where("id IN ?", requestDto.ContainerId)
+	}
+	if len(requestDto.ContainerAccountId) > 0 {
+		dbQuery = dbQuery.Where("account_id IN ?", requestDto.ContainerAccountId)
+	}
+	if len(requestDto.ExceptContainerId) > 0 {
+		dbQuery = dbQuery.Where("id NOT IN ?", requestDto.ExceptContainerId)
+	}
+	if len(requestDto.ExceptContainerAccountId) > 0 {
+		dbQuery = dbQuery.Where("account_id NOT IN ?", requestDto.ExceptContainerAccountId)
+	}
 	if requestDto.CreatedBeforeAt != nil {
 		dbQuery = dbQuery.Where("created_at < ?", requestDto.CreatedBeforeAt.GetAsGoTime())
 	}
@@ -330,35 +330,15 @@ func (repo *ContainerQueryRepo) Read(
 		dbQuery = dbQuery.Where("stopped_at > ?", requestDto.StoppedAfterAt.GetAsGoTime())
 	}
 
-	var itemsTotal int64
-	err = dbQuery.Count(&itemsTotal).Error
+	paginatedDbQuery, responsePagination, err := dbHelper.PaginationQueryBuilder(
+		dbQuery, requestDto.Pagination,
+	)
 	if err != nil {
-		return responseDto, errors.New("CountItemsTotalError: " + err.Error())
-	}
-
-	dbQuery = dbQuery.Limit(int(requestDto.Pagination.ItemsPerPage))
-	if requestDto.Pagination.LastSeenId == nil {
-		offset := int(requestDto.Pagination.PageNumber) * int(requestDto.Pagination.ItemsPerPage)
-		dbQuery = dbQuery.Offset(offset)
-	} else {
-		dbQuery = dbQuery.Where("id > ?", requestDto.Pagination.LastSeenId.String())
-	}
-	if requestDto.Pagination.SortBy != nil {
-		orderStatement := requestDto.Pagination.SortBy.String()
-		orderStatement = strcase.ToSnake(orderStatement)
-		if orderStatement == "id" {
-			orderStatement = "ID"
-		}
-
-		if requestDto.Pagination.SortDirection != nil {
-			orderStatement += " " + requestDto.Pagination.SortDirection.String()
-		}
-
-		dbQuery = dbQuery.Order(orderStatement)
+		return responseDto, errors.New("PaginationQueryBuilderError: " + err.Error())
 	}
 
 	containerModels := []dbModel.Container{}
-	err = dbQuery.Find(&containerModels).Error
+	err = paginatedDbQuery.Find(&containerModels).Error
 	if err != nil {
 		return responseDto, err
 	}
@@ -377,22 +357,9 @@ func (repo *ContainerQueryRepo) Read(
 		containerEntities = append(containerEntities, containerEntity)
 	}
 
-	itemsTotalUint := uint64(itemsTotal)
-	pagesTotal := uint32(
-		math.Ceil(float64(itemsTotal) / float64(requestDto.Pagination.ItemsPerPage)),
-	)
-	responsePagination := dto.Pagination{
-		PageNumber:    requestDto.Pagination.PageNumber,
-		ItemsPerPage:  requestDto.Pagination.ItemsPerPage,
-		SortBy:        requestDto.Pagination.SortBy,
-		SortDirection: requestDto.Pagination.SortDirection,
-		PagesTotal:    &pagesTotal,
-		ItemsTotal:    &itemsTotalUint,
-	}
-
 	responseDto = dto.ReadContainersResponse{
 		Pagination:            responsePagination,
-		Containers:            []entity.Container{},
+		Containers:            containerEntities,
 		ContainersWithMetrics: []dto.ContainerWithMetrics{},
 	}
 
@@ -402,10 +369,52 @@ func (repo *ContainerQueryRepo) Read(
 			return responseDto, err
 		}
 
+		responseDto.Containers = []entity.Container{}
 		responseDto.ContainersWithMetrics = containersWithMetrics
 		return responseDto, nil
 	}
 
-	responseDto.Containers = containerEntities
 	return responseDto, nil
+}
+
+func (repo *ContainerQueryRepo) ReadFirst(
+	requestDto dto.ReadContainersRequest,
+) (containerEntity entity.Container, err error) {
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+
+	responseDto, err := repo.Read(requestDto)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	if len(responseDto.Containers) == 0 {
+		return containerEntity, errors.New("ContainerNotFound")
+	}
+
+	return responseDto.Containers[0], nil
+}
+
+func (repo *ContainerQueryRepo) ReadFirstWithMetrics(
+	requestDto dto.ReadContainersRequest,
+) (containerWithMetrics dto.ContainerWithMetrics, err error) {
+	withMetrics := true
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
+	}
+	requestDto.WithMetrics = &withMetrics
+
+	responseDto, err := repo.Read(requestDto)
+	if err != nil {
+		return containerWithMetrics, err
+	}
+
+	if len(responseDto.ContainersWithMetrics) == 0 {
+		return containerWithMetrics, errors.New("ContainerNotFound")
+	}
+
+	return responseDto.ContainersWithMetrics[0], nil
 }

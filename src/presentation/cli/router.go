@@ -45,6 +45,58 @@ func (router *Router) accountRoutes() {
 	rootCmd.AddCommand(accountCmd)
 }
 
+func (router *Router) backupRoutes() {
+	var backupCmd = &cobra.Command{
+		Use:   "backup",
+		Short: "BackupManagement",
+	}
+
+	backupController := cliController.NewBackupController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
+
+	var backupDestinationCmd = &cobra.Command{
+		Use:   "destination",
+		Short: "BackupDestinationManagement",
+	}
+	backupDestinationCmd.AddCommand(backupController.ReadDestination())
+	backupDestinationCmd.AddCommand(backupController.CreateDestination())
+	backupDestinationCmd.AddCommand(backupController.UpdateDestination())
+	backupDestinationCmd.AddCommand(backupController.DeleteDestination())
+	backupCmd.AddCommand(backupDestinationCmd)
+
+	var backupJobCmd = &cobra.Command{
+		Use:   "job",
+		Short: "BackupJobManagement",
+	}
+	backupJobCmd.AddCommand(backupController.ReadJob())
+	backupJobCmd.AddCommand(backupController.CreateJob())
+	backupJobCmd.AddCommand(backupController.UpdateJob())
+	backupJobCmd.AddCommand(backupController.DeleteJob())
+	backupJobCmd.AddCommand(backupController.RunJob())
+	backupCmd.AddCommand(backupJobCmd)
+
+	var backupTaskCmd = &cobra.Command{
+		Use:   "task",
+		Short: "BackupTaskManagement",
+	}
+	backupTaskCmd.AddCommand(backupController.ReadTask())
+	backupTaskCmd.AddCommand(backupController.UpdateTask())
+	backupTaskCmd.AddCommand(backupController.RestoreTask())
+	backupTaskCmd.AddCommand(backupController.DeleteTask())
+	var backupTaskArchiveCmd = &cobra.Command{
+		Use:   "archive",
+		Short: "BackupTaskArchiveManagement",
+	}
+	backupTaskArchiveCmd.AddCommand(backupController.ReadTaskArchives())
+	backupTaskArchiveCmd.AddCommand(backupController.CreateTaskArchive())
+	backupTaskArchiveCmd.AddCommand(backupController.DeleteTaskArchive())
+	backupTaskCmd.AddCommand(backupTaskArchiveCmd)
+	backupCmd.AddCommand(backupTaskCmd)
+
+	rootCmd.AddCommand(backupCmd)
+}
+
 func (router *Router) containerRoutes() {
 	var containerCmd = &cobra.Command{
 		Use:   "container",
@@ -99,9 +151,9 @@ func (router *Router) containerRoutes() {
 		Use:   "archive",
 		Short: "ContainerImageArchiveManagement",
 	}
-	containerImageArchiveCmd.AddCommand(containerImageController.ReadArchiveFiles())
-	containerImageArchiveCmd.AddCommand(containerImageController.CreateArchiveFile())
-	containerImageArchiveCmd.AddCommand(containerImageController.DeleteArchiveFile())
+	containerImageArchiveCmd.AddCommand(containerImageController.ReadArchives())
+	containerImageArchiveCmd.AddCommand(containerImageController.CreateArchive())
+	containerImageArchiveCmd.AddCommand(containerImageController.DeleteArchive())
 	containerImageCmd.AddCommand(containerImageArchiveCmd)
 
 	containerCmd.AddCommand(containerProfileCmd)
@@ -183,6 +235,7 @@ func (router *Router) systemRoutes() {
 
 func (router Router) RegisterRoutes() {
 	router.accountRoutes()
+	router.backupRoutes()
 	router.containerRoutes()
 	router.mappingRoutes()
 	router.o11yRoutes()

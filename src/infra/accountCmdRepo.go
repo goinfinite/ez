@@ -131,7 +131,7 @@ func (repo *AccountCmdRepo) Create(
 
 func (repo *AccountCmdRepo) getUsernameById(
 	accountId valueObject.AccountId,
-) (valueObject.Username, error) {
+) (valueObject.UnixUsername, error) {
 	accountQuery := NewAccountQueryRepo(repo.persistentDbSvc)
 	accountEntity, err := accountQuery.ReadById(accountId)
 	if err != nil {
@@ -352,7 +352,7 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 	}
 	readContainersRequestDto := dto.ReadContainersRequest{
 		Pagination:         readContainersPaginationDto,
-		ContainerAccountId: &accountId,
+		ContainerAccountId: []valueObject.AccountId{accountId},
 	}
 
 	readContainersResponseDto, err := containerQueryRepo.Read(readContainersRequestDto)

@@ -12,7 +12,7 @@ type ContainerSummary struct {
 	Hostname         valueObject.Fqdn                  `json:"hostname"`
 	ImageAddress     valueObject.ContainerImageAddress `json:"imageAddress"`
 	AccountId        valueObject.AccountId             `json:"accountId"`
-	AccountUsername  valueObject.Username              `json:"accountUsername"`
+	AccountUsername  valueObject.UnixUsername          `json:"accountUsername"`
 	ProfileId        valueObject.ContainerProfileId    `json:"profileId"`
 	ProfileName      valueObject.ContainerProfileName  `json:"profileName"`
 	ProfileBaseSpecs valueObject.ContainerSpecs        `json:"profileBaseSpecs"`
@@ -24,7 +24,7 @@ func NewContainerSummary(
 	hostname valueObject.Fqdn,
 	imageAddress valueObject.ContainerImageAddress,
 	accountId valueObject.AccountId,
-	accountUsername valueObject.Username,
+	accountUsername valueObject.UnixUsername,
 	profileId valueObject.ContainerProfileId,
 	profileName valueObject.ContainerProfileName,
 	profileBaseSpecs valueObject.ContainerSpecs,

@@ -137,7 +137,7 @@ script ContainerImageIndexLocalState() {
 
 templ ContainerImageIndex(
 	imagesEntities []entity.ContainerImage,
-	archiveFilesEntities []entity.ContainerImageArchiveFile,
+	archiveEntities []entity.ContainerImageArchive,
 	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 	accountsSelectPairs []componentForm.SelectLabelValuePair,
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
@@ -157,7 +157,7 @@ templ ContainerImageIndex(
 				"Compressed image files ready to be downloaded to your local machine.",
 				"ph-file-zip",
 			)
-			@ContainerImageArchiveFilesTable(archiveFilesEntities, accountIdEntityMap)
+			@ContainerImageArchivesTable(archiveEntities, accountIdEntityMap)
 			<p class="mt-2 text-xs">
 				Note: archive files are automatically deleted after 24h to preserve storage space.
 			</p>
@@ -176,12 +176,18 @@ templ ContainerImageIndex(
 					)
 				</div>
 				<div class="my-4 flex basis-[40%] space-x-4">
-					@componentForm.SubmitButton(
-						"Import Container Image", "ph-upload", "openImportImageModal()", false,
-					)
-					@componentForm.SubmitButton(
-						"Take Container Snapshot", "ph-camera", "openTakeSnapshotModal()", false,
-					)
+					@componentStructural.IconButton(componentStructural.IconButtonSettings{
+						Label:       "Import Container Image",
+						Icon:        "ph-upload",
+						OnClick:     "openImportImageModal()",
+						IsFullWidth: true,
+					})
+					@componentStructural.IconButton(componentStructural.IconButtonSettings{
+						Label:       "Take Container Snapshot",
+						Icon:        "ph-camera",
+						OnClick:     "openTakeSnapshotModal()",
+						IsFullWidth: true,
+					})
 				</div>
 			</div>
 			@ContainerImagesTable(imagesEntities, accountIdEntityMap)
@@ -198,8 +204,8 @@ templ ContainerImageIndex(
 	</div>
 }
 
-templ ContainerImageArchiveFilesTable(
-	archiveFilesEntities []entity.ContainerImageArchiveFile,
+templ ContainerImageArchivesTable(
+	archiveEntities []entity.ContainerImageArchive,
 	accountIdEntityMap map[valueObject.AccountId]entity.Account,
 ) {
 	<table
@@ -222,35 +228,47 @@ templ ContainerImageArchiveFilesTable(
 			</tr>
 		</thead>
 		<tbody>
-			for _, archiveFileEntity := range archiveFilesEntities {
+			for _, archiveEntity := range archiveEntities {
 				<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-sm">
-					<td class="w-3/6 px-3 py-2">{ archiveFileEntity.UnixFilePath.String() }</td>
-					<td class="px-3 py-2">{ archiveFileEntity.ImageId.String() }</td>
+					<td class="w-3/6 px-3 py-2">{ archiveEntity.UnixFilePath.String() }</td>
+					<td class="px-3 py-2">{ archiveEntity.ImageId.String() }</td>
 					<td class="px-3 py-2 leading-tight">
-						<p>{ accountIdEntityMap[archiveFileEntity.AccountId].Username.String() }</p>
+						<p>{ accountIdEntityMap[archiveEntity.AccountId].Username.String() }</p>
 						<i class="text-[10px] text-neutral-50 text-opacity-70">
-							({ archiveFileEntity.AccountId.String() })
+							({ archiveEntity.AccountId.String() })
 						</i>
 					</td>
 					<td class="w-24 px-3 py-2">
-						{ archiveFileEntity.SizeBytes.StringWithSuffix() }
+						{ archiveEntity.SizeBytes.StringWithSuffix() }
 					</td>
-					<td class="px-3 py-2">{ archiveFileEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="px-3 py-2">{ archiveEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-4 py-2">
-						@componentStructural.CircularIconButtonWithTooltip(
-							"download-archive", "ph-download", "ez-300", "ez-200",
-							"window.open('"+archiveFileEntity.DownloadUrl.String()+"')",
-							"Download Archive", "ez-300",
-						)
-						@componentStructural.CircularIconButtonWithTooltip(
-							"delete-archive", "ph-trash", "red-900", "red-700",
-							"openDeleteArchiveModal('"+archiveFileEntity.AccountId.String()+"','"+archiveFileEntity.ImageId.String()+"')",
-							"Delete Archive", "red-700",
-						)
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
+							Id:                   "download-archive",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-download",
+							BackgroundColor:      "ez-300",
+							HoverBackgroundColor: "ez-200",
+							OnClick:              "window.open('" + archiveEntity.DownloadUrl.String() + "')",
+							TooltipText:          "Download Archive",
+							TooltipColor:         "ez-300",
+							TooltipPosition:      "bottom",
+						})
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
+							Id:                   "delete-archive",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-trash",
+							BackgroundColor:      "red-900",
+							HoverBackgroundColor: "red-700",
+							OnClick:              "openDeleteArchiveModal('" + archiveEntity.AccountId.String() + "','" + archiveEntity.ImageId.String() + "')",
+							TooltipText:          "Delete Archive",
+							TooltipColor:         "red-700",
+							TooltipPosition:      "bottom",
+						})
 					</td>
 				</tr>
 			}
-			if len(archiveFilesEntities) == 0 {
+			if len(archiveEntities) == 0 {
 				<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
 					<td class="px-6 py-4" colspan="12">No image archives found.</td>
 				</tr>
@@ -309,18 +327,30 @@ templ ContainerImagesTable(
 							<div class="text-center text-neutral-400">---</div>
 						}
 					</td>
-					<td class="px-6 py-4">{ imageEntity.CreatedAt.GetRfcDate() }</td>
+					<td class="px-6 py-4">{ imageEntity.CreatedAt.ReadAsRfcDate() }</td>
 					<td class="inline-flex space-x-2 px-6 py-4">
-						@componentStructural.CircularIconButtonWithTooltip(
-							"archive-image", "ph-file-zip", "ez-300", "ez-200",
-							"archiveImage('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
-							"Archive/Compress Image", "ez-300",
-						)
-						@componentStructural.CircularIconButtonWithTooltip(
-							"delete-image", "ph-trash", "red-900", "red-700",
-							"openDeleteImageModal('"+imageEntity.AccountId.String()+"','"+imageEntity.Id.String()+"')",
-							"Delete Image", "red-700",
-						)
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
+							Id:                   "archive-image",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-file-zip",
+							BackgroundColor:      "ez-300",
+							HoverBackgroundColor: "ez-200",
+							OnClick:              "archiveImage('" + imageEntity.AccountId.String() + "','" + imageEntity.Id.String() + "')",
+							TooltipText:          "Archive/Compress Image",
+							TooltipColor:         "ez-300",
+							TooltipPosition:      "bottom",
+						})
+						@componentStructural.IconButton(componentStructural.IconButtonSettings{
+							Id:                   "delete-image",
+							Shape:                componentStructural.IconButtonShapeCircular,
+							Icon:                 "ph-trash",
+							BackgroundColor:      "red-900",
+							HoverBackgroundColor: "red-700",
+							OnClick:              "openDeleteImageModal('" + imageEntity.AccountId.String() + "','" + imageEntity.Id.String() + "')",
+							TooltipText:          "Delete Image",
+							TooltipColor:         "red-700",
+							TooltipPosition:      "bottom",
+						})
 					</td>
 				</tr>
 			}
@@ -342,16 +372,23 @@ templ ImportContainerImageForm(
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		enctype="multipart/form-data"
+		x-on:submit="closeImportImageModal()"
 	>
 		<div class="flex flex-col space-y-6">
 			@componentForm.SelectInputWithLabelValuePair(
-				"accountId", "Account", "containerImage.accountId",
-				accountsSelectPairs, false,
-			)
+				componentForm.SelectInputWithLabelValuePairDto{
+					Id:                    "accountId",
+					Label:                 "Account",
+					SelectedModelBindPath: "containerImage.accountId",
+					Options:               accountsSelectPairs,
+				})
 			@componentForm.Dropzone(
 				"archiveFiles", ".tar, .gzip, .zip, .xz or .br", ".tar,.gzip,.zip,.xz,.br", true,
 			)
-			@componentForm.SubmitButton("Import", "ph-check-fat", "closeImportImageModal()", false)
+			@componentStructural.IconButton(componentStructural.IconButtonSettings{
+				Label: "Import",
+				Icon:  "ph-check-fat",
+			})
 		</div>
 	</form>
 }
@@ -394,39 +431,6 @@ templ ImportContainerImageModal(
 	}
 }
 
-func transformCompressionFormatsIntoSelectPairs() []componentForm.SelectLabelValuePair {
-	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
-
-	valueLabelMap := map[string]string{
-		"tar":  `Tarball (Ratio: ☆☆☆ / Speed: ★★★)`,
-		"gzip": `Gzip (Ratio: ★☆☆ / Speed: ★★☆)`,
-		"zip":  `Zip (Ratio: ★☆☆ / Speed: ★☆☆)`,
-		"xz":   `XZ (Ratio: ★★★ / Speed: ★☆☆)`,
-		"br":   `Brotli (Ratio: ★★☆ / Speed: ★★☆) (recommended)`,
-	}
-
-	for _, compressionFormat := range valueObject.ValidCompressionFormats {
-		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: compressionFormat,
-			Value: compressionFormat,
-		}
-		if _, exists := valueLabelMap[compressionFormat]; exists {
-			selectLabelValuePair.Label = valueLabelMap[compressionFormat]
-		}
-
-		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
-	}
-
-	return selectLabelValuePairs
-}
-
-templ CompressionFormatSelectInput(id, bindValuePath string) {
-	@componentForm.SelectInputWithLabelValuePair(
-		id, "Compression Format", bindValuePath,
-		transformCompressionFormatsIntoSelectPairs(), false,
-	)
-}
-
 templ TakeContainerSnapshotForm(
 	containerSummariesSearchableItems []componentForm.SearchableSelectItem,
 ) {
@@ -436,7 +440,7 @@ templ TakeContainerSnapshotForm(
 		hx-post="/api/v1/container/image/snapshot/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		x-on:submit="$store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeTakeSnapshotModal(); $store.main.refreshScheduledTasksPopover()"
 	>
 		<div class="flex flex-col space-y-6">
 			<div>
@@ -448,30 +452,29 @@ templ TakeContainerSnapshotForm(
 					Note: the container's owner account must have enough quota to store the snapshot image (and/or archive).
 				</p>
 			</div>
-			@componentForm.CheckboxInputSwitchToggle(
-				"shouldCreateArchive",
-				"Also create an archive after the snapshot is taken.",
-				"shouldCreateArchive", "",
-			)
+			@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+				Id:            "shouldCreateArchive",
+				Label:         "Also create an archive after the snapshot is taken.",
+				ModelBindPath: "shouldCreateArchive",
+			})
 			<div x-show="shouldCreateArchive">
-				@componentForm.CheckboxInputSwitchToggle(
-					"shouldDiscardImage",
-					"Discard the snapshot image after the archive is created (keep the archive only).",
-					"shouldDiscardImage", "",
-				)
+				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+					Id:            "shouldDiscardImage",
+					Label:         "Discard the snapshot image after the archive is created (keep the archive only).",
+					ModelBindPath: "shouldDiscardImage",
+				})
 			</div>
 			<div x-show="shouldCreateArchive">
 				@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-					<div class="w-full">
-						@CompressionFormatSelectInput(
-							"archiveCompressionFormat", "archiveCompressionFormat",
-						)
-					</div>
+					@componentForm.CompressionFormatSelectInput(
+						"archiveCompressionFormat", "archiveCompressionFormat",
+					)
 				}
 			</div>
-			@componentForm.SubmitButton(
-				"Take Snapshot", "ph-check-fat", "closeTakeSnapshotModal()", false,
-			)
+			@componentStructural.IconButton(componentStructural.IconButtonSettings{
+				Label: "Take Snapshot",
+				Icon:  "ph-check-fat",
+			})
 		</div>
 	</form>
 	<div class="mt-2">

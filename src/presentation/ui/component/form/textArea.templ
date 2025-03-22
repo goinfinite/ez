@@ -1,38 +1,113 @@
 package componentForm
 
-templ TextArea(id, label, bindValuePath string) {
+const (
+	TextAreaSizeXs = "xs"
+	TextAreaSizeSm = "sm"
+	TextAreaSizeMd = "md"
+	TextAreaSizeLg = "lg"
+	TextAreaSizeXl = "xl"
+)
+
+type TextAreaSettings struct {
+	Id            string
+	Label         string
+	Size          string
+	ModelBindPath string
+	Value         string
+	IsCode        bool
+	IsReadOnly    bool
+	IsRequired    bool
+}
+
+templ TextArea(inputSettings TextAreaSettings) {
 	<!-- TextArea -->
-	<div class="relative w-full">
-		<textarea
-			if id != "" {
-				id={ id }
-				name={ id }
-			}
-			if bindValuePath != "" {
-				x-model:value={ bindValuePath }
-			}
-			placeholder={ label }
-			class="bg-ez-300 border-ez-200 hover:border-ez-100 autofill:bg-ez-300 focus:border-ez-50 min-h-24 peer relative w-full rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
-		></textarea>
-		if label != "" {
-			<label
-				if id != "" {
-					for={ id }
+	<fieldset
+		class="relative w-full rounded-md border border-neutral-50/10 bg-neutral-50/5 transition-all autofill:bg-neutral-50/20 focus-within:border-neutral-50/40 hover:border-neutral-50/40"
+		x-data="{ isTextAreaExpanded: false }"
+		@click.away="isTextAreaExpanded = false"
+	>
+		if inputSettings.Label != "" {
+			<legend
+				class="ml-1.5 px-1 text-left text-xs font-bold text-neutral-50/80 transition-opacity"
+				if inputSettings.ModelBindPath != "" {
+					:class={ `!` + inputSettings.ModelBindPath + ` && 'opacity-0 !p-0 w-0 h-3.5'` }
 				}
-				class="from-ez-300 via-ez-300 z-1 absolute -top-2 left-1.5 cursor-text bg-gradient-to-t via-50% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
 			>
-				{ label }
-			</label>
+				{ inputSettings.Label }
+				if inputSettings.IsRequired {
+					<span class="text-red-700">*</span>
+				}
+			</legend>
 		}
-		<div class="text-md absolute right-1.5 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
+		{{ textAreaClasses := "placeholder-text-opacity-80" }}
+		if inputSettings.ModelBindPath == "" && inputSettings.Value == "" {
+			{{ textAreaClasses = "placeholder-text-opacity-0" }}
+		}
+		{{ textAreaSizeClasses := "h-24 text-base" }}
+		{{ isExpandedClasses := "h-72" }}
+		switch inputSettings.Size {
+			case TextAreaSizeXs:
+				{{ textAreaSizeClasses = "h-12 text-xs" }}
+				{{ isExpandedClasses = "h-36" }}
+			case TextAreaSizeSm:
+				{{ textAreaSizeClasses = "h-18 text-sm" }}
+				{{ isExpandedClasses = "h-54" }}
+			case TextAreaSizeMd:
+				{{ textAreaSizeClasses = "h-24 text-base" }}
+				{{ isExpandedClasses = "h-72" }}
+			case TextAreaSizeLg:
+				{{ textAreaSizeClasses = "h-30 text-lg" }}
+				{{ isExpandedClasses = "h-90" }}
+			case TextAreaSizeXl:
+				{{ textAreaSizeClasses = "h-36 text-xl" }}
+				{{ isExpandedClasses = "h-108" }}
+		}
+		{{ textAreaClasses += " " + textAreaSizeClasses + " placeholder-text-neutral-50 peer w-full resize-none overflow-y-scroll bg-transparent pl-2 pr-9 text-sm text-neutral-100 outline-none transition-all" }}
+		{{ textAreaClasses += " [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50" }}
+		if inputSettings.IsReadOnly {
+			{{ textAreaClasses += " text-neutral-400 cursor-not-allowed" }}
+		}
+		if inputSettings.IsCode {
+			{{ textAreaClasses += " font-mono" }}
+		}
+		<textarea
+			if inputSettings.Id != "" {
+				id={ inputSettings.Id }
+				name={ inputSettings.Id }
+				x-ref={ inputSettings.Id }
+			}
+			if inputSettings.ModelBindPath != "" {
+				x-model:value={ inputSettings.ModelBindPath }
+			}
+			placeholder={ inputSettings.Label }
+			class={ textAreaClasses }
+			:class={ "isTextAreaExpanded && '" + isExpandedClasses + "'" }
+		>
+			{ inputSettings.Value }
+		</textarea>
+		<div class="text-md absolute right-5 top-0 hidden flex-col gap-1.5 transition-all hover:flex active:flex peer-hover:flex">
+			{{ floatingIconsClasses := "ph-bold border-1 active:bg-infinite-500 cursor-pointer rounded-md border-neutral-50/10 bg-neutral-50/5 p-1 text-neutral-100 hover:border-neutral-50/40 hover:bg-neutral-50/20" }}
 			<i
-				class="ph-bold ph-clipboard-text bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ "navigator.clipboard.writeText(" + bindValuePath + ")" }
+				class={ floatingIconsClasses }
+				:class="isTextAreaExpanded ? 'ph-arrows-in' : 'ph-arrows-out'"
+				@click.prevent="isTextAreaExpanded = !isTextAreaExpanded"
 			></i>
 			<i
-				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
-				@click.prevent={ bindValuePath + " = ''" }
+				class={ floatingIconsClasses + " ph-clipboard-text" }
+				if inputSettings.ModelBindPath != "" {
+					@click.prevent={ "navigator.clipboard.writeText(" + inputSettings.ModelBindPath + ")" }
+				} else {
+					if inputSettings.Id != "" {
+						@click.prevent={ "$refs." + inputSettings.Id + ".select(); document.execCommand('copy')" }
+					}
+				}
 			></i>
+			if inputSettings.ModelBindPath != "" {
+				<i
+					class={ floatingIconsClasses + " ph-x-circle" }
+					@click.prevent={ inputSettings.ModelBindPath + " = ''" }
+				></i>
+			}
 		</div>
-	</div>
+	</fieldset>
 }

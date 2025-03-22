@@ -59,6 +59,37 @@ func (router *Router) accountRoutes() {
 	go accountController.AutoRefreshAccountQuotas()
 }
 
+func (router *Router) backupRoutes() {
+	backupGroup := router.baseRoute.Group("/v1/backup")
+	backupController := apiController.NewBackupController(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
+
+	destinationGroup := backupGroup.Group("/destination")
+	destinationGroup.GET("/", backupController.ReadDestination)
+	destinationGroup.POST("/", backupController.CreateDestination)
+	destinationGroup.PUT("/", backupController.UpdateDestination)
+	destinationGroup.DELETE("/:accountId/:destinationId/", backupController.DeleteDestination)
+
+	jobGroup := backupGroup.Group("/job")
+	jobGroup.GET("/", backupController.ReadJob)
+	jobGroup.POST("/", backupController.CreateJob)
+	jobGroup.PUT("/", backupController.UpdateJob)
+	jobGroup.DELETE("/:accountId/:jobId/", backupController.DeleteJob)
+	jobGroup.POST("/:accountId/:jobId/run/", backupController.RunJob)
+
+	taskGroup := backupGroup.Group("/task")
+	taskGroup.GET("/", backupController.ReadTask)
+	taskGroup.PUT("/", backupController.UpdateTask)
+	taskGroup.POST("/restore/", backupController.RestoreTask)
+	taskGroup.DELETE("/:taskId/", backupController.DeleteTask)
+	taskArchiveGroup := taskGroup.Group("/archive")
+	taskArchiveGroup.GET("/", backupController.ReadTaskArchives)
+	taskArchiveGroup.GET("/:archiveId/", backupController.ReadTaskArchive)
+	taskArchiveGroup.POST("/", backupController.CreateTaskArchive)
+	taskArchiveGroup.DELETE("/:archiveId/", backupController.DeleteTaskArchive)
+}
+
 func (router *Router) containerRoutes() {
 	containerGroup := router.baseRoute.Group("/v1/container")
 	containerController := apiController.NewContainerController(
@@ -102,16 +133,16 @@ func (router *Router) containerRoutes() {
 	containerImageGroup.POST("/snapshot/", containerImageController.CreateSnapshot)
 
 	containerImageArchiveGroup := containerImageGroup.Group("/archive")
-	containerImageArchiveGroup.GET("/", containerImageController.ReadArchiveFiles)
+	containerImageArchiveGroup.GET("/", containerImageController.ReadArchives)
 	containerImageArchiveGroup.GET(
-		"/:accountId/:imageId/", containerImageController.ReadArchiveFile,
+		"/:accountId/:imageId/", containerImageController.ReadArchive,
 	)
-	containerImageArchiveGroup.POST("/", containerImageController.CreateArchiveFile)
+	containerImageArchiveGroup.POST("/", containerImageController.CreateArchive)
 	containerImageArchiveGroup.POST(
-		"/import/", containerImageController.ImportArchiveFile,
+		"/import/", containerImageController.ImportArchive,
 	)
 	containerImageArchiveGroup.DELETE(
-		"/:accountId/:imageId/", containerImageController.DeleteArchiveFile,
+		"/:accountId/:imageId/", containerImageController.DeleteArchive,
 	)
 }
 
@@ -163,6 +194,7 @@ func (router *Router) RegisterRoutes() {
 	router.swaggerRoute()
 	router.authRoutes()
 	router.accountRoutes()
+	router.backupRoutes()
 	router.containerRoutes()
 	router.mappingRoutes()
 	router.marketplaceRoutes()

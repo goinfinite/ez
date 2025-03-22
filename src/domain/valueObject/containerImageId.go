@@ -24,6 +24,10 @@ func NewContainerImageId(value interface{}) (ContainerImageId, error) {
 		return "", errors.New("InvalidContainerImageId")
 	}
 
+	if len(stringValue) > 12 {
+		stringValue = stringValue[:12]
+	}
+
 	return ContainerImageId(stringValue), nil
 }
 

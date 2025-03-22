@@ -516,25 +516,31 @@ templ OverviewIndex(
 		</div>
 		<div id="containers" class="card w-full" x-data="containers">
 			<div class="-mt-15 float-right mb-5 w-fit">
-				@componentForm.SubmitButton(
-					"Create Container", "ph-plus-square", "openCreateContainerModal()", false,
-				)
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
+					Label:   "Create Container",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateContainerModal()",
+				})
 			</div>
 			@ContainersTable(containersResponseDto, containerIdSummariesMap)
 			@CreateContainerModal(createContainerDto)
 			@UpdateContainerModal(createContainerDto.ContainerProfileSearchableItems)
-			@componentStructural.ConfirmationModal(
-				"Power Off Container", "ph-lightning-slash",
-				"Are you sure you want to power off this container?<br />The container won't be accessible until powered back on.",
-				"isShutdownContainerModalOpen", "shutdownContainer()",
-				componentStructural.ConfirmationTypeWarning,
-			)
-			@componentStructural.ConfirmationModal(
-				"Restart Container", "ph-arrows-clockwise",
-				"Are you sure you want to restart this container?<br />The container will be stopped and started again.",
-				"isRestartContainerModalOpen", "restartContainer()",
-				componentStructural.ConfirmationTypeWarning,
-			)
+			@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+				Title:            "Power Off Container",
+				TitleIcon:        "ph-lightning-slash",
+				Description:      "Are you sure you want to power off this container?<br />The container won't be accessible until powered back on.",
+				ConfirmationType: componentStructural.ConfirmationTypeWarning,
+				IsOpenState:      "isShutdownContainerModalOpen",
+				ConfirmFunction:  "shutdownContainer()",
+			})
+			@componentStructural.ConfirmationModal(componentStructural.ConfirmationModalSettings{
+				Title:            "Restart Container",
+				TitleIcon:        "ph-arrows-clockwise",
+				Description:      "Are you sure you want to restart this container?<br />The container will be stopped and started again.",
+				ConfirmationType: componentStructural.ConfirmationTypeWarning,
+				IsOpenState:      "isRestartContainerModalOpen",
+				ConfirmFunction:  "restartContainer()",
+			})
 			@componentStructural.DeleteModal(
 				"isDeleteContainerModalOpen", "closeDeleteContainerModal()", "deleteContainer()",
 				"delete-container", "container.hostname", "container.id",
@@ -619,34 +625,64 @@ templ ContainersTable(
 						</td>
 						<td class="w-[10%] px-3 py-2">
 							<div class="flex flex-wrap items-center gap-1">
-								@componentStructural.SquareIconButtonWithTooltip(
-									"restart-container", "ph-arrows-clockwise", "ez-300", "ez-200",
-									"openRestartContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
-									"Restart", "ez-300", "top",
-								)
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "restart-container",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-arrows-clockwise",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openRestartContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
+									TooltipText:          "Restart",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "top",
+								})
 								if containerEntity.Status {
-									@componentStructural.SquareIconButtonWithTooltip(
-										"toggle-container-status", "ph-lightning-slash", "yellow-900", "yellow-700",
-										"openShutdownContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
-										"Power Off", "yellow-700", "top",
-									)
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "toggle-container-status",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-lightning-slash",
+										BackgroundColor:      "yellow-900",
+										HoverBackgroundColor: "yellow-700",
+										OnClick:              "openShutdownContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
+										TooltipText:          "Power Off",
+										TooltipColor:         "yellow-700",
+										TooltipPosition:      "top",
+									})
 								} else {
-									@componentStructural.SquareIconButtonWithTooltip(
-										"toggle-container-status", "ph-lightning", "cyan-900", "cyan-700",
-										"powerOnContainer('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"')",
-										"Power On", "cyan-700", "top",
-									)
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "toggle-container-status",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-lightning",
+										BackgroundColor:      "cyan-900",
+										HoverBackgroundColor: "cyan-700",
+										OnClick:              "powerOnContainer('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "')",
+										TooltipText:          "Power On",
+										TooltipColor:         "cyan-700",
+										TooltipPosition:      "top",
+									})
 								}
-								@componentStructural.SquareIconButtonWithTooltip(
-									"update-container", "ph-gear", "ez-300", "ez-200",
-									"openUpdateContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.ProfileId.String()+"')",
-									"Update", "ez-300", "bottom",
-								)
-								@componentStructural.SquareIconButtonWithTooltip(
-									"delete-container", "ph-trash", "red-900", "red-700",
-									"openDeleteContainerModal('"+containerEntity.AccountId.String()+"','"+containerEntity.Id.String()+"','"+containerEntity.Hostname.String()+"')",
-									"Delete", "red-700", "bottom",
-								)
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "update-container",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-gear",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openUpdateContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "','" + containerEntity.ProfileId.String() + "')",
+									TooltipText:          "Update",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "bottom",
+								})
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "delete-container",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-900",
+									HoverBackgroundColor: "red-700",
+									OnClick:              "openDeleteContainerModal('" + containerEntity.AccountId.String() + "','" + containerEntity.Id.String() + "','" + containerEntity.Hostname.String() + "')",
+									TooltipText:          "Delete",
+									TooltipColor:         "red-700",
+									TooltipPosition:      "bottom",
+								})
 							</div>
 						</td>
 					</tr>
@@ -673,22 +709,24 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		hx-post="/api/v1/container/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		@submit="closeCreateContainerModal(); $store.main.refreshScheduledTasksPopover()"
+		x-on:submit="closeCreateContainerModal(); $store.main.refreshScheduledTasksPopover()"
 		enctype="multipart/form-data"
 		class="space-y-4"
 	>
-		@componentForm.InputField(componentForm.InputFieldDto{
+		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType: "text", Id: "hostname", Label: "Hostname",
-			BindValuePath: "container.hostname", IsRequired: true,
+			ModelBindPath: "container.hostname", IsRequired: true,
 		})
 		<!-- ContainerSource & LaunchScript -->
 		<div class="border-ez-200 flex flex-col gap-4 rounded-md border p-3">
 			<div class="flex items-center space-x-3 text-sm">
 				<div>Source: </div>
 				for _, sourceOption := range []string{"Marketplace", "URL", "Existing Container", "Local Image", "Upload Image"} {
-					@componentForm.RadioInput(
-						"", sourceOption, sourceOption, "createContainerSourceSelectedOption",
-					)
+					@componentForm.RadioInput(componentForm.RadioInputDto{
+						Label:         sourceOption,
+						BindValue:     sourceOption,
+						ModelBindPath: "createContainerSourceSelectedOption",
+					})
 				}
 			</div>
 			<div
@@ -756,11 +794,11 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					"archiveImageFile", ".tar, .gzip, .zip, .xz or .br",
 					".tar,.gzip,.zip,.xz,.br", false,
 				)
-				@componentForm.CheckboxInputSwitchToggle(
-					"useImageExposedPorts",
-					"Map the image's exposed ports (if any) as \"Port Bindings\".",
-					"container.useImageExposedPorts", "",
-				)
+				@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+					Id:            "useImageExposedPorts",
+					Label:         "Map the image's exposed ports (if any) as \"Port Bindings\".",
+					ModelBindPath: "container.useImageExposedPorts",
+				})
 			</div>
 			<div>
 				<input
@@ -769,8 +807,12 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 					name="launchScript"
 					x-model="btoa(container.launchScript)"
 				/>
-				@componentForm.TextArea("", "Launch Script", "container.launchScript")
-				<p class="-mt-0.5 px-1.5 text-[11px] text-neutral-50 text-opacity-50">
+				@componentForm.TextArea(componentForm.TextAreaSettings{
+					Label:         "Launch Script",
+					ModelBindPath: "container.launchScript",
+					IsCode:        true,
+				})
+				<p class="mt-1 px-1.5 text-[11px] text-neutral-50/50">
 					Optional; one command per line. Executed only on initial container deployment, useful to install dependencies and configure the environment.
 				</p>
 			</div>
@@ -780,54 +822,59 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 			createDto.ContainerProfileSearchableItems,
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="flex w-full flex-col gap-6">
-				@componentForm.InputField(componentForm.InputFieldDto{
-					InputType: "text", Id: "entrypoint", Label: "Entrypoint",
-					BindValuePath: "container.entrypoint",
-				})
-				<div class="flex flex-row items-center gap-6">
-					<div class="basis-1/2">
-						@componentForm.SelectInputWithLabelValuePair(
-							"accountId", "Account", "container.accountId",
-							createDto.AccountSelectLabelValuePairs, true,
-						)
-					</div>
-					<div class="basis-1/2">
-						@componentForm.SelectInput(componentForm.SelectInputDto{
-							Id: "restartPolicy", Label: "Restart Policy",
-							BindValuePath: "container.restartPolicy",
-							Options:       valueObject.ValidContainerRestartPolicies,
-						})
-					</div>
+			@componentForm.InputField(componentForm.InputFieldSettings{
+				InputType: "text", Id: "entrypoint", Label: "Entrypoint",
+				ModelBindPath: "container.entrypoint",
+			})
+			<div class="flex flex-row items-center gap-6">
+				<div class="basis-1/2">
+					@componentForm.SelectInputWithLabelValuePair(
+						componentForm.SelectInputWithLabelValuePairDto{
+							Id:                    "accountId",
+							Label:                 "Account",
+							SelectedModelBindPath: "container.accountId",
+							Options:               createDto.AccountSelectLabelValuePairs,
+						},
+					)
 				</div>
-				@componentForm.MultiColumnRepeatableFieldset(
-					"envs", "Environment Variables", "", "container.envs", []componentForm.RepeatableField{
-						{InputType: "text", Id: "key", Label: "Key"},
-						{InputType: "text", Id: "value", Label: "Value"},
-					},
-				)
-				@componentForm.MultiColumnRepeatableFieldset(
-					"portBindings", "Port Bindings", "Configure which ports are exposed to the outside world. You may select just the 'Service Name' to use the standard ports. Be aware that once deployed, you cannot change the port arrangements.",
-					"container.portBindings", []componentForm.RepeatableField{
-						{
-							InputType: "select",
-							Id:        "serviceName",
-							Label:     "Service Name",
-							Options:   valueObject.ReadPortBindingsServiceNames(),
-						},
-						{InputType: "text", Id: "publicPort", Label: "Public Port"},
-						{InputType: "text", Id: "containerPort", Label: "Container Port"},
-						{
-							InputType: "select",
-							Id:        "protocol",
-							Label:     "Protocol",
-							Options:   valueObject.ValidNetworkProtocols,
-						},
-					},
-				)
+				<div class="basis-1/2">
+					@componentForm.SelectInput(componentForm.SelectInputDto{
+						Id: "restartPolicy", Label: "Restart Policy",
+						ModelBindPath: "container.restartPolicy",
+						Options:       valueObject.ValidContainerRestartPolicies,
+					})
+				</div>
 			</div>
+			@componentForm.MultiColumnRepeatableFieldset(
+				"envs", "Environment Variables", "", "container.envs", []componentForm.RepeatableField{
+					{InputType: "text", Id: "key", Label: "Key"},
+					{InputType: "text", Id: "value", Label: "Value"},
+				},
+			)
+			@componentForm.MultiColumnRepeatableFieldset(
+				"portBindings", "Port Bindings", "Configure which ports are exposed to the outside world. You may select just the 'Service Name' to use the standard ports. Be aware that once deployed, you cannot change the port arrangements.",
+				"container.portBindings", []componentForm.RepeatableField{
+					{
+						InputType: "select",
+						Id:        "serviceName",
+						Label:     "Service Name",
+						Options:   valueObject.ReadPortBindingsServiceNames(),
+					},
+					{InputType: "text", Id: "publicPort", Label: "Public Port"},
+					{InputType: "text", Id: "containerPort", Label: "Container Port"},
+					{
+						InputType: "select",
+						Id:        "protocol",
+						Label:     "Protocol",
+						Options:   valueObject.ValidNetworkProtocols,
+					},
+				},
+			)
 		}
-		@componentForm.SubmitButton("Create", "ph-check-fat", "", false)
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Create",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -893,6 +940,7 @@ templ UpdateContainerForm(
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
 		class="space-y-4"
+		x-on:submit="closeUpdateContainerModal()"
 	>
 		<input type="hidden" name="containerId" x-bind:value="container.id"/>
 		<input type="hidden" name="accountId" x-bind:value="container.accountId"/>
@@ -900,7 +948,10 @@ templ UpdateContainerForm(
 			"profileId", "Profile", "container.profileId",
 			containerProfileSearchableItems,
 		)
-		@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateContainerModal()", false)
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Update",
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 
@@ -964,7 +1015,7 @@ templ ResourceUsageCharts() {
 					},
 					"networkChartTabSelected",
 				)
-				<div class="bg-ez-500 rounded-lb-md rounded-r-md px-2 py-4">
+				<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] px-2 py-4">
 					<div
 						x-show="networkChartTabSelected === 'io'"
 						class="flex flex-col items-center justify-center gap-4"
@@ -1001,7 +1052,7 @@ templ ResourceUsageCharts() {
 					},
 					"storageChartTabSelected",
 				)
-				<div class="bg-ez-500 rounded-lb-md rounded-r-md px-2 py-4">
+				<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] px-2 py-4">
 					<div
 						x-show="storageChartTabSelected === 'io'"
 						class="flex flex-col items-center justify-center gap-4"
@@ -1038,23 +1089,47 @@ templ ResourceUsageCharts() {
 
 templ SystemInformation() {
 	<div class="bg-ez-800 mt-4 grid grid-cols-3 gap-4 rounded-md p-4">
-		@componentForm.InputFieldReadOnly(
-			"text", "hostname", "Server Hostname", "sysInfo.serverHostname",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "cpuModel", "CPU", "sysInfo.cpuModel",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "memoryRamGibibytes", "Memory (RAM)", "sysInfo.memoryRamGibibytes",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "publicIpAddress", "Public IP Address", "sysInfo.publicIpAddress",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "privateIpAddress", "Private IP Address", "sysInfo.privateIpAddress",
-		)
-		@componentForm.InputFieldReadOnly(
-			"text", "uptimeRelativeStr", "Server Uptime", "sysInfo.uptimeRelative",
-		)
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "serverHostname",
+			Label:         "Server Hostname",
+			ModelBindPath: "sysInfo.serverHostname",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "cpuModel",
+			Label:         "CPU",
+			ModelBindPath: "sysInfo.cpuModel",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "memoryRamGibibytes",
+			Label:         "Memory (RAM)",
+			ModelBindPath: "sysInfo.memoryRamGibibytes",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "publicIpAddress",
+			Label:         "Public IP Address",
+			ModelBindPath: "sysInfo.publicIpAddress",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "privateIpAddress",
+			Label:         "Private IP Address",
+			ModelBindPath: "sysInfo.privateIpAddress",
+			IsReadOnly:    true,
+		})
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:     "text",
+			Id:            "uptimeRelativeStr",
+			Label:         "Server Uptime",
+			ModelBindPath: "sysInfo.uptimeRelative",
+			IsReadOnly:    true,
+		})
 	</div>
 }

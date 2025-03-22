@@ -50,7 +50,7 @@ func (controller *AuthController) Login(c echo.Context) error {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}
 
-	username, err := valueObject.NewUsername(requestBody["username"])
+	username, err := valueObject.NewUnixUsername(requestBody["username"])
 	if err != nil {
 		return apiHelper.ResponseWrapper(c, http.StatusBadRequest, err.Error())
 	}

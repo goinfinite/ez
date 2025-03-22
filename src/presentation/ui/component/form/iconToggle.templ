@@ -1,13 +1,13 @@
 package componentForm
 
 templ IconToggle(
-	uncheckedIcon, uncheckedTooltip, checkedIcon, checkedTooltip, bindValuePath string,
+	uncheckedIcon, uncheckedTooltip, checkedIcon, checkedTooltip, modelBindPath string,
 ) {
 	<label class="relative flex cursor-pointer flex-wrap items-center gap-2">
 		<input
 			class="checked:bg-infinite-500 checked:ring-infinite-500 hover:bg-ez-300 checked:hover:bg-infinite-800 peer relative h-8 w-16 cursor-pointer appearance-none rounded-lg ring-2 ring-inset ring-neutral-50 ring-opacity-50 transition-colors focus-visible:outline-none"
 			type="checkbox"
-			x-model={ bindValuePath }
+			x-model={ modelBindPath }
 		/>
 		<div class="bg-ez-500 group absolute flex h-8 w-8 items-center justify-center rounded-xl text-neutral-50 opacity-100 ring-2 ring-neutral-50 transition-opacity hover:overflow-visible peer-checked:opacity-0">
 			<i class={ "ph-duotone " + uncheckedIcon + " text-2xl" }></i>

@@ -48,7 +48,7 @@ func (service *AccountService) Create(input map[string]interface{}) ServiceOutpu
 		return NewServiceOutput(UserError, err.Error())
 	}
 
-	username, err := valueObject.NewUsername(input["username"])
+	username, err := valueObject.NewUnixUsername(input["username"])
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}

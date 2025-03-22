@@ -152,9 +152,11 @@ templ ContainerProfileIndex(profiles []entity.ContainerProfile) {
 					"ph-table", "Form View", "ph-chat-circle-dots", "Textual View",
 					"$store.main.textualViewSelector",
 				)
-				@componentForm.SubmitButton(
-					"Create Container Profile", "ph-plus-square", "openCreateModal()", false,
-				)
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
+					Label:   "Create Container Profile",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateModal()",
+				})
 			</div>
 		</div>
 		<div id="profiles-tables" class="card w-full">
@@ -423,9 +425,11 @@ templ ContainerProfileForm(action string) {
 	<form
 		if action == "create" {
 			hx-post="/api/v1/container/profile/"
+			x-on:submit="closeCreateModal()"
 		}
 		if action == "update" {
 			hx-put="/api/v1/container/profile/"
+			x-on:submit="closeUpdateModal()"
 		}
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
@@ -435,9 +439,9 @@ templ ContainerProfileForm(action string) {
 			<input type="hidden" name="id" x-bind:value="containerProfile.id"/>
 			<input type="hidden" name="accountId" x-bind:value="containerProfile.accountId"/>
 		}
-		@componentForm.InputField(componentForm.InputFieldDto{
+		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType: "text", Id: "name", Label: "Profile Name",
-			BindValuePath: "containerProfile.name", IsRequired: true,
+			ModelBindPath: "containerProfile.name", IsRequired: true,
 		})
 		<div class="flex flex-row gap-4">
 			<div class="space-y-5.5 bg-ez-500 w-1/2 rounded-md p-4">
@@ -496,65 +500,65 @@ templ ContainerProfileForm(action string) {
 			</div>
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
-			<div class="space-y-5.5">
-				@componentForm.SelectInput(componentForm.SelectInputDto{
-					Id: "scalingPolicy", Label: "Scaling Policy",
-					BindValuePath: "containerProfile.scalingPolicy",
-					Options:       valueObject.ValidScalingPolicies,
-				})
-				<div class="flex flex-row space-x-6">
-					<div class="basis-1/2">
-						<template x-if="isScalingPolicyConn">
-							@componentForm.NumberRangeInputField(
-								"scalingThreshold", "Connections Threshold",
-								"conn(s)", "1", "1000", "10",
-								"containerProfile.scalingThreshold",
-							)
-						</template>
-						<template x-if="!isScalingPolicyConn">
-							@componentForm.NumberRangeInputField(
-								"scalingThreshold", "Resource Usage Threshold",
-								"%", "0", "100", "1",
-								"containerProfile.scalingThreshold",
-							)
-						</template>
-					</div>
-					<div class="basis-1/2">
+			@componentForm.SelectInput(componentForm.SelectInputDto{
+				Id: "scalingPolicy", Label: "Scaling Policy",
+				ModelBindPath: "containerProfile.scalingPolicy",
+				Options:       valueObject.ValidScalingPolicies,
+			})
+			<div class="flex flex-row space-x-6">
+				<div class="basis-1/2">
+					<template x-if="isScalingPolicyConn">
 						@componentForm.NumberRangeInputField(
-							"hostMinCapacityPercent", "Minimum Free Host Capacity",
+							"scalingThreshold", "Connections Threshold",
+							"conn(s)", "1", "1000", "10",
+							"containerProfile.scalingThreshold",
+						)
+					</template>
+					<template x-if="!isScalingPolicyConn">
+						@componentForm.NumberRangeInputField(
+							"scalingThreshold", "Resource Usage Threshold",
 							"%", "0", "100", "1",
-							"containerProfile.hostMinCapacityPercent",
+							"containerProfile.scalingThreshold",
 						)
-					</div>
+					</template>
 				</div>
-				<div class="flex flex-row space-x-6">
-					<div class="basis-1/2">
-						@componentForm.DualNumberRangeInputField(
-							"Scaling Max Duration", "scalingMaxDurationHoursSelector",
-							"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
-							"containerProfile.scalingMaxDurationHours",
-							"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
-							"containerProfile.scalingMaxDurationMinutes",
-						)
-					</div>
-					<div class="basis-1/2">
-						@componentForm.DualNumberRangeInputField(
-							"Scaling Interval", "scalingIntervalHoursSelector",
-							"scalingIntervalHours", "hour(s)", "1", "24", "1",
-							"containerProfile.scalingIntervalHours",
-							"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
-							"containerProfile.scalingIntervalMinutes",
-						)
-					</div>
+				<div class="basis-1/2">
+					@componentForm.NumberRangeInputField(
+						"hostMinCapacityPercent", "Minimum Free Host Capacity",
+						"%", "0", "100", "1",
+						"containerProfile.hostMinCapacityPercent",
+					)
+				</div>
+			</div>
+			<div class="flex flex-row space-x-6">
+				<div class="basis-1/2">
+					@componentForm.DualNumberRangeInputField(
+						"Scaling Max Duration", "scalingMaxDurationHoursSelector",
+						"scalingMaxDurationHours", "hour(s)", "1", "24", "1",
+						"containerProfile.scalingMaxDurationHours",
+						"scalingMaxDurationMinutes", "min(s)", "1", "1440", "5",
+						"containerProfile.scalingMaxDurationMinutes",
+					)
+				</div>
+				<div class="basis-1/2">
+					@componentForm.DualNumberRangeInputField(
+						"Scaling Interval", "scalingIntervalHoursSelector",
+						"scalingIntervalHours", "hour(s)", "1", "24", "1",
+						"containerProfile.scalingIntervalHours",
+						"scalingIntervalMinutes", "min(s)", "1", "1440", "5",
+						"containerProfile.scalingIntervalMinutes",
+					)
 				</div>
 			</div>
 		}
-		switch action {
-			case "create":
-				@componentForm.SubmitButton("Create", "ph-check-fat", "closeCreateModal()", false)
-			case "update":
-				@componentForm.SubmitButton("Update", "ph-check-fat", "closeUpdateModal()", false)
+		{{ buttonLabel := "Create" }}
+		if action == "update" {
+			{{ buttonLabel = "Update" }}
 		}
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: buttonLabel,
+			Icon:  "ph-check-fat",
+		})
 	</form>
 }
 

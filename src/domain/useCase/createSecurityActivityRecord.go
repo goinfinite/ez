@@ -341,10 +341,10 @@ func (uc *CreateSecurityActivityRecord) DeleteContainerImage(
 	uc.createActivityRecord(createRecordDto)
 }
 
-func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
-	createDto dto.CreateContainerImageArchiveFile,
+func (uc *CreateSecurityActivityRecord) CreateContainerImageArchive(
+	createDto dto.CreateContainerImageArchive,
 ) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileCreated")
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveCreated")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel: uc.recordLevel,
 		RecordCode:  recordCode,
@@ -358,11 +358,11 @@ func (uc *CreateSecurityActivityRecord) CreateContainerImageArchiveFile(
 	uc.createActivityRecord(createRecordDto)
 }
 
-func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
-	importDto dto.ImportContainerImageArchiveFile,
+func (uc *CreateSecurityActivityRecord) ImportContainerImageArchive(
+	importDto dto.ImportContainerImageArchive,
 	imageId valueObject.ContainerImageId,
 ) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileImported")
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveImported")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel: uc.recordLevel,
 		RecordCode:  recordCode,
@@ -376,15 +376,240 @@ func (uc *CreateSecurityActivityRecord) ImportContainerImageArchiveFile(
 	uc.createActivityRecord(createRecordDto)
 }
 
-func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchiveFile(
-	deleteDto dto.DeleteContainerImageArchiveFile,
+func (uc *CreateSecurityActivityRecord) DeleteContainerImageArchive(
+	deleteDto dto.DeleteContainerImageArchive,
 ) {
-	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveFileDeleted")
+	recordCode, _ := valueObject.NewActivityRecordCode("ContainerImageArchiveDeleted")
 	createRecordDto := dto.CreateActivityRecord{
 		RecordLevel: uc.recordLevel,
 		RecordCode:  recordCode,
 		AffectedResources: []valueObject.SystemResourceIdentifier{
 			valueObject.NewContainerImageSri(deleteDto.AccountId, deleteDto.ImageId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) CreateBackupDestination(
+	createDto dto.CreateBackupDestinationRequest,
+	destinationId valueObject.BackupDestinationId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupDestinationCreated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupDestinationSri(createDto.AccountId, destinationId),
+		},
+		OperatorAccountId: &createDto.OperatorAccountId,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) UpdateBackupDestination(
+	updateDto dto.UpdateBackupDestination,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupDestinationUpdated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupDestinationSri(updateDto.AccountId, updateDto.DestinationId),
+		},
+		RecordDetails:     updateDto,
+		OperatorAccountId: &updateDto.OperatorAccountId,
+		OperatorIpAddress: &updateDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) DeleteBackupDestination(
+	deleteDto dto.DeleteBackupDestination,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupDestinationDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupDestinationSri(deleteDto.AccountId, deleteDto.DestinationId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) CreateBackupJob(
+	createDto dto.CreateBackupJob,
+	jobId valueObject.BackupJobId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupJobCreated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupJobSri(createDto.AccountId, jobId),
+		},
+		OperatorAccountId: &createDto.OperatorAccountId,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) UpdateBackupJob(
+	updateDto dto.UpdateBackupJob,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupJobUpdated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupJobSri(updateDto.AccountId, updateDto.JobId),
+		},
+		RecordDetails:     updateDto,
+		OperatorAccountId: &updateDto.OperatorAccountId,
+		OperatorIpAddress: &updateDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) DeleteBackupJob(
+	deleteDto dto.DeleteBackupJob,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupJobDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupJobSri(deleteDto.AccountId, deleteDto.JobId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) RunBackupJob(runDto dto.RunBackupJob) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupJobRun")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupJobSri(runDto.AccountId, runDto.JobId),
+		},
+		OperatorAccountId: &runDto.OperatorAccountId,
+		OperatorIpAddress: &runDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) RestoreBackupTask(
+	requestRestoreDto dto.RestoreBackupTaskRequest,
+	accountId valueObject.AccountId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskRestored")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel:       uc.recordLevel,
+		RecordCode:        recordCode,
+		RecordDetails:     requestRestoreDto,
+		OperatorAccountId: &requestRestoreDto.OperatorAccountId,
+		OperatorIpAddress: &requestRestoreDto.OperatorIpAddress,
+	}
+
+	if requestRestoreDto.TaskId != nil {
+		createRecordDto.AffectedResources = append(
+			createRecordDto.AffectedResources,
+			valueObject.NewBackupTaskSri(accountId, *requestRestoreDto.TaskId),
+		)
+	}
+
+	if requestRestoreDto.ArchiveId != nil {
+		createRecordDto.AffectedResources = append(
+			createRecordDto.AffectedResources,
+			valueObject.NewBackupTaskArchiveSri(accountId, *requestRestoreDto.ArchiveId),
+		)
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) UpdateBackupTask(
+	updateDto dto.UpdateBackupTask,
+	accountId valueObject.AccountId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskUpdated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupTaskSri(accountId, updateDto.TaskId),
+		},
+		RecordDetails:     updateDto,
+		OperatorAccountId: &updateDto.OperatorAccountId,
+		OperatorIpAddress: &updateDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) DeleteBackupTask(
+	deleteDto dto.DeleteBackupTask,
+	accountId valueObject.AccountId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupTaskSri(accountId, deleteDto.TaskId),
+		},
+		OperatorAccountId: &deleteDto.OperatorAccountId,
+		OperatorIpAddress: &deleteDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) CreateBackupTaskArchive(
+	createDto dto.CreateBackupTaskArchive,
+	accountId valueObject.AccountId,
+	taskArchiveId valueObject.BackupTaskArchiveId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskArchiveCreated")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupTaskArchiveSri(accountId, taskArchiveId),
+		},
+		OperatorAccountId: &createDto.OperatorAccountId,
+		OperatorIpAddress: &createDto.OperatorIpAddress,
+	}
+
+	uc.createActivityRecord(createRecordDto)
+}
+
+func (uc *CreateSecurityActivityRecord) DeleteBackupTaskArchive(
+	deleteDto dto.DeleteBackupTaskArchive,
+	accountId valueObject.AccountId,
+) {
+	recordCode, _ := valueObject.NewActivityRecordCode("BackupTaskArchiveDeleted")
+	createRecordDto := dto.CreateActivityRecord{
+		RecordLevel: uc.recordLevel,
+		RecordCode:  recordCode,
+		AffectedResources: []valueObject.SystemResourceIdentifier{
+			valueObject.NewBackupTaskArchiveSri(accountId, deleteDto.ArchiveId),
 		},
 		OperatorAccountId: &deleteDto.OperatorAccountId,
 		OperatorIpAddress: &deleteDto.OperatorIpAddress,

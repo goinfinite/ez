@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func DeleteAccount(
@@ -22,7 +23,7 @@ func DeleteAccount(
 
 	readContainersDto := dto.ReadContainersRequest{
 		Pagination:         ContainersDefaultPagination,
-		ContainerAccountId: &deleteDto.AccountId,
+		ContainerAccountId: []valueObject.AccountId{deleteDto.AccountId},
 	}
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)

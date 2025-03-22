@@ -9,11 +9,11 @@ import (
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
-func ImportContainerImageArchiveFile(
+func ImportContainerImageArchive(
 	containerImageCmdRepo repository.ContainerImageCmdRepo,
 	accountQueryRepo repository.AccountQueryRepo,
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
-	importDto dto.ImportContainerImageArchiveFile,
+	importDto dto.ImportContainerImageArchive,
 ) (imageId valueObject.ContainerImageId, err error) {
 	accountEntity, err := accountQueryRepo.ReadById(importDto.AccountId)
 	if err != nil {
@@ -32,14 +32,14 @@ func ImportContainerImageArchiveFile(
 		return imageId, errors.New("AccountStorageQuotaUsageExceeded")
 	}
 
-	imageId, err = containerImageCmdRepo.ImportArchiveFile(importDto)
+	imageId, err = containerImageCmdRepo.ImportArchive(importDto)
 	if err != nil {
-		slog.Error("ImportContainerImageArchiveFileInfraError", slog.Any("error", err))
-		return imageId, errors.New("ImportContainerImageArchiveFileInfraError")
+		slog.Error("ImportContainerImageArchiveInfraError", slog.Any("error", err))
+		return imageId, errors.New("ImportContainerImageArchiveInfraError")
 	}
 
 	NewCreateSecurityActivityRecord(activityRecordCmdRepo).
-		ImportContainerImageArchiveFile(importDto, imageId)
+		ImportContainerImageArchive(importDto, imageId)
 
 	return imageId, nil
 }

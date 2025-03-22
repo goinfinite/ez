@@ -3,31 +3,9 @@ package layout
 import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 	componentUtil "github.com/goinfinite/ez/src/presentation/ui/component/util"
+	"github.com/goinfinite/ez/src/presentation/ui/envs"
 	"os"
 )
-
-script MainLayoutState() {
-	document.addEventListener('alpine:initializing', () => {
-		Alpine.store('main', {
-			textualViewSelector: Alpine.$persist(false).as('dash.textualViewSelector'),
-			displayScheduledTasksPopover: Alpine.$persist(false).as('dash.displayScheduledTasksPopover'),
-
-			toggleScheduledTasksPopover() {
-				this.displayScheduledTasksPopover = !this.displayScheduledTasksPopover;
-			},
-			refreshScheduledTasksPopover() {
-				window.dispatchEvent(new CustomEvent('refresh:footer'));
-				setTimeout(() => {this.displayScheduledTasksPopover = true}, 1000);
-			},
-
-			init() {
-				Alpine.watch(() => this.textualViewSelector, () => {
-					htmx.process(document.body);
-				});
-			}
-		});
-	});
-}
 
 script DevWsHotReload() {
 	hotReloadWs = new WebSocket("wss://" + document.location.host + "/dev/hot-reload");
@@ -42,8 +20,8 @@ templ HeadTag() {
 		<link rel="icon" type="image/ico" href="/assets/favicon.ico"/>
 		<link
 			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/@unocss/reset@0.65.1/tailwind-compat.css"
-			integrity="sha256-pCKlYZLg3IXpMC3ZJUcT48bRjbo4yEfjdPPvnn+psc8="
+			href="https://cdn.jsdelivr.net/npm/@unocss/reset@66.0.0/tailwind-compat.css"
+			integrity="sha256-YmuJOpwODv9JhZSXl17QoPLeBbIhkqZpNt39S++mkdk="
 			crossorigin="anonymous"
 		/>
 		<link
@@ -66,12 +44,12 @@ templ HeadTag() {
 			rel="stylesheet"
 			href="/assets/additional.css"
 		/>
-		<script src="/assets/additional.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime@0.61.5/uno.global.min.js" integrity="sha256-miwoG1k3DDK5ai24d7edKuvz3xRNHkUNcX8zl6qru5U=" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="/assets/additional.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime@66.0.0/uno.global.min.js" integrity="sha256-blhgsQv0/ztGg+RPOT4x4o8o0G85scS6EQKcOsVBJl0=" crossorigin="anonymous"></script>
 		<script defer src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.min.js" integrity="sha256-i3DE8yiIpruNsMXiSKI3JOdqxmRlPv7HqIZiKqvaivI=" crossorigin="anonymous"></script>
-		<script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.1/dist/htmx.min.js" integrity="sha256-bUqqSw0+i0yR+Nl7kqNhoZsb1FRN6j9mj9w+YqY5ld8=" crossorigin="anonymous"></script>
-		<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js" integrity="sha256-jFBwr6faTqqhp3sVi4/VTxJ0FpaF9YGZN1ZGLl/5QYM=" crossorigin="anonymous"></script>
-		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" integrity="sha256-NY2a+7GrW++i9IBhowd25bzXcH9BCmBrqYX5i8OxwDQ=" crossorigin="anonymous"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" integrity="sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc=" crossorigin="anonymous"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.8/dist/cdn.min.js" integrity="sha256-jFBwr6faTqqhp3sVi4/VTxJ0FpaF9YGZN1ZGLl/5QYM=" crossorigin="anonymous"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js" integrity="sha256-tgDjY9mdlURNtUrL+y3v/smueSqpmgkim82geOW1VkM=" crossorigin="anonymous"></script>
 		if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {
 			@DevWsHotReload()
 		}
@@ -83,7 +61,6 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 	<html>
 		@HeadTag()
 		<body class="bg-ez-500 flex text-white">
-			@MainLayoutState()
 			@componentUtil.LoadingOverlay()
 			@Sidebar(currentUrl)
 			<!-- Page Content -->
@@ -93,5 +70,6 @@ templ MainLayout(pageContent templ.Component, currentUrl string) {
 			@FooterSkeleton()
 			@componentUtil.Toast()
 		</body>
+		<script type="text/javascript" src={ uiEnvs.GlobalStateAssetsPath + "/layout/main.js" }></script>
 	</html>
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/goinfinite/ez/src/infra/db"
 	apiHelper "github.com/goinfinite/ez/src/presentation/api/helper"
 	"github.com/goinfinite/ez/src/presentation/service"
+	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,6 +87,18 @@ func (controller *ContainerController) Read(c echo.Context) error {
 		paramValue := c.QueryParam(paramName)
 		if paramValue == "" {
 			continue
+		}
+
+		if paramName == "containerId" {
+			requestBody["containerId"] = sharedHelper.StringSliceValueObjectParser(
+				requestBody["containerId"], valueObject.NewContainerId,
+			)
+		}
+
+		if paramName == "containerAccountId" {
+			requestBody["containerAccountId"] = sharedHelper.StringSliceValueObjectParser(
+				requestBody["containerAccountId"], valueObject.NewAccountId,
+			)
 		}
 
 		if paramName == "containerPortBindings" {
@@ -374,10 +387,6 @@ func (controller *ContainerController) Create(c echo.Context) error {
 		return err
 	}
 
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
-	}
-
 	if _, exists := requestBody["imageAddress"]; !exists {
 		possibleKeys := []string{"imgAddr", "imageAddr", "imgAddress"}
 		for _, possibleKey := range possibleKeys {
@@ -441,15 +450,15 @@ func (controller *ContainerController) Create(c echo.Context) error {
 			accountId = operatorAccountId
 		}
 
-		importDto := dto.NewImportContainerImageArchiveFile(
-			accountId, archiveImageFile, operatorAccountId, operatorIpAddress,
+		importDto := dto.NewImportContainerImageArchive(
+			accountId, archiveImageFile, nil, operatorAccountId, operatorIpAddress,
 		)
 
 		containerImageCmdRepo := infra.NewContainerImageCmdRepo(controller.persistentDbSvc)
 		accountQueryRepo := infra.NewAccountQueryRepo(controller.persistentDbSvc)
 		activityRecordCmdRepo := infra.NewActivityRecordCmdRepo(controller.trailDbSvc)
 
-		importedImageId, err := useCase.ImportContainerImageArchiveFile(
+		importedImageId, err := useCase.ImportContainerImageArchive(
 			containerImageCmdRepo, accountQueryRepo, activityRecordCmdRepo, importDto,
 		)
 		if err != nil {
@@ -485,10 +494,6 @@ func (controller *ContainerController) Update(c echo.Context) error {
 		if _, exists := requestBody["id"]; exists {
 			requestBody["containerId"] = requestBody["id"]
 		}
-	}
-
-	if requestBody["accountId"] == nil {
-		requestBody["accountId"] = requestBody["operatorAccountId"]
 	}
 
 	return apiHelper.ServiceResponseWrapper(

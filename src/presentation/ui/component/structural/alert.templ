@@ -8,8 +8,19 @@ const (
 )
 
 templ Alert(alertType string, alertMessage string) {
+	{{ backgroundColor := "ez-500" }}
+	switch alertType {
+		case AlertTypeSuccess:
+			{{ backgroundColor = "emerald-500" }}
+		case AlertTypeError:
+			{{ backgroundColor = "red-500" }}
+		case AlertTypeWarning:
+			{{ backgroundColor = "amber-500" }}
+		default:
+			{{ backgroundColor = "sky-500" }}
+	}
 	<div
-		class="bg-ez-500 flex items-center bg-opacity-75 p-2 text-[11px] text-neutral-50"
+		class={ "rounded-md bg-" + backgroundColor + " flex items-center bg-opacity-10 p-2 text-[11px] text-neutral-50" }
 		role="alert"
 	>
 		switch alertType {

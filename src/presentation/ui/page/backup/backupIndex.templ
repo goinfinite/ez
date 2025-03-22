@@ -1,0 +1,50 @@
+package pageBackup
+
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"github.com/goinfinite/ez/src/presentation/ui/envs"
+)
+
+templ BackupIndex(
+	readTasksRequest dto.ReadBackupTasksRequest,
+	readTasksResponse dto.ReadBackupTasksResponse,
+	readTaskArchivesRequest dto.ReadBackupTaskArchivesRequest,
+	readTaskArchivesResponse dto.ReadBackupTaskArchivesResponse,
+	readJobsRequest dto.ReadBackupJobsRequest,
+	readJobsResponse dto.ReadBackupJobsResponse,
+	createJobModalDto CreateBackupJobModalDto,
+	readDestinationsRequest dto.ReadBackupDestinationsRequest,
+	readDestinationsResponse BackupDestinationModifiedResponseDto,
+	createDestinationModalDto CreateBackupDestinationModalDto,
+) {
+	<!-- BackupIndex JavaScript -->
+	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/backup.js" }></script>
+	<!-- BackupIndex HTML -->
+	<div x-data="backupIndex">
+		@componentStructural.HorizontalTabHeader(
+			[]componentStructural.TabHeaderItem{
+				{Label: "Tasks", Value: "tasks", Icon: "ph-package", Size: "lg"},
+				{Label: "Jobs", Value: "jobs", Icon: "ph-factory", Size: "lg"},
+				{Label: "Destinations", Value: "destinations", Icon: "ph-barn", Size: "lg"},
+			},
+			"backupFeatureTabSelected",
+		)
+		<div class="rounded-lb-md rounded-r-md bg-neutral-100 bg-opacity-[4%] p-4">
+			<div x-show="backupFeatureTabSelected === 'tasks'">
+				@BackupTasks(
+					readTasksRequest, readTasksResponse,
+					readTaskArchivesRequest, readTaskArchivesResponse,
+				)
+			</div>
+			<div x-show="backupFeatureTabSelected === 'jobs'">
+				@BackupJobs(readJobsRequest, readJobsResponse, createJobModalDto)
+			</div>
+			<div x-show="backupFeatureTabSelected === 'destinations'">
+				@BackupDestinations(
+					readDestinationsRequest, readDestinationsResponse, createDestinationModalDto,
+				)
+			</div>
+		</div>
+	</div>
+}

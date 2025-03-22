@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/goinfinite/ez/src/domain/dto"
@@ -111,7 +112,7 @@ func (service *ContainerImageService) CreateSnapshot(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("containerImage")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		timeoutSeconds := uint16(1800)
+		timeoutSeconds := valueObject.TimeDuration(21600)
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
@@ -142,7 +143,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	}
 
 	createSnapshotImageDto := dto.NewCreateContainerSnapshotImage(
-		containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr,
+		containerId, shouldCreateArchivePtr, archiveCompressionFormatPtr, nil,
 		shouldDiscardImagePtr, operatorAccountId, operatorIpAddress,
 	)
 
@@ -150,7 +151,7 @@ func (service *ContainerImageService) CreateSnapshot(
 	containerQueryRepo := infra.NewContainerQueryRepo(service.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 
-	err = useCase.CreateContainerSnapshotImage(
+	imageEntity, err := useCase.CreateContainerSnapshotImage(
 		service.containerImageQueryRepo, containerImageCmdRepo, containerQueryRepo,
 		accountQueryRepo, service.activityRecordCmdRepo, createSnapshotImageDto,
 	)
@@ -158,7 +159,7 @@ func (service *ContainerImageService) CreateSnapshot(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "ContainerSnapshotImageCreated")
+	return NewServiceOutput(Created, imageEntity)
 }
 
 func (service *ContainerImageService) Delete(
@@ -214,10 +215,49 @@ func (service *ContainerImageService) Delete(
 	return NewServiceOutput(Success, "ContainerImageDeleted")
 }
 
-func (service *ContainerImageService) ReadArchiveFiles(
+func (service *ContainerImageService) ReadArchives(
+	input map[string]interface{},
 	requestHostname *string,
 ) ServiceOutput {
-	archiveFilesList, err := useCase.ReadContainerImageArchiveFiles(service.containerImageQueryRepo)
+	var imageIdPtr *valueObject.ContainerImageId
+	if input["imageId"] != nil {
+		imageId, err := valueObject.NewContainerImageId(input["imageId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		imageIdPtr = &imageId
+	}
+
+	var accountIdPtr *valueObject.AccountId
+	if input["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(input["accountId"])
+		if err != nil {
+			return NewServiceOutput(UserError, err.Error())
+		}
+		accountIdPtr = &accountId
+	}
+
+	timeParamNames := []string{"createdBeforeAt", "createdAfterAt"}
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
+
+	requestPagination, err := serviceHelper.PaginationParser(
+		input, useCase.BackupTaskArchivesDefaultPagination,
+	)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+
+	requestDto := dto.ReadContainerImageArchivesRequest{
+		Pagination:      requestPagination,
+		ImageId:         imageIdPtr,
+		AccountId:       accountIdPtr,
+		CreatedBeforeAt: timeParamPtrs["createdBeforeAt"],
+		CreatedAfterAt:  timeParamPtrs["createdAfterAt"],
+	}
+
+	responseDto, err := useCase.ReadContainerImageArchives(
+		service.containerImageQueryRepo, requestDto,
+	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
@@ -229,24 +269,29 @@ func (service *ContainerImageService) ReadArchiveFiles(
 		}
 		serverHostnameStr := serverHostname.String()
 
-		for archiveFileIndex, archiveFile := range archiveFilesList {
+		for archiveFileIndex, archiveFile := range responseDto.Archives {
 			rawUpdatedUrl := strings.Replace(
 				archiveFile.DownloadUrl.String(), serverHostnameStr, *requestHostname, 1,
 			)
 
 			updatedUrl, err := valueObject.NewUrl(rawUpdatedUrl)
 			if err != nil {
-				return NewServiceOutput(InfraError, err.Error())
+				slog.Debug(
+					"UpdateDownloadUrlError",
+					slog.Int("archiveFileIndex", archiveFileIndex),
+					slog.String("rawUpdatedUrl", rawUpdatedUrl),
+				)
+				continue
 			}
 
-			archiveFilesList[archiveFileIndex].DownloadUrl = updatedUrl
+			responseDto.Archives[archiveFileIndex].DownloadUrl = &updatedUrl
 		}
 	}
 
-	return NewServiceOutput(Success, archiveFilesList)
+	return NewServiceOutput(Success, responseDto)
 }
 
-func (service *ContainerImageService) CreateArchiveFile(
+func (service *ContainerImageService) CreateArchive(
 	input map[string]interface{},
 	shouldSchedule bool,
 ) ServiceOutput {
@@ -294,11 +339,11 @@ func (service *ContainerImageService) CreateArchiveFile(
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
 
 		scheduledTaskCmdRepo := infra.NewScheduledTaskCmdRepo(service.persistentDbSvc)
-		taskName, _ := valueObject.NewScheduledTaskName("CreateContainerImageArchiveFile")
+		taskName, _ := valueObject.NewScheduledTaskName("CreateContainerImageArchive")
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("containerImageArchive")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		timeoutSeconds := uint16(1800)
+		timeoutSeconds := valueObject.TimeDuration(21600)
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
@@ -309,7 +354,7 @@ func (service *ContainerImageService) CreateArchiveFile(
 			return NewServiceOutput(InfraError, err.Error())
 		}
 
-		return NewServiceOutput(Created, "ContainerImageArchiveFileCreationScheduled")
+		return NewServiceOutput(Created, "ContainerImageArchiveCreationScheduled")
 	}
 
 	operatorAccountId := LocalOperatorAccountId
@@ -328,14 +373,14 @@ func (service *ContainerImageService) CreateArchiveFile(
 		}
 	}
 
-	createDto := dto.NewCreateContainerImageArchiveFile(
-		accountId, imageId, compressionFormatPtr, operatorAccountId, operatorIpAddress,
+	createDto := dto.NewCreateContainerImageArchive(
+		accountId, imageId, compressionFormatPtr, nil, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 	accountQueryRepo := infra.NewAccountQueryRepo(service.persistentDbSvc)
 
-	archiveFile, err := useCase.CreateContainerImageArchiveFile(
+	archiveFile, err := useCase.CreateContainerImageArchive(
 		service.containerImageQueryRepo, containerImageCmdRepo, accountQueryRepo,
 		service.activityRecordCmdRepo, createDto,
 	)
@@ -346,7 +391,7 @@ func (service *ContainerImageService) CreateArchiveFile(
 	return NewServiceOutput(Success, archiveFile)
 }
 
-func (service *ContainerImageService) DeleteArchiveFile(
+func (service *ContainerImageService) DeleteArchive(
 	input map[string]interface{},
 ) ServiceOutput {
 	requiredParams := []string{"accountId", "imageId"}
@@ -381,13 +426,13 @@ func (service *ContainerImageService) DeleteArchiveFile(
 		}
 	}
 
-	deleteDto := dto.NewDeleteContainerImageArchiveFile(
+	deleteDto := dto.NewDeleteContainerImageArchive(
 		accountId, imageId, operatorAccountId, operatorIpAddress,
 	)
 
 	containerImageCmdRepo := infra.NewContainerImageCmdRepo(service.persistentDbSvc)
 
-	err = useCase.DeleteContainerImageArchiveFile(
+	err = useCase.DeleteContainerImageArchive(
 		service.containerImageQueryRepo, containerImageCmdRepo,
 		service.activityRecordCmdRepo, deleteDto,
 	)
@@ -395,5 +440,5 @@ func (service *ContainerImageService) DeleteArchiveFile(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, "ContainerImageArchiveFileDeleted")
+	return NewServiceOutput(Success, "ContainerImageArchiveDeleted")
 }

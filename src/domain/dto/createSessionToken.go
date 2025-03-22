@@ -3,13 +3,13 @@ package dto
 import "github.com/goinfinite/ez/src/domain/valueObject"
 
 type CreateSessionToken struct {
-	Username          valueObject.Username  `json:"username"`
-	Password          valueObject.Password  `json:"password"`
-	OperatorIpAddress valueObject.IpAddress `json:"-"`
+	Username          valueObject.UnixUsername `json:"username"`
+	Password          valueObject.Password     `json:"password"`
+	OperatorIpAddress valueObject.IpAddress    `json:"-"`
 }
 
 func NewCreateSessionToken(
-	username valueObject.Username,
+	username valueObject.UnixUsername,
 	password valueObject.Password,
 	operatorIpAddress valueObject.IpAddress,
 ) CreateSessionToken {

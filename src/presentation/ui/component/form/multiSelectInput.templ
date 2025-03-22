@@ -1,0 +1,166 @@
+package componentForm
+
+type MultiSelectInputDto struct {
+	Id                       string
+	Label                    string
+	SelectedModelBindPath    string
+	Options                  []string
+	IsRequired               bool
+	ShouldIncludeBlankOption bool
+	DispatchEventName        string
+}
+
+templ MultiSelectInput(inputDto MultiSelectInputDto) {
+	<!-- MultiSelectInput -->
+	<div class="relative w-full">
+		<select
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+			}
+			if inputDto.SelectedModelBindPath != "" {
+				x-model={ inputDto.SelectedModelBindPath }
+			}
+			if inputDto.Label != "" {
+				placeholder={ inputDto.Label }
+			}
+			if inputDto.IsRequired {
+				required
+			}
+			class="bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative w-full appearance-none rounded-md border p-3 text-sm text-neutral-100 placeholder-transparent outline-none transition-all"
+			if inputDto.DispatchEventName != "" {
+				@change={ "$dispatch('" + inputDto.DispatchEventName + "')" }
+			}
+			multiple
+		>
+			if inputDto.ShouldIncludeBlankOption {
+				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value></option>
+			}
+			for _, option := range inputDto.Options {
+				<option class="bg-ez-500 checked:bg-infinite-500 bg-opacity-90" value={ option }>{ option }</option>
+			}
+		</select>
+		if inputDto.Label != "" {
+			<label
+				if inputDto.Id != "" {
+					for={ inputDto.Id }
+				}
+				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+			>
+				{ inputDto.Label }
+				if inputDto.IsRequired {
+					<span class="text-red-700">*</span>
+				}
+			</label>
+		}
+		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
+			<i
+				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ inputDto.SelectedModelBindPath + " = []" }
+			></i>
+		</div>
+	</div>
+}
+
+type MultiSelectInputWithLabelValuePairDto struct {
+	Id                    string
+	Label                 string
+	Size                  string
+	SelectedModelBindPath string
+	Options               []SelectLabelValuePair
+	OptionsModelBindPath  string
+	IsRequired            bool
+}
+
+func labelValuePairsValueExtractor(options []SelectLabelValuePair) []string {
+	var values []string
+	for _, option := range options {
+		values = append(values, option.Value)
+	}
+	return values
+}
+
+templ MultiSelectInputWithLabelValuePair(inputDto MultiSelectInputWithLabelValuePairDto) {
+	<!-- MultiSelectInputWithLabelValuePair -->
+	<div class="relative w-full">
+		{{ selectInputSize := "p-2 text-sm" }}
+		switch inputDto.Size {
+			case "xs":
+				{{ selectInputSize = "p-1.5 text-xs" }}
+			case "sm":
+				{{ selectInputSize = "p-2 text-sm" }}
+			case "md":
+				{{ selectInputSize = "p-2.5 text-md" }}
+			case "lg":
+				{{ selectInputSize = "p-3 text-lg" }}
+			case "xl":
+				{{ selectInputSize = "p-3.5 text-xl" }}
+		}
+		<div class={ "bg-ez-300 hover:border-ez-100 border-ez-200 autofill:bg-ez-300 focus:border-ez-50 peer relative w-full appearance-none rounded-md border " + selectInputSize + " text-neutral-100 placeholder-transparent outline-none transition-all overflow-y-scroll h-24 flex flex-col gap-0.5" }>
+			for _, option := range inputDto.Options {
+				<div
+					class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
+					@click={ "if (!" + inputDto.SelectedModelBindPath + ".some((item) => item == `" + option.Value + "`)) { " + inputDto.SelectedModelBindPath + ".push(`" + option.Value + "`); } else { " + inputDto.SelectedModelBindPath + " = " + inputDto.SelectedModelBindPath + ".filter((item) => item != `" + option.Value + "`); }" }
+				>
+					<i
+						class="ph-duotone text-xl"
+						:class={ inputDto.SelectedModelBindPath + `.some((item) => item == "` + option.Value + `") ? "ph-check-square text-infinite-500" : "ph-square"` }
+					></i>
+					<span class="truncate">{ option.Label }</span>
+				</div>
+			}
+			if inputDto.OptionsModelBindPath != "" {
+				<template x-for={ "selectableOption in " + inputDto.OptionsModelBindPath }>
+					<div
+						class="flex cursor-pointer items-center gap-1 rounded-lg p-0.5 hover:bg-neutral-950/10 hover:bg-opacity-50"
+						@click={ "if (!" + inputDto.SelectedModelBindPath + ".some((item) => item == selectableOption)) { " + inputDto.SelectedModelBindPath + ".push(selectableOption); } else { " + inputDto.SelectedModelBindPath + " = " + inputDto.SelectedModelBindPath + ".filter((item) => item != selectableOption); }" }
+					>
+						<i
+							class="ph-duotone text-xl"
+							:class={ inputDto.SelectedModelBindPath + `.some((item) => item == selectableOption) ? "ph-check-square text-infinite-500" : "ph-square"` }
+						></i>
+						<span class="truncate" x-text="selectableOption"></span>
+					</div>
+				</template>
+			}
+		</div>
+		<input
+			if inputDto.Id != "" {
+				id={ inputDto.Id }
+				name={ inputDto.Id }
+			}
+			class="hidden"
+			if inputDto.SelectedModelBindPath != "" {
+				x-model:value={ inputDto.SelectedModelBindPath }
+			}
+		/>
+		if inputDto.Label != "" {
+			<label
+				if inputDto.Id != "" {
+					for={ inputDto.Id }
+				}
+				class="from-ez-300 via-ez-300 absolute -top-2 left-1.5 z-[1] cursor-text bg-gradient-to-t via-55% to-transparent to-55% px-1.5 text-xs font-bold text-neutral-50 text-opacity-80 transition-all before:absolute before:left-0 before:top-0 before:z-[-1] before:block before:h-full before:w-full before:bg-white before:transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-autofill:-top-2 peer-hover:text-opacity-90 peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-opacity-100"
+			>
+				{ inputDto.Label }
+				if inputDto.IsRequired {
+					<span class="text-red-700">*</span>
+				}
+			</label>
+		}
+		<div class="text-md absolute right-6 top-1.5 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
+			{{ selectAllOnClick := inputDto.SelectedModelBindPath + " = " + inputDto.OptionsModelBindPath }}
+			if inputDto.OptionsModelBindPath == "" {
+				{{ labelValuePairsValuesStr, _ := templ.JSONString(labelValuePairsValueExtractor(inputDto.Options)) }}
+				{{ selectAllOnClick = inputDto.SelectedModelBindPath + " = " + labelValuePairsValuesStr }}
+			}
+			<i
+				class="ph-bold ph-list-checks bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ selectAllOnClick }
+			></i>
+			<i
+				class="ph-bold ph-x-circle bg-ez-300 border-1 border-ez-50 hover:bg-ez-400 active:bg-infinite-500 cursor-pointer rounded-md p-1 text-neutral-100"
+				@click.prevent={ inputDto.SelectedModelBindPath + " = []" }
+			></i>
+		</div>
+	</div>
+}

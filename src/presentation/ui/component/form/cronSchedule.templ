@@ -1,0 +1,169 @@
+package componentForm
+
+templ CronPredefinedInput(bindModelPath string) {
+	@SelectInputWithLabelValuePair(SelectInputWithLabelValuePairDto{
+		Label:                 "Predefined Schedule",
+		SelectedModelBindPath: bindModelPath,
+		Options: []SelectLabelValuePair{
+			{Label: "Hourly", Value: "@hourly"},
+			{Label: "Every 3 hours", Value: "0 */3 * * *"},
+			{Label: "Every 6 hours", Value: "0 */6 * * *"},
+			{Label: "Every 12 hours", Value: "0 */12 * * *"},
+			{Label: "Daily at midnight", Value: "0 0 * * *"},
+			{Label: "Daily at 1 AM", Value: "0 1 * * *"},
+			{Label: "Daily at 2 AM", Value: "0 2 * * *"},
+			{Label: "Every 2 days", Value: "0 0 */2 * *"},
+			{Label: "Every 3 days", Value: "0 0 */3 * *"},
+			{Label: "Every 5 days", Value: "0 0 */3 * *"},
+			{Label: "Weekly", Value: "@weekly"},
+			{Label: "Monthly", Value: "@monthly"},
+			{Label: "Annually", Value: "@annually"},
+			{Label: "On Reboot", Value: "@reboot"},
+		}},
+	)
+}
+
+templ CronCustomScheduleInput(bindModelPath string) {
+	<div
+		x-data="{ cronSchedule: { minute: '0', hour: '0', day: '*', month: '*', weekday: '*' } }"
+		x-effect={ bindModelPath + " = cronSchedule.minute+' '+cronSchedule.hour+' '+cronSchedule.day+' '+cronSchedule.month+' '+cronSchedule.weekday" }
+		class="-mt-4"
+	>
+		<div class="flex flex-row items-center justify-evenly">
+			for _, customSchedulePart := range []string{"minute", "hour", "day", "month", "weekday"} {
+				<input
+					type="text"
+					class="h-12 w-12 border-b-2 border-neutral-50/10 bg-transparent text-center text-xl outline-none"
+					x-model:value={ "cronSchedule['" + customSchedulePart + "']" }
+				/>
+			}
+		</div>
+		<div class="mt-6 grid grid-cols-2 gap-4">
+			@DualSelectInputWithLabelValueInputField(
+				"text", "", "Minute", "xs", "cronSchedule['minute']",
+				[]SelectLabelValuePair{
+					{Label: "Custom", Value: ""},
+					{Label: "At minute 0", Value: "0"},
+					{Label: "At minute 5", Value: "5"},
+					{Label: "At minute 10", Value: "10"},
+					{Label: "At minute 15", Value: "15"},
+					{Label: "At minute 30", Value: "30"},
+					{Label: "At minute 45", Value: "45"},
+					{Label: "Every minute", Value: "*"},
+					{Label: "Every 5 minutes", Value: "*/5"},
+					{Label: "Every 10 minutes", Value: "*/10"},
+					{Label: "Every 15 minutes", Value: "*/15"},
+					{Label: "Every 30 minutes", Value: "*/30"},
+					{Label: "Every 45 minutes", Value: "*/45"},
+				},
+			)
+			@DualSelectInputWithLabelValueInputField(
+				"text", "", "Hour", "xs", "cronSchedule['hour']",
+				[]SelectLabelValuePair{
+					{Label: "Custom", Value: ""},
+					{Label: "Every hour", Value: "*"},
+					{Label: "Every 2 hour", Value: "*/2"},
+					{Label: "Every 6 hour", Value: "*/6"},
+					{Label: "Every 12 hour", Value: "*/12"},
+					{Label: "At midnight", Value: "0"},
+					{Label: "At 2h00 AM", Value: "2"},
+					{Label: "At 6h00 AM", Value: "6"},
+					{Label: "At midday", Value: "12"},
+					{Label: "At 14h00 (2h00 PM)", Value: "14"},
+					{Label: "At 18h00 (6h00 PM)", Value: "18"},
+				},
+			)
+			@DualSelectInputWithLabelValueInputField(
+				"text", "", "Day", "xs", "cronSchedule['day']",
+				[]SelectLabelValuePair{
+					{Label: "Custom", Value: ""},
+					{Label: "Every day", Value: "*"},
+					{Label: "Weekly", Value: "*/7"},
+					{Label: "Every 15 days", Value: "*/15"},
+					{Label: "Every 30 days", Value: "*/30"},
+					{Label: "At day 1", Value: "1"},
+					{Label: "At day 5", Value: "5"},
+					{Label: "At day 10", Value: "10"},
+					{Label: "At day 15", Value: "15"},
+					{Label: "At day 20", Value: "20"},
+					{Label: "At day 25", Value: "25"},
+					{Label: "At day 30", Value: "30"},
+				},
+			)
+			@DualSelectInputWithLabelValueInputField(
+				"text", "", "Month", "xs", "cronSchedule['month']",
+				[]SelectLabelValuePair{
+					{Label: "Custom", Value: ""},
+					{Label: "Every month", Value: "*"},
+					{Label: "Every 2 months", Value: "*/2"},
+					{Label: "Every 6 months", Value: "*/6"},
+					{Label: "Every year", Value: "*/12"},
+					{Label: "January", Value: "1"},
+					{Label: "February", Value: "2"},
+					{Label: "March", Value: "3"},
+					{Label: "April", Value: "4"},
+					{Label: "May", Value: "5"},
+					{Label: "June", Value: "6"},
+					{Label: "July", Value: "7"},
+					{Label: "August", Value: "8"},
+					{Label: "September", Value: "9"},
+					{Label: "October", Value: "10"},
+					{Label: "November", Value: "11"},
+					{Label: "December", Value: "12"},
+				},
+			)
+			@DualSelectInputWithLabelValueInputField(
+				"text", "", "Week Day", "xs", "cronSchedule['weekday']",
+				[]SelectLabelValuePair{
+					{Label: "Custom", Value: ""},
+					{Label: "Every day", Value: "*"},
+					{Label: "Monday to Friday", Value: "1-5"},
+					{Label: "Only weekends", Value: "6-0"},
+					{Label: "Every Monday", Value: "1"},
+					{Label: "Every Tuesday", Value: "2"},
+					{Label: "Every Wednesday", Value: "3"},
+					{Label: "Every Thursday", Value: "4"},
+					{Label: "Every Friday", Value: "5"},
+					{Label: "Every Saturday", Value: "6"},
+					{Label: "Every Sunday", Value: "7"},
+				},
+			)
+		</div>
+	</div>
+}
+
+templ CronScheduleInput(id, bindModelPath string) {
+	<div
+		x-data="{ selectedScheduleType: 'predefined'}"
+		class="flex flex-col gap-4 rounded-lg border-2 border-dashed border-neutral-50/5 p-2"
+	>
+		<div class="flex flex-row gap-4">
+			@RadioInput(RadioInputDto{
+				Label:         "Predefined",
+				BindValue:     "predefined",
+				ModelBindPath: "selectedScheduleType",
+			})
+			@RadioInput(RadioInputDto{
+				Label:         "Custom",
+				BindValue:     "custom",
+				ModelBindPath: "selectedScheduleType",
+			})
+		</div>
+		<input
+			if id != "" {
+				id={ id }
+				name={ id }
+			}
+			type="hidden"
+			if bindModelPath != "" {
+				x-model:value={ bindModelPath }
+			}
+		/>
+		<template x-if="selectedScheduleType === 'predefined'">
+			@CronPredefinedInput(bindModelPath)
+		</template>
+		<template x-if="selectedScheduleType === 'custom'">
+			@CronCustomScheduleInput(bindModelPath)
+		</template>
+	</div>
+}

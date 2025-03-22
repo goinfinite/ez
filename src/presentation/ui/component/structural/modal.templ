@@ -1,9 +1,11 @@
 package componentStructural
 
+import "github.com/goinfinite/ez/src/presentation/ui/component/form"
+
 templ RegularModal(
 	title, isOpenState, closeModalFunction, elementIdStatePath string,
 ) {
-	<!-- Modal HTML -->
+	<!-- RegularModal HTML -->
 	<div
 		x-show={ isOpenState }
 		x-transition:enter="transition ease-out duration-500"
@@ -15,7 +17,7 @@ templ RegularModal(
 		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
 	>
 		<div class="bg-ez-400 max-w-3/5 relative mx-auto mt-20 rounded-md p-6 drop-shadow-xl xl:mt-24 xl:max-w-3xl">
-			<div class="mb-6 flex justify-between align-middle">
+			<div class="mb-4 flex justify-between align-middle">
 				<h2 class="text-2xl">
 					{ title }
 					if elementIdStatePath != "" {
@@ -40,7 +42,7 @@ templ DeleteModal(
 	isOpenState, closeFunction, deleteFunction, deleteIdTag string,
 	elNameStatePath, elIdStatePath string,
 ) {
-	<!-- Delete Modal HTML -->
+	<!-- DeleteModal HTML -->
 	<div
 		x-show={ isOpenState }
 		x-transition:enter="transition ease-out duration-500"
@@ -61,7 +63,7 @@ templ DeleteModal(
 			<div class="h-18 w-18 mx-auto my-4 flex items-center justify-center rounded-full bg-neutral-300 text-center text-5xl">
 				<i class="ph-duotone ph-warning text-red-950"></i>
 			</div>
-			<h3 class="text-pretty my-3 px-2 text-center text-xl font-bold leading-relaxed">
+			<h3 class="text-pretty my-3 px-2 text-center text-xl font-bold leading-relaxed after:content-['?']">
 				Are you sure you want to delete
 				if elNameStatePath != "" {
 					<strong
@@ -71,52 +73,77 @@ templ DeleteModal(
 					></strong>
 				}
 				if elIdStatePath != "" {
-					<span x-show={ elIdStatePath + " !== ''" }>
-						#<strong x-text={ elIdStatePath }></strong>
-					</span>
+					<span x-show={ elIdStatePath + " !== ''" } class="font-bold before:content-['#']" x-text={ elIdStatePath }></span>
 				}
-				?
 			</h3>
 			<p class="mb-6 text-center">
 				This process cannot be undone. This will permanently delete the element.
 			</p>
-			<div class="flex flex-row space-x-4">
-				<button
-					@click={ closeFunction }
-					class="w-full rounded-md border-none bg-neutral-300 p-3 text-center text-base lowercase leading-none text-neutral-950 hover:bg-neutral-400"
-				>
-					No, Keep it.
-				</button>
-				<button
-					if deleteIdTag != "" {
-						id={ deleteIdTag }
-					} else {
-						id="delete-element"
-					}
-					type="submit"
-					@click={ deleteFunction }
-					class="w-full rounded-md border-none bg-red-800 p-3 text-center text-base font-bold lowercase leading-none text-white hover:bg-red-900"
-				>
-					<i class={ "ph-duotone ph-trash mr-1 align-middle text-xl" }></i>Yes, Delete!
-				</button>
+			<div class="grid grid-cols-2 gap-4">
+				@IconButton(IconButtonSettings{
+					Label:                "No, Keep it.",
+					BackgroundColor:      "neutral-300",
+					HoverBackgroundColor: "neutral-400",
+					TextColor:            "neutral-950",
+					HoverTextColor:       "neutral-950",
+					OnClick:              closeFunction,
+					Size:                 IconButtonSizeMd,
+					IsFullWidth:          true,
+				})
+				{{ deleteButtonId := "" }}
+				if deleteIdTag != "" {
+					{{ deleteButtonId = deleteIdTag }}
+				}
+				@IconButton(IconButtonSettings{
+					Id:                   deleteButtonId,
+					Label:                "Yes, Delete!",
+					Icon:                 "ph-trash",
+					BackgroundColor:      "red-800",
+					HoverBackgroundColor: "red-900",
+					TextColor:            "white",
+					OnClick:              deleteFunction,
+					Size:                 IconButtonSizeMd,
+					IsFullWidth:          true,
+				})
 			</div>
 		</div>
 	</div>
 }
 
+type ConfirmationCheckboxSettings struct {
+	Label              string
+	IsCheckedStatePath string
+}
+
 const (
-	ConfirmationTypeInfo     = "info"
-	ConfirmationTypeWarning  = "warning"
-	ConfirmationTypeDanger   = "danger"
-	ConfirmationTypeCritical = "critical"
+	ConfirmationTitleIconPositionTop  = "top"
+	ConfirmationTitleIconPositionLeft = "left"
+
+	ConfirmationDescriptionDelete = "This process cannot be undone. This will permanently delete the element."
+
+	ConfirmationTypeInfo    = "info"
+	ConfirmationTypeWarning = "warning"
+	ConfirmationTypeDanger  = "danger"
 )
 
-templ ConfirmationModal(
-	title, titleIcon, description, isOpenState, confirmFunction, confirmationType string,
-) {
+type ConfirmationModalSettings struct {
+	Title              string
+	TitleIcon          string
+	TitleIconPosition  string
+	Description        string
+	ConfirmationType   string
+	IsOpenState        string
+	CancelFunction     string
+	CancelButtonLabel  string
+	ConfirmFunction    string
+	ConfirmButtonLabel string
+	Checkboxes         []ConfirmationCheckboxSettings
+}
+
+templ ConfirmationModal(inputSettings ConfirmationModalSettings) {
 	<!-- ConfirmationModal HTML -->
 	<div
-		x-show={ isOpenState }
+		x-show={ inputSettings.IsOpenState }
 		x-transition:enter="transition ease-out duration-500"
 		x-transition:enter-start="opacity-0"
 		x-transition:enter-end="opacity-100"
@@ -126,40 +153,89 @@ templ ConfirmationModal(
 		class="fixed left-0 top-0 z-50 mx-auto h-screen max-h-screen w-full overflow-y-auto overflow-x-hidden bg-neutral-950 bg-opacity-50"
 	>
 		<div class="relative mx-auto mt-[5%] max-w-2xl rounded-md drop-shadow-xl">
-			<div
-				if confirmationType == ConfirmationTypeInfo {
-					class="flex flex-col rounded-md bg-sky-900 p-8"
-				} else {
-					class="flex flex-col rounded-md bg-yellow-900 p-8"
-				}
-			>
+			{{ modalContentClasses := "flex flex-col rounded-md p-8 gap-5" }}
+			switch inputSettings.ConfirmationType {
+				case ConfirmationTypeInfo:
+					{{ modalContentClasses += " bg-cyan-900" }}
+				case ConfirmationTypeWarning:
+					{{ modalContentClasses += " bg-yellow-900" }}
+				case ConfirmationTypeDanger:
+					{{ modalContentClasses += " bg-red-950" }}
+				default:
+					{{ modalContentClasses += " bg-zinc-900" }}
+			}
+			<div class={ modalContentClasses }>
 				<i
-					@click={ isOpenState + " = false" }
+					@click={ inputSettings.IsOpenState + " = false" }
 					class="ph-bold ph-x-square opacity-85 right-7.5 top-7.5 absolute cursor-pointer text-3xl hover:opacity-100 active:opacity-100"
 				></i>
-				<h3 class="my-3 flex flex-row items-center justify-center gap-2 leading-relaxed">
-					<i class={ "ph-duotone " + titleIcon + " text-4xl text-neutral-100" }></i>
-					<span class="text-2xl font-bold">
-						@templ.Raw(title)
-					</span>
-				</h3>
-				<p class="mb-6 text-center">
-					@templ.Raw(description)
-				</p>
-				<div class="flex flex-row gap-4">
-					<button
-						@click={ isOpenState + " = false" }
-						class="w-full rounded-md bg-transparent p-3 text-center text-base lowercase leading-none text-neutral-50 ring-1 ring-neutral-50 transition-all hover:bg-neutral-50 hover:text-neutral-950"
-					>
-						No, do not proceed.
-					</button>
-					<button
-						type="submit"
-						@click={ confirmFunction }
-						class="w-full rounded-md border-none bg-neutral-950 bg-opacity-50 p-3 text-center text-base font-bold lowercase leading-none text-neutral-50 transition-all hover:bg-opacity-75"
-					>
-						Yes, Proceed!
-					</button>
+				<div class="flex flex-col gap-2">
+					if inputSettings.TitleIconPosition == ConfirmationTitleIconPositionTop {
+						<div class="h-18 w-18 mx-auto flex items-center justify-center rounded-full bg-neutral-50/20 text-center text-5xl">
+							<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-neutral-50" }></i>
+						</div>
+						<h3 class="text-center text-2xl font-bold">
+							@templ.Raw(inputSettings.Title)
+						</h3>
+					} else {
+						<h3 class="flex flex-row items-center justify-center gap-2 leading-relaxed">
+							if inputSettings.TitleIcon != "" {
+								<i class={ "ph-duotone " + inputSettings.TitleIcon + " text-4xl text-neutral-100" }></i>
+							}
+							<span class="text-2xl font-bold">
+								@templ.Raw(inputSettings.Title)
+							</span>
+						</h3>
+					}
+					<p class="text-center">
+						@templ.Raw(inputSettings.Description)
+					</p>
+				</div>
+				if len(inputSettings.Checkboxes) > 0 {
+					<div class="flex flex-col gap-2 rounded-lg border-2 border-dashed border-neutral-50/20 p-4">
+						for _, checkboxSettings := range inputSettings.Checkboxes {
+							@componentForm.SwitchToggle(componentForm.SwitchToggleDto{
+								Label:         checkboxSettings.Label,
+								ModelBindPath: checkboxSettings.IsCheckedStatePath,
+							})
+						}
+					</div>
+				}
+				<div class="grid grid-cols-2 gap-4">
+					{{ cancelButtonLabel := "no, do not proceed." }}
+					if inputSettings.CancelButtonLabel != "" {
+						{{ cancelButtonLabel = inputSettings.CancelButtonLabel }}
+					}
+					{{ cancelFunction := "" }}
+					if inputSettings.IsOpenState != "" {
+						{{ cancelFunction = inputSettings.IsOpenState + " = false" }}
+					}
+					if inputSettings.CancelFunction != "" {
+						{{ cancelFunction = inputSettings.CancelFunction }}
+					}
+					@IconButton(IconButtonSettings{
+						Label:                cancelButtonLabel,
+						BackgroundColor:      "neutral-300/90",
+						HoverBackgroundColor: "neutral-100",
+						TextColor:            "neutral-950",
+						HoverTextColor:       "neutral-950",
+						OnClick:              cancelFunction,
+						Size:                 IconButtonSizeMd,
+						IsFullWidth:          true,
+					})
+					{{ confirmButtonLabel := "yes, proceed!" }}
+					if inputSettings.ConfirmButtonLabel != "" {
+						{{ confirmButtonLabel = inputSettings.ConfirmButtonLabel }}
+					}
+					@IconButton(IconButtonSettings{
+						Label:                confirmButtonLabel,
+						BackgroundColor:      "neutral-950/50",
+						HoverBackgroundColor: "neutral-950/90",
+						TextColor:            "neutral-50",
+						OnClick:              inputSettings.ConfirmFunction,
+						Size:                 IconButtonSizeMd,
+						IsFullWidth:          true,
+					})
 				</div>
 			</div>
 		</div>

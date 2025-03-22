@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func CreateMappingTarget(
@@ -23,7 +24,7 @@ func CreateMappingTarget(
 
 	readContainersDto := dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
-		ContainerId: &createDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{createDto.ContainerId},
 	}
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)

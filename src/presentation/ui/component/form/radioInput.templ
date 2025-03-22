@@ -1,33 +1,72 @@
 package componentForm
 
-templ RadioInput(id, label, bindValue, bindModelPath string) {
+const (
+	RadioInputSizeXs = "xs"
+	RadioInputSizeSm = "sm"
+	RadioInputSizeMd = "md"
+	RadioInputSizeLg = "lg"
+	RadioInputSizeXl = "xl"
+)
+
+type RadioInputDto struct {
+	Id            string
+	Label         string
+	Size          string
+	BindValue     string
+	ModelBindPath string
+}
+
+templ RadioInput(inputDto RadioInputDto) {
 	<!-- RadioInput -->
 	<div
 		class="hover:text-infinite-500 inline-flex items-center text-neutral-100"
-		@click={ bindModelPath + ` = "` + bindValue + `"` }
+		@click={ inputDto.ModelBindPath + ` = "` + inputDto.BindValue + `"` }
 	>
-		<label class="relative flex cursor-pointer items-center rounded-full p-1">
-			<input
-				type="radio"
-				name={ id }
-				value={ bindValue }
-				x-model={ bindModelPath }
-				class="hidden"
-			/>
-			<i
-				x-show={ bindModelPath + ` !== "` + bindValue + `"` }
-				class="ph-duotone ph-circle text-xl"
-			></i>
-			<i
-				x-show={ bindModelPath + ` === "` + bindValue + `"` }
-				class="ph-duotone ph-check-circle text-infinite-500 text-xl"
-			></i>
-		</label>
+		{{ labelTextSize := "text-sm" }}
+		switch inputDto.Size {
+			case RadioInputSizeXs:
+				{{ labelTextSize = "text-xs" }}
+			case RadioInputSizeSm:
+				{{ labelTextSize = "text-sm" }}
+			case RadioInputSizeMd:
+				{{ labelTextSize = "text-base" }}
+			case RadioInputSizeLg:
+				{{ labelTextSize = "text-lg" }}
+			case RadioInputSizeXl:
+				{{ labelTextSize = "text-xl" }}
+		}
 		<label
-			class="cursor-pointer text-sm"
-			:class={ bindModelPath + " === '" + bindValue + "' && 'text-infinite-500 font-bold'" }
+			class={ "flex flex-row gap-1 cursor-pointer items-center " + labelTextSize }
+			:class={ `String(` + inputDto.ModelBindPath + `) == "` + inputDto.BindValue + `" && "text-infinite-500 font-bold"` }
 		>
-			{ label }
+			if inputDto.Id != "" {
+				<input
+					type="radio"
+					id={ inputDto.Id }
+					name={ inputDto.Id }
+					value={ inputDto.BindValue }
+					x-model={ inputDto.ModelBindPath }
+					class="hidden"
+				/>
+			}
+			{{ iconSize := "text-xl" }}
+			switch inputDto.Size {
+				case RadioInputSizeXs:
+					{{ iconSize = "text-lg" }}
+				case RadioInputSizeSm:
+					{{ iconSize = "text-xl" }}
+				case RadioInputSizeMd:
+					{{ iconSize = "text-2xl" }}
+				case RadioInputSizeLg:
+					{{ iconSize = "text-3xl" }}
+				case RadioInputSizeXl:
+					{{ iconSize = "text-4xl" }}
+			}
+			<i
+				class={ "ph-duotone " + iconSize }
+				:class={ `String(` + inputDto.ModelBindPath + `) == "` + inputDto.BindValue + `" ? "ph-check-circle" : "ph-circle"` }
+			></i>
+			{ inputDto.Label }
 		</label>
 	</div>
 }

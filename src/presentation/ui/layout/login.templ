@@ -3,6 +3,7 @@ package layout
 import (
 	infraEnvs "github.com/goinfinite/ez/src/infra/envs"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
+	"github.com/goinfinite/ez/src/presentation/ui/component/structural"
 	componentUtil "github.com/goinfinite/ez/src/presentation/ui/component/util"
 )
 
@@ -72,21 +73,25 @@ templ Login() {
 				</a>
 				<form
 					x-data="login"
-					onsubmit="event.preventDefault()"
+					x-on:submit.prevent="createSessionToken()"
 					class="bg-ez-400 min-w-110 flex flex-col items-center justify-center gap-4 rounded-lg p-8 drop-shadow-md"
 				>
-					<div class="mb-1 w-full">
+					<div class="w-full">
 						<h1 class="text-2xl">Hello Again!</h1>
 						<p class="mt-1 text-sm">Please enter your credentials to continue.</p>
 					</div>
-					@componentForm.InputField(componentForm.InputFieldDto{
+					@componentForm.InputField(componentForm.InputFieldSettings{
 						InputType:     "text",
 						Id:            "username",
 						Label:         "Username",
-						BindValuePath: "username",
+						ModelBindPath: "username",
 					})
 					@componentForm.PasswordInput("password", "Password", "password", false, false)
-					@componentForm.SubmitButton("Login", "ph-sign-in", "createSessionToken()", false)
+					@componentStructural.IconButton(componentStructural.IconButtonSettings{
+						Label:       "Login",
+						Icon:        "ph-sign-in",
+						IsFullWidth: true,
+					})
 				</form>
 			</div>
 			@componentUtil.Toast()

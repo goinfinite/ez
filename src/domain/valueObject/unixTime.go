@@ -39,7 +39,7 @@ func (vo UnixTime) Read() int64 {
 	return time.Unix(int64(vo), 0).UTC().Unix()
 }
 
-func (vo UnixTime) GetRfcDate() string {
+func (vo UnixTime) ReadAsRfcDate() string {
 	return time.Unix(int64(vo), 0).UTC().Format(time.RFC3339)
 }
 

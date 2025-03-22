@@ -3,7 +3,7 @@ package dto
 import "github.com/goinfinite/ez/src/domain/valueObject"
 
 type CreateAccount struct {
-	Username          valueObject.Username      `json:"username"`
+	Username          valueObject.UnixUsername  `json:"username"`
 	Password          valueObject.Password      `json:"password"`
 	Quota             *valueObject.AccountQuota `json:"quota,omitempty"`
 	OperatorAccountId valueObject.AccountId     `json:"-"`
@@ -11,7 +11,7 @@ type CreateAccount struct {
 }
 
 func NewCreateAccount(
-	username valueObject.Username,
+	username valueObject.UnixUsername,
 	password valueObject.Password,
 	quota *valueObject.AccountQuota,
 	operatorAccountId valueObject.AccountId,

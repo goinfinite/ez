@@ -1,8 +1,6 @@
 package service
 
 import (
-	"errors"
-
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
@@ -10,8 +8,6 @@ import (
 	"github.com/goinfinite/ez/src/infra"
 	"github.com/goinfinite/ez/src/infra/db"
 	serviceHelper "github.com/goinfinite/ez/src/presentation/service/helper"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type ScheduledTaskService struct {
@@ -34,7 +30,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["taskId"] != nil {
 		taskId, err := valueObject.NewScheduledTaskId(input["taskId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		taskIdPtr = &taskId
 	}
@@ -43,7 +39,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["taskName"] != nil {
 		taskName, err := valueObject.NewScheduledTaskName(input["taskName"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		taskNamePtr = &taskName
 	}
@@ -52,7 +48,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["taskStatus"] != nil {
 		taskStatus, err := valueObject.NewScheduledTaskStatus(input["taskStatus"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		taskStatusPtr = &taskStatus
 	}
@@ -62,51 +58,22 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 		var assertOk bool
 		taskTags, assertOk = input["taskTags"].([]valueObject.ScheduledTaskTag)
 		if !assertOk {
-			return NewServiceOutput(UserError, errors.New("InvalidTaskTags"))
+			return NewServiceOutput(UserError, "InvalidTaskTags")
 		}
 	}
-
-	var startedBeforeAtPtr, startedAfterAtPtr *valueObject.UnixTime
-	var finishedBeforeAtPtr, finishedAfterAtPtr *valueObject.UnixTime
-	var createdBeforeAtPtr, createdAfterAtPtr *valueObject.UnixTime
 
 	timeParamNames := []string{
 		"startedBeforeAt", "startedAfterAt",
 		"finishedBeforeAt", "finishedAfterAt",
 		"createdBeforeAt", "createdAfterAt",
 	}
-	for _, timeParamName := range timeParamNames {
-		if input[timeParamName] == nil {
-			continue
-		}
-
-		timeParam, err := valueObject.NewUnixTime(input[timeParamName])
-		if err != nil {
-			capitalParamName := cases.Title(language.English).String(timeParamName)
-			return NewServiceOutput(UserError, errors.New("Invalid"+capitalParamName))
-		}
-
-		switch timeParamName {
-		case "startedBeforeAt":
-			startedBeforeAtPtr = &timeParam
-		case "startedAfterAt":
-			startedAfterAtPtr = &timeParam
-		case "finishedBeforeAt":
-			finishedBeforeAtPtr = &timeParam
-		case "finishedAfterAt":
-			finishedAfterAtPtr = &timeParam
-		case "createdBeforeAt":
-			createdBeforeAtPtr = &timeParam
-		case "createdAfterAt":
-			createdAfterAtPtr = &timeParam
-		}
-	}
+	timeParamPtrs := serviceHelper.TimeParamsParser(timeParamNames, input)
 
 	paginationDto := useCase.ScheduledTasksDefaultPagination
 	if input["pageNumber"] != nil {
 		pageNumber, err := voHelper.InterfaceToUint32(input["pageNumber"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidPageNumber"))
+			return NewServiceOutput(UserError, "InvalidPageNumber")
 		}
 		paginationDto.PageNumber = pageNumber
 	}
@@ -114,7 +81,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["itemsPerPage"] != nil {
 		itemsPerPage, err := voHelper.InterfaceToUint16(input["itemsPerPage"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidItemsPerPage"))
+			return NewServiceOutput(UserError, "InvalidItemsPerPage")
 		}
 		paginationDto.ItemsPerPage = itemsPerPage
 	}
@@ -122,7 +89,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["sortBy"] != nil {
 		sortBy, err := valueObject.NewPaginationSortBy(input["sortBy"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.SortBy = &sortBy
 	}
@@ -130,7 +97,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["sortDirection"] != nil {
 		sortDirection, err := valueObject.NewPaginationSortDirection(input["sortDirection"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.SortDirection = &sortDirection
 	}
@@ -138,7 +105,7 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 	if input["lastSeenId"] != nil {
 		lastSeenId, err := valueObject.NewPaginationLastSeenId(input["lastSeenId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.LastSeenId = &lastSeenId
 	}
@@ -149,12 +116,12 @@ func (service *ScheduledTaskService) Read(input map[string]interface{}) ServiceO
 		TaskName:         taskNamePtr,
 		TaskStatus:       taskStatusPtr,
 		TaskTags:         taskTags,
-		StartedBeforeAt:  startedBeforeAtPtr,
-		StartedAfterAt:   startedAfterAtPtr,
-		FinishedBeforeAt: finishedBeforeAtPtr,
-		FinishedAfterAt:  finishedAfterAtPtr,
-		CreatedBeforeAt:  createdBeforeAtPtr,
-		CreatedAfterAt:   createdAfterAtPtr,
+		StartedBeforeAt:  timeParamPtrs["startedBeforeAt"],
+		StartedAfterAt:   timeParamPtrs["startedAfterAt"],
+		FinishedBeforeAt: timeParamPtrs["finishedBeforeAt"],
+		FinishedAfterAt:  timeParamPtrs["finishedAfterAt"],
+		CreatedBeforeAt:  timeParamPtrs["createdBeforeAt"],
+		CreatedAfterAt:   timeParamPtrs["createdAfterAt"],
 	}
 
 	scheduledTaskQueryRepo := infra.NewScheduledTaskQueryRepo(service.persistentDbSvc)

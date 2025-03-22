@@ -60,7 +60,7 @@ script MultiColumnRepeatableFieldsetLocalState(id string) {
 }
 
 templ MultiColumnRepeatableFieldset(
-	id, title, description, bindValuePath string,
+	id, title, description, modelBindPath string,
 	repeatableFields []RepeatableField,
 ) {
 	<!-- MultiColumnRepeatableFieldset JavaScript -->
@@ -69,7 +69,7 @@ templ MultiColumnRepeatableFieldset(
 	<div
 		class="bg-ez-400 flex flex-col gap-6 rounded-md p-4"
 		x-data={ id + "MultiColumnRepeatableFieldset" }
-		x-init={ "$watch('" + bindValuePath + "', value => {registeredFieldsets = value; flattenRegisteredFieldsets()})" }
+		x-init={ "$watch('" + modelBindPath + "', value => {registeredFieldsets = value; flattenRegisteredFieldsets()})" }
 	>
 		<input type="hidden" id={ id } name={ id } x-model:value="registeredFieldsetsFlattened"/>
 		<div>
@@ -102,7 +102,7 @@ templ MultiColumnRepeatableFieldset(
 					</template>
 					<button
 						type="button"
-						@click={ "removeRegisteredFieldset(fieldsetIndex); " + bindValuePath + " = registeredFieldsets" }
+						@click={ "removeRegisteredFieldset(fieldsetIndex); " + modelBindPath + " = registeredFieldsets" }
 						class="min-w-9 h-9 rounded-sm bg-red-900 leading-none hover:bg-red-700"
 					>
 						<i class="ph-bold ph-trash text-xl"></i>
@@ -115,19 +115,21 @@ templ MultiColumnRepeatableFieldset(
 				switch repeatableField.InputType {
 					case "select":
 						@SelectInput(SelectInputDto{
-							Label: repeatableField.Label, BindValuePath: "newFieldset['" + repeatableField.Id + "']",
-							Options: repeatableField.Options,
+							Label:         repeatableField.Label,
+							ModelBindPath: "newFieldset['" + repeatableField.Id + "']",
+							Options:       repeatableField.Options,
 						})
 					case "text":
-						@InputField(InputFieldDto{
-							InputType: repeatableField.InputType, Label: repeatableField.Label,
-							BindValuePath: "newFieldset['" + repeatableField.Id + "']",
+						@InputField(InputFieldSettings{
+							InputType:     repeatableField.InputType,
+							Label:         repeatableField.Label,
+							ModelBindPath: "newFieldset['" + repeatableField.Id + "']",
 						})
 				}
 			}
 			<button
 				type="button"
-				@click={ "createFieldset(); " + bindValuePath + " = registeredFieldsets" }
+				@click={ "createFieldset(); " + modelBindPath + " = registeredFieldsets" }
 				class="bg-infinite-500 hover:bg-infinite-300 min-w-9 h-9 rounded-sm leading-none"
 			>
 				<i class="ph-bold ph-plus text-xl"></i>

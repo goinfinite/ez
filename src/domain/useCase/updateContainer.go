@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func UpdateContainer(
@@ -19,7 +20,7 @@ func UpdateContainer(
 ) error {
 	readContainersDto := dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
-		ContainerId: &updateDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{updateDto.ContainerId},
 	}
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)

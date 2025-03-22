@@ -21,7 +21,7 @@ func TestAccountQueryRepo(t *testing.T) {
 	})
 
 	t.Run("GetValidAccountByUsername", func(t *testing.T) {
-		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
+		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 
 		_, err := accountQueryRepo.ReadByUsername(username)
 		if err != nil {
@@ -39,7 +39,7 @@ func TestAccountQueryRepo(t *testing.T) {
 	})
 
 	t.Run("GetInvalidAccount", func(t *testing.T) {
-		username, _ := valueObject.NewUsername("invalid")
+		username, _ := valueObject.NewUnixUsername("invalid")
 
 		_, err := accountQueryRepo.ReadByUsername(username)
 		if err == nil {

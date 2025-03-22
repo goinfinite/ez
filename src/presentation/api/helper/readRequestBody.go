@@ -106,5 +106,9 @@ func ReadRequestBody(c echo.Context) (map[string]interface{}, error) {
 	requestBody["operatorAccountId"] = c.Get("accountId")
 	requestBody["operatorIpAddress"] = c.RealIP()
 
+	if requestBody["accountId"] == nil {
+		requestBody["accountId"] = requestBody["operatorAccountId"]
+	}
+
 	return requestBody, nil
 }

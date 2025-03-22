@@ -35,22 +35,21 @@ func NewContainerService(
 }
 
 func (service *ContainerService) Read(input map[string]interface{}) ServiceOutput {
-	var containerIdPtr *valueObject.ContainerId
+	var containerId []valueObject.ContainerId
+	var assertOk bool
 	if input["containerId"] != nil {
-		containerId, err := valueObject.NewContainerId(input["containerId"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+		containerId, assertOk = input["containerId"].([]valueObject.ContainerId)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidContainerId")
 		}
-		containerIdPtr = &containerId
 	}
 
-	var containerAccountIdPtr *valueObject.AccountId
+	var containerAccountId []valueObject.AccountId
 	if input["containerAccountId"] != nil {
-		containerAccountId, err := valueObject.NewAccountId(input["containerAccountId"])
-		if err != nil {
-			return NewServiceOutput(UserError, err.Error())
+		containerAccountId, assertOk = input["containerAccountId"].([]valueObject.AccountId)
+		if !assertOk {
+			return NewServiceOutput(UserError, "InvalidContainerAccountId")
 		}
-		containerAccountIdPtr = &containerAccountId
 	}
 
 	var containerHostnamePtr *valueObject.Fqdn
@@ -102,7 +101,6 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 
 	containerPortBindings := []valueObject.PortBinding{}
 	if input["containerPortBindings"] != nil {
-		var assertOk bool
 		containerPortBindings, assertOk = input["containerPortBindings"].([]valueObject.PortBinding)
 		if !assertOk {
 			return NewServiceOutput(UserError, "InvalidContainerPortBindings")
@@ -155,7 +153,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 		timeParam, err := valueObject.NewUnixTime(input[timeParamName])
 		if err != nil {
 			capitalParamName := cases.Title(language.English).String(timeParamName)
-			return NewServiceOutput(UserError, errors.New("Invalid"+capitalParamName))
+			return NewServiceOutput(UserError, "Invalid"+capitalParamName)
 		}
 
 		switch timeParamName {
@@ -178,7 +176,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["withMetrics"] != nil {
 		withMetrics, err := voHelper.InterfaceToBool(input["withMetrics"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidWithMetrics"))
+			return NewServiceOutput(UserError, "InvalidWithMetrics")
 		}
 		withMetricsPtr = &withMetrics
 	}
@@ -187,7 +185,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["pageNumber"] != nil {
 		pageNumber, err := voHelper.InterfaceToUint32(input["pageNumber"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidPageNumber"))
+			return NewServiceOutput(UserError, "InvalidPageNumber")
 		}
 		paginationDto.PageNumber = pageNumber
 	}
@@ -195,7 +193,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["itemsPerPage"] != nil {
 		itemsPerPage, err := voHelper.InterfaceToUint16(input["itemsPerPage"])
 		if err != nil {
-			return NewServiceOutput(UserError, errors.New("InvalidItemsPerPage"))
+			return NewServiceOutput(UserError, "InvalidItemsPerPage")
 		}
 		paginationDto.ItemsPerPage = itemsPerPage
 	}
@@ -203,7 +201,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["sortBy"] != nil {
 		sortBy, err := valueObject.NewPaginationSortBy(input["sortBy"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.SortBy = &sortBy
 	}
@@ -211,7 +209,7 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["sortDirection"] != nil {
 		sortDirection, err := valueObject.NewPaginationSortDirection(input["sortDirection"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.SortDirection = &sortDirection
 	}
@@ -219,15 +217,15 @@ func (service *ContainerService) Read(input map[string]interface{}) ServiceOutpu
 	if input["lastSeenId"] != nil {
 		lastSeenId, err := valueObject.NewPaginationLastSeenId(input["lastSeenId"])
 		if err != nil {
-			return NewServiceOutput(UserError, err)
+			return NewServiceOutput(UserError, err.Error())
 		}
 		paginationDto.LastSeenId = &lastSeenId
 	}
 
 	readDto := dto.ReadContainersRequest{
 		Pagination:             paginationDto,
-		ContainerId:            containerIdPtr,
-		ContainerAccountId:     containerAccountIdPtr,
+		ContainerId:            containerId,
+		ContainerAccountId:     containerAccountId,
 		ContainerHostname:      containerHostnamePtr,
 		ContainerStatus:        containerStatusPtr,
 		ContainerImageId:       containerImageIdPtr,
@@ -493,12 +491,11 @@ func (service *ContainerService) Create(
 			createParams = append(createParams, "true")
 		}
 
-		timeoutSeconds := uint16(600)
-
+		timeoutSeconds := uint32(600)
 		if existingContainerIdPtr != nil {
 			createParams = append(createParams, "--existing-container-id")
 			createParams = append(createParams, existingContainerIdPtr.String())
-			timeoutSeconds = uint16(1800)
+			timeoutSeconds = uint32(1800)
 		}
 
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
@@ -508,9 +505,10 @@ func (service *ContainerService) Create(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("container")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
+		taskTimeoutSecs := valueObject.TimeDuration(uint64(timeoutSeconds))
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
-			taskName, taskCmd, taskTags, &timeoutSeconds, nil,
+			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,
 		)
 
 		err = useCase.CreateScheduledTask(scheduledTaskCmdRepo, scheduledTaskCreateDto)
@@ -553,7 +551,7 @@ func (service *ContainerService) Create(
 	mappingCmdRepo := infra.NewMappingCmdRepo(service.persistentDbSvc)
 	containerProxyCmdRepo := infra.NewContainerProxyCmdRepo(service.persistentDbSvc)
 
-	err = useCase.CreateContainer(
+	containerId, err := useCase.CreateContainer(
 		service.containerQueryRepo, containerCmdRepo, containerImageQueryRepo,
 		containerImageCmdRepo, accountQueryRepo, accountCmdRepo,
 		containerProfileQueryRepo, mappingQueryRepo, mappingCmdRepo,
@@ -563,7 +561,7 @@ func (service *ContainerService) Create(
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Created, "ContainerCreated")
+	return NewServiceOutput(Created, containerId)
 }
 
 func (service *ContainerService) Update(input map[string]interface{}) ServiceOutput {

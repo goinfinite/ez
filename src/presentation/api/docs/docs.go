@@ -206,6 +206,1000 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup/destination/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backups destinations.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupsDestinations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationName",
+                        "name": "destinationName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationType",
+                        "name": "destinationType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ObjectStorageProvider",
+                        "name": "objectStorageProvider",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RemoteHostType",
+                        "name": "remoteHostType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RemoteHostname",
+                        "name": "remoteHostname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupDestinationsResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "UpdateBackupDestination",
+                "parameters": [
+                    {
+                        "description": "UpdateBackupDestination",
+                        "name": "updateBackupDestinationDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBackupDestination"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupDestinationUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "CreateBackupDestination",
+                "parameters": [
+                    {
+                        "description": "CreateBackupDestination",
+                        "name": "createBackupDestinationDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupDestinationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupDestinationResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "CreateBackupDestinationInfraError",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/destination/{accountId}/{destinationId}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DeleteBackupDestination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupDestinationDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/job/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backup jobs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupJobs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "BackupJobStatus",
+                        "name": "jobStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RetentionStrategy",
+                        "name": "retentionStrategy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ArchiveCompressionFormat",
+                        "name": "archiveCompressionFormat",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastRunStatus",
+                        "name": "lastRunStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastRunBeforeAt",
+                        "name": "lastRunBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastRunAfterAt",
+                        "name": "lastRunAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "NextRunBeforeAt",
+                        "name": "nextRunBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "NextRunAfterAt",
+                        "name": "nextRunAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupJobsResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a backup job.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "UpdateBackupJob",
+                "parameters": [
+                    {
+                        "description": "UpdateBackupJob",
+                        "name": "updateBackupJobDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBackupJob"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupJobUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a backup destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "CreateBackupJob",
+                "parameters": [
+                    {
+                        "description": "CreateBackupJob",
+                        "name": "createBackupJobDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupJob"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupJobCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/job/{accountId}/{jobId}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a backup job.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DeleteBackupJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupJobDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/job/{accountId}/{jobId}/run/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Run a backup job.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "RunBackupJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupTaskCreated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/task/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backup tasks.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupTasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskId",
+                        "name": "taskId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupJobId",
+                        "name": "jobId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupDestinationId",
+                        "name": "destinationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupTaskStatus",
+                        "name": "taskStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RetentionStrategy",
+                        "name": "retentionStrategy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ContainerId",
+                        "name": "containerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedBeforeAt",
+                        "name": "startedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "StartedAfterAt",
+                        "name": "startedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FinishedBeforeAt",
+                        "name": "finishedBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FinishedAfterAt",
+                        "name": "finishedAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupTasksResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update a backup task.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "UpdateBackupTask",
+                "parameters": [
+                    {
+                        "description": "UpdateBackupTask",
+                        "name": "updateBackupTaskDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBackupTask"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskUpdated",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/task/archive/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List backup tasks archives.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "ReadBackupTaskArchives",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskArchiveId",
+                        "name": "archiveId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "BackupAccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "BackupTaskId",
+                        "name": "taskId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadBackupTaskArchivesResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Schedule a backup task archive creation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "CreateBackupTaskArchive",
+                "parameters": [
+                    {
+                        "description": "CreateBackupTaskArchive",
+                        "name": "createBackupTaskArchiveDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBackupTaskArchive"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupTaskArchiveCreationScheduled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/task/archive/{archiveId}/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Download a backup task archive file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DownloadBackupTaskArchiveFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ArchiveId",
+                        "name": "archiveId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskArchiveFile",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a backup task archive.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DeleteBackupTaskArchive",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskArchiveId",
+                        "name": "archiveId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskArchiveDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/task/restore/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Schedule a backup task restoration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "RestoreBackupTask",
+                "parameters": [
+                    {
+                        "description": "RestoreBackupTask",
+                        "name": "restoreBackupTaskDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RestoreBackupTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "BackupTaskRestorationScheduled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/backup/task/{taskId}/": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a backup task and its files if \"shouldDiscardFiles\" is true.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "DeleteBackupTask",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BackupTaskId",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ShouldDiscardFiles (bool)",
+                        "name": "shouldDiscardFiles",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BackupTaskDeleted",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/container/": {
             "get": {
                 "security": [
@@ -502,15 +1496,68 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "ReadContainerImageArchiveFiles",
+                "summary": "ReadContainerImageArchives",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ImageId",
+                        "name": "imageId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "AccountId",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedBeforeAt",
+                        "name": "createdBeforeAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "CreatedAfterAt",
+                        "name": "createdAfterAt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.ContainerImageArchiveFile"
-                            }
+                            "$ref": "#/definitions/dto.ReadContainerImageArchivesResponse"
                         }
                     }
                 }
@@ -531,21 +1578,21 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "CreateContainerImageArchiveFile",
+                "summary": "CreateContainerImageArchive",
                 "parameters": [
                     {
-                        "description": "CreateContainerImageArchiveFileDto",
-                        "name": "createContainerImageArchiveFileDto",
+                        "description": "CreateContainerImageArchiveDto",
+                        "name": "createContainerImageArchiveDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateContainerImageArchiveFile"
+                            "$ref": "#/definitions/dto.CreateContainerImageArchive"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "ContainerImageArchiveFileCreationScheduled",
+                        "description": "ContainerImageArchiveCreationScheduled",
                         "schema": {
                             "type": "object"
                         }
@@ -570,7 +1617,7 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "ImportContainerImageArchiveFiles",
+                "summary": "ImportContainerImageArchives",
                 "parameters": [
                     {
                         "type": "string",
@@ -588,13 +1635,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "ContainerImageArchiveFilesImported",
+                        "description": "ContainerImageArchivesImported",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "207": {
-                        "description": "ContainerImageArchiveFilesPartiallyImported",
+                        "description": "ContainerImageArchivesPartiallyImported",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -622,7 +1669,7 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "DownloadContainerImageArchiveFile",
+                "summary": "DownloadContainerImageArchive",
                 "parameters": [
                     {
                         "type": "string",
@@ -641,7 +1688,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ContainerImageArchiveFile",
+                        "description": "ContainerImageArchive",
                         "schema": {
                             "type": "file"
                         }
@@ -664,7 +1711,7 @@ const docTemplate = `{
                 "tags": [
                     "containerImageArchive"
                 ],
-                "summary": "DeleteContainerImageArchiveFile",
+                "summary": "DeleteContainerImageArchive",
                 "parameters": [
                     {
                         "type": "string",
@@ -683,7 +1730,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ContainerImageArchiveFileDeleted",
+                        "description": "ContainerImageArchiveDeleted",
                         "schema": {
                             "type": "object"
                         }
@@ -1897,6 +2944,194 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateBackupDestinationRequest": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "destinationDescription": {
+                    "type": "string"
+                },
+                "destinationName": {
+                    "type": "string"
+                },
+                "destinationPath": {
+                    "type": "string"
+                },
+                "destinationType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationType"
+                },
+                "downloadBytesSecRateLimit": {
+                    "type": "integer"
+                },
+                "maxConcurrentConnections": {
+                    "type": "integer"
+                },
+                "maxDestinationStorageUsagePercent": {
+                    "type": "integer"
+                },
+                "minLocalStorageFreePercent": {
+                    "type": "integer"
+                },
+                "objectStorageBucketName": {
+                    "type": "string"
+                },
+                "objectStorageEndpointUrl": {
+                    "type": "string"
+                },
+                "objectStorageProvider": {
+                    "$ref": "#/definitions/valueObject.ObjectStorageProvider"
+                },
+                "objectStorageProviderAccessKeyId": {
+                    "type": "string"
+                },
+                "objectStorageProviderRegion": {
+                    "type": "string"
+                },
+                "objectStorageProviderSecretAccessKey": {
+                    "type": "string"
+                },
+                "remoteHostConnectionRetrySecs": {
+                    "type": "integer"
+                },
+                "remoteHostConnectionTimeoutSecs": {
+                    "type": "integer"
+                },
+                "remoteHostNetworkPort": {
+                    "type": "integer"
+                },
+                "remoteHostPassword": {
+                    "type": "string"
+                },
+                "remoteHostPrivateKeyFilePath": {
+                    "type": "string"
+                },
+                "remoteHostType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationRemoteHostType"
+                },
+                "remoteHostUsername": {
+                    "type": "string"
+                },
+                "remoteHostname": {
+                    "type": "string"
+                },
+                "skipCertificateVerification": {
+                    "type": "boolean"
+                },
+                "uploadBytesSecRateLimit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateBackupDestinationResponse": {
+            "type": "object",
+            "properties": {
+                "destinationId": {
+                    "type": "integer"
+                },
+                "encryptionKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateBackupJob": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "archiveCompressionFormat": {
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "destinationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "jobDescription": {
+                    "type": "string"
+                },
+                "maxConcurrentCpuCores": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionCount": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionDays": {
+                    "type": "integer"
+                },
+                "retentionStrategy": {
+                    "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateBackupTaskArchive": {
+            "type": "object",
+            "properties": {
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.CreateContainer": {
             "type": "object",
             "properties": {
@@ -1947,14 +3182,14 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateContainerImageArchiveFile": {
+        "dto.CreateContainerImageArchive": {
             "type": "object",
             "properties": {
                 "accountId": {
                     "type": "integer"
                 },
                 "compressionFormat": {
-                    "type": "string"
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
                 },
                 "imageId": {
                     "type": "string"
@@ -1997,7 +3232,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "archiveCompressionFormat": {
-                    "type": "string"
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
                 },
                 "containerId": {
                     "type": "string"
@@ -2080,7 +3315,75 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sortDirection": {
-                    "type": "string"
+                    "$ref": "#/definitions/valueObject.PaginationSortDirection"
+                }
+            }
+        },
+        "dto.ReadBackupDestinationsResponse": {
+            "type": "object",
+            "properties": {
+                "destinations": {
+                    "type": "array",
+                    "items": {}
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                }
+            }
+        },
+        "dto.ReadBackupJobsResponse": {
+            "type": "object",
+            "properties": {
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.BackupJob"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                }
+            }
+        },
+        "dto.ReadBackupTaskArchivesResponse": {
+            "type": "object",
+            "properties": {
+                "archives": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.BackupTaskArchive"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                }
+            }
+        },
+        "dto.ReadBackupTasksResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.BackupTask"
+                    }
+                }
+            }
+        },
+        "dto.ReadContainerImageArchivesResponse": {
+            "type": "object",
+            "properties": {
+                "archives": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.ContainerImageArchive"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.Pagination"
                 }
             }
         },
@@ -2132,6 +3435,50 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.RestoreBackupTaskRequest": {
+            "type": "object",
+            "properties": {
+                "archiveId": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "shouldReplaceExistingContainers": {
+                    "type": "boolean"
+                },
+                "shouldRestoreMappings": {
+                    "type": "boolean"
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.UpdateAccount": {
             "type": "object",
             "properties": {
@@ -2146,6 +3493,159 @@ const docTemplate = `{
                 },
                 "shouldUpdateApiKey": {
                     "type": "boolean"
+                }
+            }
+        },
+        "dto.UpdateBackupDestination": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "destinationDescription": {
+                    "type": "string"
+                },
+                "destinationId": {
+                    "type": "integer"
+                },
+                "destinationName": {
+                    "type": "string"
+                },
+                "destinationPath": {
+                    "type": "string"
+                },
+                "downloadBytesSecRateLimit": {
+                    "type": "integer"
+                },
+                "maxConcurrentConnections": {
+                    "type": "integer"
+                },
+                "maxDestinationStorageUsagePercent": {
+                    "type": "integer"
+                },
+                "minLocalStorageFreePercent": {
+                    "type": "integer"
+                },
+                "objectStorageBucketName": {
+                    "type": "string"
+                },
+                "objectStorageEndpointUrl": {
+                    "type": "string"
+                },
+                "objectStorageProvider": {
+                    "$ref": "#/definitions/valueObject.ObjectStorageProvider"
+                },
+                "objectStorageProviderAccessKeyId": {
+                    "type": "string"
+                },
+                "objectStorageProviderRegion": {
+                    "type": "string"
+                },
+                "objectStorageProviderSecretAccessKey": {
+                    "type": "string"
+                },
+                "remoteHostConnectionRetrySecs": {
+                    "type": "integer"
+                },
+                "remoteHostConnectionTimeoutSecs": {
+                    "type": "integer"
+                },
+                "remoteHostNetworkPort": {
+                    "type": "integer"
+                },
+                "remoteHostPassword": {
+                    "type": "string"
+                },
+                "remoteHostPrivateKeyFilePath": {
+                    "type": "string"
+                },
+                "remoteHostType": {
+                    "$ref": "#/definitions/valueObject.BackupDestinationRemoteHostType"
+                },
+                "remoteHostUsername": {
+                    "type": "string"
+                },
+                "remoteHostname": {
+                    "type": "string"
+                },
+                "skipCertificateVerification": {
+                    "type": "boolean"
+                },
+                "uploadBytesSecRateLimit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateBackupJob": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "destinationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "jobDescription": {
+                    "type": "string"
+                },
+                "jobId": {
+                    "type": "integer"
+                },
+                "jobStatus": {
+                    "type": "boolean"
+                },
+                "maxConcurrentCpuCores": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionCount": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionDays": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateBackupTask": {
+            "type": "object",
+            "properties": {
+                "jobId": {
+                    "type": "integer"
+                },
+                "taskStatus": {
+                    "$ref": "#/definitions/valueObject.BackupTaskStatus"
                 }
             }
         },
@@ -2258,6 +3758,198 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.BackupJob": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "accountUsername": {
+                    "type": "string"
+                },
+                "archiveCompressionFormat": {
+                    "$ref": "#/definitions/valueObject.CompressionFormat"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "containerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "destinationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "exceptContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "jobDescription": {
+                    "type": "string"
+                },
+                "jobId": {
+                    "type": "integer"
+                },
+                "jobStatus": {
+                    "type": "boolean"
+                },
+                "lastRunAt": {
+                    "type": "integer"
+                },
+                "lastRunStatus": {
+                    "$ref": "#/definitions/valueObject.BackupTaskStatus"
+                },
+                "maxConcurrentCpuCores": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionCount": {
+                    "type": "integer"
+                },
+                "maxTaskRetentionDays": {
+                    "type": "integer"
+                },
+                "nextRunAt": {
+                    "type": "integer"
+                },
+                "retentionStrategy": {
+                    "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
+                },
+                "tasksCount": {
+                    "type": "integer"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                },
+                "totalSpaceUsageBytes": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.BackupTask": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "accountUsername": {
+                    "type": "string"
+                },
+                "backupSchedule": {
+                    "type": "string"
+                },
+                "containerAccountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "destinationId": {
+                    "type": "integer"
+                },
+                "elapsedSecs": {
+                    "type": "integer"
+                },
+                "executionOutput": {
+                    "type": "string"
+                },
+                "failedContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "finishedAt": {
+                    "type": "integer"
+                },
+                "jobId": {
+                    "type": "integer"
+                },
+                "retentionStrategy": {
+                    "$ref": "#/definitions/valueObject.BackupRetentionStrategy"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "startedAt": {
+                    "type": "integer"
+                },
+                "successfulContainerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "taskStatus": {
+                    "$ref": "#/definitions/valueObject.BackupTaskStatus"
+                },
+                "timeoutSecs": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.BackupTaskArchive": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "accountUsername": {
+                    "type": "string"
+                },
+                "archiveId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "integer"
+                },
+                "downloadUrl": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "taskId": {
+                    "type": "integer"
+                },
+                "unixFilePath": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Container": {
             "type": "object",
             "properties": {
@@ -2350,6 +4042,15 @@ const docTemplate = `{
                 "isa": {
                     "type": "string"
                 },
+                "originContainerDetails": {
+                    "$ref": "#/definitions/entity.Container"
+                },
+                "originContainerMappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Mapping"
+                    }
+                },
                 "portBindings": {
                     "type": "array",
                     "items": {
@@ -2361,11 +4062,14 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.ContainerImageArchiveFile": {
+        "entity.ContainerImageArchive": {
             "type": "object",
             "properties": {
                 "accountId": {
                     "type": "integer"
+                },
+                "containerId": {
+                    "type": "string"
                 },
                 "createdAt": {
                     "type": "integer"
@@ -2731,6 +4435,77 @@ const docTemplate = `{
                 }
             }
         },
+        "valueObject.BackupDestinationRemoteHostType": {
+            "type": "string",
+            "enum": [
+                "ftp",
+                "sftp"
+            ],
+            "x-enum-varnames": [
+                "BackupDestinationRemoteHostTypeFtp",
+                "BackupDestinationRemoteHostTypeSftp"
+            ]
+        },
+        "valueObject.BackupDestinationType": {
+            "type": "string",
+            "enum": [
+                "local",
+                "remote-host",
+                "object-storage"
+            ],
+            "x-enum-varnames": [
+                "BackupDestinationTypeLocal",
+                "BackupDestinationTypeRemoteHost",
+                "BackupDestinationTypeObjectStorage"
+            ]
+        },
+        "valueObject.BackupRetentionStrategy": {
+            "type": "string",
+            "enum": [
+                "full",
+                "incremental"
+            ],
+            "x-enum-varnames": [
+                "BackupRetentionStrategyFull",
+                "BackupRetentionStrategyIncremental"
+            ]
+        },
+        "valueObject.BackupTaskStatus": {
+            "type": "string",
+            "enum": [
+                "completed",
+                "failed",
+                "executing",
+                "partial",
+                "canceled",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "BackupTaskStatusCompleted",
+                "BackupTaskStatusFailed",
+                "BackupTaskStatusExecuting",
+                "BackupTaskStatusPartial",
+                "BackupTaskStatusCanceled",
+                "BackupTaskStatusCancelled"
+            ]
+        },
+        "valueObject.CompressionFormat": {
+            "type": "string",
+            "enum": [
+                "tar",
+                "gzip",
+                "zip",
+                "xz",
+                "br"
+            ],
+            "x-enum-varnames": [
+                "CompressionFormatTarball",
+                "CompressionFormatGzip",
+                "CompressionFormatZip",
+                "CompressionFormatXz",
+                "CompressionFormatBrotli"
+            ]
+        },
         "valueObject.ContainerMetrics": {
             "type": "object",
             "properties": {
@@ -2833,6 +4608,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/valueObject.NetInterfaceInfo"
                     }
                 },
+                "netInfoAggregated": {
+                    "$ref": "#/definitions/valueObject.NetInterfaceInfo"
+                },
                 "storageInfo": {
                     "type": "array",
                     "items": {
@@ -2875,6 +4653,46 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "valueObject.ObjectStorageProvider": {
+            "type": "string",
+            "enum": [
+                "custom",
+                "akamai",
+                "aws",
+                "azure",
+                "backblaze",
+                "cloudflare",
+                "digitalocean",
+                "google-cloud",
+                "linode",
+                "magalu",
+                "wasabi"
+            ],
+            "x-enum-varnames": [
+                "ObjectStorageProviderCustom",
+                "ObjectStorageProviderAkamai",
+                "ObjectStorageProviderAws",
+                "ObjectStorageProviderAzure",
+                "ObjectStorageProviderBackblaze",
+                "ObjectStorageProviderCloudFlare",
+                "ObjectStorageProviderDigitalOcean",
+                "ObjectStorageProviderGoogleCloud",
+                "ObjectStorageProviderLinode",
+                "ObjectStorageProviderMagalu",
+                "ObjectStorageProviderWasabi"
+            ]
+        },
+        "valueObject.PaginationSortDirection": {
+            "type": "string",
+            "enum": [
+                "asc",
+                "desc"
+            ],
+            "x-enum-varnames": [
+                "PaginationSortDirectionAsc",
+                "PaginationSortDirectionDesc"
+            ]
         },
         "valueObject.PortBinding": {
             "type": "object",
@@ -2962,7 +4780,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.0.9",
+	Version:          "0.1.0",
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},

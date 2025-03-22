@@ -9,7 +9,7 @@ import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
-const unixFileExtensionRegexExpression = `^[\w\_\-]{1,15}$`
+const unixFileExtensionRegexExpression = `^([\w\-]{1,15}\.)?[\w\-]{1,15}$`
 
 type UnixFileExtension string
 
@@ -20,10 +20,7 @@ func NewUnixFileExtension(value interface{}) (
 	if err != nil {
 		return unixFileExtension, errors.New("UnixFileExtensionMustBeString")
 	}
-
-	if strings.HasPrefix(stringValue, ".") {
-		stringValue, _ = strings.CutPrefix(stringValue, ".")
-	}
+	stringValue = strings.TrimPrefix(stringValue, ".")
 
 	re := regexp.MustCompile(unixFileExtensionRegexExpression)
 	if !re.MatchString(stringValue) {

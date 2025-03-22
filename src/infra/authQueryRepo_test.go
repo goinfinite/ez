@@ -18,7 +18,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	localIpAddress := valueObject.NewLocalhostIpAddress()
 
 	t.Run("ValidLoginCredentials", func(t *testing.T) {
-		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
+		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword(os.Getenv("DUMMY_USER_PASS"))
 
 		createDto := dto.NewCreateSessionToken(username, password, localIpAddress)
@@ -29,7 +29,7 @@ func TestAuthQueryRepo(t *testing.T) {
 	})
 
 	t.Run("InvalidLoginCredentials", func(t *testing.T) {
-		username, _ := valueObject.NewUsername(os.Getenv("DUMMY_USER_NAME"))
+		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 		password, _ := valueObject.NewPassword("wrongPassword")
 
 		createDto := dto.NewCreateSessionToken(username, password, localIpAddress)
@@ -74,6 +74,26 @@ func TestAuthQueryRepo(t *testing.T) {
 		_, err = authQueryRepo.ReadAccessTokenDetails(apiKey)
 		if err != nil {
 			t.Error(err)
+		}
+	})
+
+	t.Run("InvalidAccountApiKey", func(t *testing.T) {
+		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
+		apiKey, err := accountCmdRepo.UpdateApiKey(accountId)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		rawTamperedApiKey := apiKey.String() + "tampered"
+		tamperedApiKey, err := valueObject.NewAccessTokenValue(rawTamperedApiKey)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		_, err = authQueryRepo.ReadAccessTokenDetails(tamperedApiKey)
+		if err == nil {
+			t.Error("TamperedApiKeyShouldBeInvalid")
 		}
 	})
 }

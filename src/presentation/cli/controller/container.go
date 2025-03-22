@@ -8,6 +8,7 @@ import (
 	infraHelper "github.com/goinfinite/ez/src/infra/helper"
 	cliHelper "github.com/goinfinite/ez/src/presentation/cli/helper"
 	"github.com/goinfinite/ez/src/presentation/service"
+	sharedHelper "github.com/goinfinite/ez/src/presentation/shared/helper"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +28,7 @@ func NewContainerController(
 }
 
 func (controller *ContainerController) Read() *cobra.Command {
-	var containerIdStr string
-	var containerAccountIdUint uint64
+	var containerIdSlice, containerAccountIdSlice []string
 	var containerHostnameStr, containerStatusStr string
 	var containerImageIdStr, containerImageAddressStr, containerImageHashStr string
 	var portBindingsSlice []string
@@ -47,11 +47,15 @@ func (controller *ContainerController) Read() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{}
 
-			if containerIdStr != "" {
-				requestBody["containerId"] = containerIdStr
+			if len(containerIdSlice) > 0 {
+				requestBody["containerId"] = sharedHelper.StringSliceValueObjectParser(
+					containerIdSlice, valueObject.NewContainerId,
+				)
 			}
-			if containerAccountIdUint != 0 {
-				requestBody["containerAccountId"] = containerAccountIdUint
+			if len(containerAccountIdSlice) > 0 {
+				requestBody["containerAccountId"] = sharedHelper.StringSliceValueObjectParser(
+					containerAccountIdSlice, valueObject.NewAccountId,
+				)
 			}
 			if containerHostnameStr != "" {
 				requestBody["containerHostname"] = containerHostnameStr
@@ -107,9 +111,11 @@ func (controller *ContainerController) Read() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&containerIdStr, "container-id", "c", "", "ContainerId")
-	cmd.Flags().Uint64VarP(
-		&containerAccountIdUint, "account-id", "a", 0, "ContainerAccountId",
+	cmd.Flags().StringSliceVarP(
+		&containerIdSlice, "container-ids", "c", []string{}, "ContainerIds",
+	)
+	cmd.Flags().StringSliceVarP(
+		&containerAccountIdSlice, "container-account-ids", "a", []string{}, "ContainerAccountIds",
 	)
 	cmd.Flags().StringVarP(
 		&containerHostnameStr, "hostname", "n", "", "ContainerHostname",

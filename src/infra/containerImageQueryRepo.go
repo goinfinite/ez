@@ -28,6 +28,207 @@ func NewContainerImageQueryRepo(
 	return &ContainerImageQueryRepo{persistentDbSvc: persistentDbSvc}
 }
 
+func (repo *ContainerImageQueryRepo) originContainerDetailsFactory(
+	rawOriginContainerDetails string,
+) (containerEntity entity.Container, err error) {
+	decodedDetails, err := infraHelper.DecodeStr(rawOriginContainerDetails)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	var originContainerDetailsMap map[string]interface{}
+	err = json.Unmarshal([]byte(decodedDetails), &originContainerDetailsMap)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	rawContainerId, exists := originContainerDetailsMap["id"]
+	if !exists {
+		return containerEntity, errors.New("ContainerIdNotFound")
+	}
+	containerId, err := valueObject.NewContainerId(rawContainerId)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	rawAccountId, exists := originContainerDetailsMap["accountId"]
+	if !exists {
+		return containerEntity, errors.New("AccountIdNotFound")
+	}
+	accountId, err := valueObject.NewAccountId(rawAccountId)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	rawHostname, exists := originContainerDetailsMap["hostname"]
+	if !exists {
+		return containerEntity, errors.New("HostnameNotFound")
+	}
+	containerHostname, err := valueObject.NewFqdn(rawHostname)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	rawRestartPolicy, exists := originContainerDetailsMap["restartPolicy"]
+	if !exists {
+		return containerEntity, errors.New("RestartPolicyNotFound")
+	}
+	restartPolicy, err := valueObject.NewContainerRestartPolicy(rawRestartPolicy)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	rawProfileId, exists := originContainerDetailsMap["profileId"]
+	if !exists {
+		return containerEntity, errors.New("ProfileIdNotFound")
+	}
+	profileId, err := valueObject.NewContainerProfileId(rawProfileId)
+	if err != nil {
+		return containerEntity, err
+	}
+
+	return entity.Container{
+		Id:            containerId,
+		AccountId:     accountId,
+		Hostname:      containerHostname,
+		RestartPolicy: restartPolicy,
+		ProfileId:     profileId,
+	}, nil
+}
+
+func (repo *ContainerImageQueryRepo) originContainerMappingTargetFactory(
+	rawTarget interface{},
+) (targetEntity entity.MappingTarget, err error) {
+	rawTargetMap, assertOk := rawTarget.(map[string]interface{})
+	if !assertOk {
+		return targetEntity, errors.New("InvalidContainerMappingTarget")
+	}
+
+	targetId, err := valueObject.NewMappingTargetId(rawTargetMap["id"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	mappingId, err := valueObject.NewMappingId(rawTargetMap["mappingId"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	containerId, err := valueObject.NewContainerId(rawTargetMap["containerId"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	containerHostname, err := valueObject.NewFqdn(rawTargetMap["containerHostname"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	containerPrivatePort, err := valueObject.NewNetworkPort(rawTargetMap["containerPrivatePort"])
+	if err != nil {
+		return targetEntity, nil
+	}
+
+	return entity.NewMappingTarget(
+		targetId, mappingId, containerId, containerHostname, containerPrivatePort,
+	), nil
+}
+
+func (repo *ContainerImageQueryRepo) originContainerMappingFactory(
+	rawMapping interface{},
+) (mappingEntity entity.Mapping, err error) {
+	rawMappingMap, assertOk := rawMapping.(map[string]interface{})
+	if !assertOk {
+		return mappingEntity, errors.New("InvalidContainerMappingStructure")
+	}
+
+	mappingId, err := valueObject.NewMappingId(rawMappingMap["id"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	accountId, err := valueObject.NewAccountId(rawMappingMap["accountId"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	var hostnamePtr *valueObject.Fqdn
+	if rawMappingMap["hostname"] != nil {
+		hostname, err := valueObject.NewFqdn(rawMappingMap["hostname"])
+		if err != nil {
+			return mappingEntity, err
+		}
+		hostnamePtr = &hostname
+	}
+
+	publicPort, err := valueObject.NewNetworkPort(rawMappingMap["publicPort"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	protocol, err := valueObject.NewNetworkProtocol(rawMappingMap["protocol"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	targetEntities := []entity.MappingTarget{}
+	rawTargets, assertOk := rawMappingMap["targets"].([]interface{})
+	if !assertOk {
+		return mappingEntity, errors.New("InvalidContainerMappingTargets")
+	}
+	for _, rawTarget := range rawTargets {
+		targetEntity, err := repo.originContainerMappingTargetFactory(rawTarget)
+		if err != nil {
+			slog.Debug(err.Error(), slog.Any("rawTarget", rawTarget))
+			return mappingEntity, err
+		}
+
+		targetEntities = append(targetEntities, targetEntity)
+	}
+
+	createdAt, err := valueObject.NewUnixTime(rawMappingMap["createdAt"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	updatedAt, err := valueObject.NewUnixTime(rawMappingMap["updatedAt"])
+	if err != nil {
+		return mappingEntity, err
+	}
+
+	return entity.NewMapping(
+		mappingId, accountId, hostnamePtr, publicPort, protocol,
+		targetEntities, createdAt, updatedAt,
+	), nil
+}
+
+func (repo *ContainerImageQueryRepo) originContainerMappingsFactory(
+	rawOriginContainerMappings string,
+) (mappingEntities []entity.Mapping, err error) {
+	decodedMappings, err := infraHelper.DecodeStr(rawOriginContainerMappings)
+	if err != nil {
+		return mappingEntities, err
+	}
+
+	var originContainerMappingsRawList []interface{}
+	err = json.Unmarshal([]byte(decodedMappings), &originContainerMappingsRawList)
+	if err != nil {
+		return mappingEntities, err
+	}
+
+	for _, rawMapping := range originContainerMappingsRawList {
+		mappingEntity, err := repo.originContainerMappingFactory(rawMapping)
+		if err != nil {
+			slog.Debug(err.Error(), slog.Any("rawMapping", rawMapping))
+			return mappingEntities, err
+		}
+
+		mappingEntities = append(mappingEntities, mappingEntity)
+	}
+
+	return mappingEntities, nil
+}
+
 func (repo *ContainerImageQueryRepo) containerImageFactory(
 	accountId valueObject.AccountId,
 	rawContainerImage map[string]interface{},
@@ -35,9 +236,6 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	rawImageId, assertOk := rawContainerImage["Id"].(string)
 	if !assertOk {
 		return containerImage, errors.New("InvalidContainerImageId")
-	}
-	if len(rawImageId) > 12 {
-		rawImageId = rawImageId[:12]
 	}
 	imageId, err := valueObject.NewContainerImageId(rawImageId)
 	if err != nil {
@@ -49,27 +247,37 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		return containerImage, errors.New("InvalidContainerImageConfig")
 	}
 
-	rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
+	rawLabels, assertOk := rawConfig["Labels"].(map[string]interface{})
 	if !assertOk {
-		accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-		accountEntity, err := accountQueryRepo.ReadById(accountId)
-		if err != nil {
-			return containerImage, errors.New("ReadOwnerAccountError")
-		}
-
-		rawImageNames = []interface{}{
-			"localhost/" + accountEntity.Username.String() + "/" + imageId.String(),
-		}
-	}
-	if len(rawImageNames) == 0 {
-		return containerImage, errors.New("ReadContainerImageNamesError")
+		return containerImage, errors.New("InvalidContainerImageLabels")
 	}
 
-	imageAddressStr, assertOk := rawImageNames[0].(string)
-	if !assertOk {
-		return containerImage, errors.New("InvalidContainerImageAddress")
+	rawImageAddress, exists := rawLabels["ez.imageAddress"]
+	if !exists {
+		rawImageNames, assertOk := rawContainerImage["NamesHistory"].([]interface{})
+		if !assertOk {
+			rawAccountUsername := "unknown"
+			idOutput, err := infraHelper.RunCmd("id", "-nu", accountId.String())
+			if err == nil {
+				rawAccountUsername = idOutput
+			}
+
+			accountUsername, err := valueObject.NewUnixUsername(rawAccountUsername)
+			if err != nil {
+				return containerImage, errors.New("ParseContainerImageAccountUsernameError")
+			}
+
+			rawImageNames = []interface{}{
+				"localhost/" + accountUsername.String() + "/" + imageId.String(),
+			}
+		}
+		if len(rawImageNames) == 0 {
+			return containerImage, errors.New("ReadContainerImageNamesError")
+		}
+		rawImageAddress = rawImageNames[0]
 	}
-	imageAddress, err := valueObject.NewContainerImageAddress(imageAddressStr)
+
+	imageAddress, err := valueObject.NewContainerImageAddress(rawImageAddress)
 	if err != nil {
 		return containerImage, err
 	}
@@ -163,6 +371,28 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 		entrypointPtr = &entrypoint
 	}
 
+	originContainerDetails := entity.Container{}
+	rawEncodedOriginContainerDetails, assertOk := rawLabels["ez.originContainerDetails"].(string)
+	if assertOk {
+		originContainerDetails, err = repo.originContainerDetailsFactory(
+			rawEncodedOriginContainerDetails,
+		)
+		if err != nil {
+			return containerImage, errors.New("ParseContainerImageDetailsError: " + err.Error())
+		}
+	}
+
+	originContainerMappings := []entity.Mapping{}
+	rawEncodedOriginContainerMappings, assertOk := rawLabels["ez.originContainerMappings"].(string)
+	if assertOk {
+		originContainerMappings, err = repo.originContainerMappingsFactory(
+			rawEncodedOriginContainerMappings,
+		)
+		if err != nil {
+			return containerImage, errors.New("ParseContainerImageMappingsError: " + err.Error())
+		}
+	}
+
 	rawCreated, assertOk := rawContainerImage["Created"].(string)
 	if !assertOk {
 		return containerImage, errors.New("InvalidContainerImageCreated")
@@ -174,8 +404,8 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 	createdAt := valueObject.NewUnixTimeWithGoTime(createdTime)
 
 	return entity.NewContainerImage(
-		imageId, accountId, imageAddress, imageHash, isa, sizeBytes,
-		portBindings, envs, entrypointPtr, createdAt,
+		imageId, accountId, imageAddress, imageHash, isa, sizeBytes, portBindings, envs,
+		entrypointPtr, &originContainerDetails, originContainerMappings, createdAt,
 	), nil
 }
 
@@ -263,17 +493,19 @@ func (repo *ContainerImageQueryRepo) ReadById(
 func (repo *ContainerImageQueryRepo) archiveFileFactory(
 	archiveFilePath valueObject.UnixFilePath,
 	serverHostname valueObject.Fqdn,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+) (archiveFile entity.ContainerImageArchive, err error) {
 	archiveFileName := archiveFilePath.ReadFileName()
 	archiveFileNameParts := strings.Split(archiveFileName.String(), "-")
 	if len(archiveFileNameParts) == 0 {
 		return archiveFile, errors.New("SplitArchiveFilePartsError")
 	}
 
-	rawImageId := archiveFileNameParts[0]
-	imageId, err := valueObject.NewContainerImageId(rawImageId)
+	imageId, err := valueObject.NewContainerImageId(archiveFileNameParts[1])
 	if err != nil {
-		return archiveFile, errors.New("ArchiveFileImageIdParseError")
+		imageId, err = valueObject.NewContainerImageId(archiveFileNameParts[0])
+		if err != nil {
+			return archiveFile, errors.New("ArchiveFileImageIdParseError")
+		}
 	}
 
 	fileInfo, err := os.Stat(archiveFilePath.String())
@@ -287,47 +519,55 @@ func (repo *ContainerImageQueryRepo) archiveFileFactory(
 		return archiveFile, errors.New("ArchiveFileOwnerAccountIdParseError")
 	}
 
-	downloadUrl, _ := valueObject.NewUrl(
-		"https://" + serverHostname.String() + "/api/v1/container/image/archive/" +
-			accountId.String() + "/" + imageId.String() + "/",
-	)
-
 	sizeBytes, err := valueObject.NewByte(fileInfo.Size())
 	if err != nil {
 		return archiveFile, errors.New("ArchiveFileSizeBytesParseError")
 	}
 
+	downloadUrl, _ := valueObject.NewUrl(
+		"https://" + serverHostname.String() + "/api/v1/container/image/archive/" +
+			accountId.String() + "/" + imageId.String() + "/",
+	)
+
 	rawCreatedAt := fileInfo.ModTime()
 	createdAt := valueObject.NewUnixTimeWithGoTime(rawCreatedAt)
 
-	return entity.NewContainerImageArchiveFile(
-		imageId, accountId, archiveFilePath, downloadUrl, sizeBytes, createdAt,
+	return entity.NewContainerImageArchive(
+		imageId, accountId, archiveFilePath, sizeBytes, &downloadUrl, nil, createdAt,
 	), nil
 }
 
-func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
-	[]entity.ContainerImageArchiveFile, error,
-) {
-	archiveFiles := []entity.ContainerImageArchiveFile{}
+func (repo *ContainerImageQueryRepo) ReadArchives(
+	requestDto dto.ReadContainerImageArchivesRequest,
+) (responseDto dto.ReadContainerImageArchivesResponse, err error) {
+	archiveFiles := []entity.ContainerImageArchive{}
+
+	archiveFilesBaseDirectoryStr := infraEnvs.UserDataDirectory
+	findPathFlagValue := "*/archives/*"
+	if requestDto.ArchivesDirectory != nil {
+		archiveFilesBaseDirectoryStr = requestDto.ArchivesDirectory.String()
+		findPathFlagValue = "*"
+	}
 
 	findResult, err := infraHelper.RunCmd(
-		"find", infraEnvs.UserDataDirectory,
+		"find", archiveFilesBaseDirectoryStr,
 		"-type", "f",
-		"-path", "*/archives/*",
+		"-path", findPathFlagValue,
+		"-maxdepth", "3",
 		"-regex", `.*\.\(`+strings.Join(valueObject.ValidCompressionFormats, `\|`)+`\)$`,
 	)
 	if err != nil {
-		return archiveFiles, errors.New("FindArchiveFilesError: " + err.Error())
+		return responseDto, errors.New("FindArchiveFilesError: " + err.Error())
 	}
 
 	rawArchiveFilesPaths := strings.Split(findResult, "\n")
 	if len(rawArchiveFilesPaths) == 0 {
-		return archiveFiles, nil
+		return responseDto, nil
 	}
 
 	serverHostname, err := infraHelper.ReadServerHostname()
 	if err != nil {
-		return archiveFiles, errors.New("InvalidServerHostname: " + err.Error())
+		return responseDto, errors.New("InvalidServerHostname: " + err.Error())
 	}
 
 	for _, rawArchiveFilePath := range rawArchiveFilesPaths {
@@ -349,12 +589,15 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFiles() (
 		archiveFiles = append(archiveFiles, archiveFile)
 	}
 
-	return archiveFiles, nil
+	return dto.ReadContainerImageArchivesResponse{
+		Pagination: requestDto.Pagination,
+		Archives:   archiveFiles,
+	}, nil
 }
 
-func (repo *ContainerImageQueryRepo) ReadArchiveFile(
-	readDto dto.ReadContainerImageArchiveFile,
-) (archiveFile entity.ContainerImageArchiveFile, err error) {
+func (repo *ContainerImageQueryRepo) ReadArchive(
+	readDto dto.ReadContainerImageArchive,
+) (archiveFile entity.ContainerImageArchive, err error) {
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
 	accountEntity, err := accountQueryRepo.ReadById(readDto.AccountId)
 	if err != nil {
@@ -364,7 +607,7 @@ func (repo *ContainerImageQueryRepo) ReadArchiveFile(
 	archiveDirStr := accountEntity.HomeDirectory.String() + "/archives"
 	rawArchiveFilePath, err := infraHelper.RunCmdAsUser(
 		readDto.AccountId,
-		"find", archiveDirStr, "-type", "f", "-name", readDto.ImageId.String()+"*",
+		"find", archiveDirStr, "-type", "f", "-name", "*"+readDto.ImageId.String()+"*",
 	)
 	if err != nil {
 		return archiveFile, errors.New("FindArchiveFileError: " + err.Error())

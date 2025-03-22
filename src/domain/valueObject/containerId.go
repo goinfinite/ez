@@ -17,27 +17,20 @@ func NewContainerId(value interface{}) (ContainerId, error) {
 	if err != nil {
 		return "", errors.New("ContainerIdMustBeString")
 	}
-
-	stringValue = strings.TrimSpace(stringValue)
 	stringValue = strings.ToLower(stringValue)
 
 	re := regexp.MustCompile(containerIdRegex)
-	isValid := re.MatchString(stringValue)
-	if !isValid {
+	if !re.MatchString(stringValue) {
 		return "", errors.New("InvalidContainerId")
+	}
+
+	if len(stringValue) > 12 {
+		stringValue = stringValue[:12]
 	}
 
 	return ContainerId(stringValue), nil
 }
 
-func NewContainerIdPanic(value string) ContainerId {
-	containerId, err := NewContainerId(value)
-	if err != nil {
-		panic(err)
-	}
-	return containerId
-}
-
-func (containerId ContainerId) String() string {
-	return string(containerId)
+func (vo ContainerId) String() string {
+	return string(vo)
 }

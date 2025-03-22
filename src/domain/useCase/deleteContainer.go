@@ -6,6 +6,7 @@ import (
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
+	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
 func DeleteContainer(
@@ -19,7 +20,7 @@ func DeleteContainer(
 ) error {
 	readContainersDto := dto.ReadContainersRequest{
 		Pagination:  ContainersDefaultPagination,
-		ContainerId: &deleteDto.ContainerId,
+		ContainerId: []valueObject.ContainerId{deleteDto.ContainerId},
 	}
 
 	responseDto, err := ReadContainers(containerQueryRepo, readContainersDto)

@@ -59,6 +59,130 @@ definitions:
       username:
         type: string
     type: object
+  dto.CreateBackupDestinationRequest:
+    properties:
+      accountId:
+        type: integer
+      destinationDescription:
+        type: string
+      destinationName:
+        type: string
+      destinationPath:
+        type: string
+      destinationType:
+        $ref: '#/definitions/valueObject.BackupDestinationType'
+      downloadBytesSecRateLimit:
+        type: integer
+      maxConcurrentConnections:
+        type: integer
+      maxDestinationStorageUsagePercent:
+        type: integer
+      minLocalStorageFreePercent:
+        type: integer
+      objectStorageBucketName:
+        type: string
+      objectStorageEndpointUrl:
+        type: string
+      objectStorageProvider:
+        $ref: '#/definitions/valueObject.ObjectStorageProvider'
+      objectStorageProviderAccessKeyId:
+        type: string
+      objectStorageProviderRegion:
+        type: string
+      objectStorageProviderSecretAccessKey:
+        type: string
+      remoteHostConnectionRetrySecs:
+        type: integer
+      remoteHostConnectionTimeoutSecs:
+        type: integer
+      remoteHostNetworkPort:
+        type: integer
+      remoteHostPassword:
+        type: string
+      remoteHostPrivateKeyFilePath:
+        type: string
+      remoteHostType:
+        $ref: '#/definitions/valueObject.BackupDestinationRemoteHostType'
+      remoteHostUsername:
+        type: string
+      remoteHostname:
+        type: string
+      skipCertificateVerification:
+        type: boolean
+      uploadBytesSecRateLimit:
+        type: integer
+    type: object
+  dto.CreateBackupDestinationResponse:
+    properties:
+      destinationId:
+        type: integer
+      encryptionKey:
+        type: string
+    type: object
+  dto.CreateBackupJob:
+    properties:
+      accountId:
+        type: integer
+      archiveCompressionFormat:
+        $ref: '#/definitions/valueObject.CompressionFormat'
+      backupSchedule:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      destinationIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      jobDescription:
+        type: string
+      maxConcurrentCpuCores:
+        type: integer
+      maxTaskRetentionCount:
+        type: integer
+      maxTaskRetentionDays:
+        type: integer
+      retentionStrategy:
+        $ref: '#/definitions/valueObject.BackupRetentionStrategy'
+      timeoutSecs:
+        type: integer
+    type: object
+  dto.CreateBackupTaskArchive:
+    properties:
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      taskId:
+        type: integer
+      timeoutSecs:
+        type: integer
+    type: object
   dto.CreateContainer:
     properties:
       accountId:
@@ -92,12 +216,12 @@ definitions:
       useImageExposedPorts:
         type: boolean
     type: object
-  dto.CreateContainerImageArchiveFile:
+  dto.CreateContainerImageArchive:
     properties:
       accountId:
         type: integer
       compressionFormat:
-        type: string
+        $ref: '#/definitions/valueObject.CompressionFormat'
       imageId:
         type: string
     type: object
@@ -125,7 +249,7 @@ definitions:
   dto.CreateContainerSnapshotImage:
     properties:
       archiveCompressionFormat:
-        type: string
+        $ref: '#/definitions/valueObject.CompressionFormat'
       containerId:
         type: string
       shouldCreateArchive:
@@ -179,7 +303,51 @@ definitions:
       sortBy:
         type: string
       sortDirection:
-        type: string
+        $ref: '#/definitions/valueObject.PaginationSortDirection'
+    type: object
+  dto.ReadBackupDestinationsResponse:
+    properties:
+      destinations:
+        items: {}
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+    type: object
+  dto.ReadBackupJobsResponse:
+    properties:
+      jobs:
+        items:
+          $ref: '#/definitions/entity.BackupJob'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+    type: object
+  dto.ReadBackupTaskArchivesResponse:
+    properties:
+      archives:
+        items:
+          $ref: '#/definitions/entity.BackupTaskArchive'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+    type: object
+  dto.ReadBackupTasksResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
+      tasks:
+        items:
+          $ref: '#/definitions/entity.BackupTask'
+        type: array
+    type: object
+  dto.ReadContainerImageArchivesResponse:
+    properties:
+      archives:
+        items:
+          $ref: '#/definitions/entity.ContainerImageArchive'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.Pagination'
     type: object
   dto.ReadContainersResponse:
     properties:
@@ -212,6 +380,35 @@ definitions:
           $ref: '#/definitions/entity.ScheduledTask'
         type: array
     type: object
+  dto.RestoreBackupTaskRequest:
+    properties:
+      archiveId:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      shouldReplaceExistingContainers:
+        type: boolean
+      shouldRestoreMappings:
+        type: boolean
+      taskId:
+        type: integer
+      timeoutSecs:
+        type: integer
+    type: object
   dto.UpdateAccount:
     properties:
       accountId:
@@ -222,6 +419,107 @@ definitions:
         $ref: '#/definitions/valueObject.AccountQuota'
       shouldUpdateApiKey:
         type: boolean
+    type: object
+  dto.UpdateBackupDestination:
+    properties:
+      accountId:
+        type: integer
+      destinationDescription:
+        type: string
+      destinationId:
+        type: integer
+      destinationName:
+        type: string
+      destinationPath:
+        type: string
+      downloadBytesSecRateLimit:
+        type: integer
+      maxConcurrentConnections:
+        type: integer
+      maxDestinationStorageUsagePercent:
+        type: integer
+      minLocalStorageFreePercent:
+        type: integer
+      objectStorageBucketName:
+        type: string
+      objectStorageEndpointUrl:
+        type: string
+      objectStorageProvider:
+        $ref: '#/definitions/valueObject.ObjectStorageProvider'
+      objectStorageProviderAccessKeyId:
+        type: string
+      objectStorageProviderRegion:
+        type: string
+      objectStorageProviderSecretAccessKey:
+        type: string
+      remoteHostConnectionRetrySecs:
+        type: integer
+      remoteHostConnectionTimeoutSecs:
+        type: integer
+      remoteHostNetworkPort:
+        type: integer
+      remoteHostPassword:
+        type: string
+      remoteHostPrivateKeyFilePath:
+        type: string
+      remoteHostType:
+        $ref: '#/definitions/valueObject.BackupDestinationRemoteHostType'
+      remoteHostUsername:
+        type: string
+      remoteHostname:
+        type: string
+      skipCertificateVerification:
+        type: boolean
+      uploadBytesSecRateLimit:
+        type: integer
+    type: object
+  dto.UpdateBackupJob:
+    properties:
+      accountId:
+        type: integer
+      backupSchedule:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      destinationIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      jobDescription:
+        type: string
+      jobId:
+        type: integer
+      jobStatus:
+        type: boolean
+      maxConcurrentCpuCores:
+        type: integer
+      maxTaskRetentionCount:
+        type: integer
+      maxTaskRetentionDays:
+        type: integer
+      timeoutSecs:
+        type: integer
+    type: object
+  dto.UpdateBackupTask:
+    properties:
+      jobId:
+        type: integer
+      taskStatus:
+        $ref: '#/definitions/valueObject.BackupTaskStatus'
     type: object
   dto.UpdateContainer:
     properties:
@@ -294,6 +592,133 @@ definitions:
       username:
         type: string
     type: object
+  entity.BackupJob:
+    properties:
+      accountId:
+        type: integer
+      accountUsername:
+        type: string
+      archiveCompressionFormat:
+        $ref: '#/definitions/valueObject.CompressionFormat'
+      backupSchedule:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      containerIds:
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: integer
+      destinationIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerAccountIds:
+        items:
+          type: integer
+        type: array
+      exceptContainerIds:
+        items:
+          type: string
+        type: array
+      jobDescription:
+        type: string
+      jobId:
+        type: integer
+      jobStatus:
+        type: boolean
+      lastRunAt:
+        type: integer
+      lastRunStatus:
+        $ref: '#/definitions/valueObject.BackupTaskStatus'
+      maxConcurrentCpuCores:
+        type: integer
+      maxTaskRetentionCount:
+        type: integer
+      maxTaskRetentionDays:
+        type: integer
+      nextRunAt:
+        type: integer
+      retentionStrategy:
+        $ref: '#/definitions/valueObject.BackupRetentionStrategy'
+      tasksCount:
+        type: integer
+      timeoutSecs:
+        type: integer
+      totalSpaceUsageBytes:
+        type: integer
+      updatedAt:
+        type: integer
+    type: object
+  entity.BackupTask:
+    properties:
+      accountId:
+        type: integer
+      accountUsername:
+        type: string
+      backupSchedule:
+        type: string
+      containerAccountIds:
+        items:
+          type: integer
+        type: array
+      createdAt:
+        type: integer
+      destinationId:
+        type: integer
+      elapsedSecs:
+        type: integer
+      executionOutput:
+        type: string
+      failedContainerIds:
+        items:
+          type: string
+        type: array
+      finishedAt:
+        type: integer
+      jobId:
+        type: integer
+      retentionStrategy:
+        $ref: '#/definitions/valueObject.BackupRetentionStrategy'
+      sizeBytes:
+        type: integer
+      startedAt:
+        type: integer
+      successfulContainerIds:
+        items:
+          type: string
+        type: array
+      taskId:
+        type: integer
+      taskStatus:
+        $ref: '#/definitions/valueObject.BackupTaskStatus'
+      timeoutSecs:
+        type: integer
+      updatedAt:
+        type: integer
+    type: object
+  entity.BackupTaskArchive:
+    properties:
+      accountId:
+        type: integer
+      accountUsername:
+        type: string
+      archiveId:
+        type: string
+      createdAt:
+        type: integer
+      downloadUrl:
+        type: string
+      sizeBytes:
+        type: integer
+      taskId:
+        type: integer
+      unixFilePath:
+        type: string
+    type: object
   entity.Container:
     properties:
       accountId:
@@ -355,6 +780,12 @@ definitions:
         type: string
       isa:
         type: string
+      originContainerDetails:
+        $ref: '#/definitions/entity.Container'
+      originContainerMappings:
+        items:
+          $ref: '#/definitions/entity.Mapping'
+        type: array
       portBindings:
         items:
           $ref: '#/definitions/valueObject.PortBinding'
@@ -362,10 +793,12 @@ definitions:
       sizeBytes:
         type: integer
     type: object
-  entity.ContainerImageArchiveFile:
+  entity.ContainerImageArchive:
     properties:
       accountId:
         type: integer
+      containerId:
+        type: string
       createdAt:
         type: integer
       downloadUrl:
@@ -606,6 +1039,62 @@ definitions:
       storagePerformanceUnits:
         type: integer
     type: object
+  valueObject.BackupDestinationRemoteHostType:
+    enum:
+    - ftp
+    - sftp
+    type: string
+    x-enum-varnames:
+    - BackupDestinationRemoteHostTypeFtp
+    - BackupDestinationRemoteHostTypeSftp
+  valueObject.BackupDestinationType:
+    enum:
+    - local
+    - remote-host
+    - object-storage
+    type: string
+    x-enum-varnames:
+    - BackupDestinationTypeLocal
+    - BackupDestinationTypeRemoteHost
+    - BackupDestinationTypeObjectStorage
+  valueObject.BackupRetentionStrategy:
+    enum:
+    - full
+    - incremental
+    type: string
+    x-enum-varnames:
+    - BackupRetentionStrategyFull
+    - BackupRetentionStrategyIncremental
+  valueObject.BackupTaskStatus:
+    enum:
+    - completed
+    - failed
+    - executing
+    - partial
+    - canceled
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - BackupTaskStatusCompleted
+    - BackupTaskStatusFailed
+    - BackupTaskStatusExecuting
+    - BackupTaskStatusPartial
+    - BackupTaskStatusCanceled
+    - BackupTaskStatusCancelled
+  valueObject.CompressionFormat:
+    enum:
+    - tar
+    - gzip
+    - zip
+    - xz
+    - br
+    type: string
+    x-enum-varnames:
+    - CompressionFormatTarball
+    - CompressionFormatGzip
+    - CompressionFormatZip
+    - CompressionFormatXz
+    - CompressionFormatBrotli
   valueObject.ContainerMetrics:
     properties:
       avgCpuPercent:
@@ -673,6 +1162,8 @@ definitions:
         items:
           $ref: '#/definitions/valueObject.NetInterfaceInfo'
         type: array
+      netInfoAggregated:
+        $ref: '#/definitions/valueObject.NetInterfaceInfo'
       storageInfo:
         items:
           $ref: '#/definitions/valueObject.StorageUnitInfo'
@@ -701,6 +1192,40 @@ definitions:
       sentPackets:
         type: integer
     type: object
+  valueObject.ObjectStorageProvider:
+    enum:
+    - custom
+    - akamai
+    - aws
+    - azure
+    - backblaze
+    - cloudflare
+    - digitalocean
+    - google-cloud
+    - linode
+    - magalu
+    - wasabi
+    type: string
+    x-enum-varnames:
+    - ObjectStorageProviderCustom
+    - ObjectStorageProviderAkamai
+    - ObjectStorageProviderAws
+    - ObjectStorageProviderAzure
+    - ObjectStorageProviderBackblaze
+    - ObjectStorageProviderCloudFlare
+    - ObjectStorageProviderDigitalOcean
+    - ObjectStorageProviderGoogleCloud
+    - ObjectStorageProviderLinode
+    - ObjectStorageProviderMagalu
+    - ObjectStorageProviderWasabi
+  valueObject.PaginationSortDirection:
+    enum:
+    - asc
+    - desc
+    type: string
+    x-enum-varnames:
+    - PaginationSortDirectionAsc
+    - PaginationSortDirectionDesc
   valueObject.PortBinding:
     properties:
       containerPort:
@@ -760,7 +1285,7 @@ info:
     url: https://github.com/goinfinite/ez/blob/main/LICENSE.md
   termsOfService: https://goinfinite.net/tos/
   title: ezApi
-  version: 0.0.9
+  version: 0.1.0
 paths:
   /v1/account/:
     get:
@@ -879,6 +1404,640 @@ paths:
       summary: CreateSessionTokenWithCredentials
       tags:
       - auth
+  /v1/backup/destination/:
+    get:
+      consumes:
+      - application/json
+      description: List backups destinations.
+      parameters:
+      - description: BackupDestinationId
+        in: query
+        name: destinationId
+        type: string
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupDestinationName
+        in: query
+        name: destinationName
+        type: string
+      - description: BackupDestinationType
+        in: query
+        name: destinationType
+        type: string
+      - description: ObjectStorageProvider
+        in: query
+        name: objectStorageProvider
+        type: string
+      - description: RemoteHostType
+        in: query
+        name: remoteHostType
+        type: string
+      - description: RemoteHostname
+        in: query
+        name: remoteHostname
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupDestinationsResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupsDestinations
+      tags:
+      - backup
+    post:
+      consumes:
+      - application/json
+      description: Create a backup destination.
+      parameters:
+      - description: CreateBackupDestination
+        in: body
+        name: createBackupDestinationDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBackupDestinationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CreateBackupDestinationResponse'
+        "500":
+          description: CreateBackupDestinationInfraError
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: CreateBackupDestination
+      tags:
+      - backup
+    put:
+      consumes:
+      - application/json
+      description: Update a backup destination.
+      parameters:
+      - description: UpdateBackupDestination
+        in: body
+        name: updateBackupDestinationDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBackupDestination'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupDestinationUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateBackupDestination
+      tags:
+      - backup
+  /v1/backup/destination/{accountId}/{destinationId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup destination.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: BackupDestinationId
+        in: path
+        name: destinationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupDestinationDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupDestination
+      tags:
+      - backup
+  /v1/backup/job/:
+    get:
+      consumes:
+      - application/json
+      description: List backup jobs.
+      parameters:
+      - description: BackupJobId
+        in: query
+        name: jobId
+        type: string
+      - description: BackupJobStatus
+        in: query
+        name: jobStatus
+        type: boolean
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupDestinationId
+        in: query
+        name: destinationId
+        type: string
+      - description: RetentionStrategy
+        in: query
+        name: retentionStrategy
+        type: string
+      - description: ArchiveCompressionFormat
+        in: query
+        name: archiveCompressionFormat
+        type: string
+      - description: LastRunStatus
+        in: query
+        name: lastRunStatus
+        type: string
+      - description: LastRunBeforeAt
+        in: query
+        name: lastRunBeforeAt
+        type: string
+      - description: LastRunAfterAt
+        in: query
+        name: lastRunAfterAt
+        type: string
+      - description: NextRunBeforeAt
+        in: query
+        name: nextRunBeforeAt
+        type: string
+      - description: NextRunAfterAt
+        in: query
+        name: nextRunAfterAt
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupJobsResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupJobs
+      tags:
+      - backup
+    post:
+      consumes:
+      - application/json
+      description: Create a backup destination.
+      parameters:
+      - description: CreateBackupJob
+        in: body
+        name: createBackupJobDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBackupJob'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupJobCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateBackupJob
+      tags:
+      - backup
+    put:
+      consumes:
+      - application/json
+      description: Update a backup job.
+      parameters:
+      - description: UpdateBackupJob
+        in: body
+        name: updateBackupJobDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBackupJob'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupJobUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateBackupJob
+      tags:
+      - backup
+  /v1/backup/job/{accountId}/{jobId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup job.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: BackupJobId
+        in: path
+        name: jobId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupJobDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupJob
+      tags:
+      - backup
+  /v1/backup/job/{accountId}/{jobId}/run/:
+    post:
+      consumes:
+      - application/json
+      description: Run a backup job.
+      parameters:
+      - description: AccountId
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: BackupJobId
+        in: path
+        name: jobId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupTaskCreated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: RunBackupJob
+      tags:
+      - backup
+  /v1/backup/task/:
+    get:
+      consumes:
+      - application/json
+      description: List backup tasks.
+      parameters:
+      - description: BackupTaskId
+        in: query
+        name: taskId
+        type: string
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupJobId
+        in: query
+        name: jobId
+        type: string
+      - description: BackupDestinationId
+        in: query
+        name: destinationId
+        type: string
+      - description: BackupTaskStatus
+        in: query
+        name: taskStatus
+        type: string
+      - description: RetentionStrategy
+        in: query
+        name: retentionStrategy
+        type: string
+      - description: ContainerId
+        in: query
+        name: containerId
+        type: string
+      - description: StartedBeforeAt
+        in: query
+        name: startedBeforeAt
+        type: string
+      - description: StartedAfterAt
+        in: query
+        name: startedAfterAt
+        type: string
+      - description: FinishedBeforeAt
+        in: query
+        name: finishedBeforeAt
+        type: string
+      - description: FinishedAfterAt
+        in: query
+        name: finishedAfterAt
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupTasksResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupTasks
+      tags:
+      - backup
+    put:
+      consumes:
+      - application/json
+      description: Update a backup task.
+      parameters:
+      - description: UpdateBackupTask
+        in: body
+        name: updateBackupTaskDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBackupTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupTaskUpdated
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: UpdateBackupTask
+      tags:
+      - backup
+  /v1/backup/task/{taskId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup task and its files if "shouldDiscardFiles" is true.
+      parameters:
+      - description: BackupTaskId
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: ShouldDiscardFiles (bool)
+        in: query
+        name: shouldDiscardFiles
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupTaskDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupTask
+      tags:
+      - backup
+  /v1/backup/task/archive/:
+    get:
+      consumes:
+      - application/json
+      description: List backup tasks archives.
+      parameters:
+      - description: BackupTaskArchiveId
+        in: query
+        name: archiveId
+        type: string
+      - description: BackupAccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: BackupTaskId
+        in: query
+        name: taskId
+        type: string
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadBackupTaskArchivesResponse'
+      security:
+      - Bearer: []
+      summary: ReadBackupTaskArchives
+      tags:
+      - backup
+    post:
+      consumes:
+      - application/json
+      description: Schedule a backup task archive creation.
+      parameters:
+      - description: CreateBackupTaskArchive
+        in: body
+        name: createBackupTaskArchiveDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBackupTaskArchive'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupTaskArchiveCreationScheduled
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateBackupTaskArchive
+      tags:
+      - backup
+  /v1/backup/task/archive/{archiveId}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a backup task archive.
+      parameters:
+      - description: BackupTaskArchiveId
+        in: path
+        name: archiveId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BackupTaskArchiveDeleted
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: DeleteBackupTaskArchive
+      tags:
+      - backup
+    get:
+      consumes:
+      - application/json
+      description: Download a backup task archive file.
+      parameters:
+      - description: ArchiveId
+        in: path
+        name: archiveId
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: BackupTaskArchiveFile
+          schema:
+            type: file
+      security:
+      - Bearer: []
+      summary: DownloadBackupTaskArchiveFile
+      tags:
+      - backup
+  /v1/backup/task/restore/:
+    post:
+      consumes:
+      - application/json
+      description: Schedule a backup task restoration.
+      parameters:
+      - description: RestoreBackupTask
+        in: body
+        name: restoreBackupTaskDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RestoreBackupTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: BackupTaskRestorationScheduled
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: RestoreBackupTask
+      tags:
+      - backup
   /v1/container/:
     get:
       consumes:
@@ -1121,18 +2280,53 @@ paths:
       consumes:
       - application/json
       description: List container image archive files.
+      parameters:
+      - description: ImageId
+        in: query
+        name: imageId
+        type: string
+      - description: AccountId
+        in: query
+        name: accountId
+        type: integer
+      - description: CreatedBeforeAt
+        in: query
+        name: createdBeforeAt
+        type: string
+      - description: CreatedAfterAt
+        in: query
+        name: createdAfterAt
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.ContainerImageArchiveFile'
-            type: array
+            $ref: '#/definitions/dto.ReadContainerImageArchivesResponse'
       security:
       - Bearer: []
-      summary: ReadContainerImageArchiveFiles
+      summary: ReadContainerImageArchives
       tags:
       - containerImageArchive
     post:
@@ -1140,22 +2334,22 @@ paths:
       - application/json
       description: Export a container image to a file. This is an asynchronous operation.
       parameters:
-      - description: CreateContainerImageArchiveFileDto
+      - description: CreateContainerImageArchiveDto
         in: body
-        name: createContainerImageArchiveFileDto
+        name: createContainerImageArchiveDto
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateContainerImageArchiveFile'
+          $ref: '#/definitions/dto.CreateContainerImageArchive'
       produces:
       - application/json
       responses:
         "201":
-          description: ContainerImageArchiveFileCreationScheduled
+          description: ContainerImageArchiveCreationScheduled
           schema:
             type: object
       security:
       - Bearer: []
-      summary: CreateContainerImageArchiveFile
+      summary: CreateContainerImageArchive
       tags:
       - containerImageArchive
   /v1/container/image/archive/{accountId}/{imageId}/:
@@ -1178,12 +2372,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: ContainerImageArchiveFileDeleted
+          description: ContainerImageArchiveDeleted
           schema:
             type: object
       security:
       - Bearer: []
-      summary: DeleteContainerImageArchiveFile
+      summary: DeleteContainerImageArchive
       tags:
       - containerImageArchive
     get:
@@ -1205,12 +2399,12 @@ paths:
       - application/octet-stream
       responses:
         "200":
-          description: ContainerImageArchiveFile
+          description: ContainerImageArchive
           schema:
             type: file
       security:
       - Bearer: []
-      summary: DownloadContainerImageArchiveFile
+      summary: DownloadContainerImageArchive
       tags:
       - containerImageArchive
   /v1/container/image/archive/import/:
@@ -1232,18 +2426,18 @@ paths:
       - application/json
       responses:
         "201":
-          description: ContainerImageArchiveFilesImported
+          description: ContainerImageArchivesImported
           schema:
             type: string
         "207":
-          description: ContainerImageArchiveFilesPartiallyImported
+          description: ContainerImageArchivesPartiallyImported
           schema:
             items:
               $ref: '#/definitions/apiController.FailedArchiveFileUpload'
             type: array
       security:
       - Bearer: []
-      summary: ImportContainerImageArchiveFiles
+      summary: ImportContainerImageArchives
       tags:
       - containerImageArchive
   /v1/container/image/snapshot/:

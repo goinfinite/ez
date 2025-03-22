@@ -1,11 +1,11 @@
 package infra
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	dbModel "github.com/goinfinite/ez/src/infra/db/model"
@@ -35,6 +35,12 @@ func (repo *ScheduledTaskCmdRepo) Create(
 		taskTagsModels = append(taskTagsModels, taskTagModel)
 	}
 
+	var timeoutSecsPtr *uint64
+	if createDto.TimeoutSecs != nil {
+		timeoutSecsUint64 := createDto.TimeoutSecs.Uint64()
+		timeoutSecsPtr = &timeoutSecsUint64
+	}
+
 	var runAtPtr *time.Time
 	if createDto.RunAt != nil {
 		runAt := time.Unix(createDto.RunAt.Read(), 0)
@@ -43,7 +49,7 @@ func (repo *ScheduledTaskCmdRepo) Create(
 
 	scheduledTaskModel := dbModel.NewScheduledTask(
 		0, createDto.Name.String(), newTaskStatus.String(), createDto.Command.String(),
-		taskTagsModels, createDto.TimeoutSecs, runAtPtr, nil, nil, nil, nil, nil,
+		taskTagsModels, timeoutSecsPtr, runAtPtr, nil, nil, nil, nil, nil,
 	)
 
 	return repo.persistentDbSvc.Handler.Create(&scheduledTaskModel).Error
@@ -88,9 +94,9 @@ func (repo *ScheduledTaskCmdRepo) Run(
 		return err
 	}
 
-	timeoutStr := "300"
+	timeoutStr := useCase.ScheduledTasksDefaultTimeoutSecs.String()
 	if pendingTask.TimeoutSecs != nil {
-		timeoutStr = strconv.FormatUint(uint64(*pendingTask.TimeoutSecs), 10)
+		timeoutStr = pendingTask.TimeoutSecs.String()
 	}
 
 	startedAtUnixTime := valueObject.NewUnixTimeNow()
@@ -104,7 +110,7 @@ func (repo *ScheduledTaskCmdRepo) Run(
 	}
 
 	finishedAtUnixTime := valueObject.NewUnixTimeNow()
-	elapsedSecs := uint(finishedAtUnixTime.Read() - startedAtUnixTime.Read())
+	elapsedSecs := uint64(time.Since(startedAtUnixTime.GetAsGoTime()).Seconds())
 
 	updateMap := map[string]interface{}{
 		"status":       finalStatus.String(),

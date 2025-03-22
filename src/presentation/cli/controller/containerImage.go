@@ -96,26 +96,62 @@ func (controller *ContainerImageController) Delete() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerImageController) ReadArchiveFiles() *cobra.Command {
+func (controller *ContainerImageController) ReadArchives() *cobra.Command {
+	var imageIdStr string
+	var accountIdUint uint64
+	var paginationPageNumberUint32 uint32
+	var paginationItemsPerPageUint16 uint16
+	var paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr string
+
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "ReadContainerImageArchiveFiles",
+		Short: "ReadContainerImageArchives",
 		Run: func(cmd *cobra.Command, args []string) {
+			requestBody := map[string]interface{}{}
+			if accountIdUint != 0 {
+				requestBody["accountId"] = accountIdUint
+			}
+			if imageIdStr != "" {
+				requestBody["imageId"] = imageIdStr
+			}
+			requestBody = cliHelper.PaginationParser(
+				requestBody, paginationPageNumberUint32, paginationItemsPerPageUint16,
+				paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr,
+			)
+
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.ReadArchiveFiles(nil),
+				controller.containerImageService.ReadArchives(requestBody, nil),
 			)
 		},
 	}
+
+	cmd.Flags().Uint64VarP(&accountIdUint, "account-id", "a", 0, "AccountId")
+	cmd.Flags().StringVarP(&imageIdStr, "image-id", "i", "", "ImageId")
+	cmd.Flags().Uint32VarP(
+		&paginationPageNumberUint32, "page-number", "o", 0, "PageNumber (Pagination)",
+	)
+	cmd.Flags().Uint16VarP(
+		&paginationItemsPerPageUint16, "items-per-page", "I", 0, "ItemsPerPage (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortByStr, "sort-by", "y", "", "SortBy (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortDirectionStr, "sort-direction", "x", "", "SortDirection (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationLastSeenIdStr, "last-seen-id", "L", "", "LastSeenId (Pagination)",
+	)
 	return cmd
 }
 
-func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
+func (controller *ContainerImageController) CreateArchive() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr, compressionFormatStr string
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "CreateContainerImageArchiveFile",
+		Short: "CreateContainerImageArchive",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
 				"accountId": accountIdUint,
@@ -127,7 +163,7 @@ func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 			}
 
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.CreateArchiveFile(requestBody, false),
+				controller.containerImageService.CreateArchive(requestBody, false),
 			)
 		},
 	}
@@ -143,13 +179,13 @@ func (controller *ContainerImageController) CreateArchiveFile() *cobra.Command {
 	return cmd
 }
 
-func (controller *ContainerImageController) DeleteArchiveFile() *cobra.Command {
+func (controller *ContainerImageController) DeleteArchive() *cobra.Command {
 	var accountIdUint uint64
 	var imageIdStr string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "DeleteContainerImageArchiveFile",
+		Short: "DeleteContainerImageArchive",
 		Run: func(cmd *cobra.Command, args []string) {
 			requestBody := map[string]interface{}{
 				"accountId": accountIdUint,
@@ -157,7 +193,7 @@ func (controller *ContainerImageController) DeleteArchiveFile() *cobra.Command {
 			}
 
 			cliHelper.ServiceResponseWrapper(
-				controller.containerImageService.DeleteArchiveFile(requestBody),
+				controller.containerImageService.DeleteArchive(requestBody),
 			)
 		},
 	}
