@@ -164,7 +164,9 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					})
 				</div>
 				<div class="w-1/2">
-					<template x-if="createDestinationPayload.objectStorageProvider == 'custom'">
+					{{ isCustomProvider := `createDestinationPayload.objectStorageProvider == 'custom'` }}
+					{{ isCloudFlareProvider := `createDestinationPayload.objectStorageProvider == 'cloudflare'` }}
+					<template x-if={ isCustomProvider + ` || ` + isCloudFlareProvider }>
 						@componentForm.InputField(componentForm.InputFieldSettings{
 							InputType:     "text",
 							Id:            "objectStorageEndpointUrl",
@@ -172,7 +174,7 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 							ModelBindPath: "createDestinationPayload.objectStorageEndpointUrl",
 						})
 					</template>
-					<template x-if="createDestinationPayload.objectStorageProvider != 'custom'">
+					<template x-if={ "!(" + isCustomProvider + ` || ` + isCloudFlareProvider + ")" }>
 						@componentForm.SelectInputClientSideOptions(componentForm.SelectInputClientSideOptionsDto{
 							Id:                    "objectStorageProviderRegion",
 							Label:                 "Region",

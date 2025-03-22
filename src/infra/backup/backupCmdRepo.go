@@ -979,7 +979,8 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 		}
 
 		if destinationEntity.ObjectStorageProvider != nil {
-			if destinationEntity.ObjectStorageProviderRegion == nil {
+			isCloudFlareProvider := *destinationEntity.ObjectStorageProvider == valueObject.ObjectStorageProviderCloudFlare
+			if destinationEntity.ObjectStorageProviderRegion == nil && !isCloudFlareProvider {
 				return "", errors.New("ObjectStorageProviderRegionMissing")
 			}
 
@@ -993,6 +994,8 @@ func (repo *BackupCmdRepo) backupBinaryCliFactory(
 				providerNameStr = "AWS"
 			case valueObject.ObjectStorageProviderCloudFlare, valueObject.ObjectStorageProviderR2:
 				providerNameStr = "Cloudflare"
+				cloudFlareRegion, _ := valueObject.NewObjectStorageProviderRegion("auto")
+				destinationEntity.ObjectStorageProviderRegion = &cloudFlareRegion
 			case valueObject.ObjectStorageProviderDigitalOcean:
 				providerNameStr = "DigitalOcean"
 			case valueObject.ObjectStorageProviderGoogleCloud:
