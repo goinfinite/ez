@@ -108,6 +108,7 @@
     "vhconf",
     "vhost",
     "vhosts",
+    "zeroable",
     "zerolog",
     "Zerolog"
   ],
