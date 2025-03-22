@@ -222,26 +222,6 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		destinationUpdatedModel.Path = updateDto.DestinationPath.String()
 	}
 
-	if updateDto.MinLocalStorageFreePercent != nil {
-		destinationUpdatedModel.MinLocalStorageFreePercent = updateDto.MinLocalStorageFreePercent
-	}
-
-	if updateDto.MaxDestinationStorageUsagePercent != nil {
-		destinationUpdatedModel.MaxDestinationStorageUsagePercent = updateDto.MaxDestinationStorageUsagePercent
-	}
-
-	if updateDto.MaxConcurrentConnections != nil {
-		destinationUpdatedModel.MaxConcurrentConnections = updateDto.MaxConcurrentConnections
-	}
-
-	if updateDto.TasksCount != nil {
-		destinationUpdatedModel.TasksCount = *updateDto.TasksCount
-	}
-
-	if updateDto.TotalSpaceUsageBytes != nil {
-		destinationUpdatedModel.TotalSpaceUsageBytes = updateDto.TotalSpaceUsageBytes.Uint64()
-	}
-
 	if updateDto.DownloadBytesSecRateLimit != nil {
 		downloadBytesSecRateLimitUint := updateDto.DownloadBytesSecRateLimit.Uint64()
 		destinationUpdatedModel.DownloadBytesSecRateLimit = &downloadBytesSecRateLimitUint
@@ -327,16 +307,6 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		destinationUpdatedModel.RemoteHostPrivateKeyFilePath = &remoteHostPrivateKeyFilePathStr
 	}
 
-	if updateDto.RemoteHostConnectionTimeoutSecs != nil {
-		remoteHostConnectionTimeoutSecsUint := updateDto.RemoteHostConnectionTimeoutSecs.Uint64()
-		destinationUpdatedModel.RemoteHostConnectionTimeoutSecs = &remoteHostConnectionTimeoutSecsUint
-	}
-
-	if updateDto.RemoteHostConnectionRetrySecs != nil {
-		remoteHostConnectionRetrySecsUint := updateDto.RemoteHostConnectionRetrySecs.Uint64()
-		destinationUpdatedModel.RemoteHostConnectionRetrySecs = &remoteHostConnectionRetrySecsUint
-	}
-
 	err := repo.persistentDbSvc.Handler.
 		Model(&dbModel.BackupDestination{}).
 		Where("id = ?", updateDto.DestinationId.Uint64()).
@@ -345,19 +315,48 @@ func (repo *BackupCmdRepo) UpdateDestination(
 		return err
 	}
 
-	boolUpdateMap := map[string]interface{}{}
-	if updateDto.SkipCertificateVerification != nil {
-		boolUpdateMap["skip_certificate_verification"] = *updateDto.SkipCertificateVerification
+	zeroableFieldsUpdateMap := map[string]interface{}{}
+
+	if updateDto.MinLocalStorageFreePercent != nil {
+		zeroableFieldsUpdateMap["min_local_storage_free_percent"] = *updateDto.MinLocalStorageFreePercent
 	}
 
-	if len(boolUpdateMap) == 0 {
+	if updateDto.MaxDestinationStorageUsagePercent != nil {
+		zeroableFieldsUpdateMap["max_destination_storage_usage_percent"] = *updateDto.MaxDestinationStorageUsagePercent
+	}
+
+	if updateDto.SkipCertificateVerification != nil {
+		zeroableFieldsUpdateMap["skip_certificate_verification"] = *updateDto.SkipCertificateVerification
+	}
+
+	if updateDto.MaxConcurrentConnections != nil {
+		zeroableFieldsUpdateMap["max_concurrent_connections"] = *updateDto.MaxConcurrentConnections
+	}
+
+	if updateDto.TasksCount != nil {
+		zeroableFieldsUpdateMap["tasks_count"] = *updateDto.TasksCount
+	}
+
+	if updateDto.TotalSpaceUsageBytes != nil {
+		zeroableFieldsUpdateMap["total_space_usage_bytes"] = updateDto.TotalSpaceUsageBytes.Uint64()
+	}
+
+	if updateDto.RemoteHostConnectionTimeoutSecs != nil {
+		zeroableFieldsUpdateMap["remote_host_connection_timeout_secs"] = *updateDto.RemoteHostConnectionTimeoutSecs
+	}
+
+	if updateDto.RemoteHostConnectionRetrySecs != nil {
+		zeroableFieldsUpdateMap["remote_host_connection_retry_secs"] = *updateDto.RemoteHostConnectionRetrySecs
+	}
+
+	if len(zeroableFieldsUpdateMap) == 0 {
 		return nil
 	}
 
 	return repo.persistentDbSvc.Handler.
 		Model(&dbModel.BackupDestination{}).
 		Where("id = ?", updateDto.DestinationId.Uint64()).
-		Updates(boolUpdateMap).Error
+		Updates(zeroableFieldsUpdateMap).Error
 }
 
 func (repo *BackupCmdRepo) DeleteDestination(
@@ -503,18 +502,6 @@ func (repo *BackupCmdRepo) UpdateJob(
 		jobUpdatedModel.TimeoutSecs = updateDto.TimeoutSecs.Uint64()
 	}
 
-	if updateDto.MaxTaskRetentionCount != nil {
-		jobUpdatedModel.MaxTaskRetentionCount = updateDto.MaxTaskRetentionCount
-	}
-
-	if updateDto.MaxTaskRetentionDays != nil {
-		jobUpdatedModel.MaxTaskRetentionDays = updateDto.MaxTaskRetentionDays
-	}
-
-	if updateDto.MaxConcurrentCpuCores != nil {
-		jobUpdatedModel.MaxConcurrentCpuCores = updateDto.MaxConcurrentCpuCores
-	}
-
 	if updateDto.ContainerAccountIds != nil {
 		containerAccountIdsUint64 := []uint64{}
 		for _, containerAccountId := range updateDto.ContainerAccountIds {
@@ -547,14 +534,6 @@ func (repo *BackupCmdRepo) UpdateJob(
 		jobUpdatedModel.ExceptContainerIds = exceptContainerIds
 	}
 
-	if updateDto.TasksCount != nil {
-		jobUpdatedModel.TasksCount = *updateDto.TasksCount
-	}
-
-	if updateDto.TotalSpaceUsageBytes != nil {
-		jobUpdatedModel.TotalSpaceUsageBytes = updateDto.TotalSpaceUsageBytes.Uint64()
-	}
-
 	if updateDto.LastRunAt != nil {
 		lastRunAtTime := updateDto.LastRunAt.GetAsGoTime()
 		jobUpdatedModel.LastRunAt = &lastRunAtTime
@@ -578,16 +557,36 @@ func (repo *BackupCmdRepo) UpdateJob(
 		return err
 	}
 
-	boolUpdateMap := map[string]interface{}{}
+	zeroableFieldsUpdateMap := map[string]interface{}{}
 	if updateDto.JobStatus != nil {
-		boolUpdateMap["job_status"] = *updateDto.JobStatus
+		zeroableFieldsUpdateMap["job_status"] = *updateDto.JobStatus
 	}
 
-	if len(boolUpdateMap) > 0 {
+	if updateDto.MaxTaskRetentionCount != nil {
+		zeroableFieldsUpdateMap["max_task_retention_count"] = *updateDto.MaxTaskRetentionCount
+	}
+
+	if updateDto.MaxTaskRetentionDays != nil {
+		zeroableFieldsUpdateMap["max_task_retention_days"] = *updateDto.MaxTaskRetentionDays
+	}
+
+	if updateDto.MaxConcurrentCpuCores != nil {
+		zeroableFieldsUpdateMap["max_concurrent_cpu_cores"] = *updateDto.MaxConcurrentCpuCores
+	}
+
+	if updateDto.TasksCount != nil {
+		zeroableFieldsUpdateMap["tasks_count"] = *updateDto.TasksCount
+	}
+
+	if updateDto.TotalSpaceUsageBytes != nil {
+		zeroableFieldsUpdateMap["total_space_usage_bytes"] = updateDto.TotalSpaceUsageBytes.Uint64()
+	}
+
+	if len(zeroableFieldsUpdateMap) == 0 {
 		err = repo.persistentDbSvc.Handler.
 			Model(&dbModel.BackupJob{}).
 			Where("id = ?", updateDto.JobId.Uint64()).
-			Updates(boolUpdateMap).Error
+			Updates(zeroableFieldsUpdateMap).Error
 		if err != nil {
 			return err
 		}
