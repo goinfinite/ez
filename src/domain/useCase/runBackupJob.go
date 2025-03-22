@@ -41,10 +41,7 @@ func (uc *RunBackupJob) updateBackupDestinationStats(
 		return errors.New("ReadBackupDestinationInfraError: " + err.Error())
 	}
 
-	newDestinationTasksCount := uint16(0)
-	if iDestinationEntity.ReadTasksCount() > 0 {
-		newDestinationTasksCount = iDestinationEntity.ReadTasksCount() + 1
-	}
+	newDestinationTasksCount := iDestinationEntity.ReadTasksCount() + 1
 
 	newDestinationTotalSpaceUsageBytes := iDestinationEntity.ReadTotalSpaceUsageBytes()
 	if taskSizeBytes != nil {
