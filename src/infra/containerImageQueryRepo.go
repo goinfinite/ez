@@ -19,13 +19,17 @@ import (
 )
 
 type ContainerImageQueryRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	persistentDbSvc  *db.PersistentDatabaseService
+	accountQueryRepo *AccountQueryRepo
 }
 
 func NewContainerImageQueryRepo(
 	persistentDbSvc *db.PersistentDatabaseService,
 ) *ContainerImageQueryRepo {
-	return &ContainerImageQueryRepo{persistentDbSvc: persistentDbSvc}
+	return &ContainerImageQueryRepo{
+		persistentDbSvc:  persistentDbSvc,
+		accountQueryRepo: NewAccountQueryRepo(persistentDbSvc),
+	}
 }
 
 func (repo *ContainerImageQueryRepo) originContainerDetailsFactory(
@@ -412,14 +416,14 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 	containerImages := []entity.ContainerImage{}
 
-	readAccountsRequestDto := dto.ReadAccountsRequest{
-		Pagination: dto.Pagination{
-			PageNumber:   0,
-			ItemsPerPage: 1000,
+	readAccountsResponseDto, err := repo.accountQueryRepo.Read(
+		dto.ReadAccountsRequest{
+			Pagination: dto.Pagination{
+				PageNumber:   0,
+				ItemsPerPage: 1000,
+			},
 		},
-	}
-	readAccountsResponseDto, err := NewAccountQueryRepo(repo.persistentDbSvc).
-		Read(readAccountsRequestDto)
+	)
 	if err != nil {
 		return containerImages, err
 	}
@@ -605,8 +609,7 @@ func (repo *ContainerImageQueryRepo) ReadArchives(
 func (repo *ContainerImageQueryRepo) ReadArchive(
 	readDto dto.ReadContainerImageArchive,
 ) (archiveFile entity.ContainerImageArchive, err error) {
-	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+	accountEntity, err := repo.accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
 		AccountId: &readDto.AccountId,
 	})
 	if err != nil {
