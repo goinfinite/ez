@@ -28,7 +28,9 @@ func TestAccountQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountByUsername", func(t *testing.T) {
 		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 
-		_, err := accountQueryRepo.ReadByUsername(username)
+		_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountUsername: &username,
+		})
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -37,7 +39,9 @@ func TestAccountQueryRepo(t *testing.T) {
 	t.Run("GetValidAccountById", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 
-		_, err := accountQueryRepo.ReadById(accountId)
+		_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountId: &accountId,
+		})
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
@@ -46,7 +50,9 @@ func TestAccountQueryRepo(t *testing.T) {
 	t.Run("GetInvalidAccount", func(t *testing.T) {
 		username, _ := valueObject.NewUnixUsername("invalid")
 
-		_, err := accountQueryRepo.ReadByUsername(username)
+		_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountUsername: &username,
+		})
 		if err == nil {
 			t.Error("ExpectingError")
 		}

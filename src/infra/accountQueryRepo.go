@@ -84,55 +84,21 @@ func (repo *AccountQueryRepo) Read(
 	}, nil
 }
 
-func (repo *AccountQueryRepo) ReadByUsername(
-	username valueObject.UnixUsername,
+func (repo *AccountQueryRepo) ReadFirst(
+	requestDto dto.ReadAccountsRequest,
 ) (accountEntity entity.Account, err error) {
-	requestDto := dto.ReadAccountsRequest{
-		Pagination: dto.Pagination{
-			PageNumber:   0,
-			ItemsPerPage: 1,
-		},
-		AccountUsername: &username,
+	requestDto.Pagination = dto.Pagination{
+		PageNumber:   0,
+		ItemsPerPage: 1,
 	}
 	responseDto, err := repo.Read(requestDto)
 	if err != nil {
-		return accountEntity, errors.New("ReadAccountsError: " + err.Error())
+		return accountEntity, err
 	}
 
-	usernameStr := username.String()
-	for _, accountEntity := range responseDto.Accounts {
-		if accountEntity.Username.String() != usernameStr {
-			continue
-		}
-
-		return accountEntity, nil
+	if len(responseDto.Accounts) == 0 {
+		return accountEntity, errors.New("AccountNotFound")
 	}
 
-	return accountEntity, errors.New("AccountNotFound")
-}
-
-func (repo *AccountQueryRepo) ReadById(
-	accountId valueObject.AccountId,
-) (accountEntity entity.Account, err error) {
-	requestDto := dto.ReadAccountsRequest{
-		Pagination: dto.Pagination{
-			PageNumber:   0,
-			ItemsPerPage: 1,
-		},
-		AccountId: &accountId,
-	}
-	responseDto, err := repo.Read(requestDto)
-	if err != nil {
-		return accountEntity, errors.New("ReadAccountsError: " + err.Error())
-	}
-
-	for _, accountEntity := range responseDto.Accounts {
-		if accountEntity.Id.String() != accountId.String() {
-			continue
-		}
-
-		return accountEntity, nil
-	}
-
-	return accountEntity, errors.New("AccountNotFound")
+	return responseDto.Accounts[0], nil
 }

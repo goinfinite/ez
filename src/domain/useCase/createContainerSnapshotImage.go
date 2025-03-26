@@ -28,7 +28,9 @@ func CreateContainerSnapshotImage(
 	}
 
 	containerAccountId := containerEntityWithMetrics.AccountId
-	accountEntity, err := accountQueryRepo.ReadById(containerAccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &containerAccountId,
+	})
 	if err != nil {
 		slog.Error("ReadAccountInfoError", slog.String("error", err.Error()))
 		return imageEntity, errors.New("ReadAccountInfoInfraError")

@@ -53,7 +53,9 @@ func CreateSessionToken(
 		return accessToken, errors.New("InvalidCredentials")
 	}
 
-	accountEntity, err := accountQueryRepo.ReadByUsername(createDto.Username)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountUsername: &createDto.Username,
+	})
 	if err != nil {
 		return accessToken, errors.New("AccountNotFound")
 	}

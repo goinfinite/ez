@@ -606,7 +606,9 @@ func (repo *ContainerImageQueryRepo) ReadArchive(
 	readDto dto.ReadContainerImageArchive,
 ) (archiveFile entity.ContainerImageArchive, err error) {
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(readDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &readDto.AccountId,
+	})
 	if err != nil {
 		return archiveFile, err
 	}

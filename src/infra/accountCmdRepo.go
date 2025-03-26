@@ -132,8 +132,10 @@ func (repo *AccountCmdRepo) Create(
 func (repo *AccountCmdRepo) getUsernameById(
 	accountId valueObject.AccountId,
 ) (valueObject.UnixUsername, error) {
-	accountQuery := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQuery.ReadById(accountId)
+	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &accountId,
+	})
 	if err != nil {
 		return "", err
 	}

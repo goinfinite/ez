@@ -1395,7 +1395,9 @@ func (repo *BackupCmdRepo) RunJob(
 			)
 		}
 
-		preTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
+		preTaskAccountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountId: &accountId,
+		})
 		if err != nil {
 			localProcExecOutputWriteStr("ReadPreTaskAccountEntityFailed: " + err.Error())
 			continue
@@ -1421,7 +1423,9 @@ func (repo *BackupCmdRepo) RunJob(
 			localProcExecOutputWriteStr("BackupTaskTimeout")
 		}
 
-		postTaskAccountEntity, err := accountQueryRepo.ReadById(accountId)
+		postTaskAccountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountId: &accountId,
+		})
 		if err != nil {
 			localProcExecOutputWriteStr("ReadPostTaskAccountEntityFailed: " + err.Error())
 			continue
@@ -1589,7 +1593,9 @@ func (repo *BackupCmdRepo) restoreContainerArchive(
 
 	originalAccountOwnerId := containerImageEntity.OriginContainerDetails.AccountId
 	if containerImageEntity.AccountId != originalAccountOwnerId {
-		_, err = accountQueryRepo.ReadById(originalAccountOwnerId)
+		_, err = accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountId: &originalAccountOwnerId,
+		})
 		if err == nil {
 			deleteImageDto := dto.DeleteContainerImage{
 				AccountId: containerImageEntity.AccountId,
@@ -2161,7 +2167,9 @@ func (repo *BackupCmdRepo) CreateTaskArchive(
 	accountHomeDirStr := infraEnvs.NobodyDataDirectory
 	if createDto.OperatorAccountId != valueObject.SystemAccountId {
 		accountQueryRepo := infra.NewAccountQueryRepo(repo.persistentDbSvc)
-		operatorAccountEntity, err := accountQueryRepo.ReadById(createDto.OperatorAccountId)
+		operatorAccountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountId: &createDto.OperatorAccountId,
+		})
 		if err != nil {
 			return archiveId, errors.New("ReadOperatorAccountFailed: " + err.Error())
 		}

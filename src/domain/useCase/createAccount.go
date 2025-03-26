@@ -15,7 +15,9 @@ func CreateAccount(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	createDto dto.CreateAccount,
 ) error {
-	_, err := accountQueryRepo.ReadByUsername(createDto.Username)
+	_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountUsername: &createDto.Username,
+	})
 	if err == nil {
 		return errors.New("AccountAlreadyExists")
 	}
