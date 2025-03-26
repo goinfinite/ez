@@ -428,14 +428,16 @@ func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 		return containerImages, err
 	}
 
-	for _, account := range readAccountsResponseDto.Accounts {
+	for _, accountEntity := range readAccountsResponseDto.Accounts {
+		accountIdStr := accountEntity.Id.String()
+
 		rawContainerImagesIdsStr, err := infraHelper.RunCmdAsUser(
-			account.Id, "podman", "images", "--format", "{{.Id}}",
+			accountEntity.Id, "podman", "images", "--format", "{{.Id}}",
 		)
 		if err != nil {
 			slog.Debug(
 				"PodmanListImagesIdError",
-				slog.String("accountId", account.Id.String()),
+				slog.String("accountId", accountIdStr),
 				slog.Any("error", err),
 			)
 			continue
@@ -446,7 +448,6 @@ func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 			continue
 		}
 
-		accountIdStr := account.Id.String()
 		for _, rawContainerImageId := range rawContainerImagesIds {
 			if rawContainerImageId == "" {
 				continue
@@ -463,7 +464,7 @@ func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 				continue
 			}
 
-			containerImage, err := repo.ReadById(account.Id, imageId)
+			containerImage, err := repo.ReadById(accountEntity.Id, imageId)
 			if err != nil {
 				slog.Debug(
 					"ContainerImageReadError",
