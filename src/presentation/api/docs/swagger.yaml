@@ -1196,27 +1196,27 @@ definitions:
     enum:
     - custom
     - akamai
+    - alibaba
     - aws
-    - azure
-    - backblaze
     - cloudflare
     - digitalocean
     - google-cloud
     - linode
     - magalu
+    - r2
     - wasabi
     type: string
     x-enum-varnames:
     - ObjectStorageProviderCustom
     - ObjectStorageProviderAkamai
+    - ObjectStorageProviderAlibaba
     - ObjectStorageProviderAws
-    - ObjectStorageProviderAzure
-    - ObjectStorageProviderBackblaze
     - ObjectStorageProviderCloudFlare
     - ObjectStorageProviderDigitalOcean
     - ObjectStorageProviderGoogleCloud
     - ObjectStorageProviderLinode
     - ObjectStorageProviderMagalu
+    - ObjectStorageProviderR2
     - ObjectStorageProviderWasabi
   valueObject.PaginationSortDirection:
     enum:
@@ -1292,6 +1292,35 @@ paths:
       consumes:
       - application/json
       description: List accounts.
+      parameters:
+      - description: AccountId
+        in: query
+        name: id
+        type: string
+      - description: AccountUsername
+        in: query
+        name: username
+        type: string
+      - description: PageNumber (Pagination)
+        in: query
+        name: pageNumber
+        type: integer
+      - description: ItemsPerPage (Pagination)
+        in: query
+        name: itemsPerPage
+        type: integer
+      - description: SortBy (Pagination)
+        in: query
+        name: sortBy
+        type: string
+      - description: SortDirection (Pagination)
+        in: query
+        name: sortDirection
+        type: string
+      - description: LastSeenId (Pagination)
+        in: query
+        name: lastSeenId
+        type: string
       produces:
       - application/json
       responses:

@@ -42,6 +42,50 @@ const docTemplate = `{
                     "account"
                 ],
                 "summary": "ReadAccounts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "AccountId",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "AccountUsername",
+                        "name": "username",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "PageNumber (Pagination)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ItemsPerPage (Pagination)",
+                        "name": "itemsPerPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortBy (Pagination)",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortDirection (Pagination)",
+                        "name": "sortDirection",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastSeenId (Pagination)",
+                        "name": "lastSeenId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -4659,27 +4703,27 @@ const docTemplate = `{
             "enum": [
                 "custom",
                 "akamai",
+                "alibaba",
                 "aws",
-                "azure",
-                "backblaze",
                 "cloudflare",
                 "digitalocean",
                 "google-cloud",
                 "linode",
                 "magalu",
+                "r2",
                 "wasabi"
             ],
             "x-enum-varnames": [
                 "ObjectStorageProviderCustom",
                 "ObjectStorageProviderAkamai",
+                "ObjectStorageProviderAlibaba",
                 "ObjectStorageProviderAws",
-                "ObjectStorageProviderAzure",
-                "ObjectStorageProviderBackblaze",
                 "ObjectStorageProviderCloudFlare",
                 "ObjectStorageProviderDigitalOcean",
                 "ObjectStorageProviderGoogleCloud",
                 "ObjectStorageProviderLinode",
                 "ObjectStorageProviderMagalu",
+                "ObjectStorageProviderR2",
                 "ObjectStorageProviderWasabi"
             ]
         },
