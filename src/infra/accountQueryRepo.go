@@ -3,6 +3,7 @@ package infra
 import (
 	"errors"
 	"log/slog"
+	"strings"
 
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
@@ -60,7 +61,9 @@ func (repo *AccountQueryRepo) Read(
 		Preload("QuotaUsage").
 		Find(&accountModels).Error
 	if err != nil {
-		return responseDto, errors.New("QueryAccountsError: " + err.Error())
+		if !strings.Contains(err.Error(), "no such column") {
+			return responseDto, errors.New("FindAccountsError: " + err.Error())
+		}
 	}
 
 	accountEntities := []entity.Account{}
