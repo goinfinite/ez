@@ -32,8 +32,57 @@ func NewAccountService(
 	}
 }
 
-func (service *AccountService) Read() ServiceOutput {
-	accountsList, err := useCase.ReadAccounts(service.accountQueryRepo)
+func (service *AccountService) ReadAccountsRequestFactory(
+	serviceInput map[string]any,
+) (readRequestDto dto.ReadAccountsRequest, err error) {
+	var accountIdPtr *valueObject.AccountId
+	if serviceInput["accountId"] != nil {
+		accountId, err := valueObject.NewAccountId(serviceInput["id"])
+		if err != nil {
+			return readRequestDto, err
+		}
+		accountIdPtr = &accountId
+	}
+
+	var accountUsernamePtr *valueObject.UnixUsername
+	if serviceInput["accountUsername"] != nil {
+		accountUsername, err := valueObject.NewUnixUsername(serviceInput["accountUsername"])
+		if err != nil {
+			return readRequestDto, err
+		}
+		accountUsernamePtr = &accountUsername
+	}
+
+	requestPagination, err := serviceHelper.PaginationParser(
+		serviceInput, useCase.AccountsDefaultPagination,
+	)
+	if err != nil {
+		return readRequestDto, err
+	}
+
+	return dto.ReadAccountsRequest{
+		Pagination:      requestPagination,
+		AccountId:       accountIdPtr,
+		AccountUsername: accountUsernamePtr,
+	}, nil
+}
+
+func (service *AccountService) Read(input map[string]any) ServiceOutput {
+	if input["id"] != nil {
+		input["accountId"] = input["id"]
+	}
+
+	if input["username"] != nil {
+		input["accountUsername"] = input["username"]
+	}
+
+	readAccountsRequestDto, err := service.ReadAccountsRequestFactory(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+	accountsList, err := useCase.ReadAccounts(
+		service.accountQueryRepo, readAccountsRequestDto,
+	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}

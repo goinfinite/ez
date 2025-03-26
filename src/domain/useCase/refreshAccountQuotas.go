@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/repository"
 )
 
@@ -13,13 +14,19 @@ func RefreshAccountQuotas(
 	accountQueryRepo repository.AccountQueryRepo,
 	accountCmdRepo repository.AccountCmdRepo,
 ) error {
-	accountEntities, err := accountQueryRepo.Read()
+	readAccountsRequestDto := dto.ReadAccountsRequest{
+		Pagination: dto.Pagination{
+			PageNumber:   0,
+			ItemsPerPage: 1000,
+		},
+	}
+	readAccountsResponseDto, err := accountQueryRepo.Read(readAccountsRequestDto)
 	if err != nil {
 		slog.Error("ReadAccountsInfraError", slog.Any("error", err))
 		return errors.New("ReadAccountsInfraError")
 	}
 
-	for _, accountEntity := range accountEntities {
+	for _, accountEntity := range readAccountsResponseDto.Accounts {
 		err := accountCmdRepo.UpdateQuotaUsage(accountEntity.Id)
 		if err != nil {
 			slog.Debug(

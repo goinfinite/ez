@@ -412,12 +412,19 @@ func (repo *ContainerImageQueryRepo) containerImageFactory(
 func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 	containerImages := []entity.ContainerImage{}
 
-	accountsList, err := NewAccountQueryRepo(repo.persistentDbSvc).Read()
+	readAccountsRequestDto := dto.ReadAccountsRequest{
+		Pagination: dto.Pagination{
+			PageNumber:   0,
+			ItemsPerPage: 1000,
+		},
+	}
+	readAccountsResponseDto, err := NewAccountQueryRepo(repo.persistentDbSvc).
+		Read(readAccountsRequestDto)
 	if err != nil {
 		return containerImages, err
 	}
 
-	for _, account := range accountsList {
+	for _, account := range readAccountsResponseDto.Accounts {
 		rawContainerImagesIdsStr, err := infraHelper.RunCmdAsUser(
 			account.Id, "podman", "images", "--format", "{{.Id}}",
 		)

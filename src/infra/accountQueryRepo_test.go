@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	testHelpers "github.com/goinfinite/ez/src/devUtils"
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/useCase"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 )
 
@@ -14,7 +16,10 @@ func TestAccountQueryRepo(t *testing.T) {
 	accountQueryRepo := NewAccountQueryRepo(persistentDbSvc)
 
 	t.Run("GetValidAccounts", func(t *testing.T) {
-		_, err := accountQueryRepo.Read()
+		requestDto := dto.ReadAccountsRequest{
+			Pagination: useCase.AccountsDefaultPagination,
+		}
+		_, err := accountQueryRepo.Read(requestDto)
 		if err != nil {
 			t.Error("UnexpectedError")
 		}

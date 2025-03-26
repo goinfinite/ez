@@ -105,20 +105,23 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
-	readAccountsServiceOutput := accountService.Read()
+	readAccountsServiceOutput := accountService.Read(map[string]any{
+		"pageNumber":   0,
+		"itemsPerPage": 1000,
+	})
 	if readAccountsServiceOutput.Status != service.Success {
 		slog.Debug("ReadAccountsFailure")
 		return nil
 	}
 
-	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
+	readAccountsRequestDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
 		slog.Debug("AssertAccountsFailure")
 		return nil
 	}
 
 	accountIdEntityMap := map[valueObject.AccountId]entity.Account{}
-	for _, accountEntity := range accountEntities {
+	for _, accountEntity := range readAccountsRequestDto.Accounts {
 		accountIdEntityMap[accountEntity.Id] = accountEntity
 	}
 

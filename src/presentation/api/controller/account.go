@@ -38,9 +38,23 @@ func NewAccountController(
 // @Produce      json
 // @Security     Bearer
 // @Success      200 {array} entity.Account
+// @Param        id query  string  false  "AccountId"
+// @Param        username query  string  false  "AccountUsername"
+// @Param        pageNumber query  uint  false  "PageNumber (Pagination)"
+// @Param        itemsPerPage query  uint  false  "ItemsPerPage (Pagination)"
+// @Param        sortBy query  string  false  "SortBy (Pagination)"
+// @Param        sortDirection query  string  false  "SortDirection (Pagination)"
+// @Param        lastSeenId query  string  false  "LastSeenId (Pagination)"
 // @Router       /v1/account/ [get]
 func (controller *AccountController) Read(c echo.Context) error {
-	return apiHelper.ServiceResponseWrapper(c, controller.accountService.Read())
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
+	}
+
+	return apiHelper.ServiceResponseWrapper(
+		c, controller.accountService.Read(requestBody),
+	)
 }
 
 func (controller *AccountController) accountQuotaFactory(
