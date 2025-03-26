@@ -15,17 +15,16 @@ func TestAccountQueryRepo(t *testing.T) {
 	persistentDbSvc := testHelpers.GetPersistentDbSvc()
 	accountQueryRepo := NewAccountQueryRepo(persistentDbSvc)
 
-	t.Run("GetValidAccounts", func(t *testing.T) {
-		requestDto := dto.ReadAccountsRequest{
+	t.Run("ReadValidAccounts", func(t *testing.T) {
+		_, err := accountQueryRepo.Read(dto.ReadAccountsRequest{
 			Pagination: useCase.AccountsDefaultPagination,
-		}
-		_, err := accountQueryRepo.Read(requestDto)
+		})
 		if err != nil {
 			t.Error("UnexpectedError")
 		}
 	})
 
-	t.Run("GetValidAccountByUsername", func(t *testing.T) {
+	t.Run("ReadValidAccountByUsername", func(t *testing.T) {
 		username, _ := valueObject.NewUnixUsername(os.Getenv("DUMMY_USER_NAME"))
 
 		_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
@@ -36,7 +35,7 @@ func TestAccountQueryRepo(t *testing.T) {
 		}
 	})
 
-	t.Run("GetValidAccountById", func(t *testing.T) {
+	t.Run("ReadValidAccountById", func(t *testing.T) {
 		accountId, _ := valueObject.NewAccountId(os.Getenv("DUMMY_USER_ID"))
 
 		_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
@@ -47,7 +46,7 @@ func TestAccountQueryRepo(t *testing.T) {
 		}
 	})
 
-	t.Run("GetInvalidAccount", func(t *testing.T) {
+	t.Run("ReadInvalidAccount", func(t *testing.T) {
 		username, _ := valueObject.NewUnixUsername("invalid")
 
 		_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
