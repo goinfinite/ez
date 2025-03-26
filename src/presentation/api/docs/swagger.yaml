@@ -1285,7 +1285,7 @@ info:
     url: https://github.com/goinfinite/ez/blob/main/LICENSE.md
   termsOfService: https://goinfinite.net/tos/
   title: ezApi
-  version: 0.1.0
+  version: 0.1.1
 paths:
   /v1/account/:
     get:
