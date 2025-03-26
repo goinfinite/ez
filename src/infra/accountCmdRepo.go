@@ -21,11 +21,17 @@ import (
 )
 
 type AccountCmdRepo struct {
-	persistentDbSvc *db.PersistentDatabaseService
+	persistentDbSvc  *db.PersistentDatabaseService
+	accountQueryRepo *AccountQueryRepo
 }
 
-func NewAccountCmdRepo(persistentDbSvc *db.PersistentDatabaseService) *AccountCmdRepo {
-	return &AccountCmdRepo{persistentDbSvc: persistentDbSvc}
+func NewAccountCmdRepo(
+	persistentDbSvc *db.PersistentDatabaseService,
+) *AccountCmdRepo {
+	return &AccountCmdRepo{
+		persistentDbSvc:  persistentDbSvc,
+		accountQueryRepo: NewAccountQueryRepo(persistentDbSvc),
+	}
 }
 
 func (repo *AccountCmdRepo) updateFilesystemQuota(
@@ -129,28 +135,16 @@ func (repo *AccountCmdRepo) Create(
 	return accountId, nil
 }
 
-func (repo *AccountCmdRepo) getUsernameById(
-	accountId valueObject.AccountId,
-) (valueObject.UnixUsername, error) {
-	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
+	accountEntity, err := repo.accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
 		AccountId: &accountId,
 	})
 	if err != nil {
-		return "", err
+		return errors.New("ReadAccountEntityError: " + err.Error())
 	}
 
-	return accountEntity.Username, nil
-}
-
-func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
 	quota := valueObject.NewAccountQuotaWithBlankValues()
-	err := repo.updateFilesystemQuota(accountId, quota)
-	if err != nil {
-		return err
-	}
-
-	username, err := repo.getUsernameById(accountId)
+	err = repo.updateFilesystemQuota(accountId, quota)
 	if err != nil {
 		return err
 	}
@@ -165,7 +159,7 @@ func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
 		_, _ = infraHelper.RunCmd("pkill", "-9", "-U", accountId.String())
 	}
 
-	_, err = infraHelper.RunCmd("userdel", "-r", username.String())
+	_, err = infraHelper.RunCmd("userdel", "-r", accountEntity.Username.String())
 	if err != nil {
 		return err
 	}
@@ -198,6 +192,13 @@ func (repo *AccountCmdRepo) Delete(accountId valueObject.AccountId) error {
 func (repo *AccountCmdRepo) UpdatePassword(
 	accountId valueObject.AccountId, password valueObject.Password,
 ) error {
+	accountEntity, err := repo.accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &accountId,
+	})
+	if err != nil {
+		return errors.New("ReadAccountEntityError: " + err.Error())
+	}
+
 	passHash, err := bcrypt.GenerateFromPassword(
 		[]byte(password.String()), bcrypt.DefaultCost,
 	)
@@ -205,12 +206,9 @@ func (repo *AccountCmdRepo) UpdatePassword(
 		return errors.New("PassHashError: " + err.Error())
 	}
 
-	username, err := repo.getUsernameById(accountId)
-	if err != nil {
-		return err
-	}
-
-	_, err = infraHelper.RunCmd("usermod", "-p", string(passHash), username.String())
+	_, err = infraHelper.RunCmd(
+		"usermod", "-p", string(passHash), accountEntity.Username.String(),
+	)
 	if err != nil {
 		return errors.New("UserModFailed: " + err.Error())
 	}
