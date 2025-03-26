@@ -1,0 +1,20 @@
+package page
+
+import (
+	"github.com/goinfinite/ez/src/domain/entity"
+	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+)
+
+templ AccountsIndex(accountList []entity.Account) {
+	<div class="flex flex-col">
+		<div class="mb-6 flex flex-row justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Accounts",
+					"",
+					"ph-users-three",
+				)
+			</div>
+		</div>
+	</div>
+}
