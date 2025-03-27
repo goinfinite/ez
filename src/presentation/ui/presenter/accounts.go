@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/goinfinite/ez/src/domain/dto"
-	"github.com/goinfinite/ez/src/domain/valueObject"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	uiHelper "github.com/goinfinite/ez/src/presentation/ui/helper"
@@ -31,9 +30,6 @@ func NewAccountsPresenter(
 func (presenter *AccountsPresenter) Handler(c echo.Context) error {
 	entitiesNamePrefix := "accounts"
 	paginationMap := uiHelper.PaginationParser(c, entitiesNamePrefix, "id")
-	if c.QueryParam(entitiesNamePrefix+"SortDirection") == "" {
-		paginationMap["sortDirection"] = valueObject.PaginationSortDirectionDesc.String()
-	}
 	requestParamsMap := uiHelper.ReadRequestParser(
 		c, entitiesNamePrefix, dto.ReadAccountsRequest{},
 	)

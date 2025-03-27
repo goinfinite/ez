@@ -35,8 +35,16 @@ func NewAccountService(
 func (service *AccountService) ReadAccountsRequestFactory(
 	serviceInput map[string]any,
 ) (readRequestDto dto.ReadAccountsRequest, err error) {
-	var accountIdPtr *valueObject.AccountId
 	if serviceInput["accountId"] != nil {
+		serviceInput["id"] = serviceInput["accountId"]
+	}
+
+	if serviceInput["accountUsername"] != nil {
+		serviceInput["username"] = serviceInput["accountUsername"]
+	}
+
+	var accountIdPtr *valueObject.AccountId
+	if serviceInput["id"] != nil {
 		accountId, err := valueObject.NewAccountId(serviceInput["id"])
 		if err != nil {
 			return readRequestDto, err
@@ -45,8 +53,8 @@ func (service *AccountService) ReadAccountsRequestFactory(
 	}
 
 	var accountUsernamePtr *valueObject.UnixUsername
-	if serviceInput["accountUsername"] != nil {
-		accountUsername, err := valueObject.NewUnixUsername(serviceInput["accountUsername"])
+	if serviceInput["username"] != nil {
+		accountUsername, err := valueObject.NewUnixUsername(serviceInput["username"])
 		if err != nil {
 			return readRequestDto, err
 		}
@@ -68,14 +76,6 @@ func (service *AccountService) ReadAccountsRequestFactory(
 }
 
 func (service *AccountService) Read(input map[string]any) ServiceOutput {
-	if input["id"] != nil {
-		input["accountId"] = input["id"]
-	}
-
-	if input["username"] != nil {
-		input["accountUsername"] = input["username"]
-	}
-
 	readAccountsRequestDto, err := service.ReadAccountsRequestFactory(input)
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())

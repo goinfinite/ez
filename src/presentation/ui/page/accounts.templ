@@ -2,6 +2,7 @@ package page
 
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 	"github.com/goinfinite/ez/src/presentation/ui/envs"
@@ -37,14 +38,14 @@ templ AccountsTable(
 ) {
 	<!-- Accounts Table -->
 	{{ accountsTableId := "accounts-table" }}
-	<div
-		id={ accountsTableId }
-		hx-get="/accounts/"
-		hx-trigger=""
-		hx-select={ "#" + accountsTableId }
-		hx-target={ "#" + accountsTableId }
-		hx-swap="outerHTML transition:true"
-	>
+	<div id={ accountsTableId }>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"accounts", "/accounts/", "#"+accountsTableId,
+				readAccountsRequestDto, readAccountsResponseDto.Pagination,
+				entity.Account{},
+			)
+		</div>
 		<table class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out">
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
@@ -60,9 +61,11 @@ templ AccountsTable(
 				for _, accountEntity := range readAccountsResponseDto.Accounts {
 					<!-- Account Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
-						@templ.JSONScript("accountEntity_"+accountEntity.Id.String(), accountEntity)
+						{{ accountIdStr := accountEntity.Id.String() }}
+						@templ.JSONScript("accountEntity_"+accountIdStr, accountEntity)
+						{{ accountUsernameStr := accountEntity.Username.String() }}
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							{ accountEntity.Username.String() }
+							{ accountUsernameStr }
 						</td>
 						<td class="w-[30%] overflow-x-hidden py-3">
 							<table class="mt-2 w-full rounded-md text-left text-sm ring-2 ring-neutral-50/5">
@@ -131,7 +134,7 @@ templ AccountsTable(
 							</table>
 						</td>
 						<td class="w-[15%] overflow-x-hidden px-3 py-2">
-							{ accountEntity.Id.String() + "/" + accountEntity.GroupId.String() }
+							{ accountIdStr + "/" + accountEntity.GroupId.String() }
 						</td>
 						<td class="w-[15%] overflow-x-hidden px-3 py-2">
 							{ accountEntity.HomeDirectory.String() }
@@ -147,7 +150,7 @@ templ AccountsTable(
 									Icon:                 "ph-lock-key",
 									BackgroundColor:      "ez-300",
 									HoverBackgroundColor: "ez-200",
-									OnClick:              "openUpdatePasswordModal(" + accountEntity.Id.String() + ")",
+									OnClick:              "openUpdatePasswordModal(" + accountIdStr + ")",
 									TooltipText:          "Update Password",
 									TooltipColor:         "ez-300",
 									TooltipPosition:      "top",
@@ -158,7 +161,7 @@ templ AccountsTable(
 									Icon:                 "ph-key",
 									BackgroundColor:      "ez-300",
 									HoverBackgroundColor: "ez-200",
-									OnClick:              "openUpdateApiKeyModal(" + accountEntity.Id.String() + ", '" + accountEntity.Username.String() + "')",
+									OnClick:              "openUpdateApiKeyModal(" + accountIdStr + ", '" + accountUsernameStr + "')",
 									TooltipText:          "Update API Key",
 									TooltipColor:         "ez-300",
 									TooltipPosition:      "top",
@@ -169,7 +172,7 @@ templ AccountsTable(
 									Icon:                 "ph-disc",
 									BackgroundColor:      "ez-300",
 									HoverBackgroundColor: "ez-200",
-									OnClick:              "openUpdateAccountQuotaModal(" + accountEntity.Id.String() + ", '" + accountEntity.Username.String() + "')",
+									OnClick:              "openUpdateAccountQuotaModal(" + accountIdStr + ", '" + accountUsernameStr + "')",
 									TooltipText:          "Update Account Quota",
 									TooltipColor:         "ez-300",
 									TooltipPosition:      "top",
@@ -180,7 +183,7 @@ templ AccountsTable(
 									Icon:                 "ph-trash",
 									BackgroundColor:      "red-800",
 									HoverBackgroundColor: "red-600",
-									OnClick:              "openDeleteAccountModal(" + accountEntity.Id.String() + ", '" + accountEntity.Username.String() + "')",
+									OnClick:              "openDeleteAccountModal(" + accountIdStr + ", '" + accountUsernameStr + "')",
 									TooltipText:          "Delete Account",
 									TooltipColor:         "red-800",
 									TooltipPosition:      "top",
