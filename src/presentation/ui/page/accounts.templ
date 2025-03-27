@@ -189,6 +189,11 @@ templ AccountsTable(
 						</td>
 					</tr>
 				}
+				if len(readAccountsResponseDto.Accounts) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No accounts found.</td>
+					</tr>
+				}
 			</tbody>
 		</table>
 	</div>
