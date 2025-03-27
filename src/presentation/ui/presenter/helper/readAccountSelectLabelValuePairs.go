@@ -30,9 +30,10 @@ func ReadAccountSelectLabelValuePairs(
 	}
 
 	for _, accountEntity := range readAccountsRequestDto.Accounts {
+		accountIdStr := accountEntity.Id.String()
 		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: accountEntity.Username.String() + " (#" + accountEntity.Id.String() + ")",
-			Value: accountEntity.Id.String(),
+			Label: accountEntity.Username.String() + " (#" + accountIdStr + ")",
+			Value: accountIdStr,
 		}
 		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
 	}
