@@ -7,8 +7,8 @@ import (
 
 type ReadAccountsRequest struct {
 	Pagination      Pagination                `json:"pagination"`
-	AccountId       *valueObject.AccountId    `json:"id,omitempty"`
-	AccountUsername *valueObject.UnixUsername `json:"username,omitempty"`
+	AccountId       *valueObject.AccountId    `json:"accountId"`
+	AccountUsername *valueObject.UnixUsername `json:"accountUsername"`
 }
 
 type ReadAccountsResponse struct {
