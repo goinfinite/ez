@@ -31,3 +31,78 @@ templ ProgressBar(completionRate uint8, label string) {
 		<div class={ progressBarCssClassesFactory(completionRate) }></div>
 	</div>
 }
+
+const (
+	ProgressBarSizeXs               = "xs"
+	ProgressBarSizeSm               = "sm"
+	ProgressBarSizeMd               = "md"
+	ProgressBarSizeLg               = "lg"
+	ProgressBarSizeXl               = "xl"
+	ProgressBarShapeSlightlyRounded = "slightlyRounded"
+	ProgressBarShapeRounded         = "rounded"
+)
+
+type ProgressBarSettings struct {
+	Label          string
+	CompletionRate uint8
+	Shape          string
+	Size           string
+	TooltipText    string
+	TooltipColor   string
+}
+
+templ NewlyProgressBar(inputSettings ProgressBarSettings) {
+	<!-- ProgressBar -->
+	<div class="group/progressBar relative">
+		{{ radiusRoundness := "rounded-md" }}
+		if inputSettings.Shape == ProgressBarShapeSlightlyRounded {
+			{{ radiusRoundness = "rounded-sm" }}
+		}
+		{{ backgroundSize := "h-5 w-20" }}
+		{{ labelSize := "text-sm" }}
+		switch inputSettings.Size {
+			case ProgressBarSizeXs:
+				{{ backgroundSize = "h-5 w-20" }}
+				{{ labelSize = "text-xs" }}
+			case ProgressBarSizeSm:
+				{{ backgroundSize = "h-10 w-25" }}
+				{{ labelSize = "text-sm" }}
+			case ProgressBarSizeMd:
+				{{ backgroundSize = "h-10 w-30" }}
+				{{ labelSize = "text-base" }}
+			case ProgressBarSizeLg:
+				{{ backgroundSize = "h-15 w-35" }}
+				{{ labelSize = "text-lg" }}
+			case ProgressBarSizeXl:
+				{{ backgroundSize = "h-15 w-40" }}
+				{{ labelSize = "text-xl" }}
+		}
+		<div class={ "bg-ez-300 relative m-auto flex " + backgroundSize + " items-center " + radiusRoundness }>
+			{{ completionRateStr := strconv.Itoa(int(inputSettings.CompletionRate)) }}
+			{{ label := completionRateStr }}
+			if inputSettings.Label != "" {
+				{{ label = inputSettings.Label }}
+			}
+			<div class={ "bg-ez-700 absolute left-1/2 -translate-x-1/2 transform rounded-sm bg-opacity-75 px-1 text-neutral-50" + labelSize }>
+				{ label }
+			</div>
+			{{ completionRateColor := "bg-cyan-400" }}
+			switch  {
+				case inputSettings.CompletionRate >= 90:
+					{{ completionRateColor = "bg-red-800" }}
+				case inputSettings.CompletionRate > 85:
+					{{ completionRateColor = "bg-red-600" }}
+				case inputSettings.CompletionRate > 75:
+					{{ completionRateColor = "bg-amber-600" }}
+				case inputSettings.CompletionRate >= 50:
+					{{ completionRateColor = "bg-amber-300" }}
+			}
+			<div class={ "h-full rounded-sm w-[" + completionRateStr + "%] " + completionRateColor }></div>
+		</div>
+		if inputSettings.TooltipText != "" {
+			<div class={ "absolute hidden transition-all duration-300 group-hover/progressBar:flex transform w-fit p-1.5 bg-" + inputSettings.TooltipColor + " text-neutral-100 text-xs rounded-md shadow-lg bottom-full mb-1.5 group-hover/progressBar:-translate-y-0.5 left-1/2 -translate-x-1/2" }>
+				{ inputSettings.TooltipText }
+			</div>
+		}
+	</div>
+}
