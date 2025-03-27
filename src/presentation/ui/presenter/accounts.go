@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"log/slog"
 	"maps"
 	"net/http"
 
@@ -39,16 +40,24 @@ func (presenter *AccountsPresenter) Handler(c echo.Context) error {
 	serviceRequestBody := paginationMap
 	maps.Copy(serviceRequestBody, requestParamsMap)
 
-	responseOutput := presenter.accountService.Read(serviceRequestBody)
-	if responseOutput.Status != service.Success {
+	readAccountsRequestDto, err := presenter.accountService.ReadAccountsRequestFactory(
+		serviceRequestBody,
+	)
+	if err != nil {
+		slog.Debug("ReadAccountsRequestFactoryFailure", slog.Any("error", err))
 		return nil
 	}
 
-	readAccountsResponseDto, assertOk := responseOutput.Body.(dto.ReadAccountsResponse)
+	readAccountsServiceOutput := presenter.accountService.Read(serviceRequestBody)
+	if readAccountsServiceOutput.Status != service.Success {
+		return nil
+	}
+
+	readAccountsResponseDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
 		return nil
 	}
 
-	pageContent := page.AccountsIndex(readAccountsResponseDto.Accounts)
+	pageContent := page.AccountsIndex(readAccountsRequestDto, readAccountsResponseDto)
 	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }
