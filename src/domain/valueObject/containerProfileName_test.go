@@ -6,12 +6,12 @@ import (
 
 func TestNewContainerProfileName(t *testing.T) {
 	t.Run("ValidContainerProfileName", func(t *testing.T) {
-		validContainerProfileName := []any{
+		validContainerProfileNames := []any{
 			"névoa", "cirrus", "cirrostratus", "stratocumulus", "cumulus",
 			"altostratus", "testContainer", "production",
 		}
 
-		for _, name := range validContainerProfileName {
+		for _, name := range validContainerProfileNames {
 			_, err := NewContainerProfileName(name)
 			if err != nil {
 				t.Errorf("Expected no error for '%v', got '%s'", name, err.Error())
@@ -20,11 +20,11 @@ func TestNewContainerProfileName(t *testing.T) {
 	})
 
 	t.Run("InvalidContainerProfileName", func(t *testing.T) {
-		invalidContainerProfileName := []any{
+		invalidContainerProfileNames := []any{
 			"", 10,
 		}
 
-		for _, name := range invalidContainerProfileName {
+		for _, name := range invalidContainerProfileNames {
 			_, err := NewContainerProfileName(name)
 			if err == nil {
 				t.Errorf("Expected error for '%v', got nil", name)
