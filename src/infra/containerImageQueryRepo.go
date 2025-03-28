@@ -418,10 +418,7 @@ func (repo *ContainerImageQueryRepo) Read() ([]entity.ContainerImage, error) {
 
 	readAccountsResponseDto, err := repo.accountQueryRepo.Read(
 		dto.ReadAccountsRequest{
-			Pagination: dto.Pagination{
-				PageNumber:   0,
-				ItemsPerPage: 1000,
-			},
+			Pagination: dto.PaginationUnpaginated,
 		},
 	)
 	if err != nil {

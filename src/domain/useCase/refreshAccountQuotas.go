@@ -15,10 +15,7 @@ func RefreshAccountQuotas(
 	accountCmdRepo repository.AccountCmdRepo,
 ) error {
 	readAccountsResponseDto, err := accountQueryRepo.Read(dto.ReadAccountsRequest{
-		Pagination: dto.Pagination{
-			PageNumber:   0,
-			ItemsPerPage: 1000,
-		},
+		Pagination: dto.PaginationUnpaginated,
 	})
 	if err != nil {
 		slog.Error("ReadAccountsInfraError", slog.Any("error", err))

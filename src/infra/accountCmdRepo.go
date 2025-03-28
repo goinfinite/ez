@@ -346,12 +346,8 @@ func (repo *AccountCmdRepo) UpdateQuotaUsage(accountId valueObject.AccountId) er
 
 	containerQueryRepo := NewContainerQueryRepo(repo.persistentDbSvc)
 
-	readContainersPaginationDto := dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1000,
-	}
 	readContainersRequestDto := dto.ReadContainersRequest{
-		Pagination:         readContainersPaginationDto,
+		Pagination:         dto.PaginationUnpaginated,
 		ContainerAccountId: []valueObject.AccountId{accountId},
 	}
 

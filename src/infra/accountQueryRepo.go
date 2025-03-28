@@ -90,10 +90,8 @@ func (repo *AccountQueryRepo) Read(
 func (repo *AccountQueryRepo) ReadFirst(
 	requestDto dto.ReadAccountsRequest,
 ) (accountEntity entity.Account, err error) {
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
+	requestDto.Pagination = dto.PaginationSingleItem
+
 	responseDto, err := repo.Read(requestDto)
 	if err != nil {
 		return accountEntity, err

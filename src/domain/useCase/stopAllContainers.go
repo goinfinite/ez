@@ -13,14 +13,9 @@ func StopAllContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) error {
-	paginationDto := dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1000,
-	}
-
 	isRunning := true
 	readContainersDto := dto.ReadContainersRequest{
-		Pagination:      paginationDto,
+		Pagination:      dto.PaginationUnpaginated,
 		ContainerStatus: &isRunning,
 	}
 

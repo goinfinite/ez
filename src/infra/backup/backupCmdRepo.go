@@ -371,11 +371,8 @@ func (repo *BackupCmdRepo) DeleteDestination(
 func (repo *BackupCmdRepo) updateBackupCronFile() error {
 	desiredJobStatus := true
 	readJobsRequestDto := dto.ReadBackupJobsRequest{
-		Pagination: dto.Pagination{
-			PageNumber:   0,
-			ItemsPerPage: 1000,
-		},
-		JobStatus: &desiredJobStatus,
+		Pagination: dto.PaginationUnpaginated,
+		JobStatus:  &desiredJobStatus,
 	}
 
 	readJobsResponseDto, err := repo.backupQueryRepo.ReadJob(readJobsRequestDto)
@@ -624,10 +621,7 @@ func (repo *BackupCmdRepo) readAccountsContainersWithMetrics(
 	accountIdContainersMap := map[valueObject.AccountId][]dto.ContainerWithMetrics{}
 	withMetrics := true
 	requestContainersDto := dto.ReadContainersRequest{
-		Pagination: dto.Pagination{
-			PageNumber:   0,
-			ItemsPerPage: 1000,
-		},
+		Pagination:               dto.PaginationUnpaginated,
 		ContainerAccountId:       jobEntity.ContainerAccountIds,
 		ContainerId:              jobEntity.ContainerIds,
 		ExceptContainerAccountId: jobEntity.ExceptContainerAccountIds,
@@ -1775,9 +1769,7 @@ func (repo *BackupCmdRepo) RestoreTask(
 
 	containerImageQueryRepo := infra.NewContainerImageQueryRepo(repo.persistentDbSvc)
 	requestContainerImagesDto := dto.ReadContainerImageArchivesRequest{
-		Pagination: dto.Pagination{
-			ItemsPerPage: 1000,
-		},
+		Pagination:        dto.PaginationUnpaginated,
 		ArchivesDirectory: &restoreTaskTmpDir,
 	}
 
