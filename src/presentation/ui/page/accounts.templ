@@ -26,8 +26,12 @@ templ AccountsIndex(
 				)
 			</div>
 		</div>
-		<div x-data="accounts">
+		<div id="accounts" class="card w-full" x-data="accounts">
 			@AccountsTable(readAccountsRequestDto, readAccountsResponseDto)
+			@componentStructural.DeleteModal(
+				"isDeleteAccountModalOpen", "closeDeleteAccountModal()", "deleteAccount()",
+				"delete-account", "accountEntity.username", "accountEntity.id",
+			)
 		</div>
 	</div>
 }
@@ -38,134 +42,142 @@ templ AccountsTable(
 ) {
 	<!-- Accounts Table -->
 	{{ accountsTableId := "accounts-table" }}
-	<div id={ accountsTableId }>
-		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
-			@componentStructural.ReadRequestSettingsBar(
-				"accounts", "/accounts/", "#"+accountsTableId,
-				readAccountsRequestDto, readAccountsResponseDto.Pagination,
-				entity.Account{},
-			)
+	<div
+		id={ accountsTableId }
+		hx-get="/accounts/"
+		hx-trigger="delete:account from:window delay:250ms"
+		hx-select={ "#" + accountsTableId }
+		hx-target={ "#" + accountsTableId }
+		hx-swap="outerHTML transition:true"
+	>
+		<div id={ accountsTableId }>
+			<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+				@componentStructural.ReadRequestSettingsBar(
+					"accounts", "/accounts/", "#"+accountsTableId,
+					readAccountsRequestDto, readAccountsResponseDto.Pagination,
+					entity.Account{},
+				)
+			</div>
+			<table class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out">
+				<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+					<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+						<th scope="col" class="w-[15%] overflow-x-hidden py-3 pl-3 text-left">Username</th>
+						<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
+						<th scope="col" class="w-[10%] overflow-x-hidden py-3">Memory</th>
+						<th scope="col" class="w-[10%] overflow-x-hidden py-3">Disk</th>
+						<th scope="col" class="w-[10%] overflow-x-hidden py-3">Inodes</th>
+						<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Storage Performance Units</th>
+						<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Created At</th>
+						<th scope="col" class="w-[10%] py-3"></th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, accountEntity := range readAccountsResponseDto.Accounts {
+						<!-- Account Table Entry -->
+						<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+							{{ accountIdStr := accountEntity.Id.String() }}
+							@templ.JSONScript("accountEntity_"+accountIdStr, accountEntity)
+							<td class="w-[15%] overflow-x-hidden px-3 py-2 text-left">
+								{ accountEntity.Username.String() }
+								<div class="mt-2 flex flex-wrap gap-2">
+									@componentMisc.TinyTag(
+										"ph-identification-card", "", accountIdStr, "infinite-500",
+									)
+									@componentMisc.TinyTag(
+										"ph-folder-user", "", accountEntity.HomeDirectory.String(), "infinite-500",
+									)
+								</div>
+							</td>
+							<td class="w-[10%] overflow-x-hidden px-3 py-2">
+								{{ cpuQuotaUsage := accountEntity.QuotaUsage.CpuCores / accountEntity.Quota.CpuCores }}
+								@componentMisc.ProgressBar(
+									uint8(cpuQuotaUsage), strconv.Itoa(int(cpuQuotaUsage))+"%",
+								)
+							</td>
+							<td class="w-[10%] overflow-x-hidden px-3 py-2">
+								{{ memoryQuotaUsage := accountEntity.QuotaUsage.MemoryBytes.Int64() / accountEntity.Quota.MemoryBytes.Int64() }}
+								@componentMisc.ProgressBar(
+									uint8(memoryQuotaUsage), strconv.Itoa(int(memoryQuotaUsage))+"%",
+								)
+							</td>
+							<td class="w-[10%] overflow-x-hidden px-3 py-2">
+								{{ diskQuotaUsage := accountEntity.QuotaUsage.StorageBytes.Int64() / accountEntity.Quota.StorageBytes.Int64() }}
+								@componentMisc.ProgressBar(
+									uint8(diskQuotaUsage), strconv.Itoa(int(diskQuotaUsage))+"%",
+								)
+							</td>
+							<td class="w-[10%] overflow-x-hidden px-3 py-2">
+								{{ inodesQuotaUsage := accountEntity.QuotaUsage.StorageInodes / accountEntity.Quota.StorageInodes }}
+								@componentMisc.ProgressBar(
+									uint8(inodesQuotaUsage), strconv.Itoa(int(inodesQuotaUsage))+"%",
+								)
+							</td>
+							<td class="w-[17.5%] overflow-x-hidden px-3 py-2">
+								{{ storagePerformanceUnitsQuotaUsage := accountEntity.QuotaUsage.StoragePerformanceUnits.Uint() / accountEntity.Quota.StoragePerformanceUnits.Uint() }}
+								@componentMisc.ProgressBar(
+									uint8(storagePerformanceUnitsQuotaUsage), strconv.Itoa(int(storagePerformanceUnitsQuotaUsage))+"%",
+								)
+							</td>
+							<td class="w-[17.5%] overflow-x-hidden px-3 py-2">
+								{ accountEntity.CreatedAt.ReadAsRfcDate() }
+							</td>
+							<td class="w-[10%] px-3 py-2">
+								<div class="flex flex-wrap items-center justify-center gap-1">
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "update-password",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-lock-key",
+										BackgroundColor:      "ez-300",
+										HoverBackgroundColor: "ez-200",
+										OnClick:              "openUpdatePasswordModal(" + accountIdStr + ")",
+										TooltipText:          "Update Password",
+										TooltipColor:         "ez-300",
+										TooltipPosition:      "top",
+									})
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "update-api-key",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-key",
+										BackgroundColor:      "ez-300",
+										HoverBackgroundColor: "ez-200",
+										OnClick:              "openUpdateApiKeyModal(" + accountIdStr + ")",
+										TooltipText:          "Update API Key",
+										TooltipColor:         "ez-300",
+										TooltipPosition:      "top",
+									})
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "update-account-quota",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-disc",
+										BackgroundColor:      "ez-300",
+										HoverBackgroundColor: "ez-200",
+										OnClick:              "openUpdateAccountQuotaModal(" + accountIdStr + ")",
+										TooltipText:          "Update Account Quota",
+										TooltipColor:         "ez-300",
+										TooltipPosition:      "top",
+									})
+									@componentStructural.IconButton(componentStructural.IconButtonSettings{
+										Id:                   "delete-account",
+										Shape:                componentStructural.IconButtonShapeSquare,
+										Icon:                 "ph-trash",
+										BackgroundColor:      "red-800",
+										HoverBackgroundColor: "red-600",
+										OnClick:              "openDeleteAccountModal(" + accountIdStr + ")",
+										TooltipText:          "Delete Account",
+										TooltipColor:         "red-800",
+										TooltipPosition:      "top",
+									})
+								</div>
+							</td>
+						</tr>
+					}
+					if len(readAccountsResponseDto.Accounts) == 0 {
+						<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+							<td class="px-3 py-2" colspan="12">No accounts found.</td>
+						</tr>
+					}
+				</tbody>
+			</table>
 		</div>
-		<table class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out">
-			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
-				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[15%] overflow-x-hidden py-3">Username</th>
-					<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
-					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Memory</th>
-					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Disk</th>
-					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Inodes</th>
-					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Storage Performance Units</th>
-					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Created At</th>
-					<th scope="col" class="w-[10%]"></th>
-				</tr>
-			</thead>
-			<tbody>
-				for _, accountEntity := range readAccountsResponseDto.Accounts {
-					<!-- Account Entry -->
-					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
-						{{ accountIdStr := accountEntity.Id.String() }}
-						@templ.JSONScript("accountEntity_"+accountIdStr, accountEntity)
-						{{ accountUsernameStr := accountEntity.Username.String() }}
-						<td class="w-[15%] overflow-x-hidden px-3 py-2">
-							{ accountUsernameStr }
-							<div class="mt-2 flex flex-wrap justify-center gap-2">
-								@componentMisc.TinyTag(
-									"ph-identification-card", "", accountIdStr, "infinite-500",
-								)
-								@componentMisc.TinyTag(
-									"ph-folder-user", "", accountEntity.HomeDirectory.String(), "infinite-500",
-								)
-							</div>
-						</td>
-						<td class="w-[10%] overflow-x-hidden py-3">
-							{{ cpuQuotaUsage := accountEntity.QuotaUsage.CpuCores / accountEntity.Quota.CpuCores }}
-							@componentMisc.ProgressBar(
-								uint8(cpuQuotaUsage), strconv.Itoa(int(cpuQuotaUsage))+"%",
-							)
-						</td>
-						<td class="w-[10%] overflow-x-hidden py-3">
-							{{ memoryQuotaUsage := accountEntity.QuotaUsage.MemoryBytes.Int64() / accountEntity.Quota.MemoryBytes.Int64() }}
-							@componentMisc.ProgressBar(
-								uint8(memoryQuotaUsage), strconv.Itoa(int(memoryQuotaUsage))+"%",
-							)
-						</td>
-						<td class="w-[10%] overflow-x-hidden py-3">
-							{{ diskQuotaUsage := accountEntity.QuotaUsage.StorageBytes.Int64() / accountEntity.Quota.StorageBytes.Int64() }}
-							@componentMisc.ProgressBar(
-								uint8(diskQuotaUsage), strconv.Itoa(int(diskQuotaUsage))+"%",
-							)
-						</td>
-						<td class="w-[10%] overflow-x-hidden py-3">
-							{{ inodesQuotaUsage := accountEntity.QuotaUsage.StorageInodes / accountEntity.Quota.StorageInodes }}
-							@componentMisc.ProgressBar(
-								uint8(inodesQuotaUsage), strconv.Itoa(int(inodesQuotaUsage))+"%",
-							)
-						</td>
-						<td class="w-[17.5%] overflow-x-hidden py-3">
-							{{ storagePerformanceUnitsQuotaUsage := accountEntity.QuotaUsage.StoragePerformanceUnits.Uint() / accountEntity.Quota.StoragePerformanceUnits.Uint() }}
-							@componentMisc.ProgressBar(
-								uint8(storagePerformanceUnitsQuotaUsage), strconv.Itoa(int(storagePerformanceUnitsQuotaUsage))+"%",
-							)
-						</td>
-						<td class="w-[17.5%] overflow-x-hidden px-3 py-2">
-							{ accountEntity.CreatedAt.ReadAsRfcDate() }
-						</td>
-						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							<div class="flex flex-wrap items-center justify-center gap-1">
-								@componentStructural.IconButton(componentStructural.IconButtonSettings{
-									Id:                   "update-password",
-									Shape:                componentStructural.IconButtonShapeSquare,
-									Icon:                 "ph-lock-key",
-									BackgroundColor:      "ez-300",
-									HoverBackgroundColor: "ez-200",
-									OnClick:              "openUpdatePasswordModal(" + accountIdStr + ")",
-									TooltipText:          "Update Password",
-									TooltipColor:         "ez-300",
-									TooltipPosition:      "top",
-								})
-								@componentStructural.IconButton(componentStructural.IconButtonSettings{
-									Id:                   "update-api-key",
-									Shape:                componentStructural.IconButtonShapeSquare,
-									Icon:                 "ph-key",
-									BackgroundColor:      "ez-300",
-									HoverBackgroundColor: "ez-200",
-									OnClick:              "openUpdateApiKeyModal(" + accountIdStr + ", '" + accountUsernameStr + "')",
-									TooltipText:          "Update API Key",
-									TooltipColor:         "ez-300",
-									TooltipPosition:      "top",
-								})
-								@componentStructural.IconButton(componentStructural.IconButtonSettings{
-									Id:                   "update-account-quota",
-									Shape:                componentStructural.IconButtonShapeSquare,
-									Icon:                 "ph-disc",
-									BackgroundColor:      "ez-300",
-									HoverBackgroundColor: "ez-200",
-									OnClick:              "openUpdateAccountQuotaModal(" + accountIdStr + ", '" + accountUsernameStr + "')",
-									TooltipText:          "Update Account Quota",
-									TooltipColor:         "ez-300",
-									TooltipPosition:      "top",
-								})
-								@componentStructural.IconButton(componentStructural.IconButtonSettings{
-									Id:                   "delete-account",
-									Shape:                componentStructural.IconButtonShapeSquare,
-									Icon:                 "ph-trash",
-									BackgroundColor:      "red-800",
-									HoverBackgroundColor: "red-600",
-									OnClick:              "openDeleteAccountModal(" + accountIdStr + ", '" + accountUsernameStr + "')",
-									TooltipText:          "Delete Account",
-									TooltipColor:         "red-800",
-									TooltipPosition:      "top",
-								})
-							</div>
-						</td>
-					</tr>
-				}
-				if len(readAccountsResponseDto.Accounts) == 0 {
-					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
-						<td class="px-3 py-2" colspan="12">No accounts found.</td>
-					</tr>
-				}
-			</tbody>
-		</table>
 	</div>
 }
