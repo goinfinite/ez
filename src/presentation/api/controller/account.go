@@ -71,20 +71,20 @@ func (controller *AccountController) accountQuotaFactory(
 	}
 
 	millicores := accountQuota.Millicores
-	if quotaMap["cpuCores"] != nil {
-		cpuCoresUint, err := voHelper.InterfaceToUint(quotaMap["cpuCores"])
-		if err != nil {
-			return accountQuota, err
-		}
-
-		millicores, err = valueObject.NewMillicores(cpuCoresUint * 1000)
+	if quotaMap["millicores"] != nil {
+		millicores, err = valueObject.NewMillicores(quotaMap["millicores"])
 		if err != nil {
 			return accountQuota, err
 		}
 	}
 
-	if quotaMap["millicores"] != nil {
-		millicores, err = valueObject.NewMillicores(quotaMap["millicores"])
+	if quotaMap["cpuCores"] != nil {
+		cpuCoresUint, err := voHelper.InterfaceToFloat64(quotaMap["cpuCores"])
+		if err != nil {
+			return accountQuota, err
+		}
+
+		millicores, err = valueObject.NewMillicores(cpuCoresUint * 1000)
 		if err != nil {
 			return accountQuota, err
 		}
@@ -98,6 +98,20 @@ func (controller *AccountController) accountQuotaFactory(
 		}
 	}
 
+	if quotaMap["memoryMebibytes"] != nil {
+		memoryBytes, err = valueObject.NewMebibyte(quotaMap["memoryMebibytes"])
+		if err != nil {
+			return accountQuota, err
+		}
+	}
+
+	if quotaMap["memoryGibibytes"] != nil {
+		memoryBytes, err = valueObject.NewGibibyte(quotaMap["memoryGibibytes"])
+		if err != nil {
+			return accountQuota, err
+		}
+	}
+
 	storageBytes := accountQuota.StorageBytes
 	if quotaMap["diskBytes"] != nil {
 		quotaMap["storageBytes"] = quotaMap["diskBytes"]
@@ -105,6 +119,28 @@ func (controller *AccountController) accountQuotaFactory(
 
 	if quotaMap["storageBytes"] != nil {
 		storageBytes, err = valueObject.NewByte(quotaMap["storageBytes"])
+		if err != nil {
+			return accountQuota, err
+		}
+	}
+
+	if quotaMap["diskMebibytes"] != nil {
+		quotaMap["storageMebibytes"] = quotaMap["diskMebibytes"]
+	}
+
+	if quotaMap["storageMebibytes"] != nil {
+		storageBytes, err = valueObject.NewMebibyte(quotaMap["storageMebibytes"])
+		if err != nil {
+			return accountQuota, err
+		}
+	}
+
+	if quotaMap["diskGibibytes"] != nil {
+		quotaMap["storageGibibytes"] = quotaMap["diskGibibytes"]
+	}
+
+	if quotaMap["storageGibibytes"] != nil {
+		storageBytes, err = valueObject.NewGibibyte(quotaMap["storageGibibytes"])
 		if err != nil {
 			return accountQuota, err
 		}
