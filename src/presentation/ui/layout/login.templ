@@ -81,10 +81,10 @@ templ Login() {
 						<p class="mt-1 text-sm">Please enter your credentials to continue.</p>
 					</div>
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:     "text",
-						Id:            "username",
-						Label:         "Username",
-						ModelBindPath: "username",
+						InputType:              "text",
+						RequestPayloadPropName: "username",
+						Label:                  "Username",
+						ModelBindPath:          "username",
 					})
 					@componentForm.PasswordInput("password", "Password", "password", false, false)
 					@componentStructural.IconButton(componentStructural.IconButtonSettings{

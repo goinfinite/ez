@@ -113,7 +113,7 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 
 						adjustedPortBinding.publicPort = adjustedPortBinding.containerPort;
 						delete adjustedPortBinding.privatePort;
-						
+
 						return adjustedPortBinding;
 					},
 				);
@@ -714,7 +714,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		class="space-y-4"
 	>
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType: "text", Id: "hostname", Label: "Hostname",
+			InputType: "text", RequestPayloadPropName: "hostname", Label: "Hostname",
 			ModelBindPath: "container.hostname", IsRequired: true,
 		})
 		<!-- ContainerSource & LaunchScript -->
@@ -823,7 +823,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType: "text", Id: "entrypoint", Label: "Entrypoint",
+				InputType: "text", RequestPayloadPropName: "entrypoint", Label: "Entrypoint",
 				ModelBindPath: "container.entrypoint",
 			})
 			<div class="flex flex-row items-center gap-6">
@@ -1090,46 +1090,46 @@ templ ResourceUsageCharts() {
 templ SystemInformation() {
 	<div class="bg-ez-800 mt-4 grid grid-cols-3 gap-4 rounded-md p-4">
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:     "text",
-			Id:            "serverHostname",
-			Label:         "Server Hostname",
-			ModelBindPath: "sysInfo.serverHostname",
-			IsReadOnly:    true,
+			InputType:              "text",
+			RequestPayloadPropName: "serverHostname",
+			Label:                  "Server Hostname",
+			ModelBindPath:          "sysInfo.serverHostname",
+			IsReadOnly:             true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:     "text",
-			Id:            "cpuModel",
-			Label:         "CPU",
-			ModelBindPath: "sysInfo.cpuModel",
-			IsReadOnly:    true,
+			InputType:              "text",
+			RequestPayloadPropName: "cpuModel",
+			Label:                  "CPU",
+			ModelBindPath:          "sysInfo.cpuModel",
+			IsReadOnly:             true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:     "text",
-			Id:            "memoryRamGibibytes",
-			Label:         "Memory (RAM)",
-			ModelBindPath: "sysInfo.memoryRamGibibytes",
-			IsReadOnly:    true,
+			InputType:              "text",
+			RequestPayloadPropName: "memoryRamGibibytes",
+			Label:                  "Memory (RAM)",
+			ModelBindPath:          "sysInfo.memoryRamGibibytes",
+			IsReadOnly:             true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:     "text",
-			Id:            "publicIpAddress",
-			Label:         "Public IP Address",
-			ModelBindPath: "sysInfo.publicIpAddress",
-			IsReadOnly:    true,
+			InputType:              "text",
+			RequestPayloadPropName: "publicIpAddress",
+			Label:                  "Public IP Address",
+			ModelBindPath:          "sysInfo.publicIpAddress",
+			IsReadOnly:             true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:     "text",
-			Id:            "privateIpAddress",
-			Label:         "Private IP Address",
-			ModelBindPath: "sysInfo.privateIpAddress",
-			IsReadOnly:    true,
+			InputType:              "text",
+			RequestPayloadPropName: "privateIpAddress",
+			Label:                  "Private IP Address",
+			ModelBindPath:          "sysInfo.privateIpAddress",
+			IsReadOnly:             true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:     "text",
-			Id:            "uptimeRelativeStr",
-			Label:         "Server Uptime",
-			ModelBindPath: "sysInfo.uptimeRelative",
-			IsReadOnly:    true,
+			InputType:              "text",
+			RequestPayloadPropName: "uptimeRelativeStr",
+			Label:                  "Server Uptime",
+			ModelBindPath:          "sysInfo.uptimeRelative",
+			IsReadOnly:             true,
 		})
 	</div>
 }
