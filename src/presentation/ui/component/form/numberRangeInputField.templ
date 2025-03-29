@@ -12,9 +12,11 @@ templ NumberRangeInputField(
 				<input
 					name={ id }
 					type="number"
-					class="hover:border-ez-100 bg-ez-300 border-ez-200 focus-visible:border-ez-50 peer relative block w-full rounded-md border p-2.5 text-sm text-neutral-50 placeholder-neutral-400 outline-none duration-300"
-					placeholder="0"
+					min={ min }
+					max={ max }
+					step={ step }
 					x-model:value={ modelBindPath }
+					class="hover:border-ez-100 bg-ez-300 border-ez-200 focus-visible:border-ez-50 peer relative block w-full rounded-md border p-2.5 text-sm text-neutral-50 placeholder-neutral-400 outline-none duration-300"
 				/>
 				if unitSuffix != "" {
 					<span class="absolute right-2 text-[10px] text-neutral-400 hover:hidden peer-hover:hidden">{ unitSuffix }</span>
