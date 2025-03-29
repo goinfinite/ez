@@ -30,6 +30,7 @@ templ AccountsIndex(
 		<div id="accounts" class="card w-full" x-data="accounts">
 			@AccountsTable(readAccountsRequestDto, readAccountsResponseDto)
 			@UpdatePasswordModal()
+			@UpdateApiKeyModal()
 			@componentStructural.DeleteModal(
 				"isDeleteAccountModalOpen", "closeDeleteAccountModal()", "deleteAccount()",
 				"delete-account", "accountEntity.username", "accountEntity.id",
@@ -210,5 +211,37 @@ templ UpdatePasswordModal() {
 		"accountEntity.id",
 	) {
 		@UpdatePasswordForm()
+	}
+}
+
+templ UpdateApiKeyContent() {
+	<!-- UpdateApiKeyContent -->
+	<div class="flex flex-col space-y-4">
+		@componentForm.TextArea(componentForm.TextAreaSettings{
+			Id:            "apiKey",
+			Label:         "API Key",
+			ModelBindPath: "accountApiKey",
+			IsReadOnly:    true,
+		})
+		<div x-show="accountApiKey !== ''">
+			@componentStructural.Alert(
+				componentStructural.AlertTypeWarning,
+				"This API key will not be stored on the server side. Please save it securely, as you will not be able to retrieve it again if lost. If you need to access your API key in the future, you will need to generate a new one.",
+			)
+		</div>
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label:   "Update",
+			Icon:    "ph-check-fat",
+			OnClick: "updateApiKey()",
+		})
+	</div>
+}
+
+templ UpdateApiKeyModal() {
+	@componentStructural.RegularModal(
+		"Update API Key", "isUpdateApiKeyModalOpen", "closeUpdateApiKeyModal()",
+		"accountEntity.username",
+	) {
+		@UpdateApiKeyContent()
 	}
 }

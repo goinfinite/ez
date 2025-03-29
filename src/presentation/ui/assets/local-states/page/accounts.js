@@ -1,8 +1,10 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('accounts', () => ({
         accountEntity: {},
+        accountApiKey: "",
         resetPrimaryStates() {
             this.accountEntity = {}
+            this.accountApiKey = ""
         },
         updateAccountEntity(accountId) {
             this.accountEntity = JSON.parse(
@@ -21,6 +23,24 @@ document.addEventListener('alpine:init', () => {
         },
         closeUpdatePasswordModal() {
             this.isUpdatePasswordModalOpen = false
+        },
+        isUpdateApiKeyModalOpen: false,
+        openUpdateApiKeyModal(accountId) {
+            this.resetPrimaryStates()
+            this.updateAccountEntity(accountId)
+            this.isUpdateApiKeyModalOpen = true
+        },
+        closeUpdateApiKeyModal() {
+            this.isUpdateApiKeyModalOpen = false
+        },
+        updateApiKey() {
+            const shouldDisplayToast = false
+            Infinite.JsonAjax(
+                "PUT",
+                "/api/v1/account/",
+                { id: this.accountEntity.id, shouldUpdateApiKey: true },
+                shouldDisplayToast
+            ).then((apiKey) => (this.accountApiKey = apiKey))
         },
         isDeleteAccountModalOpen: false,
         openDeleteAccountModal(accountId) {
