@@ -1,23 +1,31 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('accounts', () => ({
-        // Primary States
         accountEntity: {},
         resetPrimaryStates() {
             this.accountEntity = {}
+        },
+        updateAccountEntity(accountId) {
+            this.accountEntity = JSON.parse(
+                document.getElementById("accountEntity_" + accountId).textContent
+            )
         },
         init() {
             this.resetPrimaryStates()
         },
 
-        // Modal States
+        isUpdatePasswordModalOpen: false,
+        openUpdatePasswordModal(accountId) {
+            this.resetPrimaryStates()
+            this.updateAccountEntity(accountId)
+            this.isUpdatePasswordModalOpen = true
+        },
+        closeUpdatePasswordModal() {
+            this.isUpdatePasswordModalOpen = false
+        },
         isDeleteAccountModalOpen: false,
         openDeleteAccountModal(accountId) {
             this.resetPrimaryStates()
-
-            this.accountEntity = JSON.parse(
-                document.getElementById("accountEntity_" + accountId).textContent
-            )
-
+            this.updateAccountEntity(accountId)
             this.isDeleteAccountModalOpen = true
         },
         closeDeleteAccountModal() {

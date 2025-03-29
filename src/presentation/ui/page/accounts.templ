@@ -3,6 +3,7 @@ package page
 import (
 	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/presentation/ui/component/form"
 	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
 	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 	"github.com/goinfinite/ez/src/presentation/ui/envs"
@@ -28,6 +29,7 @@ templ AccountsIndex(
 		</div>
 		<div id="accounts" class="card w-full" x-data="accounts">
 			@AccountsTable(readAccountsRequestDto, readAccountsResponseDto)
+			@UpdatePasswordModal()
 			@componentStructural.DeleteModal(
 				"isDeleteAccountModalOpen", "closeDeleteAccountModal()", "deleteAccount()",
 				"delete-account", "accountEntity.username", "accountEntity.id",
@@ -180,4 +182,33 @@ templ AccountsTable(
 			</table>
 		</div>
 	</div>
+}
+
+templ UpdatePasswordForm() {
+	<!-- UpdatePasswordForm -->
+	<form
+		hx-put="/api/v1/account/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		x-on:submit="closeUpdatePasswordModal()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="id" x-bind:value="accountEntity.id"/>
+		@componentForm.PasswordInput(
+			"password", "Password", "accountEntity.password", true, true,
+		)
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Update",
+			Icon:  "ph-check-fat",
+		})
+	</form>
+}
+
+templ UpdatePasswordModal() {
+	@componentStructural.RegularModal(
+		"Update Password", "isUpdatePasswordModalOpen", "closeUpdatePasswordModal()",
+		"accountEntity.id",
+	) {
+		@UpdatePasswordForm()
+	}
 }
