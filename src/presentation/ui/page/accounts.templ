@@ -302,7 +302,7 @@ templ CreateAccountModal() {
 templ UpdateAccountQuotaModal() {
 	@componentStructural.RegularModal(
 		"Update Account Quota", "isUpdateAccountQuotaModalOpen", "closeUpdateAccountQuotaModal()",
-		"accountEntity.id",
+		"accountEntity.username",
 	) {
 		@AccountForm("update")
 	}
