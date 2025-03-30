@@ -70,14 +70,14 @@ templ AccountsTable(
 		<table class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out">
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[15%] overflow-x-hidden py-3 pl-3 text-left">Username</th>
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3 pl-3 text-left">Username</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Memory</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Disk</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Inodes</th>
 					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Storage Performance Units</th>
-					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Created At</th>
-					<th scope="col" class="w-[10%] py-3"></th>
+					<th scope="col" class="w-[15%] overflow-x-hidden py-3">Created At</th>
+					<th scope="col" class="w-[7.5%] py-3"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -86,14 +86,14 @@ templ AccountsTable(
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						{{ accountIdStr := accountEntity.Id.String() }}
 						@templ.JSONScript("accountEntity_"+accountIdStr, accountEntity)
-						<td class="w-[15%] overflow-x-hidden px-3 py-2 text-left">
+						<td class="w-[20%] overflow-x-hidden px-3 py-2 text-left">
 							{ accountEntity.Username.String() }
 							<div class="mt-2 flex flex-wrap gap-2">
 								@componentMisc.TinyTag(
-									"ph-identification-card", "", accountIdStr, "infinite-500",
+									"", "Ownership", accountIdStr+":"+accountEntity.GroupId.String(), "infinite-500",
 								)
 								@componentMisc.TinyTag(
-									"ph-folder-user", "", accountEntity.HomeDirectory.String(), "infinite-500",
+									"", "Home Directory", accountEntity.HomeDirectory.String(), "infinite-500",
 								)
 							</div>
 						</td>
@@ -150,10 +150,10 @@ templ AccountsTable(
 								<span class="text-xs italic text-neutral-400">No units available</span>
 							}
 						</td>
-						<td class="w-[17.5%] overflow-x-hidden px-3 py-2">
+						<td class="w-[15%] overflow-x-hidden px-3 py-2 text-sm">
 							{ accountEntity.CreatedAt.ReadAsRfcDate() }
 						</td>
-						<td class="w-[10%] px-3 py-2">
+						<td class="w-[7.5%] px-3 py-2">
 							<div class="flex flex-wrap items-center justify-center gap-1">
 								@componentStructural.IconButton(componentStructural.IconButtonSettings{
 									Id:                   "update-password",
@@ -331,7 +331,7 @@ templ UpdatePasswordForm() {
 templ UpdatePasswordModal() {
 	@componentStructural.RegularModal(
 		"Update Password", "isUpdatePasswordModalOpen", "closeUpdatePasswordModal()",
-		"accountEntity.id",
+		"accountEntity.username",
 	) {
 		@UpdatePasswordForm()
 	}
