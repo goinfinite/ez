@@ -1,6 +1,10 @@
 # Changelog
 
 ```log
+0.1.1 - XXXX/XX/XX
+refactor(front): accounts page with HTMX+Alpine.js
+fix(front): allow decimal values on Container Profiles Modal
+
 0.1.0 - 2025/03/24
 feat: backups
 fix: entrypoint parsing bug on create container
