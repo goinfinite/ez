@@ -2,8 +2,10 @@ package page
 
 import "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 import "github.com/goinfinite/ez/src/presentation/ui/envs"
+import "github.com/goinfinite/ez/src/domain/entity"
+import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 
-templ MappingsIndex() {
+templ MappingsIndex(mappingsList []entity.Mapping) {
 	<!-- Mappings Page JavaScript -->
 	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/mappings.js" }></script>
 	<!-- Mappings Page HTML -->
@@ -29,6 +31,87 @@ templ MappingsIndex() {
 				})
 			</div>
 		</div>
-		<div id="mappings" class="card w-full"></div>
+		<div id="mappings" class="card w-full">
+			@MappingsTable(mappingsList)
+		</div>
+	</div>
+}
+
+templ MappingsTable(mappingsList []entity.Mapping) {
+	<!-- Mappings Table -->
+	<div id="mappings-form-table" class="flex w-full flex-col gap-4">
+		for _, mapping := range mappingsList {
+			<!-- Mapping Entry -->
+			<div class="bg-ez-800 h-65 flex gap-3 rounded-md p-3">
+				<!-- Mapping Column -->
+				<div class="bg-ez-500 flex w-2/5 flex-col rounded p-3">
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						{{ mappingHostname := "*" }}
+						if mapping.Hostname != nil {
+							{{ mappingHostname = mapping.Hostname.String() }}
+						}
+						<span class="text-lg font-bold">{ mappingHostname } #{ mapping.Id.String() }</span>
+						<div class="flex gap-2">
+							@componentStructural.IconButton(componentStructural.IconButtonSettings{
+								Shape:                componentStructural.IconButtonShapeCircular,
+								Icon:                 "ph-plus-circle",
+								BackgroundColor:      "ez-300",
+								HoverBackgroundColor: "ez-200",
+								OnClick:              "console.log('Create target from mapping')",
+								TooltipText:          "Create Mapping",
+								TooltipColor:         "ez-300",
+								TooltipPosition:      "top",
+							})
+							@componentStructural.IconButton(componentStructural.IconButtonSettings{
+								Shape:                componentStructural.IconButtonShapeCircular,
+								Icon:                 "ph-trash",
+								BackgroundColor:      "red-800",
+								HoverBackgroundColor: "red-600",
+								OnClick:              "console.log('Delete mapping')",
+								TooltipText:          "Delete Mapping",
+								TooltipColor:         "red-800",
+								TooltipPosition:      "top",
+							})
+						</div>
+					</div>
+					<div class="mt-4 flex flex-wrap gap-3">
+						@componentMisc.TinyTag("ph-user-circle", "", mapping.AccountName.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-link-simple", "", mapping.Protocol.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-door-open", "", mapping.PublicPort.String(), "infinite-500")
+					</div>
+				</div>
+				<!-- Mapping Targets Column -->
+				<div class="flex w-full flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar]:w-3">
+					for _, target := range mapping.Targets {
+						<div class="bg-ez-500 flex-col rounded-md p-3">
+							<div class="flex items-center justify-between">
+								<div class="flex gap-4">
+									@componentMisc.TinyTag(
+										"", "Container Hostname",
+										target.ContainerHostname.String(),
+										"teal-800",
+									)
+									@componentMisc.TinyTag(
+										"", "Container Private Port",
+										target.ContainerPrivatePort.String(),
+										"teal-800",
+									)
+								</div>
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-800",
+									HoverBackgroundColor: "red-600",
+									OnClick:              "console.log('Delete mapping target')",
+									TooltipText:          "Delete Mapping Target",
+									TooltipColor:         "red-800",
+									TooltipPosition:      "top",
+								})
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		}
 	</div>
 }

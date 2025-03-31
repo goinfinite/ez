@@ -92,7 +92,9 @@ func (router *Router) loginRoutes() {
 func (router *Router) mappingsRoutes() {
 	mappingsGroup := router.baseRoute.Group("/mappings")
 
-	mappingsPresenter := presenter.NewMappingsPresenter()
+	mappingsPresenter := presenter.NewMappingsPresenter(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
 	mappingsGroup.GET("/", mappingsPresenter.Handler)
 }
 
