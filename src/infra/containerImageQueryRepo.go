@@ -152,7 +152,7 @@ func (repo *ContainerImageQueryRepo) originContainerMappingFactory(
 		return mappingEntity, err
 	}
 
-	accountName, err := valueObject.NewUnixUsername(rawMappingMap["accountUsername"])
+	accountName, err := valueObject.NewUnixUsername(rawMappingMap["accountName"])
 	if err != nil {
 		return mappingEntity, err
 	}
