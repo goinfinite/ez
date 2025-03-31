@@ -89,6 +89,13 @@ func (router *Router) loginRoutes() {
 	loginGroup.GET("/", loginPresenter.Handler)
 }
 
+func (router *Router) mappingsRoutes() {
+	mappingsGroup := router.baseRoute.Group("/mappings")
+
+	mappingsPresenter := presenter.NewMappingsPresenter()
+	mappingsGroup.GET("/", mappingsPresenter.Handler)
+}
+
 func (router *Router) overviewRoutes() {
 	overviewGroup := router.baseRoute.Group("/overview")
 
@@ -149,6 +156,7 @@ func (router *Router) RegisterRoutes() {
 	router.backupRoutes()
 	router.containerRoutes()
 	router.loginRoutes()
+	router.mappingsRoutes()
 	router.overviewRoutes()
 
 	if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {

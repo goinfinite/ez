@@ -1,0 +1,34 @@
+package page
+
+import "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+import "github.com/goinfinite/ez/src/presentation/ui/envs"
+
+templ MappingsIndex() {
+	<!-- Mappings Page JavaScript -->
+	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/mappings.js" }></script>
+	<!-- Mappings Page HTML -->
+	<div class="flex flex-col" x-data="mappings">
+		<div class="mb-6 flex flex-row justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Mappings",
+					"",
+					"ph-graph",
+				)
+			</div>
+			<div class="flex gap-5">
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
+					Label:   "Create Mapping",
+					Icon:    "ph-plus-square",
+					OnClick: "console.log('create mapping')",
+				})
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
+					Label:   "Create Target",
+					Icon:    "ph-plus-square",
+					OnClick: "console.log('create target')",
+				})
+			</div>
+		</div>
+		<div id="mappings" class="card w-full"></div>
+	</div>
+}
