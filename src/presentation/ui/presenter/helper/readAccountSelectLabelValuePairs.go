@@ -23,13 +23,13 @@ func ReadAccountSelectLabelValuePairs(
 		return nil
 	}
 
-	readAccountsRequestDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
+	readAccountsResponseDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
 		slog.Debug("AssertAccountsFailure")
 		return nil
 	}
 
-	for _, accountEntity := range readAccountsRequestDto.Accounts {
+	for _, accountEntity := range readAccountsResponseDto.Accounts {
 		accountIdStr := accountEntity.Id.String()
 		selectLabelValuePair := componentForm.SelectLabelValuePair{
 			Label: accountEntity.Username.String() + " (#" + accountIdStr + ")",

@@ -114,14 +114,14 @@ func (presenter *ContainerImagePresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	readAccountsRequestDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
+	readAccountsResponseDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
 		slog.Debug("AssertAccountsFailure")
 		return nil
 	}
 
 	accountIdEntityMap := map[valueObject.AccountId]entity.Account{}
-	for _, accountEntity := range readAccountsRequestDto.Accounts {
+	for _, accountEntity := range readAccountsResponseDto.Accounts {
 		accountIdEntityMap[accountEntity.Id] = accountEntity
 	}
 
