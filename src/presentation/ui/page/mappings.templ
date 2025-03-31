@@ -113,5 +113,10 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 				</div>
 			</div>
 		}
+		if len(mappingsList) == 0 {
+			<div class="bg-ez-800 flex h-20 items-center justify-center rounded-md p-3">
+				<span class="italic text-neutral-500">No mappings found.</span>
+			</div>
+		}
 	</div>
 }
