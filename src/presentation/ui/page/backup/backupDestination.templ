@@ -24,11 +24,11 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		<div class="flex w-full flex-row items-center gap-5">
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "text",
-					RequestPayloadPropName: "destinationName",
-					Label:                  "Name",
-					ModelBindPath:          "createDestinationPayload.destinationName",
-					IsRequired:             true,
+					InputType:     "text",
+					InputName:     "destinationName",
+					Label:         "Name",
+					ModelBindPath: "createDestinationPayload.destinationName",
+					IsRequired:    true,
 				})
 			</div>
 			<div class="w-1/2">
@@ -64,18 +64,18 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		<div class="flex w-full flex-row items-center gap-5">
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "text",
-					RequestPayloadPropName: "destinationPath",
-					Label:                  "Destination Path",
-					ModelBindPath:          "createDestinationPayload.destinationPath",
+					InputType:     "text",
+					InputName:     "destinationPath",
+					Label:         "Destination Path",
+					ModelBindPath: "createDestinationPayload.destinationPath",
 				})
 			</div>
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "number",
-					RequestPayloadPropName: "minLocalStorageFreePercent",
-					Label:                  "Min Free Local Storage (%)",
-					ModelBindPath:          "createDestinationPayload.minLocalStorageFreePercent",
+					InputType:     "number",
+					InputName:     "minLocalStorageFreePercent",
+					Label:         "Min Free Local Storage (%)",
+					ModelBindPath: "createDestinationPayload.minLocalStorageFreePercent",
 				})
 			</div>
 		</div>
@@ -103,11 +103,11 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "remoteHostname",
-						Label:                  "Server Hostname",
-						ModelBindPath:          "createDestinationPayload.remoteHostname",
-						IsRequired:             true,
+						InputType:     "text",
+						InputName:     "remoteHostname",
+						Label:         "Server Hostname",
+						ModelBindPath: "createDestinationPayload.remoteHostname",
+						IsRequired:    true,
 					})
 				</div>
 			</div>
@@ -116,19 +116,19 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			<div class="flex w-full flex-row items-center gap-5">
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "remoteHostUsername",
-						Label:                  "Username",
-						ModelBindPath:          "createDestinationPayload.remoteHostUsername",
-						IsRequired:             true,
+						InputType:     "text",
+						InputName:     "remoteHostUsername",
+						Label:         "Username",
+						ModelBindPath: "createDestinationPayload.remoteHostUsername",
+						IsRequired:    true,
 					})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "password",
-						RequestPayloadPropName: "remoteHostPassword",
-						Label:                  "Password",
-						ModelBindPath:          "createDestinationPayload.remoteHostPassword",
+						InputType:     "password",
+						InputName:     "remoteHostPassword",
+						Label:         "Password",
+						ModelBindPath: "createDestinationPayload.remoteHostPassword",
 					})
 				</div>
 			</div>
@@ -137,18 +137,18 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			<div class="flex w-full flex-row items-center gap-5">
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "number",
-						RequestPayloadPropName: "remoteHostNetworkPort",
-						Label:                  "Server Port",
-						ModelBindPath:          "createDestinationPayload.remoteHostNetworkPort",
+						InputType:     "number",
+						InputName:     "remoteHostNetworkPort",
+						Label:         "Server Port",
+						ModelBindPath: "createDestinationPayload.remoteHostNetworkPort",
 					})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "remoteHostPrivateKeyFilePath",
-						Label:                  "Private Key File Path",
-						ModelBindPath:          "createDestinationPayload.remoteHostPrivateKeyFilePath",
+						InputType:     "text",
+						InputName:     "remoteHostPrivateKeyFilePath",
+						Label:         "Private Key File Path",
+						ModelBindPath: "createDestinationPayload.remoteHostPrivateKeyFilePath",
 					})
 				</div>
 			</div>
@@ -168,10 +168,10 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 					{{ isCloudFlareProvider := `createDestinationPayload.objectStorageProvider == 'cloudflare'` }}
 					<template x-if={ isCustomProvider + ` || ` + isCloudFlareProvider }>
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "text",
-							RequestPayloadPropName: "objectStorageEndpointUrl",
-							Label:                  "Endpoint Url",
-							ModelBindPath:          "createDestinationPayload.objectStorageEndpointUrl",
+							InputType:     "text",
+							InputName:     "objectStorageEndpointUrl",
+							Label:         "Endpoint Url",
+							ModelBindPath: "createDestinationPayload.objectStorageEndpointUrl",
 						})
 					</template>
 					<template x-if={ "!(" + isCustomProvider + ` || ` + isCloudFlareProvider + ")" }>
@@ -187,28 +187,28 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		</template>
 		<template x-if={ isObjectStorageDestination }>
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType:              "text",
-				RequestPayloadPropName: "objectStorageBucketName",
-				Label:                  "Bucket Name",
-				ModelBindPath:          "createDestinationPayload.objectStorageBucketName",
+				InputType:     "text",
+				InputName:     "objectStorageBucketName",
+				Label:         "Bucket Name",
+				ModelBindPath: "createDestinationPayload.objectStorageBucketName",
 			})
 		</template>
 		<template x-if={ isObjectStorageDestination }>
 			<div class="flex w-full flex-row items-center gap-5">
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "objectStorageProviderAccessKeyId",
-						Label:                  "Access Key Id",
-						ModelBindPath:          "createDestinationPayload.objectStorageProviderAccessKeyId",
+						InputType:     "text",
+						InputName:     "objectStorageProviderAccessKeyId",
+						Label:         "Access Key Id",
+						ModelBindPath: "createDestinationPayload.objectStorageProviderAccessKeyId",
 					})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "password",
-						RequestPayloadPropName: "objectStorageProviderSecretAccessKey",
-						Label:                  "Secret Access Key",
-						ModelBindPath:          "createDestinationPayload.objectStorageProviderSecretAccessKey",
+						InputType:     "password",
+						InputName:     "objectStorageProviderSecretAccessKey",
+						Label:         "Secret Access Key",
+						ModelBindPath: "createDestinationPayload.objectStorageProviderSecretAccessKey",
 					})
 				</div>
 			</div>
@@ -223,10 +223,10 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				})
 			<template x-if={ "!(" + isRemoteDestination + ")" }>
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "number",
-					RequestPayloadPropName: "maxDestinationStorageUsagePercent",
-					Label:                  "Max Dest. Storage Usage (%)",
-					ModelBindPath:          "createDestinationPayload.maxDestinationStorageUsagePercent",
+					InputType:     "number",
+					InputName:     "maxDestinationStorageUsagePercent",
+					Label:         "Max Dest. Storage Usage (%)",
+					ModelBindPath: "createDestinationPayload.maxDestinationStorageUsagePercent",
 				})
 			</template>
 			<template x-if={ isRemoteDestination }>
@@ -275,10 +275,10 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				<div class="flex w-full flex-row items-center gap-5">
 					<div class="w-1/2">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "number",
-							RequestPayloadPropName: "maxConcurrentConnections",
-							Label:                  "Max Concurrent Connections",
-							ModelBindPath:          "createDestinationPayload.maxConcurrentConnections",
+							InputType:     "number",
+							InputName:     "maxConcurrentConnections",
+							Label:         "Max Concurrent Connections",
+							ModelBindPath: "createDestinationPayload.maxConcurrentConnections",
 						})
 					</div>
 					<div class="w-1/2">
@@ -304,18 +304,18 @@ templ CreateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				<div class="flex w-full flex-row items-center gap-5">
 					<div class="w-1/2">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "number",
-							RequestPayloadPropName: "remoteHostConnectionTimeoutSecs",
-							Label:                  "Connection Timeout (secs)",
-							ModelBindPath:          "createDestinationPayload.remoteHostConnectionTimeoutSecs",
+							InputType:     "number",
+							InputName:     "remoteHostConnectionTimeoutSecs",
+							Label:         "Connection Timeout (secs)",
+							ModelBindPath: "createDestinationPayload.remoteHostConnectionTimeoutSecs",
 						})
 					</div>
 					<div class="w-1/2">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "number",
-							RequestPayloadPropName: "remoteHostConnectionRetrySecs",
-							Label:                  "Connection Retry Time (secs)",
-							ModelBindPath:          "createDestinationPayload.remoteHostConnectionRetrySecs",
+							InputType:     "number",
+							InputName:     "remoteHostConnectionRetrySecs",
+							Label:         "Connection Retry Time (secs)",
+							ModelBindPath: "createDestinationPayload.remoteHostConnectionRetrySecs",
 						})
 					</div>
 				</div>
@@ -380,10 +380,10 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		<input type="hidden" name="destinationId" x-bind:value="destinationEntity.destinationId"/>
 		<input type="hidden" name="accountId" x-bind:value="destinationEntity.accountId"/>
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType:              "text",
-			RequestPayloadPropName: "destinationName",
-			Label:                  "Name",
-			ModelBindPath:          "destinationEntity.destinationName",
+			InputType:     "text",
+			InputName:     "destinationName",
+			Label:         "Name",
+			ModelBindPath: "destinationEntity.destinationName",
 		})
 		@componentForm.TextArea(componentForm.TextAreaSettings{
 			Id:            "destinationDescription",
@@ -393,18 +393,18 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		<div class="flex w-full flex-row items-center gap-5">
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "text",
-					RequestPayloadPropName: "destinationPath",
-					Label:                  "Destination Path",
-					ModelBindPath:          "destinationEntity.destinationPath",
+					InputType:     "text",
+					InputName:     "destinationPath",
+					Label:         "Destination Path",
+					ModelBindPath: "destinationEntity.destinationPath",
 				})
 			</div>
 			<div class="w-1/2">
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "number",
-					RequestPayloadPropName: "minLocalStorageFreePercent",
-					Label:                  "Min Free Local Storage (%)",
-					ModelBindPath:          "destinationEntity.minLocalStorageFreePercent",
+					InputType:     "number",
+					InputName:     "minLocalStorageFreePercent",
+					Label:         "Min Free Local Storage (%)",
+					ModelBindPath: "destinationEntity.minLocalStorageFreePercent",
 				})
 			</div>
 		</div>
@@ -432,11 +432,11 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "remoteHostname",
-						Label:                  "Server Hostname",
-						ModelBindPath:          "destinationEntity.remoteHostname",
-						IsRequired:             true,
+						InputType:     "text",
+						InputName:     "remoteHostname",
+						Label:         "Server Hostname",
+						ModelBindPath: "destinationEntity.remoteHostname",
+						IsRequired:    true,
 					})
 				</div>
 			</div>
@@ -447,19 +447,19 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "remoteHostUsername",
-						Label:                  "Username",
-						ModelBindPath:          "destinationEntity.remoteHostUsername",
-						IsRequired:             true,
+						InputType:     "text",
+						InputName:     "remoteHostUsername",
+						Label:         "Username",
+						ModelBindPath: "destinationEntity.remoteHostUsername",
+						IsRequired:    true,
 					})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "password",
-						RequestPayloadPropName: "remoteHostPassword",
-						Label:                  "Password",
-						ModelBindPath:          "destinationEntity.remoteHostPassword",
+						InputType:     "password",
+						InputName:     "remoteHostPassword",
+						Label:         "Password",
+						ModelBindPath: "destinationEntity.remoteHostPassword",
 					})
 				</div>
 			</div>
@@ -470,18 +470,18 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 			>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "number",
-						RequestPayloadPropName: "remoteHostNetworkPort",
-						Label:                  "Server Port",
-						ModelBindPath:          "destinationEntity.remoteHostNetworkPort",
+						InputType:     "number",
+						InputName:     "remoteHostNetworkPort",
+						Label:         "Server Port",
+						ModelBindPath: "destinationEntity.remoteHostNetworkPort",
 					})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "remoteHostPrivateKeyFilePath",
-						Label:                  "Private Key File Path",
-						ModelBindPath:          "destinationEntity.remoteHostPrivateKeyFilePath",
+						InputType:     "text",
+						InputName:     "remoteHostPrivateKeyFilePath",
+						Label:         "Private Key File Path",
+						ModelBindPath: "destinationEntity.remoteHostPrivateKeyFilePath",
 					})
 				</div>
 			</div>
@@ -499,18 +499,18 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				<div class="w-1/2">
 					<template x-if="destinationEntity.objectStorageProvider == 'custom'">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "text",
-							RequestPayloadPropName: "objectStorageEndpointUrl",
-							Label:                  "Endpoint Url",
-							ModelBindPath:          "destinationEntity.objectStorageEndpointUrl",
+							InputType:     "text",
+							InputName:     "objectStorageEndpointUrl",
+							Label:         "Endpoint Url",
+							ModelBindPath: "destinationEntity.objectStorageEndpointUrl",
 						})
 					</template>
 					<template x-if="destinationEntity.objectStorageProvider != 'custom'">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "text",
-							RequestPayloadPropName: "objectStorageProviderRegion",
-							Label:                  "Region",
-							ModelBindPath:          "destinationEntity.objectStorageProviderRegion",
+							InputType:     "text",
+							InputName:     "objectStorageProviderRegion",
+							Label:         "Region",
+							ModelBindPath: "destinationEntity.objectStorageProviderRegion",
 						})
 					</template>
 				</div>
@@ -518,28 +518,28 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 		</template>
 		<template x-if={ isObjectStorageDestination }>
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType:              "text",
-				RequestPayloadPropName: "objectStorageBucketName",
-				Label:                  "Bucket Name",
-				ModelBindPath:          "destinationEntity.objectStorageBucketName",
+				InputType:     "text",
+				InputName:     "objectStorageBucketName",
+				Label:         "Bucket Name",
+				ModelBindPath: "destinationEntity.objectStorageBucketName",
 			})
 		</template>
 		<template x-if={ isObjectStorageDestination }>
 			<div class="flex w-full flex-row items-center gap-5">
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "text",
-						RequestPayloadPropName: "objectStorageProviderAccessKeyId",
-						Label:                  "Access Key Id",
-						ModelBindPath:          "destinationEntity.objectStorageProviderAccessKeyId",
+						InputType:     "text",
+						InputName:     "objectStorageProviderAccessKeyId",
+						Label:         "Access Key Id",
+						ModelBindPath: "destinationEntity.objectStorageProviderAccessKeyId",
 					})
 				</div>
 				<div class="w-1/2">
 					@componentForm.InputField(componentForm.InputFieldSettings{
-						InputType:              "password",
-						RequestPayloadPropName: "objectStorageProviderSecretAccessKey",
-						Label:                  "Secret Access Key",
-						ModelBindPath:          "destinationEntity.objectStorageProviderSecretAccessKey",
+						InputType:     "password",
+						InputName:     "objectStorageProviderSecretAccessKey",
+						Label:         "Secret Access Key",
+						ModelBindPath: "destinationEntity.objectStorageProviderSecretAccessKey",
 					})
 				</div>
 			</div>
@@ -554,10 +554,10 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				})
 			<template x-if={ "!(" + isRemoteDestination + ")" }>
 				@componentForm.InputField(componentForm.InputFieldSettings{
-					InputType:              "number",
-					RequestPayloadPropName: "maxDestinationStorageUsagePercent",
-					Label:                  "Max Dest. Storage Usage (%)",
-					ModelBindPath:          "destinationEntity.maxDestinationStorageUsagePercent",
+					InputType:     "number",
+					InputName:     "maxDestinationStorageUsagePercent",
+					Label:         "Max Dest. Storage Usage (%)",
+					ModelBindPath: "destinationEntity.maxDestinationStorageUsagePercent",
 				})
 			</template>
 			<template x-if={ isRemoteDestination }>
@@ -606,10 +606,10 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				<div class="flex w-full flex-row items-center gap-5">
 					<div class="w-1/2">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "number",
-							RequestPayloadPropName: "maxConcurrentConnections",
-							Label:                  "Max Concurrent Connections",
-							ModelBindPath:          "destinationEntity.maxConcurrentConnections",
+							InputType:     "number",
+							InputName:     "maxConcurrentConnections",
+							Label:         "Max Concurrent Connections",
+							ModelBindPath: "destinationEntity.maxConcurrentConnections",
 						})
 					</div>
 					<div class="w-1/2">
@@ -635,18 +635,18 @@ templ UpdateBackupDestinationForm(createDto CreateBackupDestinationModalDto) {
 				<div class="flex w-full flex-row items-center gap-5">
 					<div class="w-1/2">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "number",
-							RequestPayloadPropName: "remoteHostConnectionTimeoutSecs",
-							Label:                  "Connection Timeout (secs)",
-							ModelBindPath:          "destinationEntity.remoteHostConnectionTimeoutSecs",
+							InputType:     "number",
+							InputName:     "remoteHostConnectionTimeoutSecs",
+							Label:         "Connection Timeout (secs)",
+							ModelBindPath: "destinationEntity.remoteHostConnectionTimeoutSecs",
 						})
 					</div>
 					<div class="w-1/2">
 						@componentForm.InputField(componentForm.InputFieldSettings{
-							InputType:              "number",
-							RequestPayloadPropName: "remoteHostConnectionRetrySecs",
-							Label:                  "Connection Retry Time (secs)",
-							ModelBindPath:          "destinationEntity.remoteHostConnectionRetrySecs",
+							InputType:     "number",
+							InputName:     "remoteHostConnectionRetrySecs",
+							Label:         "Connection Retry Time (secs)",
+							ModelBindPath: "destinationEntity.remoteHostConnectionRetrySecs",
 						})
 					</div>
 				</div>

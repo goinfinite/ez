@@ -1,13 +1,13 @@
 package componentForm
 
 type InputFieldSettings struct {
-	InputType              string
-	ComponentId            string
-	RequestPayloadPropName string
-	Label                  string
-	ModelBindPath          string
-	IsRequired             bool
-	IsReadOnly             bool
+	InputType     string
+	ComponentId   string
+	InputName     string
+	Label         string
+	ModelBindPath string
+	IsRequired    bool
+	IsReadOnly    bool
 }
 
 templ InputField(inputSettings InputFieldSettings) {
@@ -33,8 +33,8 @@ templ InputField(inputSettings InputFieldSettings) {
 			if inputSettings.ComponentId != "" {
 				id={ inputSettings.ComponentId }
 			}
-			if inputSettings.RequestPayloadPropName != "" {
-				name={ inputSettings.RequestPayloadPropName }
+			if inputSettings.InputName != "" {
+				name={ inputSettings.InputName }
 			}
 			x-model:value={ inputSettings.ModelBindPath }
 			autocomplete="off"

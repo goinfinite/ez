@@ -76,11 +76,11 @@ templ CreateBackupTaskArchiveForm() {
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType:              "number",
-				RequestPayloadPropName: "timeoutSecs",
-				Label:                  "Timeout (seconds)",
-				ModelBindPath:          "createTaskArchive.timeoutSecs",
-				IsRequired:             false,
+				InputType:     "number",
+				InputName:     "timeoutSecs",
+				Label:         "Timeout (seconds)",
+				ModelBindPath: "createTaskArchive.timeoutSecs",
+				IsRequired:    false,
 			})
 		}
 		@componentStructural.IconButton(componentStructural.IconButtonSettings{
@@ -177,11 +177,11 @@ templ RestoreBackupTaskForm() {
 		</div>
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType:              "number",
-				RequestPayloadPropName: "timeoutSecs",
-				Label:                  "Timeout (seconds)",
-				ModelBindPath:          "restoreTask.timeoutSecs",
-				IsRequired:             false,
+				InputType:     "number",
+				InputName:     "timeoutSecs",
+				Label:         "Timeout (seconds)",
+				ModelBindPath: "restoreTask.timeoutSecs",
+				IsRequired:    false,
 			})
 		}
 		@componentStructural.IconButton(componentStructural.IconButtonSettings{
@@ -490,11 +490,11 @@ templ RestoreBackupTaskArchiveForm() {
 		})
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType:              "number",
-				RequestPayloadPropName: "timeoutSecs",
-				Label:                  "Timeout (seconds)",
-				ModelBindPath:          "restoreTaskArchive.timeoutSecs",
-				IsRequired:             false,
+				InputType:     "number",
+				InputName:     "timeoutSecs",
+				Label:         "Timeout (seconds)",
+				ModelBindPath: "restoreTaskArchive.timeoutSecs",
+				IsRequired:    false,
 			})
 		}
 		@componentStructural.IconButton(componentStructural.IconButtonSettings{
