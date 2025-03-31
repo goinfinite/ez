@@ -80,14 +80,14 @@ func (service *AccountService) Read(input map[string]any) ServiceOutput {
 	if err != nil {
 		return NewServiceOutput(UserError, err.Error())
 	}
-	accountsList, err := useCase.ReadAccounts(
+	accountsResponseDto, err := useCase.ReadAccounts(
 		service.accountQueryRepo, readAccountsRequestDto,
 	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, accountsList)
+	return NewServiceOutput(Success, accountsResponseDto)
 }
 
 func (service *AccountService) Create(input map[string]interface{}) ServiceOutput {
