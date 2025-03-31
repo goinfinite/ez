@@ -2,7 +2,7 @@ package componentForm
 
 type InputFieldSettings struct {
 	InputType     string
-	ComponentId   string
+	InputId       string
 	InputName     string
 	Label         string
 	ModelBindPath string
@@ -30,8 +30,8 @@ templ InputField(inputSettings InputFieldSettings) {
 		}
 		<input
 			type={ inputSettings.InputType }
-			if inputSettings.ComponentId != "" {
-				id={ inputSettings.ComponentId }
+			if inputSettings.InputId != "" {
+				id={ inputSettings.InputId }
 			}
 			if inputSettings.InputName != "" {
 				name={ inputSettings.InputName }
