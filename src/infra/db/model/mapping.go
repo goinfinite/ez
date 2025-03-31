@@ -8,14 +8,15 @@ import (
 )
 
 type Mapping struct {
-	ID         uint64 `gorm:"primarykey"`
-	AccountID  uint64
-	Hostname   *string
-	PublicPort uint
-	Protocol   string
-	Targets    []MappingTarget
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID          uint64 `gorm:"primarykey"`
+	AccountID   uint64
+	AccountName string
+	Hostname    *string
+	PublicPort  uint
+	Protocol    string
+	Targets     []MappingTarget
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func (Mapping) TableName() string {
@@ -24,6 +25,7 @@ func (Mapping) TableName() string {
 
 func NewMapping(
 	id, accountId uint64,
+	accountName string,
 	hostname *string,
 	publicPort uint,
 	protocol string,
@@ -31,13 +33,14 @@ func NewMapping(
 	createdAt, updatedAt time.Time,
 ) Mapping {
 	mappingModel := Mapping{
-		AccountID:  accountId,
-		Hostname:   hostname,
-		PublicPort: publicPort,
-		Protocol:   protocol,
-		Targets:    targets,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
+		AccountID:   accountId,
+		AccountName: accountName,
+		Hostname:    hostname,
+		PublicPort:  publicPort,
+		Protocol:    protocol,
+		Targets:     targets,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}
 
 	if id != 0 {
@@ -56,6 +59,11 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 	}
 
 	accountId, err := valueObject.NewAccountId(model.AccountID)
+	if err != nil {
+		return mapping, err
+	}
+
+	accountName, err := valueObject.NewUnixUsername(model.AccountName)
 	if err != nil {
 		return mapping, err
 	}
@@ -92,13 +100,7 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 	updatedAt := valueObject.NewUnixTimeWithGoTime(model.UpdatedAt)
 
 	return entity.NewMapping(
-		mappingId,
-		accountId,
-		hostnamePtr,
-		port,
-		protocol,
-		targets,
-		createdAt,
-		updatedAt,
+		mappingId, accountId, accountName, hostnamePtr, port, protocol, targets,
+		createdAt, updatedAt,
 	), nil
 }
