@@ -75,7 +75,7 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 						</div>
 					</div>
 					<div class="mt-4 flex flex-wrap gap-3">
-						@componentMisc.TinyTag("ph-user-circle", "", mapping.AccountName.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-user-circle", "", mapping.AccountUsername.String(), "infinite-500")
 						@componentMisc.TinyTag("ph-link-simple", "", mapping.Protocol.String(), "infinite-500")
 						@componentMisc.TinyTag("ph-door-open", "", mapping.PublicPort.String(), "infinite-500")
 					</div>

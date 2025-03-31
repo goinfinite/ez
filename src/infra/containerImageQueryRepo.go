@@ -152,7 +152,7 @@ func (repo *ContainerImageQueryRepo) originContainerMappingFactory(
 		return mappingEntity, err
 	}
 
-	accountName, err := valueObject.NewUnixUsername(rawMappingMap["accountName"])
+	accountUsername, err := valueObject.NewUnixUsername(rawMappingMap["accountUsername"])
 	if err != nil {
 		return mappingEntity, err
 	}
@@ -202,7 +202,7 @@ func (repo *ContainerImageQueryRepo) originContainerMappingFactory(
 	}
 
 	return entity.NewMapping(
-		mappingId, accountId, accountName, hostnamePtr, publicPort, protocol,
+		mappingId, accountId, accountUsername, hostnamePtr, publicPort, protocol,
 		targetEntities, createdAt, updatedAt,
 	), nil
 }
