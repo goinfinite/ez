@@ -46,11 +46,13 @@ func (presenter *AccountsPresenter) Handler(c echo.Context) error {
 
 	readAccountsServiceOutput := presenter.accountService.Read(serviceRequestBody)
 	if readAccountsServiceOutput.Status != service.Success {
+		slog.Debug("ReadAccountsFailure")
 		return nil
 	}
 
 	readAccountsResponseDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
+		slog.Debug("ReadAccountsRequestTypeAssertFailure")
 		return nil
 	}
 
