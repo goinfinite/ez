@@ -71,7 +71,7 @@ templ AccountsTable(
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
 					<th scope="col" class="w-[20%] overflow-x-hidden py-3 pl-3 text-left">Username</th>
-					<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
+					<th scope="col" class="w-[10%] py-3">CPU</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Memory</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Disk</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Inodes</th>
@@ -97,58 +97,85 @@ templ AccountsTable(
 								)
 							</div>
 						</td>
-						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							if accountEntity.Quota.CpuCores > 0 {
-								{{ cpuQuotaUsage := accountEntity.QuotaUsage.CpuCores / accountEntity.Quota.CpuCores }}
-								@componentMisc.ProgressBar(
-									uint8(cpuQuotaUsage), strconv.Itoa(int(cpuQuotaUsage))+"%",
-								)
-							} else {
-								<span class="text-xs italic text-neutral-400">No CPU cores available</span>
+						{{
+							emptyQuotaProgressBarSettings := componentMisc.ProgressBarSettings{
+								Size:                   componentMisc.ProgressBarSizeSm,
+								CurrentProgressValue:   1,
+								MaxProgressValue:       1,
+								LabelCustomText:        "0/0",
+								LabelBackgroundColor:   "ez-800",
+								TooltipText:            "No quota available",
+								TooltipBackgroundColor: "ez-200",
 							}
+						}}
+						<td class="w-[10%] px-3 py-2">
+							<div class="flex items-center justify-center">
+								if accountEntity.Quota.CpuCores > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   uint64(accountEntity.QuotaUsage.Millicores.Uint()),
+										MaxProgressValue:       uint64(accountEntity.Quota.Millicores.Uint()),
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.FormatFloat(accountEntity.QuotaUsage.CpuCores, 'f', -1, 64) + "/" + strconv.FormatFloat(accountEntity.Quota.CpuCores, 'f', -1, 64) + " cores",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
 						</td>
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							{{ memoryBytesQuotaInt := accountEntity.Quota.MemoryBytes.Int64() }}
-							if memoryBytesQuotaInt > 0 {
-								{{ memoryQuotaUsage := accountEntity.QuotaUsage.MemoryBytes.Int64() / memoryBytesQuotaInt }}
-								@componentMisc.ProgressBar(
-									uint8(memoryQuotaUsage), strconv.Itoa(int(memoryQuotaUsage))+"%",
-								)
-							} else {
-								<span class="text-xs italic text-neutral-400">No memory available</span>
-							}
+							<div class="flex items-center justify-center">
+								{{ memoryBytesQuotaUint := accountEntity.Quota.MemoryBytes.Uint64() }}
+								if memoryBytesQuotaUint > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   accountEntity.QuotaUsage.MemoryBytes.Uint64(),
+										MaxProgressValue:       memoryBytesQuotaUint,
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.Itoa(int(accountEntity.Quota.MemoryGibibytes)) + "/" + strconv.Itoa(int(accountEntity.Quota.MemoryGibibytes)) + " GiB",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
 						</td>
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							{{ diskBytesQuotaInt := accountEntity.Quota.StorageBytes.Int64() }}
-							if diskBytesQuotaInt > 0 {
-								{{ diskQuotaUsage := accountEntity.QuotaUsage.StorageBytes.Int64() / diskBytesQuotaInt }}
-								@componentMisc.ProgressBar(
-									uint8(diskQuotaUsage), strconv.Itoa(int(diskQuotaUsage))+"%",
-								)
-							} else {
-								<span class="text-xs italic text-neutral-400">No storage available</span>
-							}
+							<div class="flex items-center justify-center">
+								{{ diskBytesQuotaUint := accountEntity.Quota.StorageBytes.Uint64() }}
+								if diskBytesQuotaUint > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   accountEntity.QuotaUsage.StorageBytes.Uint64(),
+										MaxProgressValue:       diskBytesQuotaUint,
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.Itoa(int(accountEntity.QuotaUsage.StorageGibibytes)) + "/" + strconv.Itoa(int(accountEntity.Quota.StorageGibibytes)) + " GiB",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
 						</td>
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							if accountEntity.Quota.StorageInodes > 0 {
-								{{ inodesQuotaUsage := accountEntity.QuotaUsage.StorageInodes / accountEntity.Quota.StorageInodes }}
-								@componentMisc.ProgressBar(
-									uint8(inodesQuotaUsage), strconv.Itoa(int(inodesQuotaUsage))+"%",
-								)
-							} else {
-								<span class="text-xs italic text-neutral-400">No inodes available</span>
-							}
+							<div class="flex items-center justify-center">
+								if accountEntity.Quota.StorageInodes > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   accountEntity.QuotaUsage.StorageInodes,
+										MaxProgressValue:       accountEntity.Quota.StorageInodes,
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.Itoa(int(accountEntity.QuotaUsage.StorageInodes)) + "/" + strconv.Itoa(int(accountEntity.Quota.StorageInodes)) + " nodes",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
 						</td>
 						<td class="w-[17.5%] overflow-x-hidden px-3 py-2">
-							{{ storagePerformanceUnitsQuotaInt := accountEntity.Quota.StoragePerformanceUnits.Uint() }}
-							if storagePerformanceUnitsQuotaInt > 0 {
-								{{ storagePerformanceUnitsQuotaUsage := accountEntity.QuotaUsage.StoragePerformanceUnits.Uint() / storagePerformanceUnitsQuotaInt }}
-								@componentMisc.ProgressBar(
-									uint8(storagePerformanceUnitsQuotaUsage), strconv.Itoa(int(storagePerformanceUnitsQuotaUsage))+"%",
-								)
-							} else {
-								<span class="text-xs italic text-neutral-400">No units available</span>
-							}
+							{ accountEntity.Quota.StoragePerformanceUnits.String() }
 						</td>
 						<td class="w-[15%] overflow-x-hidden px-3 py-2 text-sm">
 							{ accountEntity.CreatedAt.ReadAsRfcDate() }
