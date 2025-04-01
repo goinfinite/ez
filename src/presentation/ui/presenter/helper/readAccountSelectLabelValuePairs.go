@@ -3,7 +3,7 @@ package presenterHelper
 import (
 	"log/slog"
 
-	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
 	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
@@ -17,22 +17,23 @@ func ReadAccountSelectLabelValuePairs(
 
 	accountService := service.NewAccountService(persistentDbSvc, trailDbSvc)
 
-	readAccountsServiceOutput := accountService.Read()
+	readAccountsServiceOutput := accountService.Read(map[string]any{})
 	if readAccountsServiceOutput.Status != service.Success {
 		slog.Debug("ReadAccountsFailure", slog.Any("serviceOutput", readAccountsServiceOutput))
 		return nil
 	}
 
-	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
+	readAccountsResponseDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
 		slog.Debug("AssertAccountsFailure")
 		return nil
 	}
 
-	for _, accountEntity := range accountEntities {
+	for _, accountEntity := range readAccountsResponseDto.Accounts {
+		accountIdStr := accountEntity.Id.String()
 		selectLabelValuePair := componentForm.SelectLabelValuePair{
-			Label: accountEntity.Username.String() + " (#" + accountEntity.Id.String() + ")",
-			Value: accountEntity.Id.String(),
+			Label: accountEntity.Username.String() + " (#" + accountIdStr + ")",
+			Value: accountIdStr,
 		}
 		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
 	}

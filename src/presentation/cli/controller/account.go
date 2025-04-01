@@ -22,13 +22,58 @@ func NewAccountController(
 }
 
 func (controller *AccountController) Read() *cobra.Command {
+	var idUint64 uint64
+	var usernameStr string
+	var paginationPageNumberUint32 uint32
+	var paginationItemsPerPageUint16 uint16
+	var paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr string
+
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "ReadAccounts",
 		Run: func(cmd *cobra.Command, args []string) {
-			cliHelper.ServiceResponseWrapper(controller.accountService.Read())
+			requestBody := map[string]any{}
+
+			if idUint64 != 0 {
+				requestBody["id"] = idUint64
+			}
+
+			if usernameStr != "" {
+				requestBody["username"] = usernameStr
+			}
+
+			requestBody = cliHelper.PaginationParser(
+				requestBody, paginationPageNumberUint32, paginationItemsPerPageUint16,
+				paginationSortByStr, paginationSortDirectionStr, paginationLastSeenIdStr,
+			)
+
+			cliHelper.ServiceResponseWrapper(
+				controller.accountService.Read(requestBody),
+			)
 		},
 	}
+
+	cmd.Flags().Uint64VarP(&idUint64, "account-id", "i", 0, "AccountId")
+	cmd.Flags().StringVarP(
+		&usernameStr, "account-username", "n", "", "AccountUsername",
+	)
+	cmd.Flags().Uint32VarP(
+		&paginationPageNumberUint32, "page-number", "p", 0, "PageNumber (Pagination)",
+	)
+	cmd.Flags().Uint16VarP(
+		&paginationItemsPerPageUint16, "items-per-page", "m", 0,
+		"ItemsPerPage (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortByStr, "sort-by", "y", "", "SortBy (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationSortDirectionStr, "sort-direction", "r", "",
+		"SortDirection (Pagination)",
+	)
+	cmd.Flags().StringVarP(
+		&paginationLastSeenIdStr, "last-seen-id", "l", "", "LastSeenId (Pagination)",
+	)
 
 	return cmd
 }

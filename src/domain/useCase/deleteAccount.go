@@ -16,7 +16,9 @@ func DeleteAccount(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	deleteDto dto.DeleteAccount,
 ) error {
-	_, err := accountQueryRepo.ReadById(deleteDto.AccountId)
+	_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &deleteDto.AccountId,
+	})
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}

@@ -124,10 +124,7 @@ func (repo *BackupQueryRepo) ReadFirstDestination(
 	requestDto dto.ReadBackupDestinationsRequest,
 	withSecrets bool,
 ) (destinationEntity entity.IBackupDestination, err error) {
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
+	requestDto.Pagination = dto.PaginationSingleItem
 
 	responseDto, err := repo.ReadDestination(requestDto, withSecrets)
 	if err != nil {
@@ -232,10 +229,7 @@ func (repo *BackupQueryRepo) ReadJob(
 func (repo *BackupQueryRepo) ReadFirstJob(
 	requestDto dto.ReadBackupJobsRequest,
 ) (jobEntity entity.BackupJob, err error) {
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
+	requestDto.Pagination = dto.PaginationSingleItem
 
 	responseDto, err := repo.ReadJob(requestDto)
 	if err != nil {
@@ -343,10 +337,7 @@ func (repo *BackupQueryRepo) ReadTask(
 func (repo *BackupQueryRepo) ReadFirstTask(
 	requestDto dto.ReadBackupTasksRequest,
 ) (taskEntity entity.BackupTask, err error) {
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
+	requestDto.Pagination = dto.PaginationSingleItem
 
 	responseDto, err := repo.ReadTask(requestDto)
 	if err != nil {
@@ -543,10 +534,7 @@ func (repo *BackupQueryRepo) ReadTaskArchive(
 func (repo *BackupQueryRepo) ReadFirstTaskArchive(
 	requestDto dto.ReadBackupTaskArchivesRequest,
 ) (taskArchiveEntity entity.BackupTaskArchive, err error) {
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
+	requestDto.Pagination = dto.PaginationSingleItem
 
 	responseDto, err := repo.ReadTaskArchive(requestDto)
 	if err != nil {

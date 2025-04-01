@@ -15,7 +15,9 @@ func ImportContainerImageArchive(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	importDto dto.ImportContainerImageArchive,
 ) (imageId valueObject.ContainerImageId, err error) {
-	accountEntity, err := accountQueryRepo.ReadById(importDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &importDto.AccountId,
+	})
 	if err != nil {
 		slog.Error("ReadAccountInfoInfraError", slog.Any("error", err))
 		return imageId, errors.New("ReadAccountInfoInfraError")

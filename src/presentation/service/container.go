@@ -491,11 +491,9 @@ func (service *ContainerService) Create(
 			createParams = append(createParams, "true")
 		}
 
-		timeoutSeconds := uint32(600)
 		if existingContainerIdPtr != nil {
 			createParams = append(createParams, "--existing-container-id")
 			createParams = append(createParams, existingContainerIdPtr.String())
-			timeoutSeconds = uint32(1800)
 		}
 
 		cliCmd = cliCmd + " " + strings.Join(createParams, " ")
@@ -505,7 +503,7 @@ func (service *ContainerService) Create(
 		taskCmd, _ := valueObject.NewUnixCommand(cliCmd)
 		taskTag, _ := valueObject.NewScheduledTaskTag("container")
 		taskTags := []valueObject.ScheduledTaskTag{taskTag}
-		taskTimeoutSecs := valueObject.TimeDuration(uint64(timeoutSeconds))
+		taskTimeoutSecs := valueObject.TimeDuration(uint64(1800))
 
 		scheduledTaskCreateDto := dto.NewCreateScheduledTask(
 			taskName, taskCmd, taskTags, &taskTimeoutSecs, nil,

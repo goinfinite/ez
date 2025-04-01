@@ -14,7 +14,9 @@ func UpdateAccount(
 	activityRecordCmdRepo repository.ActivityRecordCmdRepo,
 	updateDto dto.UpdateAccount,
 ) error {
-	_, err := accountQueryRepo.ReadById(updateDto.AccountId)
+	_, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &updateDto.AccountId,
+	})
 	if err != nil {
 		return errors.New("AccountNotFound")
 	}

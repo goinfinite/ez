@@ -2,32 +2,86 @@ package componentMisc
 
 import "strconv"
 
-func progressBarCssClassesFactory(completionRate uint8) string {
-	completionRateStr := strconv.FormatUint(uint64(completionRate), 10)
-	baseClasses := "h-full rounded-sm w-[" + completionRateStr + "%]"
+const (
+	ProgressBarSizeXs = "xs"
+	ProgressBarSizeSm = "sm"
+	ProgressBarSizeMd = "md"
+)
 
-	bgClass := "bg-cyan-400"
-	switch {
-	case completionRate >= 90:
-		bgClass = "bg-red-800"
-	case completionRate > 85:
-		bgClass = "bg-red-600"
-	case completionRate > 75:
-		bgClass = "bg-amber-600"
-	case completionRate >= 50:
-		bgClass = "bg-amber-300"
-	}
-
-	return baseClasses + " " + bgClass
+// If the value of "PercentProgressValue" is provided, the values of
+// "CurrentProgressValue" and "MaxProgressValue" will be ignored.
+type ProgressBarSettings struct {
+	Size                   string
+	CurrentProgressValue   uint64
+	MaxProgressValue       uint64
+	PercentProgressValue   float32
+	LabelCustomText        string
+	LabelTextColor         string
+	LabelBackgroundColor   string
+	TooltipText            string
+	TooltipTextColor       string
+	TooltipBackgroundColor string
 }
 
-templ ProgressBar(completionRate uint8, label string) {
-	<div class="bg-ez-300 relative m-auto flex h-5 w-20 items-center rounded-sm">
-		if label != "" {
-			<div class="bg-ez-700 absolute left-1/2 -translate-x-1/2 transform rounded-sm bg-opacity-75 px-1 text-xs text-neutral-50">
-				{ label }
+templ ProgressBar(inputSettings ProgressBarSettings) {
+	<!-- ProgressBar -->
+	{{ fullyBarSize := "h-7.5 text-sm" }}
+	switch inputSettings.Size {
+		case ProgressBarSizeXs:
+			{{ fullyBarSize = "h-5 text-xs w-20" }}
+		case ProgressBarSizeSm:
+			{{ fullyBarSize = "h-5.75 text-xs w-22.5" }}
+		case ProgressBarSizeMd:
+			{{ fullyBarSize = "h-6 text-sm w-25" }}
+	}
+	<div class={ fullyBarSize + " group relative flex rounded-sm bg-neutral-100/15" }>
+		{{ completionRate := 0.00 }}
+		if inputSettings.CurrentProgressValue > 0 && inputSettings.MaxProgressValue > 0 {
+			{{ completionRate = (float64(inputSettings.CurrentProgressValue) / float64(inputSettings.MaxProgressValue)) * 100 }}
+		}
+		if inputSettings.PercentProgressValue > 0 {
+			{{ completionRate = float64(inputSettings.PercentProgressValue) }}
+		}
+		{{ completionBarBackgroundColor := "bg-cyan-400" }}
+		switch  {
+			case completionRate >= 90:
+				{{ completionBarBackgroundColor = "bg-red-800" }}
+			case completionRate > 85:
+				{{ completionBarBackgroundColor = "bg-red-600" }}
+			case completionRate > 75:
+				{{ completionBarBackgroundColor = "bg-amber-600" }}
+			case completionRate >= 50:
+				{{ completionBarBackgroundColor = "bg-amber-300" }}
+		}
+		{{ completionRateStr := strconv.Itoa(int(completionRate)) }}
+		<div class={ "h-full rounded-sm w-[" + completionRateStr + "%] " + completionBarBackgroundColor }></div>
+		{{ labelBackgroundColor := "bg-infinite-500" }}
+		if inputSettings.LabelBackgroundColor != "" {
+			{{ labelBackgroundColor = "bg-" + inputSettings.LabelBackgroundColor }}
+		}
+		{{ labelBackgroundColor += "/75" }}
+		{{ labelTextColor := "text-white" }}
+		if inputSettings.LabelTextColor != "" {
+			{{ labelTextColor = "text-" + inputSettings.LabelTextColor }}
+		}
+		{{ labelText := completionRateStr + "%" }}
+		if inputSettings.LabelCustomText != "" {
+			{{ labelText = inputSettings.LabelCustomText }}
+		}
+		<div class={ "absolute left-1/2 top-1/2 flex h-2/3 -translate-x-1/2 -translate-y-1/2 cursor-default items-center justify-center rounded-sm p-2 whitespace-nowrap " + labelBackgroundColor + " " + labelTextColor }>{ labelText }</div>
+		if inputSettings.TooltipText != "" {
+			{{ tooltipBackgroundColor := "bg-infinite-300" }}
+			if inputSettings.TooltipBackgroundColor != "" {
+				{{ tooltipBackgroundColor = "bg-" + inputSettings.TooltipBackgroundColor }}
+			}
+			{{ tooltipBackgroundColor += "/75" }}
+			{{ tooltipTextColor := "text-neutral-100" }}
+			if inputSettings.TooltipTextColor != "" {
+				{{ tooltipTextColor = "text-" + inputSettings.TooltipTextColor }}
+			}
+			<div class={ "absolute bottom-full left-1/2 mb-1.5 hidden w-fit -translate-x-1/2 transform whitespace-nowrap rounded-md p-1.5 shadow-lg transition-all duration-300 group-hover:flex group-hover:-translate-y-0.5 " + tooltipBackgroundColor + " " + tooltipTextColor }>
+				{ inputSettings.TooltipText }
 			</div>
 		}
-		<div class={ progressBarCssClassesFactory(completionRate) }></div>
 	</div>
 }

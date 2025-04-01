@@ -11,3 +11,13 @@ type Pagination struct {
 	PagesTotal    *uint32                              `json:"pagesTotal"`
 	ItemsTotal    *uint64                              `json:"itemsTotal"`
 }
+
+var PaginationSingleItem = Pagination{
+	PageNumber:   0,
+	ItemsPerPage: 1,
+}
+
+var PaginationUnpaginated = Pagination{
+	PageNumber:   0,
+	ItemsPerPage: 1000,
+}

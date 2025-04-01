@@ -41,7 +41,9 @@ func (repo *ContainerImageCmdRepo) CreateSnapshot(
 	}
 
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(containerEntity.AccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &containerEntity.AccountId,
+	})
 	if err != nil {
 		return imageId, err
 	}
@@ -110,7 +112,9 @@ func (repo *ContainerImageCmdRepo) readArchiveFilesDirectory(
 	accountId valueObject.AccountId,
 ) (archiveFilesDir valueObject.UnixFilePath, err error) {
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(accountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &accountId,
+	})
 	if err != nil {
 		return archiveFilesDir, err
 	}

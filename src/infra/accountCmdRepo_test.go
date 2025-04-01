@@ -133,7 +133,9 @@ func TestAccountCmdRepo(t *testing.T) {
 			t.Error(err)
 		}
 
-		accountEntity, err := accountQueryRepo.ReadById(accountId)
+		accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+			AccountId: &accountId,
+		})
 		if err != nil {
 			t.Error(err)
 		}

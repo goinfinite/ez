@@ -113,7 +113,7 @@ script OverviewIndexLocalState(containersCurrentPageNumber int) {
 
 						adjustedPortBinding.publicPort = adjustedPortBinding.containerPort;
 						delete adjustedPortBinding.privatePort;
-						
+
 						return adjustedPortBinding;
 					},
 				);
@@ -583,10 +583,10 @@ templ ContainersTable(
 		>
 			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
 				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
-					<th scope="col" class="w-[40%] overflow-x-hidden p-3 text-left">Container</th>
+					<th scope="col" class="w-[37.5%] overflow-x-hidden p-3 text-left">Container</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">CPU</th>
 					<th scope="col" class="w-[10%] overflow-x-hidden py-3">RAM</th>
-					<th scope="col" class="w-[5%] overflow-x-hidden py-3">Restarts</th>
+					<th scope="col" class="w-[7.5%] overflow-x-hidden py-3">Restarts</th>
 					<th scope="col" class="w-[25%] overflow-x-hidden py-3">Port Bindings</th>
 					<th scope="col" class="w-[10%] py-3"></th>
 				</tr>
@@ -596,24 +596,32 @@ templ ContainersTable(
 					<!-- Container Table Entry -->
 					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
 						@templ.JSONScript("containerEntity_"+containerEntity.Id.String(), containerEntity)
-						<td class="w-[40%] overflow-x-hidden px-3 py-2 text-left">
+						<td class="w-[37.5%] overflow-x-hidden px-3 py-2 text-left">
 							@componentContainer.ContainerTaggedSummary(
 								containerIdSummariesMap[containerEntity.Id], "containersFilters",
 							)
 						</td>
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							@componentMisc.ProgressBar(
-								uint8(containerEntity.Metrics.CurrentCpuPercent),
-								containerEntity.Metrics.CurrentCpuPercentStr+"%",
-							)
+							<div class="flex items-center justify-center">
+								@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+									Size:                 componentMisc.ProgressBarSizeSm,
+									PercentProgressValue: float32(containerEntity.Metrics.CurrentCpuPercent),
+									LabelCustomText:      containerEntity.Metrics.CurrentCpuPercentStr + "%",
+									LabelBackgroundColor: "ez-800",
+								})
+							</div>
 						</td>
 						<td class="w-[10%] overflow-x-hidden px-3 py-2">
-							@componentMisc.ProgressBar(
-								uint8(containerEntity.Metrics.MemoryPercent),
-								containerEntity.Metrics.MemoryPercentStr+"%",
-							)
+							<div class="flex items-center justify-center">
+								@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+									Size:                 componentMisc.ProgressBarSizeSm,
+									PercentProgressValue: float32(containerEntity.Metrics.MemoryPercent),
+									LabelCustomText:      containerEntity.Metrics.MemoryPercentStr + "%",
+									LabelBackgroundColor: "ez-800",
+								})
+							</div>
 						</td>
-						<td class="w-[5%] overflow-x-hidden px-3 py-2">
+						<td class="w-[7.5%] overflow-x-hidden px-3 py-2">
 							{ strconv.FormatUint(containerEntity.RestartCount, 10) }
 						</td>
 						<td class="w-[25%] overflow-x-hidden px-3 py-2">
@@ -714,7 +722,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		class="space-y-4"
 	>
 		@componentForm.InputField(componentForm.InputFieldSettings{
-			InputType: "text", Id: "hostname", Label: "Hostname",
+			InputType: "text", InputName: "hostname", Label: "Hostname",
 			ModelBindPath: "container.hostname", IsRequired: true,
 		})
 		<!-- ContainerSource & LaunchScript -->
@@ -823,7 +831,7 @@ templ CreateContainerForm(createDto CreateContainerModalDto) {
 		)
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType: "text", Id: "entrypoint", Label: "Entrypoint",
+				InputType: "text", InputName: "entrypoint", Label: "Entrypoint",
 				ModelBindPath: "container.entrypoint",
 			})
 			<div class="flex flex-row items-center gap-6">
@@ -1091,42 +1099,42 @@ templ SystemInformation() {
 	<div class="bg-ez-800 mt-4 grid grid-cols-3 gap-4 rounded-md p-4">
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
-			Id:            "serverHostname",
+			InputName:     "serverHostname",
 			Label:         "Server Hostname",
 			ModelBindPath: "sysInfo.serverHostname",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
-			Id:            "cpuModel",
+			InputName:     "cpuModel",
 			Label:         "CPU",
 			ModelBindPath: "sysInfo.cpuModel",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
-			Id:            "memoryRamGibibytes",
+			InputName:     "memoryRamGibibytes",
 			Label:         "Memory (RAM)",
 			ModelBindPath: "sysInfo.memoryRamGibibytes",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
-			Id:            "publicIpAddress",
+			InputName:     "publicIpAddress",
 			Label:         "Public IP Address",
 			ModelBindPath: "sysInfo.publicIpAddress",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
-			Id:            "privateIpAddress",
+			InputName:     "privateIpAddress",
 			Label:         "Private IP Address",
 			ModelBindPath: "sysInfo.privateIpAddress",
 			IsReadOnly:    true,
 		})
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:     "text",
-			Id:            "uptimeRelativeStr",
+			InputName:     "uptimeRelativeStr",
 			Label:         "Server Uptime",
 			ModelBindPath: "sysInfo.uptimeRelative",
 			IsReadOnly:    true,

@@ -23,7 +23,9 @@ func CreateContainerImageArchive(
 		return archiveFile, errors.New("ContainerImageNotFound")
 	}
 
-	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &createDto.AccountId,
+	})
 	if err != nil {
 		slog.Error("ReadAccountInfoInfraError", slog.Any("error", err))
 		return archiveFile, errors.New("ReadAccountInfoInfraError")

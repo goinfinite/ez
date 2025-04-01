@@ -12,23 +12,23 @@ const (
 )
 
 // @title						ezApi
-// @version					0.1.0
-// @description			Infinite Ez API
-// @termsOfService	https://goinfinite.net/tos/
+// @version						0.1.1
+// @description					Infinite Ez API
+// @termsOfService				https://goinfinite.net/tos/
 
-// @contact.name	Infinite Engineering
-// @contact.url		https://goinfinite.net/
-// @contact.email	eng+swagger@goinfinite.net
+// @contact.name				Infinite Engineering
+// @contact.url					https://goinfinite.net/
+// @contact.email				eng+swagger@goinfinite.net
 
-// @license.name  FCL-1.0-ALv2
-// @license.url   https://github.com/goinfinite/ez/blob/main/LICENSE.md
+// @license.name  				FCL-1.0-ALv2
+// @license.url   				https://github.com/goinfinite/ez/blob/main/LICENSE.md
 
 // @securityDefinitions.apikey	Bearer
-// @in													header
-// @name												Authorization
-// @description									Type "Bearer" + JWT token or API key.
+// @in							header
+// @name						Authorization
+// @description					Type "Bearer" + JWT token or API key.
 
-// @BasePath	/api
+// @BasePath					/api
 func ApiInit(
 	e *echo.Echo,
 	persistentDbSvc *db.PersistentDatabaseService,

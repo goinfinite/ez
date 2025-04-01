@@ -16,7 +16,7 @@ func ReadContainerSummaries(
 ) []componentContainer.ContainerSummary {
 	containerService := service.NewContainerService(persistentDbSvc, trailDbSvc)
 
-	readContainersServiceOutput := containerService.Read(map[string]interface{}{})
+	readContainersServiceOutput := containerService.Read(map[string]any{})
 	if readContainersServiceOutput.Status != service.Success {
 		slog.Debug("ReadContainersFailure")
 		return nil
@@ -44,19 +44,20 @@ func ReadContainerSummaries(
 
 	accountService := service.NewAccountService(persistentDbSvc, trailDbSvc)
 
-	readAccountsServiceOutput := accountService.Read()
+	readAccountsServiceOutput := accountService.Read(map[string]any{})
 	if readAccountsServiceOutput.Status != service.Success {
 		slog.Debug("ReadAccountsFailure")
 		return nil
 	}
 
-	accountEntities, assertOk := readAccountsServiceOutput.Body.([]entity.Account)
+	readAccountsRequestDto, assertOk := readAccountsServiceOutput.Body.(dto.ReadAccountsResponse)
 	if !assertOk {
 		slog.Debug("AssertAccountsFailure")
 		return nil
 	}
 
 	return componentContainer.NewContainerSummaries(
-		containersResponseDto.Containers, profileEntities, accountEntities,
+		containersResponseDto.Containers, profileEntities,
+		readAccountsRequestDto.Accounts,
 	)
 }
