@@ -44,7 +44,7 @@ func (repo *MappingCmdRepo) Create(
 	}
 
 	accountEntity, err := NewAccountQueryRepo(repo.persistentDbSvc).
-		ReadById(createDto.AccountId)
+		ReadFirst(dto.ReadAccountsRequest{AccountId: &createDto.AccountId})
 	if err != nil {
 		return mappingId, errors.New("AccountNotFound")
 	}
