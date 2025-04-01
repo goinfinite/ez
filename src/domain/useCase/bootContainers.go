@@ -12,14 +12,9 @@ func BootContainers(
 	containerQueryRepo repository.ContainerQueryRepo,
 	containerCmdRepo repository.ContainerCmdRepo,
 ) {
-	paginationDto := dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1000,
-	}
-
 	restartPolicy, _ := valueObject.NewContainerRestartPolicy("always")
 	readContainersDto := dto.ReadContainersRequest{
-		Pagination:             paginationDto,
+		Pagination:             dto.PaginationUnpaginated,
 		ContainerRestartPolicy: &restartPolicy,
 	}
 

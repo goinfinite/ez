@@ -1,0 +1,397 @@
+package page
+
+import (
+	"github.com/goinfinite/ez/src/domain/dto"
+	"github.com/goinfinite/ez/src/domain/entity"
+	"github.com/goinfinite/ez/src/presentation/ui/component/form"
+	"github.com/goinfinite/ez/src/presentation/ui/component/misc"
+	componentStructural "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+	"github.com/goinfinite/ez/src/presentation/ui/envs"
+	"strconv"
+)
+
+templ AccountsIndex(
+	readAccountsRequestDto dto.ReadAccountsRequest,
+	readAccountsResponseDto dto.ReadAccountsResponse,
+) {
+	<!-- Accounts Page JavaScript -->
+	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/accounts.js" }></script>
+	<!-- Accounts Page HTML -->
+	<div class="flex flex-col" x-data="accounts">
+		<div class="mb-6 flex flex-row justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Accounts",
+					"Create and manage accounts with their own API keys and usage quotas, allowing each one to access and use every Infinite Ez resource individually.",
+					"ph-users-three",
+				)
+			</div>
+			@componentStructural.IconButton(componentStructural.IconButtonSettings{
+				Label:   "Create Account",
+				Icon:    "ph-plus-square",
+				OnClick: "openCreateAccountModal()",
+			})
+		</div>
+		<div id="accounts" class="card w-full">
+			@AccountsTable(readAccountsRequestDto, readAccountsResponseDto)
+			@CreateAccountModal()
+			@UpdateAccountQuotaModal()
+			@UpdatePasswordModal()
+			@UpdateApiKeyModal()
+			@componentStructural.DeleteModal(
+				"isDeleteAccountModalOpen", "closeDeleteAccountModal()", "deleteAccount()",
+				"delete-account", "accountEntity.username", "accountEntity.id",
+			)
+		</div>
+	</div>
+}
+
+templ AccountsTable(
+	readAccountsRequestDto dto.ReadAccountsRequest,
+	readAccountsResponseDto dto.ReadAccountsResponse,
+) {
+	<!-- Accounts Table -->
+	{{ accountsTableId := "accounts-table" }}
+	<div
+		id={ accountsTableId }
+		hx-get="/accounts/"
+		hx-trigger="create:account from:window delay:500ms, update:account-quota from:window delay:500ms, delete:account from:window delay:500ms"
+		hx-select={ "#" + accountsTableId }
+		hx-target={ "#" + accountsTableId }
+		hx-swap="outerHTML transition:true"
+	>
+		<div class="bg-ez-800 border-b border-neutral-500 border-opacity-90 p-2">
+			@componentStructural.ReadRequestSettingsBar(
+				"accounts", "/accounts/", "#"+accountsTableId,
+				readAccountsRequestDto, readAccountsResponseDto.Pagination,
+				entity.Account{},
+			)
+		</div>
+		<table class="w-full table-fixed border-collapse rounded-md transition-all duration-300 ease-in-out">
+			<thead class="bg-ez-800 text-xs uppercase text-neutral-400">
+				<tr class="border-b border-neutral-500 border-opacity-90 text-center">
+					<th scope="col" class="w-[20%] overflow-x-hidden py-3 pl-3 text-left">Username</th>
+					<th scope="col" class="w-[10%] py-3">CPU</th>
+					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Memory</th>
+					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Disk</th>
+					<th scope="col" class="w-[10%] overflow-x-hidden py-3">Inodes</th>
+					<th scope="col" class="w-[17.5%] overflow-x-hidden py-3">Storage Performance Units</th>
+					<th scope="col" class="w-[15%] overflow-x-hidden py-3">Created At</th>
+					<th scope="col" class="w-[7.5%] py-3"></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, accountEntity := range readAccountsResponseDto.Accounts {
+					<!-- Account Table Entry -->
+					<tr class="odd:bg-ez-400 even:bg-ez-600 border-b border-neutral-500 border-opacity-30 text-center">
+						{{ accountIdStr := accountEntity.Id.String() }}
+						@templ.JSONScript("accountEntity_"+accountIdStr, accountEntity)
+						<td class="w-[20%] overflow-x-hidden px-3 py-2 text-left">
+							{ accountEntity.Username.String() }
+							<div class="mt-2 flex flex-wrap gap-2">
+								@componentMisc.TinyTag(
+									"", "Ownership", accountIdStr+":"+accountEntity.GroupId.String(), "infinite-500",
+								)
+								@componentMisc.TinyTag(
+									"", "Home Directory", accountEntity.HomeDirectory.String(), "infinite-500",
+								)
+							</div>
+						</td>
+						{{
+							emptyQuotaProgressBarSettings := componentMisc.ProgressBarSettings{
+								Size:                   componentMisc.ProgressBarSizeSm,
+								CurrentProgressValue:   1,
+								MaxProgressValue:       1,
+								LabelCustomText:        "0/0",
+								LabelBackgroundColor:   "ez-800",
+								TooltipText:            "No quota available",
+								TooltipBackgroundColor: "ez-200",
+							}
+						}}
+						<td class="w-[10%] px-3 py-2">
+							<div class="flex items-center justify-center">
+								if accountEntity.Quota.CpuCores > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   uint64(accountEntity.QuotaUsage.Millicores.Uint()),
+										MaxProgressValue:       uint64(accountEntity.Quota.Millicores.Uint()),
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.FormatFloat(accountEntity.QuotaUsage.CpuCores, 'f', -1, 64) + "/" + strconv.FormatFloat(accountEntity.Quota.CpuCores, 'f', -1, 64) + " cores",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
+						</td>
+						<td class="w-[10%] overflow-x-hidden px-3 py-2">
+							<div class="flex items-center justify-center">
+								{{ memoryBytesQuotaUint := accountEntity.Quota.MemoryBytes.Uint64() }}
+								if memoryBytesQuotaUint > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   accountEntity.QuotaUsage.MemoryBytes.Uint64(),
+										MaxProgressValue:       memoryBytesQuotaUint,
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.Itoa(int(accountEntity.Quota.MemoryGibibytes)) + "/" + strconv.Itoa(int(accountEntity.Quota.MemoryGibibytes)) + " GiB",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
+						</td>
+						<td class="w-[10%] overflow-x-hidden px-3 py-2">
+							<div class="flex items-center justify-center">
+								{{ diskBytesQuotaUint := accountEntity.Quota.StorageBytes.Uint64() }}
+								if diskBytesQuotaUint > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   accountEntity.QuotaUsage.StorageBytes.Uint64(),
+										MaxProgressValue:       diskBytesQuotaUint,
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.Itoa(int(accountEntity.QuotaUsage.StorageGibibytes)) + "/" + strconv.Itoa(int(accountEntity.Quota.StorageGibibytes)) + " GiB",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
+						</td>
+						<td class="w-[10%] overflow-x-hidden px-3 py-2">
+							<div class="flex items-center justify-center">
+								if accountEntity.Quota.StorageInodes > 0 {
+									@componentMisc.ProgressBar(componentMisc.ProgressBarSettings{
+										Size:                   componentMisc.ProgressBarSizeSm,
+										CurrentProgressValue:   accountEntity.QuotaUsage.StorageInodes,
+										MaxProgressValue:       accountEntity.Quota.StorageInodes,
+										LabelBackgroundColor:   "ez-800",
+										TooltipText:            strconv.Itoa(int(accountEntity.QuotaUsage.StorageInodes)) + "/" + strconv.Itoa(int(accountEntity.Quota.StorageInodes)) + " nodes",
+										TooltipBackgroundColor: "ez-200",
+									})
+								} else {
+									@componentMisc.ProgressBar(emptyQuotaProgressBarSettings)
+								}
+							</div>
+						</td>
+						<td class="w-[17.5%] overflow-x-hidden px-3 py-2">
+							{ accountEntity.Quota.StoragePerformanceUnits.String() }
+						</td>
+						<td class="w-[15%] overflow-x-hidden px-3 py-2 text-sm">
+							{ accountEntity.CreatedAt.ReadAsRfcDate() }
+						</td>
+						<td class="w-[7.5%] px-3 py-2">
+							<div class="flex flex-wrap items-center justify-center gap-1">
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "update-password",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-lock-key",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openUpdatePasswordModal(" + accountIdStr + ")",
+									TooltipText:          "Update Password",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "top",
+								})
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "update-api-key",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-key",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openUpdateApiKeyModal(" + accountIdStr + ")",
+									TooltipText:          "Update API Key",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "top",
+								})
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "update-account-quota",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-disc",
+									BackgroundColor:      "ez-300",
+									HoverBackgroundColor: "ez-200",
+									OnClick:              "openUpdateAccountQuotaModal(" + accountIdStr + ")",
+									TooltipText:          "Update Account Quota",
+									TooltipColor:         "ez-300",
+									TooltipPosition:      "top",
+								})
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Id:                   "delete-account",
+									Shape:                componentStructural.IconButtonShapeSquare,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-800",
+									HoverBackgroundColor: "red-600",
+									OnClick:              "openDeleteAccountModal(" + accountIdStr + ")",
+									TooltipText:          "Delete Account",
+									TooltipColor:         "red-800",
+									TooltipPosition:      "top",
+								})
+							</div>
+						</td>
+					</tr>
+				}
+				if len(readAccountsResponseDto.Accounts) == 0 {
+					<tr class="border-b border-neutral-500 border-opacity-30 bg-neutral-950 bg-opacity-20">
+						<td class="px-3 py-2" colspan="12">No accounts found.</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ AccountForm(action string) {
+	<form
+		if action == "create" {
+			hx-post="/api/v1/account/"
+			@submit="closeCreateAccountModal(); $dispatch('create:account')"
+		}
+		if action == "update" {
+			hx-put="/api/v1/account/"
+			@submit="closeUpdateAccountQuotaModal(); $dispatch('update:account-quota')"
+		}
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		class="flex flex-col space-y-4"
+	>
+		{{
+			accountUsernameInputSettings := componentForm.InputFieldSettings{
+				InputType:     "text",
+				InputName:     "username",
+				Label:         "Username",
+				ModelBindPath: "accountEntity.username",
+			}
+		}}
+		if action == "create" {
+			{{ accountUsernameInputSettings.IsRequired = true }}
+		}
+		if action == "update" {
+			<input type="hidden" name="id" x-bind:value="accountEntity.id"/>
+			{{ accountUsernameInputSettings.IsReadOnly = true }}
+		}
+		@componentForm.InputField(accountUsernameInputSettings)
+		if action == "create" {
+			@componentForm.PasswordInput(
+				"password", "Password", "accountEntity.password", true, true,
+			)
+		}
+		@componentForm.NumberRangeInputField(
+			"quota.cpuCores", "CPU Cores", "cores", "0", "128", "0.5",
+			"accountEntity.quota.cpuCores",
+		)
+		@componentForm.DualNumberRangeInputField(
+			"RAM Memory", "isMemoryGibibyteSelector",
+			"quota.memoryGibibytes", "GiB", "0", "128", "1",
+			"accountEntity.quota.memoryGibibytes",
+			"memoryMebibytes", "MiB", "0", "2048", "100",
+			"accountEntity.quota.memoryMebibytes",
+		)
+		@componentForm.DualNumberRangeInputField(
+			"Disk Storage", "isStorageGibibyteSelection",
+			"quota.storageGibibytes", "GiB", "0", "4096", "1",
+			"accountEntity.quota.storageGibibytes",
+			"storageMebibytes", "MiB", "0", "4194304", "100",
+			"accountEntity.quota.storageMebibytes",
+		)
+		@componentForm.NumberRangeInputField(
+			"quota.storageInodes", "Inodes", "inodes", "0", "100000000", "1",
+			"accountEntity.quota.storageInodes",
+		)
+		<div>
+			@componentForm.NumberRangeInputField(
+				"quota.storagePerformanceUnits", "Storage Performance Units",
+				"units", "1", "100", "1", "accountEntity.quota.storagePerformanceUnits",
+			)
+			<small class="mt-3 block rounded-md border-x-4 border-amber-400 border-opacity-20 bg-amber-400 bg-opacity-5 p-1 text-center text-[11px] text-neutral-50">
+				<strong x-text="accountEntity.quota.storagePerformanceUnits"></strong> unit(s) = <strong><span x-text="accountEntity.quota.storagePerformanceUnits * 5"></span> MiB/s & <span x-text="accountEntity.quota.storagePerformanceUnits * 250"></span> operations</strong> of read and write
+			</small>
+		</div>
+		{{ buttonLabel := "Create" }}
+		if action == "update" {
+			{{ buttonLabel = "Update" }}
+		}
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: buttonLabel,
+			Icon:  "ph-check-fat",
+		})
+	</form>
+}
+
+templ CreateAccountModal() {
+	@componentStructural.RegularModal(
+		"Create Account", "isCreateAccountModalOpen", "closeCreateAccountModal()",
+		"",
+	) {
+		@AccountForm("create")
+	}
+}
+
+templ UpdateAccountQuotaModal() {
+	@componentStructural.RegularModal(
+		"Update Account Quota", "isUpdateAccountQuotaModalOpen", "closeUpdateAccountQuotaModal()",
+		"accountEntity.username",
+	) {
+		@AccountForm("update")
+	}
+}
+
+templ UpdatePasswordForm() {
+	<!-- UpdatePasswordForm -->
+	<form
+		hx-put="/api/v1/account/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		@submit="closeUpdatePasswordModal()"
+		class="flex flex-col space-y-4"
+	>
+		<input type="hidden" name="id" x-bind:value="accountEntity.id"/>
+		@componentForm.PasswordInput(
+			"password", "Password", "accountEntity.password", true, true,
+		)
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Update",
+			Icon:  "ph-check-fat",
+		})
+	</form>
+}
+
+templ UpdatePasswordModal() {
+	@componentStructural.RegularModal(
+		"Update Password", "isUpdatePasswordModalOpen", "closeUpdatePasswordModal()",
+		"accountEntity.username",
+	) {
+		@UpdatePasswordForm()
+	}
+}
+
+templ UpdateApiKeyContent() {
+	<!-- UpdateApiKeyContent -->
+	<div class="flex flex-col space-y-4">
+		@componentForm.TextArea(componentForm.TextAreaSettings{
+			Id:            "apiKey",
+			Label:         "API Key",
+			ModelBindPath: "accountApiKey",
+			IsReadOnly:    true,
+		})
+		<div x-show="accountApiKey !== ''">
+			@componentStructural.Alert(
+				componentStructural.AlertTypeWarning,
+				"This API key will not be stored on the server side. Please save it securely, as you will not be able to retrieve it again if lost. If you need to access your API key in the future, you will need to generate a new one.",
+			)
+		</div>
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label:   "Update",
+			Icon:    "ph-check-fat",
+			OnClick: "updateApiKey()",
+		})
+	</div>
+}
+
+templ UpdateApiKeyModal() {
+	@componentStructural.RegularModal(
+		"Update API Key", "isUpdateApiKeyModalOpen", "closeUpdateApiKeyModal()",
+		"accountEntity.username",
+	) {
+		@UpdateApiKeyContent()
+	}
+}

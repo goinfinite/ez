@@ -473,7 +473,9 @@ func (repo *ContainerCmdRepo) Create(
 	containerId = containerEntity.Id
 
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(createDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &createDto.AccountId,
+	})
 	if err != nil {
 		return containerId, err
 	}
@@ -557,7 +559,9 @@ func (repo *ContainerCmdRepo) Update(updateDto dto.UpdateContainer) error {
 	}
 
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	accountEntity, err := accountQueryRepo.ReadById(updateDto.AccountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &updateDto.AccountId,
+	})
 	if err != nil {
 		return err
 	}

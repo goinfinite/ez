@@ -380,10 +380,7 @@ func (repo *ContainerQueryRepo) Read(
 func (repo *ContainerQueryRepo) ReadFirst(
 	requestDto dto.ReadContainersRequest,
 ) (containerEntity entity.Container, err error) {
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
+	requestDto.Pagination = dto.PaginationSingleItem
 
 	responseDto, err := repo.Read(requestDto)
 	if err != nil {
@@ -400,11 +397,9 @@ func (repo *ContainerQueryRepo) ReadFirst(
 func (repo *ContainerQueryRepo) ReadFirstWithMetrics(
 	requestDto dto.ReadContainersRequest,
 ) (containerWithMetrics dto.ContainerWithMetrics, err error) {
+	requestDto.Pagination = dto.PaginationSingleItem
+
 	withMetrics := true
-	requestDto.Pagination = dto.Pagination{
-		PageNumber:   0,
-		ItemsPerPage: 1,
-	}
 	requestDto.WithMetrics = &withMetrics
 
 	responseDto, err := repo.Read(requestDto)

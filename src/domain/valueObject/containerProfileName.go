@@ -7,11 +7,11 @@ import (
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
 )
 
-const containerProfileNameRegex string = `^\w[\w\ \-]{1,64}\w$`
+const containerProfileNameRegex string = `^\w[\p{L}0-9\ \-]{1,64}\w$`
 
 type ContainerProfileName string
 
-func NewContainerProfileName(value interface{}) (name ContainerProfileName, err error) {
+func NewContainerProfileName(value any) (name ContainerProfileName, err error) {
 	stringValue, err := voHelper.InterfaceToString(value)
 	if err != nil {
 		return name, errors.New("ContainerProfileNameMustBeString")

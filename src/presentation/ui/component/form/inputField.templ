@@ -2,7 +2,8 @@ package componentForm
 
 type InputFieldSettings struct {
 	InputType     string
-	Id            string
+	InputId       string
+	InputName     string
 	Label         string
 	ModelBindPath string
 	IsRequired    bool
@@ -29,9 +30,11 @@ templ InputField(inputSettings InputFieldSettings) {
 		}
 		<input
 			type={ inputSettings.InputType }
-			if inputSettings.Id != "" {
-				id={ inputSettings.Id }
-				name={ inputSettings.Id }
+			if inputSettings.InputId != "" {
+				id={ inputSettings.InputId }
+			}
+			if inputSettings.InputName != "" {
+				name={ inputSettings.InputName }
 			}
 			x-model:value={ inputSettings.ModelBindPath }
 			autocomplete="off"

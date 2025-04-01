@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/valueObject"
 	voHelper "github.com/goinfinite/ez/src/domain/valueObject/helper"
@@ -483,7 +484,9 @@ func (repo *ContainerRegistryQueryRepo) readTaggedImageFromLocalhost(
 	}
 
 	accountQueryRepo := NewAccountQueryRepo(repo.persistentDbSvc)
-	ownerEntity, err := accountQueryRepo.ReadByUsername(ownerUsername)
+	ownerEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountUsername: &ownerUsername,
+	})
 	if err != nil {
 		return taggedImage, errors.New("FindOwnerError: " + err.Error())
 	}

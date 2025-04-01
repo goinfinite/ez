@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/goinfinite/ez/src/domain/dto"
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/domain/repository"
 	"github.com/goinfinite/ez/src/domain/valueObject"
@@ -16,7 +17,9 @@ func CheckAccountQuota(
 	newProfileId valueObject.ContainerProfileId,
 	prevProfileId *valueObject.ContainerProfileId,
 ) error {
-	accountEntity, err := accountQueryRepo.ReadById(accountId)
+	accountEntity, err := accountQueryRepo.ReadFirst(dto.ReadAccountsRequest{
+		AccountId: &accountId,
+	})
 	if err != nil {
 		slog.Error("ReadAccountInfoInfraError", slog.Any("error", err))
 		return errors.New("ReadAccountInfoInfraError")

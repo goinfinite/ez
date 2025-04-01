@@ -32,13 +32,62 @@ func NewAccountService(
 	}
 }
 
-func (service *AccountService) Read() ServiceOutput {
-	accountsList, err := useCase.ReadAccounts(service.accountQueryRepo)
+func (service *AccountService) ReadAccountsRequestFactory(
+	serviceInput map[string]any,
+) (readRequestDto dto.ReadAccountsRequest, err error) {
+	if serviceInput["accountId"] != nil {
+		serviceInput["id"] = serviceInput["accountId"]
+	}
+
+	if serviceInput["accountUsername"] != nil {
+		serviceInput["username"] = serviceInput["accountUsername"]
+	}
+
+	var accountIdPtr *valueObject.AccountId
+	if serviceInput["id"] != nil {
+		accountId, err := valueObject.NewAccountId(serviceInput["id"])
+		if err != nil {
+			return readRequestDto, err
+		}
+		accountIdPtr = &accountId
+	}
+
+	var accountUsernamePtr *valueObject.UnixUsername
+	if serviceInput["username"] != nil {
+		accountUsername, err := valueObject.NewUnixUsername(serviceInput["username"])
+		if err != nil {
+			return readRequestDto, err
+		}
+		accountUsernamePtr = &accountUsername
+	}
+
+	requestPagination, err := serviceHelper.PaginationParser(
+		serviceInput, useCase.AccountsDefaultPagination,
+	)
+	if err != nil {
+		return readRequestDto, err
+	}
+
+	return dto.ReadAccountsRequest{
+		Pagination:      requestPagination,
+		AccountId:       accountIdPtr,
+		AccountUsername: accountUsernamePtr,
+	}, nil
+}
+
+func (service *AccountService) Read(input map[string]any) ServiceOutput {
+	readAccountsRequestDto, err := service.ReadAccountsRequestFactory(input)
+	if err != nil {
+		return NewServiceOutput(UserError, err.Error())
+	}
+	accountsResponseDto, err := useCase.ReadAccounts(
+		service.accountQueryRepo, readAccountsRequestDto,
+	)
 	if err != nil {
 		return NewServiceOutput(InfraError, err.Error())
 	}
 
-	return NewServiceOutput(Success, accountsList)
+	return NewServiceOutput(Success, accountsResponseDto)
 }
 
 func (service *AccountService) Create(input map[string]interface{}) ServiceOutput {

@@ -77,7 +77,7 @@ templ CreateBackupTaskArchiveForm() {
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
 				InputType:     "number",
-				Id:            "timeoutSecs",
+				InputName:     "timeoutSecs",
 				Label:         "Timeout (seconds)",
 				ModelBindPath: "createTaskArchive.timeoutSecs",
 				IsRequired:    false,
@@ -178,7 +178,7 @@ templ RestoreBackupTaskForm() {
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
 				InputType:     "number",
-				Id:            "timeoutSecs",
+				InputName:     "timeoutSecs",
 				Label:         "Timeout (seconds)",
 				ModelBindPath: "restoreTask.timeoutSecs",
 				IsRequired:    false,
@@ -491,7 +491,7 @@ templ RestoreBackupTaskArchiveForm() {
 		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
 			@componentForm.InputField(componentForm.InputFieldSettings{
 				InputType:     "number",
-				Id:            "timeoutSecs",
+				InputName:     "timeoutSecs",
 				Label:         "Timeout (seconds)",
 				ModelBindPath: "restoreTaskArchive.timeoutSecs",
 				IsRequired:    false,
