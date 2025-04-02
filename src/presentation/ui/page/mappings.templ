@@ -39,13 +39,26 @@ templ MappingsIndex(
 		<div id="mappings" class="card w-full">
 			@MappingsTable(mappingsList)
 			@CreateMappingModal(accountSelectPairs)
+			@componentStructural.DeleteModal(
+				"isDeleteMappingModalOpen", "closeDeleteMappingModal()", "deleteMapping()",
+				"delete-mapping", "mappingEntity.hostname", "mappingEntity.id",
+			)
 		</div>
 	</div>
 }
 
 templ MappingsTable(mappingsList []entity.Mapping) {
 	<!-- Mappings Table -->
-	<div id="mappings-form-table" class="flex w-full flex-col gap-4">
+	{{ mappingsTableId := "mappings-table" }}
+	<div
+		id={ mappingsTableId }
+		hx-get="/mappings/"
+		hx-trigger={ "refresh:" + mappingsTableId + " from:window" }
+		hx-select={ "#" + mappingsTableId }
+		hx-target={ "#" + mappingsTableId }
+		hx-swap="outerHTML transition:true"
+		class="flex w-full flex-col gap-4"
+	>
 		for _, mapping := range mappingsList {
 			<!-- Mapping Entry -->
 			<div class="bg-ez-800 h-65 flex gap-3 rounded-md p-3">
@@ -73,7 +86,7 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 								Icon:                 "ph-trash",
 								BackgroundColor:      "red-800",
 								HoverBackgroundColor: "red-600",
-								OnClick:              "console.log('Delete mapping')",
+								OnClick:              "openDeleteMappingModal(" + mapping.Id.String() + ", '" + mappingHostname + "')",
 								TooltipText:          "Delete Mapping",
 								TooltipColor:         "red-800",
 								TooltipPosition:      "top",
