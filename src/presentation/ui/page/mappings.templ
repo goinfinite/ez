@@ -1,0 +1,272 @@
+package page
+
+import "github.com/goinfinite/ez/src/presentation/ui/component/structural"
+import "github.com/goinfinite/ez/src/presentation/ui/envs"
+import "github.com/goinfinite/ez/src/domain/entity"
+import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
+import "github.com/goinfinite/ez/src/presentation/ui/component/form"
+import "github.com/goinfinite/ez/src/domain/valueObject"
+
+const (
+	mappingsRecordsDisplayId               string = "mappings-table"
+	mappingsRecordsDisplayRefreshEventName string = "refresh:" + mappingsRecordsDisplayId
+)
+
+templ MappingsIndex(
+	mappingsList []entity.Mapping,
+	mappingsSelectPair []componentForm.SelectLabelValuePair,
+	accountSelectPairs []componentForm.SelectLabelValuePair,
+	containerSelectPairs []componentForm.SelectLabelValuePair,
+) {
+	<!-- Mappings Page JavaScript -->
+	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/mappings.js" }></script>
+	<!-- Mappings Page HTML -->
+	<div class="flex flex-col" x-data="mappings">
+		<div class="mb-6 flex flex-row justify-between">
+			<div class="basis-[70%]">
+				@componentStructural.PageTitle(
+					"Mappings",
+					"Manage public port mappings and network protocols for each hostname, allowing access to the desired containers.",
+					"ph-graph",
+				)
+			</div>
+			<div class="flex gap-5">
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
+					Label:   "Create Mapping",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateMappingModal()",
+				})
+				@componentStructural.IconButton(componentStructural.IconButtonSettings{
+					Label:   "Create Target",
+					Icon:    "ph-plus-square",
+					OnClick: "openCreateTargetModal()",
+				})
+			</div>
+		</div>
+		<div id="mappings" class="card w-full">
+			@MappingsTable(mappingsList)
+			@CreateMappingModal(accountSelectPairs)
+			@componentStructural.DeleteModal(
+				"isDeleteMappingModalOpen", "closeDeleteMappingModal()", "deleteMapping()",
+				"delete-mapping", "mappingEntity.hostname", "mappingEntity.id",
+			)
+			@CreateTargetModal(mappingsSelectPair, containerSelectPairs)
+			@componentStructural.DeleteModal(
+				"isDeleteTargetModalOpen", "closeDeleteTargetModal()", "deleteTarget()",
+				"delete-target", "", "targetEntity.id",
+			)
+		</div>
+	</div>
+}
+
+templ MappingsTable(mappingsList []entity.Mapping) {
+	<!-- Mappings Table -->
+	<div
+		id={ mappingsRecordsDisplayId }
+		hx-get="/mappings/"
+		hx-trigger={ mappingsRecordsDisplayRefreshEventName + " from:window" }
+		hx-select={ "#" + mappingsRecordsDisplayId }
+		hx-target={ "#" + mappingsRecordsDisplayId }
+		hx-swap="outerHTML transition:true"
+		class="flex w-full flex-col gap-4"
+	>
+		for _, mappingEntity := range mappingsList {
+			<!-- Mapping Entry -->
+			<div class="bg-ez-800 h-65 flex gap-3 rounded-md p-3">
+				<!-- Mapping Column -->
+				<div class="bg-ez-500 flex w-2/5 flex-col rounded p-3">
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						{{ mappingHostnameStr := "*" }}
+						if mappingEntity.Hostname != nil {
+							{{ mappingHostnameStr = mappingEntity.Hostname.String() }}
+						}
+						{{ mappingIdStr := mappingEntity.Id.String() }}
+						<span class="text-lg font-bold">{ mappingHostnameStr } #{ mappingIdStr }</span>
+						<div class="flex gap-2">
+							@componentStructural.IconButton(componentStructural.IconButtonSettings{
+								Shape:                componentStructural.IconButtonShapeCircular,
+								Icon:                 "ph-plus-circle",
+								BackgroundColor:      "ez-300",
+								HoverBackgroundColor: "ez-200",
+								OnClick:              "openCreateTargetModal(" + mappingIdStr + ", '" + mappingHostnameStr + "')",
+								TooltipText:          "Create Target",
+								TooltipColor:         "ez-300",
+								TooltipPosition:      "top",
+							})
+							@componentStructural.IconButton(componentStructural.IconButtonSettings{
+								Shape:                componentStructural.IconButtonShapeCircular,
+								Icon:                 "ph-trash",
+								BackgroundColor:      "red-800",
+								HoverBackgroundColor: "red-600",
+								OnClick:              "openDeleteMappingModal(" + mappingIdStr + ", '" + mappingHostnameStr + "')",
+								TooltipText:          "Delete Mapping",
+								TooltipColor:         "red-800",
+								TooltipPosition:      "top",
+							})
+						</div>
+					</div>
+					<div class="mt-4 flex flex-wrap gap-3">
+						@componentMisc.TinyTag("ph-user-circle", "", mappingEntity.AccountUsername.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-link-simple", "", mappingEntity.Protocol.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-door-open", "", mappingEntity.PublicPort.String(), "infinite-500")
+					</div>
+				</div>
+				<!-- Mapping Targets Column -->
+				<div class="flex w-full flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar]:w-3">
+					for _, target := range mappingEntity.Targets {
+						<div class="bg-ez-500 flex-col rounded-md p-3">
+							<div class="flex items-center justify-between">
+								{{ targetIdStr := target.Id.String() }}
+								<div class="flex gap-4">
+									<span>#{ targetIdStr }</span>
+									@componentMisc.TinyTag(
+										"", "Container Hostname",
+										target.ContainerHostname.String(),
+										"teal-800",
+									)
+									@componentMisc.TinyTag(
+										"", "Container Private Port",
+										target.ContainerPrivatePort.String(),
+										"teal-800",
+									)
+								</div>
+								@componentStructural.IconButton(componentStructural.IconButtonSettings{
+									Shape:                componentStructural.IconButtonShapeCircular,
+									Icon:                 "ph-trash",
+									BackgroundColor:      "red-800",
+									HoverBackgroundColor: "red-600",
+									OnClick:              "openDeleteTargetModal(" + mappingIdStr + ", " + targetIdStr + ")",
+									TooltipColor:         "red-800",
+									TooltipPosition:      "top",
+								})
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+		if len(mappingsList) == 0 {
+			<div class="bg-ez-800 flex h-20 items-center justify-center rounded-md p-3">
+				<span class="italic text-neutral-500">No mappings found.</span>
+			</div>
+		}
+	</div>
+}
+
+templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair) {
+	<!-- CreateMappingForm -->
+	<form
+		id="create-mapping-form"
+		class="flex flex-col gap-4"
+		hx-post="/api/v1/mapping/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		@submit="closeCreateMappingModal()"
+		@htmx:after-request={ "$dispatch('" + mappingsRecordsDisplayRefreshEventName + "')" }
+	>
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:  "text",
+			InputName:  "hostname",
+			Label:      "Hostname",
+			IsRequired: true,
+		})
+		<div class="flex flex-row gap-x-2">
+			@componentForm.InputField(componentForm.InputFieldSettings{
+				InputType:     "number",
+				InputName:     "publicPort",
+				Label:         "Public Port",
+				ModelBindPath: "mappingEntity.publicPort",
+				IsRequired:    true,
+			})
+			@componentForm.SelectInput(componentForm.SelectInputDto{
+				Id:                       "protocol",
+				Label:                    "Protocol",
+				ModelBindPath:            "mappingEntity.protocol",
+				Options:                  valueObject.ValidNetworkProtocols,
+				IsRequired:               true,
+				ShouldIncludeBlankOption: false,
+			})
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
+				Id:                       "accountId",
+				Label:                    "Account",
+				Options:                  accountSelectPairs,
+				ShouldIncludeBlankOption: true,
+			})
+		}
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Create",
+			Icon:  "ph-check-fat",
+		})
+	</form>
+}
+
+templ CreateMappingModal(accountSelectPairs []componentForm.SelectLabelValuePair) {
+	@componentStructural.RegularModal(
+		"Create Mapping", "isCreateMappingModalOpen", "closeCreateMappingModal()",
+		"",
+	) {
+		@CreateMappingForm(accountSelectPairs)
+	}
+}
+
+templ CreateTargetForm(
+	mappingsSelectPair []componentForm.SelectLabelValuePair,
+	containerSelectPairs []componentForm.SelectLabelValuePair,
+) {
+	<!-- CreateTargetForm -->
+	<form
+		id="create-target-form"
+		class="flex flex-col gap-4"
+		hx-post="/api/v1/mapping/target/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		@submit="closeCreateTargetModal()"
+		@htmx:after-request={ "$dispatch('" + mappingsRecordsDisplayRefreshEventName + "')" }
+	>
+		<template x-if="mappingEntity.id == ''">
+			@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
+				Id:                       "mappingId",
+				Label:                    "Mapping",
+				SelectedModelBindPath:    "mappingEntity.hostname",
+				Options:                  mappingsSelectPair,
+				ShouldIncludeBlankOption: true,
+			})
+		</template>
+		<template x-if="mappingEntity.id != ''">
+			<div>
+				<input type="hidden" name="mappingId" x-bind:value="mappingEntity.id"/>
+				@componentForm.InputField(componentForm.InputFieldSettings{
+					InputType:     "text",
+					Label:         "Mapping",
+					ModelBindPath: "mappingEntity.hostname",
+					IsReadOnly:    true,
+				})
+			</div>
+		</template>
+		@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
+			Id:                       "containerId",
+			Label:                    "Container",
+			SelectedModelBindPath:    "targetEntity.containerId",
+			Options:                  containerSelectPairs,
+			ShouldIncludeBlankOption: true,
+		})
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Create",
+			Icon:  "ph-check-fat",
+		})
+	</form>
+}
+
+templ CreateTargetModal(
+	mappingsSelectPair []componentForm.SelectLabelValuePair,
+	containerSelectPairs []componentForm.SelectLabelValuePair,
+) {
+	@componentStructural.RegularModal(
+		"Create Target", "isCreateTargetModalOpen", "closeCreateTargetModal()",
+		"",
+	) {
+		@CreateTargetForm(mappingsSelectPair, containerSelectPairs)
+	}
+}

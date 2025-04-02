@@ -37,9 +37,6 @@ func NewRouter(
 	}
 }
 
-//go:embed dist/*
-var previousDashFiles embed.FS
-
 //go:embed assets/*
 var assetsFiles embed.FS
 
@@ -98,6 +95,15 @@ func (router *Router) loginRoutes() {
 	loginGroup.GET("/", loginPresenter.Handler)
 }
 
+func (router *Router) mappingsRoutes() {
+	mappingsGroup := router.baseRoute.Group("/mappings")
+
+	mappingsPresenter := presenter.NewMappingsPresenter(
+		router.persistentDbSvc, router.trailDbSvc,
+	)
+	mappingsGroup.GET("/", mappingsPresenter.Handler)
+}
+
 func (router *Router) overviewRoutes() {
 	overviewGroup := router.baseRoute.Group("/overview")
 
@@ -138,27 +144,13 @@ func (router *Router) fragmentRoutes() {
 	fragmentGroup.GET("/footer", footerPresenter.Handler)
 }
 
-func (router *Router) previousDashboardRoute() {
-	dashFilesFs, err := fs.Sub(previousDashFiles, "dist")
-	if err != nil {
-		slog.Error("ReadPreviousDashFilesError", slog.Any("error", err))
-		os.Exit(1)
-	}
-	dashFileServer := http.FileServer(http.FS(dashFilesFs))
-
-	previousDashGroup := router.baseRoute.Group("/_")
-	previousDashGroup.GET(
-		"/*",
-		echo.WrapHandler(http.StripPrefix("/_", dashFileServer)),
-	)
-}
-
 func (router *Router) RegisterRoutes() {
 	router.assetsRoute()
 	router.accountsRoutes()
 	router.backupRoutes()
 	router.containerRoutes()
 	router.loginRoutes()
+	router.mappingsRoutes()
 	router.overviewRoutes()
 
 	if isDevMode, _ := voHelper.InterfaceToBool(os.Getenv("DEV_MODE")); isDevMode {
@@ -166,7 +158,6 @@ func (router *Router) RegisterRoutes() {
 	}
 
 	router.fragmentRoutes()
-	router.previousDashboardRoute()
 
 	router.baseRoute.RouteNotFound("/*", func(c echo.Context) error {
 		urlPath := c.Request().URL.Path

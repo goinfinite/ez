@@ -1,7 +1,8 @@
 # Changelog
 
 ```log
-0.1.1 - XXXX/XX/XX
+0.1.1 - 2025/04/02
+refactor(front): mappings page with HTMX+Alpine.js
 refactor(front): accounts page with HTMX+Alpine.js
 fix(front): allow decimal values on Container Profiles Modal
 

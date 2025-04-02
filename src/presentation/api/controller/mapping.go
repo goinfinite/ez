@@ -97,17 +97,9 @@ func (controller *MappingController) Create(c echo.Context) error {
 // @Router       /v1/mapping/{mappingId}/ [delete]
 // @Router       /v1/mapping/{accountId}/{mappingId}/ [delete]
 func (controller *MappingController) Delete(c echo.Context) error {
-	operatorAccountId := c.Get("accountId").(string)
-	accountId := c.Param("accountId")
-	if accountId == "" {
-		accountId = operatorAccountId
-	}
-
-	requestBody := map[string]interface{}{
-		"accountId":         accountId,
-		"mappingId":         c.Param("mappingId"),
-		"operatorAccountId": operatorAccountId,
-		"operatorIpAddress": c.RealIP(),
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
 	}
 
 	return apiHelper.ServiceResponseWrapper(
@@ -149,18 +141,9 @@ func (controller *MappingController) CreateTarget(c echo.Context) error {
 // @Router       /v1/mapping/{mappingId}/target/{targetId}/ [delete]
 // @Router       /v1/mapping/{accountId}/{mappingId}/target/{targetId}/ [delete]
 func (controller *MappingController) DeleteTarget(c echo.Context) error {
-	operatorAccountId := c.Get("accountId").(string)
-	accountId := c.Param("accountId")
-	if accountId == "" {
-		accountId = operatorAccountId
-	}
-
-	requestBody := map[string]interface{}{
-		"accountId":         accountId,
-		"mappingId":         c.Param("mappingId"),
-		"targetId":          c.Param("targetId"),
-		"operatorAccountId": operatorAccountId,
-		"operatorIpAddress": c.RealIP(),
+	requestBody, err := apiHelper.ReadRequestBody(c)
+	if err != nil {
+		return err
 	}
 
 	return apiHelper.ServiceResponseWrapper(
