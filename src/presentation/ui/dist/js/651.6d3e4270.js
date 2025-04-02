@@ -1,1 +1,0 @@
-"use strict";(globalThis["webpackChunkez"]=globalThis["webpackChunkez"]||[]).push([[651],{3651:(e,n,a)=>{a.r(n),a.d(n,{default:()=>h});var r=a(9835);function s(e,n){const a=(0,r.up)("q-page");return(0,r.wg)(),(0,r.j4)(a)}var t=a(1639),u=a(9885),c=a(9984),o=a.n(c);const p={},g=(0,t.Z)(p,[["render",s]]),h=g;o()(p,"components",{QPage:u.Z})}}]);
