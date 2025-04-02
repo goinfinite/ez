@@ -2,7 +2,7 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("mappings", () => ({
         mappingEntity: {},
         resetPrimaryStates() {
-            this.mappingEntity = {}
+            this.mappingEntity = { id: "", hostname: "" }
         },
         init() {
             this.resetPrimaryStates()
@@ -33,6 +33,16 @@ document.addEventListener("alpine:init", () => {
                 })
                 .then(() => this.$dispatch("refresh:mappings-table"))
             this.closeDeleteMappingModal()
+        },
+        isCreateTargetModalOpen: false,
+        openCreateTargetModal(mappingId = "", mappingHostname = "") {
+            this.resetPrimaryStates()
+            this.mappingEntity.id = mappingId
+            this.mappingEntity.hostname = mappingHostname
+            this.isCreateTargetModalOpen = true
+        },
+        closeCreateTargetModal() {
+            this.isCreateTargetModalOpen = false
         },
     }))
 })

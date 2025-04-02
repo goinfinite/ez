@@ -8,6 +8,7 @@ import (
 	"github.com/goinfinite/ez/src/domain/entity"
 	"github.com/goinfinite/ez/src/infra/db"
 	"github.com/goinfinite/ez/src/presentation/service"
+	componentForm "github.com/goinfinite/ez/src/presentation/ui/component/form"
 	"github.com/goinfinite/ez/src/presentation/ui/page"
 	presenterHelper "github.com/goinfinite/ez/src/presentation/ui/presenter/helper"
 )
@@ -27,6 +28,28 @@ func NewMappingsPresenter(
 	}
 }
 
+func (presenter *MappingsPresenter) readMappingsSelectLabelValuePairs(
+	mappingsList []entity.Mapping,
+) []componentForm.SelectLabelValuePair {
+	selectLabelValuePairs := []componentForm.SelectLabelValuePair{}
+
+	defaultHostname := "*"
+	for _, mappingEntity := range mappingsList {
+		mappingHostname := defaultHostname
+		if mappingEntity.Hostname != nil {
+			mappingHostname = mappingEntity.Hostname.String()
+		}
+
+		selectLabelValuePair := componentForm.SelectLabelValuePair{
+			Label: mappingHostname + " (#" + mappingEntity.Id.String() + ")",
+			Value: mappingEntity.Id.String(),
+		}
+		selectLabelValuePairs = append(selectLabelValuePairs, selectLabelValuePair)
+	}
+
+	return selectLabelValuePairs
+}
+
 func (presenter *MappingsPresenter) Handler(c echo.Context) error {
 	readMappingsServiceOutput := service.
 		NewMappingService(presenter.persistentDbSvc, presenter.trailDbSvc).Read()
@@ -39,10 +62,18 @@ func (presenter *MappingsPresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	accountSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
+	mappingsSelectPairs := presenter.readMappingsSelectLabelValuePairs(mappingsList)
+
+	accountsSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
 		presenter.persistentDbSvc, presenter.trailDbSvc,
 	)
 
-	pageContent := page.MappingsIndex(mappingsList, accountSelectPairs)
+	containersSelectPairs := presenterHelper.ReadContainerSelectLabelValuePairs(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	pageContent := page.MappingsIndex(
+		mappingsList, mappingsSelectPairs, accountsSelectPairs, containersSelectPairs,
+	)
 	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

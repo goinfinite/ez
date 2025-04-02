@@ -7,9 +7,13 @@ import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 import "github.com/goinfinite/ez/src/presentation/ui/component/form"
 import "github.com/goinfinite/ez/src/domain/valueObject"
 
+const mappingsTableId string = "mappings-table"
+
 templ MappingsIndex(
 	mappingsList []entity.Mapping,
+	mappingsSelectPair []componentForm.SelectLabelValuePair,
 	accountSelectPairs []componentForm.SelectLabelValuePair,
+	containerSelectPairs []componentForm.SelectLabelValuePair,
 ) {
 	<!-- Mappings Page JavaScript -->
 	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/mappings.js" }></script>
@@ -32,7 +36,7 @@ templ MappingsIndex(
 				@componentStructural.IconButton(componentStructural.IconButtonSettings{
 					Label:   "Create Target",
 					Icon:    "ph-plus-square",
-					OnClick: "console.log('create target')",
+					OnClick: "openCreateTargetModal()",
 				})
 			</div>
 		</div>
@@ -43,41 +47,42 @@ templ MappingsIndex(
 				"isDeleteMappingModalOpen", "closeDeleteMappingModal()", "deleteMapping()",
 				"delete-mapping", "mappingEntity.hostname", "mappingEntity.id",
 			)
+			@CreateTargetModal(mappingsSelectPair, containerSelectPairs)
 		</div>
 	</div>
 }
 
 templ MappingsTable(mappingsList []entity.Mapping) {
 	<!-- Mappings Table -->
-	{{ mappingsTableId := "mappings-table" }}
 	<div
 		id={ mappingsTableId }
 		hx-get="/mappings/"
-		hx-trigger={ "refresh:" + mappingsTableId + " from:window" }
+		hx-trigger={ "refresh:" + mappingsTableId + " from:window delay:250ms" }
 		hx-select={ "#" + mappingsTableId }
 		hx-target={ "#" + mappingsTableId }
 		hx-swap="outerHTML transition:true"
 		class="flex w-full flex-col gap-4"
 	>
-		for _, mapping := range mappingsList {
+		for _, mappingEntity := range mappingsList {
 			<!-- Mapping Entry -->
 			<div class="bg-ez-800 h-65 flex gap-3 rounded-md p-3">
 				<!-- Mapping Column -->
 				<div class="bg-ez-500 flex w-2/5 flex-col rounded p-3">
 					<div class="flex flex-wrap items-center justify-between gap-2">
-						{{ mappingHostname := "*" }}
-						if mapping.Hostname != nil {
-							{{ mappingHostname = mapping.Hostname.String() }}
+						{{ mappingHostnameStr := "*" }}
+						if mappingEntity.Hostname != nil {
+							{{ mappingHostnameStr = mappingEntity.Hostname.String() }}
 						}
-						<span class="text-lg font-bold">{ mappingHostname } #{ mapping.Id.String() }</span>
+						{{ mappingIdStr := mappingEntity.Id.String() }}
+						<span class="text-lg font-bold">{ mappingHostnameStr } #{ mappingIdStr }</span>
 						<div class="flex gap-2">
 							@componentStructural.IconButton(componentStructural.IconButtonSettings{
 								Shape:                componentStructural.IconButtonShapeCircular,
 								Icon:                 "ph-plus-circle",
 								BackgroundColor:      "ez-300",
 								HoverBackgroundColor: "ez-200",
-								OnClick:              "console.log('Create target from mapping')",
-								TooltipText:          "Create Mapping",
+								OnClick:              "openCreateTargetModal(" + mappingIdStr + ", '" + mappingHostnameStr + "')",
+								TooltipText:          "Create Target",
 								TooltipColor:         "ez-300",
 								TooltipPosition:      "top",
 							})
@@ -86,7 +91,7 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 								Icon:                 "ph-trash",
 								BackgroundColor:      "red-800",
 								HoverBackgroundColor: "red-600",
-								OnClick:              "openDeleteMappingModal(" + mapping.Id.String() + ", '" + mappingHostname + "')",
+								OnClick:              "openDeleteMappingModal(" + mappingIdStr + ", '" + mappingHostnameStr + "')",
 								TooltipText:          "Delete Mapping",
 								TooltipColor:         "red-800",
 								TooltipPosition:      "top",
@@ -94,14 +99,14 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 						</div>
 					</div>
 					<div class="mt-4 flex flex-wrap gap-3">
-						@componentMisc.TinyTag("ph-user-circle", "", mapping.AccountUsername.String(), "infinite-500")
-						@componentMisc.TinyTag("ph-link-simple", "", mapping.Protocol.String(), "infinite-500")
-						@componentMisc.TinyTag("ph-door-open", "", mapping.PublicPort.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-user-circle", "", mappingEntity.AccountUsername.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-link-simple", "", mappingEntity.Protocol.String(), "infinite-500")
+						@componentMisc.TinyTag("ph-door-open", "", mappingEntity.PublicPort.String(), "infinite-500")
 					</div>
 				</div>
 				<!-- Mapping Targets Column -->
 				<div class="flex w-full flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-50/30 [&::-webkit-scrollbar-thumb]:hover:bg-neutral-50/50 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-neutral-50/10 [&::-webkit-scrollbar]:w-3">
-					for _, target := range mapping.Targets {
+					for _, target := range mappingEntity.Targets {
 						<div class="bg-ez-500 flex-col rounded-md p-3">
 							<div class="flex items-center justify-between">
 								<div class="flex gap-4">
@@ -122,7 +127,6 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 									BackgroundColor:      "red-800",
 									HoverBackgroundColor: "red-600",
 									OnClick:              "console.log('Delete mapping target')",
-									TooltipText:          "Delete Mapping Target",
 									TooltipColor:         "red-800",
 									TooltipPosition:      "top",
 								})
@@ -146,8 +150,8 @@ templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair)
 		hx-post="/api/v1/mapping/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		@submit="closeCreateMappingModal()"
-		class="flex flex-col space-y-4"
+		@htmx:after-request={ "$dispatch('refresh:" + mappingsTableId + "')" }
+		class="flex flex-col gap-4"
 	>
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:  "text",
@@ -179,8 +183,9 @@ templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair)
 			})
 		}
 		@componentStructural.IconButton(componentStructural.IconButtonSettings{
-			Label: "Create",
-			Icon:  "ph-check-fat",
+			Label:   "Create",
+			Icon:    "ph-check-fat",
+			OnClick: "closeCreateMappingModal()",
 		})
 	</form>
 }
@@ -191,5 +196,62 @@ templ CreateMappingModal(accountSelectPairs []componentForm.SelectLabelValuePair
 		"",
 	) {
 		@CreateMappingForm(accountSelectPairs)
+	}
+}
+
+templ CreateTargetForm(
+	mappingsSelectPair []componentForm.SelectLabelValuePair,
+	containerSelectPairs []componentForm.SelectLabelValuePair,
+) {
+	<!-- CreateTargetForm -->
+	<form
+		hx-post="/api/v1/mapping/target/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		@htmx:after-request={ "$dispatch('refresh:" + mappingsTableId + "')" }
+		class="flex flex-col gap-4"
+	>
+		<template x-if="mappingEntity.id == ''">
+			@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
+				Id:                       "mappingId",
+				Label:                    "Mapping",
+				Options:                  mappingsSelectPair,
+				ShouldIncludeBlankOption: true,
+			})
+		</template>
+		<template x-if="mappingEntity.id != ''">
+			<div>
+				<input type="hidden" name="mappingId" x-bind:value="mappingEntity.id"/>
+				@componentForm.InputField(componentForm.InputFieldSettings{
+					InputType:     "text",
+					Label:         "Mapping",
+					ModelBindPath: "mappingEntity.hostname",
+					IsReadOnly:    true,
+				})
+			</div>
+		</template>
+		@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
+			Id:                       "containerId",
+			Label:                    "Container",
+			Options:                  containerSelectPairs,
+			ShouldIncludeBlankOption: true,
+		})
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label:   "Create",
+			Icon:    "ph-check-fat",
+			OnClick: "closeCreateTargetModal()",
+		})
+	</form>
+}
+
+templ CreateTargetModal(
+	mappingsSelectPair []componentForm.SelectLabelValuePair,
+	containerSelectPairs []componentForm.SelectLabelValuePair,
+) {
+	@componentStructural.RegularModal(
+		"Create Target", "isCreateTargetModalOpen", "closeCreateTargetModal()",
+		"",
+	) {
+		@CreateTargetForm(mappingsSelectPair, containerSelectPairs)
 	}
 }
