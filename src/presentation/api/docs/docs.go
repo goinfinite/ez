@@ -4185,6 +4185,9 @@ const docTemplate = `{
                 "accountId": {
                     "type": "integer"
                 },
+                "accountUsername": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "integer"
                 },
