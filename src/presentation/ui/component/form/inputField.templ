@@ -16,7 +16,9 @@ templ InputField(inputSettings InputFieldSettings) {
 		if inputSettings.Label != "" {
 			<legend
 				class="ml-1.5 px-1 text-xs font-bold text-neutral-50/80 transition-opacity"
-				:class={ `!` + inputSettings.ModelBindPath + ` && 'opacity-0 !p-0 w-0 h-3.5'` }
+				if inputSettings.ModelBindPath != "" {
+					:class={ `!` + inputSettings.ModelBindPath + ` && 'opacity-0 !p-0 w-0 h-3.5'` }
+				}
 			>
 				{ inputSettings.Label }
 				if inputSettings.IsRequired {
@@ -36,7 +38,9 @@ templ InputField(inputSettings InputFieldSettings) {
 			if inputSettings.InputName != "" {
 				name={ inputSettings.InputName }
 			}
-			x-model:value={ inputSettings.ModelBindPath }
+			if inputSettings.ModelBindPath != "" {
+				x-model:value={ inputSettings.ModelBindPath }
+			}
 			autocomplete="off"
 			if inputSettings.Label != "" {
 				placeholder={ inputSettings.Label }
@@ -49,7 +53,7 @@ templ InputField(inputSettings InputFieldSettings) {
 				readonly
 			}
 		/>
-		if inputSettings.IsReadOnly {
+		if inputSettings.IsReadOnly && inputSettings.ModelBindPath != "" {
 			<div class="text-md absolute right-2 top-0 hidden flex-col gap-1 transition-all hover:flex active:flex peer-hover:flex">
 				<i
 					class="ph-bold ph-clipboard-text border-1 active:bg-infinite-500 cursor-pointer rounded-md border-neutral-50/10 bg-neutral-50/5 p-1 text-neutral-100 hover:border-neutral-50/40 hover:bg-neutral-50/20"
