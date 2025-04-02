@@ -13,7 +13,8 @@ import (
 )
 
 type MappingsPresenter struct {
-	mappingService *service.MappingService
+	persistentDbSvc *db.PersistentDatabaseService
+	trailDbSvc      *db.TrailDatabaseService
 }
 
 func NewMappingsPresenter(
@@ -21,12 +22,14 @@ func NewMappingsPresenter(
 	trailDbSvc *db.TrailDatabaseService,
 ) *MappingsPresenter {
 	return &MappingsPresenter{
-		mappingService: service.NewMappingService(persistentDbSvc, trailDbSvc),
+		persistentDbSvc: persistentDbSvc,
+		trailDbSvc:      trailDbSvc,
 	}
 }
 
 func (presenter *MappingsPresenter) Handler(c echo.Context) error {
-	readMappingsServiceOutput := presenter.mappingService.Read()
+	readMappingsServiceOutput := service.
+		NewMappingService(presenter.persistentDbSvc, presenter.trailDbSvc).Read()
 	if readMappingsServiceOutput.Status != service.Success {
 		return nil
 	}
@@ -36,6 +39,10 @@ func (presenter *MappingsPresenter) Handler(c echo.Context) error {
 		return nil
 	}
 
-	pageContent := page.MappingsIndex(mappingsList)
+	accountSelectPairs := presenterHelper.ReadAccountSelectLabelValuePairs(
+		presenter.persistentDbSvc, presenter.trailDbSvc,
+	)
+
+	pageContent := page.MappingsIndex(mappingsList, accountSelectPairs)
 	return presenterHelper.Render(c, pageContent, http.StatusOK)
 }

@@ -4,8 +4,13 @@ import "github.com/goinfinite/ez/src/presentation/ui/component/structural"
 import "github.com/goinfinite/ez/src/presentation/ui/envs"
 import "github.com/goinfinite/ez/src/domain/entity"
 import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
+import "github.com/goinfinite/ez/src/presentation/ui/component/form"
+import "github.com/goinfinite/ez/src/domain/valueObject"
 
-templ MappingsIndex(mappingsList []entity.Mapping) {
+templ MappingsIndex(
+	mappingsList []entity.Mapping,
+	accountSelectPairs []componentForm.SelectLabelValuePair,
+) {
 	<!-- Mappings Page JavaScript -->
 	<script type="text/javascript" src={ uiEnvs.LocalStateAssetsPath + "/page/mappings.js" }></script>
 	<!-- Mappings Page HTML -->
@@ -22,7 +27,7 @@ templ MappingsIndex(mappingsList []entity.Mapping) {
 				@componentStructural.IconButton(componentStructural.IconButtonSettings{
 					Label:   "Create Mapping",
 					Icon:    "ph-plus-square",
-					OnClick: "console.log('create mapping')",
+					OnClick: "openCreateMappingModal()",
 				})
 				@componentStructural.IconButton(componentStructural.IconButtonSettings{
 					Label:   "Create Target",
@@ -33,6 +38,7 @@ templ MappingsIndex(mappingsList []entity.Mapping) {
 		</div>
 		<div id="mappings" class="card w-full">
 			@MappingsTable(mappingsList)
+			@CreateMappingModal(accountSelectPairs)
 		</div>
 	</div>
 }
@@ -119,4 +125,58 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 			</div>
 		}
 	</div>
+}
+
+templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair) {
+	<!-- CreateMappingForm -->
+	<form
+		hx-post="/api/v1/mapping/"
+		hx-indicator="#loading-overlay"
+		hx-swap="none"
+		@submit="closeCreateMappingModal()"
+		class="flex flex-col space-y-4"
+	>
+		@componentForm.InputField(componentForm.InputFieldSettings{
+			InputType:  "text",
+			InputName:  "hostname",
+			Label:      "Hostname",
+			IsRequired: true,
+		})
+		<div class="flex flex-row gap-x-2">
+			@componentForm.InputField(componentForm.InputFieldSettings{
+				InputType:  "number",
+				InputName:  "publicPort",
+				Label:      "Public Port",
+				IsRequired: true,
+			})
+			@componentForm.SelectInput(componentForm.SelectInputDto{
+				Id:                       "protocol",
+				Label:                    "Protocol",
+				Options:                  valueObject.ValidNetworkProtocols,
+				IsRequired:               true,
+				ShouldIncludeBlankOption: false,
+			})
+		</div>
+		@componentStructural.CollapsibleSection("Advanced Settings", "ph-gear") {
+			@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
+				Id:                       "accountId",
+				Label:                    "Account",
+				Options:                  accountSelectPairs,
+				ShouldIncludeBlankOption: true,
+			})
+		}
+		@componentStructural.IconButton(componentStructural.IconButtonSettings{
+			Label: "Create",
+			Icon:  "ph-check-fat",
+		})
+	</form>
+}
+
+templ CreateMappingModal(accountSelectPairs []componentForm.SelectLabelValuePair) {
+	@componentStructural.RegularModal(
+		"Create Mapping", "isCreateMappingModalOpen", "closeCreateMappingModal()",
+		"",
+	) {
+		@CreateMappingForm(accountSelectPairs)
+	}
 }
