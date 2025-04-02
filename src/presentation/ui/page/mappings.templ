@@ -7,7 +7,10 @@ import "github.com/goinfinite/ez/src/presentation/ui/component/misc"
 import "github.com/goinfinite/ez/src/presentation/ui/component/form"
 import "github.com/goinfinite/ez/src/domain/valueObject"
 
-const mappingsTableId string = "mappings-table"
+const (
+	mappingsRecordsDisplayId               string = "mappings-table"
+	mappingsRecordsDisplayRefreshEventName string = "refresh:" + mappingsRecordsDisplayId
+)
 
 templ MappingsIndex(
 	mappingsList []entity.Mapping,
@@ -59,11 +62,11 @@ templ MappingsIndex(
 templ MappingsTable(mappingsList []entity.Mapping) {
 	<!-- Mappings Table -->
 	<div
-		id={ mappingsTableId }
+		id={ mappingsRecordsDisplayId }
 		hx-get="/mappings/"
-		hx-trigger={ "refresh:" + mappingsTableId + " from:window delay:250ms" }
-		hx-select={ "#" + mappingsTableId }
-		hx-target={ "#" + mappingsTableId }
+		hx-trigger={ mappingsRecordsDisplayRefreshEventName + " from:window" }
+		hx-select={ "#" + mappingsRecordsDisplayId }
+		hx-target={ "#" + mappingsRecordsDisplayId }
 		hx-swap="outerHTML transition:true"
 		class="flex w-full flex-col gap-4"
 	>
@@ -153,11 +156,13 @@ templ MappingsTable(mappingsList []entity.Mapping) {
 templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair) {
 	<!-- CreateMappingForm -->
 	<form
+		id="create-mapping-form"
+		class="flex flex-col gap-4"
 		hx-post="/api/v1/mapping/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		@htmx:after-request={ "$dispatch('refresh:" + mappingsTableId + "')" }
-		class="flex flex-col gap-4"
+		@submit="closeCreateMappingModal()"
+		@htmx:after-request={ "$dispatch('" + mappingsRecordsDisplayRefreshEventName + "')" }
 	>
 		@componentForm.InputField(componentForm.InputFieldSettings{
 			InputType:  "text",
@@ -167,14 +172,16 @@ templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair)
 		})
 		<div class="flex flex-row gap-x-2">
 			@componentForm.InputField(componentForm.InputFieldSettings{
-				InputType:  "number",
-				InputName:  "publicPort",
-				Label:      "Public Port",
-				IsRequired: true,
+				InputType:     "number",
+				InputName:     "publicPort",
+				Label:         "Public Port",
+				ModelBindPath: "mappingEntity.publicPort",
+				IsRequired:    true,
 			})
 			@componentForm.SelectInput(componentForm.SelectInputDto{
 				Id:                       "protocol",
 				Label:                    "Protocol",
+				ModelBindPath:            "mappingEntity.protocol",
 				Options:                  valueObject.ValidNetworkProtocols,
 				IsRequired:               true,
 				ShouldIncludeBlankOption: false,
@@ -189,9 +196,8 @@ templ CreateMappingForm(accountSelectPairs []componentForm.SelectLabelValuePair)
 			})
 		}
 		@componentStructural.IconButton(componentStructural.IconButtonSettings{
-			Label:   "Create",
-			Icon:    "ph-check-fat",
-			OnClick: "closeCreateMappingModal()",
+			Label: "Create",
+			Icon:  "ph-check-fat",
 		})
 	</form>
 }
@@ -211,16 +217,19 @@ templ CreateTargetForm(
 ) {
 	<!-- CreateTargetForm -->
 	<form
+		id="create-target-form"
+		class="flex flex-col gap-4"
 		hx-post="/api/v1/mapping/target/"
 		hx-indicator="#loading-overlay"
 		hx-swap="none"
-		@htmx:after-request={ "$dispatch('refresh:" + mappingsTableId + "')" }
-		class="flex flex-col gap-4"
+		@submit="closeCreateTargetModal()"
+		@htmx:after-request={ "$dispatch('" + mappingsRecordsDisplayRefreshEventName + "')" }
 	>
 		<template x-if="mappingEntity.id == ''">
 			@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
 				Id:                       "mappingId",
 				Label:                    "Mapping",
+				SelectedModelBindPath:    "mappingEntity.hostname",
 				Options:                  mappingsSelectPair,
 				ShouldIncludeBlankOption: true,
 			})
@@ -239,13 +248,13 @@ templ CreateTargetForm(
 		@componentForm.SelectInputWithLabelValuePair(componentForm.SelectInputWithLabelValuePairDto{
 			Id:                       "containerId",
 			Label:                    "Container",
+			SelectedModelBindPath:    "targetEntity.containerId",
 			Options:                  containerSelectPairs,
 			ShouldIncludeBlankOption: true,
 		})
 		@componentStructural.IconButton(componentStructural.IconButtonSettings{
-			Label:   "Create",
-			Icon:    "ph-check-fat",
-			OnClick: "closeCreateTargetModal()",
+			Label: "Create",
+			Icon:  "ph-check-fat",
 		})
 	</form>
 }

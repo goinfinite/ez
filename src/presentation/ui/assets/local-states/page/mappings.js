@@ -3,74 +3,74 @@ document.addEventListener("alpine:init", () => {
     mappingEntity: {},
     targeEntity: {},
     resetPrimaryStates() {
-      this.mappingEntity = { id: "", hostname: "" };
-      this.targetEntity = { id: "" };
+      this.mappingEntity = { id: "", hostname: "", publicPort: "", protocol: "" }
+      this.targetEntity = { id: "", containerId: "" }
     },
     init() {
-      this.resetPrimaryStates();
+      this.resetPrimaryStates()
     },
 
     isCreateMappingModalOpen: false,
     openCreateMappingModal() {
-      this.resetPrimaryStates();
-      this.isCreateMappingModalOpen = true;
+      this.resetPrimaryStates()
+      this.isCreateMappingModalOpen = true
     },
     closeCreateMappingModal() {
-      this.isCreateMappingModalOpen = false;
+      this.isCreateMappingModalOpen = false
     },
     isDeleteMappingModalOpen: false,
     openDeleteMappingModal(mappingId, mappingHostname) {
-      this.resetPrimaryStates();
-      this.mappingEntity.id = mappingId;
-      this.mappingEntity.hostname = mappingHostname;
-      this.isDeleteMappingModalOpen = true;
+      this.resetPrimaryStates()
+      this.mappingEntity.id = mappingId
+      this.mappingEntity.hostname = mappingHostname
+      this.isDeleteMappingModalOpen = true
     },
     closeDeleteMappingModal() {
-      this.isDeleteMappingModalOpen = false;
+      this.isDeleteMappingModalOpen = false
     },
     deleteMapping() {
       htmx
         .ajax("DELETE", "/api/v1/mapping/" + this.mappingEntity.id + "/", {
           swap: "none",
         })
-        .then(() => this.$dispatch("refresh:mappings-table"));
-      this.closeDeleteMappingModal();
+        .then(() => this.$dispatch("refresh:mappings-table"))
+      this.closeDeleteMappingModal()
     },
     isCreateTargetModalOpen: false,
     openCreateTargetModal(mappingId = "", mappingHostname = "") {
-      this.resetPrimaryStates();
-      this.mappingEntity.id = mappingId;
-      this.mappingEntity.hostname = mappingHostname;
-      this.isCreateTargetModalOpen = true;
+      this.resetPrimaryStates()
+      this.mappingEntity.id = mappingId
+      this.mappingEntity.hostname = mappingHostname
+      this.isCreateTargetModalOpen = true
     },
     closeCreateTargetModal() {
-      this.isCreateTargetModalOpen = false;
+      this.isCreateTargetModalOpen = false
     },
     isDeleteTargetModalOpen: false,
     openDeleteTargetModal(mappingId, targetId) {
-      this.resetPrimaryStates();
-      this.mappingEntity.id = mappingId;
-      this.targetEntity.id = targetId;
-      this.isDeleteTargetModalOpen = true;
+      this.resetPrimaryStates()
+      this.mappingEntity.id = mappingId
+      this.targetEntity.id = targetId
+      this.isDeleteTargetModalOpen = true
     },
     closeDeleteTargetModal() {
-      this.isDeleteTargetModalOpen = false;
+      this.isDeleteTargetModalOpen = false
     },
     deleteTarget() {
       htmx
         .ajax(
           "DELETE",
           "/api/v1/mapping/" +
-            this.mappingEntity.id +
-            "/target/" +
-            this.targetEntity.id +
-            "/",
+          this.mappingEntity.id +
+          "/target/" +
+          this.targetEntity.id +
+          "/",
           {
             swap: "none",
           }
         )
-        .then(() => this.$dispatch("refresh:mappings-table"));
-      this.closeDeleteTargetModal();
+        .then(() => this.$dispatch("refresh:mappings-table"))
+      this.closeDeleteTargetModal()
     },
-  }));
-});
+  }))
+})
