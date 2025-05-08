@@ -8,15 +8,15 @@ import (
 )
 
 type Mapping struct {
-	ID              uint64 `gorm:"primarykey"`
-	AccountID       uint64
-	AccountUsername string
-	Hostname        *string
-	PublicPort      uint
-	Protocol        string
-	Targets         []MappingTarget
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	ID         uint64 `gorm:"primaryKey"`
+	AccountID  uint64
+	Account    Account `gorm:"association:foreignKey:AccountID;references:ID"`
+	Hostname   *string
+	PublicPort uint
+	Protocol   string
+	Targets    []MappingTarget
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (Mapping) TableName() string {
@@ -25,22 +25,17 @@ func (Mapping) TableName() string {
 
 func NewMapping(
 	id, accountId uint64,
-	accountUsername string,
 	hostname *string,
 	publicPort uint,
 	protocol string,
 	targets []MappingTarget,
-	createdAt, updatedAt time.Time,
 ) Mapping {
 	mappingModel := Mapping{
-		AccountID:       accountId,
-		AccountUsername: accountUsername,
-		Hostname:        hostname,
-		PublicPort:      publicPort,
-		Protocol:        protocol,
-		Targets:         targets,
-		CreatedAt:       createdAt,
-		UpdatedAt:       updatedAt,
+		AccountID:  accountId,
+		Hostname:   hostname,
+		PublicPort: publicPort,
+		Protocol:   protocol,
+		Targets:    targets,
 	}
 
 	if id != 0 {
@@ -63,7 +58,7 @@ func (model Mapping) ToEntity() (entity.Mapping, error) {
 		return mapping, err
 	}
 
-	accountUsername, err := valueObject.NewUnixUsername(model.AccountUsername)
+	accountUsername, err := valueObject.NewUnixUsername(model.Account.Username)
 	if err != nil {
 		return mapping, err
 	}

@@ -25,6 +25,7 @@ func (repo *MappingQueryRepo) Read() ([]entity.Mapping, error) {
 
 	var mappingModels []dbModel.Mapping
 	err := repo.persistentDbSvc.Handler.
+		Preload("Account").
 		Preload("Targets").
 		Find(&mappingModels).Error
 	if err != nil {
@@ -55,6 +56,7 @@ func (repo *MappingQueryRepo) ReadByContainerId(
 
 	var mappingModels []dbModel.Mapping
 	err := repo.persistentDbSvc.Handler.
+		Preload("Account").
 		Preload("Targets", "container_id = ?", containerId.String()).
 		Model(&dbModel.Mapping{}).
 		Find(&mappingModels).Error
@@ -88,6 +90,7 @@ func (repo *MappingQueryRepo) ReadById(
 ) (mappingEntity entity.Mapping, err error) {
 	var mappingModel dbModel.Mapping
 	err = repo.persistentDbSvc.Handler.
+		Preload("Account").
 		Preload("Targets").
 		Where("id = ?", id.Uint64()).
 		First(&mappingModel).Error
@@ -105,6 +108,7 @@ func (repo *MappingQueryRepo) GetByProtocol(
 
 	var mappingModels []dbModel.Mapping
 	err := repo.persistentDbSvc.Handler.
+		Preload("Account").
 		Preload("Targets").
 		Where("protocol = ?", protocol.String()).
 		Find(&mappingModels).Error

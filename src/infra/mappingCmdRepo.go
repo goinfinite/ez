@@ -43,17 +43,9 @@ func (repo *MappingCmdRepo) Create(
 		hostnamePtr = &hostnameStr
 	}
 
-	accountEntity, err := NewAccountQueryRepo(repo.persistentDbSvc).
-		ReadFirst(dto.ReadAccountsRequest{AccountId: &createDto.AccountId})
-	if err != nil {
-		return mappingId, errors.New("AccountNotFound")
-	}
-
 	mappingModel := dbModel.NewMapping(
-		0, createDto.AccountId.Uint64(), accountEntity.Username.String(),
-		hostnamePtr, uint(createDto.PublicPort.Uint16()),
-		createDto.Protocol.String(), []dbModel.MappingTarget{}, time.Now(),
-		time.Now(),
+		0, createDto.AccountId.Uint64(), hostnamePtr, uint(createDto.PublicPort.Uint16()),
+		createDto.Protocol.String(), []dbModel.MappingTarget{},
 	)
 
 	createResult := repo.persistentDbSvc.Handler.Create(&mappingModel)
