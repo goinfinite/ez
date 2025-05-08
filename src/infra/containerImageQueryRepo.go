@@ -156,9 +156,12 @@ func (repo *ContainerImageQueryRepo) originContainerMappingFactory(
 		return mappingEntity, err
 	}
 
-	accountUsername, err := valueObject.NewUnixUsername(rawMappingMap["accountUsername"])
-	if err != nil {
-		return mappingEntity, err
+	accountUsername, _ := valueObject.NewUnixUsername("unknown")
+	if rawMappingMap["accountUsername"] != nil {
+		accountUsername, err = valueObject.NewUnixUsername(rawMappingMap["accountUsername"])
+		if err != nil {
+			return mappingEntity, err
+		}
 	}
 
 	var hostnamePtr *valueObject.Fqdn
