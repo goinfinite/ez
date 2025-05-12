@@ -233,7 +233,7 @@ func (router *Router) systemRoutes() {
 	rootCmd.AddCommand(serveCmd)
 }
 
-func (router Router) RegisterRoutes() {
+func (router *Router) RegisterRoutes() {
 	router.accountRoutes()
 	router.backupRoutes()
 	router.containerRoutes()
